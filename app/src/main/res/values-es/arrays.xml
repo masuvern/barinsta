@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="languages">
+        <item>Sistema por Defecto</item>
+        <item>Inglés</item>
+        <item>Francés [Gracias a @kernoeb (Telegram)]</item>
+        <item>Español [Gracias a @sguinetti (GitLab)]</item>
+        <item>Chino Simplificado [Gracias a @laiboonsing (GitLab)]</item>
+        <item>Indonesio [Gracias a @Galang23 (GitLab)]</item>
+        <item>Italiano [Gracias a @RAR_Ramar (Telegram)]</item>
+    </string-array>
+
+    <string-array name="theme_presets">
+        <item>Auto / Seguir Sistema</item>
+        <item>Auto / Seguir Batería</item>
+        <item>Oscuro</item>
+        <item>Ligero</item>
+    </string-array>
+</resources>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="description">Esto comenzó como una pequeña y básica aplicación personal con intenciones de [copia-]descargar publicaciones de Instagram.\nAparentemente tengo un temperamento rápido y soy bastante impaciente a veces… \{frecuentemente… la mayoría del tiempo… ¡OK! todo el tiempo!} Y gracias a Dios casi todos los descargadores de Instagram tienen al menos un proveedor de anuncios, así que decidí hacer mi propio descargador.\nEntonces aquí está, la pequeña y estúpida aplicación para hacer que eso suceda.\n\nDe todas formas, si tienes \{como si tu mamá te hiciera} una pregunta, sugerencia, corrección de errores o cualquier otra pregunta, hmu en un Telegram o correo electrónico\nTelegram: @awais404\nCorreo electrónico: chapter50000@hotmail.com (sí, 50.000 capítulos! 😎🤘)</string>
+
+    <string name="action_quickaccess">Acceso rápido</string>
+    <string name="action_about">Sobre</string>
+    <string name="action_dms">Mensajes Directos</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="action_download">Descarga</string>
+    <string name="action_search">Buscar usuario…</string>
+    <string name="action_compare">Comparar</string>
+
+    <string name="single_like">me gusta</string>
+    <string name="multiple_likes">me gustas</string>
+
+    <string name="clipboard_error">Error al copiar texto</string>
+    <string name="clipboard_copied">¡Copiar al portapapeles!</string>
+    <string name="report">Reportar</string>
+    <string name="password">Contraseña (Max 32 chars)</string>
+    <string name="ok">Aceptar</string>
+    <string name="yes">Sí</string>
+    <string name="cancel">Cancelar</string>
+    <string name="no">No</string>
+    <string name="confirm">Confirmar</string>
+    <string name="nav_up">Subir</string>
+    <string name="dont_show_again">No mostrar de nuevo</string>
+    <string name="selected_folder_label">Seleccionar carpeta:</string>
+
+    <string name="title_favorites">Favoritos</string>
+    <string name="title_discover">Explorar</string>
+    <string name="title_comments">Comentarios</string>
+    <string name="title_hashtag_prefix">Hashtag: </string>
+    <string name="title_highlight">Resaltado: %s</string>
+    <string name="title_user_story">Historia de usuario</string>
+    <string name="title_changelog">Lista de cambios</string>
+
+    <string name="bottom_toolbar">Mostrar barra de herramientas inferior</string>
+    <string name="download_user_folder">Descargar mensajes a la carpeta de usuario en Downloads</string>
+    <string name="autoload_posts">Cargar automáticamente todos los mensajes de usuario</string>
+    <string name="error_loading_profile">¡Error al cargar el perfil!\nVuelve a entrar y buscar de nuevo.</string>
+    <string name="error_creating_folders">Error creando carpetas de descarga.</string>
+    <string name="show_feed">Mostrar noticias del usuario (Funciona sólo cuando algún usuario está conectado)</string>
+    <string name="save_to_folder">Guardar en carpeta personalizada</string>
+    <string name="select_folder">Seleccionar carpeta</string>
+    <string name="theme_settings">Ajustes del tema</string>
+    <string name="import_export">Importación/Exportación</string>
+    <string name="select_language">Seleccione el idioma</string>
+    <string name="what_to_do_dialog">¿Qué quieres hacer?</string>
+
+    <string name="main_posts_count">%s\nPublicaciones</string>
+    <string name="main_posts_followers">%s\nSeguidores</string>
+    <string name="main_posts_following">%s\nSiguiendo</string>
+
+    <string name="post_viewer_video_post">Publicación de vídeo</string>
+    <string name="post_viewer_image_post">Publicación de imagen</string>
+    <string name="post_viewer_autoplay_video">Autoreproducir videos</string>
+    <string name="post_viewer_muted_autoplay">Videos siempre silenciados</string>
+    <string name="post_viewer_post_from">%s de %s</string>
+    <string name="post_viewer_download_message">La actual [Sesión] no mostrará este diálogo hasta que estés aquí, y siempre descargará la publicación mostrada.</string>
+    <string name="post_viewer_download_dialog_title">Seleccionar qué descargar</string>
+    <string name="post_viewer_download_session">Actual [Sesión]</string>
+    <string name="post_viewer_download_current">Actual</string>
+    <string name="post_viewer_download_album">Todo el álbum</string>
+
+    <string name="show_stories">Mostrar historias</string>
+    <string name="view_story_post">Ver publicación de la historia</string>
+    <string name="priv_acc">Esta cuenta es privada</string>
+
+    <string name="curr_version">Versión actual: v%s</string>
+    <string name="read_more">leer más…</string>
+
+    <string name="login">Acceder</string>
+    <string name="send_logs">Enviar registros [si algo no funciona]</string>
+    <string name="time_settings">Ajustes de fecha de publicación</string>
+    <string name="project_link">Visitar página del proyecto</string>
+    <string name="telegram_link">Unirse al grupo de Telegram</string>
+
+    <string name="dialog_export_btn_export">Exportar</string>
+    <string name="dialog_export_btn_import">Importar</string>
+    <string name="dialog_export_logins">Exportar Logins</string>
+    <string name="dialog_export_settings">Ajustes de exportación</string>
+    <string name="dialog_export_favorites">Exportar favoritos</string>
+    <string name="dialog_import_settings">Ajustes de la importación</string>
+    <string name="dialog_import_logins">Importar inicio de sesión</string>
+    <string name="dialog_import_favorites">Importar favoritos</string>
+    <string name="dialog_import_success">¡Importado con éxito!</string>
+    <string name="dialog_import_failed">¡Falló la importación!</string>
+    <string name="dialog_export_success">¡Exportado con éxito!</string>
+    <string name="dialog_export_failed">¡Falló la exportación!</string>
+    <string name="dialog_export_err_password_empty">¡La contraseña está vacía! La contraseña no puede estar vacía, ¡tonto!</string>
+
+    <string name="refresh">Actualizar</string>
+    <string name="get_cookies">Obtener cookies</string>
+    <string name="desktop_2fa">Modo escritorio\npara 2FA</string>
+
+    <string name="time_settings_title_custom">Formato Personalizado</string>
+    <string name="time_settings_title_separator">Separador</string>
+    <string name="time_settings_title_time_format">Formato de tiempo</string>
+    <string name="time_settings_title_date_format">Formato de fecha</string>
+    <string name="time_settings_title_preview">Previsualizar</string>
+    <string name="time_settings_swap_time">Intercambiar posiciones de fecha y hora</string>
+
+    <string name="quick_access_info_dialog">El panel de favoritos es para añadir tus hashtags y/o nombres de usuario favoritos.\n\nY el panel de acceso rápido es para cambiar rápidamente entre cuentas. \n\nNota 1: Asegúrate de acceder a cada cuenta [Ajustes > Ingreso] para añadir una cuenta a la lista. \n\nNota 2: Sal de la cuenta actual y luego accede a la otra cuenta. Si varias cuentas no funcionan para ti, no hay nada que podamos hacer con los dos.</string>
+    <string name="quick_access_cannot_delete_curr">No se puede borrar la cuenta actualmente en uso account</string>
+    <string name="quick_access_confirm_delete">¿Estás seguro de que quieres borrar %s?</string>
+
+    <string name="profile_viewer_imageinfo">Ancho: %d\nAlto: %d</string>
+    <string name="profile_viewer_colordepth_prefix">\nProfundidad de color:</string>
+    <string name="profile_endpoint">Seleccione el servidor de fotos del perfil</string>
+    <string name="open_profile">Abrir perfil</string>
+    <string name="view_pfp">Ver foto de perfil</string>
+
+    <string name="direct_download">Descargar directamente</string>
+    <string name="direct_download_desc">¡Descarga los mensajes directamente al teléfono!</string>
+    <string name="direct_download_loading">Capturando publicaciones</string>
+    <string name="direct_download_perms_ask">Por favor, conceda los permisos e intente descargar de nuevo!</string>
+
+    <string name="downloader_started">Descarga iniciada</string>
+    <string name="downloader_complete">Descarga completada</string>
+    <string name="downloader_downloading_post">Descargar publicaciones</string>
+    <string name="downloader_downloading_pfp">Descargar foto de perfil</string>
+
+    <string name="downloader_downloaded_in_folder">¡Archivo descargado en la carpeta de descargas!</string>
+    <string name="downloader_unknown_error">¡Ha ocurrido un error desconocido!</string>
+    <string name="downloader_error_creating_folder">¡Error al crear carpeta!</string>
+    <string name="downloader_error_download_file">¡Error al descargar archivo!</string>
+
+    <string name="comment_viewer_copy_user">Copiar nombre de usuario</string>
+    <string name="comment_viewer_copy_comment">Copiar comentario</string>
+    <string name="comment_view_mention_user_search">¿Quieres buscar el nombre de usuario?</string>
+    <string name="comment_view_mention_hash_search">¿Quieres buscar el hashtag?</string>
+
+    <string name="followers_open_in_insta">Abrir en Instagram</string>
+    <string name="followers_type_followers">Seguidores</string>
+    <string name="followers_type_following">Siguiendo</string>
+    <string name="followers_compare">Comparar seguidores &amp; siguiendo</string>
+    <string name="followers_both_following">Ambos se siguen mutuamente</string>
+    <string name="followers_not_following">no está siguiendo %s</string>
+    <string name="followers_not_follower">%s no está siguiendo</string>
+
+    <string name="login_error_loading_cookies">Error al cargar cookies</string>
+    <string name="login_success_loading_cookies">¡Cookies cargadas con éxito!\nSi aún no puedes abrir páginas/publicaciones privadas, ¡vuelve a ingresar!</string>
+
+    <string name="crash_title">App atascada</string>
+    <string name="crash_descr">Vaya.. la aplicación dejó de funcionar, pero no te preocupes por un enviar un reporte de error al desarrollador para solucionar este problema. (:</string>
+</resources>

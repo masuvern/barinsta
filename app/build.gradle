@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        applicationId 'awais.instagrabber'
+
+        minSdkVersion 16
+        targetSdkVersion 29
+
+        versionCode 27
+        versionName '16.5-a1'
+
+        multiDexEnabled true
+
+        vectorDrawables.useSupportLibrary = true
+        vectorDrawables.generatedDensities = []
+    }
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures { viewBinding true }
+
+    aaptOptions { additionalParameters '--no-version-vectors' }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation('androidx.appcompat:appcompat:1.3.0-alpha01@aar') { transitive true }
+    implementation('androidx.recyclerview:recyclerview:1.2.0-alpha03@aar') { transitive true }
+    implementation('com.google.android.material:material:1.3.0-alpha01@aar') { transitive true }
+    implementation('androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-rc01') { transitive true }
+
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
+    implementation('org.jsoup:jsoup:1.13.1') { transitive true }
+    implementation('com.github.bumptech.glide:glide:4.11.0') { transitive true }
+    implementation('com.github.chrisbanes:PhotoView:v2.0.0@aar') { transitive true }
+    implementation('com.google.android.exoplayer:exoplayer:2.11.1@aar') { transitive true }
+}

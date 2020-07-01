@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+
+    <color name="text_color_light">@android:color/primary_text_light</color>
+    <color name="text_color_dark">@android:color/primary_text_dark</color>
+
+    <color name="btn_green_background">#5CE362</color>
+    <color name="btn_green_text_color">@color/text_color_light</color>
+
+    <color name="btn_blue_background">#0288D1</color>
+    <color name="btn_blue_text_color">@color/text_color_light</color>
+
+    <color name="btn_red_background">#E62323</color>
+    <color name="btn_red_text_color">@color/text_color_dark</color>
+
+    <color name="feed_text_primary_color">@color/text_color_light</color>
+
+    <color name="dm_profile_button_color">#efefef</color>
+</resources>

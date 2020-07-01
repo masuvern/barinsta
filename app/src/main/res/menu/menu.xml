@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AlwaysShowAction">
+
+    <item
+        android:id="@+id/action_download"
+        android:icon="@drawable/ic_download"
+        android:title="@string/action_download"
+        android:titleCondensed="@string/action_download"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_about"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@string/action_about"
+        android:titleCondensed="@string/action_about"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_quickaccess"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="@string/action_quickaccess"
+        android:titleCondensed="@string/action_quickaccess"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/action_settings"
+        android:titleCondensed="@string/action_settings"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_dms"
+        android:icon="@android:drawable/ic_menu_send"
+        android:title="@string/action_dms"
+        android:titleCondensed="@string/action_dms"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_search"
+        android:actionLayout="@layout/layout_searchview"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/action_search"
+        android:titleCondensed="@string/action_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
+</menu>

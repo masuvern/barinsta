@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/btnComments"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:background="?android:selectableItemBackground"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            app:srcCompat="@drawable/comments" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/commentsCount"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:padding="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="?android:textColorPrimary"
+            tools:text="690000" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llVideoViews"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_toEndOf="@id/btnComments"
+        android:layout_toRightOf="@id/btnComments"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            app:srcCompat="@drawable/video_views" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvVideoViews"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:padding="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="?android:textColorPrimary"
+            tools:text="690000" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignEnd="@id/btnMute"
+        android:layout_alignRight="@id/btnMute"
+        android:layout_marginEnd="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_toEndOf="@id/llVideoViews"
+        android:layout_toRightOf="@id/llVideoViews">
+
+        <View
+            android:layout_width="1dip"
+            android:layout_height="match_parent"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="?android:attr/dividerVertical" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvPostDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:padding="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="?android:textColorPrimary"
+            tools:text="690000" />
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/btnMute"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toStartOf="@id/btnDownload"
+        android:layout_toLeftOf="@id/btnDownload"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:visibility="gone"
+        app:srcCompat="@drawable/vol" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/btnDownload"
+        android:layout_width="40dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="4dp"
+        app:srcCompat="@drawable/ic_download" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btnDownload"
+        android:isScrollContainer="true"
+        android:scrollbars="vertical"
+        android:scrollHorizontally="false">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <awais.instagrabber.customviews.RamboTextView
+                android:id="@+id/viewerCaption"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:selectableItemBackground"
+                android:clipToPadding="false"
+                android:padding="12dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="16sp"
+                tools:text="Fuck y'all for real." />
+        </FrameLayout>
+    </ScrollView>
+</RelativeLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="languages">
+        <item>Par défaut (Système)</item>
+        <item>Anglais</item>
+        <item>Français [Merci à @kernoeb (Telegram)]</item>
+        <item>Espagnol [Merci à @sguinetti (GitLab)]</item>
+        <item>Chinois Simplifié [Merci à @laiboonsing (GitLab)]</item>
+        <item>Indonésien [Merci à @Galang23 (GitLab)]</item>
+        <item>Italien [Merci à @RAR_Ramar (Telegram)]</item>
+    </string-array>
+
+    <string-array name="theme_presets">
+        <item>Automatique (Système)</item>
+        <item>Automatique (Batterie)</item>
+        <item>Sombre</item>
+        <item>Clair</item>
+    </string-array>
+
+    <string-array name="separator_presets">
+        <item>None</item>
+        <item>\@</item>
+        <item>à</item>
+        <item>le</item>
+        <item>\|</item>
+        <item>-</item>
+    </string-array>
+</resources>
