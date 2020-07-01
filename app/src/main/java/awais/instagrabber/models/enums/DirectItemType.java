@@ -16,4 +16,5 @@ public enum DirectItemType implements Serializable {
     REEL_SHARE,
     ACTION_LOG,
     PLACEHOLDER,
+    STORY_SHARE,
 }

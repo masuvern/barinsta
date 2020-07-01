@@ -402,7 +402,7 @@ public final class Utils {
         if ("video_call_event".equals(itemType)) return DirectItemType.VIDEO_CALL_EVENT;
         if ("animated_media".equals(itemType)) return DirectItemType.ANIMATED_MEDIA;
         if ("voice_media".equals(itemType)) return DirectItemType.VOICE_MEDIA;
-        //if ("story_share".equals(itemType)) return DirectItemType.STORY_SHARE;
+        if ("story_share".equals(itemType)) return DirectItemType.STORY_SHARE;
         return DirectItemType.TEXT;
     }
 
@@ -524,7 +524,6 @@ public final class Utils {
 
                 case REEL_SHARE: {
                     final JSONObject reelShare = itemObject.getJSONObject("reel_share");
-                    Log.d("AWAISKING_APP", "(rs) itemObject: " + itemObject); // todo
                     reelShareModel = new DirectItemReelShareModel(
                             reelShare.optBoolean("is_reel_persisted"),
                             reelShare.getLong("reel_owner_id"),
@@ -635,8 +634,22 @@ public final class Utils {
                     ((SpannableString) text).setSpan(new RelativeSizeSpan(15f), 0, text.length(), 0);
                     break;
 
-                /*case STORY_SHARE:
-                    if*/
+                case STORY_SHARE:
+                    final JSONObject storyShare = itemObject.getJSONObject("story_share");
+                    if (!storyShare.has("media"))
+                        text = "<small>" + storyShare.optString("message") + "</small>";
+                    else {
+                        reelShareModel = new DirectItemReelShareModel(
+                                storyShare.optBoolean("is_reel_persisted"),
+                                storyShare.getJSONObject("media").getJSONObject("user").getLong("pk"),
+                                storyShare.getString("text"),
+                                storyShare.getString("story_share_type"),
+                                storyShare.getString("reel_type"),
+                                storyShare.optString("reel_name"),
+                                storyShare.optString("reel_id"),
+                                getDirectMediaModel(storyShare.optJSONObject("media")));
+                    }
+                    break;
 
                 case TEXT:
                     if (!itemObject.has("text"))

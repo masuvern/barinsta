@@ -271,6 +271,30 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                 }
                 break;
 
+                case STORY_SHARE: {
+                    final DirectItemReelShareModel reelShare = directItemModel.getReelShare();
+                    if (reelShare == null) {
+                        holder.tvMessage.setText(HtmlCompat.fromHtml(directItemModel.getText().toString(), 63));
+                        holder.tvMessage.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        if (!Utils.isEmpty(text = reelShare.getText())) {
+                            holder.tvMessage.setText(text);
+                            holder.tvMessage.setVisibility(View.VISIBLE);
+                        }
+
+                        final DirectItemMediaModel reelShareMedia = reelShare.getMedia();
+                        final MediaItemType mediaType = reelShareMedia.getMediaType();
+
+                        holder.mediaTypeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
+                                mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
+
+                        glideRequestManager.load(reelShareMedia.getThumbUrl()).into(holder.ivMediaPreview);
+                        holder.mediaMessageContainer.setVisibility(View.VISIBLE);
+                    }
+                }
+                break;
+
                 case VOICE_MEDIA: {
                     final DirectItemVoiceMediaModel voiceMediaModel = directItemModel.getVoiceMediaModel();
 
