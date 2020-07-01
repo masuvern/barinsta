@@ -263,11 +263,15 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                     final DirectItemMediaModel reelShareMedia = reelShare.getMedia();
                     final MediaItemType mediaType = reelShareMedia.getMediaType();
 
-                    holder.mediaTypeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
-                            mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
+                    if (mediaType == null)
+                        holder.mediaExpiredIcon.setVisibility(View.VISIBLE);
+                    else {
+                        holder.mediaTypeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
+                                mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
 
-                    glideRequestManager.load(reelShareMedia.getThumbUrl()).into(holder.ivMediaPreview);
-                    holder.mediaMessageContainer.setVisibility(View.VISIBLE);
+                        glideRequestManager.load(reelShareMedia.getThumbUrl()).into(holder.ivMediaPreview);
+                        holder.mediaMessageContainer.setVisibility(View.VISIBLE);
+                    }
                 }
                 break;
 
