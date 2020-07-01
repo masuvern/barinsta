@@ -10,7 +10,7 @@ android {
         targetSdkVersion 29
 
         versionCode 27
-        versionName '16.5-a1'
+        versionName '16.6-a1'
 
         multiDexEnabled true
 
