@@ -1,13 +1,16 @@
 package awais.instagrabber.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +23,7 @@ import com.bumptech.glide.RequestManager;
 import java.util.ArrayList;
 
 import awais.instagrabber.R;
+import awais.instagrabber.activities.Main;
 import awais.instagrabber.adapters.viewholder.directmessages.TextMessageViewHolder;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ProfileModel;
@@ -30,6 +34,7 @@ import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
+import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemLinkContext;
@@ -163,6 +168,10 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                     else holder.tvMessage.setText(text);
 
                     holder.tvMessage.setVisibility(View.VISIBLE);
+                    holder.tvMessage.setOnClickListener(v -> {
+                        Utils.copyText(v.getContext(), holder.tvMessage.getText());
+                        Toast.makeText(v.getContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
+                    });
                     break;
 
                 case LINK: {
@@ -351,7 +360,14 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                 case VIDEO_CALL_EVENT: {
                     // todo add call event info
                     holder.tvMessage.setVisibility(View.VISIBLE);
-                    holder.itemView.setBackgroundColor(0xFF_1F90E6); // blue bitch
+                    holder.itemView.setBackgroundColor(0xFF_1F90E6);
+                }
+                break;
+
+                case ACTION_LOG: {
+                    text = directItemModel.getActionLogModel().getDescription();
+                    holder.tvMessage.setText(HtmlCompat.fromHtml("<small>"+text+"</small>", 63));
+                    holder.tvMessage.setVisibility(View.VISIBLE);
                 }
                 break;
             }

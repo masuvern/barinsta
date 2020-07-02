@@ -291,6 +291,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
     public final static class DirectItemReelShareModel implements Serializable {
         private final boolean isReelPersisted;
         private final long reelOwnerId;
+        private final String reelOwnerName;
         private final String text;
         private final String type;
         private final String reelType;
@@ -298,10 +299,12 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
         private final String reelId;
         private final DirectItemMediaModel media;
 
-        public DirectItemReelShareModel(final boolean isReelPersisted, final long reelOwnerId, final String text, final String type,
-                                        final String reelType, final String reelName, final String reelId, final DirectItemMediaModel media) {
+        public DirectItemReelShareModel(final boolean isReelPersisted, final long reelOwnerId, final String reelOwnerName,
+                                        final String text, final String type, final String reelType, final String reelName,
+                                        final String reelId, final DirectItemMediaModel media) {
             this.isReelPersisted = isReelPersisted;
             this.reelOwnerId = reelOwnerId;
+            this.reelOwnerName = reelOwnerName;
             this.text = text;
             this.type = type;
             this.reelType = reelType;
@@ -317,6 +320,8 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
         public long getReelOwnerId() {
             return reelOwnerId;
         }
+
+        public String getReelOwnerName() { return reelOwnerName; }
 
         public String getText() {
             return text;
@@ -346,17 +351,18 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
     public final static class DirectItemMediaModel implements Serializable {
         private final MediaItemType mediaType;
         private final long expiringAt, pk;
-        private final String id, thumbUrl;
+        private final String id, thumbUrl, code;
         private final ProfileModel user;
 
         public DirectItemMediaModel(final MediaItemType mediaType, final long expiringAt, final long pk, final String id,
-                                    final String thumbUrl, final ProfileModel user) {
+                                    final String thumbUrl, final ProfileModel user, final String code) {
             this.mediaType = mediaType;
             this.expiringAt = expiringAt;
             this.pk = pk;
             this.id = id;
             this.thumbUrl = thumbUrl;
             this.user = user;
+            this.code = code;
         }
 
         public MediaItemType getMediaType() {
@@ -373,6 +379,10 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
 
         public String getId() {
             return id;
+        }
+
+        public String getCode() {
+            return code;
         }
 
         public ProfileModel getUser() {

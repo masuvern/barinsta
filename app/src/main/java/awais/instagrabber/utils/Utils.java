@@ -384,7 +384,8 @@ public final class Utils {
                     mediaObj.optLong("pk"),
                     id,
                     getThumbnailUrl(mediaObj, mediaType),
-                    user);
+                    user,
+                    mediaObj.optString("code"));
         }
         return mediaModel;
     }
@@ -527,6 +528,7 @@ public final class Utils {
                     reelShareModel = new DirectItemReelShareModel(
                             reelShare.optBoolean("is_reel_persisted"),
                             reelShare.getLong("reel_owner_id"),
+                            reelShare.getJSONObject("media").getJSONObject("user").getString("username"),
                             reelShare.getString("text"),
                             reelShare.getString("type"),
                             reelShare.getString("reel_type"),
@@ -616,9 +618,15 @@ public final class Utils {
                         // prevents empty viewholders when in thread view mode
                         continue;
                     final JSONObject actionLog = itemObject.getJSONObject("action_log");
-                    actionLogModel = new DirectItemActionLogModel(actionLog.getString("description")
-                            // todo add bold , text_attributes objects [find out how tf to implement them]
-                    );
+                    String desc = actionLog.getString("description");
+                    JSONArray bold = actionLog.getJSONArray("bold");
+                    for (int q=0; q < bold.length(); ++q) {
+                        JSONObject boldItem = bold.getJSONObject(q);
+                        desc = desc.substring(0, boldItem.getInt("start") + q*7) + "<b>"
+                                + desc.substring(boldItem.getInt("start") + q*7, boldItem.getInt("end") + q*7)
+                                + "</b>" + desc.substring(boldItem.getInt("end") + q*7, desc.length());
+                    }
+                    actionLogModel = new DirectItemActionLogModel(desc);
                     break;
 
                 case MEDIA_SHARE:
@@ -642,6 +650,7 @@ public final class Utils {
                         reelShareModel = new DirectItemReelShareModel(
                                 storyShare.optBoolean("is_reel_persisted"),
                                 storyShare.getJSONObject("media").getJSONObject("user").getLong("pk"),
+                                storyShare.getJSONObject("media").getJSONObject("user").getString("username"),
                                 storyShare.getString("text"),
                                 storyShare.getString("story_share_type"),
                                 storyShare.getString("reel_type"),

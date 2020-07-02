@@ -38,7 +38,7 @@ public final class AboutDialog extends BottomSheetDialogFragment {
                 if (!Utils.isEmpty(Utils.telegramPackage))
                     intent.setPackage(Utils.telegramPackage);
             } else
-                intent.setData(Uri.parse("https://gitlab.com/AwaisKing/instagrabber/"));
+                intent.setData(Uri.parse("https://github.com/austinhuang0131/instagrabber/"));
             startActivity(intent);
         };
         btnProject.setOnClickListener(onClickListener);

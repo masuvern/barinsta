@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -18,17 +19,25 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.MessageItemsAdapter;
 import awais.instagrabber.asyncs.direct_messages.UserInboxFetcher;
+import awais.instagrabber.asyncs.UsernameFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.ActivityDmsBinding;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
+import awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemMediaModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
+import awais.instagrabber.models.enums.DirectItemType;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
 public final class DirectMessagesUserInbox extends AppCompatActivity {
+    private DirectItemModel directItemModel;
+    private final ProfileModel myProfileHolder = new ProfileModel(false, false, null, null, null, null, null, null, null, 0, 0, 0);
     private final ArrayList<ProfileModel> users = new ArrayList<>();
     private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
@@ -90,12 +99,58 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
 
         dmsBinding.rvDirectMessages.setAdapter(messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, v -> {
             // todo do something with clicked message
-            Log.d("AWAISKING_APP", "--> " + v.getTag());
+            Object tag = v.getTag();
+            if (tag instanceof DirectItemModel) {
+                directItemModel = (DirectItemModel) tag;
+                final String username = getUser(directItemModel.getUserId()).getUsername();
+                final DirectItemType itemType = directItemModel.getItemType();
+                switch(itemType) {
+                    case MEDIA_SHARE:
+                        startActivity(new Intent(this, PostViewer.class)
+                                .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode())));
+                        break;
+                    /*case STORY_SHARE:
+                        startActivity(new Intent(this, StoryViewer.class)
+                                .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
+                                .putExtra(Constants.EXTRAS_STORIES, new StoryModel(
+                                        directItemModel.getReelShare().getReelId(),
+                                        directItemModel.getReelShare().getMedia()
+                                ))
+                        );
+                        break;*/
+                    case TEXT:
+                        searchUsername(username);
+                }
+
+                /*
+                startActivity(new Intent(this, PostViewer.class)
+                        .putExtra(Constants.EXTRAS_POST, new PostModel(tag.toString())));
+                 */
+            }
         }, (view, text, isHashtag) -> {
             // todo mention click stuff
-
         }));
 
         new UserInboxFetcher(threadModel.getThreadId(), UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Nullable
+    private ProfileModel getUser(final long userId) {
+        if (users != null) {
+            for (final ProfileModel user : users)
+                if (Long.toString(userId).equals(user.getId())) return user;
+            return myProfileHolder;
+        }
+        return null;
+    }
+
+    private void searchUsername(final String text) {
+        if (Main.scanHack != null) {
+            Main.scanHack.onResult(text);
+            setResult(6969);
+            Intent intent = new Intent(getApplicationContext(), Main.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
     }
 }
