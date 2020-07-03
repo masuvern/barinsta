@@ -872,10 +872,62 @@ public final class Utils {
             Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
     }
 
+    public static void dmDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
+                                     final List<? extends DirectItemMediaModel> itemsToDownload) {
+        if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
+
+        if (itemsToDownload == null || itemsToDownload.size() < 1) return;
+
+        if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
+            dmDownloadImpl(context, username, method, itemsToDownload);
+        else if (context instanceof Activity)
+            ActivityCompat.requestPermissions((Activity) context, Utils.PERMS, 8020);
+    }
+
+    private static void dmDownloadImpl(@NonNull final Context context, @Nullable final String username,
+                                          final DownloadMethod method, final List<? extends DirectItemMediaModel> itemsToDownload) {
+        File dir = new File(Environment.getExternalStorageDirectory(), "Download");
+
+        if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
+            final String customPath = settingsHelper.getString(FOLDER_PATH);
+            if (!Utils.isEmpty(customPath)) dir = new File(customPath);
+        }
+
+        if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !isEmpty(username))
+            dir = new File(dir, username);
+
+        if (dir.exists() || dir.mkdirs()) {
+            final Main main = method != DownloadMethod.DOWNLOAD_FEED && context instanceof Main ? (Main) context : null;
+
+            final int itemsToDownloadSize = itemsToDownload.size();
+
+            final File finalDir = dir;
+            for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
+                final DirectItemMediaModel selectedItem = itemsToDownload.get(i);
+
+                if (main == null) {
+                    new DownloadAsync(context,
+                            selectedItem.getThumbUrl(),
+                            getDownloadSaveFileDm(finalDir, selectedItem, ""),
+                            null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                }
+            }
+        } else
+            Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
+    }
+
     @NonNull
     private static File getDownloadSaveFile(final File finalDir, @NonNull final BasePostModel model, final String sliderPrefix) {
         final String displayUrl = model.getDisplayUrl();
         return new File(finalDir, model.getPostId() + '_' + model.getTimestamp() + sliderPrefix +
+                getExtensionFromModel(displayUrl, model));
+    }
+
+    @NonNull
+    private static File getDownloadSaveFileDm(final File finalDir, @NonNull final DirectItemMediaModel model, final String sliderPrefix) {
+        final String displayUrl = model.getThumbUrl();
+        return new File(finalDir, model.getId() + sliderPrefix +
                 getExtensionFromModel(displayUrl, model));
     }
 

@@ -140,6 +140,7 @@
     <string name="downloader_started">Download started</string>
     <string name="downloader_complete">Download completed</string>
     <string name="downloader_downloading_post">Downloading post</string>
+    <string name="downloader_downloading_media">Downloading media</string>
     <string name="downloader_downloading_pfp">Downloading profile picture</string>
 
     <string name="downloader_downloaded_in_folder">File downloaded in Downloads folder!</string>

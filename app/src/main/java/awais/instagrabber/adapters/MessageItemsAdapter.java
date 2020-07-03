@@ -168,10 +168,6 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                     else holder.tvMessage.setText(text);
 
                     holder.tvMessage.setVisibility(View.VISIBLE);
-                    holder.tvMessage.setOnClickListener(v -> {
-                        Utils.copyText(v.getContext(), holder.tvMessage.getText());
-                        Toast.makeText(v.getContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
-                    });
                     break;
 
                 case LINK: {

@@ -1,6 +1,7 @@
 package awais.instagrabber.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
@@ -30,6 +32,7 @@ import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemMediaModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
+import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
@@ -48,7 +51,7 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
 
         @Override
         public void onResult(final InboxThreadModel result) {
-            if (result == null && "MINCURSOR".equals(endCursor) || "MAXCURSOR".equals(endCursor) || Utils.isEmpty(endCursor))
+            if (result == null && ("MINCURSOR".equals(endCursor) || "MAXCURSOR".equals(endCursor) || Utils.isEmpty(endCursor)))
                 Toast.makeText(DirectMessagesUserInbox.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
 
             if (result != null) {
@@ -97,29 +100,41 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
             }
         }));
 
-        dmsBinding.rvDirectMessages.setAdapter(messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, v -> {
-            // todo do something with clicked message
+        messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, v -> {
             Object tag = v.getTag();
             if (tag instanceof DirectItemModel) {
                 directItemModel = (DirectItemModel) tag;
                 final String username = getUser(directItemModel.getUserId()).getUsername();
                 final DirectItemType itemType = directItemModel.getItemType();
-                switch(itemType) {
+                switch (itemType) {
+                    case LINK:
+                        Intent linkIntent = new Intent(Intent.ACTION_VIEW);
+                        linkIntent.setData(Uri.parse(directItemModel.getLinkModel().getLinkContext().getLinkUrl()));
+                        startActivity(linkIntent);
+                        break;
                     case MEDIA_SHARE:
                         startActivity(new Intent(this, PostViewer.class)
                                 .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode())));
                         break;
-                    /*case STORY_SHARE:
-                        startActivity(new Intent(this, StoryViewer.class)
-                                .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
-                                .putExtra(Constants.EXTRAS_STORIES, new StoryModel(
+                    case MEDIA:
+                        Utils.dmDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(directItemModel.getMediaModel()));
+                        Toast.makeText(v.getContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                        break;
+                    case REEL_SHARE:
+                    case STORY_SHARE:
+                        if (directItemModel.getReelShare() != null)
+                            startActivity(new Intent(this, StoryViewer.class)
+                                            .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
+                                /*.putExtra(Constants.EXTRAS_STORIES, new StoryModel(
                                         directItemModel.getReelShare().getReelId(),
                                         directItemModel.getReelShare().getMedia()
-                                ))
-                        );
-                        break;*/
+                                ))*/
+                            );
+                        break;
                     case TEXT:
-                        searchUsername(username);
+                        Utils.copyText(v.getContext(), directItemModel.getText());
+                        Toast.makeText(v.getContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
+                        break;
                 }
 
                 /*
@@ -127,9 +142,13 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
                         .putExtra(Constants.EXTRAS_POST, new PostModel(tag.toString())));
                  */
             }
-        }, (view, text, isHashtag) -> {
-            // todo mention click stuff
-        }));
+        },
+        (view, text, isHashtag) -> {
+        });
+
+        dmsBinding.rvDirectMessages.setAdapter(
+                messageItemsAdapter
+        );
 
         new UserInboxFetcher(threadModel.getThreadId(), UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
