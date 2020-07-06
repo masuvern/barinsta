@@ -222,6 +222,8 @@ public final class Utils {
                             break;
                         }
                     }
+                    else if (currChar == '.')
+                        break;
 
                     // for merged hashtags
                     if (currChar == '#') {
@@ -233,7 +235,8 @@ public final class Utils {
                         && currChar != ']' && currChar != '\\' && currChar != '=' && currChar != '-' && currChar != '!'
                         && currChar != '$' && currChar != '%' && currChar != '^' && currChar != '&' && currChar != '*'
                         && currChar != '(' && currChar != ')' && currChar != '{' && currChar != '}' && currChar != '/'
-                        && currChar != '|' && currChar != '?' && currChar != '`' && currChar != '~');
+                        && currChar != '|' && currChar != '?' && currChar != '`' && currChar != '~'
+                );
 
                 final int endLen = currChar != '#' ? i : i + 1; // for merged hashtags
                 stringBuilder.setSpan(new CommentMentionClickSpan(), startLen,
