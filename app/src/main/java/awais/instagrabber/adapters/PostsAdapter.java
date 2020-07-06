@@ -85,20 +85,7 @@ public final class PostsAdapter extends RecyclerView.Adapter<PostViewHolder> {
                 @Override
                 public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
                     holder.progressView.setVisibility(View.GONE);
-                    try {
-                        final HttpURLConnection conn = (HttpURLConnection) new URL(postModel.getDisplayUrl()).openConnection();
-                        conn.setUseCaches(false);
-                        conn.connect();
-                        if (conn.getResponseCode() != HttpURLConnection.HTTP_GONE) {
-                            glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
-                        }
-                        else return true;
-                    }
-                    catch (Exception urle) {
-                        if (logCollector != null)
-                            logCollector.appendException(urle, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground");
-                        if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", urle);
-                    }
+                    // glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
                     return false;
                 }
             }).into(holder.postImage);
