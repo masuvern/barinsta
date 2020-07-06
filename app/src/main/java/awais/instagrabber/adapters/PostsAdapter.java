@@ -1,6 +1,7 @@
 package awais.instagrabber.adapters;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +21,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.PostViewHolder;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awaisomereport.LogCollector;
+
+import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class PostsAdapter extends RecyclerView.Adapter<PostViewHolder> {
     private final ArrayList<PostModel> postModels;
@@ -80,11 +85,18 @@ public final class PostsAdapter extends RecyclerView.Adapter<PostViewHolder> {
                 @Override
                 public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
                     holder.progressView.setVisibility(View.GONE);
-                    final HttpURLConnection conn = (HttpURLConnection) new URL(postModel.getDisplayUrl()).openConnection();
-                    conn.setUseCaches(false);
-                    conn.connect();
-                    if (conn.getResponseCode() != HttpURLConnection.HTTP_GONE)
-                        glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
+                    try {
+                        final HttpURLConnection conn = (HttpURLConnection) new URL(postModel.getDisplayUrl()).openConnection();
+                        conn.setUseCaches(false);
+                        conn.connect();
+                        if (conn.getResponseCode() != HttpURLConnection.HTTP_GONE)
+                            glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
+                    }
+                    catch (Exception urle) {
+                        if (logCollector != null)
+                            logCollector.appendException(urle, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground");
+                        if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", urle);
+                    }
                     return false;
                 }
             }).into(holder.postImage);
