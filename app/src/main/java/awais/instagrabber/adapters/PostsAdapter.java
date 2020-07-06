@@ -89,8 +89,10 @@ public final class PostsAdapter extends RecyclerView.Adapter<PostViewHolder> {
                         final HttpURLConnection conn = (HttpURLConnection) new URL(postModel.getDisplayUrl()).openConnection();
                         conn.setUseCaches(false);
                         conn.connect();
-                        if (conn.getResponseCode() != HttpURLConnection.HTTP_GONE)
+                        if (conn.getResponseCode() != HttpURLConnection.HTTP_GONE) {
                             glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
+                        }
+                        else return true;
                     }
                     catch (Exception urle) {
                         if (logCollector != null)
