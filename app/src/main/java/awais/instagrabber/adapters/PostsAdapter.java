@@ -16,6 +16,8 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import awais.instagrabber.R;
@@ -78,7 +80,11 @@ public final class PostsAdapter extends RecyclerView.Adapter<PostViewHolder> {
                 @Override
                 public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
                     holder.progressView.setVisibility(View.GONE);
-                    glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
+                    final HttpURLConnection conn = (HttpURLConnection) new URL(postModel.getDisplayUrl()).openConnection();
+                    conn.setUseCaches(false);
+                    conn.connect();
+                    if (conn.getResponseCode() != HttpURLConnection.HTTP_GONE)
+                        glideRequestManager.load(postModel.getDisplayUrl()).into(holder.postImage);
                     return false;
                 }
             }).into(holder.postImage);
