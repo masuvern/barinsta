@@ -215,7 +215,7 @@ public final class Utils {
                     if (++i == commentLength) break;
                     currChar = text.charAt(i);
 
-                    if (currChar == '.') {
+                    if (currChar == '.' && i + 1 < commentLength) {
                         final char nextChar = text.charAt(i + 1);
                         if (nextChar == '.' || nextChar == ' ' || nextChar == '#' || nextChar == '@' || nextChar == '/'
                                 || nextChar == '\r' || nextChar == '\n') {
