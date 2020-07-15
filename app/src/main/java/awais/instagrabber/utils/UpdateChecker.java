@@ -22,7 +22,7 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
     @NonNull
     @Override
     protected Boolean doInBackground(final Void... voids) {
-        final String UPDATE_BASE_URL = "https://gitlab.com/AwaisKing/instagrabber/-/releases/v";
+        final String UPDATE_BASE_URL = "https://github.com/austinhuang0131/instagrabber/releases/tag/v";
         final String versionName = BuildConfig.VERSION_NAME;
         final int index = versionName.indexOf('.');
 

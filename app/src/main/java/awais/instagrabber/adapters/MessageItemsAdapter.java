@@ -188,10 +188,11 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                 }
                 break;
 
-                case MEDIA_SHARE: {
+                case MEDIA_SHARE:
+                {
                     final ProfileModel modelUser = mediaModel.getUser();
                     if (modelUser != null) {
-                        holder.tvMessage.setText(context.getString(R.string.dms_inbox_media_shared_from, modelUser.getUsername()));
+                        holder.tvMessage.setText(HtmlCompat.fromHtml("<small>"+context.getString(R.string.dms_inbox_media_shared_from, modelUser.getUsername())+"</small>", 63));
                         holder.tvMessage.setVisibility(View.VISIBLE);
                     }
                 }
@@ -220,31 +221,34 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                     int textRes = R.string.dms_inbox_raven_media_unknown;
                     if (isExpired) textRes = R.string.dms_inbox_raven_media_expired;
 
-                    if (!isExpired && mediaActionSummary != null) {
-                        final RavenExpiringMediaType expiringMediaType = mediaActionSummary.getType();
+                    if (!isExpired) {
+                        if (mediaActionSummary != null) {
+                            final RavenExpiringMediaType expiringMediaType = mediaActionSummary.getType();
 
-                        if (expiringMediaType == RavenExpiringMediaType.RAVEN_DELIVERED)
-                            textRes = R.string.dms_inbox_raven_media_delivered;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SENT)
-                            textRes = R.string.dms_inbox_raven_media_sent;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_OPENED)
-                            textRes = R.string.dms_inbox_raven_media_opened;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_REPLAYED)
-                            textRes = R.string.dms_inbox_raven_media_replayed;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SENDING)
-                            textRes = R.string.dms_inbox_raven_media_sending;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_BLOCKED)
-                            textRes = R.string.dms_inbox_raven_media_blocked;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SUGGESTED)
-                            textRes = R.string.dms_inbox_raven_media_suggested;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SCREENSHOT)
-                            textRes = R.string.dms_inbox_raven_media_screenshot;
-                        else if (expiringMediaType == RavenExpiringMediaType.RAVEN_CANNOT_DELIVER)
-                            textRes = R.string.dms_inbox_raven_media_cant_deliver;
+                            if (expiringMediaType == RavenExpiringMediaType.RAVEN_DELIVERED)
+                                textRes = R.string.dms_inbox_raven_media_delivered;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SENT)
+                                textRes = R.string.dms_inbox_raven_media_sent;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_OPENED)
+                                textRes = R.string.dms_inbox_raven_media_opened;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_REPLAYED)
+                                textRes = R.string.dms_inbox_raven_media_replayed;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SENDING)
+                                textRes = R.string.dms_inbox_raven_media_sending;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_BLOCKED)
+                                textRes = R.string.dms_inbox_raven_media_blocked;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SUGGESTED)
+                                textRes = R.string.dms_inbox_raven_media_suggested;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_SCREENSHOT)
+                                textRes = R.string.dms_inbox_raven_media_screenshot;
+                            else if (expiringMediaType == RavenExpiringMediaType.RAVEN_CANNOT_DELIVER)
+                                textRes = R.string.dms_inbox_raven_media_cant_deliver;
+                        }
 
                         final RavenMediaViewType ravenMediaViewType = ravenMediaModel.getViewType();
                         if (ravenMediaViewType == RavenMediaViewType.PERMANENT || ravenMediaViewType == RavenMediaViewType.REPLAYABLE) {
                             final MediaItemType mediaType = mediaModel.getMediaType();
+                            textRes = -1;
                             holder.mediaTypeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
                                     mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
 
@@ -252,9 +256,10 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                             holder.mediaMessageContainer.setVisibility(View.VISIBLE);
                         }
                     }
-
-                    holder.tvMessage.setText(context.getText(textRes));
-                    holder.tvMessage.setVisibility(View.VISIBLE);
+                    if (textRes != -1) {
+                        holder.tvMessage.setText(context.getText(textRes));
+                        holder.tvMessage.setVisibility(View.VISIBLE);
+                    }
                 }
                 break;
 
@@ -385,7 +390,7 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
         if (users != null) {
             for (final ProfileModel user : users)
                 if (Long.toString(userId).equals(user.getId())) return user;
-            return myProfileHolder;
+                return myProfileHolder;
         }
         return null;
     }

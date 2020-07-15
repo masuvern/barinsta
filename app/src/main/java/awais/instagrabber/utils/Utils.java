@@ -349,6 +349,16 @@ public final class Utils {
         return thumbnail;
     }
 
+    public static String getVideoUrl(@NonNull final JSONObject mediaObj) throws Exception {
+        String thumbnail = null;
+
+        final JSONArray imageVersions = mediaObj.optJSONArray("video_versions");
+        if (imageVersions != null)
+            thumbnail = Utils.getItemThumbnail(imageVersions);
+
+        return thumbnail;
+    }
+
     @Nullable
     public static MediaItemType getMediaItemType(final int mediaType) {
         if (mediaType == 1) return MediaItemType.MEDIA_TYPE_IMAGE;
@@ -387,6 +397,7 @@ public final class Utils {
                     mediaObj.optLong("pk"),
                     id,
                     getThumbnailUrl(mediaObj, mediaType),
+                    mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? getVideoUrl(mediaObj) : null,
                     user,
                     mediaObj.optString("code"));
         }
@@ -521,7 +532,7 @@ public final class Utils {
 
                     linkModel = new DirectItemLinkModel(linkObj.getString("text"),
                             linkObj.getString("client_context"),
-                            linkObj.getString("mutation_token"),
+                            linkObj.optString("mutation_token"),
                             itemLinkContext);
                 }
                 break;
@@ -570,7 +581,7 @@ public final class Utils {
                     }
 
                     ravenMediaModel = new DirectItemRavenMediaModel(
-                            visualMedia.getLong(viewType == RavenMediaViewType.PERMANENT ? "url_expire_at_secs" : "replay_expiring_at_us"),
+                            visualMedia.optLong(viewType == RavenMediaViewType.PERMANENT ? "url_expire_at_secs" : "replay_expiring_at_us"),
                             visualMedia.optInt("playback_duration_secs"),
                             visualMedia.getInt("seen_count"),
                             seenUserIds,
@@ -618,7 +629,6 @@ public final class Utils {
 
                 case ACTION_LOG:
                     if (inThreadView && itemObject.optInt("hide_in_thread", 0) != 0)
-                        // prevents empty viewholders when in thread view mode
                         continue;
                     final JSONObject actionLog = itemObject.getJSONObject("action_log");
                     String desc = actionLog.getString("description");
@@ -910,7 +920,7 @@ public final class Utils {
 
                 if (main == null) {
                     new DownloadAsync(context,
-                            selectedItem.getThumbUrl(),
+                            selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
                             getDownloadSaveFileDm(finalDir, selectedItem, ""),
                             null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -929,7 +939,7 @@ public final class Utils {
 
     @NonNull
     private static File getDownloadSaveFileDm(final File finalDir, @NonNull final DirectItemMediaModel model, final String sliderPrefix) {
-        final String displayUrl = model.getThumbUrl();
+        final String displayUrl = model.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? model.getVideoUrl() : model.getThumbUrl();
         return new File(finalDir, model.getId() + sliderPrefix +
                 getExtensionFromModel(displayUrl, model));
     }

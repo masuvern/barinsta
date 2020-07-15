@@ -351,16 +351,17 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
     public final static class DirectItemMediaModel implements Serializable {
         private final MediaItemType mediaType;
         private final long expiringAt, pk;
-        private final String id, thumbUrl, code;
+        private final String id, thumbUrl, videoUrl, code;
         private final ProfileModel user;
 
         public DirectItemMediaModel(final MediaItemType mediaType, final long expiringAt, final long pk, final String id,
-                                    final String thumbUrl, final ProfileModel user, final String code) {
+                                    final String thumbUrl, final String videoUrl, final ProfileModel user, final String code) {
             this.mediaType = mediaType;
             this.expiringAt = expiringAt;
             this.pk = pk;
             this.id = id;
             this.thumbUrl = thumbUrl;
+            this.videoUrl = videoUrl;
             this.user = user;
             this.code = code;
         }
@@ -391,6 +392,13 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
 
         public String getThumbUrl() {
             return thumbUrl;
+        }
+
+        public String getVideoUrl() {
+
+            if (mediaType == MediaItemType.MEDIA_TYPE_VIDEO) return videoUrl;
+            else return thumbUrl;
+
         }
     }
 

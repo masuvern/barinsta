@@ -114,6 +114,7 @@
     <string name="direct_messages_you">You</string>
     <string name="direct_messages_sent_link">Shared a link</string>
     <string name="direct_messages_sent_media">Shared a media</string>
+    <string name="direct_messages_sent_raven">Shared a timed message</string>
     <string name="direct_messages_replied_story">Replied to a story</string>
     <string name="direct_messages_reacted_story">Reacted on a story</string>
     <string name="direct_messages_mention_story">Mentioned in a story</string>

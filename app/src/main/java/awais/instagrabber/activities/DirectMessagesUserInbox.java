@@ -30,6 +30,7 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemMediaModel;
+import awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemRavenMediaModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.DownloadMethod;
@@ -104,46 +105,50 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
             Object tag = v.getTag();
             if (tag instanceof DirectItemModel) {
                 directItemModel = (DirectItemModel) tag;
-                final String username = getUser(directItemModel.getUserId()).getUsername();
                 final DirectItemType itemType = directItemModel.getItemType();
                 switch (itemType) {
+                    case MEDIA_SHARE:
+                        startActivity(new Intent(this, PostViewer.class)
+                                .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode())));
+                        break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);
                         linkIntent.setData(Uri.parse(directItemModel.getLinkModel().getLinkContext().getLinkUrl()));
                         startActivity(linkIntent);
                         break;
-                    case MEDIA_SHARE:
-                        startActivity(new Intent(this, PostViewer.class)
-                                .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode())));
-                        break;
-                    case MEDIA:
-                        Utils.dmDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(directItemModel.getMediaModel()));
-                        Toast.makeText(v.getContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
-                        break;
-                    case REEL_SHARE:
-                    case STORY_SHARE:
-                        if (directItemModel.getReelShare() != null)
-                            startActivity(new Intent(this, StoryViewer.class)
-                                            .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
-                                /*.putExtra(Constants.EXTRAS_STORIES, new StoryModel(
-                                        directItemModel.getReelShare().getReelId(),
-                                        directItemModel.getReelShare().getMedia()
-                                ))*/
-                            );
-                        break;
                     case TEXT:
+                    case REEL_SHARE:
                         Utils.copyText(v.getContext(), directItemModel.getText());
                         Toast.makeText(v.getContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
                         break;
+                    case RAVEN_MEDIA:
+                    case MEDIA:
+                        Utils.dmDownload(this, getUser(directItemModel.getUserId()).getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
+                                Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
+                        Toast.makeText(v.getContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                        break;
+                    case STORY_SHARE:
+                        StoryModel sm = new StoryModel(
+                                directItemModel.getReelShare().getReelId(),
+                                directItemModel.getReelShare().getMedia().getVideoUrl(),
+                                directItemModel.getReelShare().getMedia().getMediaType(),
+                                directItemModel.getTimestamp()
+                        );
+                        sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
+                        StoryModel[] sms = {sm};
+                        if (directItemModel.getReelShare() != null)
+                            startActivity(new Intent(this, StoryViewer.class)
+                                    .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
+                                    .putExtra(Constants.EXTRAS_STORIES, sms)
+                            );
+                        break;
+                    default:
+                        Log.d("austin_debug", "unsupported type "+itemType);
                 }
-
-                /*
-                startActivity(new Intent(this, PostViewer.class)
-                        .putExtra(Constants.EXTRAS_POST, new PostModel(tag.toString())));
-                 */
             }
         },
         (view, text, isHashtag) -> {
+            searchUsername(text);
         });
 
         dmsBinding.rvDirectMessages.setAdapter(

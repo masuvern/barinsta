@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -85,8 +86,8 @@ public final class DirectMessagesAdapter extends RecyclerView.Adapter<DirectMess
             else if (itemType == DirectItemType.ACTION_LOG) {
                 final DirectItemActionLogModel logModel = lastItemModel.getActionLogModel();
                 messageText = logModel != null ? logModel.getDescription() : "...";
-
-            } else if (itemType == DirectItemType.REEL_SHARE) {
+            }
+            else if (itemType == DirectItemType.REEL_SHARE) {
                 final DirectItemReelShareModel reelShare = lastItemModel.getReelShare();
                 if (reelShare == null)
                     messageText = context.getString(R.string.direct_messages_sent_media);
@@ -94,16 +95,20 @@ public final class DirectMessagesAdapter extends RecyclerView.Adapter<DirectMess
                     final String reelType = reelShare.getType();
                     final int textRes;
                     if ("reply".equals(reelType)) textRes = R.string.direct_messages_replied_story;
-                    else if ("mention".equals(reelType)) textRes = R.string.direct_messages_mention_story;
-                    else if ("reaction".equals(reelType)) textRes = R.string.direct_messages_reacted_story;
+                    else if ("mention".equals(reelType))
+                        textRes = R.string.direct_messages_mention_story;
+                    else if ("reaction".equals(reelType))
+                        textRes = R.string.direct_messages_reacted_story;
                     else textRes = R.string.direct_messages_sent_media;
 
                     messageText = context.getString(textRes) + " : " + reelShare.getText();
                 }
-
+            }
+            else if (itemType == DirectItemType.RAVEN_MEDIA) {
+                messageText = context.getString(R.string.direct_messages_sent_media);
             } else messageText = null;
 
-            holder.tvMessage.setText(messageText);
+            holder.tvMessage.setText(HtmlCompat.fromHtml(messageText.toString(), 63));
 
             holder.tvDate.setText(lastItemModel.getDateTime());
         }

@@ -104,6 +104,9 @@ public final class StoryViewer extends BaseLanguageActivity {
 
         if (hasUsername) {
             storyViewerBinding.toolbar.toolbar.setTitle(username);
+            storyViewerBinding.toolbar.toolbar.setOnClickListener(v -> {
+                searchUsername(username);
+            });
             if (hasHighlight) storyViewerBinding.toolbar.toolbar.setSubtitle(getString(R.string.title_highlight, highlight));
             else storyViewerBinding.toolbar.toolbar.setSubtitle(R.string.title_user_story);
         }
@@ -342,6 +345,16 @@ public final class StoryViewer extends BaseLanguageActivity {
         releasePlayer();
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
+    }
+
+    private void searchUsername(final String text) {
+        if (Main.scanHack != null) {
+            Main.scanHack.onResult(text);
+            setResult(6969);
+            Intent intent = new Intent(getApplicationContext(), Main.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
     }
 
     private void releasePlayer() {
