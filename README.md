@@ -2,16 +2,13 @@
 
 ## InstaGrabber
 
-InstaGrabber is an app that allows downloading Instagram posts (and, in fact, an open-source drop-in replacement for the Instagram app, but with only read functionalities).
+InstaGrabber is an app that allows ~~stealing~~ downloading Instagram posts, stories, and DM. It can be used as a drop-in replacement for read functionalities of the Instagram app.
 
 This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber). I decided to continue the app cuz why not, ~~even though it might not be that *cash money*.~~ (Also I need to learn Java.)
 
 ### Download
 
-Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under each release is an `app-release.apk`. Just install that. Unfortunately,
-
-* I have to sign it with my own key, which means you have to uninstall the old app and log in again. Sorry.
-* ~~I don't plan on getting a Google Play Dev account yet, so that means Google Play will shout at you for installing "malware". Just ignore it.~~ (Does not seem to happen anymore after I sent the app to Google.) If you're skeptical (which is not necessarily a bad thing), just inspect the source code and build the app yourself.
+Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under each release is an `app-release.apk`. Just install that. Unfortunately, I have to sign it with my own key, which means you have to uninstall the old app and log in again. Sorry.
 
 ### How to log in
 
