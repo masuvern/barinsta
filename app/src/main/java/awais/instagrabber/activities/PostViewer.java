@@ -361,7 +361,10 @@ public final class PostViewer extends BaseLanguageActivity {
     private void searchUsername(final String text) {
         if (Main.scanHack != null) {
             Main.scanHack.onResult(text);
-            finish();
+            setResult(6969);
+            Intent intent = new Intent(getApplicationContext(), Main.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
     }
 

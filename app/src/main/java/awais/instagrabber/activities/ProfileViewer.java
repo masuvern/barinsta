@@ -98,6 +98,8 @@ public final class ProfileViewer extends BaseLanguageActivity {
 
             final RequestManager glideRequestManager = Glide.with(this);
 
+            if (glideRequestManager == null) return;
+
             glideRequestManager.load(profilePicUrl).addListener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
