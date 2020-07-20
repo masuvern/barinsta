@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +52,7 @@ public final class ProfileViewer extends BaseLanguageActivity {
     private FetchListener<String> fetchListener;
     private boolean errorHandled = false;
     private boolean fallbackToProfile = false;
+    private boolean destroyed = false;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -96,9 +98,9 @@ public final class ProfileViewer extends BaseLanguageActivity {
             if (errorHandled && fallbackToProfile || Utils.isEmpty(profilePicUrl))
                 profilePicUrl = profileModel.getHdProfilePic();
 
-            final RequestManager glideRequestManager = Glide.with(this);
+            if (destroyed == true) return;
 
-            if (glideRequestManager == null) return;
+            final RequestManager glideRequestManager = Glide.with(this);
 
             glideRequestManager.load(profilePicUrl).addListener(new RequestListener<Drawable>() {
                 @Override
@@ -187,6 +189,13 @@ public final class ProfileViewer extends BaseLanguageActivity {
 
         if (error == 1) Toast.makeText(this, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
         else if (error == 2) Toast.makeText(this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getDelegate().onDestroy();
+        destroyed = true;
     }
 
     @Override
