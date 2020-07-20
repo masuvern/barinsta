@@ -12,4 +12,20 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under
 
 ### How to log in
 
-Original instructions are [here](https://gitlab.com/AwaisKing/instagrabber/-/wikis/home#how-to-login-eli5-1).
+By logging in, you can access posts/stories from private accounts, as well as your direct messages.
+
+The relevant source code is [here](https://github.com/austinhuang0131/instagrabber/blob/master/app/src/main/java/awais/instagrabber/activities/Login.java) should you be concerned.
+
+1. Click the 3 dots on the bottom right corner.
+2. Click "Settings".
+3. Scroll down, click the green button called "Login".
+4. (Recommended, not required) Enable desktop mode if you have 2FA.
+5. Login as usual. Use "Refresh" when needed.
+6. When you see your feed page, click "Get cookies".
+7. Test it by checking your direct messages. If it loads, it works!
+
+### Legal
+
+* We do not collect any data, other than crash log, which is only stored locally. No funky stuff.
+* You can voluntarily provide us with the crash log (3 dots => Settings => "Send logs"). In that case, it is your sole responsibility to remove any sensitive information. As well, you agree to the privacy policy of the platform that you send it on.
+* **You are solely responsible for the integrity of your account.** While much effort is made to imitate the actual Instagram app, no one can make any guarantee that you can't get banned over this (blame Zucc).
