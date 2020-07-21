@@ -46,6 +46,7 @@ import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.ActivityStoryViewerBinding;
 import awais.instagrabber.interfaces.SwipeEvent;
+import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -121,13 +122,34 @@ public final class StoryViewer extends BaseLanguageActivity {
             @Override
             public void onSwipe(final boolean isRightSwipe) {
                 if (storyModels != null && storiesLen > 0) {
-                    if (isRightSwipe) {
-                        if (--slidePos <= 0) slidePos = 0;
-                    } else if (++slidePos >= storiesLen) slidePos = storiesLen - 1;
+                    if (((slidePos == storiesLen - 1 && isRightSwipe == false) || (slidePos == 0 && isRightSwipe == true))
+                            && intent.hasExtra(Constants.FEED)) {
+                        final FeedStoryModel[] storyFeed = (FeedStoryModel[]) intent.getSerializableExtra(Constants.FEED);
+                        final int index = intent.getIntExtra(Constants.FEED_ORDER, 1738);
+                        final FeedStoryModel feedStoryModel = isRightSwipe ?
+                            (storyFeed.length == 0 ? null : storyFeed[index-1]) :
+                            (storyFeed.length == index+1 ? null : storyFeed[index+1]);
+                        final StoryModel[] nextStoryModels = feedStoryModel.getStoryModels();
 
-                    currentStory = storyModels[slidePos];
-                    slidePos = currentStory.getPosition();
-                    refreshStory();
+                        if (feedStoryModel != null) {
+                            final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
+                                    .putExtra(Constants.EXTRAS_STORIES, nextStoryModels)
+                                    .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                                    .putExtra(Constants.FEED, storyFeed)
+                                    .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index-1) : (index+1));
+                            newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(newIntent);
+                        }
+                    }
+                    else {
+                        if (isRightSwipe) {
+                            if (--slidePos <= 0) slidePos = 0;
+                        } else if (++slidePos >= storiesLen) slidePos = storiesLen - 1;
+
+                        currentStory = storyModels[slidePos];
+                        slidePos = currentStory.getPosition();
+                        refreshStory();
+                    }
                 }
             }
         };
@@ -363,5 +385,16 @@ public final class StoryViewer extends BaseLanguageActivity {
             try { player.release(); } catch (Exception ignored) { }
             player = null;
         }
+    }
+
+    public static int indexOfIntArray(Object[] array, Object key) {
+        int returnvalue = -1;
+        for (int i = 0; i < array.length; ++i) {
+            if (key == array[i]) {
+                returnvalue = i;
+                break;
+            }
+        }
+        return returnvalue;
     }
 }

@@ -38,6 +38,8 @@ public final class Constants {
     public static final String EXTRAS_FOLLOWERS = "followers";
     public static final String EXTRAS_SHORTCODE = "shortcode";
     public static final String EXTRAS_END_CURSOR = "endCursor";
+    public static final String FEED = "feed";
+    public static final String FEED_ORDER = "feedOrder";
     //////////////////////// EXTRAS ////////////////////////
     public static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) " +
             "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 " +

@@ -88,6 +88,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static AsyncTask<?, ?, ?> currentlyExecuting;
     private AsyncTask<Void, Void, FeedStoryModel[]> prevStoriesFetcher;
     private final boolean autoloadPosts;
+    private FeedStoryModel[] stories;
     private boolean hasNextPage = false, feedHasNextPage = false, discoverHasMore = false;
     private String endCursor = null, feedEndCursor = null, discoverEndMaxId = null;
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
@@ -206,6 +207,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             feedStoriesAdapter.setData(result);
             if (result != null && result.length > 0)
                 main.mainBinding.feedStories.setVisibility(View.VISIBLE);
+                stories = result;
         }
     };
     private final MentionClickListener mentionClickListener = new MentionClickListener() {
@@ -224,10 +226,13 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if (tag instanceof FeedStoryModel) {
                 final FeedStoryModel feedStoryModel = (FeedStoryModel) tag;
                 final StoryModel[] storyModels = feedStoryModel.getStoryModels();
+                final int index = indexOfIntArray(stories, feedStoryModel);
 
                 main.startActivity(new Intent(main, StoryViewer.class)
                         .putExtra(Constants.EXTRAS_STORIES, storyModels)
                         .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                        .putExtra(Constants.FEED, stories)
+                        .putExtra(Constants.FEED_ORDER, index)
                 );
             }
         }
@@ -860,5 +865,16 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             currentFeedPlayer.setPlayWhenReady(true);
             currentFeedPlayer.getPlaybackState();
         }
+    }
+
+    public static int indexOfIntArray(Object[] array, Object key) {
+        int returnvalue = -1;
+        for (int i = 0; i < array.length; ++i) {
+            if (key == array[i]) {
+                returnvalue = i;
+                break;
+            }
+        }
+        return returnvalue;
     }
 }

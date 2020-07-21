@@ -215,7 +215,7 @@ public final class Main extends BaseLanguageActivity {
 
         final boolean isQueryNull = userQuery == null;
         if (isQueryNull) allItems.clear();
-        if (BuildConfig.DEBUG && isQueryNull) userQuery = "the.badak"; // todo
+        if (BuildConfig.DEBUG && isQueryNull) userQuery = "austinhuang.me";
         if (!mainBinding.swipeRefreshLayout.isRefreshing() && userQuery != null) mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
