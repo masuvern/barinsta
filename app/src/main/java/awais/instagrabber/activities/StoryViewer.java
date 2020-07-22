@@ -140,6 +140,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                             newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(newIntent);
                         }
+                        else Toast.makeText(getApplicationContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                     }
                     else {
                         if (isRightSwipe) {
