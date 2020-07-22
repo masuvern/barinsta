@@ -40,13 +40,19 @@ The relevant source code is [here](https://github.com/austinhuang0131/instagrabb
 6. When you see your feed page, click "Get cookies".
 7. Test it by checking your direct messages. If it loads, it works!
 
+### Contact us
+
+* Use [GitHub issues](https://github.com/austinhuang0131/instagrabber/issues) when possible.
+* Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
+* Telegram: [@Grabber_App](https://t.me/grabber_app)
+
 ### Legal
 
 * We do not collect any data, other than crash log, which is only stored locally. No funky stuff.
 * You can voluntarily provide us with the crash log (3 dots => Settings => "Send logs"). In that case, it is your sole responsibility to remove any sensitive information. As well, you agree to the privacy policy of the platform that you send it on.
 * While the best effort is made in this app, nobody (me or AWAiS) is liable for damages that have arisen due to the usage of this app, including but not limited to account bans and broken friendship. (The former wouldn't happen so easily as this app does imitate actual Instagram clients, the latter depends on who is using it and who their friends are, neither of which I have any control of.)
 * Please use downloaded content legally and responsibly. [Don't pull a Newsweek!](https://arstechnica.com/tech-policy/2020/06/instagram-just-threw-users-of-its-embedding-api-under-the-bus/)
-* This app is licensed under GPLv3. See [LICENSE](./LICENSE).
+* This app is licensed under GPLv3.
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com)
 
