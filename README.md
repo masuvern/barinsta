@@ -24,6 +24,8 @@ This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who po
 
 Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under each release is an `app-release.apk`. Just install that. Unfortunately, I have to sign it with my own key, which means you have to uninstall the old app and log in again. Sorry.
 
+I will release it on F-droid somewhen later.
+
 ### How to log in
 
 By logging in, you can access posts/stories from private accounts, as well as your direct messages.
