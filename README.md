@@ -2,13 +2,29 @@
 
 ## InstaGrabber
 
-InstaGrabber is an app that allows ~~stealing~~ downloading Instagram posts, stories, and DM. It can be used as a drop-in replacement for read functionalities of the Instagram app.
+InstaGrabber is an app that allows...
 
-This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber). I decided to continue the app cuz why not, ~~even though it might not be that *cash money*.~~ (Also I need to learn Java.)
+* Viewing **and downloading** Instagram posts, stories (including highlights)\*, DM\*, and profile pictures, **without** letting people know you viewed it<sup>1</sup>! Works for followed private accounts\*!
+* Downloading multiple posts at once (hold & select)!
+* **Copy** post captions, comments, DM messages\*, and profile bios.
+* **Compare** follower/following list<sup>2</sup>!
+* Searching usernames and hashtags.
+
+<sub>* Requires [login](#how-to-log-in). You must be a current follower of the desired private accounts, this app cannot hack people (which I have to state despite the obvious)!</sub>
+
+It can be used as a drop-in replacement for read functionalities of the official Instagram app, with unnecessary components stripped.
+
+[![Open Source Love svg3](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
+
+This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber) but subsequently abandoned it. I decided to continue the app cuz why not, ~~even though it might not be that *cash money*.~~ (Also I need to learn Java.)
 
 ### Download
 
 Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under each release is an `app-release.apk`. Just install that. Unfortunately, I have to sign it with my own key, which means you have to uninstall the old app and log in again. Sorry.
+
+I will release it on F-droid somewhen later.
 
 ### How to log in
 
@@ -24,8 +40,22 @@ The relevant source code is [here](https://github.com/austinhuang0131/instagrabb
 6. When you see your feed page, click "Get cookies".
 7. Test it by checking your direct messages. If it loads, it works!
 
+### Contact us
+
+* Use [GitHub issues](https://github.com/austinhuang0131/instagrabber/issues) when possible.
+* Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
+* Telegram: [@Grabber_App](https://t.me/grabber_app)
+
 ### Legal
 
 * We do not collect any data, other than crash log, which is only stored locally. No funky stuff.
 * You can voluntarily provide us with the crash log (3 dots => Settings => "Send logs"). In that case, it is your sole responsibility to remove any sensitive information. As well, you agree to the privacy policy of the platform that you send it on.
-* **You are solely responsible for the integrity of your account.** While much effort is made to imitate the actual Instagram app, no one can make any guarantee that you can't get banned over this (blame Zucc).
+* While the best effort is made in this app, nobody (me or AWAiS) is liable for damages that have arisen due to the usage of this app, including but not limited to account bans and broken friendship. (The former wouldn't happen so easily as this app does imitate actual Instagram clients, the latter depends on who is using it and who their friends are, neither of which I have any control of.)
+* Please use downloaded content legally and responsibly. [Don't pull a Newsweek!](https://arstechnica.com/tech-policy/2020/06/instagram-just-threw-users-of-its-embedding-api-under-the-bus/)
+* This app is licensed under GPLv3.
+
+[![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com)
+
+<sub>Previous owner left a lot of swearings in the code, I will remove them when I get to that file.</sub>
+
+<sub>1. The downside is that they'll always be "new" in other Instagram clients. Also, this app will not respect DM message restrictions (replay once / no replay).<br>2. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
