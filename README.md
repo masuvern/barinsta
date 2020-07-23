@@ -15,9 +15,9 @@ InstaGrabber is an app that allows...
 
 It can be used as a drop-in replacement for read functionalities of the official Instagram app, with unnecessary components stripped.
 
-[![Open Source Love svg3](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/1.jpg" alt="Profile" width="33%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/2.jpg" alt="Post" width="33%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/3.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/3.jpg" alt="Story (Highlight shown)" width="33%"/></a>
 
 This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber) but subsequently abandoned it. I decided to continue the app cuz why not, ~~even though it might not be that *cash money*.~~ (Also I need to learn Java.)
 
@@ -28,6 +28,11 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under
 Not compatible with pre-16.6 versions (including alpha).
 
 [F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432)
+
+[![Open Source Love svg3](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
+[![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
+[![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
 ### How to log in
 
