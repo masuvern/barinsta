@@ -23,9 +23,11 @@ This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who po
 
 ### Download
 
-Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under each release is an `app-release.apk`. Just install that. Unfortunately, I have to sign it with my own key, which means you have to uninstall the old app and log in again. Sorry.
+Download [here](https://github.com/austinhuang0131/instagrabber/releases). Under each release is an `app-release.apk` for installation.
 
-I will release it on F-droid somewhen later.
+Not compatible with pre-16.6 versions (including alpha).
+
+[F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432)
 
 ### How to log in
 
@@ -36,10 +38,9 @@ The relevant source code is [here](https://github.com/austinhuang0131/instagrabb
 1. Click the 3 dots on the bottom right corner.
 2. Click "Settings".
 3. Scroll down, click the green button called "Login".
-4. (Recommended, not required) Enable desktop mode if you have 2FA.
-5. Login as usual. Use "Refresh" when needed.
-6. When you see your feed page, click "Get cookies".
-7. Test it by checking your direct messages. If it loads, it works!
+4. Login as usual. Use "Refresh" when needed.
+5. When you see your feed page, click "Get cookies".
+6. Test it by checking your direct messages. If it loads, it works!
 
 ### Contact us
 
