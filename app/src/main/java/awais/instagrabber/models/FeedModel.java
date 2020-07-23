@@ -10,8 +10,8 @@ public final class FeedModel extends PostModel {
 
     public FeedModel(final ProfileModel profileModel, final MediaItemType itemType, final long viewCount, final String postId,
                      final String displayUrl, final String thumbnailUrl, final String shortCode, final String postCaption,
-                     final long commentsCount, final long timestamp) {
-        super(itemType, postId, displayUrl, thumbnailUrl, shortCode, postCaption, timestamp);
+                     final long commentsCount, final long timestamp, boolean liked, boolean bookmarked) {
+        super(itemType, postId, displayUrl, thumbnailUrl, shortCode, postCaption, timestamp, liked, bookmarked);
         this.profileModel = profileModel;
         this.commentsCount = commentsCount;
         this.viewCount = viewCount;

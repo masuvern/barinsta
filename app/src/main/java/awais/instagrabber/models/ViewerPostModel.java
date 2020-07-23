@@ -10,7 +10,8 @@ public final class ViewerPostModel extends BasePostModel {
     private boolean isCurrentSlide = false;
 
     public ViewerPostModel(final MediaItemType itemType, final String postId, final String displayUrl, final String shortCode,
-                           final String postCaption, final String username, final long videoViews, final long timestamp) {
+                           final String postCaption, final String username, final long videoViews, final long timestamp,
+                           boolean liked, boolean bookmarked) {
         this.itemType = itemType;
         this.postId = postId;
         this.displayUrl = displayUrl;
@@ -19,6 +20,22 @@ public final class ViewerPostModel extends BasePostModel {
         this.shortCode = shortCode;
         this.videoViews = videoViews;
         this.timestamp = timestamp;
+        this.liked = liked;
+        this.bookmarked = bookmarked;
+    }
+
+    public boolean getLike() {
+        return liked;
+    }
+    public boolean getBookmark() {
+        return bookmarked;
+    }
+
+    public boolean setLike() {
+        liked = liked == true ? false : true; this.liked = liked; return liked;
+    }
+    public boolean setBookmark() {
+        bookmarked = bookmarked == true ? false : true; this.bookmarked = bookmarked; return bookmarked;
     }
 
     public long getCommentsCount() {

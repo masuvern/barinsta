@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -43,6 +44,8 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,6 +67,8 @@ import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
+
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class PostViewer extends BaseLanguageActivity {
     private ActivityViewerBinding viewerBinding;
@@ -151,7 +156,10 @@ public final class PostViewer extends BaseLanguageActivity {
                     viewerBinding.bottomPanel.btnMute.setImageResource(intVol == 0f ? R.drawable.vol : R.drawable.mute);
                     Utils.sessionVolumeFull = intVol == 1f;
                 }
-
+            } else if (v == viewerBinding.btnLike) {
+                new Like().execute();
+            } else if (v == viewerBinding.btnBookmark) {
+                new Bookmark().execute();
             } else {
                 final Object tag = v.getTag();
                 if (tag instanceof ViewerPostModel) {
@@ -203,6 +211,14 @@ public final class PostViewer extends BaseLanguageActivity {
         viewerBinding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
 
         viewerBinding.ivToggleFullScreen.setOnClickListener(onClickListener);
+        if (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) {
+            viewerBinding.btnLike.setVisibility(View.GONE);
+            viewerBinding.btnBookmark.setVisibility(View.GONE);
+        }
+        else {
+            viewerBinding.btnLike.setOnClickListener(onClickListener);
+            viewerBinding.btnBookmark.setOnClickListener(onClickListener);
+        }
         viewerBinding.btnDownload.setOnClickListener(downloadClickListener);
 
         profileDialogAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
@@ -345,6 +361,8 @@ public final class PostViewer extends BaseLanguageActivity {
                 postModel.setPostId(viewerPostModel.getPostId());
                 postModel.setTimestamp(viewerPostModel.getTimestamp());
                 postModel.setPostCaption(viewerPostModel.getPostCaption());
+                postModel.setLike(viewerPostModel.getLike());
+                postModel.setBookmark(viewerPostModel.getBookmark());
             }
 
             setupPostInfoBar(viewerPostModel.getUsername(), viewerPostModel.getItemType());
@@ -555,6 +573,28 @@ public final class PostViewer extends BaseLanguageActivity {
             postModel.setPostId(viewerPostModel.getPostId());
             postModel.setTimestamp(viewerPostModel.getTimestamp());
             postModel.setPostCaption(viewerPostModel.getPostCaption());
+            postModel.setLike(viewerPostModel.getLike());
+            postModel.setBookmark(viewerPostModel.getBookmark());
+            if (viewerPostModel.getLike() == true) {
+                viewerBinding.btnLike.setText(R.string.unlike);
+                viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                        R.color.btn_pink_background, null)));
+            }
+            else {
+                viewerBinding.btnLike.setText(R.string.like);
+                viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                        R.color.btn_lightpink_background, null)));
+            }
+            if (viewerPostModel.getBookmark() == true) {
+                viewerBinding.btnBookmark.setText(R.string.unbookmark);
+                viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                        R.color.btn_orange_background, null)));
+            }
+            else {
+                viewerBinding.btnBookmark.setText(R.string.bookmark);
+                viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                        R.color.btn_lightorange_background, null)));
+            }
         }
 
         viewerBinding.bottomPanel.tvPostDate.setText(viewerPostModel.getPostDate());
@@ -638,5 +678,78 @@ public final class PostViewer extends BaseLanguageActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
             newUiOptions ^= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(newUiOptions);
+    }
+
+    /*
+     Recommended for PERSONAL use only
+     Don't ever think about running a like farm with this
+     */
+
+    class Like extends AsyncTask<Void, Void, Void> {
+        boolean ok = false;
+
+        protected Void doInBackground(Void... voids) {
+            final String url = "https://www.instagram.com/web/likes/"+postModel.getPostId()+"/"+
+                    (postModel.getLike() == true ? "unlike/" : "like/");
+            try {
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+                urlConnection.setRequestProperty("x-csrftoken",
+                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    ok = true;
+                }
+                else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT);
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "like: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok == true) {
+                viewerPostModel.setLike(postModel.getLike() == true ? false : true);
+                postModel.setLike(postModel.getLike() == true ? false : true);
+                refreshPost();
+            }
+        }
+    }
+
+    class Bookmark extends AsyncTask<Void, Void, Void> {
+        boolean ok = false;
+
+        protected Void doInBackground(Void... voids) {
+            final String url = "https://www.instagram.com/web/save/"+postModel.getPostId()+"/"+
+                    (postModel.getBookmark() == true ? "unsave/" : "save/");
+            try {
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+                urlConnection.setRequestProperty("x-csrftoken",
+                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    ok = true;
+                }
+                else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT);
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "bookmark: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok == true) {
+                viewerPostModel.setBookmark(postModel.getBookmark() == true ? false : true);
+                postModel.setBookmark(postModel.getBookmark() == true ? false : true);
+                refreshPost();
+            }
+        }
     }
 }

@@ -59,7 +59,8 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
         final ArrayList<PostModel> models = new ArrayList<>(postModels.length - 1);
         for (final ViewerPostModel postModel : postModels)
             models.add(new PostModel(postModel.getItemType(), postModel.getPostId(), postModel.getDisplayUrl(),
-                    postModel.getSliderDisplayUrl(), postModel.getShortCode(), postModel.getPostCaption(), postModel.getTimestamp()));
+                    postModel.getSliderDisplayUrl(), postModel.getShortCode(), postModel.getPostCaption(), postModel.getTimestamp(),
+                    postModel.getLike(), postModel.getBookmark()));
 
         postsAdapter = new PostsAdapter(models, v -> {
             final Object tag = v.getTag();

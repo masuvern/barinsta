@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="description">Ça a commencé comme une petite application personnelle de base avec l\'intention de télécharger (voler) des posts sur Instagram.\nApparemment, j\'ai un tempérament nerveux et je suis parfois assez impatient\{… généralement… la plupart du temps… OK ! tout le temps ! }et Dieu merci, presque tous les téléchargeurs d\'insta ont au moins un fournisseur de publicité, j\'ai donc décidé de créer le mien.\nAlors voilà ma petite application assez stupide.\n\nQuoi qu\'il en soit, si vous avez\{ ou ta mère }une question, suggestion, rapport ou correction de bogues, ou n\'importe quelle autre question, contactez-moi par Telegram ou par mail.\nTelegram: @awais404\nEmail: chapter50000@hotmail.com (ouais 50000 chapitres ! 😎🤘)</string>
-
     <string name="action_quickaccess">Accès rapide</string>
     <string name="action_about">À propos</string>
     <string name="action_dms">Messages privés</string>

@@ -132,7 +132,7 @@
                 android:padding="12dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp"
-                tools:text="Fuck y'all for real." />
+                tools:text="BOTTOM TEXT HAHA FUNNY MEME" />
         </FrameLayout>
     </ScrollView>
 </RelativeLayout>

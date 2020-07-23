@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="description">Esto comenzó como una pequeña y básica aplicación personal con intenciones de [copia-]descargar publicaciones de Instagram.\nAparentemente tengo un temperamento rápido y soy bastante impaciente a veces… \{frecuentemente… la mayoría del tiempo… ¡OK! todo el tiempo!} Y gracias a Dios casi todos los descargadores de Instagram tienen al menos un proveedor de anuncios, así que decidí hacer mi propio descargador.\nEntonces aquí está, la pequeña y estúpida aplicación para hacer que eso suceda.\n\nDe todas formas, si tienes \{como si tu mamá te hiciera} una pregunta, sugerencia, corrección de errores o cualquier otra pregunta, hmu en un Telegram o correo electrónico\nTelegram: @awais404\nCorreo electrónico: chapter50000@hotmail.com (sí, 50.000 capítulos! 😎🤘)</string>
-
     <string name="action_quickaccess">Acceso rápido</string>
     <string name="action_about">Sobre</string>
     <string name="action_dms">Mensajes Directos</string>

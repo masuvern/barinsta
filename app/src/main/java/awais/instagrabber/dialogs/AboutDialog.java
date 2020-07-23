@@ -30,19 +30,24 @@ public final class AboutDialog extends BottomSheetDialogFragment {
         final LinearLayoutCompat infoContainer = contentView.findViewById(R.id.infoContainer);
 
         final View btnTelegram = infoContainer.getChildAt(1);
-        final View btnProject = infoContainer.getChildAt(2);
+        final View btnMatrix = infoContainer.getChildAt(2);
+        final View btnProject = infoContainer.getChildAt(3);
         final View.OnClickListener onClickListener = v -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             if (v == btnTelegram) {
                 intent.setData(Uri.parse("https://t.me/grabber_app"));
                 if (!Utils.isEmpty(Utils.telegramPackage))
                     intent.setPackage(Utils.telegramPackage);
+            }
+            else if (v == btnMatrix) {
+                intent.setData(Uri.parse("https://matrix.to/#/#instagrabber:matrix.org"));
             } else
                 intent.setData(Uri.parse("https://github.com/austinhuang0131/instagrabber/"));
             startActivity(intent);
         };
         btnProject.setOnClickListener(onClickListener);
         btnTelegram.setOnClickListener(onClickListener);
+        btnMatrix.setOnClickListener(onClickListener);
 
         final String description = getString(R.string.description);
         if (!Utils.isEmpty(description)) {
@@ -60,32 +65,15 @@ public final class AboutDialog extends BottomSheetDialogFragment {
                         c = descriptionText.charAt(i);
                         if (c == ']') {
                             descriptionText.delete(i, i + 1);
-                            descriptionText.setSpan(new RelativeSizeSpan(0.5f), smallTextStart, i, 0);
+                            descriptionText.setSpan(new RelativeSizeSpan(0.6f), smallTextStart, i, 0);
                         }
                         ++i;
                     } while (c != ']' || i == descriptionText.length() - 1);
-                } else if (c == '{') {
-                    final int smallerTextStart = i;
-                    descriptionText.delete(i, i + 1);
-                    i = smallerTextStart;
-
-                    do {
-                        c = descriptionText.charAt(i);
-                        if (c == '}') {
-                            descriptionText.delete(i, i + 1);
-                            descriptionText.setSpan(new RelativeSizeSpan(0.35f), smallerTextStart, i, 0);
-                        }
-                        ++i;
-                        lastIndex = i;
-                    } while (c != '}' || i == descriptionText.length() - 1);
                 }
             }
 
-            lastIndex = Utils.indexOfChar(descriptionText, '@', lastIndex);
-            descriptionText.setSpan(new URLSpan("https://t.me/awais404"), lastIndex, lastIndex + 9, 0);
-
-            lastIndex = Utils.indexOfChar(descriptionText, ':', lastIndex + 9) + 2;
-            descriptionText.setSpan(new URLSpan("mailto:chapter50000@hotmail.com"), lastIndex, lastIndex + 24, 0);
+            lastIndex = Utils.indexOfChar(descriptionText, '@', lastIndex) - 12;
+            descriptionText.setSpan(new URLSpan("mailto:instagrabber@austinhuang.me"), lastIndex, lastIndex + 27, 0);
 
             final TextView textView = (TextView) infoContainer.getChildAt(0);
             textView.setMovementMethod(new LinkMovementMethod());

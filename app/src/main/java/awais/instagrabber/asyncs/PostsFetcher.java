@@ -106,7 +106,8 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                             mediaNode.getString("display_url"), mediaNode.getString("thumbnail_src"),
                             mediaNode.getString(Constants.EXTRAS_SHORTCODE),
                             captions.length() > 0 ? captions.getJSONObject(0).getJSONObject("node").getString("text") : null,
-                            mediaNode.getLong("taken_at_timestamp"));
+                            mediaNode.getLong("taken_at_timestamp"), mediaNode.optBoolean("viewer_has_liked"),
+                            mediaNode.optBoolean("viewer_has_saved"));
 
                     Utils.checkExistence(downloadDir, customDir, username, isSlider, -1, models[i]);
                 }

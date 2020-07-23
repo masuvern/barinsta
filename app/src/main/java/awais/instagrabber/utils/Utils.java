@@ -117,7 +117,11 @@ public final class Utils {
     public static SimpleDateFormat datetimeParser;
 
     public static void setupCookies(final String cookieRaw) {
-        if (cookieRaw != null && !isEmpty(cookieRaw)) {
+        if (cookieRaw == "LOGOUT") {
+            final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
+            cookieStore.removeAll();
+        }
+        else if (cookieRaw != null && !isEmpty(cookieRaw)) {
             final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
             try {
                 final URI uri1 = new URI("https://instagram.com");

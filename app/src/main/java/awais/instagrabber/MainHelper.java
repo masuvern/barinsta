@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -83,6 +84,9 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Utils.logCollector;
+
+import java.io.InputStream;
+import java.net.URL;
 
 public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static AsyncTask<?, ?, ?> currentlyExecuting;
@@ -278,12 +282,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
             setupExplore();
 
-            final boolean showFeed = Utils.settingsHelper.getBoolean(Constants.SHOW_FEED);
-            if (showFeed) setupFeed();
-            else {
-                iconFeed.setAlpha(0.4f);
-                main.mainBinding.drawerLayout.removeView(main.mainBinding.feedLayout);
-            }
+            setupFeed();
 
             final TypedValue resolvedAttr = new TypedValue();
             main.getTheme().resolveAttribute(android.R.attr.textColorPrimary, resolvedAttr, true);
@@ -333,18 +332,16 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         if (drawerOpening && alpha > 100)
                             ImageViewCompat.setImageTintList(iconDiscover, colorStateList.withAlpha(currentIconAlpha));
 
-                        if (showFeed) ImageViewCompat.setImageTintList(iconFeed, colorStateList.withAlpha(otherIconAlpha));
+                        ImageViewCompat.setImageTintList(iconFeed, colorStateList.withAlpha(otherIconAlpha));
                     } else {
                         // this changes toolbar title
                         main.mainBinding.toolbar.toolbar.setTitle(slideOffset >= 0.466 ? titleDiscover : main.userQuery);
 
-                        if (showFeed) {
-                            imageTintList = ImageViewCompat.getImageTintList(iconFeed);
-                            alpha = imageTintList != null ? (imageTintList.getDefaultColor() & 0xFF_000000) >> 24 : 0;
+                        imageTintList = ImageViewCompat.getImageTintList(iconFeed);
+                        alpha = imageTintList != null ? (imageTintList.getDefaultColor() & 0xFF_000000) >> 24 : 0;
 
-                            if (drawerOpening && alpha > 100)
-                                ImageViewCompat.setImageTintList(iconFeed, colorStateList.withAlpha(currentIconAlpha));
-                        }
+                        if (drawerOpening && alpha > 100)
+                            ImageViewCompat.setImageTintList(iconFeed, colorStateList.withAlpha(currentIconAlpha));
 
                         ImageViewCompat.setImageTintList(iconDiscover, colorStateList.withAlpha(otherIconAlpha));
                     }
@@ -620,7 +617,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.appBarLayout.setExpanded(true, true);
         main.mainBinding.privatePage.setVisibility(View.GONE);
         main.mainBinding.mainProfileImage.setImageBitmap(null);
-        main.mainBinding.mainProfileImage.setImageDrawable(null);
         main.mainBinding.mainUrl.setText(null);
         main.mainBinding.mainFullName.setText(null);
         main.mainBinding.mainPostCount.setText(null);
@@ -686,19 +682,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 }
 
                 main.mainBinding.mainProfileImage.setEnabled(false);
-                Glide.with(main).load(profileModel.getSdProfilePic()).listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
-                        main.mainBinding.mainProfileImage.setEnabled(false);
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(final Drawable resource, final Object model, final Target<Drawable> target, final DataSource dataSource, final boolean isFirstResource) {
-                        main.mainBinding.mainProfileImage.setEnabled(true);
-                        return false;
-                    }
-                }).into(main.mainBinding.mainProfileImage);
+                new MyTask().execute();
+                main.mainBinding.mainProfileImage.setEnabled(true);
 
                 final long followersCount = profileModel.getFollowersCount();
                 final long followingCount = profileModel.getFollowingCount();
@@ -876,5 +861,23 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             }
         }
         return returnvalue;
+    }
+
+    class MyTask extends AsyncTask<Void, Bitmap, Void> {
+        private Bitmap mIcon_val;
+
+        protected Void doInBackground(Void... voids) {
+            try {
+                mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(main.profileModel.getSdProfilePic()).getContent());
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "bitmap: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            main.mainBinding.mainProfileImage.setImageBitmap(mIcon_val);
+        }
     }
 }

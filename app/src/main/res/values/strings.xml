@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">InstaGrabber</string>
-    <string name="description">This started off as a small and basic little personal app with intentions of [steali-]downloading posts off Instagram.\nApparently i have a quick temper and I\'m pretty impatient sometimes\{… usually… most of the time… OK! all the time! }and thank God /s almost every insta downloader has at least one ad provider, so i decided to make my own downloader.\nSo here it is, the stupid little app to make that happen.\n\nAnyhow, if you have\{ or ur mom has }a question, suggestion, bug fix/report or any other query, hmu on telegram or email.\nTelegram: @awais404\nEmail: chapter50000@hotmail.com (yeah 50,000 chapters! 😎🤘)</string>
+    <string name="description">The original maintainer, AWAiS, made InstaGrabber as a small and basic little personal app with intentions of [steali-]downloading posts off Instagram. Very unfortunately, this was abandoned and me, Austin Huang, took over the ship. [Let\'s hope that\'s at least a lil\' bit cash money.] After all, this app is fully open source, ad-less, and tracking-less [aside from what Instagram knows]. Even if you don\'t care about downloading stuff [like me], it\'s still a great Instagram client to use!\n\nGot questions [or just wanna talk]? Contact instagrabber@austinhuang.me or click one of the buttons below.</string>
 
     <string name="action_quickaccess">Quick Access</string>
     <string name="action_about">About</string>
@@ -64,6 +64,7 @@
     <string name="post_viewer_download_album">Whole Album</string>
 
     <string name="show_stories">Show stories</string>
+    <string name="no_more_stories">No more stories!</string>
     <string name="view_story_post">View Story Post</string>
     <string name="priv_acc">This Account is Private</string>
 
@@ -71,10 +72,18 @@
     <string name="read_more">read more…</string>
 
     <string name="login">Login</string>
-    <string name="send_logs">Send Logs [if something\'s not working]</string>
+    <string name="logout">Logout</string>
+    <string name="send_logs">Send Debug Logs</string>
     <string name="time_settings">Post Time Settings</string>
     <string name="project_link">Visit Project Page</string>
     <string name="telegram_link">Join Telegram Group</string>
+    <string name="matrix_link">Join Matrix Room</string>
+
+    <string name="like">Like</string>
+    <string name="unlike">Unlike</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="unbookmark">Unbookmark</string>
+
 
     <string name="dialog_export_btn_export">Export</string>
     <string name="dialog_export_btn_import">Import</string>
@@ -92,7 +101,7 @@
 
     <string name="refresh">Refresh</string>
     <string name="get_cookies">Get cookies</string>
-    <string name="desktop_2fa">Desktop Mode\nfor 2FA</string>
+    <string name="desktop_2fa">Desktop Mode</string>
 
     <string name="time_settings_title_custom">Custom Format</string>
     <string name="time_settings_title_separator">Separator</string>
@@ -166,6 +175,7 @@
     <string name="login_success_loading_cookies">Successfully loaded cookies!\nIf you still can\'t open private pages/posts, re-login!</string>
 
     <string name="update_available">An update is available…\nPress Download to open browser.</string>
+    <string name="updated">Thank you for updating InstaGrabber!</string>
     <string name="crash_title">App crashed</string>
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
 </resources>

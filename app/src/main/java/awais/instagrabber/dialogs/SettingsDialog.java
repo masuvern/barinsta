@@ -17,13 +17,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
+import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DirectoryChooser;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.Utils;
@@ -45,7 +48,8 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         CompoundButton.OnCheckedChangeListener {
     private Activity activity;
     private FragmentManager fragmentManager;
-    private View btnSaveTo, btnImportExport, btnLogin, btnTimeSettings, btnReport;
+    private View btnSaveTo, btnImportExport, btnLogin, btnLogout, btnTimeSettings, btnReport;
+    private AppCompatTextView settingTitle;
     private Spinner spAppTheme, spLanguage;
     private boolean somethingChanged = false;
     private int currentTheme, currentLanguage, selectedLanguage;
@@ -81,7 +85,10 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
 
         final View contentView = View.inflate(activity, R.layout.dialog_main_settings, null);
 
+        settingTitle = contentView.findViewById(R.id.settingTitle);
+        settingTitle.setText("Settings (v"+BuildConfig.VERSION_NAME+")");
         btnLogin = contentView.findViewById(R.id.btnLogin);
+        btnLogout = contentView.findViewById(R.id.btnLogout);
         btnSaveTo = contentView.findViewById(R.id.btnSaveTo);
         btnImportExport = contentView.findViewById(R.id.importExport);
         btnTimeSettings = contentView.findViewById(R.id.btnTimeSettings);
@@ -90,10 +97,13 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         Utils.setTooltipText(btnImportExport, R.string.import_export);
 
         btnLogin.setOnClickListener(this);
+        btnLogout.setOnClickListener(this);
         btnReport.setOnClickListener(this);
         btnSaveTo.setOnClickListener(this);
         btnImportExport.setOnClickListener(this);
         btnTimeSettings.setOnClickListener(this);
+
+        if (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) btnLogout.setEnabled(false);
 
         spAppTheme = contentView.findViewById(R.id.spAppTheme);
         currentTheme = settingsHelper.getInteger(APP_THEME);
@@ -106,7 +116,6 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         spLanguage.setOnItemSelectedListener(this);
 
         final AppCompatCheckBox cbSaveTo = contentView.findViewById(R.id.cbSaveTo);
-        final AppCompatCheckBox cbShowFeed = contentView.findViewById(R.id.cbShowFeed);
         final AppCompatCheckBox cbMuteVideos = contentView.findViewById(R.id.cbMuteVideos);
         final AppCompatCheckBox cbBottomToolbar = contentView.findViewById(R.id.cbBottomToolbar);
         final AppCompatCheckBox cbAutoloadPosts = contentView.findViewById(R.id.cbAutoloadPosts);
@@ -118,12 +127,10 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         cbBottomToolbar.setChecked(settingsHelper.getBoolean(BOTTOM_TOOLBAR));
         cbAutoplayVideos.setChecked(settingsHelper.getBoolean(AUTOPLAY_VIDEOS));
 
-        cbShowFeed.setChecked(settingsHelper.getBoolean(SHOW_FEED));
         cbAutoloadPosts.setChecked(settingsHelper.getBoolean(AUTOLOAD_POSTS));
         cbDownloadUsername.setChecked(settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER));
 
         setupListener(cbSaveTo);
-        setupListener(cbShowFeed);
         setupListener(cbMuteVideos);
         setupListener(cbBottomToolbar);
         setupListener(cbAutoloadPosts);
@@ -163,7 +170,11 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         if (v == btnLogin) {
             startActivity(new Intent(v.getContext(), Login.class));
             somethingChanged = true;
-
+        } else if (v == btnLogout) {
+            Utils.setupCookies("LOGOUT");
+            settingsHelper.putString(Constants.COOKIE, null);
+            this.dismiss();
+            activity.recreate();
         } else if (v == btnImportExport) {
             if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
                 requestPermissions(Utils.PERMS, 6007);
@@ -192,7 +203,6 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         else if (id == R.id.cbAutoplayVideos) settingsHelper.putBoolean(AUTOPLAY_VIDEOS, checked);
         else if (id == R.id.cbMuteVideos) settingsHelper.putBoolean(MUTED_VIDEOS, checked);
         else if (id == R.id.cbAutoloadPosts) settingsHelper.putBoolean(AUTOLOAD_POSTS, checked);
-        else if (id == R.id.cbShowFeed) settingsHelper.putBoolean(SHOW_FEED, checked);
         else if (id == R.id.cbSaveTo) {
             settingsHelper.putBoolean(FOLDER_SAVE_TO, checked);
             btnSaveTo.setEnabled(checked);

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="description">这是从带着以[偷-]下载 Instagram 帖子为目的而开始的小而简的个人应用程式。\n显然地我脾气不好，有时也不怎么有耐性\{…通常… 大多数的时间… OK！所有时候！ }然后感谢老天 （讽） 几乎所有下载器都有至少一个广告商， 所以我决定做一个自己的下载器。\n于是乎，这个愚蠢的小应用让一切变得可能。\n\n无论如何，若你\{ 或你老妈 }有任何问题、建议、bug 修复/报告或任何疑问，请在telegram或电邮敲我。\nTelegram: @awais404\nEmail: chapter50000@hotmail.com (没错50,000章! 😎🤘)</string>
-
     <string name="action_quickaccess">快捷道</string>
     <string name="action_about">关于</string>
     <string name="action_dms">Direct消息</string>

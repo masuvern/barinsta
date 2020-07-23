@@ -126,21 +126,24 @@ public final class StoryViewer extends BaseLanguageActivity {
                             && intent.hasExtra(Constants.FEED)) {
                         final FeedStoryModel[] storyFeed = (FeedStoryModel[]) intent.getSerializableExtra(Constants.FEED);
                         final int index = intent.getIntExtra(Constants.FEED_ORDER, 1738);
-                        final FeedStoryModel feedStoryModel = isRightSwipe ?
-                            (storyFeed.length == 0 ? null : storyFeed[index-1]) :
-                            (storyFeed.length == index+1 ? null : storyFeed[index+1]);
-                        final StoryModel[] nextStoryModels = feedStoryModel.getStoryModels();
+                        if ((isRightSwipe == true && index == 0) || (isRightSwipe == false && index == storyFeed.length - 1))
+                            Toast.makeText(getApplicationContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
+                        else {
+                            final FeedStoryModel feedStoryModel = isRightSwipe ?
+                                    (index == 0 ? null : storyFeed[index - 1]) :
+                                    (storyFeed.length == index + 1 ? null : storyFeed[index + 1]);
+                            final StoryModel[] nextStoryModels = feedStoryModel.getStoryModels();
 
-                        if (feedStoryModel != null) {
-                            final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
-                                    .putExtra(Constants.EXTRAS_STORIES, nextStoryModels)
-                                    .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
-                                    .putExtra(Constants.FEED, storyFeed)
-                                    .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index-1) : (index+1));
-                            newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(newIntent);
+                            if (feedStoryModel != null) {
+                                final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
+                                        .putExtra(Constants.EXTRAS_STORIES, nextStoryModels)
+                                        .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                                        .putExtra(Constants.FEED, storyFeed)
+                                        .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index - 1) : (index + 1));
+                                newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(newIntent);
+                            }
                         }
-                        else Toast.makeText(getApplicationContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                     }
                     else {
                         if (isRightSwipe) {

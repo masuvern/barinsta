@@ -97,9 +97,36 @@
         android:layout_height="0dp"
         android:layout_weight="1.4" />
 
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
         android:layout_weight="0.26"
-        android:background="#0000" />
+        android:background="#0000"
+        android:weightSum="2">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLike"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:text="@string/like"
+            android:textColor="@color/btn_lightpink_text_color"
+            android:textSize="20sp"
+            app:backgroundTint="@color/btn_lightpink_background" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnBookmark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:text="@string/bookmark"
+            android:textColor="@color/btn_lightorange_text_color"
+            android:textSize="20sp"
+            app:backgroundTint="@color/btn_lightorange_background" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </LinearLayout>

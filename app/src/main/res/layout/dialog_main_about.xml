@@ -37,6 +37,7 @@
                 android:gravity="center_vertical"
                 android:padding="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textSize="20sp"
                 android:textColor="?android:textColorPrimary" />
 
             <androidx.appcompat.widget.AppCompatButton
@@ -47,9 +48,21 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:text="@string/telegram_link"
-                android:textColor="@color/btn_green_text_color"
-                android:textSize="16sp"
-                app:backgroundTint="@color/btn_green_background" />
+                android:textColor="@color/btn_blue_text_color"
+                android:textSize="20sp"
+                app:backgroundTint="@color/btn_blue_background" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="@string/matrix_link"
+                android:textColor="@color/btn_black_text_color"
+                android:textSize="20sp"
+                app:backgroundTint="@color/btn_black_background" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
@@ -59,9 +72,9 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:text="@string/project_link"
-                android:textColor="@color/btn_blue_text_color"
-                android:textSize="16sp"
-                app:backgroundTint="@color/btn_blue_background" />
+                android:textColor="@color/btn_green_text_color"
+                android:textSize="20sp"
+                app:backgroundTint="@color/btn_green_background" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.core.widget.NestedScrollView>
 </androidx.appcompat.widget.LinearLayoutCompat>

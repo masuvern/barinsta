@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">InstaGrabber</string>
-    <string name="description"> Aplikasi ini diawali sebagai aplikasi personal yang kecil dan sederhana dengan niat [mencu-]mengunduh kiriman dari Instagram. \nTernyata aku cepat marah dan terkadang gak sabaran\{… biasanya sih… sering gitu… OK! Hampir setiap saat! }dan syukurnya (/s) hampir setiap pengunduh Instagram punya paling nggak satu penyedia iklan, jadi aku memutuskan untuk membuatnya sendiri.\nDan, inilah hasilnya, suatu aplikasi sejadi-jadinya untuk mewujudkan hal itu.\n\nBagaimanapun, kalau kamu\{ atau ibumu }punya pertanyaan, saran, perbaikan bug/masalah, laporan, atau lainnya, kirim pesan via telegram atau surel.\nTelegram: @awais404\nSurel: chapter50000@hotmail.com (iya 50.000 chapters! 😎🤘)</string>
 
     <string name="action_quickaccess">Akses Cepat</string>
     <string name="action_about">Tentang</string>

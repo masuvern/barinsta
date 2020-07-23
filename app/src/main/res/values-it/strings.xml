@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="description">Questo è iniziato come una piccola app personale con le intenzioni di [rub-] scaricare post da Instagram. \nApparentemente ho un temperamento rapido e sono\ piuttosto impaziente a volte\{… di solito… il più delle volte… OK! tutto il tempo! } e grazie a Dio /s a quasi tutti i downloader di insta hanno almeno un fornitore di annunci, quindi ho deciso di creare il mio downloader.\nCosì, ecco la stupida piccola app per farlo accadere. \n\nIn ogni caso, se hai \{o la tua mamma ha} una domanda, un suggerimento, una correzione/segnalazione di bug o qualsiasi altra domanda, contattami su telegram o e-mail.\nTelegram: @ awais404\nEmail: chapter50000@hotmail.com (yeah 50,000 chapters! 😎🤘)</string>
-
     <string name="action_quickaccess">Accesso rapido</string>
     <string name="action_about">Riguardo</string>
     <string name="action_dms">Direct Messaggi</string>

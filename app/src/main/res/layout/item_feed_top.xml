@@ -24,7 +24,7 @@
         android:paddingEnd="4dp"
         android:paddingRight="4dp"
         android:textColor="@color/feed_text_primary_color"
-        android:textSize="18sp" />
+        android:textSize="18sp"/>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/viewStoryPost"

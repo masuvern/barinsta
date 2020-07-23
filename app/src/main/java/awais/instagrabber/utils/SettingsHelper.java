@@ -24,7 +24,6 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
 import static awais.instagrabber.utils.Constants.PROFILE_FETCH_MODE;
-import static awais.instagrabber.utils.Constants.SHOW_FEED;
 import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 
 public final class SettingsHelper {
@@ -107,7 +106,7 @@ public final class SettingsHelper {
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-            AUTOLOAD_POSTS, SHOW_FEED, CUSTOM_DATE_TIME_FORMAT_ENABLED})
+            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED})
     public @interface BooleanSettings {}
 
     @StringDef({APP_THEME, APP_LANGUAGE, PROFILE_FETCH_MODE, PREV_INSTALL_VERSION})

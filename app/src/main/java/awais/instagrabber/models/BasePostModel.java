@@ -18,6 +18,21 @@ public abstract class BasePostModel implements Serializable {
     protected boolean isDownloaded;
     protected long timestamp;
     protected int position;
+    boolean liked, bookmarked;
+
+    public boolean getLike() {
+        return liked;
+    }
+    public boolean getBookmark() {
+        return bookmarked;
+    }
+
+    public boolean setLike(final boolean like) {
+        liked = like; this.liked = liked; return liked;
+    }
+    public boolean setBookmark(final boolean bookmark) {
+        bookmarked = bookmark; this.bookmarked = bookmarked; return bookmarked;
+    }
 
     public MediaItemType getItemType() {
         return itemType;
