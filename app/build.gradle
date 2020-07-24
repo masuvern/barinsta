@@ -10,9 +10,9 @@ android {
         targetSdkVersion 29
 
         // REMEMBER TO CHANGE versionCode as well
-        // 16.7 is 31
+        // 16.7 is 32
 
-        versionCode 31
+        versionCode 32
         versionName '16.7'
 
         multiDexEnabled true

@@ -1,3 +1,5 @@
+v16.7 build 32:
+
 * You can now (un)follow/restrict/block people
   * For this reason, "Open in Instagram" for following/follower list is removed
 * Link in bio is now under bio text (like the actual Instagram app)
