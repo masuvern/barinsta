@@ -227,7 +227,7 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
 
             if (!captionEmpty && Utils.hasMentions(postCaption)) {
                 postCaption = Utils.getMentionText(postCaption);
-                //feedModel.setPostCaption(postCaption);
+                feedModel.setPostCaption(postCaption);
                 viewHolder.viewerCaption.setText(postCaption, TextView.BufferType.SPANNABLE);
                 viewHolder.viewerCaption.setMentionClickListener(mentionClickListener);
             } else {
@@ -363,23 +363,8 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
             final int minTrim = Math.min(255, i);
             if (captionLen <= minTrim) return false;
 
-            final CharSequence mentionText = caption.subSequence(0, Math.min(captionLen, minTrim));
-            final SpannableStringBuilder stringBuilder = new SpannableStringBuilder(mentionText).append(ellipsize);
-            final int spanLen = stringBuilder.length();
-
-            // fixed @mention...more merging into one span
-            final CommentMentionClickSpan[] spans = stringBuilder.getSpans(0, mentionText.length(), CommentMentionClickSpan.class);
-            if (spans != null) {
-                for (final CommentMentionClickSpan span : spans) {
-                    final int spanStart = stringBuilder.getSpanStart(span);
-                    stringBuilder.removeSpan(span);
-                    stringBuilder.setSpan(span, spanStart, mentionText.length(), 0);
-                }
-            }
-
-            stringBuilder.setSpan(new StyleSpan(Typeface.BOLD), spanLen - ellipsize.length(), spanLen, 0);
-
-            textView.setText(stringBuilder, bufferType);
+            if (Utils.hasMentions(caption))
+                textView.setText(Utils.getMentionText(caption), TextView.BufferType.SPANNABLE);
             textView.setCaptionIsExpandable(true);
             textView.setCaptionIsExpanded(true);
         } else {

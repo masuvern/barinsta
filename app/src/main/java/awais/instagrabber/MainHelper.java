@@ -962,11 +962,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         boolean ok = false;
         String action;
 
-        // arg: follow / restrict / block
-
-        // restrict https://www.instagram.com/web/restrict_action/(un)restrict/
-        // requires form data "target_user_id: <id>"
-
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
             final String url = "https://www.instagram.com/web/"+
