@@ -41,7 +41,8 @@ import awais.instagrabber.utils.Utils;
 
 public final class DirectMessagesUserInbox extends AppCompatActivity {
     private DirectItemModel directItemModel;
-    private final ProfileModel myProfileHolder = new ProfileModel(false, false, null, null, null, null, null, null, null, 0, 0, 0);
+    private final ProfileModel myProfileHolder =
+            new ProfileModel(false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
     private final ArrayList<ProfileModel> users = new ArrayList<>();
     private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
@@ -160,12 +161,10 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
 
     @Nullable
     private ProfileModel getUser(final long userId) {
-        if (users != null) {
-            for (final ProfileModel user : users)
-                if (Long.toString(userId).equals(user.getId())) return user;
-            return myProfileHolder;
+        for (final ProfileModel user : users) {
+            if (Long.toString(userId).equals(user.getId())) return user;
         }
-        return null;
+        return myProfileHolder;
     }
 
     private void searchUsername(final String text) {

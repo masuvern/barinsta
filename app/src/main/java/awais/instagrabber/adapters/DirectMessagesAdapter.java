@@ -106,7 +106,7 @@ public final class DirectMessagesAdapter extends RecyclerView.Adapter<DirectMess
             }
             else if (itemType == DirectItemType.RAVEN_MEDIA) {
                 messageText = context.getString(R.string.direct_messages_sent_media);
-            } else messageText = null;
+            } else messageText = "<i>Unsupported message</i>";
 
             holder.tvMessage.setText(HtmlCompat.fromHtml(messageText.toString(), 63));
 

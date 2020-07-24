@@ -45,7 +45,8 @@ import static awais.instagrabber.models.direct_messages.DirectItemModel.RavenExp
 
 public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageViewHolder> {
     private static final int MESSAGE_INCOMING = 69, MESSAGE_OUTGOING = 420;
-    private final ProfileModel myProfileHolder = new ProfileModel(false, false, null, null, null, null, null, null, null, 0, 0, 0);
+    private final ProfileModel myProfileHolder =
+            new ProfileModel(false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
     private final ArrayList<DirectItemModel> directItemModels;
     private final ArrayList<ProfileModel> users;
     private final View.OnClickListener onClickListener;

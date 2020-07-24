@@ -52,7 +52,6 @@ import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
-import awais.instagrabber.utils.MyApps;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -293,7 +292,7 @@ public final class Main extends BaseLanguageActivity {
         downloadAction = menu.findItem(R.id.action_download).setOnMenuItemClickListener(clickListener);
 
         if (!Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE))) {
-            settingsAction.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            //settingsAction.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             dmsAction.setVisible(true).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
 
@@ -305,7 +304,28 @@ public final class Main extends BaseLanguageActivity {
 
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setSuggestionsAdapter(suggestionAdapter);
-        searchView.setOnSearchClickListener(v -> searchView.setQuery(userQuery, false));
+        searchView.setOnSearchClickListener(v -> {
+            searchView.setQuery(userQuery, false);
+            menu.findItem(R.id.action_about).setVisible(false);
+            menu.findItem(R.id.action_settings).setVisible(false);
+            menu.findItem(R.id.action_dms).setVisible(false);
+            menu.findItem(R.id.action_quickaccess).setVisible(false);
+        });
+        searchAction.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                menu.findItem(R.id.action_about).setVisible(true);
+                menu.findItem(R.id.action_settings).setVisible(true);
+                menu.findItem(R.id.action_dms).setVisible(true);
+                menu.findItem(R.id.action_quickaccess).setVisible(true);
+                return true;
+            }
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             private boolean searchUser, searchHash;
             private AsyncTask<?, ?, ?> prevSuggestionAsync;
@@ -351,6 +371,8 @@ public final class Main extends BaseLanguageActivity {
             @Override
             public boolean onQueryTextSubmit(final String query) {
                 cancelSuggestionsAsync();
+                menu.findItem(R.id.action_about).setVisible(true);
+                menu.findItem(R.id.action_settings).setVisible(true);
 
                 closeAnyOpenDrawer();
                 addToStack();
@@ -412,11 +434,6 @@ public final class Main extends BaseLanguageActivity {
                 return;
             }
         }
-
-        MyApps.showAlertDialog(this, (parent, view, position, id) -> {
-            if (id == -1 && position == -1 && parent == null) super.onBackPressed();
-            else MyApps.openAppStore(this, position);
-        });
     }
 
     @Override

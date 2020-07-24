@@ -104,7 +104,7 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                                 owner.optString("full_name"),
                                 null, null,
                                 owner.getString("profile_pic_url"),
-                                null, 0, 0, 0);
+                                null, 0, 0, 0, false, false, false, false);
                     }
 
                     JSONObject tempJsonObject = feedItem.optJSONObject("edge_media_preview_comment");

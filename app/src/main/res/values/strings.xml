@@ -6,6 +6,7 @@
     <string name="action_quickaccess">Quick Access</string>
     <string name="action_about">About</string>
     <string name="action_dms">Direct Messages</string>
+    <string name="action_setting">Settings (v%s)</string>
     <string name="action_settings">Settings</string>
     <string name="action_download">Download</string>
     <string name="action_search">Search username…</string>
@@ -67,6 +68,7 @@
     <string name="no_more_stories">No more stories!</string>
     <string name="view_story_post">View Story Post</string>
     <string name="priv_acc">This Account is Private</string>
+    <string name="empty_acc">This Account has No Posts</string>
 
     <string name="curr_version">Current version: v%s</string>
     <string name="read_more">read more…</string>
@@ -84,6 +86,12 @@
     <string name="bookmark">Bookmark</string>
     <string name="unbookmark">Unbookmark</string>
 
+    <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
+    <string name="block">Block</string>
+    <string name="unblock">Unblock</string>
+    <string name="restrict">Restrict</string>
+    <string name="unrestrict">Unrestrict</string>
 
     <string name="dialog_export_btn_export">Export</string>
     <string name="dialog_export_btn_import">Import</string>
@@ -110,7 +118,7 @@
     <string name="time_settings_title_preview">Preview</string>
     <string name="time_settings_swap_time">Swap Time and\nDate positions</string>
 
-    <string name="quick_access_info_dialog">Favorites panel is for adding your favorite hashtags and/or usernames.\n\nAnd the Quick Access panel is for quickly switching between accounts.\n\nNote 1: Make sure to Login into each account [Settings > Login] to add account to the list!\n\nNote 2: Log out of the current account and then log into the other account.\nIf multiple accounts don\'t work for you there\'s nothing we both can do!</string>
+    <string name="quick_access_info_dialog">Favorites panel is for adding your favorite hashtags and/or usernames.\n\nAnd the Quick Access panel is for quickly switching between accounts.\n\nNote 1: Make sure to Login into each account [Settings > Login] to add account to the list!\n\nNote 2: Log out of the current account and then log into the other account.</string>
     <string name="quick_access_cannot_delete_curr">Cannot delete currently in use account</string>
     <string name="quick_access_confirm_delete">Are you sure you want to delete %s?</string>
 
@@ -163,7 +171,6 @@
     <string name="comment_view_mention_user_search">Do you want to search the username?</string>
     <string name="comment_view_mention_hash_search">Do you want to search the hashtag?</string>
 
-    <string name="followers_open_in_insta">Open in Instagram</string>
     <string name="followers_type_followers">Followers</string>
     <string name="followers_type_following">Following</string>
     <string name="followers_compare">Comparing followers &amp; following</string>
@@ -174,7 +181,7 @@
     <string name="login_error_loading_cookies">Error loading cookies</string>
     <string name="login_success_loading_cookies">Successfully loaded cookies!\nIf you still can\'t open private pages/posts, re-login!</string>
 
-    <string name="update_available">An update is available…\nPress Download to open browser.</string>
+    <string name="update_available">An update is available… Press Download to open browser.</string>
     <string name="updated">Thank you for updating InstaGrabber!</string>
     <string name="crash_title">App crashed</string>
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>

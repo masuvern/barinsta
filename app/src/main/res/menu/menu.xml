@@ -34,7 +34,7 @@
         android:title="@string/action_settings"
         android:titleCondensed="@string/action_settings"
         android:visible="false"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_dms"

@@ -86,7 +86,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         final View contentView = View.inflate(activity, R.layout.dialog_main_settings, null);
 
         settingTitle = contentView.findViewById(R.id.settingTitle);
-        settingTitle.setText("Settings (v"+BuildConfig.VERSION_NAME+")");
+        settingTitle.setText(getString(R.string.action_setting, BuildConfig.VERSION_NAME));
         btnLogin = contentView.findViewById(R.id.btnLogin);
         btnLogout = contentView.findViewById(R.id.btnLogout);
         btnSaveTo = contentView.findViewById(R.id.btnSaveTo);

@@ -388,7 +388,7 @@ public final class Utils {
                         userObj.getString("full_name"),
                         null, null,
                         userObj.getString("profile_pic_url"),
-                        null, 0, 0, 0);
+                        null, 0, 0, 0, false, false, false, false);
             }
 
             final MediaItemType mediaType = getMediaItemType(mediaObj.optInt("media_type", -1));
@@ -465,7 +465,7 @@ public final class Utils {
                     userObject.getString("full_name"),
                     null, null,
                     userObject.getString("profile_pic_url"),
-                    null, 0, 0, 0);
+                    null, 0, 0, 0, false, false, false, false);
         }
 
         final JSONArray items = data.getJSONArray("items");
@@ -614,7 +614,7 @@ public final class Utils {
                             profile.getString("full_name"),
                             null, null,
                             profile.getString("profile_pic_url"),
-                            null, 0, 0, 0);
+                            null, 0, 0, 0, false, false, false, false);
                 }
                 break;
 

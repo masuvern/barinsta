@@ -115,7 +115,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                                         owner.getString(Constants.EXTRAS_USERNAME),
                                         null, null, null,
                                         owner.getString("profile_pic_url"),
-                                        null, 0, 0, 0);
+                                        null, 0, 0, 0, false, false, false, false);
 
                                 final JSONObject likedBy = childComment.optJSONObject("edge_liked_by");
 
@@ -193,7 +193,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                                 owner.getString(Constants.EXTRAS_USERNAME),
                                 null, null, null,
                                 owner.getString("profile_pic_url"),
-                                null, 0, 0, 0);
+                                null, 0, 0, 0, false, false, false, false);
 
                         final JSONObject likedBy = comment.optJSONObject("edge_liked_by");
                         final String commentId = comment.getString(Constants.EXTRAS_ID);
@@ -231,7 +231,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                                         tempJsonObject.getString(Constants.EXTRAS_USERNAME),
                                         null, null, null,
                                         tempJsonObject.getString("profile_pic_url"),
-                                        null, 0, 0, 0);
+                                        null, 0, 0, 0, false, false, false, false);
 
                                 tempJsonObject = childComment.optJSONObject("edge_liked_by");
                                 childCommentModels[j] = new CommentModel(childComment.getString(Constants.EXTRAS_ID),

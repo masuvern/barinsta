@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="action_quickaccess">快捷道</string>
+    <string name="action_quickaccess">快捷通道</string>
     <string name="action_about">关于</string>
-    <string name="action_dms">Direct消息</string>
+    <string name="action_dms">私聊</string>
     <string name="action_settings">设定</string>
     <string name="action_download">下载</string>
-    <string name="action_search">搜寻用户名…</string>
+    <string name="action_search">搜索用户名…</string>
     <string name="action_compare">比较</string>
 
     <string name="single_like">次赞</string>
     <string name="multiple_likes">次赞</string>
 
     <string name="clipboard_error">复制文字时出错</string>
-    <string name="clipboard_copied">复制到剪贴板！</string>
+    <string name="clipboard_copied">已复制到剪贴板！</string>
     <string name="report">报告</string>
     <string name="password">密码 (最多32字符)</string>
     <string name="ok">OK</string>
@@ -36,7 +36,7 @@
     <string name="bottom_toolbar">底下显示工具栏</string>
     <string name="download_user_folder">下载帖子到下载里的用户名文件夹</string>
     <string name="autoload_posts">自动加载用户所有帖子</string>
-    <string name="error_loading_profile">载入主页时出错！\n尝试再次登录并搜寻。</string>
+    <string name="error_loading_profile">载入主页时出错！\n请尝试再次登录并搜索。</string>
     <string name="error_creating_folders">创建下载文件夹时出错</string>
     <string name="show_feed">显示用户动态 (只在登录后有效)</string> 
     <string name="save_to_folder">保存至自定义文件夹</string>
@@ -50,10 +50,10 @@
     <string name="main_posts_followers">%s\n粉丝</string>
     <string name="main_posts_following">%s\n已关注</string>
 
-    <string name="post_viewer_video_post">视频贴</string>
-    <string name="post_viewer_image_post">图片贴</string>
+    <string name="post_viewer_video_post">视频帖</string>
+    <string name="post_viewer_image_post">图片帖</string>
     <string name="post_viewer_autoplay_video">自动播放视频</string>
-    <string name="post_viewer_muted_autoplay">总是静音视频</string>
+    <string name="post_viewer_muted_autoplay">视频默认静音</string>
     <string name="post_viewer_post_from">%s - %s</string>
     <string name="post_viewer_download_message">注: 当前[时段]直到你的到来都不会显示此对话，且总是下载以显示的帖子片</string>
     <string name="post_viewer_download_dialog_title">选择要下载的</string>
@@ -69,7 +69,7 @@
     <string name="read_more">阅读更多…</string>
 
     <string name="login">登录</string>
-    <string name="send_logs">发送日志[出了什么差错的话]</string>
+    <string name="send_logs">发送调试日志</string>
     <string name="time_settings">发帖时间设定</string>
     <string name="project_link">参观项目页面</string>
     <string name="telegram_link">加入 Telegram 群组</string>
@@ -89,8 +89,8 @@
     <string name="dialog_export_err_password_empty">密码为空! 密码不能是空的，笨蛋!</string>
 
     <string name="refresh">刷新</string>
-    <string name="get_cookies">获得 cookies</string>
-    <string name="desktop_2fa">桌面版\n用于 2FA</string>
+    <string name="get_cookies">获取 cookies</string>
+    <string name="desktop_2fa">桌面版</string>
 
     <string name="time_settings_title_custom">自定义格式</string>
     <string name="time_settings_title_separator">分界</string>
@@ -99,15 +99,15 @@
     <string name="time_settings_title_preview">预览</string>
     <string name="time_settings_swap_time">时间和日期\n位置交换</string>
 
-    <string name="quick_access_info_dialog">最爱面板是用来添加你最爱的标签和/或用户。\n\n而快捷道是用来迅速切换账户的。\n\n注1: 确保登录各个账户 [设定 > 登录] 让账户写进列表!\n\n注2: 登出当前账户才登录另一个账户。\n如果多账户对你没用你我都做不了什么</string>
+    <string name="quick_access_info_dialog">最爱面板让您添加您最爱的标签和用户。\n\n而快捷通道是用来迅速切换账户的。\n\n注1: 请确保各个账户已登录 [设定 > 登录] 来添加账户!\n\n注2: 登出当前账户之后再登录另一个账户。</string>
     <string name="quick_access_cannot_delete_curr">无法删除正在使用的账户</string>
     <string name="quick_access_confirm_delete">你真的要删除 %s?</string>
 
     <string name="profile_viewer_imageinfo">宽: %d\n高: %d</string>
     <string name="profile_viewer_colordepth_prefix">\n色深:</string>
-    <string name="profile_endpoint">选择大头照终点</string>
+    <string name="profile_endpoint">选择头像服务</string>
     <string name="open_profile">打开主页</string>
-    <string name="view_pfp">看大头照</string>
+    <string name="view_pfp">查看头像</string>
 
     <string name="direct_download">直接下载</string>
     <string name="direct_download_desc">直接下载至手机!</string>
@@ -125,21 +125,33 @@
     <string name="downloader_error_download_file">下载文件时出错</string>
 
     <string name="comment_viewer_copy_user">复制用户名</string>
-    <string name="comment_viewer_copy_comment">复制留言</string>
-    <string name="comment_view_mention_user_search">你要搜寻用户名吗?</string>
-    <string name="comment_view_mention_hash_search">你要搜寻标签吗?</string>
+    <string name="comment_viewer_copy_comment">复制评论</string>
+    <string name="comment_view_mention_user_search">要搜索用户名吗?</string>
+    <string name="comment_view_mention_hash_search">要搜索标签吗?</string>
 
-    <string name="followers_open_in_insta">于 Instagram 打开</string>
     <string name="followers_type_followers">粉丝</string>
     <string name="followers_type_following">关注</string>
-    <string name="followers_compare">比较粉丝 &amp; 关注</string>
+    <string name="followers_compare">比较粉丝和关注</string>
     <string name="followers_both_following">互粉</string>
-    <string name="followers_not_following">没关注 %s</string>
-    <string name="followers_not_follower">%s 不是粉丝</string>
+    <string name="followers_not_following">未关注 %s</string>
+    <string name="followers_not_follower">%s 未关注</string>
 
     <string name="login_error_loading_cookies">载入 cookies 时出错</string>
-    <string name="login_success_loading_cookies">成功载入 cookies!\n若你仍不能查看私密 页面/帖子，重新登录!</string>
+    <string name="login_success_loading_cookies">成功载入 cookies!\n若你仍不能查看私密页面/帖子，重新登录!</string>
 
-    <string name="crash_title">应用崩溃</string>
+    <string name="crash_title">应用崩溃了</string>
     <string name="crash_descr">糟糕..应用崩溃了，不过别担心，你可以向开发者发送错误报告来帮助他修复问题。 (:</string>
+    <string name="update_available">检测到有新版本… 请点击下载来打开浏览器。</string>
+    <string name="updated">感谢阁下更新InstaGrabber！</string>
+    <string name="downloader_downloading_media">媒体下载中</string>
+    <string name="matrix_link">加入 Matrix 群组</string>
+    <string name="like">赞</string>
+    <string name="unlike">取消赞</string>
+    <string name="bookmark">加入收藏</string>
+    <string name="unbookmark">解除收藏</string>
+    <string name="logout">退出</string>
+    <string name="no_more_stories">到底啦！</string>
+    <string name="description">原作者 AWAiS 将 InstaGrabber 做成了一个小巧玲珑的 Instagram 帖子下载 [写作下载读作剽窃] 程序，不过他跳槽了，所以我（Austin Huang）就把它接了下来。 [希望此举有所值得。] 不管怎样，InstaGrabber 完全开源，无广告，无跟踪 [Instagram 原生跟踪除外]，998都不要，你还等啥？？？\n有问题 [或者只是想谈谈心] ？请联系 instagrabber@austinhuang.me 或点击下方各按钮。</string>
+    <string name="direct_messages_you">你</string>
+    <string name="direct_messages_sent_link">分享了</string>
 </resources>

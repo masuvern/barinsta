@@ -3,13 +3,14 @@ package awais.instagrabber.models;
 import java.io.Serializable;
 
 public final class ProfileModel implements Serializable {
-    private final boolean isPrivate, isVerified;
+    private final boolean isPrivate, isVerified, following, restricted, blocked, requested;
     private final long postCount, followersCount, followingCount;
     private final String id, username, name, biography, url, sdProfilePic, hdProfilePic;
 
     public ProfileModel(final boolean isPrivate, final boolean isVerified, final String id, final String username,
                         final String name, final String biography, final String url, final String sdProfilePic, final String hdProfilePic,
-                        final long postCount, final long followersCount, final long followingCount) {
+                        final long postCount, final long followersCount, final long followingCount, final boolean following,
+                        final boolean restricted, final boolean blocked, final boolean requested) {
         this.isPrivate = isPrivate;
         this.isVerified = isVerified;
         this.id = id;
@@ -22,6 +23,10 @@ public final class ProfileModel implements Serializable {
         this.postCount = postCount;
         this.followersCount = followersCount;
         this.followingCount = followingCount;
+        this.following = following;
+        this.restricted = restricted;
+        this.blocked = blocked;
+        this.requested = requested;
     }
 
     public boolean isPrivate() {
@@ -60,16 +65,23 @@ public final class ProfileModel implements Serializable {
         return hdProfilePic;
     }
 
-    public long getPostCount() {
-        return postCount;
-    }
+    public long getPostCount() { return postCount; }
 
-    public long getFollowersCount() {
-        return followersCount;
-    }
+    public long getFollowersCount() { return followersCount; }
 
     public long getFollowingCount() {
         return followingCount;
     }
 
+    public boolean getFollowing() { return following; }
+
+    public boolean getRestricted() { return restricted; }
+
+    public boolean getBlocked() {
+        return blocked;
+    }
+
+    public boolean getRequested() {
+        return requested;
+    }
 }

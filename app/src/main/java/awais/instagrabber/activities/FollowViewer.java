@@ -72,28 +72,13 @@ public final class FollowViewer extends BaseLanguageActivity implements SwipeRef
         followBinding.toolbar.toolbar.setTitle(name);
 
         resources = getResources();
-        final ArrayAdapter<Object> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{
-                resources.getString(R.string.open_profile), resources.getString(R.string.followers_open_in_insta)});
-        final AlertDialog alertDialog = new AlertDialog.Builder(this).setAdapter(adapter, (dialog, which) -> {
-            if (model != null) {
-                if (which == 0) {
-                    if (Main.scanHack != null) {
-                        Main.scanHack.onResult(model.getUsername());
-                        finish();
-                    }
-                } else {
-                    final Intent actIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://instagram.com/" + model.getUsername()));
-                    if (Utils.isInstagramInstalled) actIntent.setPackage("com.instagram.android");
-                    startActivity(actIntent);
-                }
-            }
-        }).setTitle(R.string.what_to_do_dialog).create();
 
         clickListener = v -> {
             final Object tag = v.getTag();
             if (tag instanceof FollowModel) {
                 model = (FollowModel) tag;
-                if (!alertDialog.isShowing()) alertDialog.show();
+                Main.scanHack.onResult(model.getUsername());
+                finish();
             }
         };
 
@@ -318,11 +303,11 @@ public final class FollowViewer extends BaseLanguageActivity implements SwipeRef
         final ArrayList<ExpandableGroup> groups = new ArrayList<>(1);
 
         if (isCompare) {
-            if (followingModels.size() > 0)
+            if (followingModels != null && followingModels.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_following, name), followingModels));
-            if (followersModels.size() > 0)
+            if (followersModels != null && followersModels.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_follower, namePost), followersModels));
-            if (allFollowing.size() > 0)
+            if (allFollowing != null && allFollowing.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_both_following), allFollowing));
         } else {
             final ExpandableGroup group = new ExpandableGroup(type, followModels);

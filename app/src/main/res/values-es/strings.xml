@@ -129,7 +129,6 @@
     <string name="comment_view_mention_user_search">¿Quieres buscar el nombre de usuario?</string>
     <string name="comment_view_mention_hash_search">¿Quieres buscar el hashtag?</string>
 
-    <string name="followers_open_in_insta">Abrir en Instagram</string>
     <string name="followers_type_followers">Seguidores</string>
     <string name="followers_type_following">Siguiendo</string>
     <string name="followers_compare">Comparar seguidores &amp; siguiendo</string>

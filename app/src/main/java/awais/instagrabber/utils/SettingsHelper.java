@@ -81,7 +81,7 @@ public final class SettingsHelper {
             themeCode = sharedPreferences.getInt(APP_THEME, themeCode);
             if (themeCode == 1) themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
             else if (themeCode == 3) themeCode = AppCompatDelegate.MODE_NIGHT_NO;
-            else if (themeCode != 2) themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+            else if (themeCode == 0) themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
         }
 
         if (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && Build.VERSION.SDK_INT < 29)

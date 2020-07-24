@@ -132,9 +132,8 @@ public final class StoryViewer extends BaseLanguageActivity {
                             final FeedStoryModel feedStoryModel = isRightSwipe ?
                                     (index == 0 ? null : storyFeed[index - 1]) :
                                     (storyFeed.length == index + 1 ? null : storyFeed[index + 1]);
-                            final StoryModel[] nextStoryModels = feedStoryModel.getStoryModels();
-
                             if (feedStoryModel != null) {
+                                final StoryModel[] nextStoryModels = feedStoryModel.getStoryModels();
                                 final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
                                         .putExtra(Constants.EXTRAS_STORIES, nextStoryModels)
                                         .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())

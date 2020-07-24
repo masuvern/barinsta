@@ -61,7 +61,7 @@ public final class FeedStoriesFetcher extends AsyncTask<Void, Void, FeedStoryMod
                             user.getString("username"),
                             null, null, null,
                             user.getString("profile_pic_url"),
-                            null, 0, 0, 0);
+                            null, 0, 0, 0, false, false, false, false);
 
                     final String id = node.getString("id");
                     feedStoryIDs[i] = id;

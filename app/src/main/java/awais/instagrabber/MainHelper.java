@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -34,15 +33,14 @@ import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.shape.MaterialShapeDrawable;
 
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 
 import awais.instagrabber.activities.FollowViewer;
@@ -84,9 +82,6 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Utils.logCollector;
-
-import java.io.InputStream;
-import java.net.URL;
 
 public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static AsyncTask<?, ?, ?> currentlyExecuting;
@@ -147,6 +142,12 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.mainBinding.swipeRefreshLayout.setRefreshing(false);
                     model.setPageCursor(false, null);
                 }
+            }
+            else {
+                main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                main.mainBinding.privatePage1.setImageResource(R.drawable.ic_cancel);
+                main.mainBinding.privatePage2.setText(R.string.empty_acc);
+                main.mainBinding.privatePage.setVisibility(View.VISIBLE);
             }
         }
     };
@@ -403,7 +404,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         }
         if (color == -1 || color == 0) color = resources.getBoolean(R.bool.isNight) ? 0xff212121 : 0xfff5f5f5;
         main.mainBinding.profileInfo.setBackgroundColor(color);
-        main.mainBinding.profileInfo.setClickable(true);
         if (!isBottomToolbar) main.mainBinding.toolbar.toolbar.setBackgroundColor(color);
 
         main.mainBinding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
@@ -628,6 +628,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.mainBiography.setMentionClickListener(null);
         main.mainBinding.mainUrl.setVisibility(View.GONE);
         main.mainBinding.isVerified.setVisibility(View.GONE);
+        main.mainBinding.btnFollow.setVisibility(View.GONE);
+        main.mainBinding.btnRestrict.setVisibility(View.GONE);
+        main.mainBinding.btnBlock.setVisibility(View.GONE);
 
         main.mainBinding.mainPosts.setNestedScrollingEnabled(false);
         main.mainBinding.highlightsList.setVisibility(View.GONE);
@@ -666,7 +669,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
                 final String profileId = profileModel.getId();
 
-                final boolean isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
+                final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+                final boolean isLoggedIn = !Utils.isEmpty(cookie);
                 if (isLoggedIn) {
                     new StoryStatusFetcher(profileId, result -> {
                         main.storyModels = result;
@@ -679,6 +683,51 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             main.highlightsAdapter.setData(result);
                         }
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                    final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE));
+                    if (!profileId.equals(myId)) {
+                        main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnFollow.setOnClickListener(profileActionListener);
+                        if (profileModel.getFollowing() == true) {
+                            main.mainBinding.btnFollow.setText(R.string.unfollow);
+                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_purple_background, null)));
+                        }
+                        else if (profileModel.getRequested() == true) {
+                            main.mainBinding.btnFollow.setText(R.string.cancel);
+                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_purple_background, null)));
+                        }
+                        else {
+                            main.mainBinding.btnFollow.setText(R.string.follow);
+                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_pink_background, null)));
+                        }
+                        main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnRestrict.setOnClickListener(profileActionListener);
+                        if (profileModel.getRestricted() == true) {
+                            main.mainBinding.btnRestrict.setText(R.string.unrestrict);
+                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_blue_background, null)));
+                        }
+                        else {
+                            main.mainBinding.btnRestrict.setText(R.string.restrict);
+                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_orange_background, null)));
+                        }
+                        main.mainBinding.btnBlock.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnBlock.setOnClickListener(profileActionListener);
+                        if (profileModel.getBlocked() == true) {
+                            main.mainBinding.btnBlock.setText(R.string.unblock);
+                            main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_green_background, null)));
+                        }
+                        else {
+                            main.mainBinding.btnBlock.setText(R.string.block);
+                            main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                    R.color.btn_red_background, null)));
+                        }
+                    }
                 }
 
                 main.mainBinding.mainProfileImage.setEnabled(false);
@@ -735,8 +784,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.mainBiography.setEnabled(true);
 
                 if (!profileModel.isPrivate()) {
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(true);
-                    main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
+                    main.mainBinding.mainFollowing.setClickable(true);
+                    main.mainBinding.mainFollowers.setClickable(true);
                     main.mainBinding.privatePage.setVisibility(View.GONE);
 
                     if (isLoggedIn) {
@@ -749,10 +798,25 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.mainBinding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
                     }
 
-                    currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
-                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    if (profileModel.getPostCount() == 0) {
+                        main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                        main.mainBinding.privatePage1.setImageResource(R.drawable.ic_cancel);
+                        main.mainBinding.privatePage2.setText(R.string.empty_acc);
+                        main.mainBinding.privatePage.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        main.mainBinding.swipeRefreshLayout.setRefreshing(true);
+                        main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
+                        currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
+                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }
                 } else {
+                    main.mainBinding.mainFollowers.setClickable(false);
+                    main.mainBinding.mainFollowing.setClickable(false);
                     main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    // error
+                    main.mainBinding.privatePage1.setImageResource(R.drawable.lock);
+                    main.mainBinding.privatePage2.setText(R.string.priv_acc);
                     main.mainBinding.privatePage.setVisibility(View.VISIBLE);
                     main.mainBinding.mainPosts.setVisibility(View.GONE);
                 }
@@ -878,6 +942,77 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         protected void onPostExecute(Void result) {
             main.mainBinding.mainProfileImage.setImageBitmap(mIcon_val);
+        }
+    }
+
+    private final View.OnClickListener profileActionListener = new View.OnClickListener() {
+        @Override
+        public void onClick(final View v) {
+            if (v == main.mainBinding.btnFollow) {
+                new ProfileAction().execute("follow");
+            } else if (v == main.mainBinding.btnRestrict) {
+                new ProfileAction().execute("restrict");
+            } else if (v == main.mainBinding.btnBlock) {
+                new ProfileAction().execute("block");
+            }
+        }
+    };
+
+    class ProfileAction extends AsyncTask<String, Void, Void> {
+        boolean ok = false;
+        String action;
+
+        // arg: follow / restrict / block
+
+        // restrict https://www.instagram.com/web/restrict_action/(un)restrict/
+        // requires form data "target_user_id: <id>"
+
+        protected Void doInBackground(String... rawAction) {
+            action = rawAction[0];
+            final String url = "https://www.instagram.com/web/"+
+                    (action == "restrict" ? "restrict_action" : ("friendships/"+main.profileModel.getId()))+"/"+
+                    (action == "follow" ?
+                    ((main.profileModel.getFollowing() == true ||
+                            (main.profileModel.getFollowing() == false && main.profileModel.getRequested() == true))
+                            ? "unfollow/" : "follow/") :
+                    (action == "restrict" ?
+                            (main.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
+                            (main.profileModel.getBlocked() == true ? "unblock/" : "block/")));
+            final String urlParameters = "target_user_id="+main.profileModel.getId();
+            try {
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+                urlConnection.setRequestProperty("x-csrftoken",
+                        Utils.settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                if (action == "restrict") {
+                    urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    urlConnection.setRequestProperty("Content-Length", "" +
+                            Integer.toString(urlParameters.getBytes().length));
+                    urlConnection.setDoOutput(true);
+                    DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                    wr.writeBytes(urlParameters);
+                    wr.flush();
+                    wr.close();
+                }
+                else urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    ok = true;
+                }
+                else Toast.makeText(main, R.string.downloader_unknown_error, Toast.LENGTH_SHORT);
+                urlConnection.disconnect();
+            } catch (Throwable ex) {
+                Log.e("austin_debug", action+": " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok == true) {
+                onRefresh();
+            }
         }
     }
 }

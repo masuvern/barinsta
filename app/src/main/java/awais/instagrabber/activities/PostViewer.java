@@ -157,9 +157,9 @@ public final class PostViewer extends BaseLanguageActivity {
                     Utils.sessionVolumeFull = intVol == 1f;
                 }
             } else if (v == viewerBinding.btnLike) {
-                new Like().execute();
+                new PostAction().execute("likes");
             } else if (v == viewerBinding.btnBookmark) {
-                new Bookmark().execute();
+                new PostAction().execute("save");
             } else {
                 final Object tag = v.getTag();
                 if (tag instanceof ViewerPostModel) {
@@ -252,8 +252,8 @@ public final class PostViewer extends BaseLanguageActivity {
                 isMainSwipe = false;
             }
 
-            final BasePostModel[] basePostModels = mediaAdapter != null ? mediaAdapter.getPostModels() : null;
-            final int slides = basePostModels != null ? basePostModels.length : 0;
+            final BasePostModel[] basePostModels = mediaAdapter.getPostModels();
+            final int slides = basePostModels.length;
 
             int position = postModel.getPosition();
 
@@ -685,12 +685,15 @@ public final class PostViewer extends BaseLanguageActivity {
      Don't ever think about running a like farm with this
      */
 
-    class Like extends AsyncTask<Void, Void, Void> {
+    class PostAction extends AsyncTask<String, Void, Void> {
         boolean ok = false;
+        String action;
 
-        protected Void doInBackground(Void... voids) {
-            final String url = "https://www.instagram.com/web/likes/"+postModel.getPostId()+"/"+
-                    (postModel.getLike() == true ? "unlike/" : "like/");
+        protected Void doInBackground(String... rawAction) {
+            action = rawAction[0];
+            final String url = "https://www.instagram.com/web/"+action+"/"+postModel.getPostId()+"/"+ (action == "save" ?
+                    (postModel.getBookmark() == true ? "unsave/" : "save/") :
+                    (postModel.getLike() == true ? "unlike/" : "like/"));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
@@ -703,49 +706,21 @@ public final class PostViewer extends BaseLanguageActivity {
                     ok = true;
                 }
                 else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT);
+                urlConnection.disconnect();
             } catch (Throwable ex) {
-                Log.e("austin_debug", "like: " + ex);
+                Log.e("austin_debug", action+": " + ex);
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
-            if (ok == true) {
+            if (ok == true && action == "likes") {
                 viewerPostModel.setLike(postModel.getLike() == true ? false : true);
                 postModel.setLike(postModel.getLike() == true ? false : true);
                 refreshPost();
             }
-        }
-    }
-
-    class Bookmark extends AsyncTask<Void, Void, Void> {
-        boolean ok = false;
-
-        protected Void doInBackground(Void... voids) {
-            final String url = "https://www.instagram.com/web/save/"+postModel.getPostId()+"/"+
-                    (postModel.getBookmark() == true ? "unsave/" : "save/");
-            try {
-                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setUseCaches(false);
-                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
-                urlConnection.setRequestProperty("x-csrftoken",
-                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
-                urlConnection.connect();
-                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    ok = true;
-                }
-                else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT);
-            } catch (Throwable ex) {
-                Log.e("austin_debug", "bookmark: " + ex);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            if (ok == true) {
+            else if (ok == true && action == "save") {
                 viewerPostModel.setBookmark(postModel.getBookmark() == true ? false : true);
                 postModel.setBookmark(postModel.getBookmark() == true ? false : true);
                 refreshPost();

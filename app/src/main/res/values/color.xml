@@ -17,10 +17,11 @@
     <color name="btn_red_background">#E62323</color>
     <color name="btn_red_text_color">@color/text_color_dark</color>
 
+    <color name="btn_purple_background">#909090</color>
     <color name="btn_pink_background">#FF69B4</color>
-    <color name="btn_pink_text_color">#FFFFFFFF</color>
+    <color name="btn_pink_text_color">@color/text_color_dark</color>
     <color name="btn_lightpink_background">#FFB6C1</color>
-    <color name="btn_lightpink_text_color">#FF000000</color>
+    <color name="btn_lightpink_text_color">@color/text_color_light</color>
 
     <color name="btn_orange_background">#FF5500</color>
     <color name="btn_orange_text_color">#FFFFFFFF</color>

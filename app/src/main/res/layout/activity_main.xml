@@ -75,30 +75,14 @@
                                     android:singleLine="true"
                                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                                     android:textSize="16sp"
-                                    tools:text="retro nugget" />
+                                    tools:text="Austin Huang" />
                             </LinearLayout>
-
-                            <awais.instagrabber.customviews.RamboTextView
-                                android:id="@+id/mainUrl"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@id/profileInfoText"
-                                android:ellipsize="marquee"
-                                android:paddingStart="10dp"
-                                android:paddingLeft="10dp"
-                                android:paddingEnd="10dp"
-                                android:paddingRight="10dp"
-                                android:singleLine="true"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                                android:textSize="16sp"
-                                android:visibility="gone"
-                                tools:text="http://bigdickbitch.com/" />
 
                             <awais.instagrabber.customviews.RamboTextView
                                 android:id="@+id/mainBiography"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/mainUrl"
+                                android:layout_below="@id/profileInfoText"
                                 android:background="?android:selectableItemBackground"
                                 android:paddingStart="10dp"
                                 android:paddingLeft="10dp"
@@ -106,13 +90,79 @@
                                 android:paddingRight="10dp"
                                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                                 android:textSize="16sp"
-                                tools:text="Fuck y'all for real." />
+                                tools:text="THE GLORIOUS (step)OWNER OF THIS APP" />
+
+                            <awais.instagrabber.customviews.RamboTextView
+                                android:id="@+id/mainUrl"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/mainBiography"
+                                android:ellipsize="marquee"
+                                android:paddingStart="10dp"
+                                android:paddingLeft="10dp"
+                                android:paddingEnd="10dp"
+                                android:paddingRight="10dp"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                                android:textSize="16sp"
+                                tools:text="https://austinhuang.me/"
+                                android:visibility="gone" />
+
+                            <androidx.appcompat.widget.LinearLayoutCompat
+                                android:id="@+id/profileActions"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/mainUrl"
+                                android:weightSum="3">
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnFollow"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="8dp"
+                                    android:layout_marginStart="2dp"
+                                    android:layout_marginRight="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/follow"
+                                    android:textColor="@color/btn_pink_text_color"
+                                    android:textSize="18sp"
+                                    app:backgroundTint="@color/btn_pink_background"
+                                    android:visibility="gone" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnRestrict"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="8dp"
+                                    android:layout_marginEnd="1dp"
+                                    android:layout_marginStart="1dp"
+                                    android:layout_marginRight="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/restrict"
+                                    android:textColor="@color/btn_orange_text_color"
+                                    android:textSize="18sp"
+                                    app:backgroundTint="@color/btn_orange_background"
+                                    android:visibility="gone" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnBlock"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="8dp"
+                                    android:layout_marginEnd="2dp"
+                                    android:layout_marginRight="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/block"
+                                    android:textColor="@color/btn_red_text_color"
+                                    android:textSize="18sp"
+                                    app:backgroundTint="@color/btn_red_background"
+                                    android:visibility="gone" />
+                            </androidx.appcompat.widget.LinearLayoutCompat>
+
 
                             <androidx.recyclerview.widget.RecyclerView
                                 android:id="@+id/highlightsList"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/mainBiography"
+                                android:layout_below="@id/profileActions"
                                 android:clipToPadding="false"
                                 android:orientation="horizontal"
                                 android:paddingStart="5dp"
@@ -146,7 +196,7 @@
                                     android:layout_weight="1"
                                     android:gravity="center"
                                     android:textAppearance="@style/TextAppearance.AppCompat"
-                                    android:textSize="16sp"
+                                    android:textSize="15sp"
                                     tools:text="35\nPosts" />
 
                                 <androidx.appcompat.widget.AppCompatTextView
@@ -157,7 +207,7 @@
                                     android:background="?selectableItemBackgroundBorderless"
                                     android:gravity="center"
                                     android:textAppearance="@style/TextAppearance.AppCompat"
-                                    android:textSize="16sp"
+                                    android:textSize="15sp"
                                     tools:text="68\nFollowers" />
 
                                 <androidx.appcompat.widget.AppCompatTextView
@@ -172,7 +222,7 @@
                                     android:background="?selectableItemBackgroundBorderless"
                                     android:gravity="center"
                                     android:textAppearance="@style/TextAppearance.AppCompat"
-                                    android:textSize="16sp"
+                                    android:textSize="15sp"
                                     tools:text="64\nFollowing" />
                             </LinearLayout>
                         </RelativeLayout>
@@ -212,11 +262,13 @@
                         android:visibility="gone">
 
                         <androidx.appcompat.widget.AppCompatImageView
+                            android:id="@+id/privatePage1"
                             android:layout_width="@dimen/private_page_margins"
                             android:layout_height="@dimen/private_page_margins"
                             app:srcCompat="@drawable/lock" />
 
                         <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/privatePage2"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"

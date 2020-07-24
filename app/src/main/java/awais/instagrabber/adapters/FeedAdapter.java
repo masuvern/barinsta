@@ -227,7 +227,7 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
 
             if (!captionEmpty && Utils.hasMentions(postCaption)) {
                 postCaption = Utils.getMentionText(postCaption);
-                feedModel.setPostCaption(postCaption);
+                //feedModel.setPostCaption(postCaption);
                 viewHolder.viewerCaption.setText(postCaption, TextView.BufferType.SPANNABLE);
                 viewHolder.viewerCaption.setMentionClickListener(mentionClickListener);
             } else {

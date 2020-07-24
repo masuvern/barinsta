@@ -24,20 +24,6 @@ public final class ViewerPostModel extends BasePostModel {
         this.bookmarked = bookmarked;
     }
 
-    public boolean getLike() {
-        return liked;
-    }
-    public boolean getBookmark() {
-        return bookmarked;
-    }
-
-    public boolean setLike() {
-        liked = liked == true ? false : true; this.liked = liked; return liked;
-    }
-    public boolean setBookmark() {
-        bookmarked = bookmarked == true ? false : true; this.bookmarked = bookmarked; return bookmarked;
-    }
-
     public long getCommentsCount() {
         return commentsCount;
     }
