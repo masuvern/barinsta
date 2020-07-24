@@ -6,6 +6,7 @@ InstaGrabber is an app that allows...
 
 * Viewing **and downloading** Instagram posts, stories (including highlights)\*, DM\*, and profile pictures, **without** letting people know you viewed it<sup>1</sup>! Works for followed private accounts\*!
 * Like/bookmark posts\*!
+* Follow/restrict/block people\*!
 * Downloading multiple posts at once (hold & select)!
 * **Copy** post captions, comments, DM messages\*, and profile bios.
 * **Compare** follower/following list<sup>2</sup>!
