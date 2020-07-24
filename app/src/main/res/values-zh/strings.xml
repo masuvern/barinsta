@@ -29,7 +29,7 @@
     <string name="title_discover">发现</string>
     <string name="title_comments">留言</string>
     <string name="title_hashtag_prefix">标签：</string>
-    <string name="title_highlight">强调：%s</string>
+    <string name="title_highlight">精彩：%s</string>
     <string name="title_user_story">用户快拍</string>
     <string name="title_changelog">日志</string>
 
@@ -63,7 +63,7 @@
 
     <string name="show_stories">显示快拍</string>
     <string name="view_story_post">浏览快拍</string>
-    <string name="priv_acc">这是私密账户</string>
+    <string name="priv_acc">私密账户</string>
 
     <string name="curr_version">目前版本: v%s</string>
     <string name="read_more">阅读更多…</string>
@@ -154,4 +154,12 @@
     <string name="description">原作者 AWAiS 将 InstaGrabber 做成了一个小巧玲珑的 Instagram 帖子下载 [写作下载读作剽窃] 程序，不过他跳槽了，所以我（Austin Huang）就把它接了下来。 [希望此举有所值得。] 不管怎样，InstaGrabber 完全开源，无广告，无跟踪 [Instagram 原生跟踪除外]，998都不要，你还等啥？？？\n有问题 [或者只是想谈谈心] ？请联系 instagrabber@austinhuang.me 或点击下方各按钮。</string>
     <string name="direct_messages_you">你</string>
     <string name="direct_messages_sent_link">分享了</string>
+    <string name="action_setting">设定 (v%s)</string>
+    <string name="follow">关注</string>
+    <string name="unfollow">脱粉</string>
+    <string name="block">拉黑</string>
+    <string name="unblock">解禁</string>
+    <string name="restrict">限制</string>
+    <string name="unrestrict">放开</string>
+    <string name="empty_acc">暂未发帖</string>
 </resources>

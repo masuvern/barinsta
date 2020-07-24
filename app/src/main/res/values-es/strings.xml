@@ -141,4 +141,5 @@
 
     <string name="crash_title">App atascada</string>
     <string name="crash_descr">Vaya.. la aplicación dejó de funcionar, pero no te preocupes por un enviar un reporte de error al desarrollador para solucionar este problema. (:</string>
+    <string name="action_setting">Ajustes (v%s)</string>
 </resources>

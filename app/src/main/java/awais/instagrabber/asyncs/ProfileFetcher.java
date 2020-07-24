@@ -64,10 +64,10 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, ProfileModel> {
                         timelineMedia.getLong("count"),
                         user.getJSONObject("edge_followed_by").getLong("count"),
                         user.getJSONObject("edge_follow").getLong("count"),
-                        user.getBoolean("followed_by_viewer"),
-                        user.getBoolean("restricted_by_viewer"),
-                        user.getBoolean("blocked_by_viewer"),
-                        user.getBoolean("requested_by_viewer"));
+                        user.optBoolean("followed_by_viewer"),
+                        user.optBoolean("restricted_by_viewer"),
+                        user.optBoolean("blocked_by_viewer"),
+                        user.optBoolean("requested_by_viewer"));
             }
 
             conn.disconnect();
