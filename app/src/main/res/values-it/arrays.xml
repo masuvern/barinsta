@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>Predifinito da sistema</item>
+        <item>Predefinito da sistema</item>
         <item>Inglese</item>
         <item>Francese [Grazie a @kernoeb (Telegram)]</item>
         <item>Spagnolo [Grazie a @sguinetti (GitLab)]</item>
