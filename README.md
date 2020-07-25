@@ -32,6 +32,7 @@ Not compatible with pre-16.6 versions (including alpha).
 
 Remember to read the [wiki](https://github.com/austinhuang0131/instagrabber/wiki) for more info!
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f87cac1fbf674888b00bd91bc5eccce0)](https://app.codacy.com/manual/austinhuang0131/instagrabber?utm_source=github.com&utm_medium=referral&utm_content=austinhuang0131/instagrabber&utm_campaign=Badge_Grade_Dashboard)
 [![Open Source Love svg3](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
