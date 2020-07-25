@@ -20,11 +20,12 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]> {
-    private final String id;
+    private final String id, hashtag;
     private final FetchListener<StoryModel[]> fetchListener;
 
-    public StoryStatusFetcher(final String id, final FetchListener<StoryModel[]> fetchListener) {
+    public StoryStatusFetcher(final String id, final String hashtag, final FetchListener<StoryModel[]> fetchListener) {
         this.id = id;
+        this.hashtag = hashtag;
         this.fetchListener = fetchListener;
     }
 
@@ -32,7 +33,8 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
     protected StoryModel[] doInBackground(final Void... voids) {
         StoryModel[] result = null;
         final String url = "https://www.instagram.com/graphql/query/?query_hash=52a36e788a02a3c612742ed5146f1676&variables=" +
-                "{\"precomposed_overlay\":false,\"reel_ids\":[\"" + id + "\"]}";
+                "{\"precomposed_overlay\":false,\"reel_ids\":[\"" + id + "\"]"
+                +(!Utils.isEmpty(hashtag) ? (",\"tag_names\":\""+hashtag+"\"") : "")+"}";
 
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -61,7 +63,8 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
                         models[i] = new StoryModel(data.getString(Constants.EXTRAS_ID),
                                 data.getString("display_url"),
                                 isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
-                                data.optLong("taken_at_timestamp", 0));
+                                data.optLong("taken_at_timestamp", 0),
+                                data.getJSONObject("owner").getString("username"));
 
                         final JSONArray videoResources = data.optJSONArray("video_resources");
                         if (isVideo && videoResources != null)

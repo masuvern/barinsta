@@ -133,7 +133,9 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
                                 directItemModel.getReelShare().getReelId(),
                                 directItemModel.getReelShare().getMedia().getVideoUrl(),
                                 directItemModel.getReelShare().getMedia().getMediaType(),
-                                directItemModel.getTimestamp()
+                                directItemModel.getTimestamp(),
+                                directItemModel.getReelShare().getReelOwnerName()
+
                         );
                         sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
                         StoryModel[] sms = {sm};

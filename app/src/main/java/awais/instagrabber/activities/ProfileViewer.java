@@ -31,6 +31,7 @@ import awais.instagrabber.asyncs.ProfilePictureFetcher;
 import awais.instagrabber.databinding.ActivityProfileBinding;
 import awais.instagrabber.dialogs.ProfileSettingsDialog;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.ProfilePictureFetchMode;
 import awais.instagrabber.utils.Constants;
@@ -41,11 +42,11 @@ import static awais.instagrabber.utils.Constants.PROFILE_FETCH_MODE;
 public final class ProfileViewer extends BaseLanguageActivity {
     private final ProfilePictureFetchMode[] fetchModes = {
             ProfilePictureFetchMode.INSTADP,
-            ProfilePictureFetchMode.INSTA_STALKER,
-            ProfilePictureFetchMode.INSTAFULLSIZE,
+            ProfilePictureFetchMode.INSTAFULLSIZE
     };
     private ActivityProfileBinding profileBinding;
     private ProfileModel profileModel;
+    private HashtagModel hashtagModel;
     private MenuItem menuItemDownload;
     private String profilePicUrl;
     private FragmentManager fragmentManager;
@@ -63,16 +64,17 @@ public final class ProfileViewer extends BaseLanguageActivity {
         setSupportActionBar(profileBinding.toolbar.toolbar);
 
         final Intent intent = getIntent();
-        if (intent == null || !intent.hasExtra(Constants.EXTRAS_PROFILE)
-                || (profileModel = (ProfileModel) intent.getSerializableExtra(Constants.EXTRAS_PROFILE)) == null) {
+        if (intent == null || (!intent.hasExtra(Constants.EXTRAS_PROFILE) && !intent.hasExtra(Constants.EXTRAS_HASHTAG))
+                || ((profileModel = (ProfileModel) intent.getSerializableExtra(Constants.EXTRAS_PROFILE)) == null
+                && (hashtagModel = (HashtagModel) intent.getSerializableExtra(Constants.EXTRAS_HASHTAG)) == null)) {
             Utils.errorFinish(this);
             return;
         }
 
         fragmentManager = getSupportFragmentManager();
 
-        final String id = profileModel.getId();
-        final String username = profileModel.getUsername();
+        final String id = hashtagModel != null ? hashtagModel.getId() : profileModel.getId();
+        final String username = hashtagModel != null ? hashtagModel.getName() : profileModel.getUsername();
 
         profileBinding.toolbar.toolbar.setTitle(username);
 
@@ -91,12 +93,12 @@ public final class ProfileViewer extends BaseLanguageActivity {
 
             if (!fallbackToProfile && Utils.isEmpty(profilePicUrl)) {
                 fallbackToProfile = true;
-                new ProfilePictureFetcher(username, id, fetchListener, fetchMode).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ProfilePictureFetcher(username, id, fetchListener, fetchMode, profilePicUrl, hashtagModel != null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 return;
             }
 
             if (errorHandled && fallbackToProfile || Utils.isEmpty(profilePicUrl))
-                profilePicUrl = profileModel.getHdProfilePic();
+                profilePicUrl = hashtagModel != null ? hashtagModel.getSdProfilePic() : profileModel.getHdProfilePic();
 
             if (destroyed == true) return;
 
@@ -108,10 +110,10 @@ public final class ProfileViewer extends BaseLanguageActivity {
                     fallbackToProfile = true;
                     if (!errorHandled) {
                         errorHandled = true;
-                        new ProfilePictureFetcher(username, id, fetchListener, fetchModes[Math.min(2, Math.max(0, fetchIndex + 1))])
+                        new ProfilePictureFetcher(username, id, fetchListener, fetchModes[Math.min(2, Math.max(0, fetchIndex + 1))], profilePicUrl, hashtagModel != null)
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } else {
-                        glideRequestManager.load(profileModel.getHdProfilePic()).into(profileBinding.imageViewer);
+                        glideRequestManager.load(profilePicUrl).into(profileBinding.imageViewer);
                         showImageInfo();
                     }
                     profileBinding.progressView.setVisibility(View.GONE);
@@ -163,7 +165,8 @@ public final class ProfileViewer extends BaseLanguageActivity {
             }).into(profileBinding.imageViewer);
         };
 
-        new ProfilePictureFetcher(username, id, fetchListener, fetchMode).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new ProfilePictureFetcher(username, id, fetchListener, fetchMode, profilePicUrl, hashtagModel != null)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void downloadProfilePicture() {

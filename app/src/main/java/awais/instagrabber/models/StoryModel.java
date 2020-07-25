@@ -5,18 +5,19 @@ import java.io.Serializable;
 import awais.instagrabber.models.enums.MediaItemType;
 
 public final class StoryModel implements Serializable {
-    private final String storyMediaId, storyUrl;
+    private final String storyMediaId, storyUrl, username;
     private final MediaItemType itemType;
     private final long timestamp;
     private String videoUrl, tappableShortCode;
     private int position;
     private boolean isCurrentSlide = false;
 
-    public StoryModel(final String storyMediaId, final String storyUrl, final MediaItemType itemType, final long timestamp) {
+    public StoryModel(final String storyMediaId, final String storyUrl, final MediaItemType itemType, final long timestamp, final String username) {
         this.storyMediaId = storyMediaId;
         this.storyUrl = storyUrl;
         this.itemType = itemType;
         this.timestamp = timestamp;
+        this.username = username;
     }
 
     public String getStoryUrl() {
@@ -65,5 +66,9 @@ public final class StoryModel implements Serializable {
 
     public boolean isCurrentSlide() {
         return isCurrentSlide;
+    }
+
+    public String getUsername() {
+        return username;
     }
 }

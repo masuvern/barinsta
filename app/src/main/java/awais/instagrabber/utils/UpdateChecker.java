@@ -13,7 +13,7 @@ import awais.instagrabber.interfaces.FetchListener;
 
 public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
     private final FetchListener<String> fetchListener;
-    private String versionUrl;
+    private String version;
 
     public UpdateChecker(final FetchListener<String> fetchListener) {
         this.fetchListener = fetchListener;
@@ -22,17 +22,17 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
     @NonNull
     @Override
     protected Boolean doInBackground(final Void... voids) {
-        final String UPDATE_BASE_URL = "https://github.com/austinhuang0131/instagrabber/releases/tag/v";
+        final String UPDATE_BASE_URL = "https://github.com/austinhuang0131/instagrabber/releases/tag/";
         final String versionName = BuildConfig.VERSION_NAME;
         final int index = versionName.indexOf('.');
 
         try {
             final int verMajor = Integer.parseInt(versionName.substring(0, index));
 
-            versionUrl = UPDATE_BASE_URL + (verMajor + 1) + ".0";
+            version = "v" + (verMajor + 1) + ".0";
 
             // check major version first
-            HttpURLConnection conn = (HttpURLConnection) new URL(versionUrl).openConnection();
+            HttpURLConnection conn = (HttpURLConnection) new URL(UPDATE_BASE_URL + version).openConnection();
             conn.setUseCaches(false);
             conn.setRequestMethod("HEAD");
             conn.connect();
@@ -46,10 +46,10 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
                 final int verMinor = Integer.parseInt(substring) + 1;
 
                 for (int i = verMinor; i < 10; ++i) {
-                    versionUrl = UPDATE_BASE_URL + verMajor + '.' + i;
+                    version = "v" + verMajor + '.' + i;
                     conn.disconnect();
 
-                    conn = (HttpURLConnection) new URL(versionUrl).openConnection();
+                    conn = (HttpURLConnection) new URL(UPDATE_BASE_URL + version).openConnection();
                     conn.setUseCaches(false);
                     conn.setRequestMethod("HEAD");
                     conn.connect();
@@ -70,6 +70,6 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(final Boolean result) {
         if (result != null && result && fetchListener != null)
-            fetchListener.onResult(versionUrl);
+            fetchListener.onResult(version);
     }
 }

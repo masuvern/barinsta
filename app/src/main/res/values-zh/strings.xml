@@ -109,7 +109,7 @@
     <string name="quick_access_confirm_delete">你真的要删除 %s?</string>
     <string name="profile_viewer_imageinfo">宽: %d\n高: %d</string>
     <string name="profile_viewer_colordepth_prefix">\n色深:</string>
-    <string name="profile_endpoint">Select profile picture endpoint\n(Does not affect hashtags)</string>
+    <string name="profile_endpoint">选择头像服务\n（不影响#标签）</string>
     <string name="open_profile">打开主页</string>
     <string name="view_pfp">查看头像</string>
     <string name="direct_messages_you">你</string>

@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentManager;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -26,15 +27,29 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class FlavorTown {
     public static void updateCheck(@NonNull final Context context) {
-        new UpdateChecker(versionUrl -> {
-            new AlertDialog.Builder(context).setTitle(R.string.update_available).setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.action_download, (dialog, which) -> {
+        Resources res = context.getResources();
+        new UpdateChecker(version -> {
+            new AlertDialog.Builder(context)
+                    .setTitle(res.getString(R.string.update_available) + " (" + version + ")")
+                    .setMessage(R.string.update_notice)
+                    .setNeutralButton(R.string.cancel, null)
+                    .setNegativeButton(R.string.action_github, (dialog, which) -> {
                         try {
-                            context.startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(versionUrl)));
+                            context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
+                                    Uri.parse("https://github.com/austinhuang0131/instagrabber/releases/tag/" + version)));
                         } catch (final ActivityNotFoundException e) {
                             // do nothing
                         }
-                    }).show();
+                    })
+                    .setPositiveButton(R.string.action_fdroid, (dialog, which) -> {
+                        try {
+                            context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
+                                    Uri.parse("https://f-droid.org/packages/me.austinhuang.instagrabber/")));
+                        } catch (final ActivityNotFoundException e) {
+                            // do nothing
+                        }
+                    })
+                    .show();
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 

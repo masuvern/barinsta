@@ -227,6 +227,63 @@
                             </LinearLayout>
                         </RelativeLayout>
                     </com.google.android.material.appbar.CollapsingToolbarLayout>
+                    <com.google.android.material.appbar.CollapsingToolbarLayout
+                        android:id="@+id/tagToolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                        android:visibility="gone">
+
+                        <RelativeLayout
+                            android:id="@+id/tagInfoContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:animateLayoutChanges="true"
+                            android:background="@null"
+                            android:orientation="vertical"
+                            android:paddingBottom="5dp">
+
+                            <LinearLayout
+                                android:id="@+id/hashtagInfo"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="@dimen/profile_info_container_bottom_space">
+
+                                <awais.instagrabber.customviews.CircularImageView
+                                    android:id="@+id/mainHashtagImage"
+                                    android:layout_width="@dimen/profile_picture_size"
+                                    android:layout_height="@dimen/profile_picture_size"
+                                    android:adjustViewBounds="true"
+                                    android:background="?selectableItemBackgroundBorderless" />
+
+                                <androidx.appcompat.widget.AppCompatTextView
+                                    android:id="@+id/mainTagPostCount"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginStart="12dp"
+                                    android:layout_marginLeft="12dp"
+                                    android:layout_marginEnd="12dp"
+                                    android:layout_marginRight="12dp"
+                                    android:layout_weight="1"
+                                    android:gravity="center"
+                                    android:textAppearance="@style/TextAppearance.AppCompat"
+                                    android:textSize="15sp"
+                                    tools:text="35\nPosts" />
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnFollowTag"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_weight="2"
+                                    android:text="@string/follow"
+                                    android:textColor="@color/btn_pink_text_color"
+                                    android:textSize="20sp"
+                                    app:backgroundTint="@color/btn_pink_background" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.appbar.CollapsingToolbarLayout>
                 </com.google.android.material.appbar.AppBarLayout>
 
                 <FrameLayout

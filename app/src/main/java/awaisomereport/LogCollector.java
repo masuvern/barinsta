@@ -106,6 +106,7 @@ public final class LogCollector {
         ASYNC_MAIN_POSTS_FETCHER("async-main-posts-fetcher.txt"),
         ASYNC_POST_FETCHER("async-single-post-fetcher.txt"),
         ASYNC_FEED_FETCHER("async-feed-fetcher.txt"),
+        ASYNC_HASHTAG_FETCHER("async-hashtag-fetcher.txt"),
         ASYNC_PROFILE_FETCHER("async-profile-fetcher.txt"),
         ASYNC_PROFILE_PICTURE_FETCHER("async-pfp-fetcher.txt"),
         ASYNC_STORY_STATUS_FETCHER("async-story-status-fetcher.txt"),

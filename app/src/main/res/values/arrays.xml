@@ -28,7 +28,6 @@
 
     <string-array name="profile_fetch_modes">
         <item>Instadp</item>
-        <item>Insta-Stalker</item>
         <item>Instafullsize</item>
     </string-array>
 

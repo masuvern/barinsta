@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:weightSum="3.2"
     android:animateLayoutChanges="true"
     android:orientation="vertical"
     tools:context=".activities.PostViewer">
@@ -27,7 +28,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.6">
+        android:layout_weight="1.9">
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/playerView"
@@ -81,7 +82,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/mediaList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:clipToPadding="false"
         android:orientation="horizontal"
         android:paddingStart="5dp"
@@ -95,12 +96,12 @@
         layout="@layout/item_feed_bottom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.4" />
+        android:layout_weight="1"/>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.26"
+        android:layout_weight="0.3"
         android:background="#0000"
         android:weightSum="2"
         android:layout_alignParentBottom="true">
@@ -119,6 +120,7 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnBookmark"
+            android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"

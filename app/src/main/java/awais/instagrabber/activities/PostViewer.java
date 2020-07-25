@@ -134,13 +134,13 @@ public final class PostViewer extends BaseLanguageActivity {
                 final LinearLayout topPanelRoot = viewerBinding.topPanel.getRoot();
                 final int iconRes;
 
-                if (containerLayoutParams.height == 0) {
-                    containerLayoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
+                if (containerLayoutParams.weight != 3.3f) {
+                    containerLayoutParams.weight = 3.3f;
                     iconRes = R.drawable.ic_fullscreen_exit;
                     topPanelRoot.setVisibility(View.GONE);
                     viewerBinding.btnDownload.setVisibility(View.VISIBLE);
                 } else {
-                    containerLayoutParams.height = 0;
+                    containerLayoutParams.weight = (viewerBinding.mediaList.getVisibility() == View.VISIBLE) ? 1.35f : 1.9f;
                     iconRes = R.drawable.ic_fullscreen;
                     topPanelRoot.setVisibility(View.VISIBLE);
                     viewerBinding.btnDownload.setVisibility(View.GONE);
@@ -324,6 +324,11 @@ public final class PostViewer extends BaseLanguageActivity {
 
             mediaAdapter.setData(result);
             if (result.length > 1) {
+                viewerBinding.mediaList.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, 0, 0.55f
+                ));
+                containerLayoutParams.weight = 1.35f;
+                viewerBinding.container.setLayoutParams(containerLayoutParams);
                 viewerBinding.mediaList.setVisibility(View.VISIBLE);
             }
 
@@ -604,7 +609,7 @@ public final class PostViewer extends BaseLanguageActivity {
         url = viewerPostModel.getDisplayUrl();
         releasePlayer();
 
-        viewerBinding.btnDownload.setVisibility(containerLayoutParams.height == 0 ? View.GONE : View.VISIBLE);
+        viewerBinding.btnDownload.setVisibility(containerLayoutParams.weight == 3.3f ? View.GONE : View.VISIBLE);
         if (viewerPostModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
     }
