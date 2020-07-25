@@ -214,6 +214,12 @@ public final class PostViewer extends BaseLanguageActivity {
         if (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) {
             viewerBinding.btnLike.setVisibility(View.GONE);
             viewerBinding.btnBookmark.setVisibility(View.GONE);
+            viewerBinding.postActions.setVisibility(View.GONE);
+            viewerBinding.postActions.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 0
+            ));
+            containerLayoutParams.weight = 2.2f;
+            viewerBinding.container.setLayoutParams(containerLayoutParams);
         }
         else {
             viewerBinding.btnLike.setOnClickListener(onClickListener);
@@ -328,6 +334,7 @@ public final class PostViewer extends BaseLanguageActivity {
                         LinearLayout.LayoutParams.MATCH_PARENT, 0, 0.55f
                 ));
                 containerLayoutParams.weight = 1.35f;
+                containerLayoutParams.weight += (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) ? 0.3f : 0;
                 viewerBinding.container.setLayoutParams(containerLayoutParams);
                 viewerBinding.mediaList.setVisibility(View.VISIBLE);
             }
@@ -556,6 +563,10 @@ public final class PostViewer extends BaseLanguageActivity {
             }
         }
         lastSlidePos = slidePos;
+
+        containerLayoutParams.weight = (viewerBinding.mediaList.getVisibility() == View.VISIBLE) ? 1.35f : 1.9f;
+        containerLayoutParams.weight += (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) ? 0.3f : 0;
+        viewerBinding.container.setLayoutParams(containerLayoutParams);
 
         postCaption = viewerPostModel.getPostCaption();
 

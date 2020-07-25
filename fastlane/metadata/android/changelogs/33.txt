@@ -2,6 +2,7 @@
 * Non-logged-in users now have an "add/remove from favorites" button on the profile/hashtag page, alongside Quick Access.
 * Update checker will now have a F-Droid button
 * Updated Italian and Simplified Chinese translations
+* Crash reporter now directs to `instagrabber@austinhuang.me`
 * Adjusted grid size threshold at popular request
 * Adjusted post viewer component sizes (to prevent the buttons being squished downwards, but the exact outcome depends on device)
 * Fixed a bug where highlights of the viewed user gets carried to other users
