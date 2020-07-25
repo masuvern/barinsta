@@ -20,7 +20,7 @@
         <item>\@</item>
         <item>pada</item>
         <item>pukul</item>
-        <item>tanggal</item>
+        <item>\|</item>
         <item>-</item>
     </string-array>
     <string-array name="profile_fetch_modes">
