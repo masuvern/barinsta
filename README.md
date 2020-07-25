@@ -33,6 +33,9 @@ Not compatible with pre-16.6 versions (including alpha).
 [![Open Source Love svg3](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
+[![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
+[![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
+[![Crowdin](https://badges.crowdin.net/instagrabber/localized.svg)](https://crowdin.com/project/instagrabber)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
 ### How to log in
@@ -54,15 +57,8 @@ The relevant source code is [here](https://github.com/austinhuang0131/instagrabb
 * Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 
-### Legal
-
-* We do not collect any data, other than crash log, which is only stored locally. No funky stuff.
-* You can voluntarily provide us with the crash log (3 dots => Settings => "Send logs"). In that case, it is your sole responsibility to remove any sensitive information. As well, you agree to the privacy policy of the platform that you send it on.
-* While the best effort is made in this app, nobody (me or AWAiS) is liable for damages that have arisen due to the usage of this app, including but not limited to account bans and broken friendship. (The former wouldn't happen so easily as this app does imitate actual Instagram clients, the latter depends on who is using it and who their friends are, neither of which I have any control of.)
-* Please use downloaded content legally and responsibly. [Don't pull a Newsweek!](https://arstechnica.com/tech-policy/2020/06/instagram-just-threw-users-of-its-embedding-api-under-the-bus/)
-* This app is licensed under GPLv3.
-
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com)
+[![Crowdin | Agile localization for tech companies](https://badges.crowdin.net/badge/dark/crowdin-on-light.png)](https://crowdin.com/?utm_source=badge&utm_medium=referral&utm_campaign=badge-add-on)
 
 <sub>Previous owner left a lot of swearings in the code, I will remove them when I get to that file.</sub>
 
