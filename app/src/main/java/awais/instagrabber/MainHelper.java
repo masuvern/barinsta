@@ -54,6 +54,7 @@ import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.DiscoverFetcher;
 import awais.instagrabber.asyncs.FeedFetcher;
 import awais.instagrabber.asyncs.FeedStoriesFetcher;
+import awais.instagrabber.asyncs.HashtagFetcher;
 import awais.instagrabber.asyncs.HighlightsFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
@@ -70,12 +71,14 @@ import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.FeedStoryModel;
+import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
@@ -115,7 +118,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 }
 
                 if (isHashtag)
-                    main.mainBinding.toolbar.toolbar.setTitle(main.getString(R.string.title_hashtag_prefix) + main.userQuery);
+                    main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
                 else main.mainBinding.toolbar.toolbar.setTitle(username + " (" + main.allItems.size() + postFix);
 
                 final PostModel model = result[result.length - 1];
@@ -138,8 +141,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     if ((autoloadPosts && hasNextPage) && !isHashtag)
                         currentlyExecuting = new PostsFetcher(main.profileModel.getId(), endCursor, this)
                                 .setUsername(main.profileModel.getUsername()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    else
+                    else {
                         main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                        main.mainBinding.tagToolbar.setVisibility(View.VISIBLE);
+                    }
                     model.setPageCursor(false, null);
                 }
             }
@@ -253,6 +258,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
     private DiscoverAdapter discoverAdapter;
     public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
+    final boolean isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
 
     public MainHelper(@NonNull final Main main) {
         stopCurrentExecutor();
@@ -263,8 +269,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         main.mainBinding.swipeRefreshLayout.setOnRefreshListener(this);
         main.mainBinding.mainUrl.setMovementMethod(new LinkMovementMethod());
-
-        final boolean isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
 
         final LinearLayout iconSlider = main.findViewById(R.id.iconSlider);
         final ImageView iconFeed = (ImageView) iconSlider.getChildAt(0);
@@ -426,7 +430,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             linearLayout.addView(main.mainBinding.toolbar.toolbar, linearLayout.getChildCount());
         }
 
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(main, Utils.convertDpToPx(130));
+        // change the next number to adjust grid
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(main, Utils.convertDpToPx(110));
         main.mainBinding.mainPosts.setLayoutManager(layoutManager);
         main.mainBinding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         main.mainBinding.mainPosts.setAdapter(postsAdapter = new PostsAdapter(main.allItems, v -> {
@@ -617,6 +622,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.appBarLayout.setExpanded(true, true);
         main.mainBinding.privatePage.setVisibility(View.GONE);
         main.mainBinding.mainProfileImage.setImageBitmap(null);
+        main.mainBinding.mainHashtagImage.setImageBitmap(null);
         main.mainBinding.mainUrl.setText(null);
         main.mainBinding.mainFullName.setText(null);
         main.mainBinding.mainPostCount.setText(null);
@@ -625,8 +631,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.mainBiography.setText(null);
         main.mainBinding.mainBiography.setEnabled(false);
         main.mainBinding.mainProfileImage.setEnabled(false);
+        main.mainBinding.mainHashtagImage.setEnabled(false);
         main.mainBinding.mainBiography.setMentionClickListener(null);
         main.mainBinding.mainUrl.setVisibility(View.GONE);
+        main.mainBinding.mainTagPostCount.setVisibility(View.GONE);
         main.mainBinding.isVerified.setVisibility(View.GONE);
         main.mainBinding.btnFollow.setVisibility(View.GONE);
         main.mainBinding.btnRestrict.setVisibility(View.GONE);
@@ -647,12 +655,77 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         collapsingToolbar.setVisibility(isHashtag ? View.GONE : View.VISIBLE);
 
         if (isHashtag) {
-            main.mainBinding.toolbar.toolbar.setTitle(resources.getString(R.string.title_hashtag_prefix) + main.userQuery);
+            main.profileModel = null;
+            main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
             main.mainBinding.infoContainer.setVisibility(View.GONE);
+            main.mainBinding.tagInfoContainer.setVisibility(View.VISIBLE);
+            main.mainBinding.btnFollowTag.setVisibility(View.GONE);
 
-            currentlyExecuting = new PostsFetcher(main.userQuery, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            currentlyExecuting = new HashtagFetcher(main.userQuery.substring(1), hashtagModel -> {
+                main.hashtagModel = hashtagModel;
 
+                if (hashtagModel == null) {
+                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(main, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                    main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
+                    return;
+                }
+
+                final String profileId = hashtagModel.getId();
+
+                final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+                final boolean isLoggedIn = !Utils.isEmpty(cookie);
+
+                currentlyExecuting = new PostsFetcher(main.userQuery, postsFetchListener)
+                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                main.mainBinding.btnFollowTag.setVisibility(View.VISIBLE);
+                main.mainBinding.btnFollowTag.setOnClickListener(profileActionListener);
+
+                if (isLoggedIn) {
+                    new StoryStatusFetcher(profileId, hashtagModel.getName(), result -> {
+                        main.storyModels = result;
+                        if (result != null && result.length > 0) main.mainBinding.mainHashtagImage.setStoriesBorder();
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                    if (hashtagModel.getFollowing() == true) {
+                        main.mainBinding.btnFollowTag.setText(R.string.unfollow);
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_purple_background, null)));
+                    }
+                    else {
+                        main.mainBinding.btnFollowTag.setText(R.string.follow);
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_pink_background, null)));
+                    }
+                } else {
+                    if (Utils.dataBox.getFavorite(main.userQuery) != null) {
+                        main.mainBinding.btnFollowTag.setText(R.string.unfavorite_short);
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_purple_background, null)));
+                    }
+                    else {
+                        main.mainBinding.btnFollowTag.setText(R.string.favorite_short);
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_pink_background, null)));
+                    }
+                }
+
+                main.mainBinding.mainHashtagImage.setEnabled(false);
+                new MyTask().execute();
+                main.mainBinding.mainHashtagImage.setEnabled(true);
+
+                final String postCount = String.valueOf(hashtagModel.getPostCount());
+
+                SpannableStringBuilder span = new SpannableStringBuilder(resources.getString(R.string.main_posts_count, postCount));
+                span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
+                span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
+                main.mainBinding.mainTagPostCount.setText(span);
+                main.mainBinding.mainTagPostCount.setVisibility(View.VISIBLE);
+            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
+            main.hashtagModel = null;
+            main.mainBinding.tagInfoContainer.setVisibility(View.GONE);
             main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
             main.mainBinding.infoContainer.setVisibility(View.VISIBLE);
 
@@ -672,7 +745,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
                 final boolean isLoggedIn = !Utils.isEmpty(cookie);
                 if (isLoggedIn) {
-                    new StoryStatusFetcher(profileId, result -> {
+                    new StoryStatusFetcher(profileId, "", result -> {
                         main.storyModels = result;
                         if (result != null && result.length > 0) main.mainBinding.mainProfileImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -682,6 +755,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             main.mainBinding.highlightsList.setVisibility(View.VISIBLE);
                             main.highlightsAdapter.setData(result);
                         }
+                        else main.mainBinding.highlightsList.setVisibility(View.GONE);
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                     final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE));
@@ -728,6 +802,19 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                     R.color.btn_red_background, null)));
                         }
                     }
+                } else {
+                    if (Utils.dataBox.getFavorite(main.userQuery) != null) {
+                        main.mainBinding.btnFollow.setText(R.string.unfavorite);
+                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_purple_background, null)));
+                    }
+                    else {
+                        main.mainBinding.btnFollow.setText(R.string.favorite);
+                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_pink_background, null)));
+                    }
+                    main.mainBinding.btnFollow.setOnClickListener(profileActionListener);
+                    main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
                 }
 
                 main.mainBinding.mainProfileImage.setEnabled(false);
@@ -932,7 +1019,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         protected Void doInBackground(Void... voids) {
             try {
-                mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(main.profileModel.getSdProfilePic()).getContent());
+                mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(
+                        (main.hashtagModel != null) ? main.hashtagModel.getSdProfilePic() : main.profileModel.getSdProfilePic()
+                ).getContent());
             } catch (Throwable ex) {
                 Log.e("austin_debug", "bitmap: " + ex);
             }
@@ -941,19 +1030,29 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         @Override
         protected void onPostExecute(Void result) {
-            main.mainBinding.mainProfileImage.setImageBitmap(mIcon_val);
+            if (main.hashtagModel != null) main.mainBinding.mainHashtagImage.setImageBitmap(mIcon_val);
+            else main.mainBinding.mainProfileImage.setImageBitmap(mIcon_val);
         }
     }
 
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            if (v == main.mainBinding.btnFollow) {
+            if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null) {
+                Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
+                        Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1])));
+                onRefresh();
+            } else if (!isLoggedIn) {
+                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis()));
+                onRefresh();
+            } else if (v == main.mainBinding.btnFollow) {
                 new ProfileAction().execute("follow");
             } else if (v == main.mainBinding.btnRestrict) {
                 new ProfileAction().execute("restrict");
             } else if (v == main.mainBinding.btnBlock) {
                 new ProfileAction().execute("block");
+            } else if (v == main.mainBinding.btnFollowTag) {
+                new ProfileAction().execute("followtag");
             }
         }
     };
@@ -965,15 +1064,16 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
             final String url = "https://www.instagram.com/web/"+
-                    (action == "restrict" ? "restrict_action" : ("friendships/"+main.profileModel.getId()))+"/"+
-                    (action == "follow" ?
+                    ((action == "followtag" && main.hashtagModel != null) ? ("tags/"+
+                            (main.hashtagModel.getFollowing() == true ? "unfollow/" : "follow/")+main.hashtagModel.getName()+"/") : (
+                    ((action == "restrict" && main.profileModel != null) ? "restrict_action" : ("friendships/"+main.profileModel.getId()))+"/"+
+                    ((action == "follow" && main.profileModel != null) ?
                     ((main.profileModel.getFollowing() == true ||
                             (main.profileModel.getFollowing() == false && main.profileModel.getRequested() == true))
                             ? "unfollow/" : "follow/") :
-                    (action == "restrict" ?
+                    ((action == "restrict" && main.profileModel != null) ?
                             (main.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
-                            (main.profileModel.getBlocked() == true ? "unblock/" : "block/")));
-            final String urlParameters = "target_user_id="+main.profileModel.getId();
+                            (main.profileModel.getBlocked() == true ? "unblock/" : "block/")))));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
@@ -982,6 +1082,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 urlConnection.setRequestProperty("x-csrftoken",
                         Utils.settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
                 if (action == "restrict") {
+                    final String urlParameters = "target_user_id="+main.profileModel.getId();
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     urlConnection.setRequestProperty("Content-Length", "" +
                             Integer.toString(urlParameters.getBytes().length));

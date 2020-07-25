@@ -368,6 +368,13 @@ public final class StoryViewer extends BaseLanguageActivity {
         storyViewerBinding.viewStoryPost.setTag(shortCode);
 
         releasePlayer();
+        final Intent intent = getIntent();
+        if (intent.hasExtra(Constants.EXTRAS_HASHTAG)) {
+            storyViewerBinding.toolbar.toolbar.setTitle(currentStory.getUsername() + " (" + intent.getStringExtra(Constants.EXTRAS_USERNAME) + ")");
+            storyViewerBinding.toolbar.toolbar.setOnClickListener(v -> {
+                searchUsername(currentStory.getUsername());
+            });
+        }
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
     }

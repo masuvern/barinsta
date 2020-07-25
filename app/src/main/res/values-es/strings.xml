@@ -26,7 +26,6 @@
     <string name="title_favorites">Favoritos</string>
     <string name="title_discover">Explorar</string>
     <string name="title_comments">Comentarios</string>
-    <string name="title_hashtag_prefix">Hashtag: </string>
     <string name="title_highlight">Resaltado: %s</string>
     <string name="title_user_story">Historia de usuario</string>
     <string name="title_changelog">Lista de cambios</string>

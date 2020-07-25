@@ -25,6 +25,7 @@ public final class Constants {
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
     //////////////////////// EXTRAS ////////////////////////
     public static final String EXTRAS_USER = "user";
+    public static final String EXTRAS_HASHTAG = "hashtag";
     public static final String EXTRAS_USERNAME = "username";
     public static final String EXTRAS_ID = "id";
     public static final String EXTRAS_POST = "post";

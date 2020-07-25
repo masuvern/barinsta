@@ -41,6 +41,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.ItemGetter;
 import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
@@ -89,6 +90,7 @@ public final class Main extends BaseLanguageActivity {
     public String userQuery = null;
     public MainHelper mainHelper;
     public ProfileModel profileModel;
+    public HashtagModel hashtagModel;
     private AutoCompleteTextView searchAutoComplete;
     private ArrayAdapter<String> profileDialogAdapter;
     private DialogInterface.OnClickListener profileDialogListener;
@@ -111,6 +113,9 @@ public final class Main extends BaseLanguageActivity {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String uid = Utils.getUserIdFromCookie(cookie);
         Utils.setupCookies(cookie);
+
+        if (settingsHelper.getInteger(Constants.PROFILE_FETCH_MODE) == 2)
+            settingsHelper.putInteger(Constants.PROFILE_FETCH_MODE, 1);
 
         MainHelper.stopCurrentExecutor();
         mainHelper = new MainHelper(this);
@@ -185,17 +190,21 @@ public final class Main extends BaseLanguageActivity {
                 new String[]{resources.getString(R.string.view_pfp), resources.getString(R.string.show_stories)});
         profileDialogListener = (dialog, which) -> {
             final Intent intent;
-            if (which == 0 || storyModels == null || storyModels.length < 1)
-                intent = new Intent(this, ProfileViewer.class).putExtra(Constants.EXTRAS_PROFILE, profileModel);
+            if (which == 0 || storyModels == null || storyModels.length < 1) {
+                intent = new Intent(this, ProfileViewer.class).putExtra(
+                        ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : Constants.EXTRAS_PROFILE),
+                        ((hashtagModel != null) ? hashtagModel : profileModel));
+            }
             else intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery)
-                    .putExtra(Constants.EXTRAS_STORIES, storyModels);
+                    .putExtra(Constants.EXTRAS_STORIES, storyModels)
+                    .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
             startActivity(intent);
         };
 
         final View.OnClickListener onClickListener = v -> {
             if (v == mainBinding.mainBiography) {
                 Utils.copyText(this, mainBinding.mainBiography.getText().toString());
-            } else if (v == mainBinding.mainProfileImage) {
+            } else if (v == mainBinding.mainProfileImage || v == mainBinding.mainHashtagImage) {
                 if (storyModels == null || storyModels.length <= 0) {
                     profileDialogListener.onClick(null, 0);
                 } else {
@@ -208,9 +217,11 @@ public final class Main extends BaseLanguageActivity {
 
         mainBinding.mainBiography.setOnClickListener(onClickListener);
         mainBinding.mainProfileImage.setOnClickListener(onClickListener);
+        mainBinding.mainHashtagImage.setOnClickListener(onClickListener);
 
         mainBinding.mainBiography.setEnabled(false);
         mainBinding.mainProfileImage.setEnabled(false);
+        mainBinding.mainHashtagImage.setEnabled(false);
 
         final boolean isQueryNull = userQuery == null;
         if (isQueryNull) allItems.clear();

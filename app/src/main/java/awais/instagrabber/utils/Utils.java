@@ -1155,7 +1155,7 @@ public final class Utils {
 
                     storyModels[j] = new StoryModel(data.getString(Constants.EXTRAS_ID), data.getString("display_url"),
                             isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
-                            data.getLong("taken_at_timestamp"));
+                            data.getLong("taken_at_timestamp"), data.getJSONObject("owner").getString("username"));
 
                     if (isVideo && data.has("video_resources"))
                         storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true));

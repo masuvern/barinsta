@@ -26,7 +26,6 @@
     <string name="title_favorites">最爱</string>
     <string name="title_discover">发现</string>
     <string name="title_comments">留言</string>
-    <string name="title_hashtag_prefix">标签： </string>
     <string name="title_highlight">精彩：%s</string>
     <string name="title_user_story">用户快拍</string>
     <string name="title_changelog">日志</string>
@@ -106,7 +105,7 @@
     <string name="quick_access_confirm_delete">你真的要删除 %s?</string>
     <string name="profile_viewer_imageinfo">宽: %d\n高: %d</string>
     <string name="profile_viewer_colordepth_prefix">\n色深:</string>
-    <string name="profile_endpoint">选择头像服务</string>
+    <string name="profile_endpoint">选择头像服务\n（不影响#标签）</string>
     <string name="open_profile">打开主页</string>
     <string name="view_pfp">查看头像</string>
     <string name="direct_messages_you">你</string>

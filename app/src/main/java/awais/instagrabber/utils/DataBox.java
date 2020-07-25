@@ -46,7 +46,7 @@ public final class DataBox extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) { }
 
-    ///////////////////////////////////////// YOUR WEIRD FETIS-FAVORITES! HERE /////////////////////////////////////////
+    ///////////////////////////////////////// YOUR FAVORITES! HERE /////////////////////////////////////////
     public final void addFavorite(@NonNull final FavoriteModel favoriteModel) {
         final String query = favoriteModel.getQuery();
         if (!Utils.isEmpty(query)) {
@@ -113,6 +113,20 @@ public final class DataBox extends SQLiteOpenHelper {
         }
 
         return favorites;
+    }
+
+    public final String getFavorite(@NonNull final String query) {
+        ArrayList<FavoriteModel> favorites = null;
+
+        try (final SQLiteDatabase db = getReadableDatabase();
+             final Cursor cursor = db.rawQuery("SELECT query_text, date_added FROM favorites WHERE "
+                     +KEY_QUERY_TEXT+"='"+query+"' ORDER BY date_added DESC", null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                return cursor.getString(0) + "/" + String.valueOf(cursor.getLong(1));
+            }
+        }
+
+        return null;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

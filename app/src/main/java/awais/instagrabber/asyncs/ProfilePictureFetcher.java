@@ -22,27 +22,29 @@ import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
     private final FetchListener<String> fetchListener;
-    private final String userName, userId;
-    private final ProfilePictureFetchMode fetchMode;
+    private final String userName, userId, picUrl;
+    private final boolean isHashtag;
+    private ProfilePictureFetchMode fetchMode;
 
     public ProfilePictureFetcher(final String userName, final String userId, final FetchListener<String> fetchListener,
-                                 final ProfilePictureFetchMode fetchMode) {
+                                 final ProfilePictureFetchMode fetchMode, final String picUrl, final boolean isHashtag) {
         this.fetchListener = fetchListener;
         this.fetchMode = fetchMode;
         this.userName = userName;
         this.userId = userId;
+        this.picUrl = picUrl;
+        this.isHashtag = isHashtag;
     }
 
     @Override
     protected String doInBackground(final Void... voids) {
-        String out = null;
-        try {
+        String out = picUrl;
+        if (!isHashtag) try {
+            if (fetchMode == ProfilePictureFetchMode.INSTA_STALKER) fetchMode = ProfilePictureFetchMode.INSTADP;
             final String url;
 
             if (fetchMode == ProfilePictureFetchMode.INSTADP)
                 url = "https://instadp.com/fullsize/" + userName;
-            else if (fetchMode == ProfilePictureFetchMode.INSTA_STALKER)
-                url = "https://insta-stalker.co/instadp_fullsize/?id=" + userName;
             else // select from s1, s2, s3 but s1 works fine
                 url = "https://instafullsize.com/ifsapi/ig/photo/s1/" + userName + "?igid=" + userId;
 
@@ -84,10 +86,6 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
                         fallback = true;
                     }
 
-                } else {
-                    final Elements elements = doc.select("img[data-src]");
-                    if (elements.size() > 0) out = elements.get(0).attr("data-src");
-                    else fallback = true;
                 }
 
                 if (fallback) {
