@@ -26,7 +26,6 @@
     <string name="title_favorites">最爱</string>
     <string name="title_discover">发现</string>
     <string name="title_comments">留言</string>
-    <string name="title_hashtag_prefix">标签： </string>
     <string name="title_highlight">精彩：%s</string>
     <string name="title_user_story">用户快拍</string>
     <string name="title_changelog">日志</string>
@@ -75,6 +74,10 @@
     <string name="unbookmark">解除收藏</string>
     <string name="follow">关注</string>
     <string name="unfollow">脱粉</string>
+    <string name="favorite">Add to Favorites</string>
+    <string name="unfavorite">Remove from Favorites</string>
+    <string name="favorite_short">Favorite</string>
+    <string name="unfavorite_short">Unfavorite</string>
     <string name="block">拉黑</string>
     <string name="unblock">解禁</string>
     <string name="restrict">限制</string>
@@ -106,7 +109,7 @@
     <string name="quick_access_confirm_delete">你真的要删除 %s?</string>
     <string name="profile_viewer_imageinfo">宽: %d\n高: %d</string>
     <string name="profile_viewer_colordepth_prefix">\n色深:</string>
-    <string name="profile_endpoint">选择头像服务</string>
+    <string name="profile_endpoint">Select profile picture endpoint\n(Does not affect hashtags)</string>
     <string name="open_profile">打开主页</string>
     <string name="view_pfp">查看头像</string>
     <string name="direct_messages_you">你</string>
@@ -155,6 +158,7 @@
     <string name="login_error_loading_cookies">载入 cookies 时出错</string>
     <string name="login_success_loading_cookies">成功载入 cookies!\n若你仍不能查看私密页面/帖子，重新登录!</string>
     <string name="update_available">检测到有新版本！</string>
+    <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">感谢阁下更新InstaGrabber！</string>
     <string name="crash_title">应用崩溃了</string>
     <string name="crash_descr">糟糕.. 应用崩溃了，不过别担心，你可以向开发者发送错误报告来帮助他修复问题。(:</string>
