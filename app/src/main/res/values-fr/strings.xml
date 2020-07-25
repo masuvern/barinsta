@@ -26,7 +26,6 @@
     <string name="title_favorites">Favoris</string>
     <string name="title_discover">Découvrir</string>
     <string name="title_comments">Commentaires</string>
-    <string name="title_hashtag_prefix">Hashtag: </string>
     <string name="title_highlight">Highlight: %s</string>
     <string name="title_user_story">Stories de l\'utilisateur</string>
     <string name="title_changelog">Journal des changements</string>
@@ -75,6 +74,10 @@
     <string name="unbookmark">Unbookmark</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
+    <string name="favorite">Add to Favorites</string>
+    <string name="unfavorite">Remove from Favorites</string>
+    <string name="favorite_short">Favorite</string>
+    <string name="unfavorite_short">Unfavorite</string>
     <string name="block">Block</string>
     <string name="unblock">Unblock</string>
     <string name="restrict">Restrict</string>
@@ -106,7 +109,7 @@
     <string name="quick_access_confirm_delete">Êtes-vous sûr de vouloir supprimer %s?</string>
     <string name="profile_viewer_imageinfo">Largeur: %d\nHauteur: %d</string>
     <string name="profile_viewer_colordepth_prefix">\nProfondeur des couleurs:</string>
-    <string name="profile_endpoint">Sélectionner le serveur de téléchargement des photos de profil</string>
+    <string name="profile_endpoint">Select profile picture endpoint\n(Does not affect hashtags)</string>
     <string name="open_profile">Ouvrir le profil</string>
     <string name="view_pfp">Voir la photo de profil</string>
     <string name="direct_messages_you">You</string>
@@ -155,6 +158,7 @@
     <string name="login_error_loading_cookies">Erreur de chargement des cookies</string>
     <string name="login_success_loading_cookies">Cookies chargés avec succès!\nSi vous ne pouvez toujours pas ouvrir de pages/postes privés, reconnectez-vous !</string>
     <string name="update_available">An update is available!</string>
+    <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Thank you for updating InstaGrabber!</string>
     <string name="crash_title">L\'application a planté</string>
     <string name="crash_descr">Oups.. l\'application a planté, mais ne vous inquiétez pas, vous pouvez envoyer un rapport d\'erreur au développeur pour l\'aider à résoudre le problème :)</string>
