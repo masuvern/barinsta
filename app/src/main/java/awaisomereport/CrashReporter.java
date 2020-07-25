@@ -41,7 +41,7 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
         this.application = application;
         // set your email(s) here to receive crash reports
         // this.email = "<email>";
-        this.email = "chapter50000@hotmail.com";
+        this.email = "instagrabber@austinhuang.me";
         this.crashLogsZip = new File(application.getExternalCacheDir(), "crash_logs.zip");
     }
 
