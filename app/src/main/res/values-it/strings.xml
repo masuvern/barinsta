@@ -146,7 +146,7 @@
     <string name="comment_viewer_copy_comment">Copia commento</string>
     <string name="comment_view_mention_user_search">Vuoi cercare il nome utente?</string>
     <string name="comment_view_mention_hash_search">Vuoi cercare l\'hashtag?</string>
-    <string name="followers_type_followers">Followers</string>
+    <string name="followers_type_followers">Follower</string>
     <string name="followers_type_following">Profili seguiti</string>
     <string name="followers_compare">Confronto followers &amp; profili seguiti</string>
     <string name="followers_both_following">Si seguono a vicenda</string>
