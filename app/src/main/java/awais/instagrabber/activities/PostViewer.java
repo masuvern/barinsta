@@ -81,7 +81,7 @@ public final class PostViewer extends BaseLanguageActivity {
     private View viewsContainer, viewerCaptionParent;
     private GestureDetectorCompat gestureDetector;
     private SwipeEvent swipeEvent;
-    private CharSequence postCaption = null, postShortCode;
+    private CharSequence postCaption = null, postShortCode, postUserId;
     private Resources resources;
     private boolean session = false, isFromShare;
     private int slidePos = 0, lastSlidePos = 0;
@@ -153,7 +153,7 @@ public final class PostViewer extends BaseLanguageActivity {
                 if (player != null) {
                     final float intVol = player.getVolume() == 0f ? 1f : 0f;
                     player.setVolume(intVol);
-                    viewerBinding.bottomPanel.btnMute.setImageResource(intVol == 0f ? R.drawable.vol : R.drawable.mute);
+                    viewerBinding.bottomPanel.btnMute.setImageResource(intVol == 0f ? R.drawable.mute : R.drawable.vol);
                     Utils.sessionVolumeFull = intVol == 1f;
                 }
             } else if (v == viewerBinding.btnLike) {
@@ -359,7 +359,9 @@ public final class PostViewer extends BaseLanguageActivity {
                 viewerBinding.bottomPanel.btnComments.setOnClickListener(v ->
                         startActivityForResult(new Intent(this, CommentsViewer.class)
                                 .putExtra(Constants.EXTRAS_END_CURSOR, commentsEndCursor)
-                                .putExtra(Constants.EXTRAS_SHORTCODE, postShortCode), 6969));
+                                .putExtra(Constants.EXTRAS_SHORTCODE, postShortCode)
+                                .putExtra(Constants.EXTRAS_POST, viewerPostModel.getPostId())
+                                .putExtra(Constants.EXTRAS_USER, postUserId), 6969));
                 viewerBinding.bottomPanel.btnComments.setClickable(true);
                 viewerBinding.bottomPanel.btnComments.setEnabled(true);
             } else {
@@ -592,12 +594,12 @@ public final class PostViewer extends BaseLanguageActivity {
             postModel.setLike(viewerPostModel.getLike());
             postModel.setBookmark(viewerPostModel.getBookmark());
             if (viewerPostModel.getLike() == true) {
-                viewerBinding.btnLike.setText(R.string.unlike);
+                viewerBinding.btnLike.setText(resources.getString(R.string.unlike, postModel.getLikes()));
                 viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                         R.color.btn_pink_background, null)));
             }
             else {
-                viewerBinding.btnLike.setText(R.string.like);
+                viewerBinding.btnLike.setText(resources.getString(R.string.like, postModel.getLikes()));
                 viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                         R.color.btn_lightpink_background, null)));
             }
@@ -620,7 +622,7 @@ public final class PostViewer extends BaseLanguageActivity {
         url = viewerPostModel.getDisplayUrl();
         releasePlayer();
 
-        viewerBinding.btnDownload.setVisibility(containerLayoutParams.weight == 3.3f ? View.GONE : View.VISIBLE);
+        viewerBinding.btnDownload.setVisibility(containerLayoutParams.weight == 3.3f ? View.VISIBLE : View.GONE);
         if (viewerPostModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
     }
@@ -645,6 +647,7 @@ public final class PostViewer extends BaseLanguageActivity {
                     if (result != null) {
                         final String hdProfilePic = result.getHdProfilePic();
                         final String sdProfilePic = result.getSdProfilePic();
+                        postUserId = result.getId();
 
                         final boolean hdPicEmpty = Utils.isEmpty(hdProfilePic);
                         glideRequestManager.load(hdPicEmpty ? sdProfilePic : hdProfilePic).listener(new RequestListener<Drawable>() {
@@ -732,13 +735,13 @@ public final class PostViewer extends BaseLanguageActivity {
         @Override
         protected void onPostExecute(Void result) {
             if (ok == true && action == "likes") {
-                viewerPostModel.setLike(postModel.getLike() == true ? false : true);
-                postModel.setLike(postModel.getLike() == true ? false : true);
+                viewerPostModel.setLike(!postModel.getLike());
+                postModel.setManualLike(!postModel.getLike());
                 refreshPost();
             }
             else if (ok == true && action == "save") {
-                viewerPostModel.setBookmark(postModel.getBookmark() == true ? false : true);
-                postModel.setBookmark(postModel.getBookmark() == true ? false : true);
+                viewerPostModel.setBookmark(!postModel.getBookmark());
+                postModel.setBookmark(!postModel.getBookmark());
                 refreshPost();
             }
         }

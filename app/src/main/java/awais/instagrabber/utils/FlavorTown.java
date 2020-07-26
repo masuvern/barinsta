@@ -30,7 +30,7 @@ public final class FlavorTown {
         Resources res = context.getResources();
         new UpdateChecker(version -> {
             new AlertDialog.Builder(context)
-                    .setTitle(res.getString(R.string.update_available) + " (" + version + ")")
+                    .setTitle(res.getString(R.string.update_available, version))
                     .setMessage(R.string.update_notice)
                     .setNeutralButton(R.string.cancel, null)
                     .setNegativeButton(R.string.action_github, (dialog, which) -> {

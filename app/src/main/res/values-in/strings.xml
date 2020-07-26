@@ -157,7 +157,7 @@
     <string name="followers_not_follower">%s tidak mengikuti</string>
     <string name="login_error_loading_cookies">Galat memuat cookies</string>
     <string name="login_success_loading_cookies">Berhasil memuat cookies!\nJika anda tetap tidak dapat membuka laman/kiriman pribadi, coba masuk lagi!</string>
-    <string name="update_available">An update is available!</string>
+    <string name="update_available">An update is available! (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Thank you for updating InstaGrabber!</string>
     <string name="crash_title">Aplikasi berhenti bekerja…</string>

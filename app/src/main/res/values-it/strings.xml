@@ -157,7 +157,7 @@
     <string name="followers_not_follower">%s non segue</string>
     <string name="login_error_loading_cookies"> Errore durante il caricamento dei cookie</string>
     <string name="login_success_loading_cookies">Cookie caricati correttamente! \nSe non riesci ancora ad aprire pagine / post privati, accedi nuovamente!</string>
-    <string name="update_available">Un aggiornamento è disponibile!</string>
+    <string name="update_available">Un aggiornamento è disponibile! (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Grazie per aver aggiornato InstaGrabber!</string>
     <string name="crash_title">L\'app si è arrestata in modo anomalo</string>

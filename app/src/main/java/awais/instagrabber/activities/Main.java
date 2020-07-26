@@ -316,7 +316,8 @@ public final class Main extends BaseLanguageActivity {
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setSuggestionsAdapter(suggestionAdapter);
         searchView.setOnSearchClickListener(v -> {
-            searchView.setQuery(userQuery, false);
+            searchView.setQuery((profileModel != null && profileModel.getId().equals(
+                    Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE))) ? "" : userQuery), false);
             menu.findItem(R.id.action_about).setVisible(false);
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);

@@ -51,13 +51,9 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvUsername"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_weight="1.0"
@@ -72,22 +68,7 @@
                 android:textColor="?android:textColorPrimary"
                 android:textStyle="bold" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:ellipsize="marquee"
-                android:paddingStart="4dp"
-                android:paddingLeft="4dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="8dp"
-                android:paddingRight="8dp"
-                android:singleLine="true"
-                android:textStyle="italic" />
-        </LinearLayout>
-
-        <LinearLayout
+            <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -118,18 +99,40 @@
                 android:textAppearance="@style/TextAppearance.AppCompat" />
         </LinearLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvLikes"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:paddingStart="4dp"
-            android:paddingLeft="4dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="8dp"
-            android:paddingRight="8dp"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textSize="14sp" />
+            android:weightSum="3">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvLikes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:paddingStart="4dp"
+                android:paddingLeft="4dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textSize="14sp" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_gravity="start"
+                android:ellipsize="marquee"
+                android:paddingStart="4dp"
+                android:paddingLeft="4dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp"
+                android:singleLine="true"
+                android:textStyle="italic"
+                android:gravity="right"/>
+        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

@@ -116,7 +116,7 @@
             android:layout_weight="1"
             android:text="@string/like"
             android:textColor="@color/btn_lightpink_text_color"
-            android:textSize="20sp"
+            android:textSize="18sp"
             app:backgroundTint="@color/btn_lightpink_background" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -130,7 +130,7 @@
             android:layout_weight="1"
             android:text="@string/bookmark"
             android:textColor="@color/btn_lightorange_text_color"
-            android:textSize="20sp"
+            android:textSize="18sp"
             app:backgroundTint="@color/btn_lightorange_background" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </LinearLayout>

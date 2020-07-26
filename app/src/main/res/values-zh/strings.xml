@@ -157,7 +157,7 @@
     <string name="followers_not_follower">%s 未关注</string>
     <string name="login_error_loading_cookies">载入 cookies 时出错</string>
     <string name="login_success_loading_cookies">成功载入 cookies!\n若你仍不能查看私密页面/帖子，重新登录!</string>
-    <string name="update_available">检测到有新版本！</string>
+    <string name="update_available">检测到有新版本！ (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">感谢阁下更新InstaGrabber！</string>
     <string name="crash_title">应用崩溃了</string>

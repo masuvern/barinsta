@@ -81,6 +81,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                     endCursor = commentObject.optString("end_cursor");
 
                 if (mediaItemType != MediaItemType.MEDIA_TYPE_SLIDER) {
+                    Log.d("austin_debug", "m: "+media);
                     final ViewerPostModel postModel = new ViewerPostModel(mediaItemType,
                             media.getString(Constants.EXTRAS_ID),
                             isVideo ? media.getString("video_url") : Utils.getHighQualityImage(media),

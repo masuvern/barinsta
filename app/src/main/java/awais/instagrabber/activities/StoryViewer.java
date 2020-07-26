@@ -121,8 +121,10 @@ public final class StoryViewer extends BaseLanguageActivity {
 
             @Override
             public void onSwipe(final boolean isRightSwipe) {
+                Log.d("austin_debug", "swipe: "+(isRightSwipe ? "backward " : "forward ") + slidePos + "/" + storiesLen + " "
+                        + (slidePos == storiesLen - 1 && isRightSwipe == false) + " " + intent.hasExtra(Constants.FEED));
                 if (storyModels != null && storiesLen > 0) {
-                    if (((slidePos == storiesLen - 1 && isRightSwipe == false) || (slidePos == 0 && isRightSwipe == true))
+                    if (((slidePos + 1 >= storiesLen && isRightSwipe == false) || (slidePos == 0 && isRightSwipe == true))
                             && intent.hasExtra(Constants.FEED)) {
                         final FeedStoryModel[] storyFeed = (FeedStoryModel[]) intent.getSerializableExtra(Constants.FEED);
                         final int index = intent.getIntExtra(Constants.FEED_ORDER, 1738);
@@ -148,9 +150,8 @@ public final class StoryViewer extends BaseLanguageActivity {
                         if (isRightSwipe) {
                             if (--slidePos <= 0) slidePos = 0;
                         } else if (++slidePos >= storiesLen) slidePos = storiesLen - 1;
-
                         currentStory = storyModels[slidePos];
-                        slidePos = currentStory.getPosition();
+                        //slidePos = currentStory.getPosition();
                         refreshStory();
                     }
                 }

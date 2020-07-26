@@ -123,6 +123,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                                         childComment.getString("text"),
                                         childComment.getLong("created_at"),
                                         likedBy != null ? likedBy.optLong("count", 0) : 0,
+                                        childComment.getBoolean("viewer_has_liked"),
                                         profileModel));
                             }
                         }
@@ -201,6 +202,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                                 comment.getString("text"),
                                 comment.getLong("created_at"),
                                 likedBy != null ? likedBy.optLong("count", 0) : 0,
+                                comment.getBoolean("viewer_has_liked"),
                                 profileModel);
 
                         JSONObject tempJsonObject;
@@ -238,6 +240,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                                         childComment.getString("text"),
                                         childComment.getLong("created_at"),
                                         tempJsonObject != null ? tempJsonObject.optLong("count", 0) : 0,
+                                        childComment.getBoolean("viewer_has_liked"),
                                         childProfileModel);
                             }
 
