@@ -2,18 +2,18 @@
 <resources>
     <string-array name="languages">
         <item>System Default</item>
-        <item>English</item>
-        <item>French [Thanks to @kernoeb (Telegram)]</item>
-        <item>Spanish [Thanks to @sguinetti (GitLab)]</item>
+        <item>Angielski</item>
+        <item>Francuski [Podziękowania dla @kernoeb (Telegram)]</item>
+        <item>Hiszpański [Podziękowania dla @sguinetti (GitLab)]</item>
         <item>Chinese Simplified</item>
-        <item>Indonesian [Thanks to @Galang23 (GitLab)]</item>
-        <item>Italian [Thanks to @RAR_Ramar (Telegram)]</item>
+        <item>Indonezyjski [Podziękowania dla @Galang23 (GitLab)]</item>
+        <item>Włoski [Podziękowania dla @RAR_Ramar (Telegram)]</item>
     </string-array>
     <string-array name="theme_presets">
         <item>Auto / Follow System</item>
         <item>Auto / Follow Battery</item>
-        <item>Dark</item>
-        <item>Light</item>
+        <item>Ciemny</item>
+        <item>Jasny</item>
     </string-array>
     <string-array name="separator_presets">
         <item>None</item>
