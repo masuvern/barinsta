@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>System Default</item>
+        <item>Systemowo domyślny</item>
         <item>Angielski</item>
         <item>Francuski [Podziękowania dla @kernoeb (Telegram)]</item>
         <item>Hiszpański [Podziękowania dla @sguinetti (GitLab)]</item>
-        <item>Chinese Simplified</item>
+        <item>Chiński uproszczony</item>
         <item>Indonezyjski [Podziękowania dla @Galang23 (GitLab)]</item>
         <item>Włoski [Podziękowania dla @RAR_Ramar (Telegram)]</item>
     </string-array>
@@ -16,10 +16,10 @@
         <item>Jasny</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>None</item>
+        <item>Brak</item>
         <item>\@</item>
-        <item>at</item>
-        <item>on</item>
+        <item>o</item>
+        <item>dnia</item>
         <item>\|</item>
         <item>-</item>
     </string-array>
