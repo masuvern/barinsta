@@ -6,7 +6,7 @@
     <string name="action_dms">Direct Messaggi</string>
     <string name="action_setting">Impostazioni (v%s)</string>
     <string name="action_settings">Impostazioni</string>
-    <string name="action_download">Download</string>
+    <string name="action_download">Scarica</string>
     <string name="action_search">Cerca utente…</string>
     <string name="action_compare">Compara</string>
     <string name="single_like">like</string>
@@ -74,6 +74,10 @@
     <string name="unbookmark">Elimina segnalibro</string>
     <string name="follow">Segui</string>
     <string name="unfollow">Non seguire</string>
+    <string name="favorite">Add to Favorites</string>
+    <string name="unfavorite">Remove from Favorites</string>
+    <string name="favorite_short">Favorite</string>
+    <string name="unfavorite_short">Unfavorite</string>
     <string name="block">Blocca</string>
     <string name="unblock">Sblocca</string>
     <string name="restrict">Limita</string>
@@ -105,7 +109,7 @@
     <string name="quick_access_confirm_delete">Sei sicuro di voler eliminare %s?</string>
     <string name="profile_viewer_imageinfo">Larghezza: %d\nAltezza: %d</string>
     <string name="profile_viewer_colordepth_prefix">\nProfondità colore:</string>
-    <string name="profile_endpoint">Seleziona l\'endpoint dell\'immagine del profilo</string>
+    <string name="profile_endpoint">Select profile picture endpoint\n(Does not affect hashtags)</string>
     <string name="open_profile">Apri profilo</string>
     <string name="view_pfp">Vedi foto profilo</string>
     <string name="direct_messages_you">Tu</string>
@@ -145,7 +149,7 @@
     <string name="comment_viewer_copy_comment">Copia commento</string>
     <string name="comment_view_mention_user_search">Vuoi cercare il nome utente?</string>
     <string name="comment_view_mention_hash_search">Vuoi cercare l\'hashtag?</string>
-    <string name="followers_type_followers">Followers</string>
+    <string name="followers_type_followers">Follower</string>
     <string name="followers_type_following">Profili seguiti</string>
     <string name="followers_compare">Confronto followers &amp; profili seguiti</string>
     <string name="followers_both_following">Si seguono a vicenda</string>
@@ -154,6 +158,7 @@
     <string name="login_error_loading_cookies"> Errore durante il caricamento dei cookie</string>
     <string name="login_success_loading_cookies">Cookie caricati correttamente! \nSe non riesci ancora ad aprire pagine / post privati, accedi nuovamente!</string>
     <string name="update_available">Un aggiornamento è disponibile!</string>
+    <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Grazie per aver aggiornato InstaGrabber!</string>
     <string name="crash_title">L\'app si è arrestata in modo anomalo</string>
     <string name="crash_descr">Oops… L\'app si è arrestata in modo anomalo, ma non preoccuparti, puoi inviare una segnalazione di errore allo sviluppatore per aiutarlo a risolvere il problema. (:</string>
