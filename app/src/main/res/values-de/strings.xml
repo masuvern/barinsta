@@ -40,7 +40,7 @@
     <string name="theme_settings">Theme-Einstellungen</string>
     <string name="import_export">Importieren/Exportieren</string>
     <string name="select_language">Sprache auswählen</string>
-    <string name="what_to_do_dialog">Was soll ich machen?</string>
+    <string name="what_to_do_dialog">Was soll ich tun?</string>
     <string name="main_posts_count">%s\nBeiträge</string>
     <string name="main_posts_followers">%s\nFollower</string>
     <string name="main_posts_following">%s\nFollowing</string>
@@ -49,9 +49,9 @@
     <string name="post_viewer_autoplay_video">Autoplay videos</string>
     <string name="post_viewer_muted_autoplay">Always mute videos</string>
     <string name="post_viewer_post_from">%s - %s</string>
-    <string name="post_viewer_download_message">Note: Current [Session] won\'t show this dialog until you\'re here, and will always download shown post slide.</string>
+    <string name="post_viewer_download_message" comment="post_viewer_download_message&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Note: Current [Session] won\'t show this dialog until you\'re here, and will always download shown post slide.</string>
     <string name="post_viewer_download_dialog_title">Select what to download</string>
-    <string name="post_viewer_download_session">Current [Session]</string>
+    <string name="post_viewer_download_session" comment="post_viewer_download_session&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Current [Session]</string>
     <string name="post_viewer_download_current">Current</string>
     <string name="post_viewer_download_album">Whole Album</string>
     <string name="show_stories">Show stories</string>
@@ -160,6 +160,6 @@
     <string name="update_available">An update is available!</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Thank you for updating InstaGrabber!</string>
-    <string name="crash_title">App crashed</string>
-    <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
+    <string name="crash_title">App abgestürzt</string>
+    <string name="crash_descr">Hoppla.. die App ist abgestürzt, aber keine Sorge — du kannst Fehlerberichte an den Entwickler senden um ihm zu helfen, das Problem zu beheben. (:</string>
 </resources>
