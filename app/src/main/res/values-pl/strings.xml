@@ -7,11 +7,11 @@
     <string name="action_setting">Ustawienia (v%s)</string>
     <string name="action_settings">Ustawienia</string>
     <string name="action_download">Pobierz</string>
-    <string name="action_search">Search username…</string>
-    <string name="action_compare">Compare</string>
+    <string name="action_search">Szukaj użytkownika…</string>
+    <string name="action_compare">Porównaj</string>
     <string name="single_like">like</string>
     <string name="multiple_likes">likes</string>
-    <string name="clipboard_error">Error copying text</string>
+    <string name="clipboard_error">Wystąpił błąd podczas kopiowania tekstu</string>
     <string name="clipboard_copied">Skopiowano do schowka!</string>
     <string name="report">Zgłoś</string>
     <string name="password">Hasło (maks. 32 znaków)</string>
@@ -28,7 +28,7 @@
     <string name="title_comments">Komentarze</string>
     <string name="title_highlight">Highlight: %s</string>
     <string name="title_user_story">User Story</string>
-    <string name="title_changelog">Changelog</string>
+    <string name="title_changelog">Dziennik zmian</string>
     <string name="bottom_toolbar">Show toolbar at bottom</string>
     <string name="download_user_folder">Download posts to username folder in Downloads</string>
     <string name="autoload_posts">Auto-load all posts from user</string>
@@ -39,19 +39,19 @@
     <string name="select_folder">Wybierz folder</string>
     <string name="theme_settings">Ustawienia motywu</string>
     <string name="import_export">Importuj/Eksportuj</string>
-    <string name="select_language">Select language</string>
+    <string name="select_language">Wybierz język</string>
     <string name="what_to_do_dialog">What to do?</string>
     <string name="main_posts_count">%s\nPosts</string>
     <string name="main_posts_followers">%s\nFollowers</string>
     <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_video_post">Video post</string>
     <string name="post_viewer_image_post">Image post</string>
-    <string name="post_viewer_autoplay_video">Autoplay videos</string>
+    <string name="post_viewer_autoplay_video">Automatyczne odtwarzanie filmów</string>
     <string name="post_viewer_muted_autoplay">Always mute videos</string>
     <string name="post_viewer_post_from">%s - %s</string>
-    <string name="post_viewer_download_message">Note: Current [Session] won\'t show this dialog until you\'re here, and will always download shown post slide.</string>
+    <string name="post_viewer_download_message" comment="post_viewer_download_message&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Note: Current [Session] won\'t show this dialog until you\'re here, and will always download shown post slide.</string>
     <string name="post_viewer_download_dialog_title">Select what to download</string>
-    <string name="post_viewer_download_session">Current [Session]</string>
+    <string name="post_viewer_download_session" comment="post_viewer_download_session&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Current [Session]</string>
     <string name="post_viewer_download_current">Current</string>
     <string name="post_viewer_download_album">Whole Album</string>
     <string name="show_stories">Show stories</string>
