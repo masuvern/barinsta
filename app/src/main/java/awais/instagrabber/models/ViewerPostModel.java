@@ -3,7 +3,7 @@ package awais.instagrabber.models;
 import awais.instagrabber.models.enums.MediaItemType;
 
 public final class ViewerPostModel extends BasePostModel {
-    protected final String username;
+    protected final String username, location;
     protected final long videoViews;
     protected String sliderDisplayUrl, commentsEndCursor;
     protected long commentsCount, likes;
@@ -11,7 +11,7 @@ public final class ViewerPostModel extends BasePostModel {
 
     public ViewerPostModel(final MediaItemType itemType, final String postId, final String displayUrl, final String shortCode,
                            final String postCaption, final String username, final long videoViews, final long timestamp,
-                           boolean liked, boolean bookmarked, long likes) {
+                           boolean liked, boolean bookmarked, long likes, final String location) {
         this.itemType = itemType;
         this.postId = postId;
         this.displayUrl = displayUrl;
@@ -23,6 +23,7 @@ public final class ViewerPostModel extends BasePostModel {
         this.liked = liked;
         this.likes = likes;
         this.bookmarked = bookmarked;
+        this.location = location;
     }
 
     public long getCommentsCount() {
@@ -35,6 +36,10 @@ public final class ViewerPostModel extends BasePostModel {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getLocation() {
+        return location;
     }
 
     public String getCommentsEndCursor() {
