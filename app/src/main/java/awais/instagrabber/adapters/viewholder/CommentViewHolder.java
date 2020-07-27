@@ -65,6 +65,10 @@ public final class CommentViewHolder extends RecyclerView.ViewHolder {
         if (tvLikes != null) tvLikes.setText(likes);
     }
 
+    public final void setLiked(final boolean liked) {
+        if (liked) container.setBackgroundColor(0x40FF69B4);
+    }
+
     public final void setCommment(final CharSequence commment) {
         if (tvComment != null) {
             tvComment.setText(commment, commment instanceof Spannable ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL);

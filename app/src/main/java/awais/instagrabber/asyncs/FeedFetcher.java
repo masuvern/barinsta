@@ -131,7 +131,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                             commentsCount,
                             feedItem.optLong("taken_at_timestamp", -1),
                             feedItem.getBoolean("viewer_has_liked"),
-                            feedItem.getBoolean("viewer_has_saved"));
+                            feedItem.getBoolean("viewer_has_saved"),
+                            feedItem.getJSONObject("edge_media_preview_like").getLong("count"));
 
                     final boolean isSlider = "GraphSidecar".equals(mediaType) && feedItem.has("edge_sidecar_to_children");
 

@@ -48,7 +48,9 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
             if (tag instanceof FeedModel && context instanceof Activity) {
                 if (player != null) player.setPlayWhenReady(false);
                 ((Activity) context).startActivityForResult(new Intent(context, CommentsViewer.class)
-                        .putExtra(Constants.EXTRAS_SHORTCODE, ((FeedModel) tag).getShortCode()), 6969);
+                        .putExtra(Constants.EXTRAS_SHORTCODE, ((FeedModel) tag).getShortCode())
+                        .putExtra(Constants.EXTRAS_POST, ((FeedModel) tag).getPostId())
+                        .putExtra(Constants.EXTRAS_POST, ((FeedModel) tag).getProfileModel().getId()), 6969);
             }
         }
     };
@@ -56,7 +58,7 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
         if (player == null) return;
         final float intVol = player.getVolume() == 0f ? 1f : 0f;
         player.setVolume(intVol);
-        if (btnMute != null) btnMute.setImageResource(intVol == 0f ? R.drawable.vol : R.drawable.mute);
+        if (btnMute != null) btnMute.setImageResource(intVol == 0f ? R.drawable.mute : R.drawable.vol);
         Utils.sessionVolumeFull = intVol == 1f;
     };
     private final VideoChangeCallback videoChangeCallback;

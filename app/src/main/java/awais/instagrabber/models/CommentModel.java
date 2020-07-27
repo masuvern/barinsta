@@ -12,13 +12,15 @@ public final class CommentModel {
     private final CharSequence text;
     private final long likes, timestamp;
     private CommentModel[] childCommentModels;
-    private boolean hasNextPage;
+    private boolean hasNextPage, liked;
     private String endCursor;
 
-    public CommentModel(final String id, final String text, final long timestamp, final long likes, final ProfileModel profileModel) {
+    public CommentModel(final String id, final String text, final long timestamp, final long likes, final boolean liked,
+                        final ProfileModel profileModel) {
         this.id = id;
         this.text = Utils.hasMentions(text) ? Utils.getMentionText(text) : text;
         this.likes = likes;
+        this.liked = liked;
         this.timestamp = timestamp;
         this.profileModel = profileModel;
     }
@@ -38,6 +40,10 @@ public final class CommentModel {
 
     public long getLikes() {
         return likes;
+    }
+
+    public boolean getLiked() {
+        return liked;
     }
 
     public ProfileModel getProfileModel() {

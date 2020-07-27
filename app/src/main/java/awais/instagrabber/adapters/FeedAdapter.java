@@ -82,7 +82,9 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                     switch (id) {
                         case R.id.btnComments:
                             activity.startActivityForResult(new Intent(activity, CommentsViewer.class)
-                                    .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode()), 6969);
+                                    .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode())
+                                    .putExtra(Constants.EXTRAS_POST, feedModel.getPostId())
+                                    .putExtra(Constants.EXTRAS_USER, feedModel.getProfileModel().getId()), 6969);
                             break;
 
                         case R.id.viewStoryPost:
@@ -305,7 +307,7 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                                 final SimpleExoPlayer exoPlayer = (SimpleExoPlayer) player;
                                 final float intVol = exoPlayer.getVolume() == 0f ? 1f : 0f;
                                 exoPlayer.setVolume(intVol);
-                                viewHolder.btnMute.setImageResource(intVol == 0f ? R.drawable.vol : R.drawable.mute);
+                                viewHolder.btnMute.setImageResource(intVol == 0f ? R.drawable.mute : R.drawable.vol);
                                 Utils.sessionVolumeFull = intVol == 1f;
                             }
                         };

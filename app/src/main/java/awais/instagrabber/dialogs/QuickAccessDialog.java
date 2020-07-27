@@ -36,6 +36,7 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
     private String userQuery;
     private View btnFavorite, btnImportExport;
     private SimpleAdapter<DataBox.FavoriteModel> favoritesAdapter;
+    private RecyclerView rvFavorites, rvQuickAccess;
 
     public QuickAccessDialog setQuery(final String userQuery) {
         this.userQuery = userQuery;
@@ -66,8 +67,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         btnFavorite.setOnClickListener(this);
         btnImportExport.setOnClickListener(this);
 
-        final RecyclerView rvFavorites = contentView.findViewById(R.id.rvFavorites);
-        final RecyclerView rvQuickAccess = contentView.findViewById(R.id.rvQuickAccess);
+        rvFavorites = contentView.findViewById(R.id.rvFavorites);
+        rvQuickAccess = contentView.findViewById(R.id.rvQuickAccess);
 
         final DividerItemDecoration itemDecoration = new DividerItemDecoration(activity, DividerItemDecoration.VERTICAL);
         rvFavorites.addItemDecoration(itemDecoration);
@@ -133,9 +134,12 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         if (tag instanceof DataBox.FavoriteModel) {
             final DataBox.FavoriteModel favoriteModel = (DataBox.FavoriteModel) tag;
 
-            new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> Utils.dataBox.delFavorite(favoriteModel))
-                    .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
-                    favoriteModel.getQuery())).show();
+            new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> {
+                Utils.dataBox.delFavorite(favoriteModel);
+                rvFavorites.findViewWithTag(favoriteModel).setVisibility(View.GONE);
+            })
+            .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
+            favoriteModel.getQuery())).show();
 
         } else if (tag instanceof DataBox.CookieModel) {
             final DataBox.CookieModel cookieModel = (DataBox.CookieModel) tag;
@@ -143,7 +147,10 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             if (cookieModel.isSelected())
                 Toast.makeText(v.getContext(), R.string.quick_access_cannot_delete_curr, Toast.LENGTH_SHORT).show();
             else
-                new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> Utils.dataBox.delUserCookie(cookieModel))
+                new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> {
+                    Utils.dataBox.delUserCookie(cookieModel);
+                    rvQuickAccess.findViewWithTag(cookieModel).setVisibility(View.GONE);
+                })
                         .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
                         cookieModel.getUsername())).show();
         }

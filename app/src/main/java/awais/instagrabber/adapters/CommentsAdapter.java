@@ -107,6 +107,7 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
 
             holder.setCommment(commentModel.getText());
             holder.setDate(commentModel.getDateTime());
+            holder.setLiked(commentModel.getLiked());
 
             final long likes = commentModel.getLikes();
             holder.setLikes(String.format(LocaleUtils.getCurrentLocale(), "%d %s", likes, quantityStrings[likes == 1 ? 0 : 1]));
