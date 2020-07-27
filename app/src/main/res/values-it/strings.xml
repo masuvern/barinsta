@@ -49,9 +49,9 @@
     <string name="post_viewer_autoplay_video">Auto-avvia video</string>
     <string name="post_viewer_muted_autoplay">Disattiva sempre audio ai video</string>
     <string name="post_viewer_post_from">%s - %s</string>
-    <string name="post_viewer_download_message">Nota: l\'attuale [Session] non mostrerà questa finestra di dialogo finché non sarai qui e scaricherai sempre la diapositiva post mostrata.</string>
+    <string name="post_viewer_download_message" comment="post_viewer_download_message&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Nota: l\'attuale [Session] non mostrerà questa finestra di dialogo finché non sarai qui e scaricherai sempre la diapositiva post mostrata.</string>
     <string name="post_viewer_download_dialog_title">Seleziona cosa scaricare</string>
-    <string name="post_viewer_download_session">Corrente [Session]</string>
+    <string name="post_viewer_download_session" comment="post_viewer_download_session&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Corrente [Session]</string>
     <string name="post_viewer_download_current">Corrente</string>
     <string name="post_viewer_download_album">Intero Album</string>
     <string name="show_stories">Mostra storie</string>
@@ -68,8 +68,8 @@
     <string name="project_link">Visita la pagina del progetto</string>
     <string name="telegram_link">Unisciti al gruppo Telegram</string>
     <string name="matrix_link">Unisciti alla stanza Matrix</string>
-    <string name="like">Like</string>
-    <string name="unlike">Unlike</string>
+    <string name="like">Like (%s)</string>
+    <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Salva segnalibro</string>
     <string name="unbookmark">Elimina segnalibro</string>
     <string name="follow">Segui</string>
@@ -147,6 +147,11 @@
     <string name="downloader_error_download_file">Errore durante il download del file</string>
     <string name="comment_viewer_copy_user">Copia nome utente</string>
     <string name="comment_viewer_copy_comment">Copia commento</string>
+    <string name="comment_viewer_reply_comment">Reply to comment</string>
+    <string name="comment_viewer_like_comment">Like comment</string>
+    <string name="comment_viewer_unlike_comment">Unlike comment</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
+    <string name="comment_send_empty_comment">No empty comments, dawg!</string>
     <string name="comment_view_mention_user_search">Vuoi cercare il nome utente?</string>
     <string name="comment_view_mention_hash_search">Vuoi cercare l\'hashtag?</string>
     <string name="followers_type_followers">Follower</string>
@@ -157,6 +162,7 @@
     <string name="followers_not_follower">%s non segue</string>
     <string name="login_error_loading_cookies"> Errore durante il caricamento dei cookie</string>
     <string name="login_success_loading_cookies">Cookie caricati correttamente! \nSe non riesci ancora ad aprire pagine / post privati, accedi nuovamente!</string>
+    <string name="comment_hint">Write a new comment...</string>
     <string name="update_available">Un aggiornamento è disponibile! (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Grazie per aver aggiornato InstaGrabber!</string>

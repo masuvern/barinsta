@@ -49,9 +49,9 @@
     <string name="post_viewer_autoplay_video">Otomatis putar video</string>
     <string name="post_viewer_muted_autoplay">Selalu bisukan video</string>
     <string name="post_viewer_post_from">%s dari %s</string>
-    <string name="post_viewer_download_message">Catatan: [Sesi] saat ini tidak akan meminta anda untuk memilih foto mana yang akan diunduh dan akan selalu mengunduh semua foto jika foto pada kiriman lebih dari 1.</string>
+    <string name="post_viewer_download_message" comment="post_viewer_download_message&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Catatan: [Sesi] saat ini tidak akan meminta anda untuk memilih foto mana yang akan diunduh dan akan selalu mengunduh semua foto jika foto pada kiriman lebih dari 1.</string>
     <string name="post_viewer_download_dialog_title">Pilih apa yang akan diunduh</string>
-    <string name="post_viewer_download_session">[Sesi] saat ini</string>
+    <string name="post_viewer_download_session" comment="post_viewer_download_session&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">[Sesi] saat ini</string>
     <string name="post_viewer_download_current">Foto ini saja</string>
     <string name="post_viewer_download_album">Semua foto</string>
     <string name="show_stories">Tampilkan story</string>
@@ -68,8 +68,8 @@
     <string name="project_link">Kunjungi Laman Proyek</string>
     <string name="telegram_link">Gabung Grup Telegram</string>
     <string name="matrix_link">Join Matrix Room</string>
-    <string name="like">Like</string>
-    <string name="unlike">Unlike</string>
+    <string name="like">Like (%s)</string>
+    <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Bookmark</string>
     <string name="unbookmark">Unbookmark</string>
     <string name="follow">Follow</string>
@@ -147,6 +147,11 @@
     <string name="downloader_error_download_file">Galat mengunduh berkas</string>
     <string name="comment_viewer_copy_user">Salin nama pengguna</string>
     <string name="comment_viewer_copy_comment">Salin komentar</string>
+    <string name="comment_viewer_reply_comment">Reply to comment</string>
+    <string name="comment_viewer_like_comment">Like comment</string>
+    <string name="comment_viewer_unlike_comment">Unlike comment</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
+    <string name="comment_send_empty_comment">No empty comments, dawg!</string>
     <string name="comment_view_mention_user_search">Apakah anda ingin mencari nama pengguna ini?</string>
     <string name="comment_view_mention_hash_search">Apakah anda ingin mencari hashtag ini?</string>
     <string name="followers_type_followers">Pengikut</string>
@@ -157,6 +162,7 @@
     <string name="followers_not_follower">%s tidak mengikuti</string>
     <string name="login_error_loading_cookies">Galat memuat cookies</string>
     <string name="login_success_loading_cookies">Berhasil memuat cookies!\nJika anda tetap tidak dapat membuka laman/kiriman pribadi, coba masuk lagi!</string>
+    <string name="comment_hint">Write a new comment...</string>
     <string name="update_available">An update is available! (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Thank you for updating InstaGrabber!</string>

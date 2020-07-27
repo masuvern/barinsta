@@ -68,8 +68,8 @@
     <string name="project_link">Visit Project Page</string>
     <string name="telegram_link">Join Telegram Group</string>
     <string name="matrix_link">Join Matrix Room</string>
-    <string name="like">Like</string>
-    <string name="unlike">Unlike</string>
+    <string name="like">Like (%s)</string>
+    <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Bookmark</string>
     <string name="unbookmark">Unbookmark</string>
     <string name="follow">Follow</string>
@@ -147,6 +147,11 @@
     <string name="downloader_error_download_file">Error downloading file</string>
     <string name="comment_viewer_copy_user">Copy username</string>
     <string name="comment_viewer_copy_comment">Copy comment</string>
+    <string name="comment_viewer_reply_comment">Reply to comment</string>
+    <string name="comment_viewer_like_comment">Like comment</string>
+    <string name="comment_viewer_unlike_comment">Unlike comment</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
+    <string name="comment_send_empty_comment">No empty comments, dawg!</string>
     <string name="comment_view_mention_user_search">Do you want to search the username?</string>
     <string name="comment_view_mention_hash_search">Do you want to search the hashtag?</string>
     <string name="followers_type_followers">Followers</string>
@@ -157,6 +162,7 @@
     <string name="followers_not_follower">%s not following</string>
     <string name="login_error_loading_cookies">Error loading cookies</string>
     <string name="login_success_loading_cookies">Successfully loaded cookies!\nIf you still can\'t open private pages/posts, re-login!</string>
+    <string name="comment_hint">Write a new comment...</string>
     <string name="update_available">An update is available! (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
     <string name="updated">Thank you for updating InstaGrabber!</string>
