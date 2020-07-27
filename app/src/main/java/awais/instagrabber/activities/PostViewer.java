@@ -355,20 +355,14 @@ public final class PostViewer extends BaseLanguageActivity {
             viewerBinding.bottomPanel.commentsCount.setText(String.valueOf(commentsCount));
             viewerBinding.bottomPanel.btnComments.setVisibility(View.VISIBLE);
 
-            if (commentsCount > 0) {
-                viewerBinding.bottomPanel.btnComments.setOnClickListener(v ->
-                        startActivityForResult(new Intent(this, CommentsViewer.class)
-                                .putExtra(Constants.EXTRAS_END_CURSOR, commentsEndCursor)
-                                .putExtra(Constants.EXTRAS_SHORTCODE, postShortCode)
-                                .putExtra(Constants.EXTRAS_POST, viewerPostModel.getPostId())
-                                .putExtra(Constants.EXTRAS_USER, postUserId), 6969));
-                viewerBinding.bottomPanel.btnComments.setClickable(true);
-                viewerBinding.bottomPanel.btnComments.setEnabled(true);
-            } else {
-                viewerBinding.bottomPanel.btnComments.setOnClickListener(null);
-                viewerBinding.bottomPanel.btnComments.setClickable(false);
-                viewerBinding.bottomPanel.btnComments.setEnabled(false);
-            }
+            viewerBinding.bottomPanel.btnComments.setOnClickListener(v ->
+                    startActivityForResult(new Intent(this, CommentsViewer.class)
+                            .putExtra(Constants.EXTRAS_END_CURSOR, commentsEndCursor)
+                            .putExtra(Constants.EXTRAS_SHORTCODE, postShortCode)
+                            .putExtra(Constants.EXTRAS_POST, viewerPostModel.getPostId())
+                            .putExtra(Constants.EXTRAS_USER, postUserId), 6969));
+            viewerBinding.bottomPanel.btnComments.setClickable(true);
+            viewerBinding.bottomPanel.btnComments.setEnabled(true);
 
             if (postModel instanceof PostModel) {
                 final PostModel postModel = (PostModel) this.postModel;

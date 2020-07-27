@@ -49,6 +49,7 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
     private String shortCode, postId, userId;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private Resources resources;
+    private InputMethodManager imm;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -67,6 +68,8 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
             Utils.errorFinish(this);
             return;
         }
+
+        Log.d("austin_debug", "f:"+postId);
 
         commentsBinding.swipeRefreshLayout.setRefreshing(true);
         setSupportActionBar(commentsBinding.toolbar.toolbar);
@@ -134,7 +137,7 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
             commentsBinding.commentText.postDelayed(new Runnable(){
                @Override
                public void run(){
-                   final InputMethodManager imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+                   imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
                    imm.showSoftInput(commentsBinding.commentText, 0);
                }
             }
@@ -250,6 +253,7 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
             final String action = rawAction[0];
             final String url = "https://www.instagram.com/web/comments/"+postId+"/"+action+"/";
             try {
+                Log.d("austin_debug", url);
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
@@ -274,7 +278,10 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
                 urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     ok = true;
-                    if (action == "add") commentsBinding.commentText.setText("");
+                    if (action == "add") {
+                        commentsBinding.commentText.setText("");
+                        commentsBinding.commentText.clearFocus();
+                    }
                 }
                 else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 urlConnection.disconnect();
@@ -291,6 +298,8 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
                     commentsBinding.rvComments.findViewWithTag(commentModel).setBackgroundColor(commentModel.getLiked() ? 0x40FF69B4 : 0x00000000);
                     commentsBinding.commentCancelParent.setVisibility(View.GONE);
                 }
+
+                //imm.hideSoftInputFromWindow(commentsBinding.getView().getRootView().getWindowToken(), 0);
                 onRefresh();
             }
         }

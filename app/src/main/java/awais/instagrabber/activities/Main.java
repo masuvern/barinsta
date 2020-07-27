@@ -95,6 +95,7 @@ public final class Main extends BaseLanguageActivity {
     private ArrayAdapter<String> profileDialogAdapter;
     private DialogInterface.OnClickListener profileDialogListener;
     private Stack<String> queriesStack;
+    private DataBox.CookieModel cookieModel;
 
     public Main() {
         super();
@@ -152,13 +153,13 @@ public final class Main extends BaseLanguageActivity {
                         if (mainHelper != null && !mainBinding.swipeRefreshLayout.isRefreshing()) mainHelper.onRefresh();
                     }
                     // adds cookies to database for quick access
-                    final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
+                    cookieModel = Utils.dataBox.getCookie(uid);
                     if (Utils.dataBox.getCookieCount() == 0 || cookieModel == null || Utils.isEmpty(cookieModel.getUsername()))
                         Utils.dataBox.addUserCookie(new DataBox.CookieModel(uid, username, cookie));
                 }
             };
             boolean found = false;
-            final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
+            cookieModel = Utils.dataBox.getCookie(uid);
             if (cookieModel != null) {
                 final String username = cookieModel.getUsername();
                 if (username != null) {
@@ -316,8 +317,7 @@ public final class Main extends BaseLanguageActivity {
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setSuggestionsAdapter(suggestionAdapter);
         searchView.setOnSearchClickListener(v -> {
-            searchView.setQuery((profileModel != null && profileModel.getId().equals(
-                    Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE))) ? "" : userQuery), false);
+            searchView.setQuery(userQuery.equals(cookieModel.getUsername()) ? "" : userQuery, false);
             menu.findItem(R.id.action_about).setVisible(false);
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);

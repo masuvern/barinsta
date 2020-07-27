@@ -147,7 +147,10 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             if (cookieModel.isSelected())
                 Toast.makeText(v.getContext(), R.string.quick_access_cannot_delete_curr, Toast.LENGTH_SHORT).show();
             else
-                new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> Utils.dataBox.delUserCookie(cookieModel))
+                new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> {
+                    Utils.dataBox.delUserCookie(cookieModel);
+                    rvQuickAccess.findViewWithTag(cookieModel).setVisibility(View.GONE);
+                })
                         .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
                         cookieModel.getUsername())).show();
         }
