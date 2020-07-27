@@ -104,7 +104,7 @@
     <string name="time_settings_title_date_format">Format des dates</string>
     <string name="time_settings_title_preview">Prévisualiser</string>
     <string name="time_settings_swap_time">Échanger la date\net l\'heure</string>
-    <string name="quick_access_info_dialog">Le panneau des favoris permet d\'ajouter vos hashtags et/ou noms d\'utilisateur favoris.\n\nEt le panneau \"Accès rapide\" permet de passer rapidement d\'un compte à l\'autre.\n\nNote 1: Assurez-vous de vous connecter à chaque compte [Paramètres &gt; Connexion] pour ajouter un compte à la liste !\n\nNote 2: Déconnectez-vous du compte courant et connectez-vous ensuite à l\'autre compte.\nSi les comptes multiples ne fonctionnent pas pour vous, il n\'y a rien que nous puissions faire tous les deux !</string>
+    <string name="quick_access_info_dialog">Le panneau des favoris permet d\'ajouter vos hashtags et/ou noms d\'utilisateur favoris.\n\nLe panneau \"Accès rapide\" permet de passer rapidement d\'un compte à l\'autre.\n\nNote 1: Assurez-vous de vous connecter à chaque compte [Paramètres &gt; Connexion] pour ajouter un compte à la liste !\n\nNote 2: Déconnectez-vous du compte courant et connectez-vous ensuite à l\'autre compte.</string>
     <string name="quick_access_cannot_delete_curr">Impossible de supprimer le compte actuellement utilisé</string>
     <string name="quick_access_confirm_delete">Êtes-vous sûr de vouloir supprimer %s?</string>
     <string name="profile_viewer_imageinfo">Largeur: %d\nHauteur: %d</string>
@@ -131,7 +131,7 @@
     <string name="dms_inbox_raven_media_blocked">Bloqué</string>
     <string name="dms_inbox_raven_media_suggested">Suggéré</string>
     <string name="dms_inbox_raven_media_screenshot">Capture d\'écran effectuée</string>
-    <string name="dms_inbox_raven_media_cant_deliver">Impossible de le distribuer</string>
+    <string name="dms_inbox_raven_media_cant_deliver">Impossible de distribuer</string>
     <string name="direct_download">Télécharger directement</string>
     <string name="direct_download_desc">Téléchargez les posts directement sur le téléphone !</string>
     <string name="direct_download_loading">Téléchargement de(s) post(s)</string>
