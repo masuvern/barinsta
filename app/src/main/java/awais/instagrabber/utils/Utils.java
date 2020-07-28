@@ -940,7 +940,7 @@ public final class Utils {
     @NonNull
     private static File getDownloadSaveFile(final File finalDir, @NonNull final BasePostModel model, final String sliderPrefix) {
         final String displayUrl = model.getDisplayUrl();
-        return new File(finalDir, model.getPostId() + '_' + model.getTimestamp() + sliderPrefix +
+        return new File(finalDir, model.getPostId() + '_' + model.getPosition() + sliderPrefix +
                 getExtensionFromModel(displayUrl, model));
     }
 
