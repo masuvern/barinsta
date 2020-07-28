@@ -56,6 +56,7 @@ import awais.instagrabber.asyncs.FeedFetcher;
 import awais.instagrabber.asyncs.FeedStoriesFetcher;
 import awais.instagrabber.asyncs.HashtagFetcher;
 import awais.instagrabber.asyncs.HighlightsFetcher;
+import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.StoryStatusFetcher;
@@ -109,8 +110,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 final String username;
                 final String postFix;
-                if (!isHashtag) {
-                    username = main.profileModel.getUsername();
+                if (!isHashtag && !isLocation) {
+                    username = "@"+main.profileModel.getUsername();
                     postFix = "/" + main.profileModel.getPostCount() + ')';
                 } else {
                     username = null;
@@ -119,6 +120,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 if (isHashtag)
                     main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
+                else if (isLocation)
+                    main.mainBinding.toolbar.toolbar.setTitle(main.locationModel.getName());
                 else main.mainBinding.toolbar.toolbar.setTitle(username + " (" + main.allItems.size() + postFix);
 
                 final PostModel model = result[result.length - 1];
@@ -143,7 +146,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                 .setUsername(main.profileModel.getUsername()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
                         main.mainBinding.swipeRefreshLayout.setRefreshing(false);
-                        main.mainBinding.tagToolbar.setVisibility(View.VISIBLE);
                     }
                     model.setPageCursor(false, null);
                 }
@@ -252,7 +254,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final Resources resources;
     private final View collapsingToolbar;
     private final RecyclerLazyLoader lazyLoader;
-    private boolean isHashtag;
+    private boolean isHashtag, isUser, isLocation;
     private PostsAdapter postsAdapter;
     private FeedAdapter feedAdapter;
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
@@ -599,7 +601,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                     .putExtra(Constants.EXTRAS_POST, new PostModel(modelText)), 9629);
                         } else {
                             main.addToStack();
-                            main.userQuery = modelType == IntentModelType.HASHTAG ? '#' + modelText : modelText;
+                            main.userQuery = modelType == IntentModelType.HASHTAG ? '#' + modelText : ("@"+modelText);
                             onRefresh();
                         }
                     }
@@ -623,22 +625,36 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.privatePage.setVisibility(View.GONE);
         main.mainBinding.mainProfileImage.setImageBitmap(null);
         main.mainBinding.mainHashtagImage.setImageBitmap(null);
+        main.mainBinding.mainLocationImage.setImageBitmap(null);
         main.mainBinding.mainUrl.setText(null);
+        main.mainBinding.locationUrl.setText(null);
         main.mainBinding.mainFullName.setText(null);
+        main.mainBinding.locationFullName.setText(null);
         main.mainBinding.mainPostCount.setText(null);
+        main.mainBinding.mainLocPostCount.setText(null);
+        main.mainBinding.mainTagPostCount.setText(null);
         main.mainBinding.mainFollowers.setText(null);
         main.mainBinding.mainFollowing.setText(null);
         main.mainBinding.mainBiography.setText(null);
+        main.mainBinding.locationBiography.setText(null);
         main.mainBinding.mainBiography.setEnabled(false);
+        main.mainBinding.locationBiography.setEnabled(false);
         main.mainBinding.mainProfileImage.setEnabled(false);
+        main.mainBinding.mainLocationImage.setEnabled(false);
         main.mainBinding.mainHashtagImage.setEnabled(false);
         main.mainBinding.mainBiography.setMentionClickListener(null);
+        main.mainBinding.locationBiography.setMentionClickListener(null);
         main.mainBinding.mainUrl.setVisibility(View.GONE);
-        main.mainBinding.mainTagPostCount.setVisibility(View.GONE);
+        main.mainBinding.locationUrl.setVisibility(View.GONE);
         main.mainBinding.isVerified.setVisibility(View.GONE);
         main.mainBinding.btnFollow.setVisibility(View.GONE);
         main.mainBinding.btnRestrict.setVisibility(View.GONE);
         main.mainBinding.btnBlock.setVisibility(View.GONE);
+        main.mainBinding.btnMap.setVisibility(View.GONE);
+
+        main.mainBinding.infoContainer.setVisibility(View.GONE);
+        main.mainBinding.tagInfoContainer.setVisibility(View.GONE);
+        main.mainBinding.locInfoContainer.setVisibility(View.GONE);
 
         main.mainBinding.mainPosts.setNestedScrollingEnabled(false);
         main.mainBinding.highlightsList.setVisibility(View.GONE);
@@ -652,12 +668,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         }
 
         isHashtag = main.userQuery.charAt(0) == '#';
-        collapsingToolbar.setVisibility(isHashtag ? View.GONE : View.VISIBLE);
+        isUser = main.userQuery.charAt(0) == '@';
+        isLocation = main.userQuery.contains("/");
+        collapsingToolbar.setVisibility(isUser ? View.VISIBLE : View.GONE);
 
         if (isHashtag) {
             main.profileModel = null;
+            main.locationModel = null;
             main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
-            main.mainBinding.infoContainer.setVisibility(View.GONE);
             main.mainBinding.tagInfoContainer.setVisibility(View.VISIBLE);
             main.mainBinding.btnFollowTag.setVisibility(View.GONE);
 
@@ -683,7 +701,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.btnFollowTag.setOnClickListener(profileActionListener);
 
                 if (isLoggedIn) {
-                    new StoryStatusFetcher(profileId, hashtagModel.getName(), result -> {
+                    new StoryStatusFetcher(profileId, hashtagModel.getName(), false, result -> {
                         main.storyModels = result;
                         if (result != null && result.length > 0) main.mainBinding.mainHashtagImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -723,13 +741,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.mainTagPostCount.setText(span);
                 main.mainBinding.mainTagPostCount.setVisibility(View.VISIBLE);
             }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } else {
+        } else if (isUser) {
             main.hashtagModel = null;
-            main.mainBinding.tagInfoContainer.setVisibility(View.GONE);
+            main.locationModel = null;
             main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
             main.mainBinding.infoContainer.setVisibility(View.VISIBLE);
+            main.mainBinding.btnFollowTag.setVisibility(View.GONE);
 
-            currentlyExecuting = new ProfileFetcher(main.userQuery, profileModel -> {
+            currentlyExecuting = new ProfileFetcher(main.userQuery.substring(1), profileModel -> {
                 main.profileModel = profileModel;
 
                 if (profileModel == null) {
@@ -745,7 +764,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
                 final boolean isLoggedIn = !Utils.isEmpty(cookie);
                 if (isLoggedIn) {
-                    new StoryStatusFetcher(profileId, "", result -> {
+                    new StoryStatusFetcher(profileId, "", false, result -> {
                         main.storyModels = result;
                         if (result != null && result.length > 0) main.mainBinding.mainProfileImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -907,7 +926,110 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     main.mainBinding.privatePage.setVisibility(View.VISIBLE);
                     main.mainBinding.mainPosts.setVisibility(View.GONE);
                 }
-            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+            ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else if (isLocation) {
+            main.profileModel = null;
+            main.hashtagModel = null;
+            main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
+            main.mainBinding.locInfoContainer.setVisibility(View.VISIBLE);
+
+            currentlyExecuting = new LocationFetcher(main.userQuery, locationModel -> {
+                main.locationModel = locationModel;
+
+                main.mainBinding.toolbar.toolbar.setTitle(locationModel.getName());
+
+                if (locationModel == null) {
+                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(main, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                    main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
+                    return;
+                }
+
+                final String profileId = locationModel.getId();
+
+                final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+                final boolean isLoggedIn = !Utils.isEmpty(cookie);
+                if (isLoggedIn) {
+                    new StoryStatusFetcher(profileId, "", true, result -> {
+                        main.storyModels = result;
+                        if (result != null && result.length > 0) main.mainBinding.mainLocationImage.setStoriesBorder();
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+
+                main.mainBinding.mainLocationImage.setEnabled(false);
+                new MyTask().execute();
+                main.mainBinding.mainLocationImage.setEnabled(true);
+
+                final String postCount = String.valueOf(locationModel.getPostCount());
+
+                SpannableStringBuilder span = new SpannableStringBuilder(resources.getString(R.string.main_posts_count, postCount));
+                span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
+                span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
+                main.mainBinding.mainLocPostCount.setText(span);
+
+                main.mainBinding.locationFullName.setText(locationModel.getName());
+
+                CharSequence biography = locationModel.getBio();
+                main.mainBinding.locationBiography.setCaptionIsExpandable(true);
+                main.mainBinding.locationBiography.setCaptionIsExpanded(true);
+
+                if (Utils.isEmpty(biography)) {
+                    main.mainBinding.locationBiography.setVisibility(View.GONE);
+                }
+                else if (Utils.hasMentions(biography)) {
+                    main.mainBinding.locationBiography.setVisibility(View.VISIBLE);
+                    biography = Utils.getMentionText(biography);
+                    main.mainBinding.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
+                    main.mainBinding.locationBiography.setMentionClickListener(mentionClickListener);
+                } else {
+                    main.mainBinding.locationBiography.setVisibility(View.VISIBLE);
+                    main.mainBinding.locationBiography.setText(biography);
+                    main.mainBinding.locationBiography.setMentionClickListener(null);
+                }
+
+                if (!locationModel.getGeo().startsWith("geo:0.0,0.0?z=17")) {
+                    main.mainBinding.btnMap.setVisibility(View.VISIBLE);
+                    main.mainBinding.btnMap.setOnClickListener(v -> {
+                        final Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(locationModel.getGeo()));
+                        main.startActivity(intent);
+                    });
+                }
+                else {
+                    main.mainBinding.btnMap.setVisibility(View.GONE);
+                    main.mainBinding.btnMap.setOnClickListener(null);
+                }
+
+                final String url = locationModel.getUrl();
+                if (Utils.isEmpty(url)) {
+                    main.mainBinding.locationUrl.setVisibility(View.GONE);
+                } else if (!url.startsWith("http")) {
+                    main.mainBinding.locationUrl.setVisibility(View.VISIBLE);
+                    main.mainBinding.locationUrl.setText(Utils.getSpannableUrl("http://"+url));
+                } else {
+                    main.mainBinding.locationUrl.setVisibility(View.VISIBLE);
+                    main.mainBinding.locationUrl.setText(Utils.getSpannableUrl(url));
+                }
+
+                main.mainBinding.locationFullName.setSelected(true);
+                main.mainBinding.locationBiography.setEnabled(true);
+
+                if (locationModel.getPostCount() == 0) {
+                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    main.mainBinding.privatePage1.setImageResource(R.drawable.ic_cancel);
+                    main.mainBinding.privatePage2.setText(R.string.empty_acc);
+                    main.mainBinding.privatePage.setVisibility(View.VISIBLE);
+                }
+                else {
+                    main.mainBinding.swipeRefreshLayout.setRefreshing(true);
+                    main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
+                    currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(locationModel.getName())
+                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+            }
+            ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -1020,7 +1142,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         protected Void doInBackground(Void... voids) {
             try {
                 mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(
-                        (main.hashtagModel != null) ? main.hashtagModel.getSdProfilePic() : main.profileModel.getSdProfilePic()
+                        (main.hashtagModel != null) ? main.hashtagModel.getSdProfilePic() : (
+                                (main.locationModel != null) ? main.locationModel.getSdProfilePic() :
+                                        main.profileModel.getSdProfilePic())
                 ).getContent());
             } catch (Throwable ex) {
                 Log.e("austin_debug", "bitmap: " + ex);
@@ -1031,6 +1155,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         protected void onPostExecute(Void result) {
             if (main.hashtagModel != null) main.mainBinding.mainHashtagImage.setImageBitmap(mIcon_val);
+            else if (main.locationModel != null) main.mainBinding.mainLocationImage.setImageBitmap(mIcon_val);
             else main.mainBinding.mainProfileImage.setImageBitmap(mIcon_val);
         }
     }
@@ -1040,10 +1165,12 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         public void onClick(final View v) {
             if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
-                        Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1])));
+                        Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
+                        main.locationModel != null ? main.locationModel.getName() : main.userQuery));
                 onRefresh();
             } else if (!isLoggedIn) {
-                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis()));
+                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis(),
+                        main.locationModel != null ? main.locationModel.getName() : main.userQuery));
                 onRefresh();
             } else if (v == main.mainBinding.btnFollow) {
                 new ProfileAction().execute("follow");
@@ -1096,7 +1223,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     ok = true;
                 }
-                else Toast.makeText(main, R.string.downloader_unknown_error, Toast.LENGTH_SHORT);
+                else Toast.makeText(main, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 urlConnection.disconnect();
             } catch (Throwable ex) {
                 Log.e("austin_debug", action+": " + ex);

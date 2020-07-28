@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,6 +35,8 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import org.json.JSONObject;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -195,7 +198,7 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
             final ProfileModel profileModel = feedModel.getProfileModel();
             if (profileModel != null) {
                 glideRequestManager.load(profileModel.getSdProfilePic()).into(viewHolder.profilePic);
-                viewHolder.username.setText(profileModel.getUsername());
+                viewHolder.username.setText("@"+profileModel.getUsername());
             }
 
             viewHolder.viewPost.setOnClickListener(clickListener);
@@ -215,6 +218,22 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                 viewHolder.btnComments.setTag(feedModel);
                 viewHolder.btnComments.setOnClickListener(clickListener);
                 viewHolder.btnComments.setEnabled(true);
+            }
+
+            final JSONObject location = feedModel.getLocation();
+
+            if (location == null) {
+                viewHolder.location.setVisibility(View.GONE);
+                viewHolder.username.setLayoutParams(new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
+                ));
+            }
+            else {
+                viewHolder.location.setVisibility(View.VISIBLE);
+                viewHolder.location.setText(location.optString("name"));
+                viewHolder.username.setLayoutParams(new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
+                ));
             }
 
             final String thumbnailUrl = feedModel.getThumbnailUrl();
@@ -313,7 +332,7 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                         };
 
                         viewHolder.btnMute.setOnClickListener(muteClickListener);
-                        viewHolder.mediaList.setAdapter(new ChildMediaItemsAdapter(sliderItems, viewHolder.btnMute, muteClickListener, playerChangeListener));
+                        viewHolder.mediaList.setAdapter(new ChildMediaItemsAdapter(sliderItems, viewHolder.btnMute, playerChangeListener));
                     }
                 } else {
                     viewToChangeHeight = viewHolder.imageView;
@@ -382,14 +401,12 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
 
     private static final class ChildMediaItemsAdapter extends PagerAdapter {
         private final PlayerChangeListener playerChangeListener;
-        private final View.OnClickListener muteClickListener;
         private final ViewerPostModel[] sliderItems;
         private final View btnMute;
         private SimpleExoPlayer player;
 
-        private ChildMediaItemsAdapter(final ViewerPostModel[] sliderItems, final View btnMute, final View.OnClickListener muteClickListener,
+        private ChildMediaItemsAdapter(final ViewerPostModel[] sliderItems, final View btnMute,
                                        final PlayerChangeListener playerChangeListener) {
-            this.muteClickListener = muteClickListener;
             this.sliderItems = sliderItems;
             this.btnMute = btnMute;
             if (BuildConfig.DEBUG) this.playerChangeListener = playerChangeListener;
@@ -408,6 +425,8 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                 if (btnMute != null) btnMute.setVisibility(View.VISIBLE);
                 final PlayerView playerView = new PlayerView(context);
 
+                Log.d("austin_debug","1");
+
                 player = new SimpleExoPlayer.Builder(context).build();
                 playerView.setPlayer(player);
 
@@ -424,7 +443,6 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                 player.setVolume(vol);
 
                 playerView.setTag(player);
-                playerView.setOnClickListener(muteClickListener);
 
                 if (playerChangeListener != null) {
                     //todo

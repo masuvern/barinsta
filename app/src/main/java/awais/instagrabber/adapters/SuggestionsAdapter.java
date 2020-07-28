@@ -46,9 +46,10 @@ public final class SuggestionsAdapter extends CursorAdapter {
         final boolean verified = cursor.getString(5).charAt(0) == 't';
 
         if ("TYPE_HASHTAG".equals(cursor.getString(3))) username = '#' + username;
+        else if ("TYPE_USER".equals(cursor.getString(3))) username = '@' + username;
 
         view.setOnClickListener(onClickListener);
-        view.setTag(username);
+        view.setTag("TYPE_LOCATION".equals(cursor.getString(3)) ? fullname : username);
 
         view.findViewById(R.id.isVerified).setVisibility(verified ? View.VISIBLE : View.GONE);
 
@@ -56,6 +57,6 @@ public final class SuggestionsAdapter extends CursorAdapter {
         ((TextView) view.findViewById(R.id.tvFullName)).setText(fullname);
 
         glideRequestManager.applyDefaultRequestOptions(new RequestOptions().skipMemoryCache(true))
-                .load(picUrl).into((ImageView) view.findViewById(R.id.ivProfilePic));
+                .load(picUrl == null ? R.drawable.ic_location : picUrl).into((ImageView) view.findViewById(R.id.ivProfilePic));
     }
 }

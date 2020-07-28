@@ -10,6 +10,7 @@ public final class Constants {
     public static final String APP_THEME = "app_theme";
     public static final String APP_LANGUAGE = "app_language";
     public static final String PREV_INSTALL_VERSION = "prevVersion";
+    public static final String DB_TO_MIGRATE = "dbToMigrate";
     public static final String PROFILE_FETCH_MODE = "profile_fetch_mode";
     // boolean prefs
     public static final String DOWNLOAD_USER_FOLDER = "download_user_folder";
@@ -26,6 +27,7 @@ public final class Constants {
     //////////////////////// EXTRAS ////////////////////////
     public static final String EXTRAS_USER = "user";
     public static final String EXTRAS_HASHTAG = "hashtag";
+    public static final String EXTRAS_LOCATION = "location";
     public static final String EXTRAS_USERNAME = "username";
     public static final String EXTRAS_ID = "id";
     public static final String EXTRAS_POST = "post";

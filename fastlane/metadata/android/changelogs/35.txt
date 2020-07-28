@@ -1,7 +1,7 @@
 * You can now write comments, and reply/like/delete comments through the menu (by clicking the comment)
 * Liked comments are shown with a pink background
 * You can now share posts in the post viewer
-* You can now see the geotag name of a post
+* Geotag viewing/searching support
 * Search field is now empty if you're viewing your own profile while logged in
 * Post like counts are now displayed (The button texts are slightly reduced to accomodate @world_record_egg) (logged in only)
 * Mute buttons are changed to display the current status (i.e. muted icon when muted, sound icon when not muted)

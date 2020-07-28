@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.PostsMediaAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
@@ -404,7 +406,8 @@ public final class PostViewer extends BaseLanguageActivity {
                 postModel.setBookmark(viewerPostModel.getBookmark());
             }
 
-            setupPostInfoBar(viewerPostModel.getUsername(), viewerPostModel.getItemType(), viewerPostModel.getLocation());
+            setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
+                    viewerPostModel.getLocation() == null ? null : viewerPostModel.getLocation());
 
             postCaption = postModel.getPostCaption();
             viewerCaptionParent.setVisibility(View.VISIBLE);
@@ -609,7 +612,8 @@ public final class PostViewer extends BaseLanguageActivity {
             viewerBinding.bottomPanel.viewerCaption.setText(postCaption);
         }
 
-        setupPostInfoBar(viewerPostModel.getUsername(), viewerPostModel.getItemType(), viewerPostModel.getLocation());
+        setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
+                viewerPostModel.getLocation());
 
         if (postModel instanceof PostModel) {
             final PostModel postModel = (PostModel) this.postModel;
@@ -659,14 +663,14 @@ public final class PostViewer extends BaseLanguageActivity {
         }
     }
 
-    private void setupPostInfoBar(final String from, final MediaItemType mediaItemType, final String location) {
+    private void setupPostInfoBar(final String from, final MediaItemType mediaItemType, final JSONObject location) {
         if (prevUsername == null || !prevUsername.equals(from)) {
             viewerBinding.topPanel.ivProfilePic.setImageBitmap(null);
             viewerBinding.topPanel.ivProfilePic.setImageDrawable(null);
             viewerBinding.topPanel.ivProfilePic.setImageResource(0);
 
-            if (from.charAt(0) != '#')
-                new ProfileFetcher(from, result -> {
+            if (from.charAt(0) == '@')
+                new ProfileFetcher(from.substring(1), result -> {
                     profileModel = result;
 
                     if (result != null) {
@@ -706,10 +710,9 @@ public final class PostViewer extends BaseLanguageActivity {
                 R.string.post_viewer_video_post : R.string.post_viewer_image_post);
         if (Utils.isEmpty(from)) viewerBinding.topPanel.title.setText(titlePrefix);
         else {
-            final CharSequence titleText = resources.getString(R.string.post_viewer_post_from, titlePrefix, from) + " ";
-            final int titleLen = titleText.length();
-            final SpannableString spannableString = new SpannableString(titleText);
-            spannableString.setSpan(new CommentMentionClickSpan(), titleLen - from.length() - 1, titleLen - 1, 0);
+            final int titleLen = from.length();
+            final SpannableString spannableString = new SpannableString(from);
+            spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
             viewerBinding.topPanel.title.setText(spannableString);
         }
 
@@ -721,7 +724,13 @@ public final class PostViewer extends BaseLanguageActivity {
         }
         else {
             viewerBinding.topPanel.location.setVisibility(View.VISIBLE);
-            viewerBinding.topPanel.location.setText(location);
+            viewerBinding.topPanel.location.setText(location.optString("name"));
+            viewerBinding.topPanel.location.setOnClickListener(v ->
+                new AlertDialog.Builder(PostViewer.this).setTitle(location.optString("name"))
+                        .setMessage(R.string.comment_view_mention_location_search)
+                        .setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok,
+                        (dialog, which) -> searchUsername(location.optString("id")+"/"+location.optString("slug"))).show()
+            );
             viewerBinding.topPanel.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
             ));

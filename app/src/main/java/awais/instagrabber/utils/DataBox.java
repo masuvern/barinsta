@@ -16,6 +16,7 @@ import awais.instagrabber.BuildConfig;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class DataBox extends SQLiteOpenHelper {
     private static DataBox sInstance;
@@ -24,6 +25,7 @@ public final class DataBox extends SQLiteOpenHelper {
     private final static String TABLE_FAVORITES = "favorites";
     private final static String KEY_DATE_ADDED = "date_added";
     private final static String KEY_QUERY_TEXT = "query_text";
+    private final static String KEY_QUERY_DISPLAY = "query_display";
     private final static String KEY_USERNAME = Constants.EXTRAS_USERNAME;
     private final static String KEY_COOKIE = "cookie";
     private final static String KEY_UID = "uid";
@@ -40,7 +42,7 @@ public final class DataBox extends SQLiteOpenHelper {
     @Override
     public void onCreate(@NonNull final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE cookies (id INTEGER PRIMARY KEY, uid TEXT, username TEXT, cookie TEXT)");
-        db.execSQL("CREATE TABLE favorites (id INTEGER PRIMARY KEY, query_text TEXT, date_added INTEGER)");
+        db.execSQL("CREATE TABLE favorites (id INTEGER PRIMARY KEY, query_text TEXT, date_added INTEGER, query_display TEXT)");
     }
 
     @Override
@@ -49,6 +51,7 @@ public final class DataBox extends SQLiteOpenHelper {
     ///////////////////////////////////////// YOUR FAVORITES! HERE /////////////////////////////////////////
     public final void addFavorite(@NonNull final FavoriteModel favoriteModel) {
         final String query = favoriteModel.getQuery();
+        final String display = favoriteModel.getDisplayName();
         if (!Utils.isEmpty(query)) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
@@ -56,6 +59,7 @@ public final class DataBox extends SQLiteOpenHelper {
                     final ContentValues values = new ContentValues();
                     values.put(KEY_DATE_ADDED, favoriteModel.getDate());
                     values.put(KEY_QUERY_TEXT, query);
+                    values.put(KEY_QUERY_DISPLAY, display);
 
                     final int rows = db.update(TABLE_FAVORITES, values, KEY_QUERY_TEXT + "=?", new String[]{query});
 
@@ -76,12 +80,15 @@ public final class DataBox extends SQLiteOpenHelper {
 
     public final synchronized void delFavorite(@NonNull final FavoriteModel favoriteModel) {
         final String query = favoriteModel.getQuery();
+        final String display = favoriteModel.getDisplayName();
         if (!Utils.isEmpty(query)) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
                 try {
-                    final int rowsDeleted = db.delete(TABLE_FAVORITES, KEY_QUERY_TEXT + "=? AND " + KEY_DATE_ADDED + "=?",
-                            new String[]{query, Long.toString(favoriteModel.getDate())});
+                    final int rowsDeleted = db.delete(TABLE_FAVORITES, KEY_QUERY_TEXT + "=? AND "
+                                    + KEY_DATE_ADDED + "=? AND "
+                                    + KEY_QUERY_DISPLAY + "=?",
+                            new String[]{query, Long.toString(favoriteModel.getDate()), display});
 
                     if (rowsDeleted > 0) db.setTransactionSuccessful();
                 } catch (final Exception e) {
@@ -98,16 +105,50 @@ public final class DataBox extends SQLiteOpenHelper {
     @Nullable
     public final ArrayList<FavoriteModel> getAllFavorites() {
         ArrayList<FavoriteModel> favorites = null;
+        FavoriteModel tempFav;
 
-        try (final SQLiteDatabase db = getReadableDatabase();
-             final Cursor cursor = db.rawQuery("SELECT query_text, date_added FROM favorites ORDER BY date_added DESC", null)) {
+        if (Utils.settingsHelper.getBoolean(Constants.DB_TO_MIGRATE)) {
+            try (final SQLiteDatabase db = getWritableDatabase()) {
+                db.execSQL("ALTER TABLE favorites ADD query_display TEXT");
+                try {
+                    db.beginTransaction();
+                } catch (final Exception e) {
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "delFavorite");
+                    if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                } finally {
+                    db.endTransaction();
+                    settingsHelper.putBoolean(Constants.DB_TO_MIGRATE, false);
+                }
+            }
+        }
+
+        try (final SQLiteDatabase db = getWritableDatabase();
+             final Cursor cursor = db.rawQuery("SELECT query_text, date_added, query_display FROM favorites ORDER BY date_added DESC", null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 favorites = new ArrayList<>();
                 do {
-                    favorites.add(new FavoriteModel(
+                    tempFav = new FavoriteModel(
                             cursor.getString(0), // query text
-                            cursor.getLong(1)  // date added
-                    ));
+                            cursor.getLong(1),  // date added
+                            cursor.getString(2) == null ? cursor.getString(0) : cursor.getString(2) // display
+                    );
+                    if (cursor.getString(2) == null) {
+                        try {
+                            db.beginTransaction();
+                            final int rowsDeleted = db.delete(TABLE_FAVORITES, KEY_QUERY_TEXT + "=? AND " + KEY_DATE_ADDED + "=? AND " + KEY_QUERY_DISPLAY + " IS NULL",
+                                    new String[]{cursor.getString(0), Long.toString(cursor.getLong(1))});
+                            if (rowsDeleted > 0) db.setTransactionSuccessful();
+                        } catch (final Exception e) {
+                            if (logCollector != null)
+                                logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "delFavorite");
+                            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                        } finally {
+                            db.endTransaction();
+                        }
+                        addFavorite(tempFav);
+                    }
+                    favorites.add(tempFav);
                 } while (cursor.moveToNext());
             }
         }
@@ -120,7 +161,7 @@ public final class DataBox extends SQLiteOpenHelper {
 
         try (final SQLiteDatabase db = getReadableDatabase();
              final Cursor cursor = db.rawQuery("SELECT query_text, date_added FROM favorites WHERE "
-                     +KEY_QUERY_TEXT+"='"+query+"' ORDER BY date_added DESC", null)) {
+                     +KEY_QUERY_DISPLAY+"='"+query+"' ORDER BY date_added DESC", null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 return cursor.getString(0) + "/" + String.valueOf(cursor.getLong(1));
             }
@@ -260,16 +301,21 @@ public final class DataBox extends SQLiteOpenHelper {
     }
 
     public static class FavoriteModel {
-        private final String query;
+        private final String query, displayName;
         private final long date;
 
-        public FavoriteModel(final String query, final long date) {
+        public FavoriteModel(final String query, final long date, final String displayName) {
             this.query = query;
             this.date = date;
+            this.displayName = displayName;
         }
 
         public String getQuery() {
             return query;
+        }
+
+        public String getDisplayName() {
+            return displayName;
         }
 
         public long getDate() {

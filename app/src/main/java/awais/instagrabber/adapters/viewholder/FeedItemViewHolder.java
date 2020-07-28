@@ -16,7 +16,7 @@ import awais.instagrabber.customviews.RamboTextView;
 
 public final class FeedItemViewHolder extends RecyclerView.ViewHolder {
     public final ImageView profilePic, btnMute, btnDownload;
-    public final TextView username, commentsCount, videoViews, mediaCounter, tvPostDate;
+    public final TextView username, commentsCount, videoViews, mediaCounter, tvPostDate, location;
     public final RamboTextView viewerCaption;
     public final View btnComments, videoViewsParent, viewPost;
     public final ViewPager mediaList;
@@ -34,6 +34,7 @@ public final class FeedItemViewHolder extends RecyclerView.ViewHolder {
         tvPostDate = itemView.findViewById(R.id.tvPostDate);
         viewPost = itemView.findViewById(R.id.viewStoryPost);
         username = itemView.findViewById(R.id.title);
+        location = itemView.findViewById(R.id.location);
 
         // video view
         btnMute = itemView.findViewById(R.id.btnMute);

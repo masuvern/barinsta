@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +44,7 @@ import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.HighlightModel;
+import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
@@ -91,6 +93,7 @@ public final class Main extends BaseLanguageActivity {
     public MainHelper mainHelper;
     public ProfileModel profileModel;
     public HashtagModel hashtagModel;
+    public LocationModel locationModel;
     private AutoCompleteTextView searchAutoComplete;
     private ArrayAdapter<String> profileDialogAdapter;
     private DialogInterface.OnClickListener profileDialogListener;
@@ -139,7 +142,7 @@ public final class Main extends BaseLanguageActivity {
             if (mainHelper != null && !Utils.isEmpty(result)) {
                 closeAnyOpenDrawer();
                 addToStack();
-                userQuery = result;
+                userQuery = (result.contains("/") || result.startsWith("#")) ? result : ("@"+result);
                 mainHelper.onRefresh();
             }
         };
@@ -193,8 +196,8 @@ public final class Main extends BaseLanguageActivity {
             final Intent intent;
             if (which == 0 || storyModels == null || storyModels.length < 1) {
                 intent = new Intent(this, ProfileViewer.class).putExtra(
-                        ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : Constants.EXTRAS_PROFILE),
-                        ((hashtagModel != null) ? hashtagModel : profileModel));
+                        ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
+                        ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
             }
             else intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery)
                     .putExtra(Constants.EXTRAS_STORIES, storyModels)
@@ -205,7 +208,9 @@ public final class Main extends BaseLanguageActivity {
         final View.OnClickListener onClickListener = v -> {
             if (v == mainBinding.mainBiography) {
                 Utils.copyText(this, mainBinding.mainBiography.getText().toString());
-            } else if (v == mainBinding.mainProfileImage || v == mainBinding.mainHashtagImage) {
+            } else if (v == mainBinding.locationBiography) {
+                Utils.copyText(this, mainBinding.locationBiography.getText().toString());
+            } else if (v == mainBinding.mainProfileImage || v == mainBinding.mainHashtagImage || v == mainBinding.mainLocationImage) {
                 if (storyModels == null || storyModels.length <= 0) {
                     profileDialogListener.onClick(null, 0);
                 } else {
@@ -217,16 +222,19 @@ public final class Main extends BaseLanguageActivity {
         };
 
         mainBinding.mainBiography.setOnClickListener(onClickListener);
+        mainBinding.locationBiography.setOnClickListener(onClickListener);
         mainBinding.mainProfileImage.setOnClickListener(onClickListener);
         mainBinding.mainHashtagImage.setOnClickListener(onClickListener);
+        mainBinding.mainLocationImage.setOnClickListener(onClickListener);
 
         mainBinding.mainBiography.setEnabled(false);
         mainBinding.mainProfileImage.setEnabled(false);
         mainBinding.mainHashtagImage.setEnabled(false);
+        mainBinding.mainLocationImage.setEnabled(false);
 
         final boolean isQueryNull = userQuery == null;
         if (isQueryNull) allItems.clear();
-        if (BuildConfig.DEBUG && isQueryNull) userQuery = "austinhuang.me";
+        if (BuildConfig.DEBUG && isQueryNull) userQuery = "@austinhuang.me";
         if (!mainBinding.swipeRefreshLayout.isRefreshing() && userQuery != null) mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
@@ -291,7 +299,9 @@ public final class Main extends BaseLanguageActivity {
             else if (item == settingsAction)
                 new SettingsDialog().show(fragmentManager, "settings");
             else if (item == quickAccessAction)
-                new QuickAccessDialog().setQuery(userQuery).show(fragmentManager, "quickAccess");
+                new QuickAccessDialog()
+                        .setQuery(userQuery, locationModel != null ? locationModel.getName() : userQuery)
+                        .show(fragmentManager, "quickAccess");
             else
                 new AboutDialog().show(fragmentManager, "about");
             return true;
@@ -359,7 +369,9 @@ public final class Main extends BaseLanguageActivity {
                             final SuggestionModel suggestionModel = result[i];
                             if (suggestionModel != null) {
                                 final SuggestionType suggestionType = suggestionModel.getSuggestionType();
-                                final Object[] objects = {i, suggestionModel.getUsername(), suggestionModel.getName(),
+                                final Object[] objects = {i,
+                                        (suggestionType == SuggestionType.TYPE_LOCATION) ? suggestionModel.getName() : suggestionModel.getUsername(),
+                                        (suggestionType == SuggestionType.TYPE_LOCATION) ? suggestionModel.getUsername() : suggestionModel.getName(),
                                         suggestionType, suggestionModel.getProfilePic(), suggestionModel.isVerified()};
 
                                 if (!searchHash && !searchUser) cursor.addRow(objects);
@@ -388,7 +400,7 @@ public final class Main extends BaseLanguageActivity {
 
                 closeAnyOpenDrawer();
                 addToStack();
-                userQuery = query;
+                userQuery = (query.contains("@") || query.contains("#")) ? query : ("@"+query);
                 searchAction.collapseActionView();
                 searchView.setIconified(true);
                 searchView.setIconified(true);

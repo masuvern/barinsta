@@ -133,7 +133,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                             feedItem.optLong("taken_at_timestamp", -1),
                             feedItem.getBoolean("viewer_has_liked"),
                             feedItem.getBoolean("viewer_has_saved"),
-                            feedItem.getJSONObject("edge_media_preview_like").getLong("count"));
+                            feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
+                            feedItem.optJSONObject("location"));
 
                     final boolean isSlider = "GraphSidecar".equals(mediaType) && feedItem.has("edge_sidecar_to_children");
 
@@ -156,7 +157,7 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                                             null, null, null,
                                             node.optLong("video_view_count", -1), -1, false, false,
                                             feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
-                                            feedItem.getJSONObject("location") == null ? null : feedItem.getJSONObject("location").optString("name"));
+                                            feedItem.optJSONObject("location"));
 
                                     sliderItems[j].setSliderDisplayUrl(node.getString("display_url"));
                                 }

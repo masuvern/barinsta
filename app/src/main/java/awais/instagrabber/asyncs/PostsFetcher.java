@@ -49,11 +49,15 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
     @Override
     protected PostModel[] doInBackground(final Void... voids) {
         final boolean isHashTag = id.charAt(0) == '#';
+        final boolean isLocation = id.contains("/");
 
         final String url;
         if (isHashTag)
             url = "https://www.instagram.com/graphql/query/?query_hash=ded47faa9a1aaded10161a2ff32abb6b&variables=" +
                     "{\"tag_name\":\"" + id.substring(1).toLowerCase() + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
+        else if (isLocation)
+            url = "https://www.instagram.com/graphql/query/?query_hash=36bd0f2bf5911908de389b8ceaa3be6d&variables=" +
+                    "{\"id\":\""+ id.split("/")[0] +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else
             url = "https://www.instagram.com/graphql/query/?query_id=17880160963012870&id=" + id + "&first=50&after=" + endCursor;
 
@@ -73,8 +77,10 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                 }
 
                 final JSONObject mediaPosts = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("data")
-                        .getJSONObject(isHashTag ? "hashtag" : Constants.EXTRAS_USER)
-                        .getJSONObject(isHashTag ? "edge_hashtag_to_media" : "edge_owner_to_timeline_media");
+                        .getJSONObject(isHashTag ? Constants.EXTRAS_HASHTAG :
+                                (isLocation ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_USER))
+                        .getJSONObject(isHashTag ? "edge_hashtag_to_media" :
+                                (isLocation ? "edge_location_to_media" : "edge_owner_to_timeline_media"));
 
                 final String endCursor;
                 final boolean hasNextPage;

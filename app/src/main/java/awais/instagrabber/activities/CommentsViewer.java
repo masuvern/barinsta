@@ -69,8 +69,6 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
             return;
         }
 
-        Log.d("austin_debug", "f:"+postId);
-
         commentsBinding.swipeRefreshLayout.setRefreshing(true);
         setSupportActionBar(commentsBinding.toolbar.toolbar);
         commentsBinding.toolbar.toolbar.setTitle(R.string.title_comments);
@@ -253,7 +251,6 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
             final String action = rawAction[0];
             final String url = "https://www.instagram.com/web/comments/"+postId+"/"+action+"/";
             try {
-                Log.d("austin_debug", url);
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);

@@ -21,11 +21,13 @@ import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]> {
     private final String id, hashtag;
+    private final boolean location;
     private final FetchListener<StoryModel[]> fetchListener;
 
-    public StoryStatusFetcher(final String id, final String hashtag, final FetchListener<StoryModel[]> fetchListener) {
+    public StoryStatusFetcher(final String id, final String hashtag, final boolean location, final FetchListener<StoryModel[]> fetchListener) {
         this.id = id;
         this.hashtag = hashtag;
+        this.location = location;
         this.fetchListener = fetchListener;
     }
 
@@ -33,8 +35,9 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
     protected StoryModel[] doInBackground(final Void... voids) {
         StoryModel[] result = null;
         final String url = "https://www.instagram.com/graphql/query/?query_hash=52a36e788a02a3c612742ed5146f1676&variables=" +
-                "{\"precomposed_overlay\":false,\"reel_ids\":[\"" + id + "\"]"
-                +(!Utils.isEmpty(hashtag) ? (",\"tag_names\":\""+hashtag+"\"") : "")+"}";
+                "{\"precomposed_overlay\":false,"
+                +(!Utils.isEmpty(hashtag) ? ("\"tag_names\":\""+hashtag+"\"}") : (
+                    location ? "\"location_ids\":[\""+id.split("/")[0]+"\"]}" : "\"reel_ids\":[\"" + id + "\"]}"));
 
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();

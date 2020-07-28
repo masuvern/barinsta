@@ -31,6 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
+                    <!-- for users -->
                     <com.google.android.material.appbar.CollapsingToolbarLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -227,38 +228,87 @@
                             </LinearLayout>
                         </RelativeLayout>
                     </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+                    <!-- for hashtags -->
                     <com.google.android.material.appbar.CollapsingToolbarLayout
-                        android:id="@+id/tagToolbar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                        android:visibility="gone">
+                        app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+                        <LinearLayout
+                            android:id="@+id/tagInfoContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/profile_info_container_bottom_space"
+                            android:visibility="gone">
+
+                            <awais.instagrabber.customviews.CircularImageView
+                                android:id="@+id/mainHashtagImage"
+                                android:layout_width="@dimen/profile_picture_size"
+                                android:layout_height="@dimen/profile_picture_size"
+                                android:adjustViewBounds="true"
+                                android:background="?selectableItemBackgroundBorderless" />
+
+                            <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/mainTagPostCount"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginLeft="12dp"
+                                android:layout_marginEnd="12dp"
+                                android:layout_marginRight="12dp"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:textAppearance="@style/TextAppearance.AppCompat"
+                                android:textSize="15sp"
+                                tools:text="35\nPosts" />
+
+                            <androidx.appcompat.widget.AppCompatButton
+                                android:id="@+id/btnFollowTag"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_weight="2"
+                                android:text="@string/follow"
+                                android:textColor="@color/btn_pink_text_color"
+                                android:textSize="20sp"
+                                app:backgroundTint="@color/btn_pink_background" />
+                        </LinearLayout>
+                    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+                    <!-- for locations -->
+                    <com.google.android.material.appbar.CollapsingToolbarLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
                         <RelativeLayout
-                            android:id="@+id/tagInfoContainer"
+                            android:id="@+id/locInfoContainer"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:animateLayoutChanges="true"
                             android:background="@null"
                             android:orientation="vertical"
-                            android:paddingBottom="5dp">
+                            android:paddingBottom="5dp"
+                            android:visibility="gone">
 
                             <LinearLayout
-                                android:id="@+id/hashtagInfo"
+                                android:id="@+id/locInfo"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:padding="@dimen/profile_info_container_bottom_space">
 
                                 <awais.instagrabber.customviews.CircularImageView
-                                    android:id="@+id/mainHashtagImage"
+                                    android:id="@+id/mainLocationImage"
                                     android:layout_width="@dimen/profile_picture_size"
                                     android:layout_height="@dimen/profile_picture_size"
                                     android:adjustViewBounds="true"
                                     android:background="?selectableItemBackgroundBorderless" />
 
                                 <androidx.appcompat.widget.AppCompatTextView
-                                    android:id="@+id/mainTagPostCount"
+                                    android:id="@+id/mainLocPostCount"
                                     android:layout_width="0dp"
                                     android:layout_height="match_parent"
                                     android:layout_marginStart="12dp"
@@ -272,16 +322,62 @@
                                     tools:text="35\nPosts" />
 
                                 <androidx.appcompat.widget.AppCompatButton
-                                    android:id="@+id/btnFollowTag"
+                                    android:id="@+id/btnMap"
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_gravity="center_vertical"
                                     android:layout_weight="2"
-                                    android:text="@string/follow"
-                                    android:textColor="@color/btn_pink_text_color"
+                                    android:text="@string/map"
+                                    android:textColor="@color/btn_green_text_color"
                                     android:textSize="20sp"
-                                    app:backgroundTint="@color/btn_pink_background" />
+                                    app:backgroundTint="@color/btn_green_background" />
                             </LinearLayout>
+
+                            <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/locationFullName"
+                                android:layout_below="@id/locInfo"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:paddingStart="10dp"
+                                android:paddingLeft="10dp"
+                                android:paddingEnd="10dp"
+                                android:paddingRight="10dp"
+                                android:ellipsize="marquee"
+                                android:singleLine="true"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                                android:textSize="16sp"
+                                tools:text="OUR HOUSE" />
+
+                            <awais.instagrabber.customviews.RamboTextView
+                                android:id="@+id/locationBiography"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/locationFullName"
+                                android:background="?android:selectableItemBackground"
+                                android:paddingStart="10dp"
+                                android:paddingLeft="10dp"
+                                android:paddingEnd="10dp"
+                                android:paddingRight="10dp"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                                android:textSize="16sp"
+                                android:visibility="gone"
+                                tools:text="IN THE MIDDLE OF OUR STREET" />
+
+                            <awais.instagrabber.customviews.RamboTextView
+                                android:id="@+id/locationUrl"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/locationBiography"
+                                android:ellipsize="marquee"
+                                android:paddingStart="10dp"
+                                android:paddingLeft="10dp"
+                                android:paddingEnd="10dp"
+                                android:paddingRight="10dp"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                                android:textSize="16sp"
+                                tools:text="https://austinhuang.me/"
+                                android:visibility="gone" />
                         </RelativeLayout>
                     </com.google.android.material.appbar.CollapsingToolbarLayout>
                 </com.google.android.material.appbar.AppBarLayout>

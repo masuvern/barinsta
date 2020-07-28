@@ -90,7 +90,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                             isVideo && media.has("video_view_count") ? media.getLong("video_view_count") : -1,
                             timestamp, media.getBoolean("viewer_has_liked"), media.getBoolean("viewer_has_saved"),
                             media.getJSONObject("edge_media_preview_like").getLong("count"),
-                            media.optJSONObject("location") == null ? null : media.getJSONObject("location").optString("name"));
+                            media.optJSONObject("location"));
 
                     postModel.setCommentsCount(commentsCount);
                     postModel.setCommentsEndCursor(endCursor);
@@ -116,7 +116,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                                 isChildVideo && node.has("video_view_count") ? node.getLong("video_view_count") : -1,
                                 timestamp, media.getBoolean("viewer_has_liked"), media.getBoolean("viewer_has_saved"),
                                 media.getJSONObject("edge_media_preview_like").getLong("count"),
-                                media.optJSONObject("location") == null ? null : media.getJSONObject("location").optString("name"));
+                                media.optJSONObject("location"));
                         postModels[i].setSliderDisplayUrl(node.getString("display_url"));
 
                         Utils.checkExistence(downloadDir, customDir, username, true, i, postModels[i]);

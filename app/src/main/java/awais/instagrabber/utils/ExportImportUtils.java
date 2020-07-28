@@ -167,7 +167,7 @@ public final class ExportImportUtils {
                 for (int i = 0; i < favsLen; ++i) {
                     final JSONObject favsObject = favs.getJSONObject(i);
                     Utils.dataBox.addFavorite(new DataBox.FavoriteModel(favsObject.getString("q"),
-                            favsObject.getLong("d")));
+                            favsObject.getLong("d"), favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
                 }
             }
 
@@ -265,6 +265,7 @@ public final class ExportImportUtils {
                         final JSONObject jsonObject = new JSONObject();
                         jsonObject.put("q", favorite.getQuery());
                         jsonObject.put("d", favorite.getDate());
+                        jsonObject.put("s", favorite.getDisplayName());
                         jsonArray.put(jsonObject);
                     }
                     result = jsonArray.toString();

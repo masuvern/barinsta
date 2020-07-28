@@ -55,6 +55,8 @@ public final class FlavorTown {
 
     public static void changelogCheck(@NonNull final Context context) {
         if (settingsHelper.getInteger(Constants.PREV_INSTALL_VERSION) < BuildConfig.VERSION_CODE) {
+            if (settingsHelper.getInteger(Constants.PREV_INSTALL_VERSION) < 35)
+                settingsHelper.putBoolean(Constants.DB_TO_MIGRATE, true);
             Toast.makeText(context, R.string.updated, Toast.LENGTH_SHORT).show();
             settingsHelper.putInteger(Constants.PREV_INSTALL_VERSION, BuildConfig.VERSION_CODE);
         }

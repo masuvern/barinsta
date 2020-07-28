@@ -10,9 +10,9 @@ android {
         targetSdkVersion 29
 
         // REMEMBER TO CHANGE versionCode AS WELL
-        // 16.7 is 32
+        // 16.7 is 32, 16.9 is 35 (34 is public beta)
 
-        versionCode 34
+        versionCode 35
         versionName '16.9'
 
         multiDexEnabled true

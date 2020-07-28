@@ -59,7 +59,10 @@ public final class InstaApp extends MultiDexApplication {
             clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         if (datetimeParser == null)
-            datetimeParser = new SimpleDateFormat(settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
+            datetimeParser = new SimpleDateFormat(
+                    settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED) ?
+                            settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT) :
+                            settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
 
         changeTheme();
     }

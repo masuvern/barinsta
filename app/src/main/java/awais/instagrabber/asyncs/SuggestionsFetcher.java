@@ -48,9 +48,11 @@ public final class SuggestionsFetcher extends AsyncTask<String, String, Suggesti
 
                 final JSONArray usersArray = jsonObject.getJSONArray("users");
                 final JSONArray hashtagsArray = jsonObject.getJSONArray("hashtags");
+                final JSONArray placesArray = jsonObject.getJSONArray("places");
 
                 final int usersLen = usersArray.length();
                 final int hashtagsLen = hashtagsArray.length();
+                final int placesLen = placesArray.length();
 
                 final ArrayList<SuggestionModel> suggestionModels = new ArrayList<>(usersLen + hashtagsLen);
                 for (int i = 0; i < hashtagsLen; i++) {
@@ -64,6 +66,20 @@ public final class SuggestionsFetcher extends AsyncTask<String, String, Suggesti
                             hashtag.optString("profile_pic_url", defaultHashTagPic),
                             SuggestionType.TYPE_HASHTAG,
                             hashtagsArrayJSONObject.optInt("position", suggestionModels.size() - 1)));
+                }
+
+                for (int i = 0; i < placesLen; i++) {
+                    final JSONObject placesArrayJSONObject = placesArray.getJSONObject(i);
+
+                    final JSONObject place = placesArrayJSONObject.getJSONObject("place");
+
+                    // name
+                    suggestionModels.add(new SuggestionModel(false,
+                            place.getJSONObject("location").getString("pk")+"/"+place.getString("slug"),
+                            place.getString("title"),
+                            place.optString("profile_pic_url", null),
+                            SuggestionType.TYPE_LOCATION,
+                            placesArrayJSONObject.optInt("position", suggestionModels.size() - 1)));
                 }
 
                 for (int i = 0; i < usersLen; i++) {

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -239,7 +240,16 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
                     player.prepare(mediaSource);
                     player.setVolume(vol);
 
-                    playerView.setOnClickListener(muteClickListener);
+                    playerView.setOnClickListener(v -> {
+                        if (player.getPlayWhenReady() == true) {
+                            player.setPlayWhenReady(false);
+                            player.getPlaybackState();
+                        }
+                        else {
+                            player.setPlayWhenReady(true);
+                            player.getPlaybackState();
+                        }
+                    });
                 }
             }
 

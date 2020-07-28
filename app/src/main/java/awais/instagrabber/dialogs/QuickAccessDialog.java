@@ -33,13 +33,14 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         View.OnClickListener, View.OnLongClickListener {
     private boolean cookieChanged, isQuery;
     private Activity activity;
-    private String userQuery;
+    private String userQuery, displayName;
     private View btnFavorite, btnImportExport;
     private SimpleAdapter<DataBox.FavoriteModel> favoritesAdapter;
     private RecyclerView rvFavorites, rvQuickAccess;
 
-    public QuickAccessDialog setQuery(final String userQuery) {
+    public QuickAccessDialog setQuery(final String userQuery, final String displayName) {
         this.userQuery = userQuery;
+        this.displayName = displayName;
         return this;
     }
 
@@ -102,7 +103,7 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         final Object tag = v.getTag();
         if (v == btnFavorite) {
             if (isQuery) {
-                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(userQuery, System.currentTimeMillis()));
+                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(userQuery, System.currentTimeMillis(), displayName));
                 favoritesAdapter.setItems(Utils.dataBox.getAllFavorites());
             }
         } else if (v == btnImportExport) {
