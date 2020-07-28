@@ -82,6 +82,7 @@
     <string name="unblock">Batalkan Blokir</string>
     <string name="restrict">Batasi</string>
     <string name="unrestrict">Hilangkan Batasan</string>
+    <string name="map">Map</string>
     <string name="dialog_export_btn_export">Ekspor</string>
     <string name="dialog_export_btn_import">Impor</string>
     <string name="dialog_export_logins">Ekspor Info Masuk</string>
@@ -154,6 +155,7 @@
     <string name="comment_send_empty_comment">Ups, komentar kosong!</string>
     <string name="comment_view_mention_user_search">Apakah anda ingin mencari nama pengguna ini?</string>
     <string name="comment_view_mention_hash_search">Apakah anda ingin mencari hashtag ini?</string>
+    <string name="comment_view_mention_location_search">Do you want to search the location?</string>
     <string name="followers_type_followers">Pengikut</string>
     <string name="followers_type_following">Diikuti</string>
     <string name="followers_compare">Membandingkan pengikut &amp; yang diikuti</string>
