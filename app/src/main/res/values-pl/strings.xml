@@ -95,12 +95,12 @@
     <string name="dialog_export_success">Successfully exported!</string>
     <string name="dialog_export_failed">Failed to export!</string>
     <string name="dialog_export_err_password_empty">Password is empty! Password cannot be empt, dumbass!</string>
-    <string name="refresh">Refresh</string>
+    <string name="refresh">Odśwież</string>
     <string name="get_cookies">Get cookies</string>
     <string name="desktop_2fa">Desktop Mode</string>
-    <string name="time_settings_title_custom">Custom Format</string>
+    <string name="time_settings_title_custom">Format niestandardowy</string>
     <string name="time_settings_title_separator">Separator</string>
-    <string name="time_settings_title_time_format">Time Format</string>
+    <string name="time_settings_title_time_format">Format czasu</string>
     <string name="time_settings_title_date_format">Format daty</string>
     <string name="time_settings_title_preview">Podgląd</string>
     <string name="time_settings_swap_time">Swap Time and\nDate positions</string>
@@ -110,7 +110,7 @@
     <string name="profile_viewer_imageinfo">Szerokość: %d\nWysokość: %d</string>
     <string name="profile_viewer_colordepth_prefix">\nGłębia koloru:</string>
     <string name="profile_endpoint">Select profile picture endpoint\n(Does not affect hashtags)</string>
-    <string name="open_profile">Open profile</string>
+    <string name="open_profile">Otwórz profil</string>
     <string name="view_pfp">Wyświetl zdjęcie profilowe</string>
     <string name="direct_messages_you">Ty</string>
     <string name="direct_messages_sent_link">Shared a link</string>
