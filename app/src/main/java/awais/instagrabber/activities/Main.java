@@ -167,7 +167,7 @@ public final class Main extends BaseLanguageActivity {
                 final String username = cookieModel.getUsername();
                 if (username != null) {
                     found = true;
-                    fetchListener.onResult(username);
+                    fetchListener.onResult("@"+username);
                 }
             }
 
@@ -327,7 +327,7 @@ public final class Main extends BaseLanguageActivity {
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setSuggestionsAdapter(suggestionAdapter);
         searchView.setOnSearchClickListener(v -> {
-            searchView.setQuery((cookieModel != null && userQuery.equals(cookieModel.getUsername())) ? "" : userQuery, false);
+            searchView.setQuery((cookieModel != null && userQuery.equals("@"+cookieModel.getUsername())) ? "" : userQuery, false);
             menu.findItem(R.id.action_about).setVisible(false);
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);
