@@ -82,6 +82,7 @@
     <string name="unblock">解禁</string>
     <string name="restrict">限制</string>
     <string name="unrestrict">放开</string>
+    <string name="map">Map</string>
     <string name="dialog_export_btn_export">导出</string>
     <string name="dialog_export_btn_import">导入</string>
     <string name="dialog_export_logins">导出登录</string>
@@ -154,6 +155,7 @@
     <string name="comment_send_empty_comment">朋友，评论要写字的！</string>
     <string name="comment_view_mention_user_search">要搜索用户名吗?</string>
     <string name="comment_view_mention_hash_search">要搜索标签吗?</string>
+    <string name="comment_view_mention_location_search">Do you want to search the location?</string>
     <string name="followers_type_followers">粉丝</string>
     <string name="followers_type_following">关注</string>
     <string name="followers_compare">比较粉丝和关注</string>
