@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="description">The original maintainer, AWAiS, made InstaGrabber as a small and basic little personal app with intentions of [steali-]downloading posts off Instagram. Very unfortunately, this was abandoned and me, Austin Huang, took over the ship. [Let\'s hope that\'s at least a lil\' bit cash money.] After all, this app is fully open source, ad-less, and tracking-less [aside from what Instagram knows]. Even if you don\'t care about downloading stuff [like me], it\'s still a great Instagram client to use!\n\nGot questions [or just wanna talk]? Contact instagrabber@austinhuang.me or click one of the buttons below.</string>
+    <string name="description">Pierwotny opiekun projektu, AWAiS, stworzył InstaGrabber jako małą i podstawową, osobistą aplikację z zamiarem [kradzieży-]pobierania postów z Instagrama. Niestety, projekt został porzucony, a ja, Austin Huang, przejąłem statek. [Miejmy nadzieję, że przyniesie to trochę gotówki.] W końcu ta aplikacja jest w pełni open source, bez reklam i bez śledzenia [poza tym, co wie już o Tobie Instagram]. Nawet jeśli nie zależy ci na pobieraniu rzeczy, nadal jest to świetny klient Instagrama!\n\nMasz pytania [lub po prostu chcesz porozmawiać]? Skontaktuj się ze mną drogą mailową: instagrabber@austinhuang.me lub kliknij jeden z poniższych przycisków.</string>
     <string name="action_quickaccess">Szybki dostęp</string>
     <string name="action_about">O aplikacji</string>
     <string name="action_dms">Prywatne wiadomości</string>
@@ -31,16 +31,16 @@
     <string name="title_changelog">Dziennik zmian</string>
     <string name="bottom_toolbar">Pokazuj pasek narzędzi na dole</string>
     <string name="download_user_folder">Download posts to username folder in Downloads</string>
-    <string name="autoload_posts">Auto-load all posts from user</string>
-    <string name="error_loading_profile">Error loading profile!\nTry logging in and search again.</string>
-    <string name="error_creating_folders">Error creating Download folder(s).</string>
+    <string name="autoload_posts">Automatycznie załaduj wszystkie posty użytkownika</string>
+    <string name="error_loading_profile">Błąd ładowania profilu!\nSpróbuj zalogować się i wyszukać ponownie.</string>
+    <string name="error_creating_folders">Błąd podczas tworzenia folderu(ów) pobierania.</string>
     <string name="show_feed">Show user feed (Works only when user is logged in)</string>
-    <string name="save_to_folder">Save to custom folder</string>
+    <string name="save_to_folder">Zapisz w folderze niestandardowym</string>
     <string name="select_folder">Wybierz folder</string>
     <string name="theme_settings">Ustawienia motywu</string>
     <string name="import_export">Importuj/Eksportuj</string>
     <string name="select_language">Wybierz język</string>
-    <string name="what_to_do_dialog">What to do?</string>
+    <string name="what_to_do_dialog">Co zrobić?</string>
     <string name="main_posts_count">%s\nPosts</string>
     <string name="main_posts_followers">%s\nFollowers</string>
     <string name="main_posts_following">%s\nFollowing</string>
