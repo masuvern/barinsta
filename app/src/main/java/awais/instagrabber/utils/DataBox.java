@@ -41,6 +41,7 @@ public final class DataBox extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(@NonNull final SQLiteDatabase db) {
+        settingsHelper.putBoolean(Constants.DB_TO_MIGRATE, false);
         db.execSQL("CREATE TABLE cookies (id INTEGER PRIMARY KEY, uid TEXT, username TEXT, cookie TEXT)");
         db.execSQL("CREATE TABLE favorites (id INTEGER PRIMARY KEY, query_text TEXT, date_added INTEGER, query_display TEXT)");
     }
@@ -107,14 +108,14 @@ public final class DataBox extends SQLiteOpenHelper {
         ArrayList<FavoriteModel> favorites = null;
         FavoriteModel tempFav;
 
-        if (Utils.settingsHelper.getBoolean(Constants.DB_TO_MIGRATE)) {
+        if (Utils.settingsHelper.getBoolean(Constants.DB_TO_MIGRATE) == true) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
-                db.execSQL("ALTER TABLE favorites ADD query_display TEXT");
                 try {
                     db.beginTransaction();
+                    db.execSQL("ALTER TABLE favorites ADD query_display TEXT");
                 } catch (final Exception e) {
                     if (logCollector != null)
-                        logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "delFavorite");
+                        logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "migrate");
                     if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
                 } finally {
                     db.endTransaction();
@@ -126,6 +127,7 @@ public final class DataBox extends SQLiteOpenHelper {
         try (final SQLiteDatabase db = getWritableDatabase();
              final Cursor cursor = db.rawQuery("SELECT query_text, date_added, query_display FROM favorites ORDER BY date_added DESC", null)) {
             if (cursor != null && cursor.moveToFirst()) {
+                db.beginTransaction();
                 favorites = new ArrayList<>();
                 do {
                     tempFav = new FavoriteModel(
@@ -135,21 +137,24 @@ public final class DataBox extends SQLiteOpenHelper {
                     );
                     if (cursor.getString(2) == null) {
                         try {
-                            db.beginTransaction();
-                            final int rowsDeleted = db.delete(TABLE_FAVORITES, KEY_QUERY_TEXT + "=? AND " + KEY_DATE_ADDED + "=? AND " + KEY_QUERY_DISPLAY + " IS NULL",
-                                    new String[]{cursor.getString(0), Long.toString(cursor.getLong(1))});
-                            if (rowsDeleted > 0) db.setTransactionSuccessful();
+                            final ContentValues values = new ContentValues();
+                            values.put(KEY_DATE_ADDED, tempFav.getDate());
+                            values.put(KEY_QUERY_TEXT, tempFav.getQuery());
+                            values.put(KEY_QUERY_DISPLAY, tempFav.getDisplayName());
+
+                            final int rows = db.update(TABLE_FAVORITES, values, KEY_QUERY_TEXT + "=?", new String[]{tempFav.getQuery()});
+
+                            if (rows != 1)
+                                db.insertOrThrow(TABLE_FAVORITES, null, values);
                         } catch (final Exception e) {
                             if (logCollector != null)
                                 logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "delFavorite");
                             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-                        } finally {
-                            db.endTransaction();
                         }
-                        addFavorite(tempFav);
                     }
                     favorites.add(tempFav);
                 } while (cursor.moveToNext());
+                db.endTransaction();
             }
         }
 

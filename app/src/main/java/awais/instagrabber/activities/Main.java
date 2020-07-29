@@ -142,7 +142,7 @@ public final class Main extends BaseLanguageActivity {
             if (mainHelper != null && !Utils.isEmpty(result)) {
                 closeAnyOpenDrawer();
                 addToStack();
-                userQuery = (result.contains("/") || result.startsWith("#")) ? result : ("@"+result);
+                userQuery = (result.contains("/") || result.startsWith("#") || result.startsWith("@")) ? result : ("@"+result);
                 mainHelper.onRefresh();
             }
         };
