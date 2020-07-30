@@ -177,7 +177,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
                 Utils.getThumbnailUrl(media, mediaType));
 
         Utils.checkExistence(downloadDir, customDir, username,
-                mediaType == MediaItemType.MEDIA_TYPE_SLIDER, -1, model);
+                mediaType == MediaItemType.MEDIA_TYPE_SLIDER, model);
 
         return model;
     }

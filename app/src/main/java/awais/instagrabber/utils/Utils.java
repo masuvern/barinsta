@@ -70,6 +70,7 @@ import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.IntentModel;
+import awais.instagrabber.models.PollModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -972,17 +973,17 @@ public final class Utils {
     }
 
     public static void checkExistence(final File downloadDir, final File customDir, final String username, final boolean isSlider,
-                                      final int sliderIndex, @NonNull final BasePostModel model) {
+                                      @NonNull final BasePostModel model) {
         boolean exists = false;
 
         try {
             final String displayUrl = model.getDisplayUrl();
             final int index = displayUrl.indexOf('?');
 
-            final String fileName = model.getPostId() + '_' + model.getPosition();
+            final String fileName = model.getPostId() + '_';
             final String extension = displayUrl.substring(index - 4, index);
 
-            final String fileWithoutPrefix = fileName + extension;
+            final String fileWithoutPrefix = fileName + '0' + extension;
             exists = new File(downloadDir, fileWithoutPrefix).exists();
             if (!exists) {
                 if (customDir != null) exists = new File(customDir, fileWithoutPrefix).exists();
@@ -993,8 +994,8 @@ public final class Utils {
                     exists = new File(new File(customDir, username), fileWithoutPrefix).exists();
             }
 
-            if (!exists && isSlider && sliderIndex != -1) {
-                final String fileWithPrefix = fileName + "_slide_[\\d]+" + extension;
+            if (!exists && isSlider) {
+                final String fileWithPrefix = fileName + "[\\d]+_slide_[\\d]+" + extension;
                 final FilenameFilter filenameFilter = (dir, name) -> Pattern.matches(fileWithPrefix, name);
 
                 File[] files = downloadDir.listFiles(filenameFilter);
@@ -1007,7 +1008,6 @@ public final class Utils {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "checkExistence",
                         new Pair<>("isSlider", isSlider),
-                        new Pair<>("sliderIndex", sliderIndex),
                         new Pair<>("model", model));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
@@ -1167,9 +1167,18 @@ public final class Utils {
                         for (int k = 0; k < tappableLength; ++k) {
                             JSONObject jsonObject = tappableObjects.getJSONObject(k);
                             if (jsonObject.getString("__typename").equals("GraphTappableFeedMedia") && jsonObject.has("media")) {
-                                jsonObject = jsonObject.getJSONObject("media");
-                                storyModels[j].setTappableShortCode(jsonObject.getString(Constants.EXTRAS_SHORTCODE));
-                                break;
+                                storyModels[j].setTappableShortCode(jsonObject.getJSONObject("media").getString(Constants.EXTRAS_SHORTCODE));
+                            }
+                            else if (jsonObject.optString("__typename").equals("GraphTappableStoryPoll")) {
+                                storyModels[j].setPoll(new PollModel(
+                                        jsonObject.getString("id"),
+                                        jsonObject.getString("question"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
+                                        jsonObject.optInt("viewer_vote", -1)
+                                ));
                             }
                         }
                     }

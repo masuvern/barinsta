@@ -95,7 +95,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                     postModel.setCommentsCount(commentsCount);
                     postModel.setCommentsEndCursor(endCursor);
 
-                    Utils.checkExistence(downloadDir, customDir, username, false, -1, postModel);
+                    Utils.checkExistence(downloadDir, customDir, username, false, postModel);
 
                     result = new ViewerPostModel[]{postModel};
 
@@ -119,7 +119,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                                 media.optJSONObject("location"));
                         postModels[i].setSliderDisplayUrl(node.getString("display_url"));
 
-                        Utils.checkExistence(downloadDir, customDir, username, true, i, postModels[i]);
+                        Utils.checkExistence(downloadDir, customDir, username, true, postModels[i]);
                     }
 
                     postModels[0].setCommentsCount(commentsCount);

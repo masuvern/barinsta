@@ -12,6 +12,7 @@ import java.net.URL;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.PollModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
@@ -34,8 +35,8 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
     @Override
     protected StoryModel[] doInBackground(final Void... voids) {
         StoryModel[] result = null;
-        final String url = "https://www.instagram.com/graphql/query/?query_hash=52a36e788a02a3c612742ed5146f1676&variables=" +
-                "{\"precomposed_overlay\":false,"
+        final String url = "https://www.instagram.com/graphql/query/?query_hash=90709b530ea0969f002c86a89b4f2b8d&variables=" +
+                "{\"precomposed_overlay\":false,\"show_story_viewer_list\":false,\"stories_video_dash_manifest\":false,"
                 +(!Utils.isEmpty(hashtag) ? ("\"tag_names\":\""+hashtag+"\"}") : (
                     location ? "\"location_ids\":[\""+id.split("/")[0]+"\"]}" : "\"reel_ids\":[\"" + id + "\"]}"));
 
@@ -76,9 +77,19 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
                         for (int j = 0; j < tappableLength; ++j) {
                             JSONObject tappableObject = tappableObjects.getJSONObject(j);
                             if (tappableObject.optString("__typename").equals("GraphTappableFeedMedia")) {
-                                tappableObject = tappableObject.getJSONObject("media");
-                                models[i].setTappableShortCode(tappableObject.getString(Constants.EXTRAS_SHORTCODE));
-                                break;
+                                models[i].setTappableShortCode(tappableObject.getJSONObject("media").getString(Constants.EXTRAS_SHORTCODE));
+                            }
+                            else if (tappableObject.optString("__typename").equals("GraphTappableStoryPoll")) {
+                                Log.d("austin_debug", "poll: "+url+" "+tappableObject);
+                                models[i].setPoll(new PollModel(
+                                        tappableObject.getString("id"),
+                                        tappableObject.getString("question"),
+                                        tappableObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
+                                        tappableObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
+                                        tappableObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
+                                        tappableObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
+                                        tappableObject.optInt("viewer_vote", -1)
+                                ));
                             }
                         }
                     }
