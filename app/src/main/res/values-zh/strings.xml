@@ -57,6 +57,9 @@
     <string name="show_stories">显示快拍</string>
     <string name="no_more_stories">到底啦！</string>
     <string name="view_story_post">浏览快拍</string>
+    <string name="vote_story_poll">Vote</string>
+    <string name="votef_story_poll">Vote successful!</string>
+    <string name="voted_story_poll">You have already voted!</string>
     <string name="priv_acc">私密账户</string>
     <string name="empty_acc">暂未发帖</string>
     <string name="curr_version">目前版本: v%s</string>
