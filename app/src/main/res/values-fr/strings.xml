@@ -57,6 +57,9 @@
     <string name="show_stories">Afficher les stories</string>
     <string name="no_more_stories">Plus de stories!</string>
     <string name="view_story_post">Afficher le post de la story</string>
+    <string name="vote_story_poll">Vote</string>
+    <string name="votef_story_poll">Vote successful!</string>
+    <string name="voted_story_poll">You have already voted!</string>
     <string name="priv_acc">Compte privé</string>
     <string name="empty_acc">Ce compte ne contient pas de posts</string>
     <string name="curr_version">Version actuelle : v%s</string>
