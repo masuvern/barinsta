@@ -127,10 +127,10 @@
     <string name="dms_inbox_raven_media_delivered">Diterima</string>
     <string name="dms_inbox_raven_media_sent">Terkirim</string>
     <string name="dms_inbox_raven_media_opened">Telah dibuka</string>
-    <string name="dms_inbox_raven_media_replayed">Replayed</string>
+    <string name="dms_inbox_raven_media_replayed">Telah dimainkan ulang</string>
     <string name="dms_inbox_raven_media_sending">Mengirim…</string>
-    <string name="dms_inbox_raven_media_blocked">Blocked</string>
-    <string name="dms_inbox_raven_media_suggested">Suggested</string>
+    <string name="dms_inbox_raven_media_blocked">Telah diblokir</string>
+    <string name="dms_inbox_raven_media_suggested">Telah disarankan</string>
     <string name="dms_inbox_raven_media_screenshot">Layar tertangkap</string>
     <string name="dms_inbox_raven_media_cant_deliver">Tidak dapat mengirim</string>
     <string name="direct_download">Langsung unduh</string>
@@ -155,7 +155,7 @@
     <string name="comment_send_empty_comment">Ups, komentar kosong!</string>
     <string name="comment_view_mention_user_search">Apakah anda ingin mencari nama pengguna ini?</string>
     <string name="comment_view_mention_hash_search">Apakah anda ingin mencari hashtag ini?</string>
-    <string name="comment_view_mention_location_search">Do you want to search the location?</string>
+    <string name="comment_view_mention_location_search">Apakah anda ingin mencari lokasi?</string>
     <string name="followers_type_followers">Pengikut</string>
     <string name="followers_type_following">Diikuti</string>
     <string name="followers_compare">Membandingkan pengikut &amp; yang diikuti</string>
@@ -165,8 +165,8 @@
     <string name="login_error_loading_cookies">Galat memuat cookies</string>
     <string name="login_success_loading_cookies">Berhasil memuat cookies!\nJika anda tetap tidak dapat membuka laman/kiriman pribadi, coba masuk lagi!</string>
     <string name="comment_hint">Tulis komentar baru...</string>
-    <string name="share_public_post">Share this public post to...</string>
-    <string name="share_private_post">This is a private post! Share to those who can view them!</string>
+    <string name="share_public_post">Bagikan kiriman publik ini ke...</string>
+    <string name="share_private_post">Kiriman privat! Bagikan kepada orang yang bisa melihatnya!</string>
     <string name="update_available">Ada pembaruan! (%s)</string>
     <string name="update_notice">Pengingat: Jika anda mengunduh InstaGrabber dari F-Droid, perbarui dari situ. Juga berlaku jika diunduh lewat GitHub.</string>
     <string name="updated">Terima kasih sudah menggunakan InstaGrabber!</string>
