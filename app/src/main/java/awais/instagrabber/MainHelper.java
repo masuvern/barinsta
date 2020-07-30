@@ -237,7 +237,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             final Object tag = v.getTag();
             if (tag instanceof FeedStoryModel) {
                 final FeedStoryModel feedStoryModel = (FeedStoryModel) tag;
-                final StoryModel[] storyModels = feedStoryModel.getStoryModels();
+                StoryModel[] storyModels = feedStoryModel.getStoryModels();
                 final int index = indexOfIntArray(stories, feedStoryModel);
 
                 main.startActivity(new Intent(main, StoryViewer.class)

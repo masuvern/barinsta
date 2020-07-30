@@ -88,7 +88,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                     final boolean isVideo = feedItem.optBoolean("is_video");
                     final long videoViews = feedItem.optLong("video_view_count", 0);
 
-                    final String displayUrl = feedItem.getString("display_url");
+                    final String displayUrl = feedItem.optString("display_url");
+                    if (Utils.isEmpty(displayUrl)) continue;
                     final String resourceUrl;
 
                     if (isVideo) resourceUrl = feedItem.getString("video_url");

@@ -979,7 +979,7 @@ public final class Utils {
             final String displayUrl = model.getDisplayUrl();
             final int index = displayUrl.indexOf('?');
 
-            final String fileName = model.getPostId() + '_' + model.getTimestamp();
+            final String fileName = model.getPostId() + '_' + model.getPosition();
             final String extension = displayUrl.substring(index - 4, index);
 
             final String fileWithoutPrefix = fileName + extension;
