@@ -82,6 +82,7 @@
     <string name="unblock">Débloquer</string>
     <string name="restrict">Restreindre</string>
     <string name="unrestrict">Retirer des restrictions</string>
+    <string name="map">Carte</string>
     <string name="dialog_export_btn_export">Exporter</string>
     <string name="dialog_export_btn_import">Importer</string>
     <string name="dialog_export_logins">Exporter les connexions</string>
@@ -154,6 +155,7 @@
     <string name="comment_send_empty_comment">Ehh, pas de commentaires vides !</string>
     <string name="comment_view_mention_user_search">Souhaitez-vous faire une recherche sur le nom d\'utilisateur ?</string>
     <string name="comment_view_mention_hash_search">Souhaitez-vous faire une recherch sur le hashtag ?</string>
+    <string name="comment_view_mention_location_search">Souhaitez-vous rechercher l\'emplacement ?</string>
     <string name="followers_type_followers">Abonnés</string>
     <string name="followers_type_following">Abonnements</string>
     <string name="followers_compare">Comparer les abonnés et abonnements</string>

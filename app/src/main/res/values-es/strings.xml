@@ -82,6 +82,7 @@
     <string name="unblock">Unblock</string>
     <string name="restrict">Restrict</string>
     <string name="unrestrict">Unrestrict</string>
+    <string name="map">Map</string>
     <string name="dialog_export_btn_export">Exportar</string>
     <string name="dialog_export_btn_import">Importar</string>
     <string name="dialog_export_logins">Exportar Logins</string>
@@ -154,6 +155,7 @@
     <string name="comment_send_empty_comment">No empty comments, dawg!</string>
     <string name="comment_view_mention_user_search">¿Quieres buscar el nombre de usuario?</string>
     <string name="comment_view_mention_hash_search">¿Quieres buscar el hashtag?</string>
+    <string name="comment_view_mention_location_search">Do you want to search the location?</string>
     <string name="followers_type_followers">Seguidores</string>
     <string name="followers_type_following">Siguiendo</string>
     <string name="followers_compare">Comparar seguidores &amp; siguiendo</string>
