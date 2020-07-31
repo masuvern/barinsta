@@ -13,7 +13,7 @@
     <string name="multiple_likes">likes</string>
     <string name="clipboard_error">Errore durante la copia del testo</string>
     <string name="clipboard_copied">Copiato negli appunti!</string>
-    <string name="report">Report</string>
+    <string name="report">Segnala</string>
     <string name="password">Password (Massimo 32 caratteri)</string>
     <string name="ok">OK</string>
     <string name="yes">Si</string>
@@ -57,9 +57,9 @@
     <string name="show_stories">Mostra storie</string>
     <string name="no_more_stories">Niente più storie!</string>
     <string name="view_story_post">Vedi post nella storia</string>
-    <string name="vote_story_poll">Vote</string>
-    <string name="votef_story_poll">Vote successful!</string>
-    <string name="voted_story_poll">You have already voted!</string>
+    <string name="vote_story_poll">Vota</string>
+    <string name="votef_story_poll">Votazione riuscita!</string>
+    <string name="voted_story_poll">Hai già votato!</string>
     <string name="priv_acc">Questo profilo è privato</string>
     <string name="empty_acc">Questo profilo non ha post</string>
     <string name="curr_version">Versione corrente: v%s</string>
