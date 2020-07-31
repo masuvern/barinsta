@@ -57,9 +57,9 @@
     <string name="show_stories">Tampilkan story</string>
     <string name="no_more_stories">Story sampai di sini!</string>
     <string name="view_story_post">Lihat Story Post</string>
-    <string name="vote_story_poll">Vote</string>
-    <string name="votef_story_poll">Vote successful!</string>
-    <string name="voted_story_poll">You have already voted!</string>
+    <string name="vote_story_poll">Pilih</string>
+    <string name="votef_story_poll">Berhasil memilih!</string>
+    <string name="voted_story_poll">Anda sudah memilih!</string>
     <string name="priv_acc">Akun Ini Bersifat Pribadi</string>
     <string name="empty_acc">Akun ini tidak memiliki kiriman</string>
     <string name="curr_version">Versi saat ini: v%s</string>
