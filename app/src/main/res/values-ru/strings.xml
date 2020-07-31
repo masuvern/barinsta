@@ -57,11 +57,13 @@
     <string name="show_stories">Show stories</string>
     <string name="no_more_stories">No more stories!</string>
     <string name="view_story_post">View Story Post</string>
+    <string name="spotify">Spotify</string>
     <string name="vote_story_poll">Vote</string>
     <string name="votef_story_poll">Vote successful!</string>
     <string name="voted_story_poll">You have already voted!</string>
     <string name="priv_acc">This Account is Private</string>
     <string name="empty_acc">This Account has No Posts</string>
+    <string name="empty_list">No Such Posts!</string>
     <string name="curr_version">Current version: v%s</string>
     <string name="read_more">read more…</string>
     <string name="login">Login</string>
@@ -71,6 +73,9 @@
     <string name="project_link">Visit Project Page</string>
     <string name="telegram_link">Join Telegram Group</string>
     <string name="matrix_link">Join Matrix Room</string>
+    <string name="liked">Liked</string>
+    <string name="saved">Saved</string>
+    <string name="tagged">Tagged</string>
     <string name="like">Like (%s)</string>
     <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Bookmark</string>
