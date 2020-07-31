@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,22 +28,14 @@ import awais.instagrabber.R;
 import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.ProfilePictureFetcher;
 import awais.instagrabber.databinding.ActivityProfileBinding;
-import awais.instagrabber.dialogs.ProfileSettingsDialog;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.enums.ProfilePictureFetchMode;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
-import static awais.instagrabber.utils.Constants.PROFILE_FETCH_MODE;
-
 public final class ProfileViewer extends BaseLanguageActivity {
-    private final ProfilePictureFetchMode[] fetchModes = {
-            ProfilePictureFetchMode.INSTADP,
-            ProfilePictureFetchMode.INSTAFULLSIZE
-    };
     private ActivityProfileBinding profileBinding;
     private ProfileModel profileModel;
     private HashtagModel hashtagModel;
@@ -88,15 +79,12 @@ public final class ProfileViewer extends BaseLanguageActivity {
         profileBinding.imageViewer.setZoomTransitionDuration(420);
         profileBinding.imageViewer.setMaximumScale(7.2f);
 
-        final int fetchIndex = Math.min(2, Math.max(0, Utils.settingsHelper.getInteger(PROFILE_FETCH_MODE)));
-        final ProfilePictureFetchMode fetchMode = fetchModes[fetchIndex];
-
         fetchListener = profileUrl -> {
             profilePicUrl = profileUrl;
 
             if (!fallbackToProfile && Utils.isEmpty(profilePicUrl)) {
                 fallbackToProfile = true;
-                new ProfilePictureFetcher(username, id, fetchListener, fetchMode, profilePicUrl, (hashtagModel != null || locationModel != null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new ProfilePictureFetcher(username, id, fetchListener, profilePicUrl, (hashtagModel != null || locationModel != null)).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 return;
             }
 
@@ -113,7 +101,7 @@ public final class ProfileViewer extends BaseLanguageActivity {
                     fallbackToProfile = true;
                     if (!errorHandled) {
                         errorHandled = true;
-                        new ProfilePictureFetcher(username, id, fetchListener, fetchModes[Math.min(2, Math.max(0, fetchIndex + 1))], profilePicUrl, (hashtagModel != null || locationModel != null))
+                        new ProfilePictureFetcher(username, id, fetchListener, profilePicUrl, (hashtagModel != null || locationModel != null))
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } else {
                         glideRequestManager.load(profilePicUrl).into(profileBinding.imageViewer);
@@ -168,7 +156,7 @@ public final class ProfileViewer extends BaseLanguageActivity {
             }).into(profileBinding.imageViewer);
         };
 
-        new ProfilePictureFetcher(username, id, fetchListener, fetchMode, profilePicUrl, (hashtagModel != null || locationModel != null))
+        new ProfilePictureFetcher(username, id, fetchListener, profilePicUrl, (hashtagModel != null || locationModel != null))
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -211,8 +199,6 @@ public final class ProfileViewer extends BaseLanguageActivity {
         final MenuItem.OnMenuItemClickListener menuItemClickListener = item -> {
             if (item == menuItemDownload) {
                 downloadProfilePicture();
-            } else {
-                new ProfileSettingsDialog().show(fragmentManager, "settings");
             }
             return true;
         };
@@ -222,10 +208,6 @@ public final class ProfileViewer extends BaseLanguageActivity {
         menuItemDownload.setVisible(true);
         menuItemDownload.setEnabled(false);
         menuItemDownload.setOnMenuItemClickListener(menuItemClickListener);
-
-        final MenuItem menuItemSettings = menu.findItem(R.id.action_settings);
-        menuItemSettings.setVisible(true);
-        menuItemSettings.setOnMenuItemClickListener(menuItemClickListener);
 
         return true;
     }

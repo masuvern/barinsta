@@ -82,6 +82,7 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.InboxReadState;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
 import awaisomereport.LogCollector;
@@ -128,6 +129,7 @@ public final class Utils {
             try {
                 final URI uri1 = new URI("https://instagram.com");
                 final URI uri2 = new URI("https://instagram.com/");
+                final URI uri3 = new URI("https://i.instagram.com/");
                 for (final String cookie : cookieRaw.split(";")) {
                     final String[] strings = cookie.split("=", 2);
                     final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
@@ -136,6 +138,7 @@ public final class Utils {
                     httpCookie.setVersion(0);
                     cookieStore.add(uri1, httpCookie);
                     cookieStore.add(uri2, httpCookie);
+                    cookieStore.add(uri3, httpCookie);
                 }
             } catch (final URISyntaxException e) {
                 if (logCollector != null)
@@ -732,6 +735,14 @@ public final class Utils {
         return RavenExpiringMediaType.RAVEN_UNKNOWN;
     }
 
+    public static NotificationType getNotifType(final String itemType) {
+        if ("GraphLikeAggregatedStory".equals(itemType)) return NotificationType.LIKE;
+        if ("GraphFollowAggregatedStory".equals(itemType)) return NotificationType.FOLLOW;
+        if ("GraphCommentMediaStory".equals(itemType)) return NotificationType.COMMENT;
+        if ("GraphMentionStory".equals(itemType)) return NotificationType.MENTION;
+        return null;
+    }
+
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
             displayMetrics = Resources.getSystem().getDisplayMetrics();
@@ -1189,7 +1200,7 @@ public final class Utils {
                             if (jsonObject.getString("__typename").equals("GraphTappableFeedMedia") && jsonObject.has("media")) {
                                 storyModels[j].setTappableShortCode(jsonObject.getJSONObject("media").getString(Constants.EXTRAS_SHORTCODE));
                             }
-                            else if (jsonObject.optString("__typename").equals("GraphTappableStoryPoll")) {
+                            else if (jsonObject.optString("__typename").equals("GraphTappableStoryPoll") && !jsonObject.isNull("id")) {
                                 storyModels[j].setPoll(new PollModel(
                                         jsonObject.getString("id"),
                                         jsonObject.getString("question"),

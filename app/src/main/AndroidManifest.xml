@@ -187,6 +187,15 @@
         </activity>
 
         <activity
+            android:name=".activities.NotificationsViewer"
+            android:parentActivityName=".activities.Main">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.Main" />
+        </activity>
+
+        <activity
             android:name=".activities.Login"
             android:label="@string/login"
             android:parentActivityName=".activities.Main">

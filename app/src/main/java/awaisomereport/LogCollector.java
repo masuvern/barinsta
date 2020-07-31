@@ -108,6 +108,7 @@ public final class LogCollector {
         ASYNC_FEED_FETCHER("async-feed-fetcher.txt"),
         ASYNC_HASHTAG_FETCHER("async-hashtag-fetcher.txt"),
         ASYNC_LOCATION_FETCHER("async-location-fetcher.txt"),
+        ASYNC_NOTIFICATION_FETCHER("async-notification-fetcher.txt"),
         ASYNC_PROFILE_FETCHER("async-profile-fetcher.txt"),
         ASYNC_PROFILE_PICTURE_FETCHER("async-pfp-fetcher.txt"),
         ASYNC_SAVED_FETCHER("async-saved-fetcher.txt"),

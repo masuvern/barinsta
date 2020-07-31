@@ -219,7 +219,6 @@ public final class ExportImportUtils {
                 final JSONObject json = new JSONObject();
                 json.put(Constants.APP_THEME, settingsHelper.getInteger(Constants.APP_THEME));
                 json.put(Constants.APP_LANGUAGE, settingsHelper.getInteger(Constants.APP_LANGUAGE));
-                json.put(Constants.PROFILE_FETCH_MODE, settingsHelper.getInteger(Constants.PROFILE_FETCH_MODE));
 
                 String str = settingsHelper.getString(Constants.FOLDER_PATH);
                 if (!Utils.isEmpty(str)) json.put(Constants.FOLDER_PATH, str);
