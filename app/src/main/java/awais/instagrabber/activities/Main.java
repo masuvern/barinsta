@@ -332,6 +332,7 @@ public final class Main extends BaseLanguageActivity {
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);
             menu.findItem(R.id.action_quickaccess).setVisible(false);
+            menu.findItem(R.id.action_notif).setVisible(false);
         });
         searchAction.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
@@ -345,6 +346,7 @@ public final class Main extends BaseLanguageActivity {
                 menu.findItem(R.id.action_settings).setVisible(true);
                 menu.findItem(R.id.action_dms).setVisible(true);
                 menu.findItem(R.id.action_quickaccess).setVisible(true);
+                menu.findItem(R.id.action_notif).setVisible(true);
                 return true;
             }
         });

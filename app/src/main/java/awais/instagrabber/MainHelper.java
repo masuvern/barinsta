@@ -462,7 +462,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if ((!autoloadPosts || isHashtag) && hasNextPage) {
                 main.mainBinding.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
-                currentlyExecuting = new PostsFetcher(isHashtag ? main.userQuery : main.profileModel.getId(), endCursor, postsFetchListener)
+                currentlyExecuting = new PostsFetcher((isHashtag || isLocation) ? main.userQuery : main.profileModel.getId(), endCursor, postsFetchListener)
                         .setUsername(isHashtag ? null : main.profileModel.getUsername())
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
