@@ -864,6 +864,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                 R.color.btn_pink_background, null)));
                     }
                     main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
+                    main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
+                    main.mainBinding.btnRestrict.setText(R.string.tagged);
+                    main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                            R.color.btn_blue_background, null)));
                 }
 
                 main.mainBinding.mainProfileImage.setEnabled(false);
@@ -1205,13 +1209,13 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 onRefresh();
             } else if (v == main.mainBinding.btnFollow) {
                 new ProfileAction().execute("follow");
-            } else if (v == main.mainBinding.btnRestrict) {
+            } else if (v == main.mainBinding.btnRestrict && isLoggedIn) {
                 new ProfileAction().execute("restrict");
             } else if (v == main.mainBinding.btnSaved && !iamme) {
                 new ProfileAction().execute("block");
             } else if (v == main.mainBinding.btnFollowTag) {
                 new ProfileAction().execute("followtag");
-            } else if (v == main.mainBinding.btnTagged) {
+            } else if (v == main.mainBinding.btnTagged || (v == main.mainBinding.btnRestrict && !isLoggedIn)) {
                 main.startActivity(new Intent(main, SavedViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, "%"+main.profileModel.getId())
                         .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
