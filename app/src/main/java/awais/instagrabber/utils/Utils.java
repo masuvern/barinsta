@@ -827,11 +827,13 @@ public final class Utils {
         return sb.toString();
     }
 
-    public static void batchDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
+    public static void batchDownload(@NonNull final Context context, @Nullable String username, final DownloadMethod method,
                                      final List<? extends BasePostModel> itemsToDownload) {
         if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
 
         if (itemsToDownload == null || itemsToDownload.size() < 1) return;
+
+        if (username.charAt(0) == '@') username = username.substring(1);
 
         if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
             batchDownloadImpl(context, username, method, itemsToDownload);
@@ -996,7 +998,7 @@ public final class Utils {
         return extension;
     }
 
-    public static void checkExistence(final File downloadDir, final File customDir, final String username, final boolean isSlider,
+    public static void checkExistence(final File downloadDir, final File customDir, final boolean isSlider,
                                       @NonNull final BasePostModel model) {
         boolean exists = false;
 

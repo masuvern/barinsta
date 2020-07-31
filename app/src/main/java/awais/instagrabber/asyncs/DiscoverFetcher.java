@@ -24,6 +24,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
+import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -46,7 +47,6 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
     @Override
     protected final DiscoverItemModel[] doInBackground(final Void... voids) {
         // to check if file exists
-        final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download");
         File customDir = null;
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
             final String customPath = settingsHelper.getString(FOLDER_PATH);
@@ -55,7 +55,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
 
         DiscoverItemModel[] result = null;
 
-        final ArrayList<DiscoverItemModel> discoverItemModels = fetchItems(downloadDir, customDir, null, maxId);
+        final ArrayList<DiscoverItemModel> discoverItemModels = fetchItems(customDir, null, maxId);
         if (discoverItemModels != null) {
             result = discoverItemModels.toArray(new DiscoverItemModel[0]);
             if (result.length > 0) {
@@ -67,7 +67,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
         return result;
     }
 
-    private ArrayList<DiscoverItemModel> fetchItems(final File downloadDir, final File customDir,
+    private ArrayList<DiscoverItemModel> fetchItems(final File customDir,
                                                     ArrayList<DiscoverItemModel> discoverItemModels, final String maxId) {
         try {
             final String url = "https://www.instagram.com/explore/grid/?is_prefetch=false&omit_cover_media=true&module=explore_popular" +
@@ -99,7 +99,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
                         if ("media_grid".equals(layoutType)) {
                             final JSONArray medias = layoutContent.getJSONArray("medias");
                             for (int j = 0; j < medias.length(); ++j)
-                                discoverItemModels.add(makeDiscoverModel(downloadDir, customDir,
+                                discoverItemModels.add(makeDiscoverModel(customDir,
                                         medias.getJSONObject(j).getJSONObject("media")));
 
                         } else {
@@ -108,13 +108,13 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
 
                                 final JSONObject layoutItem = layoutContent.getJSONObject(isOneSide ? "one_by_two_item" : "two_by_two_item");
                                 if (layoutItem.has("media"))
-                                    discoverItemModels.add(makeDiscoverModel(downloadDir, customDir,
+                                    discoverItemModels.add(makeDiscoverModel(customDir,
                                             layoutItem.getJSONObject("media")));
 
                                 if (layoutContent.has("fill_items")) {
                                     final JSONArray fillItems = layoutContent.getJSONArray("fill_items");
                                     for (int j = 0; j < fillItems.length(); ++j)
-                                        discoverItemModels.add(makeDiscoverModel(downloadDir, customDir,
+                                        discoverItemModels.add(makeDiscoverModel(customDir,
                                                 fillItems.getJSONObject(j).getJSONObject("media")));
                                 }
                             }
@@ -129,7 +129,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
                 if (this.isFirst) {
                     final int size = discoverItemModels.size();
                     if (size > 50) this.isFirst = false;
-                    discoverItemModels = fetchItems(downloadDir, customDir, discoverItemModels,
+                    discoverItemModels = fetchItems(customDir, discoverItemModels,
                             "&max_id=" + (lastId++));
                 }
             } else {
@@ -149,7 +149,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
     }
 
     @NonNull
-    private DiscoverItemModel makeDiscoverModel(final File downloadDir, final File customDir,
+    private DiscoverItemModel makeDiscoverModel(final File customDir,
                                                 @NonNull final JSONObject media) throws Exception {
         final JSONObject user = media.getJSONObject(Constants.EXTRAS_USER);
         final String username = user.getString(Constants.EXTRAS_USERNAME);
@@ -176,8 +176,10 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
                 media.getString("code"),
                 Utils.getThumbnailUrl(media, mediaType));
 
-        Utils.checkExistence(downloadDir, customDir, username,
-                mediaType == MediaItemType.MEDIA_TYPE_SLIDER, model);
+        final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
+                (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+
+        Utils.checkExistence(downloadDir, customDir, mediaType == MediaItemType.MEDIA_TYPE_SLIDER, model);
 
         return model;
     }

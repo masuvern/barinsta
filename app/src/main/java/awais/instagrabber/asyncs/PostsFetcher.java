@@ -19,6 +19,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
+import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -78,7 +79,8 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // to check if file exists
-                final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download");
+                final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
+                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
                 File customDir = null;
                 if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
                     final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
@@ -126,8 +128,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                             mediaNode.getLong("taken_at_timestamp"), mediaNode.optBoolean("viewer_has_liked"),
                             mediaNode.optBoolean("viewer_has_saved"), mediaNode.getJSONObject("edge_liked_by").getLong("count"));
 
-                    Utils.checkExistence(downloadDir, customDir, username, isSlider, models[i]);
-                    Utils.checkExistence(downloadDir, customDir, "@"+username, isSlider, models[i]);
+                    Utils.checkExistence(downloadDir, customDir, isSlider, models[i]);
                 }
 
                 if (models[models.length - 1] != null)
