@@ -74,8 +74,6 @@
     <string name="unbookmark">Retirer des marque-pages</string>
     <string name="follow">Suivre</string>
     <string name="unfollow">Ne plus suivre</string>
-    <string name="favorite">Ajouter aux Favoris</string>
-    <string name="unfavorite">Retirer des Favoris</string>
     <string name="favorite_short">Mettre en favoris</string>
     <string name="unfavorite_short">Enlever des favoris</string>
     <string name="block">Bloquer</string>

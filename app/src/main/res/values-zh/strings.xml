@@ -74,8 +74,6 @@
     <string name="unbookmark">解除收藏</string>
     <string name="follow">关注</string>
     <string name="unfollow">脱粉</string>
-    <string name="favorite">加入收藏</string>
-    <string name="unfavorite">取消收藏</string>
     <string name="favorite_short">加入收藏</string>
     <string name="unfavorite_short">取消收藏</string>
     <string name="block">拉黑</string>

@@ -74,8 +74,6 @@
     <string name="unbookmark">Elimina segnalibro</string>
     <string name="follow">Segui</string>
     <string name="unfollow">Non seguire</string>
-    <string name="favorite">Add to Favorites</string>
-    <string name="unfavorite">Remove from Favorites</string>
     <string name="favorite_short">Favorite</string>
     <string name="unfavorite_short">Unfavorite</string>
     <string name="block">Blocca</string>

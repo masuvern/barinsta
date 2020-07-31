@@ -74,8 +74,6 @@
     <string name="unbookmark">Batalkan Markah</string>
     <string name="follow">Ikuti</string>
     <string name="unfollow">Batal Ikuti</string>
-    <string name="favorite">Tambahkan ke Favorit</string>
-    <string name="unfavorite">Hapus dari Favorit</string>
     <string name="favorite_short">Favorit</string>
     <string name="unfavorite_short">Batal Favorit</string>
     <string name="block">Blokir</string>

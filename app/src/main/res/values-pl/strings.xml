@@ -74,8 +74,6 @@
     <string name="unbookmark">Unbookmark</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
-    <string name="favorite">Dodaj do ulubionych</string>
-    <string name="unfavorite">Usuń z ulubionych</string>
     <string name="favorite_short">Ulubiony</string>
     <string name="unfavorite_short">Unfavorite</string>
     <string name="block">Zablokuj</string>
