@@ -53,7 +53,8 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                         (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
                 File customDir = null;
                 if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
+                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
+                            (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
                     if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
                 }
 
