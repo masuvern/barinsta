@@ -57,11 +57,13 @@
     <string name="show_stories">Mostra storie</string>
     <string name="no_more_stories">Niente più storie!</string>
     <string name="view_story_post">Vedi post nella storia</string>
+    <string name="spotify">Spotify</string>
     <string name="vote_story_poll">Vota</string>
     <string name="votef_story_poll">Votazione riuscita!</string>
     <string name="voted_story_poll">Hai già votato!</string>
     <string name="priv_acc">Questo profilo è privato</string>
     <string name="empty_acc">Questo profilo non ha post</string>
+    <string name="empty_list">No Such Posts!</string>
     <string name="curr_version">Versione corrente: v%s</string>
     <string name="read_more">leggi di più…</string>
     <string name="login">Accedi</string>
@@ -71,6 +73,9 @@
     <string name="project_link">Visita la pagina del progetto</string>
     <string name="telegram_link">Unisciti al gruppo Telegram</string>
     <string name="matrix_link">Unisciti alla stanza Matrix</string>
+    <string name="liked">Liked</string>
+    <string name="saved">Saved</string>
+    <string name="tagged">Tagged</string>
     <string name="like">Like (%s)</string>
     <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Salva segnalibro</string>
