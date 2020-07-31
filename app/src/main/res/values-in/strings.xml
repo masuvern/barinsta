@@ -57,11 +57,13 @@
     <string name="show_stories">Tampilkan story</string>
     <string name="no_more_stories">Story sampai di sini!</string>
     <string name="view_story_post">Lihat Story Post</string>
+    <string name="spotify">Spotify</string>
     <string name="vote_story_poll">Pilih</string>
     <string name="votef_story_poll">Berhasil memilih!</string>
     <string name="voted_story_poll">Anda sudah memilih!</string>
     <string name="priv_acc">Akun Ini Bersifat Pribadi</string>
     <string name="empty_acc">Akun ini tidak memiliki kiriman</string>
+    <string name="empty_list">No Such Posts!</string>
     <string name="curr_version">Versi saat ini: v%s</string>
     <string name="read_more">selengkapnya…</string>
     <string name="login">Masuk</string>
@@ -71,6 +73,9 @@
     <string name="project_link">Kunjungi Laman Proyek</string>
     <string name="telegram_link">Gabung Grup Telegram</string>
     <string name="matrix_link">Gabung ke Ruangan Matrix</string>
+    <string name="liked">Liked</string>
+    <string name="saved">Saved</string>
+    <string name="tagged">Tagged</string>
     <string name="like">Suka (%s)</string>
     <string name="unlike">Batal suka (%s)</string>
     <string name="bookmark">Markah</string>
