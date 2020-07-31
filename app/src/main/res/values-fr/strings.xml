@@ -3,6 +3,7 @@
     <string name="description">Le mainteneur original, AWAiS, a fait d\'InstaGrabber une petite application personnelle de base avec l\'intention de \"voler\" les messages d\'Instagram. Très malheureusement, elle a été abandonnée et moi, Austin Huang, j\'ai repris le navire. Après tout, cette application est entièrement open source, sans publicité, et sans suivi (en dehors de ce que sait Instagram). Même si vous ne vous souciez pas de télécharger des choses (comme moi), ça reste un excellent client Instagram à utiliser ! Contactez instagrabber@austinhuang.me ou cliquez sur l\'un des boutons ci-dessous.</string>
     <string name="action_quickaccess">Accès rapide</string>
     <string name="action_about">À propos</string>
+    <string name="action_notif">Notifications</string>
     <string name="action_dms">Messages privés</string>
     <string name="action_setting">Paramètres (v%s)</string>
     <string name="action_settings">Paramètres</string>
@@ -26,6 +27,7 @@
     <string name="title_favorites">Favoris</string>
     <string name="title_discover">Découvrir</string>
     <string name="title_comments">Commentaires</string>
+    <string name="title_notifications">Notifications</string>
     <string name="title_highlight">Temps forts: %s</string>
     <string name="title_user_story">Stories de l\'utilisateur</string>
     <string name="title_changelog">Journal des changements</string>
@@ -57,6 +59,7 @@
     <string name="show_stories">Afficher les stories</string>
     <string name="no_more_stories">Plus de stories!</string>
     <string name="view_story_post">Afficher le post de la story</string>
+    <string name="view_post">View Post</string>
     <string name="spotify">Spotify</string>
     <string name="vote_story_poll">Vote</string>
     <string name="votef_story_poll">Vote successful!</string>
@@ -173,6 +176,10 @@
     <string name="login_error_loading_cookies">Erreur de chargement des cookies</string>
     <string name="login_success_loading_cookies">Cookies chargés avec succès!\nSi vous ne pouvez toujours pas ouvrir de pages/postes privés, reconnectez-vous !</string>
     <string name="comment_hint">Écrire un nouveau commentaire...</string>
+    <string name="liked_notif">Liked your post</string>
+    <string name="comment_notif">Commented on your post:</string>
+    <string name="follow_notif">Started following you</string>
+    <string name="mention_notif">Mentioned you:</string>
     <string name="share_public_post">Partager ce post public à...</string>
     <string name="share_private_post">C\'est post privé ! Partagez avec ceux qui peuvent le voir !</string>
     <string name="update_available">Une mise-à-jour est disponible! (%s)</string>
