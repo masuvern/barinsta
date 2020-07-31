@@ -60,6 +60,9 @@
     <string name="show_stories">Show stories</string>
     <string name="no_more_stories">No more stories!</string>
     <string name="view_story_post">View Story Post</string>
+    <string name="vote_story_poll">Vote</string>
+    <string name="votef_story_poll">Vote successful!</string>
+    <string name="voted_story_poll">You have already voted!</string>
     <string name="priv_acc">This Account is Private</string>
     <string name="empty_acc">This Account has No Posts</string>
     <string name="curr_version">Current version: v%s</string>
