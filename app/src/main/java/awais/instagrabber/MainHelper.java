@@ -854,20 +854,22 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     }
                 } else {
                     if (Utils.dataBox.getFavorite(main.userQuery) != null) {
-                        main.mainBinding.btnFollow.setText(R.string.unfavorite);
+                        main.mainBinding.btnFollow.setText(R.string.unfavorite_short);
                         main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                                 R.color.btn_purple_background, null)));
                     }
                     else {
-                        main.mainBinding.btnFollow.setText(R.string.favorite);
+                        main.mainBinding.btnFollow.setText(R.string.favorite_short);
                         main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                                 R.color.btn_pink_background, null)));
                     }
                     main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
-                    main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
-                    main.mainBinding.btnRestrict.setText(R.string.tagged);
-                    main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                            R.color.btn_blue_background, null)));
+                    if (!profileModel.isReallyPrivate()) {
+                        main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnRestrict.setText(R.string.tagged);
+                        main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_blue_background, null)));
+                    }
                 }
 
                 main.mainBinding.mainProfileImage.setEnabled(false);
@@ -1197,13 +1199,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            final boolean iamme = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)).equals(main.profileModel.getId());
-            if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null) {
+            final boolean iamme = isLoggedIn
+                    ? Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)).equals(main.profileModel.getId())
+                    : false;
+            if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null && v == main.mainBinding.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery));
                 onRefresh();
-            } else if (!isLoggedIn) {
+            } else if (!isLoggedIn && v == main.mainBinding.btnFollow) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis(),
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery));
                 onRefresh();

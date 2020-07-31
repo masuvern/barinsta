@@ -90,8 +90,6 @@
     <string name="unbookmark">Unbookmark</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
-    <string name="favorite">Add to Favorites</string>
-    <string name="unfavorite">Remove from Favorites</string>
     <string name="favorite_short">Favorite</string>
     <string name="unfavorite_short">Unfavorite</string>
     <string name="block">Block</string>
