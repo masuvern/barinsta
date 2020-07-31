@@ -74,6 +74,9 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
                         if (isVideo && videoResources != null)
                             models[i].setVideoUrl(Utils.getHighQualityPost(videoResources, true));
 
+                        if (!data.isNull("story_app_attribution"))
+                            models[i].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
+
                         for (int j = 0; j < tappableLength; ++j) {
                             JSONObject tappableObject = tappableObjects.getJSONObject(j);
                             if (tappableObject.optString("__typename").equals("GraphTappableFeedMedia")) {

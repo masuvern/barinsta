@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Main;
+import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
@@ -852,6 +853,7 @@ public final class Utils {
 
         if (dir.exists() || dir.mkdirs()) {
             final Main main = method != DownloadMethod.DOWNLOAD_FEED && context instanceof Main ? (Main) context : null;
+            final SavedViewer saved = method == DownloadMethod.DOWNLOAD_SAVED && context instanceof SavedViewer ? (SavedViewer) context : null;
 
             final int itemsToDownloadSize = itemsToDownload.size();
 
@@ -859,12 +861,34 @@ public final class Utils {
             for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
                 final BasePostModel selectedItem = itemsToDownload.get(i);
 
-                if (main == null) {
+                if (main == null && saved == null) {
                     new DownloadAsync(context,
                             selectedItem.getDisplayUrl(),
                             getDownloadSaveFile(finalDir, selectedItem, ""),
                             null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+                } else if (saved != null) {
+                    new PostFetcher(selectedItem.getShortCode(), result -> {
+                        if (result != null) {
+                            final int resultsSize = result.length;
+                            final boolean multiResult = resultsSize > 1;
+
+                            for (int j = 0; j < resultsSize; j++) {
+                                final BasePostModel model = result[j];
+                                final File saveFile = getDownloadSaveFile(finalDir, model, multiResult ? "_slide_" + (j + 1) : "");
+
+                                new DownloadAsync(context,
+                                        model.getDisplayUrl(),
+                                        saveFile,
+                                        file -> {
+                                            model.setDownloaded(true);
+                                            saved.deselectSelection(selectedItem);
+                                        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            }
+                        } else {
+                            saved.deselectSelection(selectedItem);
+                        }
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 } else {
                     new PostFetcher(selectedItem.getShortCode(), result -> {
                         if (result != null) {
@@ -986,16 +1010,7 @@ public final class Utils {
             final String fileWithoutPrefix = fileName + '0' + extension;
             exists = new File(downloadDir, fileWithoutPrefix).exists();
             if (!exists) {
-                if (customDir != null) exists = new File(customDir, fileWithoutPrefix).exists();
-                if (!exists && !Utils.isEmpty(username)) {
-                    exists = new File(new File(downloadDir, username), fileWithoutPrefix).exists();
-                }
-                if (!exists && customDir != null)
-                    exists = new File(new File(customDir, username), fileWithoutPrefix).exists();
-            }
-
-            if (!exists && isSlider) {
-                final String fileWithPrefix = fileName + "[\\d]+_slide_[\\d]+" + extension;
+                final String fileWithPrefix = fileName + "[\\d]+(|_slide_[\\d]+)(\\.mp4|\\" + extension + ")";
                 final FilenameFilter filenameFilter = (dir, name) -> Pattern.matches(fileWithPrefix, name);
 
                 File[] files = downloadDir.listFiles(filenameFilter);
@@ -1162,6 +1177,9 @@ public final class Utils {
 
                     if (isVideo && data.has("video_resources"))
                         storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true));
+
+                    if (!data.isNull("story_app_attribution"))
+                        storyModels[j].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
 
                     if (hasTappableObjecs) {
                         for (int k = 0; k < tappableLength; ++k) {

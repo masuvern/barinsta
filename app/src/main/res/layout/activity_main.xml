@@ -112,26 +112,25 @@
                                 android:id="@+id/profileActions"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/mainUrl"
-                                android:weightSum="3">
+                                android:layout_below="@id/mainUrl">
                                 <androidx.appcompat.widget.AppCompatButton
                                     android:id="@+id/btnFollow"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
+                                    android:layout_height="match_parent"
                                     android:layout_marginLeft="8dp"
                                     android:layout_marginStart="2dp"
                                     android:layout_marginRight="8dp"
                                     android:layout_weight="1"
                                     android:text="@string/follow"
                                     android:textColor="@color/btn_pink_text_color"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     app:backgroundTint="@color/btn_pink_background"
                                     android:visibility="gone" />
 
                                 <androidx.appcompat.widget.AppCompatButton
                                     android:id="@+id/btnRestrict"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
+                                    android:layout_height="match_parent"
                                     android:layout_marginLeft="8dp"
                                     android:layout_marginEnd="1dp"
                                     android:layout_marginStart="1dp"
@@ -139,22 +138,60 @@
                                     android:layout_weight="1"
                                     android:text="@string/restrict"
                                     android:textColor="@color/btn_orange_text_color"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     app:backgroundTint="@color/btn_orange_background"
                                     android:visibility="gone" />
 
+                                <!-- only for invisible private accounts -->
                                 <androidx.appcompat.widget.AppCompatButton
                                     android:id="@+id/btnBlock"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
+                                    android:layout_height="match_parent"
                                     android:layout_marginLeft="8dp"
                                     android:layout_marginEnd="2dp"
                                     android:layout_marginRight="8dp"
                                     android:layout_weight="1"
                                     android:text="@string/block"
                                     android:textColor="@color/btn_red_text_color"
-                                    android:textSize="18sp"
+                                    android:textSize="16sp"
                                     app:backgroundTint="@color/btn_red_background"
+                                    android:visibility="gone" />
+                            </androidx.appcompat.widget.LinearLayoutCompat>
+
+                            <androidx.appcompat.widget.LinearLayoutCompat
+                                android:id="@+id/myActions"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/profileActions">
+
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnTagged"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="8dp"
+                                    android:layout_marginStart="2dp"
+                                    android:layout_marginRight="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/tagged"
+                                    android:textColor="@color/btn_blue_text_color"
+                                    android:textSize="16sp"
+                                    app:backgroundTint="@color/btn_blue_background"
+                                    android:visibility="gone" />
+
+                                <!-- also used as block -->
+                                <androidx.appcompat.widget.AppCompatButton
+                                    android:id="@+id/btnSaved"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="8dp"
+                                    android:layout_marginEnd="1dp"
+                                    android:layout_marginStart="1dp"
+                                    android:layout_marginRight="8dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/saved"
+                                    android:textColor="@color/btn_orange_text_color"
+                                    android:textSize="16sp"
+                                    app:backgroundTint="@color/btn_orange_background"
                                     android:visibility="gone" />
                             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -163,7 +200,7 @@
                                 android:id="@+id/highlightsList"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/profileActions"
+                                android:layout_below="@id/myActions"
                                 android:clipToPadding="false"
                                 android:orientation="horizontal"
                                 android:paddingStart="5dp"

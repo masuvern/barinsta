@@ -194,6 +194,15 @@ public final class StoryViewer extends BaseLanguageActivity {
             return false;
         });
 
+        storyViewerBinding.spotify.setOnClickListener(v -> {
+            final Object tag = v.getTag();
+            if (tag instanceof CharSequence) {
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(tag.toString()));
+                startActivity(intent);
+            }
+        });
+
         storyViewerBinding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) startActivity(new Intent(this, PostViewer.class)
@@ -396,6 +405,10 @@ public final class StoryViewer extends BaseLanguageActivity {
         final String shortCode = currentStory.getTappableShortCode();
         storyViewerBinding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
         storyViewerBinding.viewStoryPost.setTag(shortCode);
+
+        final String spotify = currentStory.getSpotify();
+        storyViewerBinding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
+        storyViewerBinding.spotify.setTag(spotify);
 
         final PollModel poll = currentStory.getPoll();
         storyViewerBinding.interactStory.setVisibility(poll != null ? View.VISIBLE : View.GONE);

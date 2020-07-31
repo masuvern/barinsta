@@ -49,6 +49,9 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
     @Override
     protected PostModel[] doInBackground(final Void... voids) {
         final boolean isHashTag = id.charAt(0) == '#';
+        final boolean isSaved = id.charAt(0) == '$';
+        final boolean isTagged = id.charAt(0) == '%';
+        //final boolean isLiked = id.charAt(0) == '^';
         final boolean isLocation = id.contains("/");
 
         final String url;
@@ -58,6 +61,12 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
         else if (isLocation)
             url = "https://www.instagram.com/graphql/query/?query_hash=36bd0f2bf5911908de389b8ceaa3be6d&variables=" +
                     "{\"id\":\""+ id.split("/")[0] +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
+        else if (isSaved)
+            url = "https://www.instagram.com/graphql/query/?query_hash=8c86fed24fa03a8a2eea2a70a80c7b6b&variables=" +
+                    "{\"id\":\""+ id.substring(1) +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
+        else if (isTagged)
+            url = "https://www.instagram.com/graphql/query/?query_hash=ff260833edf142911047af6024eb634a&variables=" +
+                    "{\"id\":\""+ id.substring(1) +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else
             url = "https://www.instagram.com/graphql/query/?query_id=17880160963012870&id=" + id + "&first=50&after=" + endCursor;
 
@@ -80,7 +89,9 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                         .getJSONObject(isHashTag ? Constants.EXTRAS_HASHTAG :
                                 (isLocation ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_USER))
                         .getJSONObject(isHashTag ? "edge_hashtag_to_media" :
-                                (isLocation ? "edge_location_to_media" : "edge_owner_to_timeline_media"));
+                                (isLocation ? "edge_location_to_media" :
+                                        (isSaved ? "edge_saved_media" :
+                                                (isTagged ? "edge_user_to_photos_of_you" : "edge_owner_to_timeline_media"))));
 
                 final String endCursor;
                 final boolean hasNextPage;
@@ -116,6 +127,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                             mediaNode.optBoolean("viewer_has_saved"), mediaNode.getJSONObject("edge_liked_by").getLong("count"));
 
                     Utils.checkExistence(downloadDir, customDir, username, isSlider, models[i]);
+                    Utils.checkExistence(downloadDir, customDir, "@"+username, isSlider, models[i]);
                 }
 
                 if (models[models.length - 1] != null)

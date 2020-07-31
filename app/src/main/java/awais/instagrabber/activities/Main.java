@@ -458,6 +458,9 @@ public final class Main extends BaseLanguageActivity {
                 return;
             }
         }
+        else {
+            finish();
+        }
     }
 
     @Override

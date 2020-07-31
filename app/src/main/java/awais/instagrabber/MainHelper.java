@@ -46,6 +46,7 @@ import java.util.Arrays;
 import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.Main;
 import awais.instagrabber.activities.PostViewer;
+import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.activities.StoryViewer;
 import awais.instagrabber.adapters.DiscoverAdapter;
 import awais.instagrabber.adapters.FeedAdapter;
@@ -522,7 +523,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     }
 
     private void setupExplore() {
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(main, Utils.convertDpToPx(130));
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(main, Utils.convertDpToPx(110));
         main.mainBinding.discoverPosts.setLayoutManager(layoutManager);
         main.mainBinding.discoverPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
 
@@ -650,7 +651,16 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.btnFollow.setVisibility(View.GONE);
         main.mainBinding.btnRestrict.setVisibility(View.GONE);
         main.mainBinding.btnBlock.setVisibility(View.GONE);
+        main.mainBinding.btnSaved.setVisibility(View.GONE);
+        main.mainBinding.btnTagged.setVisibility(View.GONE);
         main.mainBinding.btnMap.setVisibility(View.GONE);
+
+        main.mainBinding.btnFollow.setOnClickListener(profileActionListener);
+        main.mainBinding.btnRestrict.setOnClickListener(profileActionListener);
+        main.mainBinding.btnBlock.setOnClickListener(profileActionListener);
+        main.mainBinding.btnSaved.setOnClickListener(profileActionListener);
+        main.mainBinding.btnTagged.setOnClickListener(profileActionListener);
+        main.mainBinding.btnFollowTag.setOnClickListener(profileActionListener);
 
         main.mainBinding.infoContainer.setVisibility(View.GONE);
         main.mainBinding.tagInfoContainer.setVisibility(View.GONE);
@@ -698,7 +708,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 main.mainBinding.btnFollowTag.setVisibility(View.VISIBLE);
-                main.mainBinding.btnFollowTag.setOnClickListener(profileActionListener);
 
                 if (isLoggedIn) {
                     new StoryStatusFetcher(profileId, hashtagModel.getName(), false, result -> {
@@ -779,8 +788,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                     final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE));
                     if (!profileId.equals(myId)) {
+                        main.mainBinding.btnTagged.setVisibility(View.GONE);
+                        main.mainBinding.btnSaved.setVisibility(View.GONE);
                         main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnFollow.setOnClickListener(profileActionListener);
                         if (profileModel.getFollowing() == true) {
                             main.mainBinding.btnFollow.setText(R.string.unfollow);
                             main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
@@ -797,29 +807,50 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                     R.color.btn_pink_background, null)));
                         }
                         main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnRestrict.setOnClickListener(profileActionListener);
                         if (profileModel.getRestricted() == true) {
                             main.mainBinding.btnRestrict.setText(R.string.unrestrict);
                             main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_blue_background, null)));
+                                    R.color.btn_green_background, null)));
                         }
                         else {
                             main.mainBinding.btnRestrict.setText(R.string.restrict);
                             main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                                     R.color.btn_orange_background, null)));
                         }
-                        main.mainBinding.btnBlock.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnBlock.setOnClickListener(profileActionListener);
-                        if (profileModel.getBlocked() == true) {
-                            main.mainBinding.btnBlock.setText(R.string.unblock);
-                            main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_green_background, null)));
+                        if (profileModel.isReallyPrivate()) {
+                            main.mainBinding.btnBlock.setVisibility(View.VISIBLE);
+                            main.mainBinding.btnSaved.setVisibility(View.GONE);
+                            main.mainBinding.btnTagged.setVisibility(View.GONE);
+                            if (profileModel.getBlocked() == true) {
+                                main.mainBinding.btnBlock.setText(R.string.unblock);
+                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                        R.color.btn_green_background, null)));
+                            } else {
+                                main.mainBinding.btnBlock.setText(R.string.block);
+                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                        R.color.btn_red_background, null)));
+                            }
+                        } else {
+                            main.mainBinding.btnBlock.setVisibility(View.GONE);
+                            main.mainBinding.btnSaved.setVisibility(View.VISIBLE);
+                            main.mainBinding.btnTagged.setVisibility(View.VISIBLE);
+                            if (profileModel.getBlocked() == true) {
+                                main.mainBinding.btnSaved.setText(R.string.unblock);
+                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                        R.color.btn_green_background, null)));
+                            } else {
+                                main.mainBinding.btnSaved.setText(R.string.block);
+                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                        R.color.btn_red_background, null)));
+                            }
                         }
-                        else {
-                            main.mainBinding.btnBlock.setText(R.string.block);
-                            main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_red_background, null)));
-                        }
+                    }
+                    else {
+                        main.mainBinding.btnTagged.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnSaved.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnSaved.setText(R.string.saved);
+                        main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
+                                R.color.btn_orange_background, null)));
                     }
                 } else {
                     if (Utils.dataBox.getFavorite(main.userQuery) != null) {
@@ -832,7 +863,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                                 R.color.btn_pink_background, null)));
                     }
-                    main.mainBinding.btnFollow.setOnClickListener(profileActionListener);
                     main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
                 }
 
@@ -864,7 +894,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
                 main.mainBinding.mainFollowing.setText(span);
 
-                main.mainBinding.mainFullName.setText(profileModel.getName());
+                main.mainBinding.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername() : profileModel.getName());
 
                 CharSequence biography = profileModel.getBiography();
                 main.mainBinding.mainBiography.setCaptionIsExpandable(true);
@@ -1163,6 +1193,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
+            final boolean iamme = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)).equals(main.profileModel.getId());
             if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
@@ -1176,10 +1207,20 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 new ProfileAction().execute("follow");
             } else if (v == main.mainBinding.btnRestrict) {
                 new ProfileAction().execute("restrict");
-            } else if (v == main.mainBinding.btnBlock) {
+            } else if (v == main.mainBinding.btnSaved && !iamme) {
                 new ProfileAction().execute("block");
             } else if (v == main.mainBinding.btnFollowTag) {
                 new ProfileAction().execute("followtag");
+            } else if (v == main.mainBinding.btnTagged) {
+                main.startActivity(new Intent(main, SavedViewer.class)
+                        .putExtra(Constants.EXTRAS_INDEX, "%"+main.profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
+                );
+            } else if (v == main.mainBinding.btnSaved) {
+                main.startActivity(new Intent(main, SavedViewer.class)
+                        .putExtra(Constants.EXTRAS_INDEX, "$"+main.profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
+                );
             }
         }
     };
