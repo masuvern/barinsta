@@ -3,7 +3,7 @@
     <string name="description">Il manutentore originale, AWAiS, ha reso InstaGrabber una piccola e semplice app personale con le intenzioni di [rub-] scaricare post da Instagram. Sfortunatamente, questo è stato abbandonato e io, Austin Huang, ho preso il timone. [Speriamo che sia almeno un po \'di denaro contante.] Dopotutto, questa app è completamente open source, senza pubblicità e senza tracciamento [a parte ciò che Instagram sa]. Anche se non ti importa di scaricare roba [come me], è comunque un ottimo client Instagram da usare! \ N \ nFai domande [o vuoi solo parlare]? Contatta instagrabber@austinhuang.me o fai clic su uno dei pulsanti di seguito.</string>
     <string name="action_quickaccess">Accesso rapido</string>
     <string name="action_about">Riguardo</string>
-    <string name="action_notif">Notifications</string>
+    <string name="action_notif">Notifiche</string>
     <string name="action_dms">Direct Messaggi</string>
     <string name="action_setting">Impostazioni (v%s)</string>
     <string name="action_settings">Impostazioni</string>
@@ -27,7 +27,7 @@
     <string name="title_favorites">Favoriti</string>
     <string name="title_discover">Scopri</string>
     <string name="title_comments">Commenti</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_notifications">Notifiche</string>
     <string name="title_highlight">Contenuto in evidenza: %s</string>
     <string name="title_user_story">Storia Utente</string>
     <string name="title_changelog">Changelog</string>
@@ -59,14 +59,14 @@
     <string name="show_stories">Mostra storie</string>
     <string name="no_more_stories">Niente più storie!</string>
     <string name="view_story_post">Vedi post nella storia</string>
-    <string name="view_post">View Post</string>
+    <string name="view_post">Mostra Post</string>
     <string name="spotify">Spotify</string>
     <string name="vote_story_poll">Vota</string>
     <string name="votef_story_poll">Votazione riuscita!</string>
     <string name="voted_story_poll">Hai già votato!</string>
     <string name="priv_acc">Questo profilo è privato</string>
     <string name="empty_acc">Questo profilo non ha post</string>
-    <string name="empty_list">No Such Posts!</string>
+    <string name="empty_list">Nessun Post Simile!</string>
     <string name="curr_version">Versione corrente: v%s</string>
     <string name="read_more">leggi di più…</string>
     <string name="login">Accedi</string>
@@ -76,9 +76,9 @@
     <string name="project_link">Visita la pagina del progetto</string>
     <string name="telegram_link">Unisciti al gruppo Telegram</string>
     <string name="matrix_link">Unisciti alla stanza Matrix</string>
-    <string name="liked">Liked</string>
-    <string name="saved">Saved</string>
-    <string name="tagged">Tagged</string>
+    <string name="liked">Ha messo Like</string>
+    <string name="saved">Salvato</string>
+    <string name="tagged">Taggato</string>
     <string name="like">Like (%s)</string>
     <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Salva segnalibro</string>
