@@ -175,7 +175,7 @@
     <string name="login_success_loading_cookies">Cookies chargés avec succès!\nSi vous ne pouvez toujours pas ouvrir de pages/postes privés, reconnectez-vous !</string>
     <string name="comment_hint">Écrire un nouveau commentaire...</string>
     <string name="liked_notif">A aimé votre publication</string>
-    <string name="comment_notif">Commented on your post:</string>
+    <string name="comment_notif">A commenté sur ta publication :</string>
     <string name="follow_notif">A commencé à vous suivre</string>
     <string name="mention_notif">Vous a mentionné :</string>
     <string name="share_public_post">Partager ce post public à...</string>
