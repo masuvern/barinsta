@@ -16,10 +16,12 @@ InstaGrabber is an app that allows...
 
 It can be used as a drop-in replacement for read functionalities of the official Instagram app, with unnecessary components stripped.
 
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/1.jpg" alt="Profile" width="23%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/2.jpg" alt="Post" width="23%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/3.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/3.jpg" alt="Story (Highlight shown)" width="23%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/4.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/3.jpg" alt="Hashtag" width="23%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/1.jpg" alt="Profile" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/2.jpg" alt="Post" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/3.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/3.jpg" alt="Comments" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/4.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/4.jpg" alt="Story (Highlight shown)" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/5.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/5.jpg" alt="Hashtag" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/6.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/6.jpg" alt="Location" width="15%"/></a>
 
 This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber) but subsequently abandoned it. I decided to continue the app cuz why not, ~~even though it might not be that *cash money*.~~ (Also I need to learn Java.)
 
@@ -34,6 +36,7 @@ Not compatible with pre-16.6 versions (including alpha).
 Remember to read the [wiki](https://github.com/austinhuang0131/instagrabber/wiki) for more info!
 
 [![Open Source Love svg3](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
 [![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)

@@ -13,6 +13,14 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/action_notif"
+        android:icon="@drawable/ic_notif"
+        android:title="@string/action_notif"
+        android:titleCondensed="@string/action_notif"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_about"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/action_about"

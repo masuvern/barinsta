@@ -87,8 +87,6 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
         new CommentsFetcher(shortCode, new FetchListener<CommentModel[]>() {
             @Override
             public void onResult(final CommentModel[] commentModels) {
-                commentsBinding.toolbar.progressCircular.setVisibility(View.GONE);
-
                 commentsAdapter = new CommentsAdapter(commentModels, true, clickListener, mentionClickListener);
 
                 commentsBinding.rvComments.setAdapter(commentsAdapter);
@@ -104,8 +102,6 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
             @Override
             public void onResult(final CommentModel[] commentModels) {
                 commentsBinding.swipeRefreshLayout.setRefreshing(false);
-
-                commentsBinding.toolbar.progressCircular.setVisibility(View.GONE);
 
                 commentsAdapter = new CommentsAdapter(commentModels, true, clickListener, mentionClickListener);
 

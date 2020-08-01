@@ -425,8 +425,6 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
                 if (btnMute != null) btnMute.setVisibility(View.VISIBLE);
                 final PlayerView playerView = new PlayerView(context);
 
-                Log.d("austin_debug","1");
-
                 player = new SimpleExoPlayer.Builder(context).build();
                 playerView.setPlayer(player);
 

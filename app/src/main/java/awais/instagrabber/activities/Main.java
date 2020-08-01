@@ -87,7 +87,7 @@ public final class Main extends BaseLanguageActivity {
     private MenuItem searchAction;
     public ActivityMainBinding mainBinding;
     public SearchView searchView;
-    public MenuItem downloadAction, settingsAction, dmsAction;
+    public MenuItem downloadAction, settingsAction, dmsAction, notifAction;
     public StoryModel[] storyModels;
     public String userQuery = null;
     public MainHelper mainHelper;
@@ -117,9 +117,6 @@ public final class Main extends BaseLanguageActivity {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String uid = Utils.getUserIdFromCookie(cookie);
         Utils.setupCookies(cookie);
-
-        if (settingsHelper.getInteger(Constants.PROFILE_FETCH_MODE) == 2)
-            settingsHelper.putInteger(Constants.PROFILE_FETCH_MODE, 1);
 
         MainHelper.stopCurrentExecutor();
         mainHelper = new MainHelper(this);
@@ -292,10 +289,12 @@ public final class Main extends BaseLanguageActivity {
         final MenuItem quickAccessAction = menu.findItem(R.id.action_quickaccess).setVisible(true);
 
         final MenuItem.OnMenuItemClickListener clickListener = item -> {
-            if (item == downloadAction) {
+            if (item == downloadAction)
                 downloadSelectedItems();
-            } else if (item == dmsAction)
+            else if (item == dmsAction)
                 startActivity(new Intent(this, DirectMessages.class));
+            else if (item == notifAction)
+                startActivity(new Intent(this, NotificationsViewer.class));
             else if (item == settingsAction)
                 new SettingsDialog().show(fragmentManager, "settings");
             else if (item == quickAccessAction)
@@ -310,11 +309,12 @@ public final class Main extends BaseLanguageActivity {
         quickAccessAction.setOnMenuItemClickListener(clickListener);
         menu.findItem(R.id.action_about).setVisible(true).setOnMenuItemClickListener(clickListener);
         dmsAction = menu.findItem(R.id.action_dms).setOnMenuItemClickListener(clickListener);
+        notifAction = menu.findItem(R.id.action_notif).setOnMenuItemClickListener(clickListener);
         settingsAction = menu.findItem(R.id.action_settings).setVisible(true).setOnMenuItemClickListener(clickListener);
         downloadAction = menu.findItem(R.id.action_download).setOnMenuItemClickListener(clickListener);
 
         if (!Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE))) {
-            //settingsAction.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            notifAction.setVisible(true);
             dmsAction.setVisible(true).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
 
@@ -332,6 +332,7 @@ public final class Main extends BaseLanguageActivity {
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);
             menu.findItem(R.id.action_quickaccess).setVisible(false);
+            menu.findItem(R.id.action_notif).setVisible(false);
         });
         searchAction.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
@@ -345,6 +346,7 @@ public final class Main extends BaseLanguageActivity {
                 menu.findItem(R.id.action_settings).setVisible(true);
                 menu.findItem(R.id.action_dms).setVisible(true);
                 menu.findItem(R.id.action_quickaccess).setVisible(true);
+                menu.findItem(R.id.action_notif).setVisible(true);
                 return true;
             }
         });
@@ -457,6 +459,9 @@ public final class Main extends BaseLanguageActivity {
                 mainHelper.onRefresh();
                 return;
             }
+        }
+        else {
+            finish();
         }
     }
 

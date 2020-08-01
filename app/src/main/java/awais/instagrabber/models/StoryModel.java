@@ -8,7 +8,8 @@ public final class StoryModel implements Serializable {
     private final String storyMediaId, storyUrl, username;
     private final MediaItemType itemType;
     private final long timestamp;
-    private String videoUrl, tappableShortCode;
+    private String videoUrl, tappableShortCode, spotify;
+    private PollModel poll;
     private int position;
     private boolean isCurrentSlide = false;
 
@@ -44,6 +45,10 @@ public final class StoryModel implements Serializable {
         return tappableShortCode;
     }
 
+    public PollModel getPoll() {
+        return poll;
+    }
+
     public int getPosition() {
         return position;
     }
@@ -52,8 +57,20 @@ public final class StoryModel implements Serializable {
         this.videoUrl = videoUrl;
     }
 
+    public String getSpotify() {
+        return spotify;
+    }
+
+    public void setSpotify(final String spotify) {
+        this.spotify = spotify;
+    }
+
     public void setTappableShortCode(final String tappableShortCode) {
         this.tappableShortCode = tappableShortCode;
+    }
+
+    public void setPoll(final PollModel poll) {
+        this.poll = poll;
     }
 
     public void setPosition(final int position) {

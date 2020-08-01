@@ -268,7 +268,11 @@ public final class PostViewer extends BaseLanguageActivity {
             final List<? extends BasePostModel> itemGetterItems;
             final boolean isMainSwipe;
 
-            if (itemGetType != null && Main.itemGetter != null) {
+            if (itemGetType == ItemGetType.SAVED_ITEMS && SavedViewer.itemGetter != null) {
+                itemGetterItems = SavedViewer.itemGetter.get(itemGetType);
+                isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.SAVED_ITEMS && isFromShare);
+            }
+            else if (itemGetType != null && Main.itemGetter != null) {
                 itemGetterItems = Main.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.MAIN_ITEMS && isFromShare);
             } else {

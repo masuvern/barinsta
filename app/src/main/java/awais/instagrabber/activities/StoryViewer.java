@@ -15,10 +15,12 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
@@ -36,8 +38,11 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -47,6 +52,7 @@ import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.ActivityStoryViewerBinding;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
+import awais.instagrabber.models.PollModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -79,6 +85,7 @@ public final class StoryViewer extends BaseLanguageActivity {
     private SimpleExoPlayer player;
     private SwipeEvent swipeEvent;
     private MenuItem menuDownload;
+    private PollModel poll;
     private StoryModel currentStory;
     private String url, username;
     private int slidePos = 0, lastSlidePos = 0;
@@ -121,8 +128,6 @@ public final class StoryViewer extends BaseLanguageActivity {
 
             @Override
             public void onSwipe(final boolean isRightSwipe) {
-                Log.d("austin_debug", "swipe: "+(isRightSwipe ? "backward " : "forward ") + slidePos + "/" + storiesLen + " "
-                        + (slidePos == storiesLen - 1 && isRightSwipe == false) + " " + intent.hasExtra(Constants.FEED));
                 if (storyModels != null && storiesLen > 0) {
                     if (((slidePos + 1 >= storiesLen && isRightSwipe == false) || (slidePos == 0 && isRightSwipe == true))
                             && intent.hasExtra(Constants.FEED)) {
@@ -189,10 +194,43 @@ public final class StoryViewer extends BaseLanguageActivity {
             return false;
         });
 
+        storyViewerBinding.spotify.setOnClickListener(v -> {
+            final Object tag = v.getTag();
+            if (tag instanceof CharSequence) {
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(tag.toString()));
+                startActivity(intent);
+            }
+        });
+
         storyViewerBinding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) startActivity(new Intent(this, PostViewer.class)
                     .putExtra(Constants.EXTRAS_POST, new PostModel(tag.toString())));
+        });
+
+        storyViewerBinding.interactStory.setOnClickListener(v -> {
+            final Object tag = v.getTag();
+            if (tag instanceof PollModel) {
+                poll = (PollModel) tag;
+                if (poll.getMyChoice() > -1)
+                    new AlertDialog.Builder(this).setTitle(R.string.voted_story_poll)
+                            .setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{
+                                    (poll.getMyChoice() == 0 ? "√ " : "") + poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
+                                    (poll.getMyChoice() == 1 ? "√ " : "") + poll.getRightChoice() + " (" + poll.getRightCount() + ")"
+                            }), null)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
+                else new AlertDialog.Builder(this).setTitle(poll.getQuestion())
+                        .setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{
+                                poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
+                                poll.getRightChoice() + " (" + poll.getRightCount() + ")"
+                        }), (d, w) -> {
+                            new VoteAction().execute(w);
+                        })
+                        .setPositiveButton(R.string.cancel, null)
+                        .show();
+            }
         });
 
         storiesAdapter.setData(storyModels);
@@ -368,9 +406,18 @@ public final class StoryViewer extends BaseLanguageActivity {
         storyViewerBinding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
         storyViewerBinding.viewStoryPost.setTag(shortCode);
 
+        final String spotify = currentStory.getSpotify();
+        storyViewerBinding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
+        storyViewerBinding.spotify.setTag(spotify);
+
+        final PollModel poll = currentStory.getPoll();
+        storyViewerBinding.interactStory.setVisibility(poll != null ? View.VISIBLE : View.GONE);
+        storyViewerBinding.interactStory.setText(R.string.vote_story_poll);
+        storyViewerBinding.interactStory.setTag(poll);
+
         releasePlayer();
         final Intent intent = getIntent();
-        if (intent.hasExtra(Constants.EXTRAS_HASHTAG)) {
+        if (intent.getBooleanExtra(Constants.EXTRAS_HASHTAG, false)) {
             storyViewerBinding.toolbar.toolbar.setTitle(currentStory.getUsername() + " (" + intent.getStringExtra(Constants.EXTRAS_USERNAME) + ")");
             storyViewerBinding.toolbar.toolbar.setOnClickListener(v -> {
                 searchUsername(currentStory.getUsername());
@@ -407,5 +454,47 @@ public final class StoryViewer extends BaseLanguageActivity {
             }
         }
         return returnvalue;
+    }
+
+    class VoteAction extends AsyncTask<Integer, Void, Void> {
+        int ok = -1;
+        String action;
+
+        protected Void doInBackground(Integer... rawchoice) {
+            int choice = rawchoice[0];
+            final String url = "https://www.instagram.com/media/"+currentStory.getStoryMediaId()+"/"+poll.getId()+"/story_poll_vote/";
+            try {
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+                urlConnection.setRequestProperty("x-csrftoken",
+                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", "6");
+                urlConnection.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes("vote="+choice);
+                wr.flush();
+                wr.close();
+                urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    ok = choice;
+                }
+                else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                urlConnection.disconnect();
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "vote: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok > -1) {
+                poll.setMyChoice(ok);
+                Toast.makeText(getApplicationContext(), R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

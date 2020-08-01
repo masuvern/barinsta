@@ -38,15 +38,42 @@
             android:layout_gravity="center"
             android:visibility="gone" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/viewStoryPost"
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/postActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:text="@string/view_story_post"
-            android:textColor="@color/btn_green_text_color"
-            android:visibility="gone"
-            app:backgroundTint="@color/btn_green_background" />
+            android:layout_weight="0.3"
+            android:background="#0000"
+            android:weightSum="3"
+            android:layout_gravity="bottom">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/viewStoryPost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/view_story_post"
+                android:textColor="@color/btn_green_text_color"
+                android:visibility="gone"
+                app:backgroundTint="@color/btn_green_background" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/interactStory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/view_story_post"
+                android:textColor="@color/btn_blue_text_color"
+                android:visibility="gone"
+                app:backgroundTint="@color/btn_blue_background" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/spotify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/spotify"
+                android:textColor="@color/btn_green_text_color"
+                android:visibility="gone"
+                app:backgroundTint="@color/btn_green_background" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
     </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView

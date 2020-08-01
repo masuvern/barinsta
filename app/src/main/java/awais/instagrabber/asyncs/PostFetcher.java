@@ -19,6 +19,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
+import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -41,18 +42,21 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // to check if file exists
-                final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download");
-                File customDir = null;
-                if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
-                    if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
-                }
 
                 final JSONObject media = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql")
                         .getJSONObject("shortcode_media");
 
                 final String username = media.has("owner") ? media.getJSONObject("owner").getString(Constants.EXTRAS_USERNAME) : null;
+
+                // to check if file exists
+                final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
+                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                File customDir = null;
+                if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
+                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
+                            (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                    if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
+                }
 
                 final long timestamp = media.getLong("taken_at_timestamp");
 
@@ -95,7 +99,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                     postModel.setCommentsCount(commentsCount);
                     postModel.setCommentsEndCursor(endCursor);
 
-                    Utils.checkExistence(downloadDir, customDir, username, false, -1, postModel);
+                    Utils.checkExistence(downloadDir, customDir, false, postModel);
 
                     result = new ViewerPostModel[]{postModel};
 
@@ -119,7 +123,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                                 media.optJSONObject("location"));
                         postModels[i].setSliderDisplayUrl(node.getString("display_url"));
 
-                        Utils.checkExistence(downloadDir, customDir, username, true, i, postModels[i]);
+                        Utils.checkExistence(downloadDir, customDir, true, postModels[i]);
                     }
 
                     postModels[0].setCommentsCount(commentsCount);

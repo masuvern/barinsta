@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Main;
+import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
@@ -70,6 +71,7 @@ import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.IntentModel;
+import awais.instagrabber.models.PollModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -80,6 +82,7 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.InboxReadState;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
 import awaisomereport.LogCollector;
@@ -126,6 +129,7 @@ public final class Utils {
             try {
                 final URI uri1 = new URI("https://instagram.com");
                 final URI uri2 = new URI("https://instagram.com/");
+                final URI uri3 = new URI("https://i.instagram.com/");
                 for (final String cookie : cookieRaw.split(";")) {
                     final String[] strings = cookie.split("=", 2);
                     final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
@@ -134,6 +138,7 @@ public final class Utils {
                     httpCookie.setVersion(0);
                     cookieStore.add(uri1, httpCookie);
                     cookieStore.add(uri2, httpCookie);
+                    cookieStore.add(uri3, httpCookie);
                 }
             } catch (final URISyntaxException e) {
                 if (logCollector != null)
@@ -730,6 +735,14 @@ public final class Utils {
         return RavenExpiringMediaType.RAVEN_UNKNOWN;
     }
 
+    public static NotificationType getNotifType(final String itemType) {
+        if ("GraphLikeAggregatedStory".equals(itemType)) return NotificationType.LIKE;
+        if ("GraphFollowAggregatedStory".equals(itemType)) return NotificationType.FOLLOW;
+        if ("GraphCommentMediaStory".equals(itemType)) return NotificationType.COMMENT;
+        if ("GraphMentionStory".equals(itemType)) return NotificationType.MENTION;
+        return null;
+    }
+
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
             displayMetrics = Resources.getSystem().getDisplayMetrics();
@@ -825,11 +838,13 @@ public final class Utils {
         return sb.toString();
     }
 
-    public static void batchDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
+    public static void batchDownload(@NonNull final Context context, @Nullable String username, final DownloadMethod method,
                                      final List<? extends BasePostModel> itemsToDownload) {
         if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
 
         if (itemsToDownload == null || itemsToDownload.size() < 1) return;
+
+        if (username.charAt(0) == '@') username = username.substring(1);
 
         if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
             batchDownloadImpl(context, username, method, itemsToDownload);
@@ -851,6 +866,7 @@ public final class Utils {
 
         if (dir.exists() || dir.mkdirs()) {
             final Main main = method != DownloadMethod.DOWNLOAD_FEED && context instanceof Main ? (Main) context : null;
+            final SavedViewer saved = method == DownloadMethod.DOWNLOAD_SAVED && context instanceof SavedViewer ? (SavedViewer) context : null;
 
             final int itemsToDownloadSize = itemsToDownload.size();
 
@@ -858,12 +874,34 @@ public final class Utils {
             for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
                 final BasePostModel selectedItem = itemsToDownload.get(i);
 
-                if (main == null) {
+                if (main == null && saved == null) {
                     new DownloadAsync(context,
                             selectedItem.getDisplayUrl(),
                             getDownloadSaveFile(finalDir, selectedItem, ""),
                             null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+                } else if (saved != null) {
+                    new PostFetcher(selectedItem.getShortCode(), result -> {
+                        if (result != null) {
+                            final int resultsSize = result.length;
+                            final boolean multiResult = resultsSize > 1;
+
+                            for (int j = 0; j < resultsSize; j++) {
+                                final BasePostModel model = result[j];
+                                final File saveFile = getDownloadSaveFile(finalDir, model, multiResult ? "_slide_" + (j + 1) : "");
+
+                                new DownloadAsync(context,
+                                        model.getDisplayUrl(),
+                                        saveFile,
+                                        file -> {
+                                            model.setDownloaded(true);
+                                            saved.deselectSelection(selectedItem);
+                                        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            }
+                        } else {
+                            saved.deselectSelection(selectedItem);
+                        }
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 } else {
                     new PostFetcher(selectedItem.getShortCode(), result -> {
                         if (result != null) {
@@ -971,30 +1009,21 @@ public final class Utils {
         return extension;
     }
 
-    public static void checkExistence(final File downloadDir, final File customDir, final String username, final boolean isSlider,
-                                      final int sliderIndex, @NonNull final BasePostModel model) {
+    public static void checkExistence(final File downloadDir, final File customDir, final boolean isSlider,
+                                      @NonNull final BasePostModel model) {
         boolean exists = false;
 
         try {
             final String displayUrl = model.getDisplayUrl();
             final int index = displayUrl.indexOf('?');
 
-            final String fileName = model.getPostId() + '_' + model.getPosition();
+            final String fileName = model.getPostId() + '_';
             final String extension = displayUrl.substring(index - 4, index);
 
-            final String fileWithoutPrefix = fileName + extension;
+            final String fileWithoutPrefix = fileName + '0' + extension;
             exists = new File(downloadDir, fileWithoutPrefix).exists();
             if (!exists) {
-                if (customDir != null) exists = new File(customDir, fileWithoutPrefix).exists();
-                if (!exists && !Utils.isEmpty(username)) {
-                    exists = new File(new File(downloadDir, username), fileWithoutPrefix).exists();
-                }
-                if (!exists && customDir != null)
-                    exists = new File(new File(customDir, username), fileWithoutPrefix).exists();
-            }
-
-            if (!exists && isSlider && sliderIndex != -1) {
-                final String fileWithPrefix = fileName + "_slide_[\\d]+" + extension;
+                final String fileWithPrefix = fileName + "[\\d]+(|_slide_[\\d]+)(\\.mp4|\\" + extension + ")";
                 final FilenameFilter filenameFilter = (dir, name) -> Pattern.matches(fileWithPrefix, name);
 
                 File[] files = downloadDir.listFiles(filenameFilter);
@@ -1007,7 +1036,6 @@ public final class Utils {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "checkExistence",
                         new Pair<>("isSlider", isSlider),
-                        new Pair<>("sliderIndex", sliderIndex),
                         new Pair<>("model", model));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
@@ -1163,13 +1191,25 @@ public final class Utils {
                     if (isVideo && data.has("video_resources"))
                         storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true));
 
+                    if (!data.isNull("story_app_attribution"))
+                        storyModels[j].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
+
                     if (hasTappableObjecs) {
                         for (int k = 0; k < tappableLength; ++k) {
                             JSONObject jsonObject = tappableObjects.getJSONObject(k);
                             if (jsonObject.getString("__typename").equals("GraphTappableFeedMedia") && jsonObject.has("media")) {
-                                jsonObject = jsonObject.getJSONObject("media");
-                                storyModels[j].setTappableShortCode(jsonObject.getString(Constants.EXTRAS_SHORTCODE));
-                                break;
+                                storyModels[j].setTappableShortCode(jsonObject.getJSONObject("media").getString(Constants.EXTRAS_SHORTCODE));
+                            }
+                            else if (jsonObject.optString("__typename").equals("GraphTappableStoryPoll") && !jsonObject.isNull("id")) {
+                                storyModels[j].setPoll(new PollModel(
+                                        jsonObject.getString("id"),
+                                        jsonObject.getString("question"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
+                                        jsonObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
+                                        jsonObject.optInt("viewer_vote", -1)
+                                ));
                             }
                         }
                     }
