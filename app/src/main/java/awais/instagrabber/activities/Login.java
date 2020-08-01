@@ -1,6 +1,7 @@
 package awais.instagrabber.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,10 +32,19 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
         @Override
         public void onPageFinished(final WebView view, final String url) {
             webViewUrl = url;
+            final String mainCookie = Utils.getCookie(url);
+            if (!mainCookie.contains("; ds_user_id=")) ready = true;
+            else if (mainCookie.contains("; ds_user_id=") && ready) {
+                Utils.setupCookies(mainCookie);
+                settingsHelper.putString(Constants.COOKIE, mainCookie);
+                Toast.makeText(getApplicationContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
     };
     private final WebChromeClient webChromeClient = new WebChromeClient();
     private String webViewUrl, defaultUserAgent;
+    private boolean ready = false;
     private ActivityLoginBinding loginBinding;
 
     @Override
@@ -62,7 +72,9 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
                 Utils.setupCookies(mainCookie);
                 settingsHelper.putString(Constants.COOKIE, mainCookie);
                 Toast.makeText(this, R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
-                finish();
+                Intent intent = new Intent(getApplicationContext(), Main.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
             }
         }
     }

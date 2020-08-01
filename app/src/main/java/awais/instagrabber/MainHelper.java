@@ -261,7 +261,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
     private DiscoverAdapter discoverAdapter;
     public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
-    final boolean isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
+    public final boolean isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
 
     public MainHelper(@NonNull final Main main) {
         stopCurrentExecutor();
@@ -624,6 +624,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         }
         main.mainBinding.appBarLayout.setExpanded(true, true);
         main.mainBinding.privatePage.setVisibility(View.GONE);
+        main.mainBinding.privatePage2.setTextSize(28);
         main.mainBinding.mainProfileImage.setImageBitmap(null);
         main.mainBinding.mainHashtagImage.setImageBitmap(null);
         main.mainBinding.mainLocationImage.setImageBitmap(null);
@@ -928,7 +929,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 if (!profileModel.isReallyPrivate()) {
                     main.mainBinding.mainFollowing.setClickable(true);
                     main.mainBinding.mainFollowers.setClickable(true);
-                    main.mainBinding.privatePage.setVisibility(View.GONE);
 
                     if (isLoggedIn) {
                         final View.OnClickListener followClickListener = v -> main.startActivity(new Intent(main, FollowViewer.class)

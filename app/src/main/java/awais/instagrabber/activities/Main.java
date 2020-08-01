@@ -230,8 +230,13 @@ public final class Main extends BaseLanguageActivity {
         mainBinding.mainLocationImage.setEnabled(false);
 
         final boolean isQueryNull = userQuery == null;
-        if (isQueryNull) allItems.clear();
-        if (BuildConfig.DEBUG && isQueryNull) userQuery = "@austinhuang.me";
+        if (isQueryNull) {
+            allItems.clear();
+            mainBinding.privatePage1.setImageResource(R.drawable.ic_info);
+            mainBinding.privatePage2.setTextSize(20);
+            mainBinding.privatePage2.setText(mainHelper.isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
+            mainBinding.privatePage.setVisibility(View.VISIBLE);
+        }
         if (!mainBinding.swipeRefreshLayout.isRefreshing() && userQuery != null) mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
@@ -327,7 +332,7 @@ public final class Main extends BaseLanguageActivity {
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setSuggestionsAdapter(suggestionAdapter);
         searchView.setOnSearchClickListener(v -> {
-            searchView.setQuery((cookieModel != null && userQuery.equals("@"+cookieModel.getUsername())) ? "" : userQuery, false);
+            searchView.setQuery((cookieModel != null && userQuery != null && userQuery.equals("@"+cookieModel.getUsername())) ? "" : userQuery, false);
             menu.findItem(R.id.action_about).setVisible(false);
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);
