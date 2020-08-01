@@ -3,6 +3,7 @@
     <string name="description">Pierwotny opiekun projektu, AWAiS, stworzył InstaGrabber jako małą i podstawową, osobistą aplikację z zamiarem [kradzieży-]pobierania postów z Instagrama. Niestety, projekt został porzucony, a ja, Austin Huang, przejąłem statek. [Miejmy nadzieję, że przyniesie to trochę gotówki.] W końcu ta aplikacja jest w pełni open source, bez reklam i bez śledzenia [poza tym, co wie już o Tobie Instagram]. Nawet jeśli nie zależy ci na pobieraniu rzeczy, nadal jest to świetny klient Instagrama!\n\nMasz pytania [lub po prostu chcesz porozmawiać]? Skontaktuj się ze mną drogą mailową: instagrabber@austinhuang.me lub kliknij jeden z poniższych przycisków.</string>
     <string name="action_quickaccess">Szybki dostęp</string>
     <string name="action_about">O aplikacji</string>
+    <string name="action_notif">Powiadomienia</string>
     <string name="action_dms">Prywatne wiadomości</string>
     <string name="action_setting">Ustawienia (v%s)</string>
     <string name="action_settings">Ustawienia</string>
@@ -26,6 +27,7 @@
     <string name="title_favorites">Ulubione</string>
     <string name="title_discover">Odkrywaj</string>
     <string name="title_comments">Komentarze</string>
+    <string name="title_notifications">Powiadomienia</string>
     <string name="title_highlight">Highlight: %s</string>
     <string name="title_user_story">User Story</string>
     <string name="title_changelog">Dziennik zmian</string>
@@ -57,8 +59,14 @@
     <string name="show_stories">Pokazuj relacje</string>
     <string name="no_more_stories">No more stories!</string>
     <string name="view_story_post">View Story Post</string>
+    <string name="view_post">Zobacz post</string>
+    <string name="spotify">Spotify</string>
+    <string name="vote_story_poll">Vote</string>
+    <string name="votef_story_poll">Vote successful!</string>
+    <string name="voted_story_poll">You have already voted!</string>
     <string name="priv_acc">To konto jest prywatne</string>
     <string name="empty_acc">To konto nie zawiera postów</string>
+    <string name="empty_list">No Such Posts!</string>
     <string name="curr_version">Aktualna wersja: v%s</string>
     <string name="read_more">czytaj więcej…</string>
     <string name="login">Zaloguj</string>
@@ -68,6 +76,9 @@
     <string name="project_link">Odwiedź stronę projektu</string>
     <string name="telegram_link">Dołącz do grupy na Telegramie</string>
     <string name="matrix_link">Dołącz do Matrix Room</string>
+    <string name="liked">Liked</string>
+    <string name="saved">Saved</string>
+    <string name="tagged">Tagged</string>
     <string name="like">Like (%s)</string>
     <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Bookmark</string>
@@ -163,6 +174,10 @@
     <string name="login_error_loading_cookies">Error loading cookies</string>
     <string name="login_success_loading_cookies">Pomyślnie załadowano ciasteczka!\nJeśli nadal nie możesz otworzyć prywatnych stron/postów, zaloguj się ponownie!</string>
     <string name="comment_hint">Napisz nowy komentarz...</string>
+    <string name="liked_notif">Polubiono twój post</string>
+    <string name="comment_notif">Skomentowano Twój post:</string>
+    <string name="follow_notif">Zaczął Cię obserwować</string>
+    <string name="mention_notif">Mentioned you:</string>
     <string name="share_public_post">Share this public post to...</string>
     <string name="share_private_post">This is a private post! Share to those who can view them!</string>
     <string name="update_available">Aktualizacja jest dostępna! (%s)</string>
