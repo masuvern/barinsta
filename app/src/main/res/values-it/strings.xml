@@ -174,10 +174,10 @@
     <string name="login_error_loading_cookies"> Errore durante il caricamento dei cookie</string>
     <string name="login_success_loading_cookies">Cookie caricati correttamente! \nSe non riesci ancora ad aprire pagine / post privati, accedi nuovamente!</string>
     <string name="comment_hint">Scrivi un nuovo commento...</string>
-    <string name="liked_notif">Liked your post</string>
-    <string name="comment_notif">Commented on your post:</string>
-    <string name="follow_notif">Started following you</string>
-    <string name="mention_notif">Mentioned you:</string>
+    <string name="liked_notif">Ha messo mi piace al tuo post</string>
+    <string name="comment_notif">Ha commentato il tuo post:</string>
+    <string name="follow_notif">Ha cominciato a seguirti</string>
+    <string name="mention_notif">Ti ha menzionato:</string>
     <string name="share_public_post">Condividi questo post pubblico a...</string>
     <string name="share_private_post">Questo è un post privato! Condividi con chi può vederli!</string>
     <string name="update_available">Un aggiornamento è disponibile! (%s)</string>
