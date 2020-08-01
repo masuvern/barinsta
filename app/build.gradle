@@ -13,7 +13,7 @@ android {
         // 16.7 is 32, 16.9 is 35 (34 is public beta)
 
         versionCode 36
-        versionName '16.9'
+        versionName '17.0'
 
         multiDexEnabled true
 
