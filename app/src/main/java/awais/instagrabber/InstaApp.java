@@ -22,8 +22,6 @@ import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.dataBox;
 import static awais.instagrabber.utils.Utils.datetimeParser;
 import static awais.instagrabber.utils.Utils.getInstalledTelegramPackage;
-import static awais.instagrabber.utils.Utils.isInstaInstalled;
-import static awais.instagrabber.utils.Utils.isInstagramInstalled;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -41,7 +39,6 @@ public final class InstaApp extends MultiDexApplication {
 
         final Context appContext = getApplicationContext();
 
-        isInstagramInstalled = isInstaInstalled(appContext);
         telegramPackage = getInstalledTelegramPackage(appContext);
 
         if (dataBox == null)

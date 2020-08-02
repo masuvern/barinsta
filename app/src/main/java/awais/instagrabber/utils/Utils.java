@@ -53,11 +53,15 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -113,7 +117,6 @@ public final class Utils {
     public static final String CHANNEL_ID = "InstaGrabber", CHANNEL_NAME = "Instagrabber",
             NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
     public static boolean isChannelCreated = false;
-    public static boolean isInstagramInstalled = false;
     public static String telegramPackage;
     public static ClipboardManager clipboardManager;
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
@@ -1223,6 +1226,26 @@ public final class Utils {
         }
     }
 
+    public static String sign(final String message) {
+        try {
+            Mac hasher = Mac.getInstance("HmacSHA256");
+            hasher.init(new SecretKeySpec(Constants.SIGNATURE_KEY.getBytes(), "HmacSHA256"));
+            byte[] hash = hasher.doFinal(message.getBytes());
+            StringBuffer hexString = new StringBuffer();
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            Log.d("austin_debug", "hash: " + hexString.toString());
+            return hexString.toString() + "." + message;
+        }
+        catch (Throwable e) {
+            Log.e("austin_debug", "sign: ", e);
+            return null;
+        }
+    }
+
     public static CharSequence getSpannableUrl(final String url) {
         if (Utils.isEmpty(url)) return url;
         final int httpIndex = url.indexOf("http:");
@@ -1351,20 +1374,6 @@ public final class Utils {
     public static void errorFinish(@NonNull final Activity activity) {
         Toast.makeText(activity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
         activity.finish();
-    }
-
-    public static boolean isInstaInstalled(@NonNull final Context context) {
-        final PackageManager packageManager = context.getPackageManager();
-        try {
-            packageManager.getPackageInfo("com.instagram.android", 0);
-            return true;
-        } catch (final Exception e) {
-            try {
-                return packageManager.getApplicationInfo("com.instagram.android", 0).enabled;
-            } catch (final Exception e1) {
-                return false;
-            }
-        }
     }
 
     @Nullable

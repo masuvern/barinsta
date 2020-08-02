@@ -83,7 +83,6 @@ public final class StoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]
                                 models[i].setTappableShortCode(tappableObject.getJSONObject("media").getString(Constants.EXTRAS_SHORTCODE));
                             }
                             else if (tappableObject.optString("__typename").equals("GraphTappableStoryPoll")) {
-                                Log.d("austin_debug", "poll: "+url+" "+tappableObject);
                                 models[i].setPoll(new PollModel(
                                         tappableObject.getString("id"),
                                         tappableObject.getString("question"),

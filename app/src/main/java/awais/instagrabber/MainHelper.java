@@ -1205,11 +1205,11 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null && v == main.mainBinding.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
-                        main.locationModel != null ? main.locationModel.getName() : main.userQuery));
+                        main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (!isLoggedIn && v == main.mainBinding.btnFollow) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis(),
-                        main.locationModel != null ? main.locationModel.getName() : main.userQuery));
+                        main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (v == main.mainBinding.btnFollow) {
                 new ProfileAction().execute("follow");
