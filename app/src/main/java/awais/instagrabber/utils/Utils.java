@@ -844,7 +844,7 @@ public final class Utils {
 
         if (itemsToDownload == null || itemsToDownload.size() < 1) return;
 
-        if (username.charAt(0) == '@') username = username.substring(1);
+        if (username != null && username.charAt(0) == '@') username = username.substring(1);
 
         if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
             batchDownloadImpl(context, username, method, itemsToDownload);
