@@ -86,12 +86,10 @@ public final class DataBox extends SQLiteOpenHelper {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
                 try {
-                    final int rowsDeleted = db.delete(TABLE_FAVORITES, KEY_QUERY_TEXT + "=? AND "
-                                    + KEY_DATE_ADDED + "=?",
+                    final int rowsDeleted = db.delete(TABLE_FAVORITES, "query_text=? AND date_added=?",
                             new String[]{query, Long.toString(favoriteModel.getDate())});
 
-                    final int rowsDeletedTwo = db.delete(TABLE_FAVORITES, KEY_QUERY_TEXT + "=? AND "
-                                    + KEY_DATE_ADDED + "=?",
+                    final int rowsDeletedTwo = db.delete(TABLE_FAVORITES, "query_text=? AND date_added=?",
                             new String[]{query.replaceAll("@", ""), Long.toString(favoriteModel.getDate())});
 
                     if (rowsDeleted > 0 || rowsDeletedTwo > 0) db.setTransactionSuccessful();

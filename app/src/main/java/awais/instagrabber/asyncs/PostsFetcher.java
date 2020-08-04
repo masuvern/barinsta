@@ -52,7 +52,6 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
         final boolean isHashTag = id.charAt(0) == '#';
         final boolean isSaved = id.charAt(0) == '$';
         final boolean isTagged = id.charAt(0) == '%';
-        //final boolean isLiked = id.charAt(0) == '^';
         final boolean isLocation = id.contains("/");
 
         final String url;

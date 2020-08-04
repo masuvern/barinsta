@@ -389,9 +389,10 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
     @Nullable
     private ProfileModel getUser(final long userId) {
         if (users != null) {
-            for (final ProfileModel user : users)
+            for (final ProfileModel user : users) {
                 if (Long.toString(userId).equals(user.getId())) return user;
                 return myProfileHolder;
+            }
         }
         return null;
     }

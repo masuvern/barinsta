@@ -479,7 +479,7 @@ public final class StoryViewer extends BaseLanguageActivity {
         storyViewerBinding.mention.setTag(mentions);
 
         quiz = currentStory.getQuiz();
-        storyViewerBinding.quiz.setVisibility((quiz != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
+        storyViewerBinding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
         storyViewerBinding.quiz.setTag(quiz);
 
         releasePlayer();

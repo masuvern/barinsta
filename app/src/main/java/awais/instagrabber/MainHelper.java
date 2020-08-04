@@ -218,9 +218,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onResult(final FeedStoryModel[] result) {
             feedStoriesAdapter.setData(result);
-            if (result != null && result.length > 0)
+            if (result != null && result.length > 0) {
                 main.mainBinding.feedStories.setVisibility(View.VISIBLE);
                 stories = result;
+            }
         }
     };
     private final MentionClickListener mentionClickListener = new MentionClickListener() {
@@ -976,14 +977,13 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             currentlyExecuting = new LocationFetcher(main.userQuery.split("/")[0], locationModel -> {
                 main.locationModel = locationModel;
 
-                main.mainBinding.toolbar.toolbar.setTitle(locationModel.getName());
-
                 if (locationModel == null) {
                     main.mainBinding.swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(main, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                     main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
                     return;
                 }
+                main.mainBinding.toolbar.toolbar.setTitle(locationModel.getName());
 
                 final String profileId = locationModel.getId();
 

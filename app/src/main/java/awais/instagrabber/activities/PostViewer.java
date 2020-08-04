@@ -632,23 +632,23 @@ public final class PostViewer extends BaseLanguageActivity {
             postModel.setBookmark(viewerPostModel.getBookmark());
             if (viewerPostModel.getLike() == true) {
                 viewerBinding.btnLike.setText(resources.getString(R.string.unlike, viewerPostModel.getLikes()));
-                viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                        R.color.btn_pink_background, null)));
+                viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        getApplicationContext(), R.color.btn_pink_background)));
             }
             else {
                 viewerBinding.btnLike.setText(resources.getString(R.string.like, viewerPostModel.getLikes()));
-                viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                        R.color.btn_lightpink_background, null)));
+                viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        getApplicationContext(), R.color.btn_lightpink_background)));
             }
             if (viewerPostModel.getBookmark() == true) {
                 viewerBinding.btnBookmark.setText(R.string.unbookmark);
-                viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                        R.color.btn_orange_background, null)));
+                viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        getApplicationContext(), R.color.btn_orange_background)));
             }
             else {
                 viewerBinding.btnBookmark.setText(R.string.bookmark);
-                viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                        R.color.btn_lightorange_background, null)));
+                viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        getApplicationContext(), R.color.btn_lightorange_background)));
             }
         }
 
