@@ -53,7 +53,6 @@ import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +74,7 @@ import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.PollModel;
+import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -89,6 +88,7 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
+import awais.instagrabber.models.stickers.QuestionModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemActionLogModel;
@@ -260,8 +260,9 @@ public final class Utils {
         return stringBuilder;
     }
 
+    // isI: true if the content was requested from i.instagram.com instead of graphql
     @Nullable
-    public static String getHighQualityPost(final JSONArray resources, final boolean isVideo) {
+    public static String getHighQualityPost(final JSONArray resources, final boolean isVideo, final boolean isI) {
         try {
             final int resourcesLen = resources.length();
 
@@ -270,18 +271,18 @@ public final class Utils {
             int lastResBase = 0, lastIndexBase = -1;
             for (int i = 0; i < resourcesLen; ++i) {
                 final JSONObject item = resources.getJSONObject(i);
-                if (item != null && (!isVideo || item.has(Constants.EXTRAS_PROFILE))) {
-                    sources[i] = item.getString("src");
-                    final int currRes = item.getInt("config_width") * item.getInt("config_height");
+                if (item != null && (!isVideo || item.has(Constants.EXTRAS_PROFILE) || isI)) {
+                    sources[i] = item.getString(isI ? "url" : "src");
+                    final int currRes = item.getInt(isI ? "width" : "config_width") * item.getInt(isI ? "height" : "config_height");
 
-                    final String profile = isVideo ? item.getString(Constants.EXTRAS_PROFILE) : null;
+                    final String profile = isVideo ? item.optString(Constants.EXTRAS_PROFILE) : null;
 
                     if (!isVideo || "MAIN".equals(profile)) {
                         if (currRes > lastResMain) {
                             lastResMain = currRes;
                             lastIndexMain = i;
                         }
-                    } else if ("BASELINE".equals(profile)) {
+                    } else {
                         if (currRes > lastResBase) {
                             lastResBase = currRes;
                             lastIndexBase = i;
@@ -305,7 +306,9 @@ public final class Utils {
     public static String getHighQualityImage(final JSONObject resources) {
         String src = null;
         try {
-            if (resources.has("display_resources")) src = getHighQualityPost(resources.getJSONArray("display_resources"), false);
+            if (resources.has("display_resources")) src = getHighQualityPost(resources.getJSONArray("display_resources"), false, false);
+            else if (resources.has("image_versions2"))
+                src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true);
             if (src == null) return resources.getString("display_url");
         } catch (final Exception e) {
             if (logCollector != null)
@@ -1157,6 +1160,23 @@ public final class Utils {
         return "[]";
     }
 
+    @NonNull
+    public static String iHighlightIdsMerger(final String... strings) {
+        if (strings != null) {
+            int iMax = strings.length - 1;
+            if (iMax != -1) {
+                final StringBuilder builder = new StringBuilder();
+                for (int i = 0; ; i++) {
+                    builder.append(strings[i]);
+                    if (i == iMax) return builder.toString();
+                    builder.append("&reel_ids=");
+                }
+            }
+
+        }
+        return "";
+    }
+
     public static void putHighlightModels(final HttpURLConnection conn, final Object[] model) throws Exception {
         final boolean isHighlightModel = model instanceof HighlightModel[];
         final boolean isFeedStoryModel = model instanceof FeedStoryModel[];
@@ -1192,7 +1212,7 @@ public final class Utils {
                             data.getLong("taken_at_timestamp"), data.getJSONObject("owner").getString("username"));
 
                     if (isVideo && data.has("video_resources"))
-                        storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true));
+                        storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true, false));
 
                     if (!data.isNull("story_app_attribution"))
                         storyModels[j].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
@@ -1226,6 +1246,75 @@ public final class Utils {
         }
     }
 
+    public static void iPutFeedStoryModels(final HttpURLConnection conn, final FeedStoryModel[] model, final String[] ids) throws Exception {
+        final JSONObject highlightsMediaReel = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("reels");
+        final int mediaLength = highlightsMediaReel.length();
+
+        for (int i = 0; i < mediaLength; ++i) {
+            final JSONArray items = highlightsMediaReel.getJSONObject(ids[i]).getJSONArray("items");
+            final int itemsLen = items.length();
+
+            final StoryModel[] storyModels = new StoryModel[itemsLen];
+            for (int j = 0; j < itemsLen; ++j) {
+                final JSONObject data = items.getJSONObject(j);
+                final boolean isVideo = data.has("has_audio") && data.optBoolean("has_audio");
+
+                storyModels[j] = new StoryModel(data.getString("pk"),
+                        data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0).getString("url"),
+                        isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                        data.optLong("taken_at", 0),
+                        model[i].getProfileModel().getUsername());
+
+                final JSONArray videoResources = data.optJSONArray("video_versions");
+                if (isVideo && videoResources != null)
+                    storyModels[j].setVideoUrl(Utils.getHighQualityPost(videoResources, true, true));
+
+                if (data.has("story_feed_media")) {
+                    storyModels[j].setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));
+                }
+
+                if (!data.isNull("story_app_attribution"))
+                    storyModels[j].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
+
+                if (data.has("story_polls")) {
+                    JSONObject tappableObject = data.optJSONArray("story_polls").getJSONObject(0).optJSONObject("poll_sticker");
+                    if (tappableObject != null) storyModels[j].setPoll(new PollModel(
+                            String.valueOf(tappableObject.getLong("poll_id")),
+                            tappableObject.getString("question"),
+                            tappableObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
+                            tappableObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
+                            tappableObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
+                            tappableObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
+                            tappableObject.optInt("viewer_vote", -1)
+                    ));
+                }
+                if (data.has("story_questions")) {
+                    JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0).optJSONObject("question_sticker");
+                    if (tappableObject != null) storyModels[j].setQuestion(new QuestionModel(
+                            String.valueOf(tappableObject.getLong("question_id")),
+                            tappableObject.getString("question")
+                    ));
+                }
+                JSONArray hashtags = data.optJSONArray("story_hashtags");
+                JSONArray atmarks = data.optJSONArray("reel_mentions");
+                String[] mentions = new String[(hashtags == null ? 0 : hashtags.length()) + (atmarks == null ? 0 : atmarks.length())];
+                if (hashtags != null) {
+                    for (int h = 0; h < hashtags.length(); ++h) {
+                        mentions[h] = "#"+hashtags.getJSONObject(h).getJSONObject("hashtag").getString("name");
+                    }
+                }
+                if (atmarks != null) {
+                    for (int h = 0; h < atmarks.length(); ++h) {
+                        mentions[h + (hashtags == null ? 0 : hashtags.length())] =
+                                "@"+atmarks.getJSONObject(h).getJSONObject("user").getString("username");
+                    }
+                }
+                storyModels[j].setMentions(mentions);
+            }
+            model[i].setStoryModels(storyModels);
+        }
+    }
+
     public static String sign(final String message) {
         try {
             Mac hasher = Mac.getInstance("HmacSHA256");
@@ -1237,8 +1326,7 @@ public final class Utils {
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            Log.d("austin_debug", "hash: " + hexString.toString());
-            return hexString.toString() + "." + message;
+            return "ig_sig_key_version="+Constants.SIGNATURE_VERSION+"&signed_body=" + hexString.toString() + "." + message;
         }
         catch (Throwable e) {
             Log.e("austin_debug", "sign: ", e);

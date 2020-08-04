@@ -8,6 +8,7 @@ import androidx.multidex.MultiDexApplication;
 
 import java.net.CookieHandler;
 import java.text.SimpleDateFormat;
+import java.util.UUID;
 
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
@@ -60,6 +61,8 @@ public final class InstaApp extends MultiDexApplication {
                     settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED) ?
                             settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT) :
                             settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
+
+        settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
 
         changeTheme();
     }
