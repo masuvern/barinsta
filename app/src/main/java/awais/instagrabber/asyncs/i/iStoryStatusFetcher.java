@@ -13,6 +13,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
+import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
@@ -99,6 +100,26 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                                     String.valueOf(tappableObject.getLong("question_id")),
                                     tappableObject.getString("question")
                             ));
+                        }
+                        if (data.has("story_quizs")) {
+                            JSONObject tappableObject = data.getJSONArray("story_quizs").getJSONObject(0).optJSONObject("quiz_sticker");
+                            if (tappableObject != null) {
+                                String[] choices = new String[tappableObject.getJSONArray("tallies").length()];
+                                Long[] counts = new Long[choices.length];
+                                for (int q = 0; q < choices.length; ++q) {
+                                    JSONObject tempchoice = tappableObject.getJSONArray("tallies").getJSONObject(q);
+                                    choices[q] = (q == tappableObject.getInt("correct_answer") ? "*** " : "")
+                                            +tempchoice.getString("text");
+                                    counts[q] = tempchoice.getLong("count");
+                                }
+                                models[i].setQuiz(new QuizModel(
+                                        String.valueOf(tappableObject.getLong("quiz_id")),
+                                        tappableObject.getString("question"),
+                                        choices,
+                                        counts,
+                                        tappableObject.optInt("viewer_answer", -1)
+                                ));
+                            }
                         }
                         JSONArray hashtags = data.optJSONArray("story_hashtags");
                         JSONArray locations = data.optJSONArray("story_locations");

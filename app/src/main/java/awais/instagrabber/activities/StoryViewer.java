@@ -62,6 +62,7 @@ import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
+import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -97,6 +98,7 @@ public final class StoryViewer extends BaseLanguageActivity {
     private PollModel poll;
     private QuestionModel question;
     private String[] mentions;
+    private QuizModel quiz;
     private StoryModel currentStory;
     private String url, username;
     private int slidePos = 0, lastSlidePos = 0;
@@ -267,11 +269,25 @@ public final class StoryViewer extends BaseLanguageActivity {
                         .setPositiveButton(R.string.cancel, null)
                         .show();
             }
+            else if (tag instanceof QuizModel) {
+                quiz = (QuizModel) quiz;
+                String[] choices = new String[quiz.getChoices().length];
+                for (int q = 0; q < choices.length; ++q) {
+                    choices[q] = (quiz.getMyChoice() == q ? "√ " :"") + quiz.getChoices()[q]+ " (" + String.valueOf(quiz.getCounts()[q]) + ")";
+                }
+                new AlertDialog.Builder(this).setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
+                        .setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, choices), (d,w) -> {
+                            if (quiz.getMyChoice() == -1) new QuizAction().execute(w);
+                        })
+                        .setPositiveButton(R.string.cancel, null)
+                        .show();
+            }
         };
 
         storyViewerBinding.poll.setOnClickListener(storyActionListener);
         storyViewerBinding.answer.setOnClickListener(storyActionListener);
         storyViewerBinding.mention.setOnClickListener(storyActionListener);
+        storyViewerBinding.quiz.setOnClickListener(storyActionListener);
 
         storiesAdapter.setData(storyModels);
         if (storyModels.length > 1) storyViewerBinding.storiesList.setVisibility(View.VISIBLE);
@@ -462,6 +478,10 @@ public final class StoryViewer extends BaseLanguageActivity {
         storyViewerBinding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
         storyViewerBinding.mention.setTag(mentions);
 
+        quiz = currentStory.getQuiz();
+        storyViewerBinding.quiz.setVisibility((quiz != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
+        storyViewerBinding.quiz.setTag(quiz);
+
         releasePlayer();
         final Intent intent = getIntent();
         if (intent.getBooleanExtra(Constants.EXTRAS_HASHTAG, false)) {
@@ -545,6 +565,56 @@ public final class StoryViewer extends BaseLanguageActivity {
         }
     }
 
+    class QuizAction extends AsyncTask<Integer, Void, Void> {
+        int ok = -1;
+        String action;
+
+        protected Void doInBackground(Integer... rawchoice) {
+            int choice = rawchoice[0];
+            final String cookie = settingsHelper.getString(Constants.COOKIE);
+            final String url = "https://i.instagram.com/api/v1/media/"+currentStory.getStoryMediaId()+"/"+quiz.getId()+"/story_quiz_answer/";
+            try {
+                JSONObject ogbody = new JSONObject("{\"client_context\":\"" + UUID.randomUUID().toString()
+                        +"\",\"mutation_token\":\"" + UUID.randomUUID().toString()
+                        +"\",\"_csrftoken\":\"" + cookie.split("csrftoken=")[1].split(";")[0]
+                        +"\",\"_uid\":\"" + Utils.getUserIdFromCookie(cookie)
+                        +"\",\"__uuid\":\"" + settingsHelper.getString(Constants.DEVICE_UUID)
+                        +"\"}");
+                ogbody.put("answer", String.valueOf(choice));
+                String urlParameters = Utils.sign(ogbody.toString());
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", Integer.toString(urlParameters.getBytes().length));
+                urlConnection.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+                Log.d("austin_debug", "quiz: "+url+" "+cookie+" "+urlParameters);
+                urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    ok = choice;
+                }
+                else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                urlConnection.disconnect();
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "quiz: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok > -1) {
+                quiz.setMyChoice(ok);
+                Toast.makeText(getApplicationContext(), R.string.answered_story, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     class RespondAction extends AsyncTask<String, Void, Void> {
         boolean ok = false;
         String action;
@@ -581,7 +651,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                 else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 urlConnection.disconnect();
             } catch (Throwable ex) {
-                Log.e("austin_debug", "vote: " + ex);
+                Log.e("austin_debug", "respond: " + ex);
             }
             return null;
         }
