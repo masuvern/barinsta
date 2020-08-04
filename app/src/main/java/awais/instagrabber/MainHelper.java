@@ -238,15 +238,19 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             final Object tag = v.getTag();
             if (tag instanceof FeedStoryModel) {
                 final FeedStoryModel feedStoryModel = (FeedStoryModel) tag;
-                StoryModel[] storyModels = feedStoryModel.getStoryModels();
                 final int index = indexOfIntArray(stories, feedStoryModel);
+                new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, result -> {
+                    if (result != null && result.length > 0)
+                        main.startActivity(new Intent(main, StoryViewer.class)
+                            .putExtra(Constants.EXTRAS_STORIES, result)
+                            .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                            .putExtra(Constants.FEED, stories)
+                            .putExtra(Constants.FEED_ORDER, index)
+                        );
+                    else Toast.makeText(main, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                main.startActivity(new Intent(main, StoryViewer.class)
-                        .putExtra(Constants.EXTRAS_STORIES, storyModels)
-                        .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
-                        .putExtra(Constants.FEED, stories)
-                        .putExtra(Constants.FEED_ORDER, index)
-                );
+
             }
         }
     });

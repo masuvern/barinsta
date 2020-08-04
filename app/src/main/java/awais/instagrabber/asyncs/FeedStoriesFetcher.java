@@ -67,24 +67,6 @@ public final class FeedStoriesFetcher extends AsyncTask<Void, Void, FeedStoryMod
                     feedStoryIDs[i] = id;
                     feedStoryModels[i] = new FeedStoryModel(id, profileModel);
                 }
-
-                for (int s = 0; s <= Math.ceil(feedStoryIDs.length / 20); ++s) {
-                    String[] shard = new String[Math.min(20, (feedStoryIDs.length - s*20))];
-                    FeedStoryModel[] feedStoryShard = new FeedStoryModel[Math.min(20, (feedStoryIDs.length - s*20))];
-                    System.arraycopy(feedStoryIDs, s*20, shard, 0, shard.length);
-                    System.arraycopy(feedStoryModels, s*20, feedStoryShard, 0, shard.length);
-                    url = "https://i.instagram.com/api/v1/feed/reels_media/?reel_ids=" + Utils.iHighlightIdsMerger(shard);
-                    conn = (HttpURLConnection) new URL(url).openConnection();
-                    conn.setRequestProperty("User-Agent", Constants.USER_AGENT);
-                    conn.setInstanceFollowRedirects(false);
-                    conn.setUseCaches(false);
-                    conn.setReadTimeout(2000);
-                    conn.connect();
-                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        Utils.iPutFeedStoryModels(conn, feedStoryShard, shard);
-                    }
-                }
-
                 result = feedStoryModels;
             }
 

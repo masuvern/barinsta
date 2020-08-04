@@ -55,6 +55,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.DownloadAsync;
+import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.ActivityStoryViewerBinding;
 import awais.instagrabber.interfaces.SwipeEvent;
@@ -150,14 +151,18 @@ public final class StoryViewer extends BaseLanguageActivity {
                                     (index == 0 ? null : storyFeed[index - 1]) :
                                     (storyFeed.length == index + 1 ? null : storyFeed[index + 1]);
                             if (feedStoryModel != null) {
-                                final StoryModel[] nextStoryModels = feedStoryModel.getStoryModels();
-                                final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
-                                        .putExtra(Constants.EXTRAS_STORIES, nextStoryModels)
-                                        .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
-                                        .putExtra(Constants.FEED, storyFeed)
-                                        .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index - 1) : (index + 1));
-                                newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(newIntent);
+                                new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, result -> {
+                                    if (result != null && result.length > 0) {
+                                        final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
+                                                .putExtra(Constants.EXTRAS_STORIES, result)
+                                                .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                                                .putExtra(Constants.FEED, storyFeed)
+                                                .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index - 1) : (index + 1));
+                                        newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(newIntent);
+                                    }
+                                    else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             }
                         }
                     }
