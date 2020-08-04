@@ -41,7 +41,7 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). ALWAY
 [![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f87cac1fbf674888b00bd91bc5eccce0)](https://app.codacy.com/manual/austinhuang0131/instagrabber)
 [![Crowdin](https://badges.crowdin.net/instagrabber/localized.svg)](https://github.com/austinhuang0131/instagrabber/wiki/Contribute)
-[![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
+[![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
 ### Contact us
 
