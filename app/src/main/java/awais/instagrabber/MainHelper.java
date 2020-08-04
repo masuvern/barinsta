@@ -256,7 +256,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     });
     @NonNull
     private final Main main;
-    private final Resources resources;
+    private Resources resources;
     private final View collapsingToolbar;
     private final RecyclerLazyLoader lazyLoader;
     private boolean isHashtag, isUser, isLocation;
