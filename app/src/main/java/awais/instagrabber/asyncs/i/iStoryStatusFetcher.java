@@ -62,7 +62,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                     final StoryModel[] models = new StoryModel[mediaLen];
                     for (int i = 0; i < mediaLen; ++i) {
                         data = media.getJSONObject(i);
-                        final boolean isVideo = data.has("has_audio") && data.optBoolean("has_audio");
+                        final boolean isVideo = data.has("video_duration");
 
                         models[i] = new StoryModel(data.getString("pk"),
                                 data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0).getString("url"),

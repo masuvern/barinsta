@@ -1257,7 +1257,7 @@ public final class Utils {
             final StoryModel[] storyModels = new StoryModel[itemsLen];
             for (int j = 0; j < itemsLen; ++j) {
                 final JSONObject data = items.getJSONObject(j);
-                final boolean isVideo = data.has("has_audio") && data.optBoolean("has_audio");
+                final boolean isVideo = data.has("video_duration");
 
                 storyModels[j] = new StoryModel(data.getString("pk"),
                         data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0).getString("url"),
