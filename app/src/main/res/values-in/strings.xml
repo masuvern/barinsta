@@ -64,7 +64,6 @@
     <string name="vote_story_poll">Pilih</string>
     <string name="votef_story_poll">Berhasil memilih!</string>
     <string name="voted_story_poll">Anda sudah memilih!</string>
-    <string name="answer_story">Jawab</string>
     <string name="answer_hint">Jawaban...</string>
     <string name="answered_story">Berhasil menjawab!</string>
     <string name="story_mentions">Sebutan</string>

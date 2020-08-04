@@ -64,7 +64,6 @@
     <string name="vote_story_poll">Abstimmung</string>
     <string name="votef_story_poll">Abstimmung erfolgreich!</string>
     <string name="voted_story_poll">Du hast bereits abgestimmt!</string>
-    <string name="answer_story">Antwort</string>
     <string name="answer_hint">Antwort...</string>
     <string name="answered_story">Antwort erfolgreich!</string>
     <string name="story_mentions">Erwähnungen</string>
