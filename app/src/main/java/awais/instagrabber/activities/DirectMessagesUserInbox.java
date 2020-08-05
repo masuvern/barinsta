@@ -43,7 +43,7 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
     private DirectItemModel directItemModel;
     private final ProfileModel myProfileHolder =
             new ProfileModel(false, false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
-    private final ArrayList<ProfileModel> users = new ArrayList<>();
+    private final ArrayList<ProfileModel> users = new ArrayList<>(), leftusers = new ArrayList<>();
     private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
         @Override
@@ -62,6 +62,9 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
 
                 users.clear();
                 users.addAll(Arrays.asList(result.getUsers()));
+
+                leftusers.clear();
+                leftusers.addAll(Arrays.asList(result.getLeftUsers()));
 
                 final int oldSize = directItemModels.size();
                 final List<DirectItemModel> itemModels = Arrays.asList(result.getItems());
@@ -102,7 +105,7 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
             }
         }));
 
-        messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, v -> {
+        messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, leftusers, v -> {
             Object tag = v.getTag();
             if (tag instanceof DirectItemModel) {
                 directItemModel = (DirectItemModel) tag;
@@ -129,21 +132,28 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
                         Toast.makeText(v.getContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         break;
                     case STORY_SHARE:
-                        StoryModel sm = new StoryModel(
-                                directItemModel.getReelShare().getReelId(),
-                                directItemModel.getReelShare().getMedia().getVideoUrl(),
-                                directItemModel.getReelShare().getMedia().getMediaType(),
-                                directItemModel.getTimestamp(),
-                                directItemModel.getReelShare().getReelOwnerName()
-
-                        );
-                        sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
-                        StoryModel[] sms = {sm};
-                        if (directItemModel.getReelShare() != null)
+                        if (directItemModel.getReelShare() != null) {
+                            StoryModel sm = new StoryModel(
+                                    directItemModel.getReelShare().getReelId(),
+                                    directItemModel.getReelShare().getMedia().getVideoUrl(),
+                                    directItemModel.getReelShare().getMedia().getMediaType(),
+                                    directItemModel.getTimestamp(),
+                                    directItemModel.getReelShare().getReelOwnerName()
+                            );
+                            sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
+                            StoryModel[] sms = {sm};
                             startActivity(new Intent(this, StoryViewer.class)
                                     .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
                                     .putExtra(Constants.EXTRAS_STORIES, sms)
                             );
+                        }
+                        else if (directItemModel.getText() != null) {
+                            searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
+                        }
+                        break;
+                    case PLACEHOLDER:
+                        if (directItemModel.getText().toString().contains("@"))
+                            searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         break;
                     default:
                         Log.d("austin_debug", "unsupported type "+itemType);
@@ -163,10 +173,18 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
 
     @Nullable
     private ProfileModel getUser(final long userId) {
-        for (final ProfileModel user : users) {
-            if (Long.toString(userId).equals(user.getId())) return user;
+        if (users != null) {
+            ProfileModel result = myProfileHolder;
+            for (final ProfileModel user : users) {
+                if (Long.toString(userId).equals(user.getId())) result = user;
+            }
+            if (leftusers != null)
+                for (final ProfileModel leftuser : leftusers) {
+                    if (Long.toString(userId).equals(leftuser.getId())) result = leftuser;
+                }
+            return result;
         }
-        return myProfileHolder;
+        return null;
     }
 
     private void searchUsername(final String text) {

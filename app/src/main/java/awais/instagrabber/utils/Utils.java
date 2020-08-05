@@ -487,11 +487,27 @@ public final class Utils {
 
         final JSONArray users = data.getJSONArray("users");
         final int usersLen = users.length();
+        final JSONArray leftusers = data.getJSONArray("left_users");
+        final int leftusersLen = leftusers.length();
 
         final ProfileModel[] userModels = new ProfileModel[usersLen];
         for (int j = 0; j < usersLen; ++j) {
             final JSONObject userObject = users.getJSONObject(j);
             userModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
+                    false,
+                    userObject.optBoolean("is_verified"),
+                    String.valueOf(userObject.get("pk")),
+                    userObject.getString("username"),
+                    userObject.getString("full_name"),
+                    null, null,
+                    userObject.getString("profile_pic_url"),
+                    null, 0, 0, 0, false, false, false, false);
+        }
+
+        final ProfileModel[] leftuserModels = new ProfileModel[leftusersLen];
+        for (int j = 0; j < leftusersLen; ++j) {
+            final JSONObject userObject = leftusers.getJSONObject(j);
+            leftuserModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
                     false,
                     userObject.optBoolean("is_verified"),
                     String.valueOf(userObject.get("pk")),
@@ -737,8 +753,7 @@ public final class Utils {
         return new InboxThreadModel(readState, threadId, threadV2Id, threadType, threadTitle,
                 threadNewestCursor, threadOldestCursor, threadNextCursor, threadPrevCursor,
                 null, // todo
-                userModels,
-                null, // todo
+                userModels, leftuserModels,
                 itemModels.toArray(new DirectItemModel[0]),
                 muted, isPin, named, canonical,
                 pending, threadHasOlder, threadHasNewer, isSpam, isGroup, archived, lastActivityAt);
