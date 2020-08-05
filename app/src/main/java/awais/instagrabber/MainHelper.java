@@ -199,7 +199,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         @Override
         public void onResult(final DiscoverItemModel[] result) {
-            if (result.length == 0) {
+            if (result == null || result.length == 0) {
                 Toast.makeText(main, R.string.discover_empty, Toast.LENGTH_SHORT).show();
             }
             else if (result != null) {
