@@ -655,14 +655,10 @@ public final class Utils {
 
                 case PLACEHOLDER: {
                     final JSONObject placeholder = itemObject.getJSONObject("placeholder");
-
                     final String title = placeholder.getString("title");
                     final String message = placeholder.getString("message");
-
-                    final SpannableString spannableString = new SpannableString(title + '\n' + message);
-                    spannableString.setSpan(new RelativeSizeSpan(1.15f), 0, title.length(), 0);
-
-                    text = hasMentions(message) ? getMentionText(spannableString) : spannableString;
+                    final String string = title + "<br><small>" + message + "</small>";
+                    text = hasMentions(message) ? getMentionText(string) : string;
                 }
                 break;
 

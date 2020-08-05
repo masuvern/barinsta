@@ -159,6 +159,9 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
             DirectItemMediaModel mediaModel = directItemModel.getMediaModel();
             switch (itemType) {
                 case PLACEHOLDER:
+                    holder.tvMessage.setText(HtmlCompat.fromHtml(directItemModel.getText().toString(), 63));
+                    holder.tvMessage.setVisibility(View.VISIBLE);
+                    break;
                 case TEXT:
                     text = directItemModel.getText();
                     text = Utils.getSpannableUrl(text.toString()); // for urls
