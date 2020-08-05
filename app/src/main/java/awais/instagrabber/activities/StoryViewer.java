@@ -153,18 +153,24 @@ public final class StoryViewer extends BaseLanguageActivity {
                                     (index == 0 ? null : storyFeed[index - 1]) :
                                     (storyFeed.length == index + 1 ? null : storyFeed[index + 1]);
                             if (feedStoryModel != null) {
-                                new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, result -> {
-                                    if (result != null && result.length > 0) {
-                                        final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
-                                                .putExtra(Constants.EXTRAS_STORIES, result)
-                                                .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
-                                                .putExtra(Constants.FEED, storyFeed)
-                                                .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index - 1) : (index + 1));
-                                        newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        startActivity(newIntent);
-                                    }
-                                    else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                boolean fetching = false;
+                                if (fetching) {
+                                    Toast.makeText(getApplicationContext(), R.string.be_patient, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    fetching = true;
+                                    new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, result -> {
+                                        if (result != null && result.length > 0) {
+                                            final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
+                                                    .putExtra(Constants.EXTRAS_STORIES, result)
+                                                    .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                                                    .putExtra(Constants.FEED, storyFeed)
+                                                    .putExtra(Constants.FEED_ORDER, isRightSwipe ? (index - 1) : (index + 1));
+                                            newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            startActivity(newIntent);
+                                        } else
+                                            Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                }
                             }
                         }
                     }

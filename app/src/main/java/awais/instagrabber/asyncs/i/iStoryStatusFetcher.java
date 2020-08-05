@@ -50,9 +50,9 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                JSONObject data = (isLoc || isHashtag)
-                    ? new JSONObject(Utils.readFromConnection(conn)).getJSONObject("story")
-                    : new JSONObject(Utils.readFromConnection(conn)).getJSONObject("reels").getJSONObject(id);
+                JSONObject data = new JSONObject(Utils.readFromConnection(conn)).getJSONObject((isLoc || isHashtag) ? "story" : "reels");
+                if (!isLoc && !isHashtag && data.isNull(id)) return null;
+                else if (!isLoc && !isHashtag) data = data.getJSONObject(id);
 
                 JSONArray media;
                 if ((media = data.optJSONArray("items")) != null && media.length() > 0 &&
@@ -73,7 +73,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
 
                         final JSONArray videoResources = data.optJSONArray("video_versions");
                         if (isVideo && videoResources != null)
-                            models[i].setVideoUrl(Utils.getHighQualityPost(videoResources, true, true));
+                            models[i].setVideoUrl(Utils.getHighQualityPost(videoResources, true, true, false));
 
                         if (data.has("story_feed_media")) {
                             models[i].setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));

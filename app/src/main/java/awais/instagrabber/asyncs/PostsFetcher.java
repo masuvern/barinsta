@@ -28,7 +28,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
     private final String endCursor;
     private final String id;
     private final FetchListener<PostModel[]> fetchListener;
-    private String username;
+    private String username = null;
 
     public PostsFetcher(final String id, final FetchListener<PostModel[]> fetchListener) {
         this.id = id;

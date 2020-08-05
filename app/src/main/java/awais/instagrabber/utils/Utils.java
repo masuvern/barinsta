@@ -262,13 +262,13 @@ public final class Utils {
 
     // isI: true if the content was requested from i.instagram.com instead of graphql
     @Nullable
-    public static String getHighQualityPost(final JSONArray resources, final boolean isVideo, final boolean isI) {
+    public static String getHighQualityPost(final JSONArray resources, final boolean isVideo, final boolean isI, final boolean low) {
         try {
             final int resourcesLen = resources.length();
 
             final String[] sources = new String[resourcesLen];
-            int lastResMain = 0, lastIndexMain = -1;
-            int lastResBase = 0, lastIndexBase = -1;
+            int lastResMain = low ? 1000000 : 0, lastIndexMain = -1;
+            int lastResBase = low ? 1000000 : 0, lastIndexBase = -1;
             for (int i = 0; i < resourcesLen; ++i) {
                 final JSONObject item = resources.getJSONObject(i);
                 if (item != null && (!isVideo || item.has(Constants.EXTRAS_PROFILE) || isI)) {
@@ -278,12 +278,20 @@ public final class Utils {
                     final String profile = isVideo ? item.optString(Constants.EXTRAS_PROFILE) : null;
 
                     if (!isVideo || "MAIN".equals(profile)) {
-                        if (currRes > lastResMain) {
+                        if (currRes > lastResMain && !low) {
+                            lastResMain = currRes;
+                            lastIndexMain = i;
+                        }
+                        else if (currRes < lastResMain && low) {
                             lastResMain = currRes;
                             lastIndexMain = i;
                         }
                     } else {
-                        if (currRes > lastResBase) {
+                        if (currRes > lastResBase && !low) {
+                            lastResBase = currRes;
+                            lastIndexBase = i;
+                        }
+                        else if (currRes < lastResBase && low) {
                             lastResBase = currRes;
                             lastIndexBase = i;
                         }
@@ -306,13 +314,26 @@ public final class Utils {
     public static String getHighQualityImage(final JSONObject resources) {
         String src = null;
         try {
-            if (resources.has("display_resources")) src = getHighQualityPost(resources.getJSONArray("display_resources"), false, false);
+            if (resources.has("display_resources")) src = getHighQualityPost(resources.getJSONArray("display_resources"), false, false, false);
             else if (resources.has("image_versions2"))
-                src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true);
+                src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, false);
             if (src == null) return resources.getString("display_url");
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
+                        new Pair<>("resourcesNull", resources == null));
+            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+        }
+        return src;
+    }
+
+    public static String getLowQualityImage(final JSONObject resources) {
+        String src = null;
+        try {
+            src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, true);
+        } catch (final Exception e) {
+            if (logCollector != null)
+                logCollector.appendException(e, LogCollector.LogFile.UTILS, "getLowQualityImage",
                         new Pair<>("resourcesNull", resources == null));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
@@ -1195,7 +1216,7 @@ public final class Utils {
                             data.getLong("taken_at_timestamp"), data.getJSONObject("owner").getString("username"));
 
                     if (isVideo && data.has("video_resources"))
-                        storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true, false));
+                        storyModels[j].setVideoUrl(Utils.getHighQualityPost(data.getJSONArray("video_resources"), true, false, false));
 
                     if (!data.isNull("story_app_attribution"))
                         storyModels[j].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);

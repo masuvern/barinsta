@@ -12,6 +12,7 @@ import java.net.URL;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.NotificationModel;
+import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.Utils;
@@ -39,16 +40,18 @@ public final class NotificationsFetcher extends AsyncTask<Void, Void, Notificati
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                JSONObject data = new JSONObject(Utils.readFromConnection(conn))
-                        .getJSONObject("graphql").getJSONObject("user").getJSONObject("activity_feed").getJSONObject("edge_web_activity_feed");
-
+                JSONObject page = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject("user"),
+                        ewaf = page.getJSONObject("activity_feed").optJSONObject("edge_web_activity_feed"),
+                        efr = page.optJSONObject("edge_follow_requests"),
+                        data;
                 JSONArray media;
-                if ((media = data.optJSONArray("edges")) != null && media.length() > 0 &&
+                int totalLength = 0, mediaLen = 0, reqLen = 0;
+                NotificationModel[] models = null, req = null;
+
+                if ((media = ewaf.optJSONArray("edges")) != null && media.length() > 0 &&
                         (data = media.optJSONObject(0).optJSONObject("node")) != null) {
-
-                    final int mediaLen = media.length();
-
-                    final NotificationModel[] models = new NotificationModel[mediaLen];
+                    mediaLen = media.length();
+                    models = new NotificationModel[mediaLen];
                     for (int i = 0; i < mediaLen; ++i) {
                         data = media.optJSONObject(i).optJSONObject("node");
                         if (Utils.getNotifType(data.getString("__typename")) == null) continue;
@@ -61,8 +64,23 @@ public final class NotificationsFetcher extends AsyncTask<Void, Void, Notificati
                                 !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null,
                                 Utils.getNotifType(data.getString("__typename")));
                     }
-                    result = models;
                 }
+
+                if (efr != null && (media = efr.optJSONArray("edges")) != null && media.length() > 0 &&
+                        (data = media.optJSONObject(0).optJSONObject("node")) != null) {
+                    reqLen = media.length();
+                    req = new NotificationModel[reqLen];
+                    for (int i = 0; i < reqLen; ++i) {
+                        data = media.optJSONObject(i).optJSONObject("node");
+                        req[i] = new NotificationModel(data.getString(Constants.EXTRAS_ID),
+                                data.optString("full_name"), 0L, data.getString("username"),
+                                data.getString("profile_pic_url"), null, null, NotificationType.REQUEST);
+                    }
+                }
+
+                result = new NotificationModel[mediaLen + reqLen];
+                if (req != null) System.arraycopy(req, 0, result, 0, reqLen);
+                if (models != null) System.arraycopy(models, 0, result, reqLen, mediaLen);
             }
 
             conn.disconnect();

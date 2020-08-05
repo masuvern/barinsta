@@ -142,9 +142,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     }
 
                     hasNextPage = model.hasNextPage();
-                    if ((autoloadPosts && hasNextPage) && !isHashtag)
+                    if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(main.profileModel.getId(), endCursor, this)
-                                .setUsername(main.profileModel.getUsername()).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                .setUsername((isLocation || isHashtag) ? null : main.profileModel.getUsername())
+                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
                         main.mainBinding.swipeRefreshLayout.setRefreshing(false);
                     }
@@ -468,7 +469,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
                 currentlyExecuting = new PostsFetcher((isHashtag || isLocation) ? main.userQuery : main.profileModel.getId(), endCursor, postsFetchListener)
-                        .setUsername(isHashtag ? null : main.profileModel.getUsername())
+                        .setUsername((isHashtag || isLocation) ? null : main.profileModel.getUsername())
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
             }
@@ -658,6 +659,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.btnRestrict.setVisibility(View.GONE);
         main.mainBinding.btnBlock.setVisibility(View.GONE);
         main.mainBinding.btnSaved.setVisibility(View.GONE);
+        main.mainBinding.btnLiked.setVisibility(View.GONE);
         main.mainBinding.btnTagged.setVisibility(View.GONE);
         main.mainBinding.btnMap.setVisibility(View.GONE);
 
@@ -665,6 +667,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.btnRestrict.setOnClickListener(profileActionListener);
         main.mainBinding.btnBlock.setOnClickListener(profileActionListener);
         main.mainBinding.btnSaved.setOnClickListener(profileActionListener);
+        main.mainBinding.btnLiked.setOnClickListener(profileActionListener);
         main.mainBinding.btnTagged.setOnClickListener(profileActionListener);
         main.mainBinding.btnFollowTag.setOnClickListener(profileActionListener);
 
@@ -794,6 +797,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     if (!profileId.equals(myId)) {
                         main.mainBinding.btnTagged.setVisibility(View.GONE);
                         main.mainBinding.btnSaved.setVisibility(View.GONE);
+                        main.mainBinding.btnLiked.setVisibility(View.GONE);
                         main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
                         if (profileModel.getFollowing() == true) {
                             main.mainBinding.btnFollow.setText(R.string.unfollow);
@@ -823,7 +827,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         }
                         if (profileModel.isReallyPrivate()) {
                             main.mainBinding.btnBlock.setVisibility(View.VISIBLE);
-                            main.mainBinding.btnSaved.setVisibility(View.GONE);
                             main.mainBinding.btnTagged.setVisibility(View.GONE);
                             if (profileModel.getBlocked() == true) {
                                 main.mainBinding.btnBlock.setText(R.string.unblock);
@@ -852,6 +855,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     else {
                         main.mainBinding.btnTagged.setVisibility(View.VISIBLE);
                         main.mainBinding.btnSaved.setVisibility(View.VISIBLE);
+                        main.mainBinding.btnLiked.setVisibility(View.VISIBLE);
                         main.mainBinding.btnSaved.setText(R.string.saved);
                         main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
                                 R.color.btn_orange_background, null)));
@@ -1063,7 +1067,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 else {
                     main.mainBinding.swipeRefreshLayout.setRefreshing(true);
                     main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
-                    currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(locationModel.getName())
+                    currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -1229,6 +1233,11 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             } else if (v == main.mainBinding.btnSaved) {
                 main.startActivity(new Intent(main, SavedViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, "$"+main.profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
+                );
+            } else if (v == main.mainBinding.btnLiked) {
+                main.startActivity(new Intent(main, SavedViewer.class)
+                        .putExtra(Constants.EXTRAS_INDEX, "^"+main.profileModel.getId())
                         .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
                 );
             }

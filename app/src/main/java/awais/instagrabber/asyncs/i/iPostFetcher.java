@@ -79,7 +79,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                     final ViewerPostModel postModel = new ViewerPostModel(mediaItemType,
                             media.getString(Constants.EXTRAS_ID),
                             isVideo
-                                    ? Utils.getHighQualityPost(media.optJSONArray("video_versions"), true, true)
+                                    ? Utils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
                                     : Utils.getHighQualityImage(media),
                             media.getString("code"),
                             Utils.isEmpty(postCaption) ? null : postCaption,
@@ -106,7 +106,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                         postModels[i] = new ViewerPostModel(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                 media.getString(Constants.EXTRAS_ID),
                                 isChildVideo
-                                        ? Utils.getHighQualityPost(node.optJSONArray("video_versions"), true, true)
+                                        ? Utils.getHighQualityPost(node.optJSONArray("video_versions"), true, true, false)
                                         : Utils.getHighQualityImage(node),
                                 media.getString("code"),
                                 postCaption,

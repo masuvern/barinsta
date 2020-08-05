@@ -1,6 +1,7 @@
 package awais.instagrabber.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.NotificationViewHolder;
 import awais.instagrabber.interfaces.MentionClickListener;
+import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.Utils;
@@ -67,11 +69,16 @@ public final class NotificationsAdapter extends RecyclerView.Adapter<Notificatio
                 case FOLLOW:
                     text = R.string.follow_notif;
                     break;
+                case REQUEST:
+                    text = R.string.request_notif;
+                    subtext = notificationModel.getText();
+                    break;
             }
 
             holder.setCommment(text);
             holder.setSubCommment(subtext);
-            holder.setDate(notificationModel.getDateTime());
+            if (notificationModel.getType() != NotificationType.REQUEST)
+                holder.setDate(notificationModel.getDateTime());
 
             holder.setUsername(notificationModel.getUsername());
 

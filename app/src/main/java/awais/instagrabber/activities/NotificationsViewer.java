@@ -12,19 +12,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.SearchView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
@@ -32,6 +28,7 @@ import awais.instagrabber.asyncs.NotificationsFetcher;
 import awais.instagrabber.databinding.ActivityNotificationBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
+import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
@@ -46,7 +43,7 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
     private String shortCode, postId, userId;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private Resources resources;
-    private InputMethodManager imm;
+    String[] commentDialogList;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -90,9 +87,11 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
     final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
         if (which == 0)
             searchUsername(notificationModel.getUsername());
-        else if (which == 1)
+        else if (which == 1 && commentDialogList.length == 2)
             startActivity(new Intent(getApplicationContext(), PostViewer.class)
                     .putExtra(Constants.EXTRAS_POST, new PostModel(notificationModel.getShortcode(), false)));
+        else if (which == 1) new ProfileAction().execute("/approve/");
+        else if (which == 2) new ProfileAction().execute("/ignore/");
     };
 
     private final View.OnClickListener clickListener = v -> {
@@ -104,12 +103,16 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
             final SpannableString title = new SpannableString(username + ":\n" + notificationModel.getText());
             title.setSpan(new RelativeSizeSpan(1.23f), 0, username.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-            String[] commentDialogList;
-
             if (notificationModel.getShortcode() != null) commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
                     resources.getString(R.string.view_post)
             };
+            else if (notificationModel.getType() == NotificationType.REQUEST)
+                commentDialogList = new String[]{
+                        resources.getString(R.string.open_profile),
+                        resources.getString(R.string.request_approve),
+                        resources.getString(R.string.request_reject)
+                };
             else commentDialogList = new String[]{
                     resources.getString(R.string.open_profile)
             };
@@ -135,6 +138,39 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
             Main.scanHack.onResult(text);
             setResult(6969);
             finish();
+        }
+    }
+
+    class ProfileAction extends AsyncTask<String, Void, Void> {
+        boolean ok = false;
+        String action;
+
+        protected Void doInBackground(String... rawAction) {
+            action = rawAction[0];
+            final String url = "https://www.instagram.com/web/friendships/"+notificationModel.getId()+action;
+            try {
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+                urlConnection.setRequestProperty("x-csrftoken",
+                        Utils.settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    ok = true;
+                }
+                else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                urlConnection.disconnect();
+            } catch (Throwable ex) {
+                Log.e("austin_debug", action+": " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok == true) {
+                onRefresh();
+            }
         }
     }
 }

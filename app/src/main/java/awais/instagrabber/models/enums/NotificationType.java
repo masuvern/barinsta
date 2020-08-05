@@ -6,5 +6,6 @@ public enum NotificationType implements Serializable {
     LIKE,
     FOLLOW,
     COMMENT,
-    MENTION
+    MENTION,
+    REQUEST
 }

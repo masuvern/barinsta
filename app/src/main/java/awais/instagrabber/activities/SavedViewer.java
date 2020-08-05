@@ -22,6 +22,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.PostsFetcher;
+import awais.instagrabber.asyncs.i.iLikedFetcher;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
@@ -73,9 +74,12 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                     endCursor = model.getEndCursor();
 
                     hasNextPage = model.hasNextPage();
-                    if (autoloadPosts && hasNextPage)
+                    if (autoloadPosts && hasNextPage && action.charAt(0) == '^')
+                        currentlyExecuting = new iLikedFetcher(endCursor, postsFetchListener)
+                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    else if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(action, endCursor, this)
-                                .setUsername(username).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
                         savedBinding.swipeRefreshLayout.setRefreshing(false);
                     }
@@ -141,8 +145,10 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             if (!autoloadPosts && hasNextPage) {
                 savedBinding.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
-                currentlyExecuting = new PostsFetcher(action, endCursor, postsFetchListener)
-                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                currentlyExecuting = action.charAt(0) == '^'
+                    ? new iLikedFetcher(endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+                    : new PostsFetcher(action, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
             }
         });
@@ -153,7 +159,8 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             return null;
         };
 
-        new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (action.charAt(0) == '^') new iLikedFetcher(postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -191,7 +198,8 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             postsAdapter.notifyDataSetChanged();
         }
         savedBinding.swipeRefreshLayout.setRefreshing(true);
-        new PostsFetcher(action, postsFetchListener).setUsername(username).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (action.charAt(0) == '^') new iLikedFetcher(postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
