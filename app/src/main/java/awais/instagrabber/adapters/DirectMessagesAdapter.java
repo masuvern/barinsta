@@ -60,7 +60,7 @@ public final class DirectMessagesAdapter extends RecyclerView.Adapter<DirectMess
                 for (int i = 0; i < Math.min(3, users.length); ++i)
                     glideRequestManager.load(users[i].getSdProfilePic()).into(holder.multipleProfilePics[i]);
 
-            } else {
+            } else if (users.length == 1) {
                 holder.ivProfilePic.setVisibility(View.VISIBLE);
                 holder.multipleProfilePicsContainer.setVisibility(View.GONE);
 
