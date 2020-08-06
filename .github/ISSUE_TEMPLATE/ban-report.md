@@ -7,6 +7,8 @@ assignees: 'austinhuang0131'
 
 ---
 
+<!-- Write "x" in the brackets to check -->
+
 ## Answer honestly. All boxes must be checked for this report to be considered.
 
 - [ ] My app is on the latest version. I understand that any other version is not supported.
@@ -15,10 +17,10 @@ assignees: 'austinhuang0131'
 
 ## Answer honestly. Check accordingly to your situation.
 
-- [ ] I had prior rule violations on Instagram, specifically: [write here]
+- [ ] I had prior rule violations on Instagram, specifically:
 - [ ] I have admitted the use of InstaGrabber on Instagram.
 - [ ] I have admitted the use of InstaGrabber to a friend who uses Instagram.
-- [ ] I have modified the source code of the app that I use, other than what is present in this repo. Specifically: [write here]
+- [ ] I have modified the source code of the app that I use, other than what is present in this repo. Specifically:
 
 ## Describe your case, including your usage pattern, but without private information.
 
