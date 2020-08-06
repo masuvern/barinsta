@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+- [ ] My app is on the latest version. I understand that any other version is not supported.
+
 <!--
 First, describe the bug here. Don't stress too much, but do include the key points.
 -->
@@ -31,9 +33,6 @@ DETAILED Steps to reproduce the behaviour. If you do not describe this part clea
 
  - Device: 
  - Android version:
- - App version:
-
-<!-- app version can be viewed in the Settings dialog -->
 
 ## Additional info
 
