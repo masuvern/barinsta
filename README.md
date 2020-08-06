@@ -2,12 +2,13 @@
 
 ## InstaGrabber
 
-InstaGrabber is an app that allows...
+InstaGrabber is an alternative Instagram client for Android. You can...
 
+* **Search**: Profile / Hashtag / Location
 * **Profile**: View posts (timeline & face-tagged), copy bio, view stories\* (Highlight & status), follow\*, restrict\*, block\*, compare following/followers\*
 * **Hashtag**: View posts (newest only), view stories\*, follow\*
 * **Location**: View posts (newest only), view stories\*, open map
-* **Posts**: View, download (+ batch download selected posts), copy captions, like/save\*
+* **Post**: View, download (+ batch download selected posts), copy captions, like/save\*
 * **Story\***: View (w/ incognito mode), download, interact with stickers, reply as DM
 * **Comment**: View (+ copy), write\*, reply\*, like\*, delete\*
 * **DM\***: View, download attachments, text reply
