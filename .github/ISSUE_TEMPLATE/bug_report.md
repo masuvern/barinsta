@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: App crashing? You seeing a confusing error message? Report them here!
 title: "[BUG]"
 labels: bug
 assignees: ''
@@ -25,14 +25,15 @@ DETAILED Steps to reproduce the behaviour. If you do not describe this part clea
 
 ## Screenshots
 
-<!-- if applicable -->
+<!-- if applicable, remove otherwise -->
 
 ## Environment
 
  - Device: 
  - Android version:
  - App version:
-<!-- Long press Instagrabber => App info => Advanced => Version number is at the bottom -->
+
+<!-- app version can be viewed in the Settings dialog -->
 
 ## Additional info
 
