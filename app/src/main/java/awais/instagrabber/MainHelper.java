@@ -114,38 +114,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
                 });
 
-                final String username;
-                final String postFix;
-                if (!isHashtag && !isLocation) {
-                    username = "@"+main.profileModel.getUsername();
-                    postFix = "/" + main.profileModel.getPostCount() + ')';
-                } else {
-                    username = null;
-                    postFix = null;
-                }
-
                 if (isHashtag)
                     main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
                 else if (isLocation)
                     main.mainBinding.toolbar.toolbar.setTitle(main.locationModel.getName());
-                else main.mainBinding.toolbar.toolbar.setTitle(username + " (" + main.allItems.size() + postFix);
+                else main.mainBinding.toolbar.toolbar.setTitle("@"+main.profileModel.getUsername());
 
                 final PostModel model = result[result.length - 1];
                 if (model != null) {
                     endCursor = model.getEndCursor();
-
-                    if (endCursor == null && !isHashtag) {
-                        main.mainBinding.toolbar.toolbar.setTitle(username + " (" + main.profileModel.getPostCount() + postFix);
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                main.mainBinding.toolbar.toolbar.setTitle(username);
-                                handler.removeCallbacks(this);
-                            }
-                        }, 1000);
-                    }
-
                     hasNextPage = model.hasNextPage();
                     if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(main.profileModel.getId(), endCursor, this)
@@ -273,8 +250,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         );
                     else Toast.makeText(main, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-
             }
         }
     });
@@ -1254,7 +1229,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
-            } else if (!isLoggedIn && v == main.mainBinding.btnFollow) {
+            } else if (!isLoggedIn && (v == main.mainBinding.btnFollow || v == main.mainBinding.btnFollowTag)) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis(),
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
