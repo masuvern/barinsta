@@ -34,6 +34,7 @@
     <string name="bottom_toolbar">Mostrar barra de herramientas inferior</string>
     <string name="download_user_folder">Descargar mensajes a la carpeta de usuario en Downloads</string>
     <string name="autoload_posts">Cargar automáticamente todos los mensajes de usuario</string>
+    <string name="mark_as_seen_setting">Mark stories as seen after viewing\n(Story author will know you viewed it)</string>
     <string name="error_loading_profile">¡Error al cargar el perfil!\nVuelve a entrar y buscar de nuevo.</string>
     <string name="error_creating_folders">Error creando carpetas de descarga.</string>
     <string name="show_feed">Mostrar noticias del usuario (Funciona sólo cuando algún usuario está conectado)</string>
@@ -68,6 +69,8 @@
     <string name="respond_story">Comentar</string>
     <string name="answer_hint">Responder...</string>
     <string name="answered_story">Has respondido con éxito</string>
+    <string name="reply_story">Reply to story</string>
+    <string name="reply_hint">Reply...</string>
     <string name="story_quiz">Cuestionario</string>
     <string name="story_quizzed">¡Ya has respondido!</string>
     <string name="story_mentions">Menciones</string>
@@ -183,6 +186,7 @@
     <string name="login_error_loading_cookies">Error al cargar cookies</string>
     <string name="login_success_loading_cookies">¡Cookies cargadas con éxito!\nSi aún no puedes abrir páginas/publicaciones privadas, ¡vuelve a ingresar!</string>
     <string name="comment_hint">Escribir un nuevo comentario...</string>
+    <string name="dm_hint">Write a new message...</string>
     <string name="liked_notif">Le ha gustado tu publicación</string>
     <string name="comment_notif">Ha comentado en tu publicación:</string>
     <string name="follow_notif">Ha empezado a seguirte</string>
@@ -192,6 +196,7 @@
     <string name="request_reject">Rechazar solicitud</string>
     <string name="share_public_post">Compartir esta publicación pública en...</string>
     <string name="share_private_post">¡Esta es una publicación privada! ¡Comparta con aquellos que puedan verla!</string>
+    <string name="discover_empty">This category is somehow empty...</string>
     <string name="update_available">¡Hay una actualización disponible! (%s)</string>
     <string name="update_notice">Recordatorio: si ha descargado de F-Droid, debe actualizar desde él. Lo mismo se aplica a GitHub.</string>
     <string name="updated">¡Gracias por actualizar InstaGrabber!</string>
