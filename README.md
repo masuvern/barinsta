@@ -9,9 +9,9 @@ InstaGrabber is an alternative Instagram client for Android. You can...
 * **Hashtag**: View posts (newest only), view stories\*, follow\*
 * **Location**: View posts (newest only), view stories\*, open map
 * **Post**: View, download (+ batch download selected posts), copy captions, like/save\*
-* **Story\***: View (w/ incognito mode), download, interact with stickers, reply as DM
+* **Story**<sup>1</sup>: View (w/ [storiesig](https://storiesig.com) support<sup>1</sup> and incognito mode<sup>2</sup>), download, interact with stickers\*, reply as DM\*
 * **Comment**: View (+ copy), write\*, reply\*, like\*, delete\*
-* **DM\***: View, download attachments, text reply
+* **DM\***: View, download attachments<sup>2</sup>, text reply
 * Viewing\* your own feed, discover, saved, and liked posts
 * Adding personal bookmarks to accounts/hashtags/locations locally
 
@@ -57,4 +57,4 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). ALWAY
 
 <sub>Previous owner left a lot of swearings in the code, I will remove them when I get to that file.</sub>
 
-<sub>1. The downside is that they'll always be "new" in other Instagram clients. Also, this app will not respect DM message restrictions (replay once / no replay).<br>2. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
+<sub>1. For anonymous users only, does not applied to users already logged in, and must be explicitly enabled in Settings. 2. Default enabled, but can be disabled for stories. The downside is that they'll always be "new" in other Instagram clients. Also, this app will not respect DM message restrictions (replay once / no replay). 3. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
