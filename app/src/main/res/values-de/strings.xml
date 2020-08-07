@@ -34,6 +34,7 @@
     <string name="bottom_toolbar">Symbolleiste unten anzeigen</string>
     <string name="download_user_folder">Beiträge in den Benutzernamen-Ordner in Downloads herunterladen</string>
     <string name="autoload_posts">Alle Beiträge des Benutzers automatisch laden</string>
+    <string name="mark_as_seen_setting">Mark stories as seen after viewing\n(Story author will know you viewed it)</string>
     <string name="error_loading_profile">Fehler beim Laden des Profils!\nVersuche dich einzuloggen und erneut zu suchen.</string>
     <string name="error_creating_folders">Fehler beim Erstellen von Download-Ordner(n).</string>
     <string name="show_feed">Nutzer-Feed anzeigen (Funktioniert nur, wenn Benutzer angemeldet ist)</string>
@@ -68,6 +69,8 @@
     <string name="respond_story">Respond</string>
     <string name="answer_hint">Antwort...</string>
     <string name="answered_story">Antwort erfolgreich!</string>
+    <string name="reply_story">Reply to story</string>
+    <string name="reply_hint">Reply...</string>
     <string name="story_quiz">Quiz</string>
     <string name="story_quizzed">You have already answered!</string>
     <string name="story_mentions">Erwähnungen</string>
@@ -183,6 +186,7 @@
     <string name="login_error_loading_cookies">Fehler beim Laden der Cookies</string>
     <string name="login_success_loading_cookies">Cookies erfolgreich geladen!\nWenn du private Seiten/Beiträge noch nicht öffnen können, melden dich erneut an!</string>
     <string name="comment_hint">Schreibe einen Kommentar...</string>
+    <string name="dm_hint">Write a new message...</string>
     <string name="liked_notif">Gefällt dein Beitrag</string>
     <string name="comment_notif">Hat deinen Beitrag kommentiert:</string>
     <string name="follow_notif">Folgt dir jetzt</string>
@@ -192,6 +196,7 @@
     <string name="request_reject">Reject request</string>
     <string name="share_public_post">Diesen öffentlichen Beitrag teilen mit...</string>
     <string name="share_private_post">Dies ist ein privater Beitrag! Teile ihn mit denen, die ihn sehen können!</string>
+    <string name="discover_empty">This category is somehow empty...</string>
     <string name="update_available">Ein Update ist verfügbar! (%s)</string>
     <string name="update_notice">Erinnerung: Wenn du die App von F-Droid heruntergeladen hast, musst du sie dort aktualisieren! Das gilt auch für GitHub.</string>
     <string name="updated">Danke für die Aktualisierung von InstaGrabber!</string>
