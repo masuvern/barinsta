@@ -27,7 +27,9 @@ import awais.instagrabber.R;
 public final class RemixDrawerLayout extends MouseDrawer implements MouseDrawer.DrawerListener {
     private final FrameLayout frameLayout;
     private View drawerView;
-    private RecyclerView scroll, feedPosts;
+    private RecyclerView highlightsList;
+    private RecyclerView feedPosts;
+    private RecyclerView feedStories;
     private float startX;
 
     public RemixDrawerLayout(@NonNull final Context context) {
@@ -91,35 +93,52 @@ public final class RemixDrawerLayout extends MouseDrawer implements MouseDrawer.
         }
 
         // thanks to Fede @ https://stackoverflow.com/questions/6920137/android-viewpager-and-horizontalscrollview/7258579#7258579
-        if (scroll == null) scroll = findViewById(R.id.highlightsList);
-        if (scroll != null) {
-            final boolean touchIsInRecycler = x >= scroll.getLeft() && x < scroll.getRight()
-                    && y >= scroll.getTop() && scroll.getBottom() > y;
-
-            if (touchIsInRecycler) {
-                final int action = ev.getActionMasked();
-
-                if (action == MotionEvent.ACTION_CANCEL) return super.onInterceptTouchEvent(ev);
-
-                if (action == MotionEvent.ACTION_DOWN) startX = x;
-                else if (action == MotionEvent.ACTION_MOVE) {
-                    final int scrollRange = scroll.computeHorizontalScrollRange();
-                    final int scrollOffset = scroll.computeHorizontalScrollOffset();
-                    final boolean scrollable = scrollRange > scroll.getWidth();
-                    final boolean draggingFromRight = startX > x;
-
-                    if (scrollOffset < 1) {
-                        if (!scrollable) return super.onInterceptTouchEvent(ev);
-                        else if (!draggingFromRight) return super.onInterceptTouchEvent(ev);
-                    } else if (scrollable && draggingFromRight && scrollRange - scrollOffset == scroll.computeHorizontalScrollExtent()) {
-                        return super.onInterceptTouchEvent(ev);
-                    }
-
-                    return false;
-                }
+        if (highlightsList == null) highlightsList = findViewById(R.id.highlightsList);
+        if (highlightsList != null) {
+            final Boolean result = handleHorizontalRecyclerView(ev, highlightsList);
+            if (result != null) {
+                return result;
+            }
+        }
+        if (feedStories == null) feedStories = findViewById(R.id.feedStories);
+        if (feedStories != null) {
+            final Boolean result = handleHorizontalRecyclerView(ev, feedStories);
+            if (result != null) {
+                return result;
             }
         }
         return super.onInterceptTouchEvent(ev);
+    }
+
+    private Boolean handleHorizontalRecyclerView(@NonNull final MotionEvent ev, final RecyclerView view) {
+        final float x = ev.getX();
+        final float y = ev.getY();
+        final boolean touchIsInRecycler = x >= view.getLeft() && x < view.getRight()
+                && y >= view.getTop() && view.getBottom() > y;
+
+        if (touchIsInRecycler) {
+            final int action = ev.getActionMasked();
+
+            if (action == MotionEvent.ACTION_CANCEL) return super.onInterceptTouchEvent(ev);
+
+            if (action == MotionEvent.ACTION_DOWN) startX = x;
+            else if (action == MotionEvent.ACTION_MOVE) {
+                final int scrollRange = view.computeHorizontalScrollRange();
+                final int scrollOffset = view.computeHorizontalScrollOffset();
+                final boolean scrollable = scrollRange > view.getWidth();
+                final boolean draggingFromRight = startX > x;
+
+                if (scrollOffset < 1) {
+                    if (!scrollable) return super.onInterceptTouchEvent(ev);
+                    else if (!draggingFromRight) return super.onInterceptTouchEvent(ev);
+                } else if (scrollable && draggingFromRight && scrollRange - scrollOffset == view.computeHorizontalScrollExtent()) {
+                    return super.onInterceptTouchEvent(ev);
+                }
+
+                return false;
+            }
+        }
+        return null;
     }
 
     @Override
