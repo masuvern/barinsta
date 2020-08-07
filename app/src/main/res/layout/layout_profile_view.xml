@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- for users -->
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <RelativeLayout
+                android:id="@+id/infoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:background="@null"
+                android:orientation="vertical"
+                android:paddingBottom="5dp">
+
+                <LinearLayout
+                    android:id="@+id/profileInfoText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/profileInfo"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/isVerified"
+                        android:layout_width="18dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="start"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        android:visibility="gone"
+                        app:srcCompat="@drawable/verified" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/mainFullName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textSize="16sp"
+                        tools:text="Austin Huang" />
+                </LinearLayout>
+
+                <awais.instagrabber.customviews.RamboTextView
+                    android:id="@+id/mainBiography"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/profileInfoText"
+                    android:background="?android:selectableItemBackground"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="16sp"
+                    tools:text="THE GLORIOUS (step)OWNER OF THIS APP" />
+
+                <awais.instagrabber.customviews.RamboTextView
+                    android:id="@+id/mainUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/mainBiography"
+                    android:ellipsize="marquee"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="16sp"
+                    tools:text="https://austinhuang.me/"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/profileActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/mainUrl">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnFollow"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/follow"
+                        android:textColor="@color/btn_pink_text_color"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/btn_pink_background"
+                        android:visibility="gone" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnRestrict"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/restrict"
+                        android:textColor="@color/btn_orange_text_color"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/btn_orange_background"
+                        android:visibility="gone" />
+
+                    <!-- only for invisible private accounts -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnBlock"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/block"
+                        android:textColor="@color/btn_red_text_color"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/btn_red_background"
+                        android:visibility="gone" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/myActions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/profileActions">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnTagged"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/tagged"
+                        android:textColor="@color/btn_blue_text_color"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/btn_blue_background"
+                        android:visibility="gone" />
+
+                    <!-- also used as block -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnSaved"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/saved"
+                        android:textColor="@color/btn_orange_text_color"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/btn_orange_background"
+                        android:visibility="gone" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnLiked"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:text="@string/liked"
+                        android:textColor="@color/btn_lightpink_text_color"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/btn_lightpink_background"
+                        android:visibility="gone" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/highlightsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/myActions"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingStart="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingRight="5dp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/profileInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/profile_info_container_bottom_space">
+
+                    <awais.instagrabber.customviews.CircularImageView
+                        android:id="@+id/mainProfileImage"
+                        android:layout_width="@dimen/profile_picture_size"
+                        android:layout_height="@dimen/profile_picture_size"
+                        android:adjustViewBounds="true"
+                        android:background="?selectableItemBackgroundBorderless" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/mainPostCount"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginLeft="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginRight="12dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.AppCompat"
+                        android:textSize="15sp"
+                        tools:text="35\nPosts" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/mainFollowers"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.AppCompat"
+                        android:textSize="15sp"
+                        tools:text="68\nFollowers" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/mainFollowing"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginLeft="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginRight="12dp"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.AppCompat"
+                        android:textSize="15sp"
+                        tools:text="64\nFollowing" />
+                </LinearLayout>
+            </RelativeLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <!-- for hashtags -->
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <LinearLayout
+                android:id="@+id/tagInfoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="@dimen/profile_info_container_bottom_space"
+                android:visibility="gone">
+
+                <awais.instagrabber.customviews.CircularImageView
+                    android:id="@+id/mainHashtagImage"
+                    android:layout_width="@dimen/profile_picture_size"
+                    android:layout_height="@dimen/profile_picture_size"
+                    android:adjustViewBounds="true"
+                    android:background="?selectableItemBackgroundBorderless" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/mainTagPostCount"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginRight="12dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat"
+                    android:textSize="15sp"
+                    tools:text="35\nPosts" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnFollowTag"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="2"
+                    android:text="@string/follow"
+                    android:textColor="@color/btn_pink_text_color"
+                    android:textSize="20sp"
+                    app:backgroundTint="@color/btn_pink_background" />
+            </LinearLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <!-- for locations -->
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <RelativeLayout
+                android:id="@+id/locInfoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:background="@null"
+                android:orientation="vertical"
+                android:paddingBottom="5dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/locInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/profile_info_container_bottom_space">
+
+                    <awais.instagrabber.customviews.CircularImageView
+                        android:id="@+id/mainLocationImage"
+                        android:layout_width="@dimen/profile_picture_size"
+                        android:layout_height="@dimen/profile_picture_size"
+                        android:adjustViewBounds="true"
+                        android:background="?selectableItemBackgroundBorderless" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/mainLocPostCount"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginLeft="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginRight="12dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.AppCompat"
+                        android:textSize="15sp"
+                        tools:text="35\nPosts" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnMap"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="2"
+                        android:text="@string/map"
+                        android:textColor="@color/btn_green_text_color"
+                        android:textSize="20sp"
+                        app:backgroundTint="@color/btn_green_background" />
+                </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/locationFullName"
+                    android:layout_below="@id/locInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textSize="16sp"
+                    tools:text="OUR HOUSE" />
+
+                <awais.instagrabber.customviews.RamboTextView
+                    android:id="@+id/locationBiography"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/locationFullName"
+                    android:background="?android:selectableItemBackground"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    tools:text="IN THE MIDDLE OF OUR STREET" />
+
+                <awais.instagrabber.customviews.RamboTextView
+                    android:id="@+id/locationUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/locationBiography"
+                    android:ellipsize="marquee"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textSize="16sp"
+                    tools:text="https://austinhuang.me/"
+                    android:visibility="gone" />
+            </RelativeLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mainPosts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp"
+                tools:listitem="@layout/item_post" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <LinearLayout
+            android:id="@+id/privatePage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/private_page_margins"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="40dp"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/privatePage1"
+                android:layout_width="@dimen/private_page_margins"
+                android:layout_height="@dimen/private_page_margins"
+                app:srcCompat="@drawable/lock" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/privatePage2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/priv_acc"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="28sp" />
+        </LinearLayout>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

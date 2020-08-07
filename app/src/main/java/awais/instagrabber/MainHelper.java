@@ -109,9 +109,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 postsAdapter.notifyItemRangeInserted(oldSize, result.length);
 
-                main.mainBinding.mainPosts.post(() -> {
-                    main.mainBinding.mainPosts.setNestedScrollingEnabled(true);
-                    main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
+                main.mainBinding.profileView.mainPosts.post(() -> {
+                    main.mainBinding.profileView.mainPosts.setNestedScrollingEnabled(true);
+                    main.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                 });
 
                 if (isHashtag)
@@ -129,23 +129,23 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                 .setUsername((isLocation || isHashtag) ? null : main.profileModel.getUsername())
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
-                        main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                        main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                     }
                     model.setPageCursor(false, null);
                 }
             }
             else {
-                main.mainBinding.swipeRefreshLayout.setRefreshing(false);
-                main.mainBinding.privatePage1.setImageResource(R.drawable.ic_cancel);
-                main.mainBinding.privatePage2.setText(R.string.empty_acc);
-                main.mainBinding.privatePage.setVisibility(View.VISIBLE);
+                main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
+                main.mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
+                main.mainBinding.profileView.privatePage2.setText(R.string.empty_acc);
+                main.mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
             }
         }
     };
     private final FetchListener<FeedModel[]> feedFetchListener = new FetchListener<FeedModel[]>() {
         @Override
         public void doBefore() {
-            main.mainBinding.feedSwipeRefreshLayout.post(() -> main.mainBinding.feedSwipeRefreshLayout.setRefreshing(true));
+            main.mainBinding.feedView.feedSwipeRefreshLayout.post(() -> main.mainBinding.feedView.feedSwipeRefreshLayout.setRefreshing(true));
         }
 
         @Override
@@ -155,7 +155,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.feedItems.addAll(Arrays.asList(result));
                 feedAdapter.notifyItemRangeInserted(oldSize, result.length);
 
-                main.mainBinding.feedPosts.post(() -> main.mainBinding.feedPosts.setNestedScrollingEnabled(true));
+                main.mainBinding.feedView.feedPosts.post(() -> main.mainBinding.feedView.feedPosts.setNestedScrollingEnabled(true));
 
                 final PostModel feedPostModel = result[result.length - 1];
                 if (feedPostModel != null) {
@@ -165,7 +165,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 }
             }
 
-            main.mainBinding.feedSwipeRefreshLayout.setRefreshing(false);
+            main.mainBinding.feedView.feedSwipeRefreshLayout.setRefreshing(false);
         }
     };
     private final FetchListener<DiscoverItemModel[]> discoverFetchListener = new FetchListener<DiscoverItemModel[]>() {
@@ -212,14 +212,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final FetchListener<FeedStoryModel[]> feedStoriesListener = new FetchListener<FeedStoryModel[]>() {
         @Override
         public void doBefore() {
-            main.mainBinding.feedStories.setVisibility(View.GONE);
+            main.mainBinding.feedView.feedStories.setVisibility(View.GONE);
         }
 
         @Override
         public void onResult(final FeedStoryModel[] result) {
             feedStoriesAdapter.setData(result);
             if (result != null && result.length > 0) {
-                main.mainBinding.feedStories.setVisibility(View.VISIBLE);
+                main.mainBinding.feedView.feedStories.setVisibility(View.VISIBLE);
                 stories = result;
             }
         }
@@ -273,8 +273,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         this.resources = main.getResources();
         this.autoloadPosts = Utils.settingsHelper.getBoolean(AUTOLOAD_POSTS);
 
-        main.mainBinding.swipeRefreshLayout.setOnRefreshListener(this);
-        main.mainBinding.mainUrl.setMovementMethod(new LinkMovementMethod());
+        main.mainBinding.profileView.swipeRefreshLayout.setOnRefreshListener(this);
+        main.mainBinding.profileView.mainUrl.setMovementMethod(new LinkMovementMethod());
 
         final LinearLayout iconSlider = main.findViewById(R.id.iconSlider);
         final ImageView iconFeed = (ImageView) iconSlider.getChildAt(0);
@@ -283,7 +283,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         final boolean isBottomToolbar = Utils.settingsHelper.getBoolean(BOTTOM_TOOLBAR);
         if (!isLoggedIn) {
-            main.mainBinding.drawerLayout.removeView(main.mainBinding.feedLayout);
+            main.mainBinding.drawerLayout.removeView(main.mainBinding.feedView.feedLayout);
             main.mainBinding.drawerLayout.removeView(main.mainBinding.discoverSwipeRefreshLayout);
             iconFeed.setAlpha(0.4f);
             iconDiscover.setAlpha(0.4f);
@@ -360,7 +360,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 @Override
                 public void onDrawerOpened(@NonNull final View drawerView, @MouseDrawer.EdgeGravity final int gravity) {
-                    if (gravity == GravityCompat.START || drawerView == main.mainBinding.feedLayout) {
+                    if (gravity == GravityCompat.START || drawerView == main.mainBinding.feedView.feedLayout) {
                         if (currentFeedPlayer != null) {
                             currentFeedPlayer.setPlayWhenReady(true);
                             currentFeedPlayer.getPlaybackState();
@@ -373,7 +373,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 @Override
                 public void onDrawerClosed(@NonNull final View drawerView, @MouseDrawer.EdgeGravity final int gravity) {
-                    if (gravity == GravityCompat.START || drawerView == main.mainBinding.feedLayout) {
+                    if (gravity == GravityCompat.START || drawerView == main.mainBinding.feedView.feedLayout) {
                         if (currentFeedPlayer != null) {
                             currentFeedPlayer.setPlayWhenReady(false);
                             currentFeedPlayer.getPlaybackState();
@@ -392,14 +392,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             main.mainBinding.drawerLayout.addDrawerListener(simpleDrawerListener);
         }
 
-        collapsingToolbar = main.mainBinding.appBarLayout.getChildAt(0);
+        collapsingToolbar = main.mainBinding.profileView.appBarLayout.getChildAt(0);
 
-        main.mainBinding.mainPosts.setNestedScrollingEnabled(false);
-        main.mainBinding.highlightsList.setLayoutManager(new LinearLayoutManager(main, LinearLayoutManager.HORIZONTAL, false));
-        main.mainBinding.highlightsList.setAdapter(main.highlightsAdapter);
+        main.mainBinding.profileView.mainPosts.setNestedScrollingEnabled(false);
+        main.mainBinding.profileView.highlightsList.setLayoutManager(new LinearLayoutManager(main, LinearLayoutManager.HORIZONTAL, false));
+        main.mainBinding.profileView.highlightsList.setAdapter(main.highlightsAdapter);
 
         int color = -1;
-        final Drawable background = main.mainBinding.appBarLayout.getBackground();
+        final Drawable background = main.mainBinding.profileView.appBarLayout.getBackground();
         if (background instanceof MaterialShapeDrawable) {
             final MaterialShapeDrawable drawable = (MaterialShapeDrawable) background;
             final ColorStateList fillColor = drawable.getFillColor();
@@ -413,19 +413,19 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if (!bitmap.isRecycled()) bitmap.recycle();
         }
         if (color == -1 || color == 0) color = resources.getBoolean(R.bool.isNight) ? 0xff212121 : 0xfff5f5f5;
-        main.mainBinding.profileInfo.setBackgroundColor(color);
+        main.mainBinding.profileView.profileInfo.setBackgroundColor(color);
         if (!isBottomToolbar) main.mainBinding.toolbar.toolbar.setBackgroundColor(color);
 
-        main.mainBinding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+        main.mainBinding.profileView.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             private int height;
 
             @Override
             public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
                 if (height == 0) {
-                    height = main.mainBinding.profileInfo.getHeight();
+                    height = main.mainBinding.profileView.profileInfo.getHeight();
                     collapsingToolbar.setMinimumHeight(height);
                 }
-                main.mainBinding.profileInfo.setTranslationY(-Math.min(0, verticalOffset));
+                main.mainBinding.profileView.profileInfo.setTranslationY(-Math.min(0, verticalOffset));
             }
         });
 
@@ -438,9 +438,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         // change the next number to adjust grid
         final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(main, Utils.convertDpToPx(110));
-        main.mainBinding.mainPosts.setLayoutManager(layoutManager);
-        main.mainBinding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
-        main.mainBinding.mainPosts.setAdapter(postsAdapter = new PostsAdapter(main.allItems, v -> {
+        main.mainBinding.profileView.mainPosts.setLayoutManager(layoutManager);
+        main.mainBinding.profileView.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
+        main.mainBinding.profileView.mainPosts.setAdapter(postsAdapter = new PostsAdapter(main.allItems, v -> {
             final Object tag = v.getTag();
             if (tag instanceof PostModel) {
                 final PostModel postModel = (PostModel) tag;
@@ -463,7 +463,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         this.lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if ((!autoloadPosts || isHashtag) && hasNextPage) {
-                main.mainBinding.swipeRefreshLayout.setRefreshing(true);
+                main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
                 currentlyExecuting = new PostsFetcher((isHashtag || isLocation) ? main.userQuery : main.profileModel.getId(), endCursor, postsFetchListener)
                         .setUsername((isHashtag || isLocation) ? null : main.profileModel.getUsername())
@@ -471,17 +471,17 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 endCursor = null;
             }
         });
-        main.mainBinding.mainPosts.addOnScrollListener(lazyLoader);
+        main.mainBinding.profileView.mainPosts.addOnScrollListener(lazyLoader);
     }
 
     private void setupFeed() {
-        main.mainBinding.feedStories.setLayoutManager(new LinearLayoutManager(main, LinearLayoutManager.HORIZONTAL, false));
-        main.mainBinding.feedStories.setAdapter(feedStoriesAdapter);
+        main.mainBinding.feedView.feedStories.setLayoutManager(new LinearLayoutManager(main, LinearLayoutManager.HORIZONTAL, false));
+        main.mainBinding.feedView.feedStories.setAdapter(feedStoriesAdapter);
         refreshFeedStories();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(main);
-        main.mainBinding.feedPosts.setLayoutManager(layoutManager);
-        main.mainBinding.feedPosts.setAdapter(feedAdapter = new FeedAdapter(main, main.feedItems, (view, text, isHashtag) ->
+        main.mainBinding.feedView.feedPosts.setLayoutManager(layoutManager);
+        main.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(main, main.feedItems, (view, text, isHashtag) ->
                 new AlertDialog.Builder(main).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
                         .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
                     if (Main.scanHack != null) {
@@ -490,7 +490,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     }
                 }).show()));
 
-        main.mainBinding.feedSwipeRefreshLayout.setOnRefreshListener(() -> {
+        main.mainBinding.feedView.feedSwipeRefreshLayout.setOnRefreshListener(() -> {
             refreshFeedStories();
 
             if (feedLazyLoader != null) feedLazyLoader.resetState();
@@ -499,15 +499,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             new FeedFetcher(feedFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
 
-        main.mainBinding.feedPosts.addOnScrollListener(feedLazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+        main.mainBinding.feedView.feedPosts.addOnScrollListener(feedLazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (feedHasNextPage) {
-                main.mainBinding.feedSwipeRefreshLayout.setRefreshing(true);
+                main.mainBinding.feedView.feedSwipeRefreshLayout.setRefreshing(true);
                 new FeedFetcher(feedEndCursor, feedFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 feedEndCursor = null;
             }
         }));
 
-        main.mainBinding.feedPosts.addOnScrollListener(new VideoAwareRecyclerScroller(main, main.feedItems,
+        main.mainBinding.feedView.feedPosts.addOnScrollListener(new VideoAwareRecyclerScroller(main, main.feedItems,
                 (itemPos, player) -> currentFeedPlayer = player));
 
         new FeedFetcher(feedFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -644,59 +644,59 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             postsAdapter.isSelecting = false;
             postsAdapter.notifyDataSetChanged();
         }
-        main.mainBinding.appBarLayout.setExpanded(true, true);
-        main.mainBinding.privatePage.setVisibility(View.GONE);
-        main.mainBinding.privatePage2.setTextSize(28);
-        main.mainBinding.mainProfileImage.setImageBitmap(null);
-        main.mainBinding.mainHashtagImage.setImageBitmap(null);
-        main.mainBinding.mainLocationImage.setImageBitmap(null);
-        main.mainBinding.mainUrl.setText(null);
-        main.mainBinding.locationUrl.setText(null);
-        main.mainBinding.mainFullName.setText(null);
-        main.mainBinding.locationFullName.setText(null);
-        main.mainBinding.mainPostCount.setText(null);
-        main.mainBinding.mainLocPostCount.setText(null);
-        main.mainBinding.mainTagPostCount.setText(null);
-        main.mainBinding.mainFollowers.setText(null);
-        main.mainBinding.mainFollowing.setText(null);
-        main.mainBinding.mainBiography.setText(null);
-        main.mainBinding.locationBiography.setText(null);
-        main.mainBinding.mainBiography.setEnabled(false);
-        main.mainBinding.locationBiography.setEnabled(false);
-        main.mainBinding.mainProfileImage.setEnabled(false);
-        main.mainBinding.mainLocationImage.setEnabled(false);
-        main.mainBinding.mainHashtagImage.setEnabled(false);
-        main.mainBinding.mainBiography.setMentionClickListener(null);
-        main.mainBinding.locationBiography.setMentionClickListener(null);
-        main.mainBinding.mainUrl.setVisibility(View.GONE);
-        main.mainBinding.locationUrl.setVisibility(View.GONE);
-        main.mainBinding.isVerified.setVisibility(View.GONE);
-        main.mainBinding.btnFollow.setVisibility(View.GONE);
-        main.mainBinding.btnRestrict.setVisibility(View.GONE);
-        main.mainBinding.btnBlock.setVisibility(View.GONE);
-        main.mainBinding.btnSaved.setVisibility(View.GONE);
-        main.mainBinding.btnLiked.setVisibility(View.GONE);
-        main.mainBinding.btnTagged.setVisibility(View.GONE);
-        main.mainBinding.btnMap.setVisibility(View.GONE);
+        main.mainBinding.profileView.appBarLayout.setExpanded(true, true);
+        main.mainBinding.profileView.privatePage.setVisibility(View.GONE);
+        main.mainBinding.profileView.privatePage2.setTextSize(28);
+        main.mainBinding.profileView.mainProfileImage.setImageBitmap(null);
+        main.mainBinding.profileView.mainHashtagImage.setImageBitmap(null);
+        main.mainBinding.profileView.mainLocationImage.setImageBitmap(null);
+        main.mainBinding.profileView.mainUrl.setText(null);
+        main.mainBinding.profileView.locationUrl.setText(null);
+        main.mainBinding.profileView.mainFullName.setText(null);
+        main.mainBinding.profileView.locationFullName.setText(null);
+        main.mainBinding.profileView.mainPostCount.setText(null);
+        main.mainBinding.profileView.mainLocPostCount.setText(null);
+        main.mainBinding.profileView.mainTagPostCount.setText(null);
+        main.mainBinding.profileView.mainFollowers.setText(null);
+        main.mainBinding.profileView.mainFollowing.setText(null);
+        main.mainBinding.profileView.mainBiography.setText(null);
+        main.mainBinding.profileView.locationBiography.setText(null);
+        main.mainBinding.profileView.mainBiography.setEnabled(false);
+        main.mainBinding.profileView.locationBiography.setEnabled(false);
+        main.mainBinding.profileView.mainProfileImage.setEnabled(false);
+        main.mainBinding.profileView.mainLocationImage.setEnabled(false);
+        main.mainBinding.profileView.mainHashtagImage.setEnabled(false);
+        main.mainBinding.profileView.mainBiography.setMentionClickListener(null);
+        main.mainBinding.profileView.locationBiography.setMentionClickListener(null);
+        main.mainBinding.profileView.mainUrl.setVisibility(View.GONE);
+        main.mainBinding.profileView.locationUrl.setVisibility(View.GONE);
+        main.mainBinding.profileView.isVerified.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnFollow.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnRestrict.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnBlock.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnSaved.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnLiked.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnTagged.setVisibility(View.GONE);
+        main.mainBinding.profileView.btnMap.setVisibility(View.GONE);
 
-        main.mainBinding.btnFollow.setOnClickListener(profileActionListener);
-        main.mainBinding.btnRestrict.setOnClickListener(profileActionListener);
-        main.mainBinding.btnBlock.setOnClickListener(profileActionListener);
-        main.mainBinding.btnSaved.setOnClickListener(profileActionListener);
-        main.mainBinding.btnLiked.setOnClickListener(profileActionListener);
-        main.mainBinding.btnTagged.setOnClickListener(profileActionListener);
-        main.mainBinding.btnFollowTag.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnFollow.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnRestrict.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnBlock.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnSaved.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnLiked.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnTagged.setOnClickListener(profileActionListener);
+        main.mainBinding.profileView.btnFollowTag.setOnClickListener(profileActionListener);
 
-        main.mainBinding.infoContainer.setVisibility(View.GONE);
-        main.mainBinding.tagInfoContainer.setVisibility(View.GONE);
-        main.mainBinding.locInfoContainer.setVisibility(View.GONE);
+        main.mainBinding.profileView.infoContainer.setVisibility(View.GONE);
+        main.mainBinding.profileView.tagInfoContainer.setVisibility(View.GONE);
+        main.mainBinding.profileView.locInfoContainer.setVisibility(View.GONE);
 
-        main.mainBinding.mainPosts.setNestedScrollingEnabled(false);
-        main.mainBinding.highlightsList.setVisibility(View.GONE);
+        main.mainBinding.profileView.mainPosts.setNestedScrollingEnabled(false);
+        main.mainBinding.profileView.highlightsList.setVisibility(View.GONE);
         collapsingToolbar.setVisibility(View.GONE);
         main.highlightsAdapter.setData(null);
 
-        main.mainBinding.swipeRefreshLayout.setRefreshing(main.userQuery != null);
+        main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(main.userQuery != null);
         if (main.userQuery == null) {
             main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
             return;
@@ -711,14 +711,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             main.profileModel = null;
             main.locationModel = null;
             main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
-            main.mainBinding.tagInfoContainer.setVisibility(View.VISIBLE);
-            main.mainBinding.btnFollowTag.setVisibility(View.GONE);
+            main.mainBinding.profileView.tagInfoContainer.setVisibility(View.VISIBLE);
+            main.mainBinding.profileView.btnFollowTag.setVisibility(View.GONE);
 
             currentlyExecuting = new HashtagFetcher(main.userQuery.substring(1), hashtagModel -> {
                 main.hashtagModel = hashtagModel;
 
                 if (hashtagModel == null) {
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(main, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                     main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
                     return;
@@ -730,67 +730,67 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 currentlyExecuting = new PostsFetcher(main.userQuery, postsFetchListener)
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                main.mainBinding.btnFollowTag.setVisibility(View.VISIBLE);
+                main.mainBinding.profileView.btnFollowTag.setVisibility(View.VISIBLE);
 
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, result -> {
                         main.storyModels = result;
-                        if (result != null && result.length > 0) main.mainBinding.mainHashtagImage.setStoriesBorder();
+                        if (result != null && result.length > 0) main.mainBinding.profileView.mainHashtagImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                     if (hashtagModel.getFollowing() == true) {
-                        main.mainBinding.btnFollowTag.setText(R.string.unfollow);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnFollowTag.setText(R.string.unfollow);
+                        main.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_purple_background)));
                     }
                     else {
-                        main.mainBinding.btnFollowTag.setText(R.string.follow);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnFollowTag.setText(R.string.follow);
+                        main.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_pink_background)));
                     }
                 } else {
                     if (Utils.dataBox.getFavorite(main.userQuery) != null) {
-                        main.mainBinding.btnFollowTag.setText(R.string.unfavorite_short);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnFollowTag.setText(R.string.unfavorite_short);
+                        main.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_purple_background)));
                     }
                     else {
-                        main.mainBinding.btnFollowTag.setText(R.string.favorite_short);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnFollowTag.setText(R.string.favorite_short);
+                        main.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_pink_background)));
                     }
                 }
 
-                main.mainBinding.mainHashtagImage.setEnabled(false);
+                main.mainBinding.profileView.mainHashtagImage.setEnabled(false);
                 new MyTask().execute();
-                main.mainBinding.mainHashtagImage.setEnabled(true);
+                main.mainBinding.profileView.mainHashtagImage.setEnabled(true);
 
                 final String postCount = String.valueOf(hashtagModel.getPostCount());
 
                 SpannableStringBuilder span = new SpannableStringBuilder(resources.getString(R.string.main_posts_count, postCount));
                 span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
-                main.mainBinding.mainTagPostCount.setText(span);
-                main.mainBinding.mainTagPostCount.setVisibility(View.VISIBLE);
+                main.mainBinding.profileView.mainTagPostCount.setText(span);
+                main.mainBinding.profileView.mainTagPostCount.setVisibility(View.VISIBLE);
             }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else if (isUser) {
             main.hashtagModel = null;
             main.locationModel = null;
             main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
-            main.mainBinding.infoContainer.setVisibility(View.VISIBLE);
-            main.mainBinding.btnFollowTag.setVisibility(View.GONE);
+            main.mainBinding.profileView.infoContainer.setVisibility(View.VISIBLE);
+            main.mainBinding.profileView.btnFollowTag.setVisibility(View.GONE);
 
             currentlyExecuting = new ProfileFetcher(main.userQuery.substring(1), profileModel -> {
                 main.profileModel = profileModel;
 
                 if (profileModel == null) {
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(main, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                     main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
                     return;
                 }
 
-                main.mainBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
+                main.mainBinding.profileView.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
                 final String profileId = profileModel.getId();
 
                 final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
@@ -799,108 +799,108 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
                         result -> {
                     main.storyModels = result;
-                    if (result != null && result.length > 0) main.mainBinding.mainProfileImage.setStoriesBorder();
+                    if (result != null && result.length > 0) main.mainBinding.profileView.mainProfileImage.setStoriesBorder();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
                     if (result != null && result.length > 0) {
-                        main.mainBinding.highlightsList.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.highlightsList.setVisibility(View.VISIBLE);
                         main.highlightsAdapter.setData(result);
                     }
-                    else main.mainBinding.highlightsList.setVisibility(View.GONE);
+                    else main.mainBinding.profileView.highlightsList.setVisibility(View.GONE);
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 if (isLoggedIn) {
                     final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE));
                     if (!profileId.equals(myId)) {
-                        main.mainBinding.btnTagged.setVisibility(View.GONE);
-                        main.mainBinding.btnSaved.setVisibility(View.GONE);
-                        main.mainBinding.btnLiked.setVisibility(View.GONE);
-                        main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.btnTagged.setVisibility(View.GONE);
+                        main.mainBinding.profileView.btnSaved.setVisibility(View.GONE);
+                        main.mainBinding.profileView.btnLiked.setVisibility(View.GONE);
+                        main.mainBinding.profileView.btnFollow.setVisibility(View.VISIBLE);
                         if (profileModel.getFollowing() == true) {
-                            main.mainBinding.btnFollow.setText(R.string.unfollow);
-                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                            main.mainBinding.profileView.btnFollow.setText(R.string.unfollow);
+                            main.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     main, R.color.btn_purple_background)));
                         }
                         else if (profileModel.getRequested() == true) {
-                            main.mainBinding.btnFollow.setText(R.string.cancel);
-                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                            main.mainBinding.profileView.btnFollow.setText(R.string.cancel);
+                            main.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     main, R.color.btn_purple_background)));
                         }
                         else {
-                            main.mainBinding.btnFollow.setText(R.string.follow);
-                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                            main.mainBinding.profileView.btnFollow.setText(R.string.follow);
+                            main.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     main, R.color.btn_pink_background)));
                         }
-                        main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.btnRestrict.setVisibility(View.VISIBLE);
                         if (profileModel.getRestricted() == true) {
-                            main.mainBinding.btnRestrict.setText(R.string.unrestrict);
-                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                            main.mainBinding.profileView.btnRestrict.setText(R.string.unrestrict);
+                            main.mainBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     main, R.color.btn_green_background)));
                         }
                         else {
-                            main.mainBinding.btnRestrict.setText(R.string.restrict);
-                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                            main.mainBinding.profileView.btnRestrict.setText(R.string.restrict);
+                            main.mainBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     main, R.color.btn_orange_background)));
                         }
                         if (profileModel.isReallyPrivate()) {
-                            main.mainBinding.btnBlock.setVisibility(View.VISIBLE);
-                            main.mainBinding.btnTagged.setVisibility(View.GONE);
+                            main.mainBinding.profileView.btnBlock.setVisibility(View.VISIBLE);
+                            main.mainBinding.profileView.btnTagged.setVisibility(View.GONE);
                             if (profileModel.getBlocked() == true) {
-                                main.mainBinding.btnBlock.setText(R.string.unblock);
-                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main.mainBinding.profileView.btnBlock.setText(R.string.unblock);
+                                main.mainBinding.profileView.btnBlock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                         main, R.color.btn_green_background)));
                             } else {
-                                main.mainBinding.btnBlock.setText(R.string.block);
-                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main.mainBinding.profileView.btnBlock.setText(R.string.block);
+                                main.mainBinding.profileView.btnBlock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                         main, R.color.btn_red_background)));
                             }
                         } else {
-                            main.mainBinding.btnBlock.setVisibility(View.GONE);
-                            main.mainBinding.btnSaved.setVisibility(View.VISIBLE);
-                            main.mainBinding.btnTagged.setVisibility(View.VISIBLE);
+                            main.mainBinding.profileView.btnBlock.setVisibility(View.GONE);
+                            main.mainBinding.profileView.btnSaved.setVisibility(View.VISIBLE);
+                            main.mainBinding.profileView.btnTagged.setVisibility(View.VISIBLE);
                             if (profileModel.getBlocked() == true) {
-                                main.mainBinding.btnSaved.setText(R.string.unblock);
-                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main.mainBinding.profileView.btnSaved.setText(R.string.unblock);
+                                main.mainBinding.profileView.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                         main, R.color.btn_green_background)));
                             } else {
-                                main.mainBinding.btnSaved.setText(R.string.block);
-                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main.mainBinding.profileView.btnSaved.setText(R.string.block);
+                                main.mainBinding.profileView.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                         main, R.color.btn_red_background)));
                             }
                         }
                     }
                     else {
-                        main.mainBinding.btnTagged.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnSaved.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnLiked.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnSaved.setText(R.string.saved);
-                        main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnTagged.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.btnSaved.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.btnLiked.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.btnSaved.setText(R.string.saved);
+                        main.mainBinding.profileView.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_orange_background)));
                     }
                 } else {
                     if (Utils.dataBox.getFavorite(main.userQuery) != null) {
-                        main.mainBinding.btnFollow.setText(R.string.unfavorite_short);
-                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnFollow.setText(R.string.unfavorite_short);
+                        main.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_purple_background)));
                     }
                     else {
-                        main.mainBinding.btnFollow.setText(R.string.favorite_short);
-                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnFollow.setText(R.string.favorite_short);
+                        main.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_pink_background)));
                     }
-                    main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.btnFollow.setVisibility(View.VISIBLE);
                     if (!profileModel.isReallyPrivate()) {
-                        main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
-                        main.mainBinding.btnRestrict.setText(R.string.tagged);
-                        main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                        main.mainBinding.profileView.btnRestrict.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.btnRestrict.setText(R.string.tagged);
+                        main.mainBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 main, R.color.btn_blue_background)));
                     }
                 }
 
-                main.mainBinding.mainProfileImage.setEnabled(false);
+                main.mainBinding.profileView.mainProfileImage.setEnabled(false);
                 new MyTask().execute();
-                main.mainBinding.mainProfileImage.setEnabled(true);
+                main.mainBinding.profileView.mainProfileImage.setEnabled(true);
 
                 final long followersCount = profileModel.getFollowersCount();
                 final long followingCount = profileModel.getFollowingCount();
@@ -910,82 +910,82 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 SpannableStringBuilder span = new SpannableStringBuilder(resources.getString(R.string.main_posts_count, postCount));
                 span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
-                main.mainBinding.mainPostCount.setText(span);
+                main.mainBinding.profileView.mainPostCount.setText(span);
 
                 final String followersCountStr = String.valueOf(followersCount);
                 final int followersCountStrLen = followersCountStr.length();
                 span = new SpannableStringBuilder(resources.getString(R.string.main_posts_followers, followersCountStr));
                 span.setSpan(new RelativeSizeSpan(1.2f), 0, followersCountStrLen, 0);
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, followersCountStrLen, 0);
-                main.mainBinding.mainFollowers.setText(span);
+                main.mainBinding.profileView.mainFollowers.setText(span);
 
                 final String followingCountStr = String.valueOf(followingCount);
                 final int followingCountStrLen = followingCountStr.length();
                 span = new SpannableStringBuilder(resources.getString(R.string.main_posts_following, followingCountStr));
                 span.setSpan(new RelativeSizeSpan(1.2f), 0, followingCountStrLen, 0);
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
-                main.mainBinding.mainFollowing.setText(span);
+                main.mainBinding.profileView.mainFollowing.setText(span);
 
-                main.mainBinding.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername() : profileModel.getName());
+                main.mainBinding.profileView.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername() : profileModel.getName());
 
                 CharSequence biography = profileModel.getBiography();
-                main.mainBinding.mainBiography.setCaptionIsExpandable(true);
-                main.mainBinding.mainBiography.setCaptionIsExpanded(true);
+                main.mainBinding.profileView.mainBiography.setCaptionIsExpandable(true);
+                main.mainBinding.profileView.mainBiography.setCaptionIsExpanded(true);
                 if (Utils.hasMentions(biography)) {
                     biography = Utils.getMentionText(biography);
-                    main.mainBinding.mainBiography.setText(biography, TextView.BufferType.SPANNABLE);
-                    main.mainBinding.mainBiography.setMentionClickListener(mentionClickListener);
+                    main.mainBinding.profileView.mainBiography.setText(biography, TextView.BufferType.SPANNABLE);
+                    main.mainBinding.profileView.mainBiography.setMentionClickListener(mentionClickListener);
                 } else {
-                    main.mainBinding.mainBiography.setText(biography);
-                    main.mainBinding.mainBiography.setMentionClickListener(null);
+                    main.mainBinding.profileView.mainBiography.setText(biography);
+                    main.mainBinding.profileView.mainBiography.setMentionClickListener(null);
                 }
 
                 final String url = profileModel.getUrl();
                 if (Utils.isEmpty(url)) {
-                    main.mainBinding.mainUrl.setVisibility(View.GONE);
+                    main.mainBinding.profileView.mainUrl.setVisibility(View.GONE);
                 } else {
-                    main.mainBinding.mainUrl.setVisibility(View.VISIBLE);
-                    main.mainBinding.mainUrl.setText(Utils.getSpannableUrl(url));
+                    main.mainBinding.profileView.mainUrl.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.mainUrl.setText(Utils.getSpannableUrl(url));
                 }
 
-                main.mainBinding.mainFullName.setSelected(true);
-                main.mainBinding.mainBiography.setEnabled(true);
+                main.mainBinding.profileView.mainFullName.setSelected(true);
+                main.mainBinding.profileView.mainBiography.setEnabled(true);
 
                 if (!profileModel.isReallyPrivate()) {
-                    main.mainBinding.mainFollowing.setClickable(true);
-                    main.mainBinding.mainFollowers.setClickable(true);
+                    main.mainBinding.profileView.mainFollowing.setClickable(true);
+                    main.mainBinding.profileView.mainFollowers.setClickable(true);
 
                     if (isLoggedIn) {
                         final View.OnClickListener followClickListener = v -> main.startActivity(new Intent(main, FollowViewer.class)
-                                .putExtra(Constants.EXTRAS_FOLLOWERS, v == main.mainBinding.mainFollowers)
+                                .putExtra(Constants.EXTRAS_FOLLOWERS, v == main.mainBinding.profileView.mainFollowers)
                                 .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
                                 .putExtra(Constants.EXTRAS_ID, profileId));
 
-                        main.mainBinding.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
-                        main.mainBinding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
+                        main.mainBinding.profileView.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
+                        main.mainBinding.profileView.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
                     }
 
                     if (profileModel.getPostCount() == 0) {
-                        main.mainBinding.swipeRefreshLayout.setRefreshing(false);
-                        main.mainBinding.privatePage1.setImageResource(R.drawable.ic_cancel);
-                        main.mainBinding.privatePage2.setText(R.string.empty_acc);
-                        main.mainBinding.privatePage.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
+                        main.mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
+                        main.mainBinding.profileView.privatePage2.setText(R.string.empty_acc);
+                        main.mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
                     }
                     else {
-                        main.mainBinding.swipeRefreshLayout.setRefreshing(true);
-                        main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
+                        main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
+                        main.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                         currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                 } else {
-                    main.mainBinding.mainFollowers.setClickable(false);
-                    main.mainBinding.mainFollowing.setClickable(false);
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    main.mainBinding.profileView.mainFollowers.setClickable(false);
+                    main.mainBinding.profileView.mainFollowing.setClickable(false);
+                    main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                     // error
-                    main.mainBinding.privatePage1.setImageResource(R.drawable.lock);
-                    main.mainBinding.privatePage2.setText(R.string.priv_acc);
-                    main.mainBinding.privatePage.setVisibility(View.VISIBLE);
-                    main.mainBinding.mainPosts.setVisibility(View.GONE);
+                    main.mainBinding.profileView.privatePage1.setImageResource(R.drawable.lock);
+                    main.mainBinding.profileView.privatePage2.setText(R.string.priv_acc);
+                    main.mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.mainPosts.setVisibility(View.GONE);
                 }
             }
             ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -994,13 +994,13 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             main.profileModel = null;
             main.hashtagModel = null;
             main.mainBinding.toolbar.toolbar.setTitle(main.userQuery);
-            main.mainBinding.locInfoContainer.setVisibility(View.VISIBLE);
+            main.mainBinding.profileView.locInfoContainer.setVisibility(View.VISIBLE);
 
             currentlyExecuting = new LocationFetcher(main.userQuery.split("/")[0], locationModel -> {
                 main.locationModel = locationModel;
 
                 if (locationModel == null) {
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
+                    main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(main, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                     main.mainBinding.toolbar.toolbar.setTitle(R.string.app_name);
                     return;
@@ -1014,77 +1014,77 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(profileId.split("/")[0], null, true, false, false, false, result -> {
                         main.storyModels = result;
-                        if (result != null && result.length > 0) main.mainBinding.mainLocationImage.setStoriesBorder();
+                        if (result != null && result.length > 0) main.mainBinding.profileView.mainLocationImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
-                main.mainBinding.mainLocationImage.setEnabled(false);
+                main.mainBinding.profileView.mainLocationImage.setEnabled(false);
                 new MyTask().execute();
-                main.mainBinding.mainLocationImage.setEnabled(true);
+                main.mainBinding.profileView.mainLocationImage.setEnabled(true);
 
                 final String postCount = String.valueOf(locationModel.getPostCount());
 
                 SpannableStringBuilder span = new SpannableStringBuilder(resources.getString(R.string.main_posts_count, postCount));
                 span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
-                main.mainBinding.mainLocPostCount.setText(span);
+                main.mainBinding.profileView.mainLocPostCount.setText(span);
 
-                main.mainBinding.locationFullName.setText(locationModel.getName());
+                main.mainBinding.profileView.locationFullName.setText(locationModel.getName());
 
                 CharSequence biography = locationModel.getBio();
-                main.mainBinding.locationBiography.setCaptionIsExpandable(true);
-                main.mainBinding.locationBiography.setCaptionIsExpanded(true);
+                main.mainBinding.profileView.locationBiography.setCaptionIsExpandable(true);
+                main.mainBinding.profileView.locationBiography.setCaptionIsExpanded(true);
 
                 if (Utils.isEmpty(biography)) {
-                    main.mainBinding.locationBiography.setVisibility(View.GONE);
+                    main.mainBinding.profileView.locationBiography.setVisibility(View.GONE);
                 }
                 else if (Utils.hasMentions(biography)) {
-                    main.mainBinding.locationBiography.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.locationBiography.setVisibility(View.VISIBLE);
                     biography = Utils.getMentionText(biography);
-                    main.mainBinding.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
-                    main.mainBinding.locationBiography.setMentionClickListener(mentionClickListener);
+                    main.mainBinding.profileView.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
+                    main.mainBinding.profileView.locationBiography.setMentionClickListener(mentionClickListener);
                 } else {
-                    main.mainBinding.locationBiography.setVisibility(View.VISIBLE);
-                    main.mainBinding.locationBiography.setText(biography);
-                    main.mainBinding.locationBiography.setMentionClickListener(null);
+                    main.mainBinding.profileView.locationBiography.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.locationBiography.setText(biography);
+                    main.mainBinding.profileView.locationBiography.setMentionClickListener(null);
                 }
 
                 if (!locationModel.getGeo().startsWith("geo:0.0,0.0?z=17")) {
-                    main.mainBinding.btnMap.setVisibility(View.VISIBLE);
-                    main.mainBinding.btnMap.setOnClickListener(v -> {
+                    main.mainBinding.profileView.btnMap.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.btnMap.setOnClickListener(v -> {
                         final Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(locationModel.getGeo()));
                         main.startActivity(intent);
                     });
                 }
                 else {
-                    main.mainBinding.btnMap.setVisibility(View.GONE);
-                    main.mainBinding.btnMap.setOnClickListener(null);
+                    main.mainBinding.profileView.btnMap.setVisibility(View.GONE);
+                    main.mainBinding.profileView.btnMap.setOnClickListener(null);
                 }
 
                 final String url = locationModel.getUrl();
                 if (Utils.isEmpty(url)) {
-                    main.mainBinding.locationUrl.setVisibility(View.GONE);
+                    main.mainBinding.profileView.locationUrl.setVisibility(View.GONE);
                 } else if (!url.startsWith("http")) {
-                    main.mainBinding.locationUrl.setVisibility(View.VISIBLE);
-                    main.mainBinding.locationUrl.setText(Utils.getSpannableUrl("http://"+url));
+                    main.mainBinding.profileView.locationUrl.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.locationUrl.setText(Utils.getSpannableUrl("http://"+url));
                 } else {
-                    main.mainBinding.locationUrl.setVisibility(View.VISIBLE);
-                    main.mainBinding.locationUrl.setText(Utils.getSpannableUrl(url));
+                    main.mainBinding.profileView.locationUrl.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.locationUrl.setText(Utils.getSpannableUrl(url));
                 }
 
-                main.mainBinding.locationFullName.setSelected(true);
-                main.mainBinding.locationBiography.setEnabled(true);
+                main.mainBinding.profileView.locationFullName.setSelected(true);
+                main.mainBinding.profileView.locationBiography.setEnabled(true);
 
                 if (locationModel.getPostCount() == 0) {
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(false);
-                    main.mainBinding.privatePage1.setImageResource(R.drawable.ic_cancel);
-                    main.mainBinding.privatePage2.setText(R.string.empty_acc);
-                    main.mainBinding.privatePage.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
+                    main.mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
+                    main.mainBinding.profileView.privatePage2.setText(R.string.empty_acc);
+                    main.mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
                 }
                 else {
-                    main.mainBinding.swipeRefreshLayout.setRefreshing(true);
-                    main.mainBinding.mainPosts.setVisibility(View.VISIBLE);
+                    main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
+                    main.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                     currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
@@ -1214,9 +1214,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         @Override
         protected void onPostExecute(Void result) {
-            if (main.hashtagModel != null) main.mainBinding.mainHashtagImage.setImageBitmap(mIcon_val);
-            else if (main.locationModel != null) main.mainBinding.mainLocationImage.setImageBitmap(mIcon_val);
-            else main.mainBinding.mainProfileImage.setImageBitmap(mIcon_val);
+            if (main.hashtagModel != null) main.mainBinding.profileView.mainHashtagImage.setImageBitmap(mIcon_val);
+            else if (main.locationModel != null) main.mainBinding.profileView.mainLocationImage.setImageBitmap(mIcon_val);
+            else main.mainBinding.profileView.mainProfileImage.setImageBitmap(mIcon_val);
         }
     }
 
@@ -1226,34 +1226,34 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             final boolean iamme = (isLoggedIn && main.profileModel != null)
                     ? Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)).equals(main.profileModel.getId())
                     : false;
-            if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null && v == main.mainBinding.btnFollow) {
+            if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null && v == main.mainBinding.profileView.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
-            } else if (!isLoggedIn && (v == main.mainBinding.btnFollow || v == main.mainBinding.btnFollowTag)) {
+            } else if (!isLoggedIn && (v == main.mainBinding.profileView.btnFollow || v == main.mainBinding.profileView.btnFollowTag)) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(main.userQuery, System.currentTimeMillis(),
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
-            } else if (v == main.mainBinding.btnFollow) {
+            } else if (v == main.mainBinding.profileView.btnFollow) {
                 new ProfileAction().execute("follow");
-            } else if (v == main.mainBinding.btnRestrict && isLoggedIn) {
+            } else if (v == main.mainBinding.profileView.btnRestrict && isLoggedIn) {
                 new ProfileAction().execute("restrict");
-            } else if (v == main.mainBinding.btnSaved && !iamme) {
+            } else if (v == main.mainBinding.profileView.btnSaved && !iamme) {
                 new ProfileAction().execute("block");
-            } else if (v == main.mainBinding.btnFollowTag) {
+            } else if (v == main.mainBinding.profileView.btnFollowTag) {
                 new ProfileAction().execute("followtag");
-            } else if (v == main.mainBinding.btnTagged || (v == main.mainBinding.btnRestrict && !isLoggedIn)) {
+            } else if (v == main.mainBinding.profileView.btnTagged || (v == main.mainBinding.profileView.btnRestrict && !isLoggedIn)) {
                 main.startActivity(new Intent(main, SavedViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, "%"+main.profileModel.getId())
                         .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
                 );
-            } else if (v == main.mainBinding.btnSaved) {
+            } else if (v == main.mainBinding.profileView.btnSaved) {
                 main.startActivity(new Intent(main, SavedViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, "$"+main.profileModel.getId())
                         .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
                 );
-            } else if (v == main.mainBinding.btnLiked) {
+            } else if (v == main.mainBinding.profileView.btnLiked) {
                 main.startActivity(new Intent(main, SavedViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, "^"+main.profileModel.getId())
                         .putExtra(Constants.EXTRAS_USER, "@"+main.profileModel.getUsername())
