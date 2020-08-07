@@ -34,7 +34,7 @@
     <string name="bottom_toolbar">Tampilkan bilah alat di bawah</string>
     <string name="download_user_folder">Unduh kiriman ke folder nama pengguna di folder unduhan</string>
     <string name="autoload_posts">Muat otomatis semua kiriman dari pengguna</string>
-    <string name="mark_as_seen_setting">Mark stories as seen after viewing\n(Story author will know you viewed it)</string>
+    <string name="mark_as_seen_setting">Tandai cerita telah dilihat setelah ditampilkan\n(Pembuat cerita akan mengetahui anda telah melihat ceritanya)</string>
     <string name="error_loading_profile">Galat saat memuat profil!\nCoba masuk dan cari lagi.</string>
     <string name="error_creating_folders">Galat saat membuat folder unduhan.</string>
     <string name="show_feed">Tampilkan Beranda pengguna (hanya bisa saat anda sudah masuk)</string>
@@ -43,7 +43,7 @@
     <string name="theme_settings">Pengaturan tema</string>
     <string name="login_settings">Only affects logged-in users:</string>
     <string name="anonymous_settings">Only affects anonymous users:</string>
-    <string name="privacy_warning">Privacy</string>
+    <string name="privacy_warning">Privasi</string>
     <string name="instadp_settings">Use Instadp for high definition profile pictures</string>
     <string name="storiesig_settings">Use storiesig for stories and highlights from public users</string>
     <string name="import_export">Ekspor/impor Pengaturan</string>
