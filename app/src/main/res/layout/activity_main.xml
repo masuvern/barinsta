@@ -32,30 +32,37 @@
                 layout="@layout/layout_feed_view" />
 
             <!-- Discover View -->
-            <LinearLayout
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:id="@+id/discoverLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
-                android:paddingTop="24dp"
                 android:animateLayoutChanges="true"
-                android:orientation="vertical"
                 android:tag="@android:string/yes">
 
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/discoverType"
+                <com.google.android.material.appbar.AppBarLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/discover_placeholder"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp" />
+                    android:layout_height="wrap_content">
+                    <com.google.android.material.appbar.CollapsingToolbarLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_scrollFlags="scroll|snap|enterAlways">
+
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/discoverType"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:entries="@array/discover_placeholder"/>
+                    </com.google.android.material.appbar.CollapsingToolbarLayout>
+                </com.google.android.material.appbar.AppBarLayout>
 
                 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                     android:id="@+id/discoverSwipeRefreshLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:tag="@android:string/yes">
+                    android:tag="@android:string/yes"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/discoverPosts"
@@ -63,8 +70,8 @@
                         android:layout_height="match_parent"
                         android:clipToPadding="false"
                         tools:listitem="@layout/item_feed" />
-                    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-            </LinearLayout>
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
         </awais.instagrabber.customviews.RemixDrawerLayout>
     </LinearLayout>
 

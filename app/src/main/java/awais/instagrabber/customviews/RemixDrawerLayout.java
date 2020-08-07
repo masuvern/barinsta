@@ -27,9 +27,7 @@ import awais.instagrabber.R;
 public final class RemixDrawerLayout extends MouseDrawer implements MouseDrawer.DrawerListener {
     private final FrameLayout frameLayout;
     private View drawerView;
-    private RecyclerView highlightsList;
-    private RecyclerView feedPosts;
-    private RecyclerView feedStories;
+    private RecyclerView highlightsList, feedPosts, feedStories;
     private float startX;
 
     public RemixDrawerLayout(@NonNull final Context context) {

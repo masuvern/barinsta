@@ -105,6 +105,7 @@ public final class StoryViewer extends BaseLanguageActivity {
     private String url, username;
     private int slidePos = 0, lastSlidePos = 0;
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
+    private boolean fetching = false;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -152,7 +153,6 @@ public final class StoryViewer extends BaseLanguageActivity {
                         if ((isRightSwipe == true && index == 0) || (isRightSwipe == false && index == storyFeed.length - 1))
                             Toast.makeText(getApplicationContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                         else {
-                            boolean fetching = false;
                             final FeedStoryModel feedStoryModel = isRightSwipe ?
                                     (index == 0 ? null : storyFeed[index - 1]) :
                                     (storyFeed.length == index + 1 ? null : storyFeed[index + 1]);
@@ -728,7 +728,7 @@ final String url = "https://www.instagram.com/stories/reel/seen";
         protected Void doInBackground(String... rawAction) {
             final String action = rawAction[0];
             final String url = "https://i.instagram.com/api/v1/direct_v2/create_group_thread/";
-try {
+            try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
