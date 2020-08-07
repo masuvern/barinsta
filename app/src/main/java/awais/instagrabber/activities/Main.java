@@ -159,7 +159,7 @@ public final class Main extends BaseLanguageActivity {
                 if (!Utils.isEmpty(username)) {
                     if (!BuildConfig.DEBUG) {
                         userQuery = username;
-                        if (mainHelper != null && !mainBinding.swipeRefreshLayout.isRefreshing()) mainHelper.onRefresh();
+                        if (mainHelper != null && !mainBinding.profileView.swipeRefreshLayout.isRefreshing()) mainHelper.onRefresh();
                     }
                     // adds cookies to database for quick access
                     cookieModel = Utils.dataBox.getCookie(uid);
@@ -212,11 +212,11 @@ public final class Main extends BaseLanguageActivity {
         };
 
         final View.OnClickListener onClickListener = v -> {
-            if (v == mainBinding.mainBiography) {
-                Utils.copyText(this, mainBinding.mainBiography.getText().toString());
-            } else if (v == mainBinding.locationBiography) {
-                Utils.copyText(this, mainBinding.locationBiography.getText().toString());
-            } else if (v == mainBinding.mainProfileImage || v == mainBinding.mainHashtagImage || v == mainBinding.mainLocationImage) {
+            if (v == mainBinding.profileView.mainBiography) {
+                Utils.copyText(this, mainBinding.profileView.mainBiography.getText().toString());
+            } else if (v == mainBinding.profileView.locationBiography) {
+                Utils.copyText(this, mainBinding.profileView.locationBiography.getText().toString());
+            } else if (v == mainBinding.profileView.mainProfileImage || v == mainBinding.profileView.mainHashtagImage || v == mainBinding.profileView.mainLocationImage) {
                 if (storyModels == null || storyModels.length <= 0) {
                     profileDialogListener.onClick(null, 0);
                 } else {
@@ -227,26 +227,26 @@ public final class Main extends BaseLanguageActivity {
             }
         };
 
-        mainBinding.mainBiography.setOnClickListener(onClickListener);
-        mainBinding.locationBiography.setOnClickListener(onClickListener);
-        mainBinding.mainProfileImage.setOnClickListener(onClickListener);
-        mainBinding.mainHashtagImage.setOnClickListener(onClickListener);
-        mainBinding.mainLocationImage.setOnClickListener(onClickListener);
+        mainBinding.profileView.mainBiography.setOnClickListener(onClickListener);
+        mainBinding.profileView.locationBiography.setOnClickListener(onClickListener);
+        mainBinding.profileView.mainProfileImage.setOnClickListener(onClickListener);
+        mainBinding.profileView.mainHashtagImage.setOnClickListener(onClickListener);
+        mainBinding.profileView.mainLocationImage.setOnClickListener(onClickListener);
 
-        mainBinding.mainBiography.setEnabled(false);
-        mainBinding.mainProfileImage.setEnabled(false);
-        mainBinding.mainHashtagImage.setEnabled(false);
-        mainBinding.mainLocationImage.setEnabled(false);
+        mainBinding.profileView.mainBiography.setEnabled(false);
+        mainBinding.profileView.mainProfileImage.setEnabled(false);
+        mainBinding.profileView.mainHashtagImage.setEnabled(false);
+        mainBinding.profileView.mainLocationImage.setEnabled(false);
 
         final boolean isQueryNull = userQuery == null;
         if (isQueryNull) {
             allItems.clear();
-            mainBinding.privatePage1.setImageResource(R.drawable.ic_info);
-            mainBinding.privatePage2.setTextSize(20);
-            mainBinding.privatePage2.setText(mainHelper.isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
-            mainBinding.privatePage.setVisibility(View.VISIBLE);
+            mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_info);
+            mainBinding.profileView.privatePage2.setTextSize(20);
+            mainBinding.profileView.privatePage2.setText(mainHelper.isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
+            mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
         }
-        if (!mainBinding.swipeRefreshLayout.isRefreshing() && userQuery != null) mainHelper.onRefresh();
+        if (!mainBinding.profileView.swipeRefreshLayout.isRefreshing() && userQuery != null) mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
     }
@@ -460,10 +460,10 @@ public final class Main extends BaseLanguageActivity {
 
         if (!mainHelper.isSelectionCleared()) return;
 
-        final GridLayoutManager layoutManager = (GridLayoutManager) mainBinding.mainPosts.getLayoutManager();
+        final GridLayoutManager layoutManager = (GridLayoutManager) mainBinding.profileView.mainPosts.getLayoutManager();
         if (layoutManager != null && layoutManager.findFirstCompletelyVisibleItemPosition() >= layoutManager.getSpanCount()) {
-            mainBinding.mainPosts.smoothScrollToPosition(0);
-            mainBinding.appBarLayout.setExpanded(true, true);
+            mainBinding.profileView.mainPosts.smoothScrollToPosition(0);
+            mainBinding.profileView.appBarLayout.setExpanded(true, true);
             return;
         }
 
