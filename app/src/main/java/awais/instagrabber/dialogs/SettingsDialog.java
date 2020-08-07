@@ -185,11 +185,12 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         if (v == btnLogin) {
             startActivity(new Intent(v.getContext(), Login.class));
             somethingChanged = true;
+            this.dismiss();
         } else if (v == btnLogout) {
             Utils.setupCookies("LOGOUT");
-            settingsHelper.putString(Constants.COOKIE, null);
+            settingsHelper.putString(Constants.COOKIE, "");
+            somethingChanged = true;
             this.dismiss();
-            activity.recreate();
         } else if (v == btnImportExport) {
             if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
                 requestPermissions(Utils.PERMS, 6007);
