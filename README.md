@@ -9,7 +9,7 @@ InstaGrabber is an alternative Instagram client for Android. You can...
 * **Hashtag**: View posts (newest only), view stories\*, follow\*
 * **Location**: View posts (newest only), view stories\*, open map
 * **Post**: View, download (+ batch download selected posts), copy captions, like/save\*
-* **Story**<sup>1</sup>: View (w/ [storiesig](https://storiesig.com) support<sup>1</sup> and incognito mode<sup>2</sup>), download, interact with stickers\*, reply as DM\*
+* **Story**: View (with [storiesig](https://storiesig.com) support<sup>1</sup> and incognito mode<sup>2</sup>), download, interact with stickers\*, reply as DM\*
 * **Comment**: View (+ copy), write\*, reply\*, like\*, delete\*
 * **DM\***: View, download attachments<sup>2</sup>, text reply
 * Viewing\* your own feed, discover, saved, and liked posts
