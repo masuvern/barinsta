@@ -20,6 +20,8 @@ public final class Constants {
     public static final String SHOW_FEED = "show_feed";
     public static final String CUSTOM_DATE_TIME_FORMAT_ENABLED = "data_time_custom_enabled";
     public static final String MARK_AS_SEEN = "mark_as_seen";
+    public static final String INSTADP = "instadp";
+    public static final String STORIESIG = "storiesig";
     // never Export
     public static final String COOKIE = "cookie";
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
@@ -49,6 +51,7 @@ public final class Constants {
             "Instagram 152.0.0.25.117 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 234847224)";
     public static final String I_USER_AGENT =
             "Instagram 152.0.0.25.117 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 234847224)";
+    public static final String A_USER_AGENT = "InstaGrabber.AustinHuang.me / InstaGrabber@AustinHuang.me";
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
     public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
             " \"13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0," +

@@ -1,11 +1,11 @@
 package awais.instagrabber.models;
 
 public final class HighlightModel {
-    private final String title, thumbnailUrl;
-    private StoryModel[] storyModels;
+    private final String title, id, thumbnailUrl;
 
-    public HighlightModel(final String title, final String thumbnailUrl) {
+    public HighlightModel(final String title, final String id, final String thumbnailUrl) {
         this.title = title;
+        this.id = id;
         this.thumbnailUrl = thumbnailUrl;
     }
 
@@ -13,15 +13,11 @@ public final class HighlightModel {
         return title;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public String getThumbnailUrl() {
         return thumbnailUrl;
-    }
-
-    public StoryModel[] getStoryModels() {
-        return storyModels;
-    }
-
-    public void setStoryModels(final StoryModel[] storyModels) {
-        this.storyModels = storyModels;
     }
 }

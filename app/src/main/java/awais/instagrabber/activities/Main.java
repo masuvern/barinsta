@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +34,7 @@ import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.asyncs.UsernameFetcher;
+import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
 import awais.instagrabber.customviews.MouseDrawer;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.dialogs.AboutDialog;
@@ -76,10 +78,16 @@ public final class Main extends BaseLanguageActivity {
             final Object tag = v.getTag();
             if (tag instanceof HighlightModel) {
                 final HighlightModel highlightModel = (HighlightModel) tag;
-                startActivity(new Intent(Main.this, StoryViewer.class)
-                        .putExtra(Constants.EXTRAS_USERNAME, userQuery)
-                        .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
-                        .putExtra(Constants.EXTRAS_STORIES, highlightModel.getStoryModels()));
+                new iStoryStatusFetcher(highlightModel.getId(), null, false, false,
+                        (!mainHelper.isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
+                    if (result != null && result.length > 0)
+                        startActivity(new Intent(Main.this, StoryViewer.class)
+                                .putExtra(Constants.EXTRAS_USERNAME, userQuery)
+                                .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
+                                .putExtra(Constants.EXTRAS_STORIES, result)
+                        );
+                    else Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     });
@@ -349,7 +357,7 @@ public final class Main extends BaseLanguageActivity {
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 menu.findItem(R.id.action_about).setVisible(true);
                 menu.findItem(R.id.action_settings).setVisible(true);
-                menu.findItem(R.id.action_dms).setVisible(true);
+                menu.findItem(R.id.action_dms).setVisible(!Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE)));
                 menu.findItem(R.id.action_quickaccess).setVisible(true);
                 menu.findItem(R.id.action_notif).setVisible(true);
                 return true;

@@ -17,58 +17,43 @@ import awais.instagrabber.utils.Utils;
 
 public final class HighlightsFetcher extends AsyncTask<Void, Void, HighlightModel[]> {
     private final String id;
+    private final boolean storiesig;
     private final FetchListener<HighlightModel[]> fetchListener;
 
-    public HighlightsFetcher(final String id, final FetchListener<HighlightModel[]> fetchListener) {
+    public HighlightsFetcher(final String id, final boolean storiesig, final FetchListener<HighlightModel[]> fetchListener) {
         this.id = id;
+        this.storiesig = storiesig;
         this.fetchListener = fetchListener;
     }
 
     @Override
     protected HighlightModel[] doInBackground(final Void... voids) {
         HighlightModel[] result = null;
-        String url = "https://www.instagram.com/graphql/query/?query_hash=7c16654f22c819fb63d1183034a5162f&variables=" +
-                "{\"user_id\":\"" + id + "\",\"include_chaining\":false,\"include_reel\":true,\"include_suggested_users\":false," +
-                "\"include_logged_out_extras\":false,\"include_highlight_reels\":true}";
+        String url = "https://" + (storiesig ? "storiesig" : "i.instagram") + ".com/api/v1/highlights/" + id + "/highlights_tray/";
 
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setInstanceFollowRedirects(false);
             conn.setUseCaches(false);
+            conn.setRequestProperty("User-Agent", storiesig ? Constants.A_USER_AGENT : Constants.I_USER_AGENT);
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONArray highlightsReel = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("data")
-                        .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_highlight_reels").getJSONArray("edges");
+                final JSONArray highlightsReel = new JSONObject(Utils.readFromConnection(conn)).getJSONArray("tray");
 
                 final int length = highlightsReel.length();
                 final HighlightModel[] highlightModels = new HighlightModel[length];
                 final String[] highlightIds = new String[length];
                 for (int i = 0; i < length; ++i) {
-                    final JSONObject highlightNode = highlightsReel.getJSONObject(i).getJSONObject("node");
-                    final String id = highlightNode.getString(Constants.EXTRAS_ID);
-                    highlightIds[i] = id;
+                    final JSONObject highlightNode = highlightsReel.getJSONObject(i);
                     highlightModels[i] = new HighlightModel(
                             highlightNode.getString("title"),
-                            highlightNode.getJSONObject("cover_media").getString("thumbnail_src")
+                            highlightNode.getString(Constants.EXTRAS_ID),
+                            highlightNode.getJSONObject("cover_media").getJSONObject("cropped_image_version").getString("url")
                     );
                 }
 
                 conn.disconnect();
-
-                // a22a50ce4582220909e302d6eb84d259
-                // 45246d3fe16ccc6577e0bd297a5db1ab
-                url = "https://www.instagram.com/graphql/query/?query_hash=a22a50ce4582220909e302d6eb84d259&variables=" +
-                        "{\"highlight_reel_ids\":" + Utils.highlightIdsMerger(highlightIds) + ",\"reel_ids\":[],\"location_ids\":[],\"precomposed_overlay\":false}";
-                conn = (HttpURLConnection) new URL(url).openConnection();
-                conn.setInstanceFollowRedirects(false);
-                conn.setUseCaches(false);
-                conn.connect();
-
-                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    Utils.putHighlightModels(conn, highlightModels);
-                }
-
                 result = highlightModels;
             }
 

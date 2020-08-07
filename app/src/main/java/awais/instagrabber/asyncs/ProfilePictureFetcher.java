@@ -55,11 +55,12 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
                     out = data.getJSONObject("hd_profile_pic_url_info").optString("url");
             }
 
-            if (Utils.isEmpty(out)) {
+            if (Utils.isEmpty(out) && Utils.settingsHelper.getBoolean(Constants.INSTADP)) {
                 final HttpURLConnection backup =
                         (HttpURLConnection) new URL("https://instadp.com/fullsize/" + userName).openConnection();
                 backup.setUseCaches(false);
                 backup.setRequestMethod("GET");
+                backup.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
 
                 final String instadp = backup.getResponseCode() == HttpURLConnection.HTTP_OK ? Utils.readFromConnection(backup) : null;
                 backup.disconnect();
@@ -85,7 +86,6 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
                         }
                     }
                 }
-                if (out == null) out = picUrl;
             }
         } catch (final Exception e) {
             if (logCollector != null)

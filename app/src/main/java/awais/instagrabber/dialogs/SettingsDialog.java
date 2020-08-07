@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,16 +41,18 @@ import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
+import static awais.instagrabber.utils.Constants.INSTADP;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.SHOW_FEED;
+import static awais.instagrabber.utils.Constants.STORIESIG;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class SettingsDialog extends BottomSheetDialogFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener,
         CompoundButton.OnCheckedChangeListener {
     private Activity activity;
     private FragmentManager fragmentManager;
-    private View btnSaveTo, btnImportExport, btnLogin, btnLogout, btnTimeSettings, btnReport;
+    private View btnSaveTo, btnImportExport, btnLogin, btnLogout, btnTimeSettings, btnReport, btnPrivacy;
     private AppCompatTextView settingTitle;
     private Spinner spAppTheme, spLanguage;
     private boolean somethingChanged = false;
@@ -94,6 +97,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         btnImportExport = contentView.findViewById(R.id.importExport);
         btnTimeSettings = contentView.findViewById(R.id.btnTimeSettings);
         btnReport = contentView.findViewById(R.id.btnReport);
+        btnPrivacy = contentView.findViewById(R.id.btnPrivacy);
 
         Utils.setTooltipText(btnImportExport, R.string.import_export);
 
@@ -103,6 +107,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         btnSaveTo.setOnClickListener(this);
         btnImportExport.setOnClickListener(this);
         btnTimeSettings.setOnClickListener(this);
+        btnPrivacy.setOnClickListener(this);
 
         if (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) btnLogout.setEnabled(false);
 
@@ -123,12 +128,16 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         final AppCompatCheckBox cbAutoplayVideos = contentView.findViewById(R.id.cbAutoplayVideos);
         final AppCompatCheckBox cbDownloadUsername = contentView.findViewById(R.id.cbDownloadUsername);
         final AppCompatCheckBox cbMarkAsSeen = contentView.findViewById(R.id.cbMarkAsSeen);
+        final AppCompatCheckBox cbInstadp = contentView.findViewById(R.id.cbInstadp);
+        final AppCompatCheckBox cbStoriesig = contentView.findViewById(R.id.cbStoriesig);
 
         cbSaveTo.setChecked(settingsHelper.getBoolean(FOLDER_SAVE_TO));
         cbMuteVideos.setChecked(settingsHelper.getBoolean(MUTED_VIDEOS));
         cbBottomToolbar.setChecked(settingsHelper.getBoolean(BOTTOM_TOOLBAR));
         cbAutoplayVideos.setChecked(settingsHelper.getBoolean(AUTOPLAY_VIDEOS));
         cbMarkAsSeen.setChecked(settingsHelper.getBoolean(MARK_AS_SEEN));
+        cbInstadp.setChecked(settingsHelper.getBoolean(INSTADP));
+        cbStoriesig.setChecked(settingsHelper.getBoolean(STORIESIG));
 
         cbAutoloadPosts.setChecked(settingsHelper.getBoolean(AUTOLOAD_POSTS));
         cbDownloadUsername.setChecked(settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER));
@@ -140,6 +149,8 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         setupListener(cbAutoplayVideos);
         setupListener(cbDownloadUsername);
         setupListener(cbMarkAsSeen);
+        setupListener(cbInstadp);
+        setupListener(cbStoriesig);
 
         btnSaveTo.setEnabled(cbSaveTo.isChecked());
 
@@ -183,18 +194,18 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
             if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
                 requestPermissions(Utils.PERMS, 6007);
             else Utils.showImportExportDialog(activity);
-
         } else if (v == btnTimeSettings) {
             new TimeSettingsDialog().show(fragmentManager, null);
-
         } else if (v == btnReport) {
             CrashReporter.get(activity.getApplication()).zipLogs().startCrashEmailIntent(activity, true);
-
         } else if (v == btnSaveTo) {
             if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
                 requestPermissions(Utils.PERMS, 6200);
             else showDirectoryChooser();
-
+        } else if (v == btnPrivacy) {
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://instagrabber.austinhuang.me/disclosure#for-anonymous-users"));
+            startActivity(intent);
         } else if (v instanceof ViewGroup)
             ((ViewGroup) v).getChildAt(0).performClick();
     }
@@ -208,6 +219,8 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         else if (id == R.id.cbMuteVideos) settingsHelper.putBoolean(MUTED_VIDEOS, checked);
         else if (id == R.id.cbAutoloadPosts) settingsHelper.putBoolean(AUTOLOAD_POSTS, checked);
         else if (id == R.id.cbMarkAsSeen) settingsHelper.putBoolean(MARK_AS_SEEN, checked);
+        else if (id == R.id.cbInstadp) settingsHelper.putBoolean(INSTADP, checked);
+        else if (id == R.id.cbStoriesig) settingsHelper.putBoolean(STORIESIG, checked);
         else if (id == R.id.cbSaveTo) {
             settingsHelper.putBoolean(FOLDER_SAVE_TO, checked);
             btnSaveTo.setEnabled(checked);

@@ -104,6 +104,7 @@ public final class StoryViewer extends BaseLanguageActivity {
     private StoryModel currentStory;
     private String url, username;
     private int slidePos = 0, lastSlidePos = 0;
+    private final String cookie = settingsHelper.getString(Constants.COOKIE);
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -160,7 +161,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                                     Toast.makeText(getApplicationContext(), R.string.be_patient, Toast.LENGTH_SHORT).show();
                                 } else {
                                     fetching = true;
-                                    new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, result -> {
+                                    new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, false, false, result -> {
                                         if (result != null && result.length > 0) {
                                             final Intent newIntent = new Intent(getApplicationContext(), StoryViewer.class)
                                                     .putExtra(Constants.EXTRAS_STORIES, result)
@@ -251,7 +252,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                                 poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
                                 poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                         }), (d, w) -> {
-                            new VoteAction().execute(w);
+                            if (!Utils.isEmpty(cookie)) new VoteAction().execute(w);
                         })
                         .setPositiveButton(R.string.cancel, null)
                         .show();
@@ -285,7 +286,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                 }
                 new AlertDialog.Builder(this).setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, choices), (d,w) -> {
-                            if (quiz.getMyChoice() == -1) new QuizAction().execute(w);
+                            if (quiz.getMyChoice() == -1 && !Utils.isEmpty(cookie)) new QuizAction().execute(w);
                         })
                         .setPositiveButton(R.string.cancel, null)
                         .show();
@@ -320,14 +321,14 @@ public final class StoryViewer extends BaseLanguageActivity {
             @Override
             public void onLoadCompleted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null) menuDm.setVisible(true);
+                if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie)) menuDm.setVisible(true);
                 storyViewerBinding.progressView.setVisibility(View.GONE);
             }
 
             @Override
             public void onLoadStarted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null) menuDm.setVisible(true);
+                if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie)) menuDm.setVisible(true);
                 storyViewerBinding.progressView.setVisibility(View.VISIBLE);
             }
 
@@ -373,7 +374,7 @@ public final class StoryViewer extends BaseLanguageActivity {
             @Override
             public boolean onResourceReady(final Drawable resource, final Object model, final Target<Drawable> target, final DataSource dataSource, final boolean isFirstResource) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null) menuDm.setVisible(true);
+                if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie)) menuDm.setVisible(true);
                 storyViewerBinding.progressView.setVisibility(View.GONE);
                 return false;
             }
@@ -497,7 +498,7 @@ public final class StoryViewer extends BaseLanguageActivity {
         storyViewerBinding.poll.setTag(poll);
 
         question = currentStory.getQuestion();
-        storyViewerBinding.answer.setVisibility(question != null ? View.VISIBLE : View.GONE);
+        storyViewerBinding.answer.setVisibility((question != null && !Utils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
         storyViewerBinding.answer.setTag(question);
 
         mentions = currentStory.getMentions();
@@ -507,8 +508,6 @@ public final class StoryViewer extends BaseLanguageActivity {
         quiz = currentStory.getQuiz();
         storyViewerBinding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
         storyViewerBinding.quiz.setTag(quiz);
-
-        storyViewerBinding.toolbar.toolbar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
 
         releasePlayer();
         final Intent intent = getIntent();
@@ -520,6 +519,9 @@ public final class StoryViewer extends BaseLanguageActivity {
         }
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
+
+        if (!intent.hasExtra(Constants.EXTRAS_HIGHLIGHT))
+            storyViewerBinding.toolbar.toolbar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
 
         if (settingsHelper.getBoolean(MARK_AS_SEEN)) new SeenAction().execute();
     }
@@ -565,8 +567,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
                 urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
-                urlConnection.setRequestProperty("x-csrftoken",
-                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
                 urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 urlConnection.setRequestProperty("Content-Length", "6");
                 urlConnection.setDoOutput(true);
@@ -601,8 +602,7 @@ public final class StoryViewer extends BaseLanguageActivity {
 
         protected Void doInBackground(Integer... rawchoice) {
             int choice = rawchoice[0];
-            final String cookie = settingsHelper.getString(Constants.COOKIE);
-            final String url = "https://i.instagram.com/api/v1/media/"+currentStory.getStoryMediaId().split("_")[0]+"/"+quiz.getId()+"/story_quiz_answer/";
+final String url = "https://i.instagram.com/api/v1/media/"+currentStory.getStoryMediaId().split("_")[0]+"/"+quiz.getId()+"/story_quiz_answer/";
             try {
                 JSONObject ogbody = new JSONObject("{\"client_context\":\"" + UUID.randomUUID().toString()
                         +"\",\"mutation_token\":\"" + UUID.randomUUID().toString()
@@ -650,7 +650,6 @@ public final class StoryViewer extends BaseLanguageActivity {
         String action;
 
         protected Void doInBackground(String... rawchoice) {
-            final String cookie = settingsHelper.getString(Constants.COOKIE);
             final String url = "https://i.instagram.com/api/v1/media/"
                     +currentStory.getStoryMediaId().split("_")[0]+"/"+question.getId()+"/story_question_response/";
             try {
@@ -696,8 +695,7 @@ public final class StoryViewer extends BaseLanguageActivity {
 
     class SeenAction extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... lmao) {
-            final String cookie = settingsHelper.getString(Constants.COOKIE);
-            final String url = "https://www.instagram.com/stories/reel/seen";
+final String url = "https://www.instagram.com/stories/reel/seen";
             try {
                 String urlParameters = "reelMediaId="+currentStory.getStoryMediaId().split("_")[0]
                         +"&reelMediaOwnerId="+currentStory.getUserId()
@@ -707,8 +705,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
-                urlConnection.setRequestProperty("x-csrftoken",
-                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
                 urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 urlConnection.setRequestProperty("Content-Length", Integer.toString(urlParameters.getBytes().length));
                 urlConnection.setDoOutput(true);
@@ -731,8 +728,7 @@ public final class StoryViewer extends BaseLanguageActivity {
         protected Void doInBackground(String... rawAction) {
             final String action = rawAction[0];
             final String url = "https://i.instagram.com/api/v1/direct_v2/create_group_thread/";
-            final String cookie = settingsHelper.getString(Constants.COOKIE);
-            try {
+try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
@@ -780,7 +776,6 @@ public final class StoryViewer extends BaseLanguageActivity {
                         wr2.flush();
                         wr2.close();
                         urlConnection2.connect();
-                        Log.d("austin_debug", urlConnection2.getResponseCode() + " " + urlParameters2 + " " + cookie);
                         if (urlConnection2.getResponseCode() == HttpURLConnection.HTTP_OK) {
                             ok = true;
                         }

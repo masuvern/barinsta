@@ -240,7 +240,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if (tag instanceof FeedStoryModel) {
                 final FeedStoryModel feedStoryModel = (FeedStoryModel) tag;
                 final int index = indexOfIntArray(stories, feedStoryModel);
-                new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, result -> {
+                new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, false, false, result -> {
                     if (result != null && result.length > 0)
                         main.startActivity(new Intent(main, StoryViewer.class)
                             .putExtra(Constants.EXTRAS_STORIES, result)
@@ -733,31 +733,31 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.btnFollowTag.setVisibility(View.VISIBLE);
 
                 if (isLoggedIn) {
-                    new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, result -> {
+                    new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, result -> {
                         main.storyModels = result;
                         if (result != null && result.length > 0) main.mainBinding.mainHashtagImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                     if (hashtagModel.getFollowing() == true) {
                         main.mainBinding.btnFollowTag.setText(R.string.unfollow);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_purple_background, null)));
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_purple_background)));
                     }
                     else {
                         main.mainBinding.btnFollowTag.setText(R.string.follow);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_pink_background, null)));
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_pink_background)));
                     }
                 } else {
                     if (Utils.dataBox.getFavorite(main.userQuery) != null) {
                         main.mainBinding.btnFollowTag.setText(R.string.unfavorite_short);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_purple_background, null)));
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_purple_background)));
                     }
                     else {
                         main.mainBinding.btnFollowTag.setText(R.string.favorite_short);
-                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_pink_background, null)));
+                        main.mainBinding.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_pink_background)));
                     }
                 }
 
@@ -795,20 +795,22 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
                 final boolean isLoggedIn = !Utils.isEmpty(cookie);
+                new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
+                        (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
+                        result -> {
+                    main.storyModels = result;
+                    if (result != null && result.length > 0) main.mainBinding.mainProfileImage.setStoriesBorder();
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
+                    if (result != null && result.length > 0) {
+                        main.mainBinding.highlightsList.setVisibility(View.VISIBLE);
+                        main.highlightsAdapter.setData(result);
+                    }
+                    else main.mainBinding.highlightsList.setVisibility(View.GONE);
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
                 if (isLoggedIn) {
-                    new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false, result -> {
-                        main.storyModels = result;
-                        if (result != null && result.length > 0) main.mainBinding.mainProfileImage.setStoriesBorder();
-                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                    new HighlightsFetcher(profileId, result -> {
-                        if (result != null && result.length > 0) {
-                            main.mainBinding.highlightsList.setVisibility(View.VISIBLE);
-                            main.highlightsAdapter.setData(result);
-                        }
-                        else main.mainBinding.highlightsList.setVisibility(View.GONE);
-                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
                     final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE));
                     if (!profileId.equals(myId)) {
                         main.mainBinding.btnTagged.setVisibility(View.GONE);
@@ -817,41 +819,41 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
                         if (profileModel.getFollowing() == true) {
                             main.mainBinding.btnFollow.setText(R.string.unfollow);
-                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_purple_background, null)));
+                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                    main, R.color.btn_purple_background)));
                         }
                         else if (profileModel.getRequested() == true) {
                             main.mainBinding.btnFollow.setText(R.string.cancel);
-                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_purple_background, null)));
+                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                    main, R.color.btn_purple_background)));
                         }
                         else {
                             main.mainBinding.btnFollow.setText(R.string.follow);
-                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_pink_background, null)));
+                            main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                    main, R.color.btn_pink_background)));
                         }
                         main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
                         if (profileModel.getRestricted() == true) {
                             main.mainBinding.btnRestrict.setText(R.string.unrestrict);
-                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_green_background, null)));
+                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                    main, R.color.btn_green_background)));
                         }
                         else {
                             main.mainBinding.btnRestrict.setText(R.string.restrict);
-                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                    R.color.btn_orange_background, null)));
+                            main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                    main, R.color.btn_orange_background)));
                         }
                         if (profileModel.isReallyPrivate()) {
                             main.mainBinding.btnBlock.setVisibility(View.VISIBLE);
                             main.mainBinding.btnTagged.setVisibility(View.GONE);
                             if (profileModel.getBlocked() == true) {
                                 main.mainBinding.btnBlock.setText(R.string.unblock);
-                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                        R.color.btn_green_background, null)));
+                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                        main, R.color.btn_green_background)));
                             } else {
                                 main.mainBinding.btnBlock.setText(R.string.block);
-                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                        R.color.btn_red_background, null)));
+                                main.mainBinding.btnBlock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                        main, R.color.btn_red_background)));
                             }
                         } else {
                             main.mainBinding.btnBlock.setVisibility(View.GONE);
@@ -859,12 +861,12 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             main.mainBinding.btnTagged.setVisibility(View.VISIBLE);
                             if (profileModel.getBlocked() == true) {
                                 main.mainBinding.btnSaved.setText(R.string.unblock);
-                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                        R.color.btn_green_background, null)));
+                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                        main, R.color.btn_green_background)));
                             } else {
                                 main.mainBinding.btnSaved.setText(R.string.block);
-                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                        R.color.btn_red_background, null)));
+                                main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                        main, R.color.btn_red_background)));
                             }
                         }
                     }
@@ -873,26 +875,26 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.mainBinding.btnSaved.setVisibility(View.VISIBLE);
                         main.mainBinding.btnLiked.setVisibility(View.VISIBLE);
                         main.mainBinding.btnSaved.setText(R.string.saved);
-                        main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_orange_background, null)));
+                        main.mainBinding.btnSaved.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_orange_background)));
                     }
                 } else {
                     if (Utils.dataBox.getFavorite(main.userQuery) != null) {
                         main.mainBinding.btnFollow.setText(R.string.unfavorite_short);
-                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_purple_background, null)));
+                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_purple_background)));
                     }
                     else {
                         main.mainBinding.btnFollow.setText(R.string.favorite_short);
-                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_pink_background, null)));
+                        main.mainBinding.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_pink_background)));
                     }
                     main.mainBinding.btnFollow.setVisibility(View.VISIBLE);
                     if (!profileModel.isReallyPrivate()) {
                         main.mainBinding.btnRestrict.setVisibility(View.VISIBLE);
                         main.mainBinding.btnRestrict.setText(R.string.tagged);
-                        main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(resources.getColor(
-                                R.color.btn_blue_background, null)));
+                        main.mainBinding.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
+                                main, R.color.btn_blue_background)));
                     }
                 }
 
@@ -1010,7 +1012,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
                 final boolean isLoggedIn = !Utils.isEmpty(cookie);
                 if (isLoggedIn) {
-                    new iStoryStatusFetcher(profileId.split("/")[0], null, true, false, result -> {
+                    new iStoryStatusFetcher(profileId.split("/")[0], null, true, false, false, false, result -> {
                         main.storyModels = result;
                         if (result != null && result.length > 0) main.mainBinding.mainLocationImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

@@ -23,37 +23,46 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]> {
-    private final String id, username;
-    private final boolean isLoc, isHashtag;
+    private final String id;
+    private String username;
+    private final boolean isLoc, isHashtag, storiesig, highlight;
     private final FetchListener<StoryModel[]> fetchListener;
 
     public iStoryStatusFetcher(final String id, final String username, final boolean isLoc,
-                               final boolean isHashtag, final FetchListener<StoryModel[]> fetchListener) {
+                               final boolean isHashtag, final boolean storiesig, final boolean highlight,
+                               final FetchListener<StoryModel[]> fetchListener) {
         this.id = id;
         this.username = username;
         this.isLoc = isLoc;
         this.isHashtag = isHashtag;
+        this.storiesig = storiesig;
+        this.highlight = highlight;
         this.fetchListener = fetchListener;
     }
 
     @Override
     protected StoryModel[] doInBackground(final Void... voids) {
         StoryModel[] result = null;
-        final String url = "https://i.instagram.com/api/v1/" + (isLoc ? "locations/" : (isHashtag ? "tags/" : "feed/user/"))
-                + id + "/story/";
+        final String url = "https://" + (storiesig ? "storiesig" : "i.instagram") + ".com/api/v1/"
+                + (isLoc ? "locations/" : (isHashtag ? "tags/" : (highlight ? "feed/reels_media?user_ids=" : "feed/user/")))
+                + id + (highlight ? "" : (storiesig ? "/reel_media/" : "/story/"));
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setInstanceFollowRedirects(false);
             conn.setUseCaches(false);
-            conn.setRequestProperty("User-Agent", Constants.USER_AGENT);
+            conn.setRequestProperty("User-Agent", storiesig ? Constants.A_USER_AGENT : Constants.I_USER_AGENT);
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                JSONObject data = new JSONObject(Utils.readFromConnection(conn)).getJSONObject((isLoc || isHashtag) ? "story" : "reel");
+                JSONObject data = new JSONObject(Utils.readFromConnection(conn));
+                if (!storiesig && !highlight) data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
+                else if (highlight) data = data.getJSONObject("reels").optJSONObject(id);
+
+                if (username == null && !isLoc && !isHashtag) username = data.getJSONObject("user").getString("username");
 
                 JSONArray media;
-                if ((media = data.optJSONArray("items")) != null && media.length() > 0 &&
-                        (data = media.optJSONObject(0)) != null) {
+                if (data != null && (media = data.optJSONArray("items")) != null
+                        && media.length() > 0 && (data = media.optJSONObject(0)) != null) {
 
                     final int mediaLen = media.length();
 
