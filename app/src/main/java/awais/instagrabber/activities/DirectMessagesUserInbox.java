@@ -164,7 +164,7 @@ public final class DirectMessagesUserInbox extends AppCompatActivity {
                                     .putExtra(Constants.EXTRAS_STORIES, sms)
                             );
                         }
-                        else if (directItemModel.getText() != null) {
+                        else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         }
                         break;

@@ -702,8 +702,7 @@ public final class Utils {
                     break;
 
                 case LIKE:
-                    text = new SpannableString(itemObject.getString("like"));
-                    ((SpannableString) text).setSpan(new RelativeSizeSpan(15f), 0, text.length(), 0);
+                    text = itemObject.getString("like");
                     break;
 
                 case STORY_SHARE:

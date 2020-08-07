@@ -167,6 +167,7 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
                     holder.tvMessage.setVisibility(View.VISIBLE);
                     break;
                 case TEXT:
+                case LIKE:
                     text = directItemModel.getText();
                     text = Utils.getSpannableUrl(text.toString()); // for urls
                     if (Utils.hasMentions(text)) text = Utils.getMentionText(text); // for mentions
@@ -217,13 +218,11 @@ public final class MessageItemsAdapter extends RecyclerView.Adapter<TextMessageV
 
                 case RAVEN_MEDIA: {
                     final DirectItemRavenMediaModel ravenMediaModel = directItemModel.getRavenMediaModel();
-                    final RavenExpiringMediaActionSummaryModel mediaActionSummary = ravenMediaModel.getExpiringMediaActionSummary();
 
-                    mediaModel = ravenMediaModel.getMedia();
-
-                    final boolean isExpired = mediaModel == null ||
+                    final boolean isExpired = ravenMediaModel == null || (mediaModel = ravenMediaModel.getMedia()) == null ||
                             Utils.isEmpty(mediaModel.getThumbUrl()) && mediaModel.getPk() < 1;
 
+                    final RavenExpiringMediaActionSummaryModel mediaActionSummary = ravenMediaModel.getExpiringMediaActionSummary();
                     holder.mediaExpiredIcon.setVisibility(isExpired ? View.VISIBLE : View.GONE);
 
                     int textRes = R.string.dms_inbox_raven_media_unknown;

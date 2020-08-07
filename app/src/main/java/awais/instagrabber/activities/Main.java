@@ -135,6 +135,7 @@ public final class Main extends BaseLanguageActivity {
             setStack(bundle);
             userQuery = bundle.getString("query");
         }
+        mainHelper.isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
 
         itemGetter = itemGetType -> {
             if (itemGetType == ItemGetType.MAIN_ITEMS) return allItems;

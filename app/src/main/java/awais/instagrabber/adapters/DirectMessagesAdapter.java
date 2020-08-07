@@ -60,11 +60,11 @@ public final class DirectMessagesAdapter extends RecyclerView.Adapter<DirectMess
                 for (int i = 0; i < Math.min(3, users.length); ++i)
                     glideRequestManager.load(users[i].getSdProfilePic()).into(holder.multipleProfilePics[i]);
 
-            } else if (users.length == 1) {
+            } else {
                 holder.ivProfilePic.setVisibility(View.VISIBLE);
                 holder.multipleProfilePicsContainer.setVisibility(View.GONE);
 
-                glideRequestManager.load(users[0].getSdProfilePic()).into(holder.ivProfilePic);
+                glideRequestManager.load(users.length == 1 ? users[0].getSdProfilePic() : null).into(holder.ivProfilePic);
             }
 
             holder.tvUsername.setText(threadModel.getThreadTitle());
@@ -79,6 +79,7 @@ public final class DirectMessagesAdapter extends RecyclerView.Adapter<DirectMess
             final CharSequence messageText;
             switch (itemType) {
                 case TEXT:
+                case LIKE:
                     messageText = lastItemModel.getText();
                     break;
                 case LINK:
