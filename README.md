@@ -55,6 +55,4 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). ALWAY
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com)
 [![Crowdin | Agile localization for tech companies](https://badges.crowdin.net/badge/dark/crowdin-on-light.png)](https://crowdin.com/?utm_source=badge&utm_medium=referral&utm_campaign=badge-add-on)
 
-<sub>Previous owner left a lot of swearings in the code, I will remove them when I get to that file.</sub>
-
-<sub>1. For anonymous users only, does not applied to users already logged in, and must be explicitly enabled in Settings. 2. Default enabled, but can be disabled for stories. The downside is that they'll always be "new" in other Instagram clients. Also, this app will not respect DM message restrictions (replay once / no replay). 3. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
+<sub>1. For anonymous users only, does not apply to users already logged in, and must be explicitly enabled in Settings. 2. Default enabled, but can be disabled for stories. The downside is that they'll always be "new" in other Instagram clients. Also, this app will not respect DM message restrictions (replay once / no replay). 3. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
