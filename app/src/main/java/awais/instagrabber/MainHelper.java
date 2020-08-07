@@ -264,7 +264,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
     private DiscoverAdapter discoverAdapter;
     public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
-    public final boolean isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
+    private String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+    public boolean isLoggedIn = !Utils.isEmpty(cookie);
 
     public MainHelper(@NonNull final Main main) {
         stopCurrentExecutor();
@@ -282,6 +283,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         final ImageView iconDiscover = (ImageView) iconSlider.getChildAt(2);
 
         final boolean isBottomToolbar = Utils.settingsHelper.getBoolean(BOTTOM_TOOLBAR);
+        isLoggedIn = !Utils.isEmpty(cookie);
         if (!isLoggedIn) {
             main.mainBinding.drawerLayout.removeView(main.mainBinding.feedLayout);
             main.mainBinding.drawerLayout.removeView(main.mainBinding.discoverSwipeRefreshLayout);
@@ -724,9 +726,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     return;
                 }
 
-                final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-                final boolean isLoggedIn = !Utils.isEmpty(cookie);
-
                 currentlyExecuting = new PostsFetcher(main.userQuery, postsFetchListener)
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -793,25 +792,25 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
                 final String profileId = profileModel.getId();
 
-                final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-                final boolean isLoggedIn = !Utils.isEmpty(cookie);
-                new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
-                        (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
-                        result -> {
-                    main.storyModels = result;
-                    if (result != null && result.length > 0) main.mainBinding.mainProfileImage.setStoriesBorder();
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                if (isLoggedIn || Utils.settingsHelper.getBoolean(Constants.STORIESIG)) {
+                    new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
+                            (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
+                            result -> {
+                                main.storyModels = result;
+                                if (result != null && result.length > 0)
+                                    main.mainBinding.mainProfileImage.setStoriesBorder();
+                            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
-                    if (result != null && result.length > 0) {
-                        main.mainBinding.highlightsList.setVisibility(View.VISIBLE);
-                        main.highlightsAdapter.setData(result);
-                    }
-                    else main.mainBinding.highlightsList.setVisibility(View.GONE);
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
+                        if (result != null && result.length > 0) {
+                            main.mainBinding.highlightsList.setVisibility(View.VISIBLE);
+                            main.highlightsAdapter.setData(result);
+                        } else main.mainBinding.highlightsList.setVisibility(View.GONE);
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
 
                 if (isLoggedIn) {
-                    final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE));
+                    final String myId = Utils.getUserIdFromCookie(cookie);
                     if (!profileId.equals(myId)) {
                         main.mainBinding.btnTagged.setVisibility(View.GONE);
                         main.mainBinding.btnSaved.setVisibility(View.GONE);
@@ -1009,8 +1008,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 final String profileId = locationModel.getId();
 
-                final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-                final boolean isLoggedIn = !Utils.isEmpty(cookie);
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(profileId.split("/")[0], null, true, false, false, false, result -> {
                         main.storyModels = result;
@@ -1224,7 +1221,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onClick(final View v) {
             final boolean iamme = (isLoggedIn && main.profileModel != null)
-                    ? Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)).equals(main.profileModel.getId())
+                    ? Utils.getUserIdFromCookie(cookie).equals(main.profileModel.getId())
                     : false;
             if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null && v == main.mainBinding.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
@@ -1284,8 +1281,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
                 urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
-                urlConnection.setRequestProperty("x-csrftoken",
-                        Utils.settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
                 if (action == "restrict") {
                     final String urlParameters = "target_user_id="+main.profileModel.getId();
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
