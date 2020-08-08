@@ -5,4 +5,5 @@ public enum IntentModelType {
     USERNAME,
     POST,
     HASHTAG,
+    LOCATION
 }

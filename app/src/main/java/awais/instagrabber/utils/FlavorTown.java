@@ -36,7 +36,7 @@ public final class FlavorTown {
                     .setNegativeButton(R.string.action_github, (dialog, which) -> {
                         try {
                             context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
-                                    Uri.parse("https://github.com/austinhuang0131/instagrabber/releases/tag/" + version)));
+                                    Uri.parse("https://github.com/austinhuang0131/instagrabber/releases/latest")));
                         } catch (final ActivityNotFoundException e) {
                             // do nothing
                         }

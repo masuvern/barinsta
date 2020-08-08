@@ -22,44 +22,23 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
     @NonNull
     @Override
     protected Boolean doInBackground(final Void... voids) {
-        final String UPDATE_BASE_URL = "https://github.com/austinhuang0131/instagrabber/releases/tag/";
-        final String versionName = BuildConfig.VERSION_NAME;
-        final int index = versionName.indexOf('.');
-
         try {
-            final int verMajor = Integer.parseInt(versionName.substring(0, index));
+            version = "";
 
-            version = "v" + (verMajor + 1) + ".0";
-
-            // check major version first
-            HttpURLConnection conn = (HttpURLConnection) new URL(UPDATE_BASE_URL + version).openConnection();
+            HttpURLConnection conn =
+                    (HttpURLConnection) new URL("https://github.com/austinhuang0131/instagrabber/releases/latest").openConnection();
             conn.setUseCaches(false);
-            conn.setRequestMethod("HEAD");
+            conn.setInstanceFollowRedirects(false);
+            conn.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
             conn.connect();
 
             final int responseCode = conn.getResponseCode();
-            conn.disconnect();
-
-            if (responseCode == HttpURLConnection.HTTP_OK) return true;
-            else {
-                final String substring = versionName.substring(index + 1);
-                final int verMinor = Integer.parseInt(substring) + 1;
-
-                for (int i = verMinor; i < 10; ++i) {
-                    version = "v" + verMajor + '.' + i;
-                    conn.disconnect();
-
-                    conn = (HttpURLConnection) new URL(UPDATE_BASE_URL + version).openConnection();
-                    conn.setUseCaches(false);
-                    conn.setRequestMethod("HEAD");
-                    conn.connect();
-
-                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        conn.disconnect();
-                        return true;
-                    }
-                }
+            if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                version = conn.getHeaderField("Location").split("/v")[1];
+                return Float.parseFloat(version) > Float.parseFloat(BuildConfig.VERSION_NAME);
             }
+
+            conn.disconnect();
         } catch (final Exception e) {
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
@@ -70,6 +49,6 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(final Boolean result) {
         if (result != null && result && fetchListener != null)
-            fetchListener.onResult(version);
+            fetchListener.onResult("v"+version);
     }
 }

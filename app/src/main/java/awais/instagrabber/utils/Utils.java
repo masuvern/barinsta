@@ -175,12 +175,18 @@ public final class Utils {
             clipString = clipString.substring((isHttps ? 22 : 21) + wwwDel);
 
             final char firstChar = clipString.charAt(0);
-            if ((firstChar == 'p' || firstChar == 'P') && clipString.charAt(1) == '/') {
-                clipString = clipString.substring(2);
+            if (clipString.startsWith("p/") || clipString.startsWith("reel/")) {
+                clipString = clipString.substring(clipString.startsWith("p/") ? 2 : 5);
                 type = IntentModelType.POST;
             } else if (clipString.startsWith("explore/tags/")) {
                 clipString = clipString.substring(13);
                 type = IntentModelType.HASHTAG;
+            } else if (clipString.startsWith("explore/locations/")) {
+                clipString = clipString.substring(18);
+                type = IntentModelType.LOCATION;
+            } else if (clipString.startsWith("_u/")) { // usually exists in embeds
+                clipString = clipString.substring(3);
+                type = IntentModelType.USERNAME;
             }
 
             clipString = cleanString(clipString);
@@ -195,7 +201,8 @@ public final class Utils {
         if (clipString.charAt(clipLen) == '/')
             clipString = clipString.substring(0, clipLen);
 
-        return new IntentModel(type, clipString);
+        if (!clipString.contains("/")) return new IntentModel(type, clipString);
+        else return null;
     }
 
     @NonNull

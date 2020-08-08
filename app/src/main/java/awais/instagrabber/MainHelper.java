@@ -626,7 +626,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                     .putExtra(Constants.EXTRAS_POST, new PostModel(modelText, false)), 9629);
                         } else {
                             main.addToStack();
-                            main.userQuery = modelType == IntentModelType.HASHTAG ? '#' + modelText : ("@"+modelText);
+                            main.userQuery = modelType == IntentModelType.HASHTAG ? ('#' + modelText) :
+                                    (modelType == IntentModelType.LOCATION ? modelText : ('@'+modelText));
                             onRefresh();
                         }
                     }

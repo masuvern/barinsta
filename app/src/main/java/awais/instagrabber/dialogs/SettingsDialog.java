@@ -185,7 +185,6 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         if (v == btnLogin) {
             startActivity(new Intent(v.getContext(), Login.class));
             somethingChanged = true;
-            this.dismiss();
         } else if (v == btnLogout) {
             Utils.setupCookies("LOGOUT");
             settingsHelper.putString(Constants.COOKIE, "");
