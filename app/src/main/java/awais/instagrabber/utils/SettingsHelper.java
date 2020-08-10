@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import static awais.instagrabber.utils.Constants.AMOLED_THEME;
 import static awais.instagrabber.utils.Constants.APP_LANGUAGE;
 import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
@@ -109,7 +110,7 @@ public final class SettingsHelper {
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, INSTADP, STORIESIG})
+            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, INSTADP, STORIESIG, AMOLED_THEME})
     public @interface BooleanSettings {}
 
     @StringDef({APP_THEME, APP_LANGUAGE, PREV_INSTALL_VERSION})

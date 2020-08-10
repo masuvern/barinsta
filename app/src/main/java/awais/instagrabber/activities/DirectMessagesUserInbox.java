@@ -42,7 +42,7 @@ import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public final class DirectMessagesUserInbox extends AppCompatActivity {
+public final class DirectMessagesUserInbox extends BaseLanguageActivity {
     private DirectItemModel directItemModel;
     private final ProfileModel myProfileHolder =
             new ProfileModel(false, false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);

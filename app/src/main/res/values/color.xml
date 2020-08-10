@@ -31,4 +31,7 @@
     <color name="feed_text_primary_color">@color/text_color_light</color>
 
     <color name="dm_profile_button_color">#efefef</color>
+
+    <!-- Amoled Colors -->
+    <color name="background_amoled">#000000</color>
 </resources>

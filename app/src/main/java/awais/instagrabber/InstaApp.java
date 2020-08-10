@@ -18,7 +18,6 @@ import awaisomereport.CrashReporter;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.NET_COOKIE_MANAGER;
-import static awais.instagrabber.utils.Utils.changeTheme;
 import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.dataBox;
 import static awais.instagrabber.utils.Utils.datetimeParser;
@@ -63,7 +62,5 @@ public final class InstaApp extends MultiDexApplication {
                             settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
 
         settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
-
-        changeTheme();
     }
 }

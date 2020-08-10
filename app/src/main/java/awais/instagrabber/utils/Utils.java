@@ -10,6 +10,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -19,7 +20,6 @@ import android.text.Editable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -71,10 +71,7 @@ import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.databinding.DialogImportExportBinding;
 import awais.instagrabber.models.BasePostModel;
-import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -88,7 +85,6 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
-import awais.instagrabber.models.stickers.QuestionModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemActionLogModel;
@@ -792,7 +788,7 @@ public final class Utils {
         return Math.round((dp * displayMetrics.densityDpi) / 160.0f);
     }
 
-    public static void changeTheme() {
+    public static void changeTheme(final Context context) {
         int themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM; // this is fallback / default
 
         if (settingsHelper != null) themeCode = settingsHelper.getThemeCode(false);
@@ -800,6 +796,27 @@ public final class Utils {
         if (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && Build.VERSION.SDK_INT < 29)
             themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
 
+        boolean isAmoledEnabled = false;
+        if (settingsHelper != null) {
+            isAmoledEnabled = settingsHelper.getBoolean(Constants.AMOLED_THEME);
+        }
+        // use amoled theme only if enabled in settings
+        if (isAmoledEnabled) {
+            // check if setting is set to 'Dark'
+            boolean isNight = themeCode == AppCompatDelegate.MODE_NIGHT_YES;
+            // if not dark check if themeCode is MODE_NIGHT_FOLLOW_SYSTEM or MODE_NIGHT_AUTO_BATTERY
+            if (!isNight && (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM || themeCode == AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)) {
+                // check if resulting theme would be NIGHT
+                final int uiMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+                isNight = uiMode == Configuration.UI_MODE_NIGHT_YES;
+            }
+            if (isNight) {
+                // set amoled theme
+                Log.d("InstaGrabber", "settings amoled theme");
+                context.setTheme(R.style.Theme_Amoled);
+                return;
+            }
+        }
         AppCompatDelegate.setDefaultNightMode(themeCode);
     }
 

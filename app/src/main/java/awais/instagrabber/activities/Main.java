@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.provider.BaseColumns;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -107,11 +106,6 @@ public final class Main extends BaseLanguageActivity {
     private DialogInterface.OnClickListener profileDialogListener;
     private Stack<String> queriesStack;
     private DataBox.CookieModel cookieModel;
-
-    public Main() {
-        super();
-        Utils.changeTheme();
-    }
 
     @Override
     protected void onCreate(@Nullable final Bundle bundle) {
