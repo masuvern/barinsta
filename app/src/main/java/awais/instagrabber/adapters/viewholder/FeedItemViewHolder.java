@@ -16,8 +16,8 @@ import awais.instagrabber.customviews.RamboTextView;
 
 public final class FeedItemViewHolder extends RecyclerView.ViewHolder {
     public final ImageView profilePic, btnMute, btnDownload;
-    public final TextView username, commentsCount, videoViews, mediaCounter, tvPostDate, location;
-    public final RamboTextView viewerCaption;
+    public final TextView commentsCount, videoViews, mediaCounter, tvPostDate, location;
+    public final RamboTextView username, viewerCaption;
     public final View btnComments, videoViewsParent, viewPost;
     public final ViewPager mediaList;
     public final PhotoView imageView;

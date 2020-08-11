@@ -81,7 +81,7 @@ public final class Main extends BaseLanguageActivity {
                         (!mainHelper.isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
                     if (result != null && result.length > 0)
                         startActivity(new Intent(Main.this, StoryViewer.class)
-                                .putExtra(Constants.EXTRAS_USERNAME, userQuery)
+                                .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
                                 .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
                                 .putExtra(Constants.EXTRAS_STORIES, result)
                         );
@@ -199,7 +199,7 @@ public final class Main extends BaseLanguageActivity {
                         ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
                         ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
             }
-            else intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery)
+            else intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
                     .putExtra(Constants.EXTRAS_STORIES, storyModels)
                     .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
             startActivity(intent);

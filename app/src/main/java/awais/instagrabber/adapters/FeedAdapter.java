@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -198,7 +200,13 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
             final ProfileModel profileModel = feedModel.getProfileModel();
             if (profileModel != null) {
                 glideRequestManager.load(profileModel.getSdProfilePic()).into(viewHolder.profilePic);
-                viewHolder.username.setText("@"+profileModel.getUsername());
+                final int titleLen = profileModel.getUsername().length() + 1;
+                final SpannableString spannableString = new SpannableString("@"+profileModel.getUsername());
+                spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
+                viewHolder.username.setText(spannableString);
+                viewHolder.username.setMovementMethod(new LinkMovementMethod());
+                viewHolder.username.setMentionClickListener((view, text, isHashtag) ->
+                        mentionClickListener.onClick(null, profileModel.getUsername(), false));
             }
 
             viewHolder.viewPost.setOnClickListener(clickListener);
@@ -416,8 +424,6 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
         @NonNull
         @Override
         public Object instantiateItem(@NonNull final ViewGroup container, final int position) {
-            if (BuildConfig.DEBUG) container.setBackgroundColor(0xFF_0a_c0_09); // todo remove
-
             final Context context = container.getContext();
             final ViewerPostModel sliderItem = sliderItems[position];
 

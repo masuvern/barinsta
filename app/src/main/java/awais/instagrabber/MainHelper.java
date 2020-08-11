@@ -280,7 +280,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         isLoggedIn = !Utils.isEmpty(cookie);
         if (!isLoggedIn) {
             main.mainBinding.drawerLayout.removeView(main.mainBinding.feedView.feedLayout);
-            main.mainBinding.drawerLayout.removeView(main.mainBinding.discoverSwipeRefreshLayout);
+            main.mainBinding.drawerLayout.removeView(main.mainBinding.discoverLayout);
             iconFeed.setAlpha(0.4f);
             iconDiscover.setAlpha(0.4f);
         } else {
