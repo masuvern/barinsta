@@ -125,13 +125,13 @@
     <string name="dialog_export_err_password_empty">Password is empty! Password cannot be empt, dumbass!</string>
     <string name="refresh">Odśwież</string>
     <string name="get_cookies">Get cookies</string>
-    <string name="desktop_2fa">Desktop Mode</string>
+    <string name="desktop_2fa">Tryb PC</string>
     <string name="time_settings_title_custom">Format niestandardowy</string>
     <string name="time_settings_title_separator">Separator</string>
     <string name="time_settings_title_time_format">Format czasu</string>
     <string name="time_settings_title_date_format">Format daty</string>
     <string name="time_settings_title_preview">Podgląd</string>
-    <string name="time_settings_swap_time">Swap Time and\nDate positions</string>
+    <string name="time_settings_swap_time">Zamień czas i\npozycję daty</string>
     <string name="quick_access_info_dialog">Favorites panel is for adding your favorite hashtags and/or usernames.\n\nAnd the Quick Access panel is for quickly switching between accounts.\n\nNote 1: Make sure to Login into each account [Settings &gt; Login] to add account to the list!\n\nNote 2: Log out of the current account and then log into the other account.</string>
     <string name="quick_access_cannot_delete_curr">Cannot delete currently in use account</string>
     <string name="quick_access_confirm_delete">Are you sure you want to delete %s?</string>
@@ -141,7 +141,7 @@
     <string name="open_profile">Otwórz profil</string>
     <string name="view_pfp">Wyświetl zdjęcie profilowe</string>
     <string name="direct_messages_you">Ty</string>
-    <string name="direct_messages_sent_link">Shared a link</string>
+    <string name="direct_messages_sent_link">Udostępnij link</string>
     <string name="direct_messages_sent_media">Shared a media</string>
     <string name="direct_messages_sent_raven">Shared a timed message</string>
     <string name="direct_messages_replied_story">Replied to a story</string>
