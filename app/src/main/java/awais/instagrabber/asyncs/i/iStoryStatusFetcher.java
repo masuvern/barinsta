@@ -45,10 +45,10 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
         StoryModel[] result = null;
         final String url = "https://" + (storiesig ? "storiesig" : "i.instagram") + ".com/api/v1/"
                 + (isLoc ? "locations/" : (isHashtag ? "tags/" : (highlight ? "feed/reels_media?user_ids=" : "feed/user/")))
-                + id + (highlight ? "" : (storiesig ? "/reel_media/" : "/story/"));
+                + id.replace(":", "%3A") + (highlight ? "" : (storiesig ? "/reel_media/" : "/story/"));
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setInstanceFollowRedirects(false);
+            conn.setInstanceFollowRedirects(true);
             conn.setUseCaches(false);
             conn.setRequestProperty("User-Agent", storiesig ? Constants.A_USER_AGENT : Constants.I_USER_AGENT);
             conn.connect();
