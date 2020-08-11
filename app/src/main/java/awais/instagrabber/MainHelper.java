@@ -5,13 +5,10 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
@@ -37,7 +34,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.shape.MaterialShapeDrawable;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -77,10 +73,8 @@ import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.DiscoverTopicModel;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.PostModel;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.utils.Constants;
@@ -400,36 +394,36 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.profileView.highlightsList.setLayoutManager(new LinearLayoutManager(main, LinearLayoutManager.HORIZONTAL, false));
         main.mainBinding.profileView.highlightsList.setAdapter(main.highlightsAdapter);
 
-        int color = -1;
-        final Drawable background = main.mainBinding.profileView.appBarLayout.getBackground();
-        if (background instanceof MaterialShapeDrawable) {
-            final MaterialShapeDrawable drawable = (MaterialShapeDrawable) background;
-            final ColorStateList fillColor = drawable.getFillColor();
-            if (fillColor != null) color = fillColor.getDefaultColor();
-        } else {
-            final Bitmap bitmap = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
-            final Canvas canvas = new Canvas();
-            canvas.setBitmap(bitmap);
-            background.draw(canvas);
-            color = bitmap.getPixel(4, 4);
-            if (!bitmap.isRecycled()) bitmap.recycle();
-        }
-        if (color == -1 || color == 0) color = resources.getBoolean(R.bool.isNight) ? 0xff212121 : 0xfff5f5f5;
-        main.mainBinding.profileView.profileInfo.setBackgroundColor(color);
-        if (!isBottomToolbar) main.mainBinding.toolbar.toolbar.setBackgroundColor(color);
+        // int color = -1;
+        // final Drawable background = main.mainBinding.profileView.appBarLayout.getBackground();
+        // if (background instanceof MaterialShapeDrawable) {
+        //     final MaterialShapeDrawable drawable = (MaterialShapeDrawable) background;
+        //     final ColorStateList fillColor = drawable.getFillColor();
+        //     if (fillColor != null) color = fillColor.getDefaultColor();
+        // } else {
+        //     final Bitmap bitmap = Bitmap.createBitmap(9, 9, Bitmap.Config.ARGB_8888);
+        //     final Canvas canvas = new Canvas();
+        //     canvas.setBitmap(bitmap);
+        //     background.draw(canvas);
+        //     color = bitmap.getPixel(4, 4);
+        //     if (!bitmap.isRecycled()) bitmap.recycle();
+        // }
+        // if (color == -1 || color == 0) color = resources.getBoolean(R.bool.isNight) ? 0xff212121 : 0xfff5f5f5;
+        // main.mainBinding.profileView.profileInfo.setBackgroundColor(color);
+        // if (!isBottomToolbar) main.mainBinding.toolbar.toolbar.setBackgroundColor(color);
 
-        main.mainBinding.profileView.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            private int height;
-
-            @Override
-            public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
-                if (height == 0) {
-                    height = main.mainBinding.profileView.profileInfo.getHeight();
-                    collapsingToolbar.setMinimumHeight(height);
-                }
-                main.mainBinding.profileView.profileInfo.setTranslationY(-Math.min(0, verticalOffset));
-            }
-        });
+        // main.mainBinding.profileView.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+        //     private int height;
+        //
+        //     @Override
+        //     public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
+        //         if (height == 0) {
+        //             height = main.mainBinding.profileView.profileInfo.getHeight();
+        //             collapsingToolbar.setMinimumHeight(height);
+        //         }
+        //         main.mainBinding.profileView.profileInfo.setTranslationY(-Math.min(0, verticalOffset));
+        //     }
+        // });
 
         main.setSupportActionBar(main.mainBinding.toolbar.toolbar);
         if (isBottomToolbar) {

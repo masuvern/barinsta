@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Amoled" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorBackground">@color/background_amoled</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog.Dark</item>
+        <item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>
+    </style>
+
+    <style name="AppTheme.BottomSheetDialog.Dark" parent="Theme.MaterialComponents.BottomSheetDialog"/>
+</resources>

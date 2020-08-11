@@ -22,6 +22,7 @@ public final class Constants {
     public static final String MARK_AS_SEEN = "mark_as_seen";
     public static final String INSTADP = "instadp";
     public static final String STORIESIG = "storiesig";
+    public static final String AMOLED_THEME = "amoled_theme";
     // never Export
     public static final String COOKIE = "cookie";
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
