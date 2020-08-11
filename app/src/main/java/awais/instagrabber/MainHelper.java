@@ -412,18 +412,18 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         // main.mainBinding.profileView.profileInfo.setBackgroundColor(color);
         // if (!isBottomToolbar) main.mainBinding.toolbar.toolbar.setBackgroundColor(color);
 
-        main.mainBinding.profileView.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            private int height;
-
-            @Override
-            public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
-                if (height == 0) {
-                    height = main.mainBinding.profileView.profileInfo.getHeight();
-                    collapsingToolbar.setMinimumHeight(height);
-                }
-                main.mainBinding.profileView.profileInfo.setTranslationY(-Math.min(0, verticalOffset));
-            }
-        });
+        // main.mainBinding.profileView.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+        //     private int height;
+        //
+        //     @Override
+        //     public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
+        //         if (height == 0) {
+        //             height = main.mainBinding.profileView.profileInfo.getHeight();
+        //             collapsingToolbar.setMinimumHeight(height);
+        //         }
+        //         main.mainBinding.profileView.profileInfo.setTranslationY(-Math.min(0, verticalOffset));
+        //     }
+        // });
 
         main.setSupportActionBar(main.mainBinding.toolbar.toolbar);
         if (isBottomToolbar) {

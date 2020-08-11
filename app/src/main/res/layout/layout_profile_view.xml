@@ -16,7 +16,7 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="noScroll">
+            app:layout_scrollFlags="scroll|enterAlways">
 
             <RelativeLayout
                 android:id="@+id/infoContainer"
