@@ -57,6 +57,11 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest)
 
 ### License
 
+    InstaGrabber
+    Copyright (C) 2019  AWAiS        <chapter50000@hotmail.com>
+    Copyright (C) 2020  Austin Huang <im@austinhuang.me>
+                        Ammar Githam <ammargitham786@gmail.com>
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
