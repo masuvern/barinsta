@@ -13,7 +13,7 @@
 InstaGrabber is an alternative Instagram client for Android. You can...
 
 * **Search**: Profile / Hashtag / Location
-* **Profile**: View posts (timeline & face-tagged), copy bio, view stories\* (Highlight & status), follow\*, restrict\*, block\*, compare following/followers\*
+* **Profile**: View posts (timeline & face-tagged), copy bio, view stories\* (Highlight & status), follow\*, restrict\*, block\*, compare following/followers\*<sup>,3</sup>
 * **Hashtag**: View posts (newest only), view stories\*, follow\*
 * **Location**: View posts (newest only), view stories\*, open map
 * **Post**: View, download (+ batch download selected posts), copy captions, like/save\*
@@ -25,7 +25,7 @@ InstaGrabber is an alternative Instagram client for Android. You can...
 
 We support private accounts!\*
 
-It can be used as a drop-in replacement for read functionalities of the official Instagram app, with unnecessary components stripped.
+It can be used as a drop-in replacement for read (and some write) functionalities of the official Instagram app, with unnecessary components stripped.
 
 <sub>* Requires [login](#how-to-log-in). You must be a current follower of the desired private accounts, this app cannot hack people (which I have to state despite the obvious)!</sub>
 
@@ -53,6 +53,7 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). ALWAY
 ### Contact us
 
 * Use [GitHub issues](https://github.com/austinhuang0131/instagrabber/issues) when possible.
+* Email: [InstaGrabber@AustinHuang.me](mailto:instagrabber@austinhuang.me) (Synced to GitHub issues)
 * Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 
