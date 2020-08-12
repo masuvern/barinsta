@@ -92,7 +92,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final boolean autoloadPosts;
     private FeedStoryModel[] stories;
     private boolean hasNextPage = false, feedHasNextPage = false, discoverHasMore = false;
-    private String endCursor = null, feedEndCursor = null, discoverEndMaxId = null, topic = null;
+    private String endCursor = null, feedEndCursor = null, discoverEndMaxId = null, topic = null, rankToken = null;
     private String[] topicIds = null;
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
@@ -197,6 +197,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         public void onResult(final DiscoverTopicModel result) {
             if (result != null) {
                 topicIds = result.getIds();
+                rankToken = result.getToken();
                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                         main, android.R.layout.simple_spinner_dropdown_item, result.getNames() );
                 main.mainBinding.discoverType.setAdapter(spinnerArrayAdapter);
@@ -536,7 +537,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     if (discoverLazyLoader != null) discoverLazyLoader.resetState();
                     main.discoverItems.clear();
                     if (discoverAdapter != null) discoverAdapter.notifyDataSetChanged();
-                    new DiscoverFetcher(topic, null, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new DiscoverFetcher(topic, null, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
 
@@ -549,7 +550,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if (discoverLazyLoader != null) discoverLazyLoader.resetState();
             main.discoverItems.clear();
             if (discoverAdapter != null) discoverAdapter.notifyDataSetChanged();
-            new DiscoverFetcher(topic, null, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new DiscoverFetcher(topic, null, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
 
         main.mainBinding.discoverPosts.setAdapter(discoverAdapter = new DiscoverAdapter(main.discoverItems, v -> {
@@ -575,12 +576,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         main.mainBinding.discoverPosts.addOnScrollListener(discoverLazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (discoverHasMore) {
                 main.mainBinding.discoverSwipeRefreshLayout.setRefreshing(true);
-                new DiscoverFetcher(topic, discoverEndMaxId, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new DiscoverFetcher(topic, discoverEndMaxId, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 discoverEndMaxId = null;
             }
         }));
-
-        new DiscoverFetcher(topic, null, discoverFetchListener, true).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void onIntent(final Intent intent) {
