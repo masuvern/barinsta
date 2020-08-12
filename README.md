@@ -8,6 +8,8 @@
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
+*As featured on: [r/androidapps](https://www.reddit.com/r/androidapps/comments/i30tpp/instagrabber_an_open_source_instagram_client/) • [HowToMen](https://nitter.net/howtomen/status/1290443637625704450) • [GitHub Trending](https://github.com/ifyour/github-trending-archive/blob/master/archives/2020-08-05.md)*
+
 InstaGrabber is an alternative Instagram client for Android. You can...
 
 * **Search**: Profile / Hashtag / Location
@@ -23,9 +25,9 @@ InstaGrabber is an alternative Instagram client for Android. You can...
 
 We support private accounts!\*
 
-<sub>* Requires [login](#how-to-log-in). You must be a current follower of the desired private accounts, this app cannot hack people (which I have to state despite the obvious)!</sub>
-
 It can be used as a drop-in replacement for read functionalities of the official Instagram app, with unnecessary components stripped.
+
+<sub>* Requires [login](#how-to-log-in). You must be a current follower of the desired private accounts, this app cannot hack people (which I have to state despite the obvious)!</sub>
 
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/1.jpg" alt="Profile" width="15%"/></a>
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/2.jpg" alt="Post" width="15%"/></a>
@@ -34,7 +36,7 @@ It can be used as a drop-in replacement for read functionalities of the official
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/5.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/5.jpg" alt="Hashtag" width="15%"/></a>
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/6.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/6.jpg" alt="Location" width="15%"/></a>
 
-This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber) but subsequently abandoned it. I decided to continue the app cuz why not, ~~even though it might not be that *cash money*.~~ (Also I need to learn Java.)
+This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber) but subsequently abandoned it. I decided to continue the app because it's just a great cause.
 
 ### Download
 
