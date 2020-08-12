@@ -632,8 +632,9 @@ state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
     InstaGrabber
-    Copyright (C) 2019  AWAiS
-    Copyright (C) 2020  Austin Huang
+    Copyright (C) 2019  AWAiS        <chapter50000@hotmail.com>
+    Copyright (C) 2020  Austin Huang <im@austinhuang.me>
+                        Ammar Githam <ammargitham786@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -650,23 +651,7 @@ the "copyright" line and a pointer to where the full notice is found.
 
 Also add information on how to contact you by electronic and paper mail.
 
-  If the program does terminal interaction, make it output a short
-notice like this when it starts in an interactive mode:
-
-    InstaGrabber  Copyright (C) 2019  AWAiS
-                  Copyright (C) 2020  Austin Huang
-    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
-    This is free software, and you are welcome to redistribute it
-    under certain conditions; type `show c' for details.
-
-The hypothetical commands `show w' and `show c' should show the appropriate
-parts of the General Public License.  Of course, your program's commands
-might be different; for a GUI interface, you would use an "about box".
-
-  You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU GPL, see
-<http://www.gnu.org/licenses/>.
+[we're not terminal program, redacted]
 
   The GNU General Public License does not permit incorporating your program
 into proprietary programs.  If your program is a subroutine library, you
