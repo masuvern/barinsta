@@ -40,9 +40,7 @@ This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who po
 
 ### Download
 
-Download [here](https://github.com/austinhuang0131/instagrabber/releases). ALWAYS download the latest version.
-
-[F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432)
+Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest). [F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432)
 
 [![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
 [![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
@@ -60,4 +58,4 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases). ALWAY
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com)
 [![Crowdin | Agile localization for tech companies](https://badges.crowdin.net/badge/dark/crowdin-on-light.png)](https://crowdin.com/?utm_source=badge&utm_medium=referral&utm_campaign=badge-add-on)
 
-<sub>1. For anonymous users only, does not apply to users already logged in, and must be explicitly enabled in Settings. 2. Default enabled, but can be disabled for stories. The downside is that they'll always be "new" in other Instagram clients. Also, this app will not respect DM message restrictions (replay once / no replay). 3. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
+<sub>1. For anonymous users only, does not apply to users already logged in, and must be explicitly enabled in Settings. 2. Default enabled, but can be disabled. 3. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
