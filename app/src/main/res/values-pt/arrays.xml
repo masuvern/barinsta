@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>Systemstandard</item>
-        <item>Englisch</item>
-        <item>Französisch [Danke an @kernoeb (Telegram)]</item>
-        <item>Spanisch [Danke an @sguinetti (GitLab)]</item>
-        <item>Chinesisch (Vereinfacht)</item>
-        <item>Indonesisch [Danke an @Galang23 (GitLab)]</item>
-        <item>Italienisch [Danke an @RAR_Ramar (Telegram)]</item>
-        <item>Deutsch [Danke an @peterge1998 (GitHub)]</item>
-        <item>Polnisch [Danke an @Lego8486 (GitHub)]</item>
-        <item>Türkisch [Danke an @faydin90 (Telegram)]</item>
+        <item>Padrão do sistema</item>
+        <item>Inglês</item>
+        <item>Francês Agradecimentos a @kernoeb (Telegram)]</item>
+        <item>Espanhol Agradecimentos a @sguinetti (GitLab)]</item>
+        <item>Chinês (Simplificado)</item>
+        <item>Indonésio [Agradecimentos a @ Galang23 (GitLab)]</item>
+        <item>Italiano [Agradecimentos a @RAR_Ramar (Telegram)]</item>
+        <item>Alemão [Agradecimentos a @ peterge1998 (GitHub)]</item>
+        <item>Polonês [Agradecimentos a @ Lego8486 (GitHub)]</item>
+        <item>Turco [Agradecimentos a @ faydin90 (Telegram)]</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>Auto / Folge System</item>
-        <item>Auto / Folge Batterie</item>
-        <item>Dunkel</item>
-        <item>Hell</item>
+        <item>Auto / Seguir o sistema</item>
+        <item>Automático / Acompanhar bateria</item>
+        <item>Escuro</item>
+        <item>Claro</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>Kein(e)</item>
+        <item>Nenhum</item>
         <item>\@</item>
-        <item>um</item>
-        <item>am</item>
+        <item>em</item>
+        <item>para</item>
         <item>\|</item>
         <item>-</item>
     </string-array>
     <string-array name="discover_placeholder">
-        <item>Lädt...</item>
+        <item>Carregando...</item>
     </string-array>
     <string-array name="date_presets">
         <item>dd-MM-yyyy</item>
