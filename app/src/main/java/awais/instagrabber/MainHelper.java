@@ -119,7 +119,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     endCursor = model.getEndCursor();
                     hasNextPage = model.hasNextPage();
                     if (autoloadPosts && hasNextPage)
-                        currentlyExecuting = new PostsFetcher(main.profileModel.getId(), endCursor, this)
+                        currentlyExecuting = new PostsFetcher(
+                                main.profileModel != null ? main.profileModel.getId()
+                                    : (main.hashtagModel != null ? main.userQuery : main.locationModel.getId()), endCursor, this)
                                 .setUsername((isLocation || isHashtag) ? null : main.profileModel.getUsername())
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
@@ -462,7 +464,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if ((!autoloadPosts || isHashtag) && hasNextPage) {
                 main.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
-                currentlyExecuting = new PostsFetcher((isHashtag || isLocation) ? main.userQuery : main.profileModel.getId(), endCursor, postsFetchListener)
+                currentlyExecuting = new PostsFetcher(main.profileModel != null ? main.profileModel.getId()
+                        : (main.hashtagModel != null ? main.userQuery : main.locationModel.getId()), endCursor, postsFetchListener)
                         .setUsername((isHashtag || isLocation) ? null : main.profileModel.getUsername())
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
