@@ -77,8 +77,10 @@ public final class FollowViewer extends BaseLanguageActivity implements SwipeRef
             final Object tag = v.getTag();
             if (tag instanceof FollowModel) {
                 model = (FollowModel) tag;
-                Main.scanHack.onResult(model.getUsername());
-                finish();
+                startActivity(
+                        new Intent(getApplicationContext(), ProfileViewer.class)
+                                .putExtra(Constants.EXTRAS_USERNAME, model.getUsername())
+                );
             }
         };
 

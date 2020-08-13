@@ -122,7 +122,7 @@ public final class PostViewer extends BaseLanguageActivity {
         if (which == 0) {
             searchUsername(username);
         } else if (profileModel != null && which == 1) {
-            startActivity(new Intent(this, ProfileViewer.class)
+            startActivity(new Intent(this, ProfilePicViewer.class)
                     .putExtra(Constants.EXTRAS_PROFILE, profileModel));
         }
     };
@@ -432,13 +432,10 @@ public final class PostViewer extends BaseLanguageActivity {
     }
 
     private void searchUsername(final String text) {
-        if (Main.scanHack != null) {
-            Main.scanHack.onResult(text);
-            setResult(6969);
-            Intent intent = new Intent(getApplicationContext(), Main.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
+        startActivity(
+                new Intent(getApplicationContext(), ProfileViewer.class)
+                .putExtra(Constants.EXTRAS_USERNAME, text)
+        );
     }
 
     private void setupVideo() {
