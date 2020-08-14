@@ -63,8 +63,9 @@ public final class FollowViewer extends BaseLanguageActivity implements SwipeRef
 
         followers = intent.getBooleanExtra(Constants.EXTRAS_FOLLOWERS, false);
         name = intent.getStringExtra(Constants.EXTRAS_NAME);
-        namePost = name + " is";
+        namePost = name;
         if (Utils.isEmpty(name)) {
+            // this usually should not occur
             name = "You";
             namePost = "You're";
         }

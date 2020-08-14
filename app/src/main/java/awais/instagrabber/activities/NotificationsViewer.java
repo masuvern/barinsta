@@ -54,7 +54,7 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
 
         notificationsBinding.swipeRefreshLayout.setRefreshing(true);
         setSupportActionBar(notificationsBinding.toolbar.toolbar);
-        notificationsBinding.toolbar.toolbar.setTitle(R.string.title_notifications);
+        notificationsBinding.toolbar.toolbar.setTitle(R.string.action_notif);
 
         resources = getResources();
 
