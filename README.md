@@ -54,6 +54,7 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest)
 * Email: [InstaGrabber@AustinHuang.me](mailto:instagrabber@austinhuang.me) (Synced to GitHub issues)
 * Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
+* [Discord](https://discord.gg/YtEDzN2)
 
 ### License
 
