@@ -672,14 +672,10 @@ public final class Utils {
                 }
                 break;
 
-                case PLACEHOLDER: {
+                case PLACEHOLDER:
                     final JSONObject placeholder = itemObject.getJSONObject("placeholder");
-                    final String title = placeholder.getString("title");
-                    final String message = placeholder.getString("message");
-                    final String string = title + "<br><small>" + message + "</small>";
-                    text = hasMentions(message) ? getMentionText(string) : string;
-                }
-                break;
+                    text = placeholder.getString("title") + "<br><small>" + placeholder.getString("message") + "</small>";
+                    break;
 
                 case ACTION_LOG:
                     if (inThreadView && itemObject.optInt("hide_in_thread", 0) != 0)
