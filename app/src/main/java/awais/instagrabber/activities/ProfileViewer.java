@@ -1,6 +1,7 @@
 package awais.instagrabber.activities;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +69,7 @@ import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
+import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
@@ -136,10 +139,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     private final MentionClickListener mentionClickListener = new MentionClickListener() {
         @Override
         public void onClick(final RamboTextView view, final String text, final boolean isHashtag) {
-            new AlertDialog.Builder(ProfileViewer.this).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
-                    .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
-                //if (scanHack != null) scanHack.onResult(text);
-            }).show();
+            startActivity(new Intent(getApplicationContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
         }
     };
     public final HighlightsAdapter highlightsAdapter = new HighlightsAdapter(null, new View.OnClickListener() {
@@ -214,7 +214,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 else startActivity(new Intent(ProfileViewer.this, PostViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, postModel.getPosition())
                         .putExtra(Constants.EXTRAS_POST, postModel)
-                        //.putExtra(Constants.EXTRAS_USER, userQuery)
+                        .putExtra(Constants.EXTRAS_USER, userQuery)
                         .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
             }
         }, v -> { // long click listener
@@ -708,6 +708,22 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.saved, menu);
+
+        downloadAction = menu.findItem(R.id.downloadAction);
+        downloadAction.setVisible(false);
+
+        downloadAction.setOnMenuItemClickListener(item -> {
+            if (selectedItems.size() > 0) {
+                Utils.batchDownload(this, userQuery, DownloadMethod.DOWNLOAD_MAIN, selectedItems);
+            }
+            return true;
+        });
+        return true;
+    }
+
     private void toggleSelection(final PostModel postModel) {
         if (postModel != null && postsAdapter != null) {
             if (postModel.isSelected()) selectedItems.remove(postModel);
@@ -725,16 +741,11 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         if (downloadAction != null) downloadAction.setVisible(postsAdapter.isSelecting);
     }
 
-    public boolean isSelectionCleared() {
-        if (postsAdapter != null && postsAdapter.isSelecting) {
-            for (final PostModel postModel : selectedItems) postModel.setSelected(false);
-            selectedItems.clear();
-            postsAdapter.isSelecting = false;
-            postsAdapter.notifyDataSetChanged();
-            if (downloadAction != null) downloadAction.setVisible(false);
-            return false;
-        }
-        return true;
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 8020 && grantResults[0] == PackageManager.PERMISSION_GRANTED && selectedItems.size() > 0)
+            Utils.batchDownload(this, userQuery, DownloadMethod.DOWNLOAD_MAIN, selectedItems);
     }
 
     public void deselectSelection(final BasePostModel postModel) {
@@ -743,17 +754,6 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             postModel.setSelected(false);
             if (postsAdapter != null) notifyAdapter((PostModel) postModel);
         }
-    }
-
-    public static int indexOfIntArray(Object[] array, Object key) {
-        int returnvalue = -1;
-        for (int i = 0; i < array.length; ++i) {
-            if (key == array[i]) {
-                returnvalue = i;
-                break;
-            }
-        }
-        return returnvalue;
     }
 
     class MyTask extends AsyncTask<Void, Bitmap, Void> {

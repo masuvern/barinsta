@@ -277,8 +277,7 @@ public final class PostViewer extends BaseLanguageActivity {
         resources = getResources();
 
         viewerBinding.topPanel.title.setMovementMethod(new LinkMovementMethod());
-        viewerBinding.topPanel.title.setMentionClickListener((view, text, isHashtag) ->
-                onClickListener.onClick(viewerBinding.topPanel.ivProfilePic));
+        viewerBinding.topPanel.title.setMentionClickListener((view, text, isHashtag) -> searchUsername(text));
         viewerBinding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
 
         viewerBinding.ivToggleFullScreen.setOnClickListener(onClickListener);

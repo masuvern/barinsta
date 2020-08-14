@@ -122,7 +122,7 @@ public final class StoryViewer extends BaseLanguageActivity {
             return;
         }
 
-        username = intent.getStringExtra(Constants.EXTRAS_USERNAME);
+        username = intent.getStringExtra(Constants.EXTRAS_USERNAME).replace("@", "");
         final String highlight = intent.getStringExtra(Constants.EXTRAS_HIGHLIGHT);
         final boolean hasUsername = !Utils.isEmpty(username);
         final boolean hasHighlight = !Utils.isEmpty(highlight);
