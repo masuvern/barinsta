@@ -86,9 +86,11 @@ public final class DirectMessageThread extends BaseLanguageActivity {
         }
     };
     private final View.OnClickListener newCommentListener = v -> {
-        if (Utils.isEmpty(dmsBinding.commentText.getText().toString()) && v == dmsBinding.commentSend)
-            Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
-        else if (v == dmsBinding.commentSend) {
+        if (v == dmsBinding.commentSend) {
+            if (Utils.isEmpty(dmsBinding.commentText.getText().toString())) {
+                Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+                return;
+            }
             final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
             action.setOnTaskCompleteListener(result -> {
                 if (!result) {
