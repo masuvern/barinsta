@@ -1,9 +1,12 @@
 package awais.instagrabber.activities;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,7 +41,12 @@ import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
+import static android.view.View.VISIBLE;
+
 public final class DirectMessageThread extends BaseLanguageActivity {
+    private static final String TAG = "DirectMessageThread";
+    private static final int PICK_IMAGE = 100;
+
     private DirectItemModel directItemModel;
     private String threadId;
     private String endCursor;
@@ -86,24 +96,34 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             dmsBinding.swipeRefreshLayout.setRefreshing(false);
         }
     };
-    private final View.OnClickListener newCommentListener = v -> {
-        if (Utils.isEmpty(dmsBinding.commentText.getText().toString())) {
-            Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadId);
-        action.setOnTaskCompleteListener(result -> {
-            if (!result) {
-                Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+    private final View.OnClickListener clickListener = v -> {
+        if (v == dmsBinding.commentSend) {
+            if (Utils.isEmpty(dmsBinding.commentText.getText().toString())) {
+                Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
                 return;
             }
-            dmsBinding.commentText.setText("");
-            dmsBinding.commentText.clearFocus();
-            directItemModels.clear();
-            messageItemsAdapter.notifyDataSetChanged();
-            new UserInboxFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        });
-        action.execute();
+            final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadId);
+            action.setOnTaskCompleteListener(result -> {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                dmsBinding.commentText.setText("");
+                dmsBinding.commentText.clearFocus();
+                directItemModels.clear();
+                messageItemsAdapter.notifyDataSetChanged();
+                new UserInboxFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            });
+            action.execute();
+            return;
+        }
+        if (v == dmsBinding.image) {
+            final Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
+        }
+
     };
 
     @Override
@@ -121,9 +141,11 @@ public final class DirectMessageThread extends BaseLanguageActivity {
         }
 
         dmsBinding.swipeRefreshLayout.setEnabled(false);
-        dmsBinding.commentText.setVisibility(View.VISIBLE);
-        dmsBinding.commentSend.setVisibility(View.VISIBLE);
-        dmsBinding.commentSend.setOnClickListener(newCommentListener);
+        dmsBinding.commentText.setVisibility(VISIBLE);
+        dmsBinding.commentSend.setVisibility(VISIBLE);
+        dmsBinding.image.setVisibility(VISIBLE);
+        dmsBinding.commentSend.setOnClickListener(clickListener);
+        dmsBinding.image.setOnClickListener(clickListener);
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, true);
         dmsBinding.rvDirectMessages.setLayoutManager(layoutManager);
@@ -197,6 +219,33 @@ public final class DirectMessageThread extends BaseLanguageActivity {
         dmsBinding.rvDirectMessages.setAdapter(messageItemsAdapter);
 
         new UserInboxFetcher(threadModel.getThreadId(), UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE  && resultCode == Activity.RESULT_OK) {
+            if (data == null || data.getData() == null) {
+                Log.w(TAG, "data is null!");
+                return;
+            }
+            Cursor cursor = null;
+            try {
+                final Uri uri = data.getData();
+                cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor != null) {
+                    final int contentLength = cursor.getColumnIndex(OpenableColumns.SIZE);
+                    final InputStream inputStream = getContentResolver().openInputStream(uri);
+                    // TODO Handle image upload
+                }
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Error opening InputStream", e);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
     }
 
     @Nullable
