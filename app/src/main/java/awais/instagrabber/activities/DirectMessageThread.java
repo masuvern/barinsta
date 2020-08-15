@@ -207,13 +207,39 @@ public final class DirectMessageThread extends BaseLanguageActivity {
     private final View.OnClickListener newCommentListener = v -> {
         if (Utils.isEmpty(dmsBinding.commentText.getText().toString()) && v == dmsBinding.commentSend)
             Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
-        else if (v == dmsBinding.commentSend) new CommentAction().execute();
+        else if (v == dmsBinding.commentSend) {
+            final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
+            action.setOnTaskCompleteListener(new CommentAction.OnTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(boolean ok) {
+                    if (!ok) {
+                        Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    dmsBinding.commentText.setText("");
+                    dmsBinding.commentText.clearFocus();
+                    directItemModels.clear();
+                    messageItemsAdapter.notifyDataSetChanged();
+                    new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+            });
+            action.execute();
+        }
     };
 
-    class CommentAction extends AsyncTask<Void, Void, Void> {
-        boolean ok = false;
+    public static class CommentAction extends AsyncTask<Void, Void, Boolean> {
+        private final String text;
+        private final String threadId;
 
-        protected Void doInBackground(Void... lmao) {
+        private OnTaskCompleteListener listener;
+
+        public CommentAction(String text, String threadId) {
+            this.text = text;
+            this.threadId = threadId;
+        }
+
+        protected Boolean doInBackground(Void... lmao) {
+            boolean ok = false;
             final String url2 = "https://i.instagram.com/api/v1/direct_v2/threads/broadcast/text/";
             final String cookie = settingsHelper.getString(Constants.COOKIE);
             try {
@@ -221,7 +247,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                 urlConnection2.setRequestMethod("POST");
                 urlConnection2.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
                 urlConnection2.setUseCaches(false);
-                final String commentText = URLEncoder.encode(dmsBinding.commentText.getText().toString(), "UTF-8")
+                final String commentText = URLEncoder.encode(text, "UTF-8")
                         .replaceAll("\\+", "%20").replaceAll("\\%21", "!").replaceAll("\\%27", "'")
                         .replaceAll("\\%28", "(").replaceAll("\\%29", ")").replaceAll("\\%7E", "~");
                 final String cc = UUID.randomUUID().toString();
@@ -231,7 +257,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                         +"\",\"client_context\":\"" + cc
                         +"\",\"mutation_token\":\"" + cc
                         +"\",\"text\":\"" + commentText
-                        +"\",\"thread_ids\":\"["+threadid
+                        +"\",\"thread_ids\":\"["+ threadId
                         +"]\",\"action\":\"send_item\"}");
                 urlConnection2.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 urlConnection2.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters2.getBytes().length));
@@ -249,19 +275,24 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             } catch (Throwable ex) {
                 Log.e("austin_debug", "dm send: " + ex);
             }
-            return null;
+            return ok;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            if (!ok) Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-            else {
-                dmsBinding.commentText.setText("");
-                dmsBinding.commentText.clearFocus();
-                directItemModels.clear();
-                messageItemsAdapter.notifyDataSetChanged();
-                new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        protected void onPostExecute(final Boolean result) {
+            if (listener != null) {
+                listener.onTaskComplete(result);
             }
+        }
+
+        public void setOnTaskCompleteListener(final OnTaskCompleteListener listener) {
+            if (listener != null) {
+                this.listener = listener;
+            }
+        }
+
+        public interface OnTaskCompleteListener {
+            void onTaskComplete(boolean ok);
         }
     }
 }
