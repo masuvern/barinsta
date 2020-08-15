@@ -1,4 +1,4 @@
-package awais.instagrabber.activities;
+package awais.instagrabber.activities.directmessages;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -16,6 +16,7 @@ import java.util.Arrays;
 
 import awais.instagrabber.R;
 import awais.instagrabber.BuildConfig;
+import awais.instagrabber.activities.BaseLanguageActivity;
 import awais.instagrabber.adapters.DirectMessagesAdapter;
 import awais.instagrabber.asyncs.direct_messages.InboxFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;

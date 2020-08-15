@@ -1,4 +1,4 @@
-package awais.instagrabber.activities;
+package awais.instagrabber.activities.directmessages;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,6 +24,10 @@ import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.activities.BaseLanguageActivity;
+import awais.instagrabber.activities.PostViewer;
+import awais.instagrabber.activities.ProfileViewer;
+import awais.instagrabber.activities.StoryViewer;
 import awais.instagrabber.adapters.MessageItemsAdapter;
 import awais.instagrabber.asyncs.direct_messages.CommentAction;
 import awais.instagrabber.asyncs.direct_messages.UserInboxFetcher;

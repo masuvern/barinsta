@@ -215,7 +215,7 @@
         </activity>
 
         <activity
-            android:name=".activities.DirectMessages"
+            android:name=".activities.directmessages.DirectMessages"
             android:parentActivityName=".activities.Main">
 
             <meta-data
@@ -224,12 +224,12 @@
         </activity>
 
         <activity
-            android:name=".activities.DirectMessageThread"
-            android:parentActivityName=".activities.DirectMessages">
+            android:name=".activities.directmessages.DirectMessageThread"
+            android:parentActivityName=".activities.directmessages.DirectMessages">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.DirectMessages" />
+                android:value=".activities.directmessages.DirectMessages" />
         </activity>
 
         <provider

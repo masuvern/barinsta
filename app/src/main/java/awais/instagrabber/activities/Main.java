@@ -29,6 +29,7 @@ import java.util.Stack;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.MainHelper;
 import awais.instagrabber.R;
+import awais.instagrabber.activities.directmessages.DirectMessages;
 import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
