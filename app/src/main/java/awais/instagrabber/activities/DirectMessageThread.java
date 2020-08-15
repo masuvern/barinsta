@@ -37,14 +37,14 @@ import awais.instagrabber.utils.Utils;
 
 public final class DirectMessageThread extends BaseLanguageActivity {
     private DirectItemModel directItemModel;
-    private String threadid;
+    private String threadId;
     private String endCursor;
     private ActivityDmsBinding dmsBinding;
     private MessageItemsAdapter messageItemsAdapter;
 
     private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
     private final ArrayList<ProfileModel> users = new ArrayList<>();
-    private final ArrayList<ProfileModel> leftusers = new ArrayList<>();
+    private final ArrayList<ProfileModel> leftUsers = new ArrayList<>();
     private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
         @Override
@@ -65,10 +65,10 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                 users.clear();
                 users.addAll(Arrays.asList(result.getUsers()));
 
-                leftusers.clear();
-                leftusers.addAll(Arrays.asList(result.getLeftUsers()));
+                leftUsers.clear();
+                leftUsers.addAll(Arrays.asList(result.getLeftUsers()));
 
-                threadid = result.getThreadId();
+                threadId = result.getThreadId();
                 dmsBinding.toolbar.toolbar.setTitle(result.getThreadTitle());
                 String[] users = new String[result.getUsers().length];
                 for (int i = 0; i < users.length; ++i) {
@@ -90,7 +90,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
             return;
         }
-        final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
+        final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadId);
         action.setOnTaskCompleteListener(result -> {
             if (!result) {
                 Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
@@ -100,7 +100,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             dmsBinding.commentText.clearFocus();
             directItemModels.clear();
             messageItemsAdapter.notifyDataSetChanged();
-            new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new UserInboxFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
         action.execute();
     };
@@ -134,7 +134,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             }
         }));
 
-        messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, leftusers, v -> {
+        messageItemsAdapter = new MessageItemsAdapter(directItemModels, users, leftUsers, v -> {
             Object tag = v.getTag();
             if (tag instanceof DirectItemModel) {
                 directItemModel = (DirectItemModel) tag;
@@ -203,9 +203,9 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             for (final ProfileModel user : users) {
                 if (Long.toString(userId).equals(user.getId())) result = user;
             }
-            if (leftusers != null)
-                for (final ProfileModel leftuser : leftusers) {
-                    if (Long.toString(userId).equals(leftuser.getId())) result = leftuser;
+            if (leftUsers != null)
+                for (final ProfileModel leftUser : leftUsers) {
+                    if (Long.toString(userId).equals(leftUser.getId())) result = leftUser;
                 }
             return result;
         }
