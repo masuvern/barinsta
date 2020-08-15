@@ -75,17 +75,25 @@ public final class ProfileModel implements Serializable {
         return hdProfilePic;
     }
 
-    public long getPostCount() { return postCount; }
+    public long getPostCount() {
+        return postCount;
+    }
 
-    public long getFollowersCount() { return followersCount; }
+    public long getFollowersCount() {
+        return followersCount;
+    }
 
     public long getFollowingCount() {
         return followingCount;
     }
 
-    public boolean getFollowing() { return following; }
+    public boolean getFollowing() {
+        return following;
+    }
 
-    public boolean getRestricted() { return restricted; }
+    public boolean getRestricted() {
+        return restricted;
+    }
 
     public boolean getBlocked() {
         return blocked;

@@ -12,15 +12,10 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.MessageItemsAdapter;
@@ -39,8 +34,6 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
-
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class DirectMessageThread extends BaseLanguageActivity {
     private DirectItemModel directItemModel;
@@ -61,7 +54,8 @@ public final class DirectMessageThread extends BaseLanguageActivity {
 
             if (result != null) {
                 endCursor = result.getPrevCursor();
-                if ("MINCURSOR".equals(endCursor) || "MAXCURSOR".equals(endCursor)) endCursor = null;
+                if ("MINCURSOR".equals(endCursor) || "MAXCURSOR".equals(endCursor))
+                    endCursor = null;
 
                 users.clear();
                 users.addAll(Arrays.asList(result.getUsers()));
@@ -162,8 +156,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                                     .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
                                     .putExtra(Constants.EXTRAS_STORIES, sms)
                             );
-                        }
-                        else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
+                        } else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         }
                         break;
@@ -172,13 +165,10 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         break;
                     default:
-                        Log.d("austin_debug", "unsupported type "+itemType);
+                        Log.d("austin_debug", "unsupported type " + itemType);
                 }
             }
-        },
-        (view, text, isHashtag) -> {
-            searchUsername(text);
-        });
+        }, (view, text, isHashtag) -> searchUsername(text));
 
         dmsBinding.rvDirectMessages.setAdapter(messageItemsAdapter);
 
