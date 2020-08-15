@@ -86,25 +86,23 @@ public final class DirectMessageThread extends BaseLanguageActivity {
         }
     };
     private final View.OnClickListener newCommentListener = v -> {
-        if (v == dmsBinding.commentSend) {
-            if (Utils.isEmpty(dmsBinding.commentText.getText().toString())) {
-                Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+        if (Utils.isEmpty(dmsBinding.commentText.getText().toString())) {
+            Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
+        action.setOnTaskCompleteListener(result -> {
+            if (!result) {
+                Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 return;
             }
-            final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
-            action.setOnTaskCompleteListener(result -> {
-                if (!result) {
-                    Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                dmsBinding.commentText.setText("");
-                dmsBinding.commentText.clearFocus();
-                directItemModels.clear();
-                messageItemsAdapter.notifyDataSetChanged();
-                new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            });
-            action.execute();
-        }
+            dmsBinding.commentText.setText("");
+            dmsBinding.commentText.clearFocus();
+            directItemModels.clear();
+            messageItemsAdapter.notifyDataSetChanged();
+            new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        });
+        action.execute();
     };
 
     @Override
