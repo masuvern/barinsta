@@ -157,8 +157,10 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                         break;
                     case RAVEN_MEDIA:
                     case MEDIA:
-                        Utils.dmDownload(this, getUser(directItemModel.getUserId()).getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
-                                Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
+                        final ProfileModel user = getUser(directItemModel.getUserId());
+                        if (user != null) {
+                            Utils.dmDownload(this, user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
+                        }
                         Toast.makeText(v.getContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         break;
                     case STORY_SHARE:
