@@ -121,29 +121,31 @@ public final class Utils {
 
     public static void setupCookies(final String cookieRaw) {
         final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
-        if (cookieRaw == "LOGOUT") {
-            cookieStore.removeAll();
+        if (cookieStore == null || isEmpty(cookieRaw)) {
+            return;
         }
-        else if (cookieRaw != null && !isEmpty(cookieRaw)) {
-            try {
-                final URI uri1 = new URI("https://instagram.com");
-                final URI uri2 = new URI("https://instagram.com/");
-                final URI uri3 = new URI("https://i.instagram.com/");
-                for (final String cookie : cookieRaw.split(";")) {
-                    final String[] strings = cookie.split("=", 2);
-                    final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
-                    httpCookie.setDomain("instagram.com");
-                    httpCookie.setPath("/");
-                    httpCookie.setVersion(0);
-                    cookieStore.add(uri1, httpCookie);
-                    cookieStore.add(uri2, httpCookie);
-                    cookieStore.add(uri3, httpCookie);
-                }
-            } catch (final URISyntaxException e) {
-                if (logCollector != null)
-                    logCollector.appendException(e, LogCollector.LogFile.UTILS, "setupCookies");
-                if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+        if (cookieRaw.equals("LOGOUT")) {
+            cookieStore.removeAll();
+            return;
+        }
+        try {
+            final URI uri1 = new URI("https://instagram.com");
+            final URI uri2 = new URI("https://instagram.com/");
+            final URI uri3 = new URI("https://i.instagram.com/");
+            for (final String cookie : cookieRaw.split(";")) {
+                final String[] strings = cookie.split("=", 2);
+                final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
+                httpCookie.setDomain("instagram.com");
+                httpCookie.setPath("/");
+                httpCookie.setVersion(0);
+                cookieStore.add(uri1, httpCookie);
+                cookieStore.add(uri2, httpCookie);
+                cookieStore.add(uri3, httpCookie);
             }
+        } catch (final URISyntaxException e) {
+            if (logCollector != null)
+                logCollector.appendException(e, LogCollector.LogFile.UTILS, "setupCookies");
+            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
     }
 
