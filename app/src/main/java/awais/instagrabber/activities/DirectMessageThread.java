@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -74,7 +75,7 @@ public final class DirectMessageThread extends BaseLanguageActivity {
                 for (int i = 0; i < users.length; ++i) {
                     users[i] = result.getUsers()[i].getUsername();
                 }
-                dmsBinding.toolbar.toolbar.setSubtitle(String.join(", ", users));
+                dmsBinding.toolbar.toolbar.setSubtitle(TextUtils.join(", ", users));
 
                 final int oldSize = directItemModels.size();
                 final List<DirectItemModel> itemModels = Arrays.asList(result.getItems());
