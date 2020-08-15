@@ -31,6 +31,10 @@ public final class ProfileModel implements Serializable {
         this.requested = requested;
     }
 
+    public static ProfileModel getDefaultProfileModel() {
+        return new ProfileModel(false, false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
+    }
+
     public boolean isPrivate() {
         return isPrivate;
     }

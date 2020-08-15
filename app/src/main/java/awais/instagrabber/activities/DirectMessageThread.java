@@ -43,8 +43,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class DirectMessageThread extends BaseLanguageActivity {
     private DirectItemModel directItemModel;
-    private final ProfileModel myProfileHolder =
-            new ProfileModel(false, false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
+    private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
     private final ArrayList<ProfileModel> users = new ArrayList<>(), leftusers = new ArrayList<>();
     private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private String threadid;
