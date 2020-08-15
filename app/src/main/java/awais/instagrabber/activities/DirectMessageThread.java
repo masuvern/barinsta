@@ -37,10 +37,15 @@ import awais.instagrabber.utils.Utils;
 
 public final class DirectMessageThread extends BaseLanguageActivity {
     private DirectItemModel directItemModel;
-    private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
-    private final ArrayList<ProfileModel> users = new ArrayList<>(), leftusers = new ArrayList<>();
-    private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private String threadid;
+    private String endCursor;
+    private ActivityDmsBinding dmsBinding;
+    private MessageItemsAdapter messageItemsAdapter;
+
+    private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
+    private final ArrayList<ProfileModel> users = new ArrayList<>();
+    private final ArrayList<ProfileModel> leftusers = new ArrayList<>();
+    private final ArrayList<DirectItemModel> directItemModels = new ArrayList<>();
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
         @Override
         public void doBefore() {
@@ -80,9 +85,25 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             dmsBinding.swipeRefreshLayout.setRefreshing(false);
         }
     };
-    private String endCursor;
-    private ActivityDmsBinding dmsBinding;
-    private MessageItemsAdapter messageItemsAdapter;
+    private final View.OnClickListener newCommentListener = v -> {
+        if (Utils.isEmpty(dmsBinding.commentText.getText().toString()) && v == dmsBinding.commentSend)
+            Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+        else if (v == dmsBinding.commentSend) {
+            final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
+            action.setOnTaskCompleteListener(result -> {
+                if (!result) {
+                    Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                dmsBinding.commentText.setText("");
+                dmsBinding.commentText.clearFocus();
+                directItemModels.clear();
+                messageItemsAdapter.notifyDataSetChanged();
+                new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            });
+            action.execute();
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -194,25 +215,4 @@ public final class DirectMessageThread extends BaseLanguageActivity {
     private void searchUsername(final String text) {
         startActivity(new Intent(getApplicationContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
     }
-
-    private final View.OnClickListener newCommentListener = v -> {
-        if (Utils.isEmpty(dmsBinding.commentText.getText().toString()) && v == dmsBinding.commentSend)
-            Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
-        else if (v == dmsBinding.commentSend) {
-            final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadid);
-            action.setOnTaskCompleteListener(result -> {
-                if (!result) {
-                    Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                dmsBinding.commentText.setText("");
-                dmsBinding.commentText.clearFocus();
-                directItemModels.clear();
-                messageItemsAdapter.notifyDataSetChanged();
-                new UserInboxFetcher(threadid, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            });
-            action.execute();
-        }
-    };
-
 }
