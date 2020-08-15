@@ -31,7 +31,7 @@ public final class DirectMessages extends BaseLanguageActivity implements SwipeR
     private final DirectMessagesAdapter messagesAdapter = new DirectMessagesAdapter(inboxThreadModelList, v -> {
         final Object tag = v.getTag();
         if (tag instanceof InboxThreadModel) {
-            startActivity(new Intent(this, DirectMessagesUserInbox.class)
+            startActivity(new Intent(this, DirectMessageThread.class)
                     .putExtra(Constants.EXTRAS_THREAD_MODEL, (InboxThreadModel) tag)
             );
         }

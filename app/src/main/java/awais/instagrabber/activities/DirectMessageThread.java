@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,7 +41,7 @@ import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public final class DirectMessagesUserInbox extends BaseLanguageActivity {
+public final class DirectMessageThread extends BaseLanguageActivity {
     private DirectItemModel directItemModel;
     private final ProfileModel myProfileHolder =
             new ProfileModel(false, false, false, null, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
@@ -58,7 +57,7 @@ public final class DirectMessagesUserInbox extends BaseLanguageActivity {
         @Override
         public void onResult(final InboxThreadModel result) {
             if (result == null && ("MINCURSOR".equals(endCursor) || "MAXCURSOR".equals(endCursor) || Utils.isEmpty(endCursor)))
-                Toast.makeText(DirectMessagesUserInbox.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(DirectMessageThread.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
 
             if (result != null) {
                 endCursor = result.getPrevCursor();
