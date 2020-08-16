@@ -138,7 +138,7 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
 
             new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> {
                 Utils.dataBox.delFavorite(favoriteModel);
-                rvFavorites.findViewWithTag(favoriteModel).setVisibility(View.GONE);
+                favoritesAdapter.setItems(Utils.dataBox.getAllFavorites());
             })
             .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
             favoriteModel.getQuery())).show();

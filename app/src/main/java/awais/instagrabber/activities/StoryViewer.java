@@ -122,12 +122,13 @@ public final class StoryViewer extends BaseLanguageActivity {
             return;
         }
 
-        username = intent.getStringExtra(Constants.EXTRAS_USERNAME).replace("@", "");
+        username = intent.getStringExtra(Constants.EXTRAS_USERNAME);
         final String highlight = intent.getStringExtra(Constants.EXTRAS_HIGHLIGHT);
         final boolean hasUsername = !Utils.isEmpty(username);
         final boolean hasHighlight = !Utils.isEmpty(highlight);
 
         if (hasUsername) {
+            username = username.replace("@", "");
             storyViewerBinding.toolbar.toolbar.setTitle(username);
             storyViewerBinding.toolbar.toolbar.setOnClickListener(v -> {
                 searchUsername(username);
@@ -150,6 +151,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                             && intent.hasExtra(Constants.FEED)) {
                         final FeedStoryModel[] storyFeed = (FeedStoryModel[]) intent.getSerializableExtra(Constants.FEED);
                         final int index = intent.getIntExtra(Constants.FEED_ORDER, 1738);
+                        if (settingsHelper.getBoolean(MARK_AS_SEEN)) new SeenAction().execute();
                         if ((isRightSwipe == true && index == 0) || (isRightSwipe == false && index == storyFeed.length - 1))
                             Toast.makeText(getApplicationContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                         else {
@@ -692,7 +694,7 @@ final String url = "https://i.instagram.com/api/v1/media/"+currentStory.getStory
 
     class SeenAction extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... lmao) {
-final String url = "https://www.instagram.com/stories/reel/seen";
+        final String url = "https://www.instagram.com/stories/reel/seen";
             try {
                 String urlParameters = "reelMediaId="+currentStory.getStoryMediaId().split("_")[0]
                         +"&reelMediaOwnerId="+currentStory.getUserId()
@@ -711,6 +713,7 @@ final String url = "https://www.instagram.com/stories/reel/seen";
                 wr.flush();
                 wr.close();
                 urlConnection.connect();
+                Log.d("austin_debug", urlConnection.getResponseCode() + " " + Utils.readFromConnection(urlConnection));
                 urlConnection.disconnect();
             } catch (Throwable ex) {
                 Log.e("austin_debug", "seen: " + ex);

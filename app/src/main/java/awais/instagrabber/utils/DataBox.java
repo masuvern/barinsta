@@ -116,11 +116,11 @@ public final class DataBox extends SQLiteOpenHelper {
                 favorites = new ArrayList<>();
                 do {
                     tempFav = new FavoriteModel(
-                            (cursor.getString(0).charAt(0) == '@' || cursor.getString(0).contains("/"))
+                            (cursor.getString(0).charAt(0) == '@' || cursor.getString(0).charAt(0) == '#' || cursor.getString(0).contains("/"))
                                     ? cursor.getString(0)
                                     : "@" + cursor.getString(0), // query text
                             cursor.getLong(1),  // date added
-                            cursor.getString(2) == null ? (cursor.getString(0).charAt(0) == '@' || cursor.getString(0).contains("/"))
+                            cursor.getString(2) == null ? (cursor.getString(0).charAt(0) == '@' || cursor.getString(0).charAt(0) == '#' || cursor.getString(0).contains("/"))
                                     ? cursor.getString(0)
                                     : "@" + cursor.getString(0) : cursor.getString(2) // display
                     );
