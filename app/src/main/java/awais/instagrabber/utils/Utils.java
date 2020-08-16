@@ -57,6 +57,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
@@ -101,6 +102,7 @@ import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 
 public final class Utils {
+    private static final String TAG = "Utils";
     public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
     public static DataBox dataBox;
@@ -1179,19 +1181,19 @@ public final class Utils {
 
     public static String sign(final String message) {
         try {
-            Mac hasher = Mac.getInstance("HmacSHA256");
+            final Mac hasher = Mac.getInstance("HmacSHA256");
             hasher.init(new SecretKeySpec(Constants.SIGNATURE_KEY.getBytes(), "HmacSHA256"));
             byte[] hash = hasher.doFinal(message.getBytes());
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
+            final StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                final String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
             return "ig_sig_key_version="+Constants.SIGNATURE_VERSION+"&signed_body=" + hexString.toString() + "." + message;
         }
-        catch (Throwable e) {
-            Log.e("austin_debug", "sign: ", e);
+        catch (Exception e) {
+            Log.e(TAG, "Error signing", e);
             return null;
         }
     }
@@ -1359,5 +1361,14 @@ public final class Utils {
         }
 
         return null;
+    }
+
+    public static void setConnectionHeaders(final HttpURLConnection connection, final Map<String, String> headers) {
+        if (connection == null || headers == null || headers.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            connection.setRequestProperty(header.getKey(), header.getValue());
+        }
     }
 }

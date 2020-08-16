@@ -2,11 +2,10 @@ package awais.instagrabber.activities.directmessages;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -16,8 +15,13 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,11 +33,17 @@ import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.activities.ProfileViewer;
 import awais.instagrabber.activities.StoryViewer;
 import awais.instagrabber.adapters.MessageItemsAdapter;
-import awais.instagrabber.asyncs.direct_messages.CommentAction;
+import awais.instagrabber.asyncs.ImageUploader;
+import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
+import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster.BroadcastOptions;
+import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster.ImageBroadcastOptions;
+import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster.OnBroadcastCompleteListener;
+import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster.TextBroadcastOptions;
 import awais.instagrabber.asyncs.direct_messages.UserInboxFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.ActivityDmsBinding;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.ImageUploadOptions;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
@@ -102,23 +112,12 @@ public final class DirectMessageThread extends BaseLanguageActivity {
     };
     private final View.OnClickListener clickListener = v -> {
         if (v == dmsBinding.commentSend) {
-            if (Utils.isEmpty(dmsBinding.commentText.getText().toString())) {
+            final String text = dmsBinding.commentText.getText().toString();
+            if (Utils.isEmpty(text)) {
                 Toast.makeText(getApplicationContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
                 return;
             }
-            final CommentAction action = new CommentAction(dmsBinding.commentText.getText().toString(), threadId);
-            action.setOnTaskCompleteListener(result -> {
-                if (!result) {
-                    Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                dmsBinding.commentText.setText("");
-                dmsBinding.commentText.clearFocus();
-                directItemModels.clear();
-                messageItemsAdapter.notifyDataSetChanged();
-                new UserInboxFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            });
-            action.execute();
+            sendText(text);
             return;
         }
         if (v == dmsBinding.image) {
@@ -127,7 +126,6 @@ public final class DirectMessageThread extends BaseLanguageActivity {
             intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
         }
-
     };
 
     @Override
@@ -228,27 +226,13 @@ public final class DirectMessageThread extends BaseLanguageActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE  && resultCode == Activity.RESULT_OK) {
+        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
             if (data == null || data.getData() == null) {
                 Log.w(TAG, "data is null!");
                 return;
             }
-            Cursor cursor = null;
-            try {
-                final Uri uri = data.getData();
-                cursor = getContentResolver().query(uri, null, null, null, null);
-                if (cursor != null) {
-                    final int contentLength = cursor.getColumnIndex(OpenableColumns.SIZE);
-                    final InputStream inputStream = getContentResolver().openInputStream(uri);
-                    // TODO Handle image upload
-                }
-            } catch (FileNotFoundException e) {
-                Log.e(TAG, "Error opening InputStream", e);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
+            final Uri uri = data.getData();
+            sendImage(uri);
         }
     }
 
@@ -270,5 +254,72 @@ public final class DirectMessageThread extends BaseLanguageActivity {
 
     private void searchUsername(final String text) {
         startActivity(new Intent(getApplicationContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
+    }
+
+    private void sendText(final String text) {
+        final TextBroadcastOptions options;
+        try {
+            options = new TextBroadcastOptions(text);
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Error", e);
+            return;
+        }
+        broadcast(options, result -> {
+            if (result == null || result.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            dmsBinding.commentText.setText("");
+            dmsBinding.commentText.clearFocus();
+            directItemModels.clear();
+            messageItemsAdapter.notifyDataSetChanged();
+            new UserInboxFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        });
+    }
+
+    private void sendImage(final Uri imageUri) {
+        try {
+            final ParcelFileDescriptor fileDescriptor = getContentResolver().openFileDescriptor(imageUri, "r");
+            if (fileDescriptor == null) {
+                Log.e(TAG, "fileDescriptor is null!");
+                return;
+            }
+            final long contentLength = fileDescriptor.getStatSize();
+            final InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            // Upload Image
+            final ImageUploader imageUploader = new ImageUploader();
+            imageUploader.setOnTaskCompleteListener(response -> {
+                if (response == null || response.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    if (response != null && response.getResponse() != null) {
+                        Log.e(TAG, response.getResponse().toString());
+                    }
+                    return;
+                }
+                final JSONObject responseJson = response.getResponse();
+                try {
+                    final String uploadId = responseJson.getString("upload_id");
+                    // Broadcast
+                    final ImageBroadcastOptions options = new ImageBroadcastOptions(true, uploadId);
+                    broadcast(options, onBroadcastCompleteListener -> {
+                        directItemModels.clear();
+                        messageItemsAdapter.notifyDataSetChanged();
+                        new UserInboxFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    });
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error parsing json response", e);
+                }
+            });
+            final ImageUploadOptions options = ImageUploadOptions.builder(inputStream, contentLength).build();
+            imageUploader.execute(options);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Error opening InputStream", e);
+        }
+    }
+
+    private void broadcast(final BroadcastOptions broadcastOptions, final OnBroadcastCompleteListener listener) {
+        final DirectThreadBroadcaster broadcaster = new DirectThreadBroadcaster(threadId);
+        broadcaster.setOnTaskCompleteListener(listener);
+        broadcaster.execute(broadcastOptions);
     }
 }
