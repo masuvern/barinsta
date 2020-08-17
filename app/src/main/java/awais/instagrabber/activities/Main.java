@@ -29,7 +29,6 @@ import java.util.Stack;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.MainHelper;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.directmessages.DirectMessages;
 import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
@@ -86,7 +85,8 @@ public final class Main extends BaseLanguageActivity {
                                 .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
                                 .putExtra(Constants.EXTRAS_STORIES, result)
                         );
-                    else Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
@@ -143,7 +143,7 @@ public final class Main extends BaseLanguageActivity {
             if (mainHelper != null && !Utils.isEmpty(result)) {
                 closeAnyOpenDrawer();
                 addToStack();
-                userQuery = (result.contains("/") || result.startsWith("#") || result.startsWith("@")) ? result : ("@"+result);
+                userQuery = (result.contains("/") || result.startsWith("#") || result.startsWith("@")) ? result : ("@" + result);
                 mainHelper.onRefresh();
             }
         };
@@ -154,7 +154,8 @@ public final class Main extends BaseLanguageActivity {
                 if (!Utils.isEmpty(username)) {
                     if (!BuildConfig.DEBUG) {
                         userQuery = username;
-                        if (mainHelper != null && !mainBinding.profileView.swipeRefreshLayout.isRefreshing()) mainHelper.onRefresh();
+                        if (mainHelper != null && !mainBinding.profileView.swipeRefreshLayout.isRefreshing())
+                            mainHelper.onRefresh();
                     }
                     // adds cookies to database for quick access
                     cookieModel = Utils.dataBox.getCookie(uid);
@@ -168,7 +169,7 @@ public final class Main extends BaseLanguageActivity {
                 final String username = cookieModel.getUsername();
                 if (username != null) {
                     found = true;
-                    fetchListener.onResult("@"+username);
+                    fetchListener.onResult("@" + username);
                 }
             }
 
@@ -199,10 +200,10 @@ public final class Main extends BaseLanguageActivity {
                 intent = new Intent(this, ProfilePicViewer.class).putExtra(
                         ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
                         ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
-            }
-            else intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
-                    .putExtra(Constants.EXTRAS_STORIES, storyModels)
-                    .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
+            } else
+                intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+                        .putExtra(Constants.EXTRAS_STORIES, storyModels)
+                        .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
             startActivity(intent);
         };
 
@@ -241,7 +242,8 @@ public final class Main extends BaseLanguageActivity {
             mainBinding.profileView.privatePage2.setText(mainHelper.isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
             mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
         }
-        if (!mainBinding.profileView.swipeRefreshLayout.isRefreshing() && userQuery != null) mainHelper.onRefresh();
+        if (!mainBinding.profileView.swipeRefreshLayout.isRefreshing() && userQuery != null)
+            mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
     }
@@ -301,7 +303,7 @@ public final class Main extends BaseLanguageActivity {
             if (item == downloadAction)
                 downloadSelectedItems();
             else if (item == dmsAction)
-                startActivity(new Intent(this, DirectMessages.class));
+                startActivity(new Intent(this, DirectMessagesActivity.class));
             else if (item == notifAction)
                 startActivity(new Intent(this, NotificationsViewer.class));
             else if (item == settingsAction)
@@ -336,7 +338,7 @@ public final class Main extends BaseLanguageActivity {
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setSuggestionsAdapter(suggestionAdapter);
         searchView.setOnSearchClickListener(v -> {
-            searchView.setQuery((cookieModel != null && userQuery != null && userQuery.equals("@"+cookieModel.getUsername())) ? "" : userQuery, false);
+            searchView.setQuery((cookieModel != null && userQuery != null && userQuery.equals("@" + cookieModel.getUsername())) ? "" : userQuery, false);
             menu.findItem(R.id.action_about).setVisible(false);
             menu.findItem(R.id.action_settings).setVisible(false);
             menu.findItem(R.id.action_dms).setVisible(false);
@@ -400,7 +402,10 @@ public final class Main extends BaseLanguageActivity {
 
             private void cancelSuggestionsAsync() {
                 if (prevSuggestionAsync != null)
-                    try { prevSuggestionAsync.cancel(true); } catch (final Exception ignored) { }
+                    try {
+                        prevSuggestionAsync.cancel(true);
+                    } catch (final Exception ignored) {
+                    }
             }
 
             @Override
@@ -411,7 +416,7 @@ public final class Main extends BaseLanguageActivity {
 
                 closeAnyOpenDrawer();
                 addToStack();
-                userQuery = (query.contains("@") || query.contains("#")) ? query : ("@"+query);
+                userQuery = (query.contains("@") || query.contains("#")) ? query : ("@" + query);
                 searchAction.collapseActionView();
                 searchView.setIconified(true);
                 searchView.setIconified(true);
@@ -468,8 +473,7 @@ public final class Main extends BaseLanguageActivity {
                 mainHelper.onRefresh();
                 return;
             }
-        }
-        else {
+        } else {
             finish();
         }
     }

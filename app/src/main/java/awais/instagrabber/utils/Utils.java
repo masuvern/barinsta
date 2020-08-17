@@ -42,6 +42,7 @@ import androidx.fragment.app.FragmentManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.internal.StringUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
@@ -1370,5 +1372,25 @@ public final class Utils {
         for (Map.Entry<String, String> header : headers.entrySet()) {
             connection.setRequestProperty(header.getKey(), header.getValue());
         }
+    }
+
+    public static String getQueryString(final Map<String, String> queryParamsMap) {
+        if (queryParamsMap == null || queryParamsMap.isEmpty()) {
+            return "";
+        }
+        final Set<Map.Entry<String, String>> params = queryParamsMap.entrySet();
+        final StringBuilder builder = new StringBuilder();
+        for (final Map.Entry<String, String> param : params) {
+            if (isEmpty(param.getKey())) {
+                continue;
+            }
+            if (builder.length() != 0) {
+                builder.append("&");
+            }
+            builder.append(param.getKey());
+            builder.append("=");
+            builder.append(param.getValue() != null ? param.getValue() : "");
+        }
+        return builder.toString();
     }
 }

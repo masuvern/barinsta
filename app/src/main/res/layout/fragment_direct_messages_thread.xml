@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".activities.directmessages.DirectMessages">
-
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/layout_include_toolbar" />
+    android:orientation="vertical">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="8">
+        android:layout_weight="1">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvDirectMessages"
+            android:id="@+id/messageList"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -31,7 +25,7 @@
             android:id="@+id/commentText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="1"
             android:gravity="bottom"
             android:hint="@string/dm_hint"
             android:importantForAutofill="no"
@@ -42,8 +36,7 @@
             android:paddingLeft="8dp"
             android:paddingEnd="4dp"
             android:paddingRight="4dp"
-            android:scrollHorizontally="false"
-            android:visibility="visible" />
+            android:scrollHorizontally="false" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image"
@@ -54,7 +47,6 @@
             android:clickable="true"
             android:focusable="true"
             android:padding="4dp"
-            android:visibility="visible"
             app:srcCompat="@drawable/ic_image_24" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -71,7 +63,6 @@
             android:paddingEnd="8dp"
             android:paddingRight="8dp"
             android:paddingBottom="4dp"
-            android:visibility="visible"
             app:srcCompat="@drawable/ic_send_24" />
     </LinearLayout>
 </LinearLayout>
