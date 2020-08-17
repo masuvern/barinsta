@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -97,6 +98,7 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
     }
 
     @SuppressLint("SetJavaScriptEnabled")
+    @SuppressWarnings("deprecation")
     private void initWebView() {
         if (loginBinding != null) {
             loginBinding.webView.setWebChromeClient(webChromeClient);
@@ -119,7 +121,18 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
                     webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             }
 
-            CookieManager.getInstance().removeAllCookies(null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                CookieManager.getInstance().removeAllCookies(null);
+                CookieManager.getInstance().flush();
+            } else {
+                CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(getApplicationContext());
+                cookieSyncMngr.startSync();
+                CookieManager cookieManager = CookieManager.getInstance();
+                cookieManager.removeAllCookie();
+                cookieManager.removeSessionCookie();
+                cookieSyncMngr.stopSync();
+                cookieSyncMngr.sync();
+            }
             loginBinding.webView.loadUrl("https://instagram.com/");
         }
     }

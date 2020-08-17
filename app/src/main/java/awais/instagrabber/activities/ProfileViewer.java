@@ -1,5 +1,6 @@
 package awais.instagrabber.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -152,7 +153,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                         (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
                     if (result != null && result.length > 0)
                         startActivity(new Intent(ProfileViewer.this, StoryViewer.class)
-                                //.putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+                                .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
                                 .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
                                 .putExtra(Constants.EXTRAS_STORIES, result)
                         );
@@ -168,6 +169,8 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     private String cookie = Utils.settingsHelper.getString(Constants.COOKIE), userQuery;
     public boolean isLoggedIn = !Utils.isEmpty(cookie);
     private ActivityProfileBinding profileBinding;
+    private ArrayAdapter<String> profileDialogAdapter;
+    private DialogInterface.OnClickListener profileDialogListener;
 
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         stopCurrentExecutor();
@@ -186,6 +189,21 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         setContentView(profileBinding.getRoot());
 
         resources = getResources();
+
+        profileDialogAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
+                new String[]{resources.getString(R.string.view_pfp), resources.getString(R.string.show_stories)});
+        profileDialogListener = (dialog, which) -> {
+            final Intent newintent;
+            if (which == 0 || storyModels == null || storyModels.length < 1) {
+                newintent = new Intent(this, ProfilePicViewer.class).putExtra(
+                        ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
+                        ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
+            }
+            else newintent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+                    .putExtra(Constants.EXTRAS_STORIES, storyModels)
+                    .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
+            startActivity(newintent);
+        };
 
         profileBinding.profileView.swipeRefreshLayout.setOnRefreshListener(this);
         profileBinding.profileView.mainUrl.setMovementMethod(new LinkMovementMethod());
@@ -238,6 +256,28 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             }
         });
         profileBinding.profileView.mainPosts.addOnScrollListener(lazyLoader);
+
+        final View.OnClickListener onClickListener = v -> {
+            if (v == profileBinding.profileView.mainBiography) {
+                Utils.copyText(this, profileBinding.profileView.mainBiography.getText().toString());
+            } else if (v == profileBinding.profileView.locationBiography) {
+                Utils.copyText(this, profileBinding.profileView.locationBiography.getText().toString());
+            } else if (v == profileBinding.profileView.mainProfileImage || v == profileBinding.profileView.mainHashtagImage || v == profileBinding.profileView.mainLocationImage) {
+                if (storyModels == null || storyModels.length <= 0) {
+                    profileDialogListener.onClick(null, 0);
+                } else {
+                    // because sometimes configuration changes made this crash on some phones
+                    new AlertDialog.Builder(this).setAdapter(profileDialogAdapter, profileDialogListener)
+                            .setNeutralButton(R.string.cancel, null).show();
+                }
+            }
+        };
+
+        profileBinding.profileView.mainBiography.setOnClickListener(onClickListener);
+        profileBinding.profileView.locationBiography.setOnClickListener(onClickListener);
+        profileBinding.profileView.mainProfileImage.setOnClickListener(onClickListener);
+        profileBinding.profileView.mainHashtagImage.setOnClickListener(onClickListener);
+        profileBinding.profileView.mainLocationImage.setOnClickListener(onClickListener);
 
         this.onRefresh();
     }
