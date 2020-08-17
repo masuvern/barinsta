@@ -262,7 +262,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private DiscoverAdapter discoverAdapter;
     public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
     private String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-    public boolean isLoggedIn = !Utils.isEmpty(cookie);
+    public boolean isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
 
     public MainHelper(@NonNull final Main main) {
         stopCurrentExecutor();

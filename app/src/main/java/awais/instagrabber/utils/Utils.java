@@ -150,13 +150,10 @@ public final class Utils {
     @Nullable
     public static String getUserIdFromCookie(final String cookie) {
         if (!isEmpty(cookie)) {
-            final int uidIndex = cookie.indexOf("ds_user_id");
+            final int uidIndex = cookie.indexOf("ds_user_id=");
             if (uidIndex > 0) {
-                final int uidEndIndex = cookie.indexOf(';', uidIndex + 10);
-                if (uidEndIndex > 0) {
-                    final String uid = cookie.substring(uidIndex + 11, uidEndIndex);
-                    return !isEmpty(uid) ? uid : null;
-                }
+                String uid = cookie.split("ds_user_id=")[1].split(";")[0];
+                return !isEmpty(uid) ? uid : null;
             }
         }
         return null;
