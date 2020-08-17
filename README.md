@@ -1,4 +1,4 @@
-### For newcomers, especially for people visiting from HowToMen
+### For newcomers, especially for those visiting from HowToMen
 
 Thank you for your interest in InstaGrabber!
 
@@ -16,6 +16,14 @@ Thank you for your interest in InstaGrabber!
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
 *As featured on [HowToMen](https://youtu.be/1Um2ZJG_mB4) and [GitHub Trending](https://github.com/ifyour/github-trending-archive/blob/master/archives/2020-08-05.md)*
+
+### Download
+
+Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
+
+[F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432) No Google Play, sorry.
+
+### Presentation
 
 InstaGrabber is an alternative Instagram client for Android. You can...
 
@@ -43,18 +51,6 @@ It can be used as a drop-in replacement for read (and some write) functionalitie
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/5.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/5.jpg" alt="Hashtag" width="15%"/></a>
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/6.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/6.jpg" alt="Location" width="15%"/></a>
 
-This app is originally made by [@AwaisKing](https://github.com/AwaisKing) who posted on [GitLab](https://gitlab.com/AwaisKing/instagrabber) but subsequently abandoned it. I decided to continue the app because it's just a great cause.
-
-### Download
-
-Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest). [F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432)
-
-[![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
-[![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
-[![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f87cac1fbf674888b00bd91bc5eccce0)](https://app.codacy.com/manual/austinhuang0131/instagrabber)
-[![Crowdin](https://badges.crowdin.net/instagrabber/localized.svg)](https://crowdin.com/project/instagrabber)
-
 ### Contact us
 
 * Use [GitHub issues](https://github.com/austinhuang0131/instagrabber/issues) when possible.
@@ -64,6 +60,8 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest)
 * Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
 
 ### License
+
+This app is originally made by [@AwaisKing](https://github.com/AwaisKing) on [GitLab](https://gitlab.com/AwaisKing/instagrabber).
 
     InstaGrabber
     Copyright (C) 2019  AWAiS        <chapter50000@hotmail.com>
@@ -82,6 +80,12 @@ Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest)
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+[![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
+[![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
+[![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f87cac1fbf674888b00bd91bc5eccce0)](https://app.codacy.com/manual/austinhuang0131/instagrabber)
+[![Crowdin](https://badges.crowdin.net/instagrabber/localized.svg)](https://crowdin.com/project/instagrabber)
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com) [![gplv3](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0.html)
 
