@@ -1,3 +1,10 @@
+### For newcomers, especially for people visiting from HowToMen
+
+Thank you for your interest in InstaGrabber!
+
+* The HowToMen video seems to have demonstrated version 17.2. We have pushed updates since then and will continue to do so.
+* This app is in active development, however we do need more hands! If you have Java experience, you're welcomed to contribute by submitting a pull request!
+
 <img src="./app/play_icon.png" alt="InstaGrabber" align="right" width="25%"/>
 
 ## InstaGrabber
@@ -8,7 +15,7 @@
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
-*As featured on: [r/androidapps](https://www.reddit.com/r/androidapps/comments/i30tpp/instagrabber_an_open_source_instagram_client/) • [HowToMen](https://nitter.net/howtomen/status/1290443637625704450) • [GitHub Trending](https://github.com/ifyour/github-trending-archive/blob/master/archives/2020-08-05.md)*
+*As featured on [HowToMen](https://youtu.be/1Um2ZJG_mB4) and [GitHub Trending](https://github.com/ifyour/github-trending-archive/blob/master/archives/2020-08-05.md)*
 
 InstaGrabber is an alternative Instagram client for Android. You can...
 
