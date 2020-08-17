@@ -96,7 +96,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         layoutManager = new LinearLayoutManager(requireContext());
         inboxList.setLayoutManager(layoutManager);
         final DirectMessageInboxAdapter inboxAdapter = new DirectMessageInboxAdapter(inboxThreadModel -> {
-            final NavDirections action = DirectMessagesInboxFragmentDirections.actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
+            final NavDirections action = DirectMessageInboxFragmentDirections.actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
             NavHostFragment.findNavController(this).navigate(action);
         });
         inboxList.setAdapter(inboxAdapter);

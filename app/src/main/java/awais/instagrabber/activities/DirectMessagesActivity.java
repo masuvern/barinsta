@@ -15,7 +15,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.ActivityDirectMessagesBinding;
-import awais.instagrabber.fragments.directmessages.DirectMessagesThreadFragmentArgs;
+import awais.instagrabber.fragments.directmessages.DirectMessageThreadFragmentArgs;
 
 public class DirectMessagesActivity extends BaseLanguageActivity implements NavController.OnDestinationChangedListener {
 
@@ -51,7 +51,7 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
                 if (arguments == null) {
                     return;
                 }
-                final String title = DirectMessagesThreadFragmentArgs.fromBundle(arguments).getTitle();
+                final String title = DirectMessageThreadFragmentArgs.fromBundle(arguments).getTitle();
                 setToolbarTitle(title);
                 return;
         }

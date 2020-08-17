@@ -160,7 +160,7 @@ public class DirectMessageThreadFragment extends Fragment {
         if (getArguments() == null) {
             return root;
         }
-        threadId = DirectMessagesThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
+        threadId = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
         binding.swipeRefreshLayout.setEnabled(false);
         messageList = binding.messageList;
         messageList.setHasFixedSize(true);
