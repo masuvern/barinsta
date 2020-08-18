@@ -49,7 +49,7 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
         form.put("client_context", cc);
         form.put("mutation_token", cc);
         form.putAll(broadcastOptions.getFormMap());
-        form.put("thread_ids", String.format("[%s]", threadId));
+        form.put("thread_id", threadId);
         form.put("action", "send_item");
         final String message = new JSONObject(form).toString();
         final String content = Utils.sign(message);
@@ -125,6 +125,7 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
 
     public enum ItemType {
         TEXT("text"),
+        REACTION("reaction"),
         IMAGE("configure_photo");
 
         private final String value;
@@ -165,6 +166,26 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
         @Override
         Map<String, String> getFormMap() {
             return Collections.singletonMap("text", text);
+        }
+    }
+
+    public static class ReactionBroadcastOptions extends BroadcastOptions {
+        private final String itemId;
+        private final boolean delete;
+
+        public ReactionBroadcastOptions(String itemId, boolean delete) {
+            super(ItemType.REACTION);
+            this.itemId = itemId;
+            this.delete = delete;
+        }
+
+        @Override
+        Map<String, String> getFormMap() {
+            final Map<String, String> form = new HashMap<>();
+            form.put("item_id", itemId);
+            form.put("reaction_status", delete ? "deleted" : "created");
+            form.put("reaction_type", "like");
+            return form;
         }
     }
 

@@ -732,10 +732,20 @@ public final class Utils {
                     break;
             }
 
+            String[] liked = null;
+            if (!itemObject.isNull("reactions") && !itemObject.getJSONObject("reactions").isNull("likes")) {
+                JSONArray rawLiked = itemObject.getJSONObject("reactions").getJSONArray("likes");
+                liked = new String[rawLiked.length()];
+                for (int l = 0; l < rawLiked.length(); ++l) {
+                    liked[l] = String.valueOf(rawLiked.getJSONObject(l).getLong("sender_id"));
+                }
+            }
+
             itemModels.add(new DirectItemModel(
                     itemObject.getLong("user_id"),
                     itemObject.getLong("timestamp"),
                     itemObject.getString("item_id"),
+                    liked,
                     itemType,
                     text,
                     linkModel,

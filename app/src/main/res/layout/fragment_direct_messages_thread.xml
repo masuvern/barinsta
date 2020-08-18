@@ -21,6 +21,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            app:srcCompat="@drawable/ic_image_24" />
+
         <EditText
             android:id="@+id/commentText"
             android:layout_width="0dp"
@@ -37,17 +48,6 @@
             android:paddingEnd="4dp"
             android:paddingRight="4dp"
             android:scrollHorizontally="false" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="4dp"
-            app:srcCompat="@drawable/ic_image_24" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/commentSend"

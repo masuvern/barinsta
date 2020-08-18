@@ -50,7 +50,7 @@ public final class MessageItemsAdapter extends ListAdapter<DirectItemModel, Dire
     public DirectMessageViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
         final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         final ItemMessageItemBinding binding = ItemMessageItemBinding.inflate(layoutInflater, parent, false);
-        return new DirectMessageViewHolder(binding, users, leftUsers);
+        return new DirectMessageViewHolder(binding, users, leftUsers, onClickListener, mentionClickListener);
     }
 
     @Override

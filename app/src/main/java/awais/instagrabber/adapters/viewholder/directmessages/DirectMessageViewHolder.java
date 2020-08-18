@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.ItemMessageItemBinding;
+import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.enums.DirectItemType;
@@ -44,6 +46,8 @@ public final class DirectMessageViewHolder extends RecyclerView.ViewHolder {
     private final String strDmYou;
     private DirectItemModel.DirectItemVoiceMediaModel prevVoiceModel;
     private ImageView prevPlayIcon;
+    private View.OnClickListener onClickListener;
+    private MentionClickListener mentionClickListener;
 
     private final View.OnClickListener voicePlayClickListener = v -> {
         final Object tag = v.getTag();
@@ -73,24 +77,18 @@ public final class DirectMessageViewHolder extends RecyclerView.ViewHolder {
         }
     };
 
-    private final View.OnClickListener openProfileClickListener = v -> {
-        final Object tag = v.getTag();
-        if (tag instanceof ProfileModel) {
-            // todo do profile stuff
-            final ProfileModel profileModel = (ProfileModel) tag;
-            Log.d(TAG, "--> " + profileModel);
-        }
-    };
-
-
     public DirectMessageViewHolder(final ItemMessageItemBinding binding,
                                    final List<ProfileModel> users,
-                                   final List<ProfileModel> leftUsers) {
+                                   final List<ProfileModel> leftUsers,
+                                   final View.OnClickListener onClickListener,
+                                   final MentionClickListener mentionClickListener) {
         super(binding.getRoot());
         this.binding = binding;
         this.users = users;
         this.leftUsers = leftUsers;
         this.itemMargin = Utils.displayMetrics.widthPixels / 5;
+        this.onClickListener = onClickListener;
+        this.mentionClickListener = mentionClickListener;
         strDmYou = binding.getRoot().getContext().getString(R.string.direct_messages_you);
     }
 
@@ -99,7 +97,7 @@ public final class DirectMessageViewHolder extends RecyclerView.ViewHolder {
             return;
         }
         final Context context = itemView.getContext();
-        itemView.setTag(directItemModel);
+        //itemView.setTag(directItemModel);
         final DirectItemType itemType = directItemModel.getItemType();
         final ProfileModel user = getUser(directItemModel.getUserId());
         final int type = user == myProfileHolder ? MESSAGE_OUTGOING : MESSAGE_INCOMING;
@@ -137,6 +135,15 @@ public final class DirectMessageViewHolder extends RecyclerView.ViewHolder {
         binding.tvUsername.setText(text);
 
         binding.ivProfilePic.setVisibility(type == MESSAGE_INCOMING ? View.VISIBLE : View.GONE);
+        binding.ivProfilePic.setTag(user);
+        binding.ivProfilePic.setOnClickListener(onClickListener);
+
+        binding.tvMessage.setMentionClickListener(mentionClickListener);
+        binding.messageCard.setTag(directItemModel);
+        LinearLayout parent = (LinearLayout) binding.messageCard.getParent();
+        parent.setTag(directItemModel);
+        binding.messageCard.setOnClickListener(onClickListener);
+        binding.liked.setVisibility(directItemModel.isLiked() ? View.VISIBLE : View.GONE);
 
         final RequestManager glideRequestManager = Glide.with(itemView);
 
@@ -338,7 +345,7 @@ public final class DirectMessageViewHolder extends RecyclerView.ViewHolder {
                 Glide.with(binding.profileInfo).load(profileModel.getSdProfilePic())
                         .into(binding.profileInfo);
                 btnOpenProfile.setTag(profileModel);
-                btnOpenProfile.setOnClickListener(openProfileClickListener);
+                btnOpenProfile.setOnClickListener(onClickListener);
 
                 binding.tvFullName.setText(profileModel.getName());
                 binding.profileInfoText.setText(profileModel.getUsername());

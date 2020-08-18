@@ -1,6 +1,7 @@
 package awais.instagrabber.fragments.directmessages;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,11 +13,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
@@ -71,8 +74,11 @@ public class DirectMessageThreadFragment extends Fragment {
     private FragmentActivity fragmentActivity;
     private String threadId;
     private String cursor;
+    private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+    private final String myId = Utils.getUserIdFromCookie(cookie);
     private FragmentDirectMessagesThreadBinding binding;
     private DirectItemModelListViewModel listViewModel;
+    private DirectItemModel directItemModel;
     private RecyclerView messageList;
     private boolean hasSentSomething;
     private boolean hasOlder = true;
@@ -80,6 +86,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
     private final List<ProfileModel> users = new ArrayList<>();
     private final List<ProfileModel> leftUsers = new ArrayList<>();
+    private ArrayAdapter<String> dialogAdapter;
 
     private final View.OnClickListener clickListener = v -> {
         if (v == binding.commentSend) {
@@ -88,7 +95,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 Toast.makeText(requireContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
                 return;
             }
-            sendText(text);
+            sendText(text, null, false);
             return;
         }
         if (v == binding.image) {
@@ -180,10 +187,8 @@ public class DirectMessageThreadFragment extends Fragment {
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener).execute(); // serial because we don't want messages to be randomly ordered
         }));
 
-        final View.OnClickListener onClickListener = v -> {
-            Object tag = v.getTag();
-            if (tag instanceof DirectItemModel) {
-                final DirectItemModel directItemModel = (DirectItemModel) tag;
+        final DialogInterface.OnClickListener onDialogListener = (d,w) -> {
+            if (w == 0) {
                 final DirectItemType itemType = directItemModel.getItemType();
                 switch (itemType) {
                     case MEDIA_SHARE:
@@ -197,14 +202,14 @@ public class DirectMessageThreadFragment extends Fragment {
                         break;
                     case TEXT:
                     case REEL_SHARE:
-                        Utils.copyText(v.getContext(), directItemModel.getText());
-                        Toast.makeText(v.getContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
+                        Utils.copyText(requireContext(), directItemModel.getText());
+                        Toast.makeText(requireContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
                         break;
                     case RAVEN_MEDIA:
                     case MEDIA:
                         final ProfileModel user = getUser(directItemModel.getUserId());
                         Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
-                        Toast.makeText(v.getContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         break;
                     case STORY_SHARE:
                         if (directItemModel.getReelShare() != null) {
@@ -235,6 +240,69 @@ public class DirectMessageThreadFragment extends Fragment {
                         Log.d("austin_debug", "unsupported type " + itemType);
                 }
             }
+            else if (w == 1) {
+                sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
+            }
+            else if (w == 2) {
+                if (String.valueOf(directItemModel.getUserId()).equals(myId)) {
+                    // unsend: https://www.instagram.com/direct_v2/web/threads/340282366841710300949128288687654467119/items/29473546990090204551245070881259520/delete/
+                }
+                else searchUsername(getUser(directItemModel.getUserId()).getUsername());
+            }
+        };
+        final View.OnClickListener onClickListener = v -> {
+            Object tag = v.getTag();
+            if (tag instanceof ProfileModel) {
+                searchUsername(((ProfileModel) tag).getUsername());
+            }
+            else if (tag instanceof DirectItemModel) {
+                directItemModel = (DirectItemModel) tag;
+                final DirectItemType itemType = directItemModel.getItemType();
+                int firstOption = R.string.dms_inbox_raven_message_unknown;
+                String[] dialogList;
+
+                switch (itemType) {
+                    case MEDIA_SHARE:
+                        firstOption = R.string.view_post;
+                        break;
+                    case LINK:
+                        firstOption = R.string.dms_inbox_open_link;
+                        break;
+                    case TEXT:
+                    case REEL_SHARE:
+                        firstOption = R.string.dms_inbox_copy_text;
+                        break;
+                    case RAVEN_MEDIA:
+                    case MEDIA:
+                        firstOption = R.string.dms_inbox_download;
+                        break;
+                    case STORY_SHARE:
+                        if (directItemModel.getReelShare() != null) {
+                            firstOption = R.string.show_stories;
+                        } else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
+                            firstOption = R.string.open_profile;
+                        }
+                        break;
+                    case PLACEHOLDER:
+                        if (directItemModel.getText().toString().contains("@"))
+                            firstOption = R.string.open_profile;
+                        break;
+                }
+
+                dialogList = new String[]{
+                        getString(firstOption),
+                        getString(directItemModel.isLiked() ? R.string.dms_inbox_unlike : R.string.dms_inbox_like),
+                        getString(String.valueOf(directItemModel.getUserId()).equals(myId) ? R.string.dms_inbox_unsend : R.string.dms_inbox_author)
+                };
+
+                dialogAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, dialogList);
+
+                new AlertDialog.Builder(requireContext())
+                        //.setTitle(title)
+                        .setAdapter(dialogAdapter, onDialogListener)
+                        .setNeutralButton(R.string.cancel, null)
+                        .show();
+            }
         };
         final MentionClickListener mentionClickListener = (view, text, isHashtag) -> searchUsername(text);
         final MessageItemsAdapter adapter = new MessageItemsAdapter(users, leftUsers, onClickListener, mentionClickListener);
@@ -264,29 +332,42 @@ public class DirectMessageThreadFragment extends Fragment {
         listViewModel.getList().postValue(Collections.emptyList());
     }
 
-    private void sendText(final String text) {
-        final DirectThreadBroadcaster.TextBroadcastOptions options;
-        try {
-            options = new DirectThreadBroadcaster.TextBroadcastOptions(text);
-        } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "Error", e);
-            return;
+    private void sendText(final String text, final String itemId, final boolean delete) {
+        DirectThreadBroadcaster.TextBroadcastOptions textOptions = null;
+        DirectThreadBroadcaster.ReactionBroadcastOptions reactionOptions = null;
+        if (text != null) {
+            try {
+                textOptions = new DirectThreadBroadcaster.TextBroadcastOptions(text);
+            } catch (UnsupportedEncodingException e) {
+                Log.e(TAG, "Error", e);
+                return;
+            }
         }
-        broadcast(options, result -> {
+        else {
+            reactionOptions = new DirectThreadBroadcaster.ReactionBroadcastOptions(itemId, delete);
+        }
+        broadcast(text != null ? textOptions : reactionOptions, result -> {
             if (result == null || result.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 return;
             }
-            binding.commentText.setText("");
-            // binding.commentText.clearFocus();
+            if (text != null) {
+                binding.commentText.setText("");
+            }
+            else {
+                LinearLayout dim = (LinearLayout) binding.messageList.findViewWithTag(directItemModel);
+                if (dim.findViewById(R.id.liked) != null) dim.findViewById(R.id.liked).setVisibility(deleted ? View.GONE : View.VISIBLE);
+                directItemModel.setLiked();
+            }
             hasSentSomething = true;
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
     }
 
     private void sendImage(final Uri imageUri) {
-        try(InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri)) {
+        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri)) {
             final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            Toast.makeText(requireContext(), R.string.uploading, Toast.LENGTH_SHORT).show();
             // Upload Image
             final ImageUploader imageUploader = new ImageUploader();
             imageUploader.setOnTaskCompleteListener(response -> {
@@ -312,6 +393,7 @@ public class DirectMessageThreadFragment extends Fragment {
             imageUploader.execute(options);
         }
         catch (IOException e) {
+            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Error opening file", e);
         }
     }
