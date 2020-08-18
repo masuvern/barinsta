@@ -1,11 +1,17 @@
 package awais.instagrabber.asyncs;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,13 +41,24 @@ public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUplo
         OutputStream out = null;
         InputStream inputStream = null;
         BufferedReader r = null;
+        ByteArrayOutputStream baos = null;
         try {
             final ImageUploadOptions options = imageUploadOptions[0];
+            final File file = options.getFile();
+            inputStream = new FileInputStream(file);
+            final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            baos = new ByteArrayOutputStream();
+            final boolean compressResult = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            if (!compressResult) {
+                Log.e(TAG, "Compress result was false!");
+                return null;
+            }
+            final byte[] bytes = baos.toByteArray();
+            final String contentLength = String.valueOf(bytes.length);
             final Map<String, String> headers = new HashMap<>();
             final String uploadId = String.valueOf(new Date().getTime());
             final long random = LOWER + new Random().nextLong() * (UPPER - LOWER + 1);
             final String name = String.format("%s_0_%s", uploadId, random);
-            final String contentLength = String.valueOf(options.getContentLength());
             final String waterfallId = options.getWaterfallId() != null ? options.getWaterfallId() : UUID.randomUUID().toString();
             headers.put("X-Entity-Type", "image/jpeg");
             headers.put("Offset", "0");
@@ -58,20 +75,15 @@ public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUplo
             connection.setUseCaches(false);
             connection.setDoOutput(true);
             Utils.setConnectionHeaders(connection, headers);
-            out = connection.getOutputStream();
-            byte[] buffer = new byte[1024];
-            int n;
-            inputStream = options.getInputStream();
-            while (-1 != (n = inputStream.read(buffer))) {
-                out.write(buffer, 0, n);
-            }
+            out = new BufferedOutputStream(connection.getOutputStream());
+            out.write(bytes);
             out.flush();
             final int responseCode = connection.getResponseCode();
             Log.d(TAG, "response: " + responseCode);
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                return new ImageUploadResponse(responseCode, null);
-            }
-            r = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            final String responseCodeString = String.valueOf(responseCode);
+            final InputStream responseInputStream = responseCodeString.startsWith("4") || responseCodeString.startsWith("5")
+                    ? connection.getErrorStream() : connection.getInputStream();
+            r = new BufferedReader(new InputStreamReader(responseInputStream));
             final StringBuilder builder = new StringBuilder();
             for (String line = r.readLine(); line != null; line = r.readLine()) {
                 if (builder.length() != 0) {
@@ -86,23 +98,25 @@ public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUplo
             if (r != null) {
                 try {
                     r.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             }
             if (inputStream != null) {
                 try {
                     inputStream.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             }
             if (out != null) {
                 try {
                     out.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
             }
             if (connection != null) {
                 connection.disconnect();
+            }
+            if (baos != null) {
+                try {
+                    baos.close();
+                } catch (IOException ignored) {}
             }
         }
         return null;

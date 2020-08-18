@@ -1,31 +1,23 @@
 package awais.instagrabber.models;
 
-import java.io.InputStream;
+import java.io.File;
 
 public class ImageUploadOptions {
-    private InputStream inputStream;
-    private long contentLength;
+    private final File file;
     private boolean isSidecar;
     private String waterfallId;
 
     public static class Builder {
-        private InputStream inputStream;
-        private long contentLength;
+        private File file;
         private boolean isSidecar;
         private String waterfallId;
 
-        public Builder(final InputStream inputStream, final long contentLength) {
-            this.inputStream = inputStream;
-            this.contentLength = contentLength;
+        public Builder(final File file) {
+            this.file = file;
         }
 
-        public Builder setInputStream(final InputStream inputStream) {
-            this.inputStream = inputStream;
-            return this;
-        }
-
-        public Builder setContentLength(final long contentLength) {
-            this.contentLength = contentLength;
+        public Builder setFile(final File file) {
+            this.file = file;
             return this;
         }
 
@@ -40,30 +32,24 @@ public class ImageUploadOptions {
         }
 
         public ImageUploadOptions build() {
-            return new ImageUploadOptions(inputStream, contentLength, isSidecar, waterfallId);
+            return new ImageUploadOptions(file, isSidecar, waterfallId);
         }
     }
 
-    public static Builder builder(final InputStream inputStream, final long contentLength) {
-        return new Builder(inputStream, contentLength);
+    public static Builder builder(final File file) {
+        return new Builder(file);
     }
 
-    private ImageUploadOptions(final InputStream inputStream,
-                               final long contentLength,
+    private ImageUploadOptions(final File file,
                                final boolean isSidecar,
                                final String waterfallId) {
-        this.inputStream = inputStream;
-        this.contentLength = contentLength;
+        this.file = file;
         this.isSidecar = isSidecar;
         this.waterfallId = waterfallId;
     }
 
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public long getContentLength() {
-        return contentLength;
+    public File getFile() {
+        return file;
     }
 
     public boolean isSidecar() {
