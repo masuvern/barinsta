@@ -1,23 +1,23 @@
 package awais.instagrabber.models;
 
-import java.io.File;
+import android.graphics.Bitmap;
 
 public class ImageUploadOptions {
-    private final File file;
+    private final Bitmap bitmap;
     private boolean isSidecar;
     private String waterfallId;
 
     public static class Builder {
-        private File file;
+        private Bitmap bitmap;
         private boolean isSidecar;
         private String waterfallId;
 
-        public Builder(final File file) {
-            this.file = file;
+        public Builder(final Bitmap bitmap) {
+            this.bitmap = bitmap;
         }
 
-        public Builder setFile(final File file) {
-            this.file = file;
+        public Builder setBitmap(final Bitmap bitmap) {
+            this.bitmap = bitmap;
             return this;
         }
 
@@ -32,24 +32,24 @@ public class ImageUploadOptions {
         }
 
         public ImageUploadOptions build() {
-            return new ImageUploadOptions(file, isSidecar, waterfallId);
+            return new ImageUploadOptions(bitmap, isSidecar, waterfallId);
         }
     }
 
-    public static Builder builder(final File file) {
+    public static Builder builder(final Bitmap file) {
         return new Builder(file);
     }
 
-    private ImageUploadOptions(final File file,
+    private ImageUploadOptions(final Bitmap bitmap,
                                final boolean isSidecar,
                                final String waterfallId) {
-        this.file = file;
+        this.bitmap = bitmap;
         this.isSidecar = isSidecar;
         this.waterfallId = waterfallId;
     }
 
-    public File getFile() {
-        return file;
+    public Bitmap getBitmap() {
+        return bitmap;
     }
 
     public boolean isSidecar() {

@@ -1,7 +1,6 @@
 package awais.instagrabber.asyncs;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -10,8 +9,6 @@ import org.json.JSONObject;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,9 +41,7 @@ public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUplo
         ByteArrayOutputStream baos = null;
         try {
             final ImageUploadOptions options = imageUploadOptions[0];
-            final File file = options.getFile();
-            inputStream = new FileInputStream(file);
-            final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            final Bitmap bitmap = options.getBitmap();
             baos = new ByteArrayOutputStream();
             final boolean compressResult = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             if (!compressResult) {

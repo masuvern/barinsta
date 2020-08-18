@@ -2,6 +2,8 @@ package awais.instagrabber.fragments.directmessages;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +29,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -280,35 +285,35 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void sendImage(final Uri imageUri) {
-        final String path = imageUri.getPath();
-        if (path == null) {
-            Log.e(TAG, "uri path is null!");
-            return;
-        }
-        final File file = new File(path);
-        // Upload Image
-        final ImageUploader imageUploader = new ImageUploader();
-        imageUploader.setOnTaskCompleteListener(response -> {
-            if (response == null || response.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                if (response != null && response.getResponse() != null) {
-                    Log.e(TAG, response.getResponse().toString());
+        try(InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri)) {
+            final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            // Upload Image
+            final ImageUploader imageUploader = new ImageUploader();
+            imageUploader.setOnTaskCompleteListener(response -> {
+                if (response == null || response.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    if (response != null && response.getResponse() != null) {
+                        Log.e(TAG, response.getResponse().toString());
+                    }
+                    return;
                 }
-                return;
-            }
-            final JSONObject responseJson = response.getResponse();
-            try {
-                final String uploadId = responseJson.getString("upload_id");
-                // Broadcast
-                final DirectThreadBroadcaster.ImageBroadcastOptions options = new DirectThreadBroadcaster.ImageBroadcastOptions(true, uploadId);
-                hasSentSomething = true;
-                broadcast(options, onBroadcastCompleteListener -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
-            } catch (JSONException e) {
-                Log.e(TAG, "Error parsing json response", e);
-            }
-        });
-        final ImageUploadOptions options = ImageUploadOptions.builder(file).build();
-        imageUploader.execute(options);
+                final JSONObject responseJson = response.getResponse();
+                try {
+                    final String uploadId = responseJson.getString("upload_id");
+                    // Broadcast
+                    final DirectThreadBroadcaster.ImageBroadcastOptions options = new DirectThreadBroadcaster.ImageBroadcastOptions(true, uploadId);
+                    hasSentSomething = true;
+                    broadcast(options, onBroadcastCompleteListener -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error parsing json response", e);
+                }
+            });
+            final ImageUploadOptions options = ImageUploadOptions.builder(bitmap).build();
+            imageUploader.execute(options);
+        }
+        catch (IOException e) {
+            Log.e(TAG, "Error opening file", e);
+        }
     }
 
     private void broadcast(final DirectThreadBroadcaster.BroadcastOptions broadcastOptions, final DirectThreadBroadcaster.OnBroadcastCompleteListener listener) {
