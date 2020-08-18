@@ -68,15 +68,13 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
             loginBinding.webView.loadUrl("https://instagram.com/");
         } else if (v == loginBinding.cookies) {
             final String mainCookie = Utils.getCookie(webViewUrl);
-            if (Utils.isEmpty(mainCookie))
+            if (Utils.isEmpty(mainCookie) || !mainCookie.contains("; ds_user_id="))
                 Toast.makeText(this, R.string.login_error_loading_cookies, Toast.LENGTH_SHORT).show();
             else {
                 Utils.setupCookies(mainCookie);
                 settingsHelper.putString(Constants.COOKIE, mainCookie);
                 Toast.makeText(this, R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(getApplicationContext(), Main.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+                finish();
             }
         }
     }
