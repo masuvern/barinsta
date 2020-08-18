@@ -356,7 +356,7 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             else {
                 LinearLayout dim = (LinearLayout) binding.messageList.findViewWithTag(directItemModel);
-                if (dim.findViewById(R.id.liked) != null) dim.findViewById(R.id.liked).setVisibility(deleted ? View.GONE : View.VISIBLE);
+                if (dim.findViewById(R.id.liked) != null) dim.findViewById(R.id.liked).setVisibility(delete ? View.GONE : View.VISIBLE);
                 directItemModel.setLiked();
             }
             hasSentSomething = true;
