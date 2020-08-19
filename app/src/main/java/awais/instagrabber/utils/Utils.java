@@ -175,8 +175,8 @@ public final class Utils {
             clipString = clipString.substring((isHttps ? 22 : 21) + wwwDel);
 
             final char firstChar = clipString.charAt(0);
-            if (clipString.startsWith("p/") || clipString.startsWith("reel/")) {
-                clipString = clipString.substring(clipString.startsWith("p/") ? 2 : 5);
+            if (clipString.startsWith("p/") || clipString.startsWith("reel/") || clipString.startsWith("tv/")) {
+                clipString = clipString.substring(clipString.startsWith("p/") ? 2 : (clipString.startsWith("tv/") ? 3 : 5));
                 type = IntentModelType.POST;
             } else if (clipString.startsWith("explore/tags/")) {
                 clipString = clipString.substring(13);

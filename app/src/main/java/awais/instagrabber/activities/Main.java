@@ -1,5 +1,7 @@
 package awais.instagrabber.activities;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -7,8 +9,10 @@ import android.content.res.Resources;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,9 +24,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -58,6 +67,8 @@ import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.Utils;
 
+import static awais.instagrabber.utils.Utils.CHANNEL_ID;
+import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class Main extends BaseLanguageActivity {
@@ -97,7 +108,7 @@ public final class Main extends BaseLanguageActivity {
     public SearchView searchView;
     public MenuItem downloadAction, settingsAction, dmsAction, notifAction;
     public StoryModel[] storyModels;
-    public String userQuery = null;
+    public String userQuery = null, cookie, uid = null;
     public MainHelper mainHelper;
     public ProfileModel profileModel;
     public HashtagModel hashtagModel;
@@ -117,8 +128,8 @@ public final class Main extends BaseLanguageActivity {
         FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
 
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final String uid = Utils.getUserIdFromCookie(cookie);
+        cookie = settingsHelper.getString(Constants.COOKIE);
+        uid = Utils.getUserIdFromCookie(cookie);
         Utils.setupCookies(cookie);
 
         MainHelper.stopCurrentExecutor();
@@ -246,6 +257,14 @@ public final class Main extends BaseLanguageActivity {
             mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                new GetActivity().execute();
+                handler.postDelayed(this, 60000);
+            }
+        }, 200);
     }
 
     private void downloadSelectedItems() {
@@ -535,5 +554,58 @@ public final class Main extends BaseLanguageActivity {
             }
         }
         return false;
+    }
+
+    class GetActivity extends AsyncTask<Void, Void, Void> {
+        String ok = null;
+
+        protected Void doInBackground(Void... lmao) {
+            final String url = "https://www.instagram.com/graphql/query/?query_hash=0f318e8cfff9cc9ef09f88479ff571fb"
+            + "&variables={\"id\":\""+uid+"\"}";
+            if (!Utils.isEmpty(cookie)) try {
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+                urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
+                urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    final JSONObject data = new JSONObject(Utils.readFromConnection(urlConnection)).getJSONObject("data")
+                            .getJSONObject("user").getJSONObject("edge_activity_count").getJSONArray("edges").getJSONObject(0)
+                            .getJSONObject("node");
+                    ok = (getString(R.string.activity_count_prefix) + " " + String.join(", ",
+                            data.getInt("relationships") == 0 ? null : getString(R.string.activity_count_relationship, data.getInt("relationships")),
+                            data.getInt("usertags") == 0 ? null : getString(R.string.activity_count_usertags, data.getInt("usertags")),
+                            data.getInt("comments") == 0 ? null : getString(R.string.activity_count_comments, data.getInt("comments")),
+                            data.getInt("comment_likes") == 0 ? null : getString(R.string.activity_count_commentlikes, data.getInt("comment_likes")),
+                            data.getInt("likes") == 0 ? null :  getString(R.string.activity_count_likes, data.getInt("likes"))) + ".")
+                        .replaceAll("null, ", "").replaceAll(",,+", ",").replaceAll("(,+|null).", ".");
+                }
+                urlConnection.disconnect();
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "getactivity: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (ok == null) {
+                if (!Utils.isEmpty(cookie)) Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            }
+            else if (!ok.equals(getString(R.string.activity_count_prefix) + " .")) {
+                final Notification notif = new NotificationCompat.Builder(Main.this, CHANNEL_ID)
+                        .setCategory(NotificationCompat.CATEGORY_STATUS).setSmallIcon(R.drawable.ic_notif)
+                        .setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_MIN).setContentText(ok)
+                        .setContentIntent(
+                                PendingIntent.getActivity(getApplicationContext(), 1738,
+                                        new Intent(getApplicationContext(), NotificationsViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                        , PendingIntent.FLAG_UPDATE_CURRENT))
+                        .build();
+                if (notificationManager != null) {
+                    notificationManager.cancel(1800000000);
+                    notificationManager.notify(1800000000, notif);
+                }
+            }
+        }
     }
 }

@@ -31,17 +31,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.PostViewer;
@@ -80,7 +83,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
-    private boolean hasSentSomething;
+    private boolean hasSentSomething, hasDeletedSomething;
     private boolean hasOlder = true;
 
     private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
@@ -137,15 +140,16 @@ public class DirectMessageThreadFragment extends Fragment {
                 List<DirectItemModel> list = listViewModel.getList().getValue();
                 final List<DirectItemModel> newList = Arrays.asList(result.getItems());
                 list = list != null ? new LinkedList<>(list) : new LinkedList<>();
-                if (hasSentSomething) {
+                if (hasSentSomething || hasDeletedSomething) {
                     list = newList;
-                    hasSentSomething = false;
                     final Handler handler = new Handler();
-                    handler.postDelayed(() -> {
+                    if (hasSentSomething) handler.postDelayed(() -> {
                         if (messageList != null) {
                             messageList.smoothScrollToPosition(0);
                         }
                     }, 200);
+                    hasSentSomething = false;
+                    hasDeletedSomething = false;
                 } else {
                     list.addAll(newList);
                 }
@@ -244,9 +248,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
             }
             else if (w == 2) {
-                if (String.valueOf(directItemModel.getUserId()).equals(myId)) {
-                    // unsend: https://www.instagram.com/direct_v2/web/threads/340282366841710300949128288687654467119/items/29473546990090204551245070881259520/delete/
-                }
+                if (String.valueOf(directItemModel.getUserId()).equals(myId)) new Unsend().execute();
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
             }
         };
@@ -428,6 +430,43 @@ public class DirectMessageThreadFragment extends Fragment {
                 list = new MutableLiveData<>();
             }
             return list;
+        }
+    }
+
+    class Unsend extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... lmao) {
+            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/"+threadId+"/items/"+directItemModel.getItemId()+"/delete/";
+            try {
+                String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
+                        +"&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", Integer.toString(urlParameters.getBytes().length));
+                urlConnection.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+                urlConnection.connect();
+                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    hasDeletedSomething = true;
+                }
+                urlConnection.disconnect();
+            } catch (Throwable ex) {
+                Log.e("austin_debug", "unsend: " + ex);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (hasDeletedSomething) {
+                directItemModel = null;
+                new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
         }
     }
 }
