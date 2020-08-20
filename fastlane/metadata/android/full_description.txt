@@ -1,23 +1,23 @@
-If you don't upload posts/stories on Instagram, but you still have to use it to keep in touch with people, you now have an alternative: InstaGrabber allows you to browse Instagram, while giving you more options to control your data! (And yes, InstaGrabber has been revived!)
+If you don't upload posts or stories on Instagram, but you still have to use it to keep in touch with people and contents, you now have an alternative: InstaGrabber allows you to browse Instagram, while giving you more options to control your data. (And yes, InstaGrabber has been revived!)
 
 Features:
 
-* Login NOT NEEDED to browse timeline and face-tagged posts from public profiles, hashtags, and locations!
-* View & download posts
-* View & download stories, highlights, & HD avatar (see note below)
-* View & copy comments, captions, & biographies
-* Zoom in on pictures with ease
-* Batch download posts from profile (Hold & Select)
-* Mark profiles as favourite for quicker access
+* Login NOT NEEDED to browse timeline and face-tagged posts from public profiles, hashtags, and locations.
+* View & download posts.
+* View & download stories, highlights, and HD avatar (see note below).
+* View & copy comments, captions, & biographies.
+* Zoom in on pictures with ease.
+* Batch download posts from profile (Hold & Select).
+* Mark profiles as favourite for quicker access.
 
 Additional features for those logged in:
 
-* Browse feed (posts & stories), discover (by topic), DM, activity/notifications, and private profiles that you have followed
-* Most features you need to view and interact: Like, "save", write/like/reply to comments, follow/block/restrict, reply to stories, play with stickers, respond to DMs (text & picture)...
-* View stories anonymously (by default, configurable)
-* See your own liked & saved posts
-* Copy DM messages & download attachments
-* Switch between accounts
+* Browse feed (posts and stories), discover (by topic), DM, activity/notifications, and private profiles that you have followed.
+* Most features you need to view and interact: Like, "save", write/like/reply to comments, follow/block/restrict, reply to stories, play with stickers, respond to DMs (text & picture), etc.
+* View stories anonymously (by default, configurable).
+* See your own liked & saved posts.
+* Copy DM messages & download attachments.
+* Switch between accounts.
 
 Extra merits:
 
@@ -30,4 +30,4 @@ Extra merits:
 
 *** Please use this app responsibly. ***
 
-(Note: HD avatars are only available on profiles. If you're not logged in, you must enable them in Settings to view stories, which are limited to profiles. If you're logged in, you can view stories from hashtags and locations, in addition to public and followed private profiles, regardless of Settings.)
+(Note: HD avatars are only available on profiles. If you're not logged in, you must enable them in Settings to view stories, which are limited to profiles. If you're logged in, you can view stories from hashtags and locations, in addition to public and followed private profiles, regardless of settings.)
