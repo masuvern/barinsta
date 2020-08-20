@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <awais.instagrabber.customviews.CircularImageView
+        android:id="@+id/profileInfo"
+        android:layout_width="@dimen/profile_picture_size"
+        android:layout_height="@dimen/profile_picture_size" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/isVerified"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="top|start"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/verified" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/profileInfoText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvFullName"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:textSize="16sp" />
+
+        <FrameLayout
+            android:id="@+id/btnOpenProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/dm_profile_button_color"
+            android:foreground="?android:selectableItemBackground">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:gravity="center"
+                android:padding="4dp"
+                android:singleLine="true"
+                android:text="@string/open_profile"
+                android:textSize="16sp" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

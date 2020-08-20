@@ -3,7 +3,6 @@ package awais.instagrabber.models.direct_messages;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 
 import awais.instagrabber.models.ProfileModel;
@@ -12,8 +11,6 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
 import awais.instagrabber.utils.Utils;
-
-import static awais.instagrabber.utils.Constants.COOKIE;
 
 public final class DirectItemModel implements Serializable, Comparable<DirectItemModel> {
     private final long userId, timestamp;
@@ -31,8 +28,9 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
     private final DirectItemRavenMediaModel ravenMediaModel;
     private final DirectItemAnimatedMediaModel animatedMediaModel;
     private final DirectItemVideoCallEventModel videoCallEventModel;
+    private final Date date;
 
-    private final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(COOKIE));
+    // private final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(COOKIE));
 
     public DirectItemModel(final long userId, final long timestamp, final String itemId, final String[] likes,
                            final DirectItemType itemType, final CharSequence text, final DirectItemLinkModel linkModel,
@@ -45,7 +43,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
         this.itemType = itemType;
         this.itemId = itemId;
         this.likes = likes;
-        this.liked = likes != null ? Arrays.asList(likes).contains(myId) : false;
+        this.liked = likes != null && likes.length != 0;
         this.text = text;
         this.linkModel = linkModel;
         this.profileModel = profileModel;
@@ -56,6 +54,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
         this.ravenMediaModel = ravenMediaModel;
         this.videoCallEventModel = videoCallEventModel;
         this.animatedMediaModel = animatedMediaModel;
+        date = new Date(timestamp / 1000L);
     }
 
     public DirectItemType getItemType() {
@@ -88,7 +87,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
 
     @NonNull
     public String getDateTime() {
-        return Utils.datetimeParser.format(new Date(timestamp / 1000L));
+        return Utils.datetimeParser.format(date);
     }
 
     public ProfileModel getProfileModel() {

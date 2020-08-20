@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <awais.instagrabber.customviews.RamboTextView
+        android:id="@+id/tvMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|fill_horizontal"
+        android:padding="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="?android:textColorPrimary" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivLinkPreview"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dm_link_image_size"
+        android:scaleType="centerCrop"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvLinkTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|fill_horizontal"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingStart="4dp"
+        android:paddingLeft="4dp"
+        android:paddingEnd="4dp"
+        android:paddingRight="4dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="?android:textColorPrimary" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvLinkSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|fill_horizontal"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:padding="4dp" />
+</LinearLayout>
