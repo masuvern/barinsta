@@ -1,1 +1,1 @@
-A simple yet advanced client for Instagram, with login support!
+Simple yet advanced Instagram client
