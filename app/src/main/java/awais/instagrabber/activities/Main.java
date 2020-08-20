@@ -1,5 +1,7 @@
 package awais.instagrabber.activities;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -7,8 +9,10 @@ import android.content.res.Resources;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.BaseColumns;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,10 +24,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import awais.instagrabber.BuildConfig;
@@ -31,6 +37,7 @@ import awais.instagrabber.MainHelper;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.adapters.SuggestionsAdapter;
+import awais.instagrabber.asyncs.GetActivityAsyncTask;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.asyncs.UsernameFetcher;
 import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
@@ -58,6 +65,8 @@ import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.Utils;
 
+import static awais.instagrabber.utils.Utils.CHANNEL_ID;
+import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class Main extends BaseLanguageActivity {
@@ -97,7 +106,7 @@ public final class Main extends BaseLanguageActivity {
     public SearchView searchView;
     public MenuItem downloadAction, settingsAction, dmsAction, notifAction;
     public StoryModel[] storyModels;
-    public String userQuery = null;
+    public String userQuery = null, cookie, uid = null;
     public MainHelper mainHelper;
     public ProfileModel profileModel;
     public HashtagModel hashtagModel;
@@ -107,6 +116,7 @@ public final class Main extends BaseLanguageActivity {
     private DialogInterface.OnClickListener profileDialogListener;
     private Stack<String> queriesStack;
     private DataBox.CookieModel cookieModel;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(@Nullable final Bundle bundle) {
@@ -117,8 +127,8 @@ public final class Main extends BaseLanguageActivity {
         FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
 
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final String uid = Utils.getUserIdFromCookie(cookie);
+        cookie = settingsHelper.getString(Constants.COOKIE);
+        uid = Utils.getUserIdFromCookie(cookie);
         Utils.setupCookies(cookie);
 
         MainHelper.stopCurrentExecutor();
@@ -246,6 +256,56 @@ public final class Main extends BaseLanguageActivity {
             mainHelper.onRefresh();
 
         mainHelper.onIntent(getIntent());
+
+        final Handler handler = new Handler();
+        runnable = () -> {
+            final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
+                if (result == null) {
+                    if (!Utils.isEmpty(cookie)) {
+                        Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                if (notificationManager == null) {
+                    return;
+                }
+                final List<String> list = new ArrayList<>();
+                if (result.getRelationshipsCount() != 0) {
+                    list.add(getString(R.string.activity_count_relationship, result.getRelationshipsCount()));
+                }
+                if (result.getUserTagsCount() != 0) {
+                    list.add(getString(R.string.activity_count_usertags, result.getUserTagsCount()));
+                }
+                if (result.getCommentsCount() != 0) {
+                    list.add(getString(R.string.activity_count_comments, result.getCommentsCount()));
+                }
+                if (result.getCommentLikesCount() != 0) {
+                    list.add(getString(R.string.activity_count_commentlikes, result.getCommentLikesCount()));
+                }
+                if (result.getLikesCount() != 0) {
+                    list.add(getString(R.string.activity_count_likes, result.getLikesCount()));
+                }
+                if (list.isEmpty()) {
+                    return;
+                }
+                final String join = TextUtils.join(", ", list);
+                final String notificationString = getString(R.string.activity_count_prefix) + " " + join + ".";
+                final Intent intent = new Intent(getApplicationContext(), NotificationsViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                final Notification notification = new NotificationCompat.Builder(Main.this, CHANNEL_ID)
+                        .setCategory(NotificationCompat.CATEGORY_STATUS)
+                        .setSmallIcon(R.drawable.ic_notif)
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_MIN)
+                        .setContentText(notificationString)
+                        .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 1738, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .build();
+                notificationManager.cancel(1800000000);
+                notificationManager.notify(1800000000, notification);
+            });
+            activityAsyncTask.execute();
+            handler.postDelayed(runnable, 60000);
+        };
+        handler.postDelayed(runnable, 200);
     }
 
     private void downloadSelectedItems() {

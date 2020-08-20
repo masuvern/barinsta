@@ -126,6 +126,7 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
     public enum ItemType {
         TEXT("text"),
         REACTION("reaction"),
+        REELSHARE("reel_share"),
         IMAGE("configure_photo");
 
         private final String value;
@@ -185,6 +186,29 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
             form.put("item_id", itemId);
             form.put("reaction_status", delete ? "deleted" : "created");
             form.put("reaction_type", "like");
+            return form;
+        }
+    }
+
+    public static class StoryReplyBroadcastOptions extends BroadcastOptions {
+        private final String text, mediaId, reelId;
+
+        public StoryReplyBroadcastOptions(String text, String mediaId, String reelId) throws UnsupportedEncodingException {
+            super(ItemType.REELSHARE);
+            this.text = URLEncoder.encode(text, "UTF-8")
+                    .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
+                    .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
+            this.mediaId = mediaId;
+            this.reelId = reelId; // or user id, usually same
+        }
+
+        @Override
+        Map<String, String> getFormMap() {
+            final Map<String, String> form = new HashMap<>();
+            form.put("text", text);
+            form.put("media_id", mediaId);
+            form.put("reel_id", reelId);
+            form.put("entry", "reel");
             return form;
         }
     }
