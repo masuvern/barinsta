@@ -1,10 +1,3 @@
-### For newcomers, especially for those visiting from HowToMen
-
-Thank you for your interest in InstaGrabber!
-
-* The HowToMen video seems to have demonstrated version 17.2. We have pushed updates since then and will continue to do so.
-* This app is in active development, however we do need more hands! If you have Java experience, you're welcomed to contribute by submitting a pull request!
-
 <img src="./app/play_icon.png" alt="InstaGrabber" align="right" width="25%"/>
 
 ## InstaGrabber
@@ -19,9 +12,9 @@ Thank you for your interest in InstaGrabber!
 
 ### Download
 
-Download [here](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
+<a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="100"></a>
 
-[F-droid pending.](https://gitlab.com/fdroid/rfp/-/issues/1432) No Google Play, sorry.
+Or you can download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
 
 ### Presentation
 
