@@ -31,8 +31,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
     private final DirectItemRavenMediaModel ravenMediaModel;
     private final DirectItemAnimatedMediaModel animatedMediaModel;
     private final DirectItemVideoCallEventModel videoCallEventModel;
-
-    private final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(COOKIE));
+    private final Date date;
 
     public DirectItemModel(final long userId, final long timestamp, final String itemId, final String[] likes,
                            final DirectItemType itemType, final CharSequence text, final DirectItemLinkModel linkModel,
@@ -40,12 +39,13 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
                            final DirectItemActionLogModel actionLogModel, final DirectItemVoiceMediaModel voiceMediaModel,
                            final DirectItemRavenMediaModel ravenMediaModel, final DirectItemVideoCallEventModel videoCallEventModel,
                            final DirectItemAnimatedMediaModel animatedMediaModel) {
+        final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(COOKIE));
         this.userId = userId;
         this.timestamp = timestamp;
         this.itemType = itemType;
         this.itemId = itemId;
         this.likes = likes;
-        this.liked = likes != null ? Arrays.asList(likes).contains(myId) : false;
+        this.liked = likes != null && Arrays.asList(likes).contains(myId);
         this.text = text;
         this.linkModel = linkModel;
         this.profileModel = profileModel;
@@ -56,6 +56,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
         this.ravenMediaModel = ravenMediaModel;
         this.videoCallEventModel = videoCallEventModel;
         this.animatedMediaModel = animatedMediaModel;
+        date = new Date(timestamp / 1000L);
     }
 
     public DirectItemType getItemType() {
@@ -88,7 +89,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
 
     @NonNull
     public String getDateTime() {
-        return Utils.datetimeParser.format(new Date(timestamp / 1000L));
+        return Utils.datetimeParser.format(date);
     }
 
     public ProfileModel getProfileModel() {

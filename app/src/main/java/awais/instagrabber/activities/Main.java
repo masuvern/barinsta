@@ -12,7 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.BaseColumns;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,11 +28,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 
-import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import awais.instagrabber.BuildConfig;
@@ -40,6 +37,7 @@ import awais.instagrabber.MainHelper;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.adapters.SuggestionsAdapter;
+import awais.instagrabber.asyncs.GetActivityAsyncTask;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.asyncs.UsernameFetcher;
 import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
@@ -118,6 +116,7 @@ public final class Main extends BaseLanguageActivity {
     private DialogInterface.OnClickListener profileDialogListener;
     private Stack<String> queriesStack;
     private DataBox.CookieModel cookieModel;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(@Nullable final Bundle bundle) {
@@ -259,12 +258,54 @@ public final class Main extends BaseLanguageActivity {
         mainHelper.onIntent(getIntent());
 
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                new GetActivity().execute();
-                handler.postDelayed(this, 60000);
-            }
-        }, 200);
+        runnable = () -> {
+            final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
+                if (result == null) {
+                    if (!Utils.isEmpty(cookie)) {
+                        Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                if (notificationManager == null) {
+                    return;
+                }
+                final List<String> list = new ArrayList<>();
+                if (result.getRelationshipsCount() != 0) {
+                    list.add(getString(R.string.activity_count_relationship, result.getRelationshipsCount()));
+                }
+                if (result.getUserTagsCount() != 0) {
+                    list.add(getString(R.string.activity_count_usertags, result.getUserTagsCount()));
+                }
+                if (result.getCommentsCount() != 0) {
+                    list.add(getString(R.string.activity_count_comments, result.getCommentsCount()));
+                }
+                if (result.getCommentLikesCount() != 0) {
+                    list.add(getString(R.string.activity_count_commentlikes, result.getCommentLikesCount()));
+                }
+                if (result.getLikesCount() != 0) {
+                    list.add(getString(R.string.activity_count_likes, result.getLikesCount()));
+                }
+                if (list.isEmpty()) {
+                    return;
+                }
+                final String join = TextUtils.join(", ", list);
+                final String notificationString = getString(R.string.activity_count_prefix) + " " + join + ".";
+                final Intent intent = new Intent(getApplicationContext(), NotificationsViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                final Notification notification = new NotificationCompat.Builder(Main.this, CHANNEL_ID)
+                        .setCategory(NotificationCompat.CATEGORY_STATUS)
+                        .setSmallIcon(R.drawable.ic_notif)
+                        .setAutoCancel(true)
+                        .setPriority(NotificationCompat.PRIORITY_MIN)
+                        .setContentText(notificationString)
+                        .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 1738, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .build();
+                notificationManager.cancel(1800000000);
+                notificationManager.notify(1800000000, notification);
+            });
+            activityAsyncTask.execute();
+            handler.postDelayed(runnable, 60000);
+        };
+        handler.postDelayed(runnable, 200);
     }
 
     private void downloadSelectedItems() {
@@ -554,58 +595,5 @@ public final class Main extends BaseLanguageActivity {
             }
         }
         return false;
-    }
-
-    class GetActivity extends AsyncTask<Void, Void, Void> {
-        String ok = null;
-
-        protected Void doInBackground(Void... lmao) {
-            final String url = "https://www.instagram.com/graphql/query/?query_hash=0f318e8cfff9cc9ef09f88479ff571fb"
-            + "&variables={\"id\":\""+uid+"\"}";
-            if (!Utils.isEmpty(cookie)) try {
-                final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-                urlConnection.setUseCaches(false);
-                urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
-                urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
-                urlConnection.connect();
-                if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    final JSONObject data = new JSONObject(Utils.readFromConnection(urlConnection)).getJSONObject("data")
-                            .getJSONObject("user").getJSONObject("edge_activity_count").getJSONArray("edges").getJSONObject(0)
-                            .getJSONObject("node");
-                    ok = (getString(R.string.activity_count_prefix) + " " + String.join(", ",
-                            data.getInt("relationships") == 0 ? null : getString(R.string.activity_count_relationship, data.getInt("relationships")),
-                            data.getInt("usertags") == 0 ? null : getString(R.string.activity_count_usertags, data.getInt("usertags")),
-                            data.getInt("comments") == 0 ? null : getString(R.string.activity_count_comments, data.getInt("comments")),
-                            data.getInt("comment_likes") == 0 ? null : getString(R.string.activity_count_commentlikes, data.getInt("comment_likes")),
-                            data.getInt("likes") == 0 ? null :  getString(R.string.activity_count_likes, data.getInt("likes"))) + ".")
-                        .replaceAll("null, ", "").replaceAll(",,+", ",").replaceAll("(,+|null).", ".");
-                }
-                urlConnection.disconnect();
-            } catch (Throwable ex) {
-                Log.e("austin_debug", "getactivity: " + ex);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            if (ok == null) {
-                if (!Utils.isEmpty(cookie)) Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-            }
-            else if (!ok.equals(getString(R.string.activity_count_prefix) + " .")) {
-                final Notification notif = new NotificationCompat.Builder(Main.this, CHANNEL_ID)
-                        .setCategory(NotificationCompat.CATEGORY_STATUS).setSmallIcon(R.drawable.ic_notif)
-                        .setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_MIN).setContentText(ok)
-                        .setContentIntent(
-                                PendingIntent.getActivity(getApplicationContext(), 1738,
-                                        new Intent(getApplicationContext(), NotificationsViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                        , PendingIntent.FLAG_UPDATE_CURRENT))
-                        .build();
-                if (notificationManager != null) {
-                    notificationManager.cancel(1800000000);
-                    notificationManager.notify(1800000000, notif);
-                }
-            }
-        }
     }
 }

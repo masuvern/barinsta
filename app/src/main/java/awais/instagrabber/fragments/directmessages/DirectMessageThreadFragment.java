@@ -50,7 +50,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.activities.ProfileViewer;
 import awais.instagrabber.activities.StoryViewer;
-import awais.instagrabber.adapters.MessageItemsAdapter;
+import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
@@ -191,8 +191,8 @@ public class DirectMessageThreadFragment extends Fragment {
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener).execute(); // serial because we don't want messages to be randomly ordered
         }));
 
-        final DialogInterface.OnClickListener onDialogListener = (d,w) -> {
-            if (w == 0) {
+        final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
+            if (which == 0) {
                 final DirectItemType itemType = directItemModel.getItemType();
                 switch (itemType) {
                     case MEDIA_SHARE:
@@ -244,10 +244,10 @@ public class DirectMessageThreadFragment extends Fragment {
                         Log.d("austin_debug", "unsupported type " + itemType);
                 }
             }
-            else if (w == 1) {
+            else if (which == 1) {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
             }
-            else if (w == 2) {
+            else if (which == 2) {
                 if (String.valueOf(directItemModel.getUserId()).equals(myId)) new Unsend().execute();
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
             }
@@ -256,8 +256,7 @@ public class DirectMessageThreadFragment extends Fragment {
             Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
                 searchUsername(((ProfileModel) tag).getUsername());
-            }
-            else if (tag instanceof DirectItemModel) {
+            } else if (tag instanceof DirectItemModel) {
                 directItemModel = (DirectItemModel) tag;
                 final DirectItemType itemType = directItemModel.getItemType();
                 int firstOption = R.string.dms_inbox_raven_message_unknown;
@@ -302,12 +301,12 @@ public class DirectMessageThreadFragment extends Fragment {
                 new AlertDialog.Builder(requireContext())
                         //.setTitle(title)
                         .setAdapter(dialogAdapter, onDialogListener)
-                        .setNeutralButton(R.string.cancel, null)
+                        // .setNeutralButton(R.string.cancel, null)
                         .show();
             }
         };
         final MentionClickListener mentionClickListener = (view, text, isHashtag) -> searchUsername(text);
-        final MessageItemsAdapter adapter = new MessageItemsAdapter(users, leftUsers, onClickListener, mentionClickListener);
+        final DirectMessageItemsAdapter adapter = new DirectMessageItemsAdapter(users, leftUsers, onClickListener, mentionClickListener);
         messageList.setAdapter(adapter);
         listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
         listViewModel.getList().observe(fragmentActivity, adapter::submitList);
@@ -344,8 +343,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 Log.e(TAG, "Error", e);
                 return;
             }
-        }
-        else {
+        } else {
             reactionOptions = new DirectThreadBroadcaster.ReactionBroadcastOptions(itemId, delete);
         }
         broadcast(text != null ? textOptions : reactionOptions, result -> {
@@ -355,10 +353,11 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             if (text != null) {
                 binding.commentText.setText("");
-            }
-            else {
-                LinearLayout dim = (LinearLayout) binding.messageList.findViewWithTag(directItemModel);
-                if (dim.findViewById(R.id.liked) != null) dim.findViewById(R.id.liked).setVisibility(delete ? View.GONE : View.VISIBLE);
+            } else {
+                final LinearLayout dim = (LinearLayout) binding.messageList.findViewWithTag(directItemModel).getParent();
+                if (dim.findViewById(R.id.liked_container) != null) {
+                    dim.findViewById(R.id.liked_container).setVisibility(delete ? View.GONE : View.VISIBLE);
+                }
                 directItemModel.setLiked();
             }
             hasSentSomething = true;
@@ -386,15 +385,14 @@ public class DirectMessageThreadFragment extends Fragment {
                     // Broadcast
                     final DirectThreadBroadcaster.ImageBroadcastOptions options = new DirectThreadBroadcaster.ImageBroadcastOptions(true, uploadId);
                     hasSentSomething = true;
-                    broadcast(options, onBroadcastCompleteListener -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
+                    broadcast(options, broadcastResponse -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
                 } catch (JSONException e) {
                     Log.e(TAG, "Error parsing json response", e);
                 }
             });
             final ImageUploadOptions options = ImageUploadOptions.builder(bitmap).build();
             imageUploader.execute(options);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Error opening file", e);
         }
