@@ -104,7 +104,7 @@ public final class DirectMessageItemsAdapter extends ListAdapter<DirectItemModel
             }
             case REEL_SHARE: {
                 final LayoutDmRavenMediaBinding binding = LayoutDmRavenMediaBinding.inflate(layoutInflater, itemViewParent, false);
-                return new DirectMessageReelShareViewHolder(baseBinding, binding, onClickListener);
+                return new DirectMessageReelShareViewHolder(baseBinding, binding, onClickListener, mentionClickListener);
             }
             case MEDIA_SHARE: {
                 final LayoutDmMediaShareBinding binding = LayoutDmMediaShareBinding.inflate(layoutInflater, itemViewParent, false);
