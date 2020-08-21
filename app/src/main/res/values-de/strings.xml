@@ -147,6 +147,13 @@
     <string name="direct_messages_reacted_story">Hat auf deine Story reagiert</string>
     <string name="direct_messages_mention_story">Hat dich in seiner/ihrer Story erwähnt</string>
     <string name="dms_inbox_raven_message_unknown"><i>Nicht unterstützter Nachrichtentyp</i></string>
+    <string name="dms_inbox_open_link">Open link</string>
+    <string name="dms_inbox_copy_text">Copy text</string>
+    <string name="dms_inbox_download">Download attachment</string>
+    <string name="dms_inbox_like">Like message</string>
+    <string name="dms_inbox_unlike">Unlike message</string>
+    <string name="dms_inbox_unsend">Unsend message</string>
+    <string name="dms_inbox_author">View author profile</string>
     <string name="dms_inbox_media_shared_from">Beitrag geteilt von %s</string>
     <string name="dms_inbox_raven_media_unknown"><i>Unbekannter Medientyp</i></string>
     <string name="dms_inbox_raven_media_expired">Medien abgelaufen!</string>
@@ -178,7 +185,7 @@
     <string name="comment_viewer_like_comment">Kommentar liken</string>
     <string name="comment_viewer_unlike_comment">Kommentar nicht liken</string>
     <string name="comment_viewer_delete_comment">Kommentar löschen</string>
-    <string name="comment_send_empty_comment">Keine leeren Kommentare, Kumpel!</string>
+    <string name="comment_send_empty_comment">No empty comments!</string>
     <string name="comment_view_mention_user_search">Möchten du nach dem Benutzernamen suchen?</string>
     <string name="comment_view_mention_hash_search">Möchten du nach dem Hashtag suchen?</string>
     <string name="comment_view_mention_location_search">Möchten du nach dem Ort suchen?</string>
@@ -209,4 +216,13 @@
     <string name="crash_descr">Hoppla.. die App ist abgestürzt, aber keine Sorge — du kannst Fehlerberichte an den Entwickler senden um ihm zu helfen, das Problem zu beheben. (:</string>
     <string name="use_amoled_dark_theme">Nutze AMOLED-Modus für Dunkles Design</string>
     <string name="action_notif">Activity</string>
+    <string name="select_picture">Select Picture</string>
+    <string name="uploading">Uploading...</string>
+    <string name="activity_count_prefix">You have:</string>
+    <string name="activity_count_relationship" comment="activity_count_relationship">%d follows</string>
+    <string name="activity_count_comments" comment="activity_count_comments">%d comments</string>
+    <string name="activity_count_commentlikes" comment="activity_count_commentlikes">%d comment likes</string>
+    <string name="activity_count_usertags" comment="activity_count_usertags">%d usertags</string>
+    <string name="activity_count_likes" comment="activity_count_likes">%d likes</string>
+    <string name="activity_notloggedin">You logged out before clicking this notification?!</string>
 </resources>

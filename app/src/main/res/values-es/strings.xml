@@ -147,6 +147,13 @@
     <string name="direct_messages_reacted_story">Reaccionó a una historia</string>
     <string name="direct_messages_mention_story">Fue mencionado en una historia</string>
     <string name="dms_inbox_raven_message_unknown"><i>Tipo de mensaje no soportado</i></string>
+    <string name="dms_inbox_open_link">Abrir enlace</string>
+    <string name="dms_inbox_copy_text">Copiar texto</string>
+    <string name="dms_inbox_download">Descargar archivo adjunto</string>
+    <string name="dms_inbox_like">Dar \"me gusta\" al mensaje</string>
+    <string name="dms_inbox_unlike">Quitar \"me gusta\" al mensaje</string>
+    <string name="dms_inbox_unsend">Cancelar envío de mensaje</string>
+    <string name="dms_inbox_author">Ver perfil del autor</string>
     <string name="dms_inbox_media_shared_from">Publicación compartida desde %s</string>
     <string name="dms_inbox_raven_media_unknown"><i>Tipo de medio desconocido</i></string>
     <string name="dms_inbox_raven_media_expired">¡Medio caducado!</string>
@@ -209,4 +216,13 @@
     <string name="crash_descr">Vaya.. la aplicación dejó de funcionar, pero no te preocupes por un enviar un reporte de error al desarrollador para solucionar este problema. (:</string>
     <string name="use_amoled_dark_theme">Usar modo AMOLED para el tema oscuro</string>
     <string name="action_notif">Actividad</string>
+    <string name="select_picture">Seleccionar imagen</string>
+    <string name="uploading">Subiendo...</string>
+    <string name="activity_count_prefix">You have:</string>
+    <string name="activity_count_relationship" comment="activity_count_relationship">%d follows</string>
+    <string name="activity_count_comments" comment="activity_count_comments">%d comments</string>
+    <string name="activity_count_commentlikes" comment="activity_count_commentlikes">%d comment likes</string>
+    <string name="activity_count_usertags" comment="activity_count_usertags">%d usertags</string>
+    <string name="activity_count_likes" comment="activity_count_likes">%d likes</string>
+    <string name="activity_notloggedin">You logged out before clicking this notification?!</string>
 </resources>
