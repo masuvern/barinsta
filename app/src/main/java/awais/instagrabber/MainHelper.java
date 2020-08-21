@@ -1100,8 +1100,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     }
 
     private void toggleSelection(final PostModel postModel) {
-        if (postModel != null && postsAdapter != null) {
+        if (postModel != null && postsAdapter != null && main.selectedItems.size() >= 100) {
+            Toast.makeText(main, R.string.downloader_too_many, Toast.LENGTH_SHORT);
+        }
+        else if (postModel != null && postsAdapter != null) {
             if (postModel.isSelected()) main.selectedItems.remove(postModel);
+            else if (main.selectedItems.size() >= 100) {
+                Toast.makeText(main, R.string.downloader_too_many, Toast.LENGTH_SHORT);
+                return;
+            }
             else main.selectedItems.add(postModel);
             postModel.setSelected(!postModel.isSelected());
             notifyAdapter(postModel);
@@ -1217,9 +1224,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            final boolean iamme = (isLoggedIn && main.profileModel != null)
-                    ? Utils.getUserIdFromCookie(cookie).equals(main.profileModel.getId())
-                    : false;
+            final boolean iamme = (isLoggedIn && main.profileModel != null) && Utils.getUserIdFromCookie(cookie).equals(main.profileModel.getId());
             if (!isLoggedIn && Utils.dataBox.getFavorite(main.userQuery) != null && v == main.mainBinding.profileView.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(main.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(main.userQuery).split("/")[1]),
@@ -1283,7 +1288,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     final String urlParameters = "target_user_id="+main.profileModel.getId();
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     urlConnection.setRequestProperty("Content-Length", "" +
-                            Integer.toString(urlParameters.getBytes().length));
+                            urlParameters.getBytes().length);
                     urlConnection.setDoOutput(true);
                     DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
                     wr.writeBytes(urlParameters);

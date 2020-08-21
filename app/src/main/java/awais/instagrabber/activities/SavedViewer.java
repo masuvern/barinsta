@@ -226,6 +226,10 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
     private void toggleSelection(final PostModel postModel) {
         if (postModel != null && postsAdapter != null) {
             if (postModel.isSelected()) selectedItems.remove(postModel);
+            else if (selectedItems.size() >= 100) {
+                Toast.makeText(SavedViewer.this, R.string.downloader_too_many, Toast.LENGTH_SHORT);
+                return;
+            }
             else selectedItems.add(postModel);
             postModel.setSelected(!postModel.isSelected());
             notifyAdapter(postModel);

@@ -36,6 +36,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
     @Override
     protected ViewerPostModel[] doInBackground(final Void... voids) {
         ViewerPostModel[] result = null;
+        Utils.setupCookies(Utils.settingsHelper.getString(Constants.COOKIE)); // <- direct download
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL("https://www.instagram.com/p/" + shortCode + "/?__a=1").openConnection();
             conn.setUseCaches(false);

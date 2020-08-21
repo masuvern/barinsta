@@ -767,6 +767,10 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     private void toggleSelection(final PostModel postModel) {
         if (postModel != null && postsAdapter != null) {
             if (postModel.isSelected()) selectedItems.remove(postModel);
+            else if (selectedItems.size() >= 100) {
+                Toast.makeText(ProfileViewer.this, R.string.downloader_too_many, Toast.LENGTH_SHORT);
+                return;
+            }
             else selectedItems.add(postModel);
             postModel.setSelected(!postModel.isSelected());
             notifyAdapter(postModel);
@@ -823,9 +827,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            final boolean iamme = (isLoggedIn && profileModel != null)
-                    ? Utils.getUserIdFromCookie(cookie).equals(profileModel.getId())
-                    : false;
+            final boolean iamme = (isLoggedIn && profileModel != null) && Utils.getUserIdFromCookie(cookie).equals(profileModel.getId());
             if (!isLoggedIn && Utils.dataBox.getFavorite(userQuery) != null && v == profileBinding.profileView.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
@@ -889,7 +891,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     final String urlParameters = "target_user_id="+profileModel.getId();
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     urlConnection.setRequestProperty("Content-Length", "" +
-                            Integer.toString(urlParameters.getBytes().length));
+                            urlParameters.getBytes().length);
                     urlConnection.setDoOutput(true);
                     DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
                     wr.writeBytes(urlParameters);
