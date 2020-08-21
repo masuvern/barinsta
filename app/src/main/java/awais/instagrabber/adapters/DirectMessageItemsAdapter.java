@@ -12,6 +12,7 @@ import java.util.List;
 
 import awais.instagrabber.adapters.viewholder.directmessages.DirectMessageActionLogViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectMessageAnimatedMediaViewHolder;
+import awais.instagrabber.adapters.viewholder.directmessages.DirectMessageDefaultViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectMessageItemViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectMessageLinkViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectMessageMediaShareViewHolder;
@@ -76,7 +77,6 @@ public final class DirectMessageItemsAdapter extends ListAdapter<DirectItemModel
         final LayoutDmBaseBinding baseBinding = LayoutDmBaseBinding.inflate(layoutInflater, parent, false);
         final ViewGroup itemViewParent = baseBinding.messageCard;
         switch (directItemType) {
-            default:
             case LIKE:
             case TEXT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, itemViewParent, false);
@@ -129,6 +129,10 @@ public final class DirectMessageItemsAdapter extends ListAdapter<DirectItemModel
             case VIDEO_CALL_EVENT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, itemViewParent, false);
                 return new DirectMessageVideoCallEventViewHolder(baseBinding, binding, onClickListener);
+            }
+            default: {
+                final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, itemViewParent, false);
+                return new DirectMessageDefaultViewHolder(baseBinding, binding, onClickListener);
             }
         }
     }
