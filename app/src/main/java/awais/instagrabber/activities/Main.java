@@ -263,11 +263,7 @@ public final class Main extends BaseLanguageActivity {
         handler = new Handler();
         runnable = () -> {
             final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
-                if (result == null) {
-                    Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (notificationManager == null) {
+                if (result == null || notificationManager == null) {
                     return;
                 }
                 final List<String> list = new ArrayList<>();
