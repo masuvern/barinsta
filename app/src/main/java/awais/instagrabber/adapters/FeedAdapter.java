@@ -270,7 +270,11 @@ public final class FeedAdapter extends RecyclerView.Adapter<FeedItemViewHolder> 
 
             if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) {
                 viewToChangeHeight = viewHolder.playerView;
-
+                final Player player = viewHolder.playerView.getPlayer();
+                if (player != null) {
+                    final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
+                    player.setPlayWhenReady(shouldAutoplay);
+                }
                 viewHolder.videoViewsParent.setVisibility(View.VISIBLE);
                 viewHolder.videoViews.setText(String.valueOf(feedModel.getViewCount()));
             } else {

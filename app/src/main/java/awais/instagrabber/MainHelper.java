@@ -85,6 +85,7 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Utils.logCollector;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static AsyncTask<?, ?, ?> currentlyExecuting;
@@ -261,7 +262,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
     private DiscoverAdapter discoverAdapter;
     public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
-    private String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+    private String cookie = settingsHelper.getString(Constants.COOKIE);
     public boolean isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
 
     public MainHelper(@NonNull final Main main) {
@@ -269,7 +270,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         this.main = main;
         this.resources = main.getResources();
-        this.autoloadPosts = Utils.settingsHelper.getBoolean(AUTOLOAD_POSTS);
+        this.autoloadPosts = settingsHelper.getBoolean(AUTOLOAD_POSTS);
 
         main.mainBinding.profileView.swipeRefreshLayout.setOnRefreshListener(this);
         main.mainBinding.profileView.mainUrl.setMovementMethod(new LinkMovementMethod());
@@ -279,7 +280,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         final ImageView iconProfile = (ImageView) iconSlider.getChildAt(1);
         final ImageView iconDiscover = (ImageView) iconSlider.getChildAt(2);
 
-        final boolean isBottomToolbar = Utils.settingsHelper.getBoolean(BOTTOM_TOOLBAR);
+        final boolean isBottomToolbar = settingsHelper.getBoolean(BOTTOM_TOOLBAR);
         isLoggedIn = !Utils.isEmpty(cookie);
         if (!isLoggedIn) {
             main.mainBinding.drawerLayout.removeView(main.mainBinding.feedView.feedLayout);
@@ -362,8 +363,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 public void onDrawerOpened(@NonNull final View drawerView, @MouseDrawer.EdgeGravity final int gravity) {
                     if (gravity == GravityCompat.START || drawerView == main.mainBinding.feedView.feedLayout) {
                         if (currentFeedPlayer != null) {
-                            currentFeedPlayer.setPlayWhenReady(true);
-                            currentFeedPlayer.getPlaybackState();
+                            final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
+                            currentFeedPlayer.setPlayWhenReady(shouldAutoplay);
                         }
                     } else {
                         // clear selection
@@ -376,7 +377,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     if (gravity == GravityCompat.START || drawerView == main.mainBinding.feedView.feedLayout) {
                         if (currentFeedPlayer != null) {
                             currentFeedPlayer.setPlayWhenReady(false);
-                            currentFeedPlayer.getPlaybackState();
                         }
                     } else {
                         // clear selection
@@ -790,15 +790,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 main.mainBinding.profileView.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
                 final String profileId = profileModel.getId();
 
-                if (isLoggedIn || Utils.settingsHelper.getBoolean(Constants.STORIESIG)) {
+                if (isLoggedIn || settingsHelper.getBoolean(Constants.STORIESIG)) {
                   new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
-                          (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
+                          (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), false,
                           result -> {
                       main.storyModels = result;
                       if (result != null && result.length > 0) main.mainBinding.profileView.mainProfileImage.setStoriesBorder();
                   }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                  new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
+                  new HighlightsFetcher(profileId, (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
                       if (result != null && result.length > 0) {
                           main.mainBinding.profileView.highlightsList.setVisibility(View.VISIBLE);
                           main.highlightsAdapter.setData(result);
@@ -1176,14 +1176,13 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     public void onPause() {
         if (currentFeedPlayer != null) {
             currentFeedPlayer.setPlayWhenReady(false);
-            currentFeedPlayer.getPlaybackState();
         }
     }
 
     public void onResume() {
         if (currentFeedPlayer != null) {
-            currentFeedPlayer.setPlayWhenReady(true);
-            currentFeedPlayer.getPlaybackState();
+            final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
+            currentFeedPlayer.setPlayWhenReady(shouldAutoplay);
         }
     }
 

@@ -70,6 +70,7 @@ import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class Main extends BaseLanguageActivity {
+    private static final int INITIAL_DELAY_MILLIS = 200;
     public static FetchListener<String> scanHack;
     public static ItemGetter itemGetter;
     // -------- items --------
@@ -117,6 +118,7 @@ public final class Main extends BaseLanguageActivity {
     private Stack<String> queriesStack;
     private DataBox.CookieModel cookieModel;
     private Runnable runnable;
+    private Handler handler;
 
     @Override
     protected void onCreate(@Nullable final Bundle bundle) {
@@ -257,7 +259,7 @@ public final class Main extends BaseLanguageActivity {
 
         mainHelper.onIntent(getIntent());
 
-        final Handler handler = new Handler();
+        handler = new Handler();
         runnable = () -> {
             final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
                 if (result == null) {
@@ -305,7 +307,7 @@ public final class Main extends BaseLanguageActivity {
             activityAsyncTask.execute();
             handler.postDelayed(runnable, 60000);
         };
-        handler.postDelayed(runnable, 200);
+        handler.postDelayed(runnable, INITIAL_DELAY_MILLIS);
     }
 
     private void downloadSelectedItems() {
@@ -559,12 +561,18 @@ public final class Main extends BaseLanguageActivity {
     @Override
     protected void onPause() {
         if (mainHelper != null) mainHelper.onPause();
+        if (handler != null && runnable != null) {
+            handler.removeCallbacks(runnable);
+        }
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         if (mainHelper != null) mainHelper.onResume();
+        if (handler != null && runnable != null) {
+            handler.postDelayed(runnable, INITIAL_DELAY_MILLIS);
+        }
         super.onResume();
     }
 

@@ -29,7 +29,7 @@ public final class FlavorTown {
     public static void updateCheck(@NonNull final Context context) {
         Resources res = context.getResources();
         new UpdateChecker(version -> {
-            if (version != BuildConfig.VERSION_NAME && !BuildConfig.DEBUG) {
+            if (!version.equals(BuildConfig.VERSION_NAME) && !BuildConfig.DEBUG) {
                 new AlertDialog.Builder(context)
                         .setTitle(res.getString(R.string.update_available, version))
                         .setMessage(R.string.update_notice)
