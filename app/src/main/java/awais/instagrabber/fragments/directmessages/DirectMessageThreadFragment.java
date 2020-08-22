@@ -299,9 +299,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 dialogAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, dialogList);
 
                 new AlertDialog.Builder(requireContext())
-                        //.setTitle(title)
                         .setAdapter(dialogAdapter, onDialogListener)
-                        // .setNeutralButton(R.string.cancel, null)
                         .show();
             }
         };

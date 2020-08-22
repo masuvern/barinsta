@@ -172,6 +172,8 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
         downloadAction = menu.findItem(R.id.downloadAction);
         downloadAction.setVisible(false);
 
+        menu.findItem(R.id.favouriteAction).setVisible(false);
+
         downloadAction.setOnMenuItemClickListener(item -> {
             if (selectedItems.size() > 0) {
                 Utils.batchDownload(this, null, DownloadMethod.DOWNLOAD_SAVED, selectedItems);

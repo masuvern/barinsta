@@ -345,7 +345,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         ImageViewCompat.setImageTintList(iconFeed, colorStateList.withAlpha(otherIconAlpha));
                     } else {
                         // this changes toolbar title
-                        main.mainBinding.toolbar.toolbar.setTitle(slideOffset >= 0.466 ? titleDiscover : main.userQuery);
+                        main.mainBinding.toolbar.toolbar.setTitle(slideOffset >= 0.466 ? titleDiscover :
+                                (main.userQuery == null ? resources.getString(R.string.app_name) : main.userQuery));
 
                         imageTintList = ImageViewCompat.getImageTintList(iconFeed);
                         alpha = imageTintList != null ? (imageTintList.getDefaultColor() & 0xFF_000000) >> 24 : 0;

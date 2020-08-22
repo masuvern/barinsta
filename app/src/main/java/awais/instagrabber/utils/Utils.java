@@ -690,7 +690,7 @@ public final class Utils {
                         JSONObject boldItem = bold.getJSONObject(q);
                         desc = desc.substring(0, boldItem.getInt("start") + q*7) + "<b>"
                                 + desc.substring(boldItem.getInt("start") + q*7, boldItem.getInt("end") + q*7)
-                                + "</b>" + desc.substring(boldItem.getInt("end") + q*7, desc.length());
+                                + "</b>" + desc.substring(boldItem.getInt("end") + q*7);
                     }
                     actionLogModel = new DirectItemActionLogModel(desc);
                     break;
@@ -810,6 +810,7 @@ public final class Utils {
         if (settingsHelper != null) {
             isAmoledEnabled = settingsHelper.getBoolean(Constants.AMOLED_THEME);
         }
+        AppCompatDelegate.setDefaultNightMode(themeCode);
         // use amoled theme only if enabled in settings
         if (isAmoledEnabled) {
             // check if setting is set to 'Dark'
@@ -827,7 +828,6 @@ public final class Utils {
                 return;
             }
         }
-        AppCompatDelegate.setDefaultNightMode(themeCode);
     }
 
     public static void setTooltipText(final View view, @StringRes final int tooltipTextRes) {

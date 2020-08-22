@@ -92,7 +92,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     private HashtagModel hashtagModel;
     private LocationModel locationModel;
     private StoryModel[] storyModels;
-    private MenuItem downloadAction;
+    private MenuItem downloadAction, favouriteAction;
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
@@ -755,12 +755,32 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         downloadAction = menu.findItem(R.id.downloadAction);
         downloadAction.setVisible(false);
 
+        favouriteAction = menu.findItem(R.id.favouriteAction);
+        favouriteAction.setVisible(!Utils.isEmpty(cookie));
+        favouriteAction.setIcon(Utils.dataBox.getFavorite(userQuery) == null ? R.drawable.ic_not_liked : R.drawable.ic_like);
+
         downloadAction.setOnMenuItemClickListener(item -> {
             if (selectedItems.size() > 0) {
                 Utils.batchDownload(this, userQuery, DownloadMethod.DOWNLOAD_MAIN, selectedItems);
             }
             return true;
         });
+
+        favouriteAction.setOnMenuItemClickListener(item -> {
+            if (Utils.dataBox.getFavorite(userQuery) == null) {
+                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(userQuery, System.currentTimeMillis(),
+                        locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
+                favouriteAction.setIcon(R.drawable.ic_like);
+            }
+            else {
+                Utils.dataBox.delFavorite(new DataBox.FavoriteModel(userQuery,
+                        Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
+                        locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
+                favouriteAction.setIcon(R.drawable.ic_not_liked);
+            }
+            return true;
+        });
+
         return true;
     }
 

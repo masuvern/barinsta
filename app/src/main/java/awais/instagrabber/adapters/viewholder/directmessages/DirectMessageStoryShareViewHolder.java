@@ -38,11 +38,12 @@ public class DirectMessageStoryShareViewHolder extends DirectMessageItemViewHold
                 binding.tvMessage.setText(text);
                 binding.tvMessage.setVisibility(View.VISIBLE);
             }
-            final DirectItemModel.DirectItemMediaModel reelShareMedia = reelShare.getMedia();
-            final MediaItemType mediaType = reelShareMedia.getMediaType();
-            binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
-                    mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
-            getGlideRequestManager().load(reelShareMedia.getThumbUrl()).into(binding.ivMediaPreview);
+            else {
+                final DirectItemModel.DirectItemMediaModel reelShareMedia = reelShare.getMedia();
+                final MediaItemType mediaType = reelShareMedia.getMediaType();
+                binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? View.VISIBLE : View.GONE);
+                getGlideRequestManager().load(reelShareMedia.getThumbUrl()).into(binding.ivMediaPreview);
+            }
         }
     }
 }
