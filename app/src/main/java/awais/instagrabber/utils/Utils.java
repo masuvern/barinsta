@@ -70,7 +70,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.Main;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.activities.ProfileViewer;
 import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.asyncs.DownloadAsync;
@@ -941,7 +941,7 @@ public final class Utils {
             dir = new File(dir, username);
 
         if (dir.exists() || dir.mkdirs()) {
-            final Main main = method != DownloadMethod.DOWNLOAD_FEED && context instanceof Main ? (Main) context : null;
+            final MainActivity mainActivity = method != DownloadMethod.DOWNLOAD_FEED && context instanceof MainActivity ? (MainActivity) context : null;
             final ProfileViewer pv = method == DownloadMethod.DOWNLOAD_MAIN && context instanceof ProfileViewer ? (ProfileViewer) context : null;
             final SavedViewer saved = method == DownloadMethod.DOWNLOAD_SAVED && context instanceof SavedViewer ? (SavedViewer) context : null;
 
@@ -951,7 +951,7 @@ public final class Utils {
             for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
                 final BasePostModel selectedItem = itemsToDownload.get(i);
 
-                if (main == null && saved == null && pv == null) {
+                if (mainActivity == null && saved == null && pv == null) {
                     new DownloadAsync(context,
                             selectedItem.getDisplayUrl(),
                             getDownloadSaveFile(finalDir, selectedItem, ""),
@@ -973,13 +973,13 @@ public final class Utils {
                                         file -> {
                                             model.setDownloaded(true);
                                             if (saved != null) saved.deselectSelection(selectedItem);
-                                            else if (main != null) main.mainHelper.deselectSelection(selectedItem);
+                                            else if (mainActivity != null) mainActivity.mainHelper.deselectSelection(selectedItem);
                                             else if (pv != null) pv.deselectSelection(selectedItem);
                                         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             }
                         } else {
                             if (saved != null) saved.deselectSelection(selectedItem);
-                            else if (main != null) main.mainHelper.deselectSelection(selectedItem);
+                            else if (mainActivity != null) mainActivity.mainHelper.deselectSelection(selectedItem);
                             else if (pv != null) pv.deselectSelection(selectedItem);
                         }
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -1014,7 +1014,7 @@ public final class Utils {
             dir = new File(dir, username);
 
         if (dir.exists() || dir.mkdirs()) {
-            final Main main = method != DownloadMethod.DOWNLOAD_FEED && context instanceof Main ? (Main) context : null;
+            final MainActivity mainActivity = method != DownloadMethod.DOWNLOAD_FEED && context instanceof MainActivity ? (MainActivity) context : null;
 
             final int itemsToDownloadSize = itemsToDownload.size();
 
@@ -1022,7 +1022,7 @@ public final class Utils {
             for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
                 final DirectItemMediaModel selectedItem = itemsToDownload.get(i);
 
-                if (main == null) {
+                if (mainActivity == null) {
                     new DownloadAsync(context,
                             selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
                             getDownloadSaveFileDm(finalDir, selectedItem, ""),

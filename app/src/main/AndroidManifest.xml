@@ -19,7 +19,7 @@
         tools:ignore="UnusedAttribute">
 
         <activity
-            android:name=".activities.Main"
+            android:name=".activities.MainActivity"
             android:launchMode="singleTop"
             android:taskAffinity=".Main"
             android:windowSoftInputMode="adjustResize">
@@ -134,11 +134,11 @@
 
         <activity
             android:name=".activities.PostViewer"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
@@ -152,29 +152,29 @@
 
         <activity
             android:name=".activities.StoryViewer"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
             android:name=".activities.FollowViewer"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
             android:name=".activities.ProfilePicViewer"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
@@ -188,39 +188,39 @@
 
         <activity
             android:name=".activities.SavedViewer"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
             android:name=".activities.NotificationsViewer"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
             android:name=".activities.Login"
             android:label="@string/login"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <activity
             android:name=".activities.DirectMessagesActivity"
-            android:parentActivityName=".activities.Main">
+            android:parentActivityName=".activities.MainActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.Main" />
+                android:value=".activities.MainActivity" />
         </activity>
 
         <provider

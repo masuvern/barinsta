@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -22,7 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.ArrayList;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.Main;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.SimpleAdapter;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
@@ -113,8 +112,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             else Utils.showImportExportDialog(v.getContext());
 
         } else if (tag instanceof DataBox.FavoriteModel) {
-            if (Main.scanHack != null) {
-                Main.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
+            if (MainActivity.scanHack != null) {
+                MainActivity.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
                 dismiss();
             }
 

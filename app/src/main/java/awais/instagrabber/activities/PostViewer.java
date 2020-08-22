@@ -243,8 +243,7 @@ public final class PostViewer extends BaseLanguageActivity {
             }
         }
 
-        setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
-                viewerPostModel.getLocation() == null ? null : viewerPostModel.getLocation());
+        setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(), viewerPostModel.getLocation());
 
         postCaption = postModel.getPostCaption();
         viewerCaptionParent.setVisibility(View.VISIBLE);
@@ -323,8 +322,8 @@ public final class PostViewer extends BaseLanguageActivity {
                 itemGetterItems = SavedViewer.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.SAVED_ITEMS && isFromShare);
             }
-            else if (itemGetType != null && Main.itemGetter != null) {
-                itemGetterItems = Main.itemGetter.get(itemGetType);
+            else if (itemGetType != null && MainActivity.itemGetter != null) {
+                itemGetterItems = MainActivity.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.MAIN_ITEMS && isFromShare);
             } else {
                 itemGetterItems = null;

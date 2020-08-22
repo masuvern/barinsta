@@ -69,7 +69,7 @@ import static awais.instagrabber.utils.Utils.CHANNEL_ID;
 import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public final class Main extends BaseLanguageActivity {
+public final class MainActivity extends BaseLanguageActivity {
     private static final int INITIAL_DELAY_MILLIS = 200;
     public static FetchListener<String> scanHack;
     public static ItemGetter itemGetter;
@@ -90,13 +90,13 @@ public final class Main extends BaseLanguageActivity {
                 new iStoryStatusFetcher(highlightModel.getId(), null, false, false,
                         (!mainHelper.isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
                     if (result != null && result.length > 0)
-                        startActivity(new Intent(Main.this, StoryViewer.class)
+                        startActivity(new Intent(MainActivity.this, StoryViewer.class)
                                 .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
                                 .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
                                 .putExtra(Constants.EXTRAS_STORIES, result)
                         );
                     else
-                        Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
@@ -264,7 +264,7 @@ public final class Main extends BaseLanguageActivity {
             final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
                 if (result == null) {
                     if (!Utils.isEmpty(cookie)) {
-                        Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     }
                     return;
                 }
@@ -293,7 +293,7 @@ public final class Main extends BaseLanguageActivity {
                 final String join = TextUtils.join(", ", list);
                 final String notificationString = getString(R.string.activity_count_prefix) + " " + join + ".";
                 final Intent intent = new Intent(getApplicationContext(), NotificationsViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                final Notification notification = new NotificationCompat.Builder(Main.this, CHANNEL_ID)
+                final Notification notification = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
                         .setCategory(NotificationCompat.CATEGORY_STATUS)
                         .setSmallIcon(R.drawable.ic_notif)
                         .setAutoCancel(true)
