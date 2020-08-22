@@ -44,14 +44,14 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.json.JSONObject;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.PostsMediaAdapter;
@@ -244,7 +244,7 @@ public final class PostViewer extends BaseLanguageActivity {
         }
 
         setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
-                viewerPostModel.getLocation() == null ? null : viewerPostModel.getLocation());
+                viewerPostModel.getLocation());
 
         postCaption = postModel.getPostCaption();
         viewerCaptionParent.setVisibility(View.VISIBLE);

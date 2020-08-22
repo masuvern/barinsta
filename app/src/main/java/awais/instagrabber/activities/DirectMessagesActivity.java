@@ -1,10 +1,12 @@
 package awais.instagrabber.activities;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.navigation.NavController;
@@ -20,6 +22,7 @@ import awais.instagrabber.fragments.directmessages.DirectMessageThreadFragmentAr
 public class DirectMessagesActivity extends BaseLanguageActivity implements NavController.OnDestinationChangedListener {
 
     private TextView toolbarTitle;
+    private AppCompatImageView infoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +35,8 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
 
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+
+        infoButton = binding.dmInfo;
 
         final NavController navController = Navigation.findNavController(this, R.id.direct_messages_nav_host_fragment);
         navController.addOnDestinationChangedListener(this);
@@ -46,6 +51,7 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
         switch (destination.getId()) {
             case R.id.directMessagesInboxFragment:
                 setToolbarTitle(R.string.action_dms);
+                infoButton.setVisibility(View.GONE);
                 return;
             case R.id.directMessagesThreadFragment:
                 if (arguments == null) {
@@ -53,6 +59,14 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
                 }
                 final String title = DirectMessageThreadFragmentArgs.fromBundle(arguments).getTitle();
                 setToolbarTitle(title);
+                infoButton.setVisibility(View.VISIBLE);
+                return;
+            case R.id.directMessagesSettingsFragment:
+                if (arguments == null) {
+                    return;
+                }
+                setToolbarTitle(R.string.action_settings);
+                infoButton.setVisibility(View.GONE);
                 return;
         }
     }

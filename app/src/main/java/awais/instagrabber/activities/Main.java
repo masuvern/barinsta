@@ -71,6 +71,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class Main extends BaseLanguageActivity {
     private static final int INITIAL_DELAY_MILLIS = 200;
+    private static final int DELAY_MILLIS = 60000;
     public static FetchListener<String> scanHack;
     public static ItemGetter itemGetter;
     // -------- items --------
@@ -263,9 +264,7 @@ public final class Main extends BaseLanguageActivity {
         runnable = () -> {
             final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
                 if (result == null) {
-                    if (!Utils.isEmpty(cookie)) {
-                        Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(Main.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (notificationManager == null) {
@@ -304,8 +303,8 @@ public final class Main extends BaseLanguageActivity {
                 notificationManager.cancel(1800000000);
                 notificationManager.notify(1800000000, notification);
             });
-            activityAsyncTask.execute();
-            handler.postDelayed(runnable, 60000);
+            if (!Utils.isEmpty(cookie) && Utils.settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) activityAsyncTask.execute();
+            handler.postDelayed(runnable, DELAY_MILLIS);
         };
         handler.postDelayed(runnable, INITIAL_DELAY_MILLIS);
     }

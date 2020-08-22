@@ -1,8 +1,8 @@
 package awais.instagrabber.models;
 
-import awais.instagrabber.models.enums.MediaItemType;
-
 import org.json.JSONObject;
+
+import awais.instagrabber.models.enums.MediaItemType;
 
 public final class FeedModel extends PostModel {
     private final ProfileModel profileModel;

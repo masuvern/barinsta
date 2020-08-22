@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.R;
-import awais.instagrabber.adapters.CommentsAdapter;
 import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.NotificationModel;

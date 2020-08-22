@@ -33,7 +33,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.material.appbar.AppBarLayout;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;

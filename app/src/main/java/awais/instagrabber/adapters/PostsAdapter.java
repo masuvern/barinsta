@@ -1,7 +1,6 @@
 package awais.instagrabber.adapters;
 
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,18 +16,12 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.PostViewHolder;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.MediaItemType;
-import awaisomereport.LogCollector;
-
-import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class PostsAdapter extends RecyclerView.Adapter<PostViewHolder> {
     private final ArrayList<PostModel> postModels;

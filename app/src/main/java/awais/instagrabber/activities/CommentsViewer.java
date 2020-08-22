@@ -9,10 +9,10 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-import android.view.inputmethod.InputMethodManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -259,7 +259,7 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
                             (commentModel == null ? "" : commentModel.getId());
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     urlConnection.setRequestProperty("Content-Length", "" +
-                            Integer.toString(urlParameters.getBytes().length));
+                            urlParameters.getBytes().length);
                     urlConnection.setDoOutput(true);
                     DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
                     wr.writeBytes(urlParameters);

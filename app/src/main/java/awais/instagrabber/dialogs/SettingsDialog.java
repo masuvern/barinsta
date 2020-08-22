@@ -39,6 +39,7 @@ import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.AUTOPLAY_VIDEOS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
+import static awais.instagrabber.utils.Constants.CHECK_ACTIVITY;
 import static awais.instagrabber.utils.Constants.COOKIE;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
@@ -132,6 +133,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         final AppCompatCheckBox cbAutoplayVideos = contentView.findViewById(R.id.cbAutoplayVideos);
         final AppCompatCheckBox cbDownloadUsername = contentView.findViewById(R.id.cbDownloadUsername);
         final AppCompatCheckBox cbMarkAsSeen = contentView.findViewById(R.id.cbMarkAsSeen);
+        final AppCompatCheckBox cbActivity = contentView.findViewById(R.id.cbActivity);
         final AppCompatCheckBox cbInstadp = contentView.findViewById(R.id.cbInstadp);
         final AppCompatCheckBox cbStoriesig = contentView.findViewById(R.id.cbStoriesig);
         final AppCompatCheckBox cbAmoledTheme = contentView.findViewById(R.id.cbAmoledTheme);
@@ -144,6 +146,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         cbInstadp.setChecked(settingsHelper.getBoolean(INSTADP));
         cbStoriesig.setChecked(settingsHelper.getBoolean(STORIESIG));
         cbAmoledTheme.setChecked(settingsHelper.getBoolean(AMOLED_THEME));
+        cbActivity.setChecked(settingsHelper.getBoolean(CHECK_ACTIVITY));
         cbAutoloadPosts.setChecked(settingsHelper.getBoolean(AUTOLOAD_POSTS));
         cbDownloadUsername.setChecked(settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER));
 
@@ -157,6 +160,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         setupListener(cbInstadp);
         setupListener(cbStoriesig);
         setupListener(cbAmoledTheme);
+        setupListener(cbActivity);
 
         btnSaveTo.setEnabled(cbSaveTo.isChecked());
 
@@ -228,6 +232,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         else if (id == R.id.cbInstadp) settingsHelper.putBoolean(INSTADP, checked);
         else if (id == R.id.cbStoriesig) settingsHelper.putBoolean(STORIESIG, checked);
         else if (id == R.id.cbAmoledTheme) settingsHelper.putBoolean(AMOLED_THEME, checked);
+        else if (id == R.id.cbActivity) settingsHelper.putBoolean(CHECK_ACTIVITY, checked);
         else if (id == R.id.cbSaveTo) {
             settingsHelper.putBoolean(FOLDER_SAVE_TO, checked);
             btnSaveTo.setEnabled(checked);

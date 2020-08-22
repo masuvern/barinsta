@@ -21,9 +21,9 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ViewerPostModel;
+import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.models.enums.DownloadMethod;
 
 public final class MultiDirectDialog extends BaseLanguageActivity {
     public final ArrayList<BasePostModel> selectedItems = new ArrayList<>();

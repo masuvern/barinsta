@@ -46,6 +46,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private String endCursor;
     private AsyncTask<Void, Void, InboxModel> currentlyRunning;
     private InboxThreadModelListViewModel listViewModel;
+    public static boolean afterLeave = false;
 
     private final FetchListener<InboxModel> fetchListener = new FetchListener<InboxModel>() {
         @Override
@@ -113,6 +114,15 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         listViewModel.getList().postValue(Collections.emptyList());
         stopCurrentExecutor();
         currentlyRunning = new InboxFetcher(null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (afterLeave) {
+            onRefresh();
+            afterLeave = false;
+        }
     }
 
     private void initData() {

@@ -1,28 +1,22 @@
 package awais.instagrabber.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.util.ArrayList;
-
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.NotificationViewHolder;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.NotificationModel;
-import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.models.enums.NotificationType;
 
 public final class NotificationsAdapter extends RecyclerView.Adapter<NotificationViewHolder> {
     private final View.OnClickListener onClickListener;

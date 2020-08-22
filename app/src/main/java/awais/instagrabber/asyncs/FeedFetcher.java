@@ -14,10 +14,10 @@ import java.util.ArrayList;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;

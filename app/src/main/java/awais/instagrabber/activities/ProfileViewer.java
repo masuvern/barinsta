@@ -16,15 +16,10 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -54,12 +47,10 @@ import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
-import awais.instagrabber.customviews.MouseDrawer;
 import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
-import awais.instagrabber.customviews.helpers.VideoAwareRecyclerScroller;
 import awais.instagrabber.databinding.ActivityProfileBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -78,7 +69,6 @@ import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
-import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class ProfileViewer extends BaseLanguageActivity implements SwipeRefreshLayout.OnRefreshListener {
