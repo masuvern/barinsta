@@ -16,6 +16,8 @@
 
 Or you can download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
 
+Version status: [F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. [GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
+
 ### Presentation
 
 InstaGrabber is an alternative Instagram client for Android. You can...
