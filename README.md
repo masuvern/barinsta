@@ -16,7 +16,7 @@
 
 Or you can download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
 
-Version status: [F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. [GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
+Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. ![GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
 
 ### Presentation
 
@@ -39,12 +39,12 @@ It can be used as a drop-in replacement for read (and some write) functionalitie
 
 <sub>* Requires [login](#how-to-log-in). You must be a current follower of the desired private accounts, this app cannot hack people (which I have to state despite the obvious)!</sub>
 
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/1.jpg" alt="Profile" width="15%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/2.jpg" alt="Post" width="15%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/3.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/3.jpg" alt="Comments" width="15%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/4.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/4.jpg" alt="Story (Highlight shown)" width="15%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/5.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/5.jpg" alt="Hashtag" width="15%"/></a>
-<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/phoneScreenshots/6.jpg"><img src="./fastlane/metadata/android/images/phoneScreenshots/6.jpg" alt="Location" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" alt="Profile" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" alt="Post" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/3.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" alt="Comments" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/4.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" alt="Story (Highlight shown)" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/5.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" alt="Hashtag" width="15%"/></a>
+<a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/6.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" alt="Location" width="15%"/></a>
 
 ### Contact us
 
