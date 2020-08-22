@@ -27,15 +27,15 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
 
             HttpURLConnection conn =
                     (HttpURLConnection) new URL("https://github.com/austinhuang0131/instagrabber/releases/latest").openConnection();
-            conn.setUseCaches(false);
             conn.setInstanceFollowRedirects(false);
+            conn.setUseCaches(false);
             conn.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
             conn.connect();
 
             final int responseCode = conn.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP && !BuildConfig.DEBUG) {
+            if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
                 version = conn.getHeaderField("Location").split("/v")[1];
-                return version != BuildConfig.VERSION_NAME;
+                return !version.equals(BuildConfig.VERSION_NAME);
             }
 
             conn.disconnect();
