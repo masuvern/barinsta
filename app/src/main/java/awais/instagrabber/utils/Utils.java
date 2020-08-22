@@ -40,9 +40,12 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.exoplayer2.database.ExoDatabaseProvider;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.SimpleCache;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.internal.StringUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -105,6 +108,8 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 
 public final class Utils {
     private static final String TAG = "Utils";
+    private static final int MAX_BYTES = 10 * 1024 * 1024;
+
     public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
     public static DataBox dataBox;
@@ -122,6 +127,7 @@ public final class Utils {
     public static ClipboardManager clipboardManager;
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
+    public static SimpleCache simpleCache;
 
     public static void setupCookies(final String cookieRaw) {
         final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
@@ -1399,5 +1405,17 @@ public final class Utils {
             builder.append(param.getValue() != null ? param.getValue() : "");
         }
         return builder.toString();
+    }
+
+    public static SimpleCache getSimpleCacheInstance(final Context context) {
+        if (context == null) {
+            return null;
+        }
+        final ExoDatabaseProvider exoDatabaseProvider = new ExoDatabaseProvider(context);
+        final File cacheDir = context.getCacheDir();
+        if (simpleCache == null && cacheDir != null) {
+            simpleCache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(MAX_BYTES), exoDatabaseProvider);
+        }
+        return simpleCache;
     }
 }
