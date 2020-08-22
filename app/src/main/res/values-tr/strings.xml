@@ -179,6 +179,7 @@
     <string name="downloader_unknown_error">Bilinmeyen bir hata oluştu!!!</string>
     <string name="downloader_error_creating_folder">Klasör oluşturma hatası!</string>
     <string name="downloader_error_download_file">Dosya indirme hatası</string>
+    <string name="downloader_too_many">Tek seferde en fazla 100 gönderi indirebilirsin, açgözlü olma!</string>
     <string name="comment_viewer_copy_user">Kullanıcı adını kopyala</string>
     <string name="comment_viewer_copy_comment">Yorumu kopyala</string>
     <string name="comment_viewer_reply_comment">Yoruma cevap ver</string>
@@ -219,10 +220,10 @@
     <string name="select_picture">Resim Seç</string>
     <string name="uploading">Yükleniyor...</string>
     <string name="activity_count_prefix">Sahip olduğun:</string>
-    <string name="activity_count_relationship" comment="activity_count_relationship">%d takip</string>
-    <string name="activity_count_comments" comment="activity_count_comments">%d yorum</string>
-    <string name="activity_count_commentlikes" comment="activity_count_commentlikes">%d yorum beğenisi</string>
-    <string name="activity_count_usertags" comment="activity_count_usertags">%d kullanıcı etiketi</string>
-    <string name="activity_count_likes" comment="activity_count_likes">%d beğeni</string>
+    <string name="activity_count_relationship">%d takip</string>
+    <string name="activity_count_comments">%d yorum</string>
+    <string name="activity_count_commentlikes">%d yorum beğenisi</string>
+    <string name="activity_count_usertags">%d kullanıcı etiketi</string>
+    <string name="activity_count_likes">%d beğeni</string>
     <string name="activity_notloggedin">Bu bildirime tıklamadan önce çıkış yaptın?!</string>
 </resources>

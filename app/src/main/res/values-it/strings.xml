@@ -179,6 +179,7 @@
     <string name="downloader_unknown_error">Si è verificato un errore sconosciuto!!!</string>
     <string name="downloader_error_creating_folder">Errore durante la creazione della cartella!</string>
     <string name="downloader_error_download_file">Errore durante il download del file</string>
+    <string name="downloader_too_many">Puoi scaricare solo 100 messaggi alla volta. Non essere troppo ingordo!</string>
     <string name="comment_viewer_copy_user">Copia nome utente</string>
     <string name="comment_viewer_copy_comment">Copia commento</string>
     <string name="comment_viewer_reply_comment">Rispondi al commento</string>
@@ -219,10 +220,10 @@
     <string name="select_picture">Seleziona immagine</string>
     <string name="uploading">Upload in corso...</string>
     <string name="activity_count_prefix">Hai:</string>
-    <string name="activity_count_relationship" comment="activity_count_relationship">%d seguaci</string>
-    <string name="activity_count_comments" comment="activity_count_comments">%d commenti</string>
-    <string name="activity_count_commentlikes" comment="activity_count_commentlikes">%d like commento</string>
-    <string name="activity_count_usertags" comment="activity_count_usertags">%d usertags</string>
-    <string name="activity_count_likes" comment="activity_count_likes">%d like</string>
+    <string name="activity_count_relationship">%d seguaci</string>
+    <string name="activity_count_comments">%d commenti</string>
+    <string name="activity_count_commentlikes">%d like commento</string>
+    <string name="activity_count_usertags">%d usertags</string>
+    <string name="activity_count_likes">%d like</string>
     <string name="activity_notloggedin">Ti sei disconnesso prima di cliccare su questa notifica?!</string>
 </resources>
