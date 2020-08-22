@@ -28,7 +28,9 @@ import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 import static awais.instagrabber.utils.Utils.telegramPackage;
 
-public final class InstaApp extends MultiDexApplication {
+public final class InstaGrabberApplication extends MultiDexApplication {
+    private static final String TAG = "InstaGrabberApplication";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -39,7 +41,7 @@ public final class InstaApp extends MultiDexApplication {
                         .getMethod("setEnabled", boolean.class)
                         .invoke(null, true);
             } catch (Exception e) {
-                Log.e("InstaApp", "Error", e);
+                Log.e(TAG, "Error", e);
             }
         }
 
