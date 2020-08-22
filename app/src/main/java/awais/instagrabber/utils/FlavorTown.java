@@ -29,27 +29,29 @@ public final class FlavorTown {
     public static void updateCheck(@NonNull final Context context) {
         Resources res = context.getResources();
         new UpdateChecker(version -> {
-            new AlertDialog.Builder(context)
-                    .setTitle(res.getString(R.string.update_available, version))
-                    .setMessage(R.string.update_notice)
-                    .setNeutralButton(R.string.cancel, null)
-                    .setNegativeButton(R.string.action_github, (dialog, which) -> {
-                        try {
-                            context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
-                                    Uri.parse("https://github.com/austinhuang0131/instagrabber/releases/latest")));
-                        } catch (final ActivityNotFoundException e) {
-                            // do nothing
-                        }
-                    })
-                    .setPositiveButton(R.string.action_fdroid, (dialog, which) -> {
-                        try {
-                            context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
-                                    Uri.parse("https://f-droid.org/packages/me.austinhuang.instagrabber/")));
-                        } catch (final ActivityNotFoundException e) {
-                            // do nothing
-                        }
-                    })
-                    .show();
+            if (version != BuildConfig.VERSION_NAME && !BuildConfig.DEBUG) {
+                new AlertDialog.Builder(context)
+                        .setTitle(res.getString(R.string.update_available, version))
+                        .setMessage(R.string.update_notice)
+                        .setNeutralButton(R.string.cancel, null)
+                        .setNegativeButton(R.string.action_github, (dialog, which) -> {
+                            try {
+                                context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
+                                        Uri.parse("https://github.com/austinhuang0131/instagrabber/releases/latest")));
+                            } catch (final ActivityNotFoundException e) {
+                                // do nothing
+                            }
+                        })
+                        .setPositiveButton(R.string.action_fdroid, (dialog, which) -> {
+                            try {
+                                context.startActivity(new Intent(Intent.ACTION_VIEW).setData(
+                                        Uri.parse("https://f-droid.org/packages/me.austinhuang.instagrabber/")));
+                            } catch (final ActivityNotFoundException e) {
+                                // do nothing
+                            }
+                        })
+                        .show();
+            }
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
