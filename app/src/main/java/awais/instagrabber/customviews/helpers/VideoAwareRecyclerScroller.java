@@ -20,7 +20,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
-import com.google.android.exoplayer2.video.VideoListener;
 
 import java.util.List;
 
@@ -237,28 +236,26 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
                 if (playerView == null) return;
                 playerView.setPlayer(player);
 
-                if (player != null) {
-                    btnMute = itemView.findViewById(R.id.btnMute);
+                btnMute = itemView.findViewById(R.id.btnMute);
 
-                    float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
-                    if (vol == 0f && Utils.sessionVolumeFull) vol = 1f;
-                    player.setVolume(vol);
+                float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
+                if (vol == 0f && Utils.sessionVolumeFull) vol = 1f;
+                player.setVolume(vol);
 
-                    if (btnMute != null) {
-                        btnMute.setVisibility(View.VISIBLE);
-                        btnMute.setImageResource(vol == 0f ? R.drawable.vol : R.drawable.mute);
-                        btnMute.setOnClickListener(muteClickListener);
-                    }
-                    final DataSource.Factory factory = cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory;
-                    final ProgressiveMediaSource.Factory sourceFactory = new ProgressiveMediaSource.Factory(factory);
-                    final ProgressiveMediaSource mediaSource = sourceFactory.createMediaSource(Uri.parse(feedModels.get(itemPos).getDisplayUrl()));
-
-                    player.setRepeatMode(Player.REPEAT_MODE_ALL);
-                    player.prepare(mediaSource);
-                    player.setVolume(vol);
-
-                    playerView.setOnClickListener(v -> player.setPlayWhenReady(!player.getPlayWhenReady()));
+                if (btnMute != null) {
+                    btnMute.setVisibility(View.VISIBLE);
+                    btnMute.setImageResource(vol == 0f ? R.drawable.vol : R.drawable.mute);
+                    btnMute.setOnClickListener(muteClickListener);
                 }
+                final DataSource.Factory factory = cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory;
+                final ProgressiveMediaSource.Factory sourceFactory = new ProgressiveMediaSource.Factory(factory);
+                final ProgressiveMediaSource mediaSource = sourceFactory.createMediaSource(Uri.parse(feedModels.get(itemPos).getDisplayUrl()));
+
+                player.setRepeatMode(Player.REPEAT_MODE_ALL);
+                player.prepare(mediaSource);
+                player.setVolume(vol);
+
+                playerView.setOnClickListener(v -> player.setPlayWhenReady(!player.getPlayWhenReady()));
             }
 
             if (videoChangeCallback != null) videoChangeCallback.playerChanged(itemPos, player);
