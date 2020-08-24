@@ -432,7 +432,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                             (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
                             stories -> {
                                 storyModels = stories;
-                                // if (stories != null && stories.length > 0)
+                                if (stories != null && stories.length > 0)
                                     profileBinding.profileView.mainProfileImage.setStoriesBorder();
                             }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 

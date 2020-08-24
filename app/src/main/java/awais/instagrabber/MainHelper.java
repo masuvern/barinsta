@@ -965,8 +965,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), false,
                             result -> {
                                 mainActivity.storyModels = result;
-                                // if (result != null && result.length > 0)
-                                mainActivity.mainBinding.profileView.mainProfileImage.setStoriesBorder();
+                                if (result != null && result.length > 0)
+                                    mainActivity.mainBinding.profileView.mainProfileImage.setStoriesBorder();
                             }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                     new HighlightsFetcher(profileId, (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
