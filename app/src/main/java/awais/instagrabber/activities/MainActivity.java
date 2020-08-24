@@ -551,8 +551,8 @@ public final class MainActivity extends BaseLanguageActivity {
             finish();
         else if (requestCode == 6007)
             Utils.showImportExportDialog(this);
-        else if (requestCode == 6969 && mainHelper.currentFeedPlayer != null)
-            mainHelper.currentFeedPlayer.setPlayWhenReady(true);
+        // else if (requestCode == 6969 && mainHelper.currentFeedPlayer != null)
+        //     mainHelper.currentFeedPlayer.setPlayWhenReady(true);
     }
 
     @Override

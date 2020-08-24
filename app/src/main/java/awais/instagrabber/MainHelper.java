@@ -39,7 +39,6 @@ import com.facebook.datasource.BaseDataSubscriber;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.request.ImageRequest;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -107,6 +106,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "MainHelper";
     private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
     private static final int RESIZED_VIDEO_HEIGHT = (int) (0.8 * Utils.displayMetrics.heightPixels);
+    public static final boolean SHOULD_AUTO_PLAY = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
 
     private static AsyncTask<?, ?, ?> currentlyExecuting;
     private AsyncTask<Void, Void, FeedStoryModel[]> prevStoriesFetcher;
@@ -279,7 +279,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             if (result != null) {
                 topicIds = result.getIds();
                 rankToken = result.getToken();
-                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
                         mainActivity, android.R.layout.simple_spinner_dropdown_item, result.getNames());
                 mainActivity.mainBinding.discoverType.setAdapter(spinnerArrayAdapter);
             }
@@ -340,10 +340,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private FeedAdapter feedAdapter;
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
     private DiscoverAdapter discoverAdapter;
-    public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
     private String cookie = settingsHelper.getString(Constants.COOKIE);
     private boolean isLoggedIn;
     private RequestManager glide;
+    private VideoAwareRecyclerScroller videoAwareRecyclerScroller;
 
     public MainHelper(@NonNull final MainActivity mainActivity) {
         stopCurrentExecutor();
@@ -443,9 +443,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 @Override
                 public void onDrawerOpened(@NonNull final View drawerView, @MouseDrawer.EdgeGravity final int gravity) {
                     if (gravity == GravityCompat.START || drawerView == mainActivity.mainBinding.feedView.feedLayout) {
-                        if (currentFeedPlayer != null) {
-                            final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
-                            currentFeedPlayer.setPlayWhenReady(shouldAutoplay);
+                        if (videoAwareRecyclerScroller != null) {
+                            if (SHOULD_AUTO_PLAY) {
+                                videoAwareRecyclerScroller.startPlaying();
+                            }
                         }
                     } else {
                         // clear selection
@@ -456,8 +457,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 @Override
                 public void onDrawerClosed(@NonNull final View drawerView, @MouseDrawer.EdgeGravity final int gravity) {
                     if (gravity == GravityCompat.START || drawerView == mainActivity.mainBinding.feedView.feedLayout) {
-                        if (currentFeedPlayer != null) {
-                            currentFeedPlayer.setPlayWhenReady(false);
+                        if (videoAwareRecyclerScroller != null) {
+                            videoAwareRecyclerScroller.stopPlaying();
                         }
                     } else {
                         // clear selection
@@ -674,9 +675,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             }
         }));
 
-        final boolean shouldAutoPlay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
-        if (shouldAutoPlay) {
-            mainActivity.mainBinding.feedView.feedPosts.addOnScrollListener(new VideoAwareRecyclerScroller());
+        if (SHOULD_AUTO_PLAY) {
+            videoAwareRecyclerScroller = new VideoAwareRecyclerScroller();
+            mainActivity.mainBinding.feedView.feedPosts.addOnScrollListener(videoAwareRecyclerScroller);
         }
         mainActivity.mainBinding.feedView.feedPosts.addOnScrollListener(new PauseGlideOnFlingScrollListener(glide));
 
@@ -1338,15 +1339,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     }
 
     public void onPause() {
-        if (currentFeedPlayer != null) {
-            currentFeedPlayer.setPlayWhenReady(false);
+        if (videoAwareRecyclerScroller != null) {
+            videoAwareRecyclerScroller.stopPlaying();
         }
     }
 
     public void onResume() {
-        if (currentFeedPlayer != null) {
-            final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
-            currentFeedPlayer.setPlayWhenReady(shouldAutoplay);
+        if (videoAwareRecyclerScroller != null && SHOULD_AUTO_PLAY) {
+            videoAwareRecyclerScroller.startPlaying();
         }
     }
 

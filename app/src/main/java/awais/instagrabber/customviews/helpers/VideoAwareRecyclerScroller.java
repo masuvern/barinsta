@@ -216,6 +216,20 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
         return null;
     }
 
+    public void startPlaying() {
+        if (currentlyPlayingViewHolder == null) {
+            return;
+        }
+        currentlyPlayingViewHolder.startPlaying();
+    }
+
+    public void stopPlaying() {
+        if (currentlyPlayingViewHolder == null) {
+            return;
+        }
+        currentlyPlayingViewHolder.stopPlaying();
+    }
+
 //     private synchronized void attachVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
 //         synchronized (LOCK) {
 //             if (recyclerView != null) {
