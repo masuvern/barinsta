@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.text.InputType;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -18,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,16 +39,15 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
+import org.json.JSONObject;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.UUID;
-
-import org.json.JSONObject;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -62,12 +59,12 @@ import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.ActivityStoryViewerBinding;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.stickers.PollModel;
-import awais.instagrabber.models.stickers.QuestionModel;
-import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.stickers.PollModel;
+import awais.instagrabber.models.stickers.QuestionModel;
+import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -285,7 +282,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                 quiz = (QuizModel) quiz;
                 String[] choices = new String[quiz.getChoices().length];
                 for (int q = 0; q < choices.length; ++q) {
-                    choices[q] = (quiz.getMyChoice() == q ? "√ " :"") + quiz.getChoices()[q]+ " (" + String.valueOf(quiz.getCounts()[q]) + ")";
+                    choices[q] = (quiz.getMyChoice() == q ? "√ " :"") + quiz.getChoices()[q]+ " (" + quiz.getCounts()[q] + ")";
                 }
                 new AlertDialog.Builder(this).setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, choices), (d,w) -> {
@@ -700,8 +697,8 @@ final String url = "https://i.instagram.com/api/v1/media/"+currentStory.getStory
                 String urlParameters = "reelMediaId="+currentStory.getStoryMediaId().split("_")[0]
                         +"&reelMediaOwnerId="+currentStory.getUserId()
                         +"&reelId="+currentStory.getUserId()
-                        +"&reelMediaTakenAt="+String.valueOf(currentStory.getTimestamp())
-                        +"&viewSeenAt="+String.valueOf(currentStory.getTimestamp());
+                        +"&reelMediaTakenAt="+ currentStory.getTimestamp()
+                        +"&viewSeenAt="+ currentStory.getTimestamp();
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
@@ -738,7 +735,7 @@ final String url = "https://i.instagram.com/api/v1/media/"+currentStory.getStory
                         +"\",\"recipient_users\":\"["+currentStory.getUserId() // <- string of array of number (not joking)
                         +"]\"}");
                 urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                urlConnection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+                urlConnection.setRequestProperty("Content-Length", "" + urlParameters.getBytes().length);
                 urlConnection.setDoOutput(true);
                 DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
                 wr.writeBytes(urlParameters);

@@ -22,5 +22,19 @@
         <argument
             android:name="title"
             app:argType="string" />
+        <action
+            android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"
+            app:destination="@id/directMessagesSettingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/directMessagesSettingsFragment"
+        android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"
+        android:label="DirectMessagesSettingsFragment">
+        <argument
+            android:name="threadId"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string" />
     </fragment>
 </navigation>

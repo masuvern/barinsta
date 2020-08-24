@@ -7,7 +7,6 @@ import androidx.core.text.HtmlCompat;
 
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmTextBinding;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 
 import static androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT;

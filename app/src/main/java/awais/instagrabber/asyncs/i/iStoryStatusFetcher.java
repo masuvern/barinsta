@@ -11,11 +11,11 @@ import java.net.URL;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.StoryModel;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
-import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -149,7 +149,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                         if (locations != null) {
                             for (int h = 0; h < locations.length(); ++h) {
                                 mentions[h + (hashtags == null ? 0 : hashtags.length()) + (atmarks == null ? 0 : atmarks.length())] =
-                                        String.valueOf(locations.getJSONObject(h).getJSONObject("location").getLong("pk"))
+                                        locations.getJSONObject(h).getJSONObject("location").getLong("pk")
                                                 +"/ ("+locations.getJSONObject(h).getJSONObject("location").getString("short_name")+")";
                             }
                         }

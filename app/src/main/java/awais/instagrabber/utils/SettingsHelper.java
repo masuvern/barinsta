@@ -14,6 +14,7 @@ import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.AUTOPLAY_VIDEOS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
+import static awais.instagrabber.utils.Constants.CHECK_ACTIVITY;
 import static awais.instagrabber.utils.Constants.COOKIE;
 import static awais.instagrabber.utils.Constants.CUSTOM_DATE_TIME_FORMAT;
 import static awais.instagrabber.utils.Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED;
@@ -110,7 +111,7 @@ public final class SettingsHelper {
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, INSTADP, STORIESIG, AMOLED_THEME})
+            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY})
     public @interface BooleanSettings {}
 
     @StringDef({APP_THEME, APP_LANGUAGE, PREV_INSTALL_VERSION})

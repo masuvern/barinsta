@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 
 import java.util.Date;
 
-import awais.instagrabber.utils.Utils;
 import awais.instagrabber.models.enums.NotificationType;
+import awais.instagrabber.utils.Utils;
 
 public final class NotificationModel {
     private final String id, username, profilePicUrl, shortcode, previewUrl;

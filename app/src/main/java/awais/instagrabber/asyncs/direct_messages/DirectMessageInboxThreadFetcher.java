@@ -47,7 +47,7 @@ public final class DirectMessageInboxThreadFetcher extends AsyncTask<Void, Void,
         InboxThreadModel result = null;
         final Map<String, String> queryParamsMap = new HashMap<>();
         queryParamsMap.put("visual_message_return_type", "unseen");
-        queryParamsMap.put("direction", direction.getValue());
+        if (direction != null) queryParamsMap.put("direction", direction.getValue());
         if (!Utils.isEmpty(endCursor)) {
             queryParamsMap.put("cursor", endCursor);
         }

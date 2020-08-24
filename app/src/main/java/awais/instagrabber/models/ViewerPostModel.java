@@ -1,6 +1,7 @@
 package awais.instagrabber.models;
 
 import org.json.JSONObject;
+
 import awais.instagrabber.models.enums.MediaItemType;
 
 public final class ViewerPostModel extends BasePostModel {

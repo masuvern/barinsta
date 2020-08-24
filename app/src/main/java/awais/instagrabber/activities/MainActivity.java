@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.MainHelper;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.HighlightsAdapter;
@@ -71,6 +70,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class MainActivity extends BaseLanguageActivity {
     private static final int INITIAL_DELAY_MILLIS = 200;
+    private static final int DELAY_MILLIS = 60000;
     public static FetchListener<String> scanHack;
     public static ItemGetter itemGetter;
 
@@ -166,9 +166,9 @@ public final class MainActivity extends BaseLanguageActivity {
             final FetchListener<String> fetchListener = username -> {
                 if (!Utils.isEmpty(username)) {
                     // if (!BuildConfig.DEBUG) {
-                        userQuery = username;
-                        if (mainHelper != null && !mainBinding.profileView.swipeRefreshLayout.isRefreshing())
-                            mainHelper.onRefresh();
+                    userQuery = username;
+                    if (mainHelper != null && !mainBinding.profileView.swipeRefreshLayout.isRefreshing())
+                        mainHelper.onRefresh();
                     // }
                     // adds cookies to database for quick access
                     cookieModel = Utils.dataBox.getCookie(uid);
@@ -215,8 +215,8 @@ public final class MainActivity extends BaseLanguageActivity {
                         ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
             } else
                 intent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
-                        .putExtra(Constants.EXTRAS_STORIES, storyModels)
-                        .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
+                                                            .putExtra(Constants.EXTRAS_STORIES, storyModels)
+                                                            .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
             startActivity(intent);
         };
 
@@ -231,7 +231,7 @@ public final class MainActivity extends BaseLanguageActivity {
                 } else {
                     // because sometimes configuration changes made this crash on some phones
                     new AlertDialog.Builder(this).setAdapter(profileDialogAdapter, profileDialogListener)
-                            .setNeutralButton(R.string.cancel, null).show();
+                                                 .setNeutralButton(R.string.cancel, null).show();
                 }
             }
         };
@@ -263,13 +263,7 @@ public final class MainActivity extends BaseLanguageActivity {
         handler = new Handler();
         runnable = () -> {
             final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(uid, cookie, result -> {
-                if (result == null) {
-                    if (!Utils.isEmpty(cookie)) {
-                        Toast.makeText(MainActivity.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    }
-                    return;
-                }
-                if (notificationManager == null) {
+                if (result == null || notificationManager == null) {
                     return;
                 }
                 final List<String> list = new ArrayList<>();
@@ -306,7 +300,9 @@ public final class MainActivity extends BaseLanguageActivity {
                 notificationManager.notify(1800000000, notification);
             });
             activityAsyncTask.execute();
-            handler.postDelayed(runnable, 60000);
+            if (!Utils.isEmpty(cookie) && Utils.settingsHelper.getBoolean(Constants.CHECK_ACTIVITY))
+                activityAsyncTask.execute();
+            handler.postDelayed(runnable, DELAY_MILLIS);
         };
         handler.postDelayed(runnable, INITIAL_DELAY_MILLIS);
     }

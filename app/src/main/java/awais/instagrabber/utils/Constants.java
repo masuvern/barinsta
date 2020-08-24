@@ -23,6 +23,7 @@ public final class Constants {
     public static final String INSTADP = "instadp";
     public static final String STORIESIG = "storiesig";
     public static final String AMOLED_THEME = "amoled_theme";
+    public static final String CHECK_ACTIVITY = "check_activity";
     // never Export
     public static final String COOKIE = "cookie";
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";

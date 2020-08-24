@@ -20,11 +20,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,8 +36,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -44,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.PostViewer;
@@ -75,7 +76,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private static final int PICK_IMAGE = 100;
 
     private FragmentActivity fragmentActivity;
-    private String threadId;
+    private String threadId, threadTitle;
     private String cursor;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private final String myId = Utils.getUserIdFromCookie(cookie);
@@ -83,6 +84,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
+    private AppCompatImageView dmInfo;
     private boolean hasSentSomething, hasDeletedSomething;
     private boolean hasOlder = true;
 
@@ -131,12 +133,6 @@ public class DirectMessageThreadFragment extends Fragment {
                 leftUsers.clear();
                 leftUsers.addAll(Arrays.asList(result.getLeftUsers()));
 
-                // thread title is already comma separated username, so no need to set by ourselves
-                // String[] users = new String[result.getUsers().length];
-                // for (int i = 0; i < users.length; ++i) {
-                //     users[i] = result.getUsers()[i].getUsername();
-                // }
-
                 List<DirectItemModel> list = listViewModel.getList().getValue();
                 final List<DirectItemModel> newList = Arrays.asList(result.getItems());
                 list = list != null ? new LinkedList<>(list) : new LinkedList<>();
@@ -170,11 +166,18 @@ public class DirectMessageThreadFragment extends Fragment {
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
+        CoordinatorLayout containerTwo = (CoordinatorLayout) container.getParent();
+        dmInfo = containerTwo.findViewById(R.id.dmInfo);
         final LinearLayout root = binding.getRoot();
+        listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
         if (getArguments() == null) {
             return root;
         }
-        threadId = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
+        if (!DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId().equals(threadId)) {
+            listViewModel.empty();
+            threadId = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
+        }
+        threadTitle = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getTitle();
         binding.swipeRefreshLayout.setEnabled(false);
         messageList = binding.messageList;
         messageList.setHasFixedSize(true);
@@ -190,6 +193,11 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener).execute(); // serial because we don't want messages to be randomly ordered
         }));
+        dmInfo.setOnClickListener(v -> {
+            final NavDirections action =
+                    DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
+            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+        });
 
         final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
             if (which == 0) {
@@ -306,9 +314,10 @@ public class DirectMessageThreadFragment extends Fragment {
         final MentionClickListener mentionClickListener = (view, text, isHashtag) -> searchUsername(text);
         final DirectMessageItemsAdapter adapter = new DirectMessageItemsAdapter(users, leftUsers, onClickListener, mentionClickListener);
         messageList.setAdapter(adapter);
-        listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
         listViewModel.getList().observe(fragmentActivity, adapter::submitList);
-        new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (listViewModel.isEmpty()) {
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
         return root;
     }
 
@@ -420,12 +429,24 @@ public class DirectMessageThreadFragment extends Fragment {
 
     public static class DirectItemModelListViewModel extends ViewModel {
         private MutableLiveData<List<DirectItemModel>> list;
+        private boolean isEmpty;
 
         public MutableLiveData<List<DirectItemModel>> getList() {
             if (list == null) {
                 list = new MutableLiveData<>();
+                isEmpty = true;
             }
+            else isEmpty = false;
             return list;
+        }
+
+        public boolean isEmpty() {
+            return isEmpty;
+        }
+
+        public void empty() {
+            list = null;
+            isEmpty = true;
         }
     }
 
