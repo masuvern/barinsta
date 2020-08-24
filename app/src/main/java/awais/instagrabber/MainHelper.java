@@ -1361,32 +1361,6 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         return returnvalue;
     }
 
-    // class MyTask extends AsyncTask<Void, Bitmap, Void> {
-    //     private Bitmap mIcon_val;
-    //
-    //     protected Void doInBackground(Void... voids) {
-    //         try {
-    //             mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(
-    //                     (mainActivity.hashtagModel != null) ? mainActivity.hashtagModel.getSdProfilePic() : (
-    //                             (mainActivity.locationModel != null) ? mainActivity.locationModel.getSdProfilePic() :
-    //                                     mainActivity.profileModel.getSdProfilePic())
-    //             ).getContent());
-    //         } catch (Throwable ex) {
-    //             Log.e("austin_debug", "bitmap: " + ex);
-    //         }
-    //         return null;
-    //     }
-    //
-    //     @Override
-    //     protected void onPostExecute(Void result) {
-    //         if (mainActivity.hashtagModel != null)
-    //             mainActivity.mainBinding.profileView.mainHashtagImage.setImageBitmap(mIcon_val);
-    //         else if (mainActivity.locationModel != null)
-    //             mainActivity.mainBinding.profileView.mainLocationImage.setImageBitmap(mIcon_val);
-    //         else mainActivity.mainBinding.profileView.mainProfileImage.setImageBitmap(mIcon_val);
-    //     }
-    // }
-
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
