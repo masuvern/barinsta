@@ -73,14 +73,13 @@ public final class MainActivity extends BaseLanguageActivity {
     private static final int INITIAL_DELAY_MILLIS = 200;
     public static FetchListener<String> scanHack;
     public static ItemGetter itemGetter;
-    // -------- items --------
+
     public final ArrayList<PostModel> allItems = new ArrayList<>();
     public final ArrayList<FeedModel> feedItems = new ArrayList<>();
     public final ArrayList<DiscoverItemModel> discoverItems = new ArrayList<>();
-    // -------- items --------
     public final ArrayList<PostModel> selectedItems = new ArrayList<>();
     public final ArrayList<DiscoverItemModel> selectedDiscoverItems = new ArrayList<>();
-    // -------- items --------
+
     public final HighlightsAdapter highlightsAdapter = new HighlightsAdapter(null, new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
@@ -88,7 +87,7 @@ public final class MainActivity extends BaseLanguageActivity {
             if (tag instanceof HighlightModel) {
                 final HighlightModel highlightModel = (HighlightModel) tag;
                 new iStoryStatusFetcher(highlightModel.getId(), null, false, false,
-                        (!mainHelper.isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
+                        (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
                     if (result != null && result.length > 0)
                         startActivity(new Intent(MainActivity.this, StoryViewer.class)
                                 .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
@@ -101,6 +100,7 @@ public final class MainActivity extends BaseLanguageActivity {
             }
         }
     });
+
     private SuggestionsAdapter suggestionAdapter;
     private MenuItem searchAction;
     public ActivityMainBinding mainBinding;
@@ -119,6 +119,7 @@ public final class MainActivity extends BaseLanguageActivity {
     private DataBox.CookieModel cookieModel;
     private Runnable runnable;
     private Handler handler;
+    private boolean isLoggedIn;
 
     @Override
     protected void onCreate(@Nullable final Bundle bundle) {
@@ -142,7 +143,7 @@ public final class MainActivity extends BaseLanguageActivity {
             setStack(bundle);
             userQuery = bundle.getString("query");
         }
-        mainHelper.isLoggedIn = !Utils.isEmpty(Utils.settingsHelper.getString(Constants.COOKIE));
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
 
         itemGetter = itemGetType -> {
             if (itemGetType == ItemGetType.MAIN_ITEMS) return allItems;
@@ -164,11 +165,11 @@ public final class MainActivity extends BaseLanguageActivity {
         if (uid != null) {
             final FetchListener<String> fetchListener = username -> {
                 if (!Utils.isEmpty(username)) {
-                    if (!BuildConfig.DEBUG) {
+                    // if (!BuildConfig.DEBUG) {
                         userQuery = username;
                         if (mainHelper != null && !mainBinding.profileView.swipeRefreshLayout.isRefreshing())
                             mainHelper.onRefresh();
-                    }
+                    // }
                     // adds cookies to database for quick access
                     cookieModel = Utils.dataBox.getCookie(uid);
                     if (Utils.dataBox.getCookieCount() == 0 || cookieModel == null || Utils.isEmpty(cookieModel.getUsername()))
@@ -251,7 +252,7 @@ public final class MainActivity extends BaseLanguageActivity {
             allItems.clear();
             mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_info);
             mainBinding.profileView.privatePage2.setTextSize(20);
-            mainBinding.profileView.privatePage2.setText(mainHelper.isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
+            mainBinding.profileView.privatePage2.setText(isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
             mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
         }
         if (!mainBinding.profileView.swipeRefreshLayout.isRefreshing() && userQuery != null)

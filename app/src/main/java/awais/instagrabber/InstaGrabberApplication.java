@@ -7,6 +7,8 @@ import android.util.Log;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.multidex.MultiDexApplication;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+
 import java.net.CookieHandler;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
@@ -34,12 +36,13 @@ public final class InstaGrabberApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fresco.initialize(this);
 
         if (BuildConfig.DEBUG) {
             try {
                 Class.forName("dalvik.system.CloseGuard")
-                        .getMethod("setEnabled", boolean.class)
-                        .invoke(null, true);
+                     .getMethod("setEnabled", boolean.class)
+                     .invoke(null, true);
             } catch (Exception e) {
                 Log.e(TAG, "Error", e);
             }

@@ -16,15 +16,10 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -54,12 +47,10 @@ import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
-import awais.instagrabber.customviews.MouseDrawer;
 import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
-import awais.instagrabber.customviews.helpers.VideoAwareRecyclerScroller;
 import awais.instagrabber.databinding.ActivityProfileBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -78,7 +69,6 @@ import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
-import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class ProfileViewer extends BaseLanguageActivity implements SwipeRefreshLayout.OnRefreshListener {
@@ -111,7 +101,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     profileBinding.toolbar.toolbar.setTitle(userQuery);
                 else if (isLocation)
                     profileBinding.toolbar.toolbar.setTitle(locationModel.getName());
-                else profileBinding.toolbar.toolbar.setTitle("@"+profileModel.getUsername());
+                else profileBinding.toolbar.toolbar.setTitle("@" + profileModel.getUsername());
 
                 final PostModel model = result[result.length - 1];
                 if (model != null) {
@@ -120,7 +110,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(
                                 profileModel != null ? profileModel.getId()
-                                    : (hashtagModel != null ? ("#"+hashtagModel.getName()) : locationModel.getId()), endCursor, this)
+                                        : (hashtagModel != null ? ("#" + hashtagModel.getName()) : locationModel.getId()), endCursor, this)
                                 .setUsername((isLocation || isHashtag) ? null : profileModel.getUsername())
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
@@ -128,8 +118,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     }
                     model.setPageCursor(false, null);
                 }
-            }
-            else {
+            } else {
                 profileBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                 profileBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
                 profileBinding.profileView.privatePage2.setText(R.string.empty_acc);
@@ -157,7 +146,8 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                                 .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
                                 .putExtra(Constants.EXTRAS_STORIES, result)
                         );
-                    else Toast.makeText(ProfileViewer.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(ProfileViewer.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
@@ -183,7 +173,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             return;
         }
 
-        userQuery = (userQuery.contains("/") || userQuery.startsWith("#") || userQuery.startsWith("@")) ? userQuery : ("@"+userQuery);
+        userQuery = (userQuery.contains("/") || userQuery.startsWith("#") || userQuery.startsWith("@")) ? userQuery : ("@" + userQuery);
 
         profileBinding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(profileBinding.getRoot());
@@ -198,10 +188,10 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 newintent = new Intent(this, ProfilePicViewer.class).putExtra(
                         ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
                         ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
-            }
-            else newintent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
-                    .putExtra(Constants.EXTRAS_STORIES, storyModels)
-                    .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
+            } else
+                newintent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+                                                               .putExtra(Constants.EXTRAS_STORIES, storyModels)
+                                                               .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
             startActivity(newintent);
         };
 
@@ -249,7 +239,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 profileBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
                 currentlyExecuting = new PostsFetcher(profileModel != null ? profileModel.getId()
-                        : (hashtagModel != null ? ("#"+hashtagModel.getName()) : locationModel.getId()), endCursor, postsFetchListener)
+                        : (hashtagModel != null ? ("#" + hashtagModel.getName()) : locationModel.getId()), endCursor, postsFetchListener)
                         .setUsername((isHashtag || isLocation) ? null : profileModel.getUsername())
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
@@ -268,7 +258,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 } else {
                     // because sometimes configuration changes made this crash on some phones
                     new AlertDialog.Builder(this).setAdapter(profileDialogAdapter, profileDialogListener)
-                            .setNeutralButton(R.string.cancel, null).show();
+                                                 .setNeutralButton(R.string.cancel, null).show();
                 }
             }
         };
@@ -295,9 +285,9 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         profileBinding.profileView.appBarLayout.setExpanded(true, true);
         profileBinding.profileView.privatePage.setVisibility(View.GONE);
         profileBinding.profileView.privatePage2.setTextSize(28);
-        profileBinding.profileView.mainProfileImage.setImageBitmap(null);
-        profileBinding.profileView.mainHashtagImage.setImageBitmap(null);
-        profileBinding.profileView.mainLocationImage.setImageBitmap(null);
+        // profileBinding.profileView.mainProfileImage.setImageBitmap(null);
+        // profileBinding.profileView.mainHashtagImage.setImageBitmap(null);
+        // profileBinding.profileView.mainLocationImage.setImageBitmap(null);
         profileBinding.profileView.mainUrl.setText(null);
         profileBinding.profileView.locationUrl.setText(null);
         profileBinding.profileView.mainFullName.setText(null);
@@ -380,15 +370,15 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, stories -> {
                         storyModels = stories;
-                        if (stories != null && stories.length > 0) profileBinding.profileView.mainHashtagImage.setStoriesBorder();
+                        if (stories != null && stories.length > 0)
+                            profileBinding.profileView.mainHashtagImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                     if (hashtagModel.getFollowing() == true) {
                         profileBinding.profileView.btnFollowTag.setText(R.string.unfollow);
                         profileBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_purple_background)));
-                    }
-                    else {
+                    } else {
                         profileBinding.profileView.btnFollowTag.setText(R.string.follow);
                         profileBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_pink_background)));
@@ -398,16 +388,15 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                         profileBinding.profileView.btnFollowTag.setText(R.string.unfavorite_short);
                         profileBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_purple_background)));
-                    }
-                    else {
+                    } else {
                         profileBinding.profileView.btnFollowTag.setText(R.string.favorite_short);
                         profileBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_pink_background)));
                     }
                 }
 
-                profileBinding.profileView.mainHashtagImage.setEnabled(false);
-                new MyTask().execute();
+                // profileBinding.profileView.mainHashtagImage.setEnabled(false);
+                profileBinding.profileView.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
                 profileBinding.profileView.mainHashtagImage.setEnabled(true);
 
                 final String postCount = String.valueOf(hashtagModel.getPostCount());
@@ -439,20 +428,20 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 final String profileId = profileModel.getId();
 
                 if (isLoggedIn || Utils.settingsHelper.getBoolean(Constants.STORIESIG)) {
-                  new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
-                          (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
-                          stories -> {
-                      storyModels = stories;
-                      if (stories != null && stories.length > 0) profileBinding.profileView.mainProfileImage.setStoriesBorder();
-                  }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
+                            (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
+                            stories -> {
+                                storyModels = stories;
+                                // if (stories != null && stories.length > 0)
+                                    profileBinding.profileView.mainProfileImage.setStoriesBorder();
+                            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                  new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), hls -> {
-                      if (hls != null && hls.length > 0) {
-                          profileBinding.profileView.highlightsList.setVisibility(View.VISIBLE);
-                          highlightsAdapter.setData(hls);
-                      }
-                      else profileBinding.profileView.highlightsList.setVisibility(View.GONE);
-                  }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), hls -> {
+                        if (hls != null && hls.length > 0) {
+                            profileBinding.profileView.highlightsList.setVisibility(View.VISIBLE);
+                            highlightsAdapter.setData(hls);
+                        } else profileBinding.profileView.highlightsList.setVisibility(View.GONE);
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
                 if (isLoggedIn) {
@@ -466,13 +455,11 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                             profileBinding.profileView.btnFollow.setText(R.string.unfollow);
                             profileBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     ProfileViewer.this, R.color.btn_purple_background)));
-                        }
-                        else if (profileModel.getRequested() == true) {
+                        } else if (profileModel.getRequested() == true) {
                             profileBinding.profileView.btnFollow.setText(R.string.cancel);
                             profileBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     ProfileViewer.this, R.color.btn_purple_background)));
-                        }
-                        else {
+                        } else {
                             profileBinding.profileView.btnFollow.setText(R.string.follow);
                             profileBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     ProfileViewer.this, R.color.btn_pink_background)));
@@ -482,8 +469,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                             profileBinding.profileView.btnRestrict.setText(R.string.unrestrict);
                             profileBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     ProfileViewer.this, R.color.btn_green_background)));
-                        }
-                        else {
+                        } else {
                             profileBinding.profileView.btnRestrict.setText(R.string.restrict);
                             profileBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     ProfileViewer.this, R.color.btn_orange_background)));
@@ -514,8 +500,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                                         ProfileViewer.this, R.color.btn_red_background)));
                             }
                         }
-                    }
-                    else {
+                    } else {
                         profileBinding.profileView.btnTagged.setVisibility(View.VISIBLE);
                         profileBinding.profileView.btnSaved.setVisibility(View.VISIBLE);
                         profileBinding.profileView.btnLiked.setVisibility(View.VISIBLE);
@@ -528,8 +513,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                         profileBinding.profileView.btnFollow.setText(R.string.unfavorite_short);
                         profileBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_purple_background)));
-                    }
-                    else {
+                    } else {
                         profileBinding.profileView.btnFollow.setText(R.string.favorite_short);
                         profileBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_pink_background)));
@@ -543,9 +527,9 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     }
                 }
 
-                profileBinding.profileView.mainProfileImage.setEnabled(false);
-                new MyTask().execute();
-                profileBinding.profileView.mainProfileImage.setEnabled(true);
+                // profileBinding.profileView.mainProfileImage.setEnabled(false);
+                profileBinding.profileView.mainProfileImage.setImageURI(profileModel.getSdProfilePic(), null);
+                // profileBinding.profileView.mainProfileImage.setEnabled(true);
 
                 final long followersCount = profileModel.getFollowersCount();
                 final long followingCount = profileModel.getFollowingCount();
@@ -615,12 +599,11 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                         profileBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
                         profileBinding.profileView.privatePage2.setText(R.string.empty_acc);
                         profileBinding.profileView.privatePage.setVisibility(View.VISIBLE);
-                    }
-                    else {
+                    } else {
                         profileBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                         profileBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                         currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
-                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                                                                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                 } else {
                     profileBinding.profileView.mainFollowers.setClickable(false);
@@ -634,8 +617,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 }
             }
             ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
-        else if (isLocation) {
+        } else if (isLocation) {
             profileModel = null;
             hashtagModel = null;
             profileBinding.toolbar.toolbar.setTitle(userQuery);
@@ -657,12 +639,13 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(profileId.split("/")[0], null, true, false, false, false, stories -> {
                         storyModels = stories;
-                        if (stories != null && stories.length > 0) profileBinding.profileView.mainLocationImage.setStoriesBorder();
+                        if (stories != null && stories.length > 0)
+                            profileBinding.profileView.mainLocationImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
-                profileBinding.profileView.mainLocationImage.setEnabled(false);
-                new MyTask().execute();
+                // profileBinding.profileView.mainLocationImage.setEnabled(false);
+                profileBinding.profileView.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
                 profileBinding.profileView.mainLocationImage.setEnabled(true);
 
                 final String postCount = String.valueOf(locationModel.getPostCount());
@@ -680,8 +663,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
 
                 if (Utils.isEmpty(biography)) {
                     profileBinding.profileView.locationBiography.setVisibility(View.GONE);
-                }
-                else if (Utils.hasMentions(biography)) {
+                } else if (Utils.hasMentions(biography)) {
                     profileBinding.profileView.locationBiography.setVisibility(View.VISIBLE);
                     biography = Utils.getMentionText(biography);
                     profileBinding.profileView.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
@@ -699,8 +681,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                         intent.setData(Uri.parse(locationModel.getGeo()));
                         startActivity(intent);
                     });
-                }
-                else {
+                } else {
                     profileBinding.profileView.btnMap.setVisibility(View.GONE);
                     profileBinding.profileView.btnMap.setOnClickListener(null);
                 }
@@ -710,7 +691,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     profileBinding.profileView.locationUrl.setVisibility(View.GONE);
                 } else if (!url.startsWith("http")) {
                     profileBinding.profileView.locationUrl.setVisibility(View.VISIBLE);
-                    profileBinding.profileView.locationUrl.setText(Utils.getSpannableUrl("http://"+url));
+                    profileBinding.profileView.locationUrl.setText(Utils.getSpannableUrl("http://" + url));
                 } else {
                     profileBinding.profileView.locationUrl.setVisibility(View.VISIBLE);
                     profileBinding.profileView.locationUrl.setText(Utils.getSpannableUrl(url));
@@ -724,8 +705,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     profileBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
                     profileBinding.profileView.privatePage2.setText(R.string.empty_acc);
                     profileBinding.profileView.privatePage.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     profileBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                     profileBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                     currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
@@ -771,8 +751,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(userQuery, System.currentTimeMillis(),
                         locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
                 favouriteAction.setIcon(R.drawable.ic_like);
-            }
-            else {
+            } else {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
                         locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
@@ -790,8 +769,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             else if (selectedItems.size() >= 100) {
                 Toast.makeText(ProfileViewer.this, R.string.downloader_too_many, Toast.LENGTH_SHORT);
                 return;
-            }
-            else selectedItems.add(postModel);
+            } else selectedItems.add(postModel);
             postModel.setSelected(!postModel.isSelected());
             notifyAdapter(postModel);
         }
@@ -825,11 +803,15 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
 
         protected Void doInBackground(Void... voids) {
             try {
-                mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(
-                        (hashtagModel != null) ? hashtagModel.getSdProfilePic() : (
-                                (locationModel != null) ? locationModel.getSdProfilePic() :
-                                        profileModel.getSdProfilePic())
-                ).getContent());
+                String url;
+                if (hashtagModel != null) {
+                    url = hashtagModel.getSdProfilePic();
+                } else if (locationModel != null) {
+                    url = locationModel.getSdProfilePic();
+                } else {
+                    url = profileModel.getSdProfilePic();
+                }
+                mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(url).getContent());
             } catch (Throwable ex) {
                 Log.e("austin_debug", "bitmap: " + ex);
             }
@@ -838,8 +820,10 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
 
         @Override
         protected void onPostExecute(Void result) {
-            if (hashtagModel != null) profileBinding.profileView.mainHashtagImage.setImageBitmap(mIcon_val);
-            else if (locationModel != null) profileBinding.profileView.mainLocationImage.setImageBitmap(mIcon_val);
+            if (hashtagModel != null)
+                profileBinding.profileView.mainHashtagImage.setImageBitmap(mIcon_val);
+            else if (locationModel != null)
+                profileBinding.profileView.mainLocationImage.setImageBitmap(mIcon_val);
             else profileBinding.profileView.mainProfileImage.setImageBitmap(mIcon_val);
         }
     }
@@ -867,18 +851,18 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 new ProfileAction().execute("followtag");
             } else if (v == profileBinding.profileView.btnTagged || (v == profileBinding.profileView.btnRestrict && !isLoggedIn)) {
                 startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "%"+profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@"+profileModel.getUsername())
+                        .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             } else if (v == profileBinding.profileView.btnSaved) {
                 startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "$"+profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@"+profileModel.getUsername())
+                        .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             } else if (v == profileBinding.profileView.btnLiked) {
                 startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "^"+profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@"+profileModel.getUsername())
+                        .putExtra(Constants.EXTRAS_INDEX, "^" + profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             }
         }
@@ -890,17 +874,17 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
-            final String url = "https://www.instagram.com/web/"+
-                    ((action == "followtag" && hashtagModel != null) ? ("tags/"+
-                            (hashtagModel.getFollowing() == true ? "unfollow/" : "follow/")+hashtagModel.getName()+"/") : (
-                    ((action == "restrict" && profileModel != null) ? "restrict_action" : ("friendships/"+profileModel.getId()))+"/"+
-                    ((action == "follow" && profileModel != null) ?
-                    ((profileModel.getFollowing() == true ||
-                            (profileModel.getFollowing() == false && profileModel.getRequested() == true))
-                            ? "unfollow/" : "follow/") :
-                    ((action == "restrict" && profileModel != null) ?
-                            (profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
-                            (profileModel.getBlocked() == true ? "unblock/" : "block/")))));
+            final String url = "https://www.instagram.com/web/" +
+                    ((action.equals("followtag") && hashtagModel != null) ? ("tags/" +
+                            (hashtagModel.getFollowing() ? "unfollow/" : "follow/") + hashtagModel.getName() + "/") : (
+                            ((action.equals("restrict") && profileModel != null) ? "restrict_action" : ("friendships/" + profileModel.getId())) + "/" +
+                                    ((action.equals("follow") && profileModel != null) ?
+                                            ((profileModel.getFollowing() ||
+                                                    (!profileModel.getFollowing() && profileModel.getRequested()))
+                                                    ? "unfollow/" : "follow/") :
+                                            ((action.equals("restrict") && profileModel != null) ?
+                                                    (profileModel.getRestricted() ? "unrestrict/" : "restrict/") :
+                                                    (profileModel.getBlocked() ? "unblock/" : "block/")))));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
@@ -908,7 +892,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
                 urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
                 if (action == "restrict") {
-                    final String urlParameters = "target_user_id="+profileModel.getId();
+                    final String urlParameters = "target_user_id=" + profileModel.getId();
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     urlConnection.setRequestProperty("Content-Length", "" +
                             urlParameters.getBytes().length);
@@ -917,22 +901,21 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     wr.writeBytes(urlParameters);
                     wr.flush();
                     wr.close();
-                }
-                else urlConnection.connect();
+                } else urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     ok = true;
-                }
-                else Toast.makeText(ProfileViewer.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(ProfileViewer.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 urlConnection.disconnect();
             } catch (Throwable ex) {
-                Log.e("austin_debug", action+": " + ex);
+                Log.e("austin_debug", action + ": " + ex);
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
-            if (ok == true) {
+            if (ok) {
                 onRefresh();
             }
         }

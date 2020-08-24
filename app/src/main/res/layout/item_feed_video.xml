@@ -1,23 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/videoHolder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    tools:viewBindingIgnore="true">
+    android:orientation="vertical">
 
-    <include layout="@layout/item_feed_top" />
+    <include
+        android:id="@+id/item_feed_top"
+        layout="@layout/item_feed_top" />
 
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/playerView"
+    <ViewSwitcher
+        android:id="@+id/view_switcher"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        app:auto_show="true"
-        app:controller_layout_id="@layout/layout_controls"
-        app:repeat_toggle_modes="all"
-        app:use_controller="true" />
+        android:layout_height="wrap_content">
 
-    <include layout="@layout/item_feed_bottom" />
+        <!--<androidx.appcompat.widget.AppCompatImageView-->
+        <!--    android:id="@+id/thumbnail"-->
+        <!--    android:layout_width="match_parent"-->
+        <!--    android:layout_height="wrap_content"-->
+        <!--    android:adjustViewBounds="true"-->
+        <!--    android:scaleType="fitCenter"/>-->
+        <FrameLayout
+            android:id="@+id/thumbnail_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:actualImageScaleType="fitCenter" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/exo_controls_play" />
+        </FrameLayout>
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:show_timeout="1000" />
+    </ViewSwitcher>
+
+    <include
+        android:id="@+id/item_feed_bottom"
+        layout="@layout/item_feed_bottom" />
 </LinearLayout>

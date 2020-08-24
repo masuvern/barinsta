@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.HighlightViewHolder;
 import awais.instagrabber.models.FeedStoryModel;
@@ -37,11 +35,9 @@ public final class FeedStoriesAdapter extends RecyclerView.Adapter<HighlightView
         if (feedStoryModel != null) {
             holder.itemView.setTag(feedStoryModel);
             holder.itemView.setOnClickListener(clickListener);
-
             final ProfileModel profileModel = feedStoryModel.getProfileModel();
-
             holder.title.setText(profileModel.getUsername());
-            Glide.with(layoutInflater.getContext()).load(profileModel.getSdProfilePic()).into(holder.icon);
+            holder.icon.setImageURI(profileModel.getSdProfilePic());
             holder.icon.setAlpha(feedStoryModel.getFullyRead() ? 0.5F : 1.0F);
             holder.title.setAlpha(feedStoryModel.getFullyRead() ? 0.5F : 1.0F);
         }

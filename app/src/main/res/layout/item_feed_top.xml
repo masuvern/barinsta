@@ -1,48 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <awais.instagrabber.customviews.CircularImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/ivProfilePic"
         android:layout_width="@dimen/feed_profile_size"
         android:layout_height="@dimen/feed_profile_size"
-        android:adjustViewBounds="true"
+        app:roundAsCircle="true"
         android:background="?selectableItemBackgroundBorderless" />
 
     <RelativeLayout
         android:id="@+id/infoContainer"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:animateLayoutChanges="true"
         android:background="@null"
         android:orientation="vertical"
-        android:weightSum="2"
         android:paddingStart="4dp"
         android:paddingLeft="4dp"
         android:paddingEnd="4dp"
-        android:paddingRight="4dp">
+        android:paddingRight="4dp"
+        android:weightSum="2">
 
         <awais.instagrabber.customviews.RamboTextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center_vertical"
             android:textColor="@color/feed_text_primary_color"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
         <awais.instagrabber.customviews.RamboTextView
             android:id="@+id/location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/title"
-            android:layout_weight="1"
             android:gravity="center_vertical"
             android:textColor="@color/feed_text_primary_color"
             android:textSize="18sp" />

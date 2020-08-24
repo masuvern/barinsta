@@ -44,14 +44,14 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.json.JSONObject;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.PostsMediaAdapter;
@@ -131,7 +131,7 @@ public final class PostViewer extends BaseLanguageActivity {
         public void onClick(final View v) {
             if (v == viewerBinding.topPanel.ivProfilePic) {
                 new AlertDialog.Builder(PostViewer.this).setAdapter(profileDialogAdapter, profileDialogListener)
-                        .setNeutralButton(R.string.cancel, null).setTitle(viewerPostModel.getUsername()).show();
+                                                        .setNeutralButton(R.string.cancel, null).setTitle(viewerPostModel.getUsername()).show();
 
             } else if (v == viewerBinding.ivToggleFullScreen) {
                 toggleFullscreen();
@@ -243,7 +243,7 @@ public final class PostViewer extends BaseLanguageActivity {
             }
         }
 
-        setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(), viewerPostModel.getLocation());
+        setupPostInfoBar("@" + viewerPostModel.getUsername(), viewerPostModel.getItemType(), viewerPostModel.getLocation());
 
         postCaption = postModel.getPostCaption();
         viewerCaptionParent.setVisibility(View.VISIBLE);
@@ -289,8 +289,7 @@ public final class PostViewer extends BaseLanguageActivity {
             ));
             containerLayoutParams.weight = (containerLayoutParams.weight == 3.3f) ? 3.3f : 2.2f;
             viewerBinding.container.setLayoutParams(containerLayoutParams);
-        }
-        else {
+        } else {
             viewerBinding.btnLike.setOnClickListener(onClickListener);
             viewerBinding.btnBookmark.setOnClickListener(onClickListener);
         }
@@ -321,8 +320,7 @@ public final class PostViewer extends BaseLanguageActivity {
             if (itemGetType == ItemGetType.SAVED_ITEMS && SavedViewer.itemGetter != null) {
                 itemGetterItems = SavedViewer.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.SAVED_ITEMS && isFromShare);
-            }
-            else if (itemGetType != null && MainActivity.itemGetter != null) {
+            } else if (itemGetType != null && MainActivity.itemGetter != null) {
                 itemGetterItems = MainActivity.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.MAIN_ITEMS && isFromShare);
             } else {
@@ -401,7 +399,7 @@ public final class PostViewer extends BaseLanguageActivity {
     private void searchUsername(final String text) {
         startActivity(
                 new Intent(getApplicationContext(), ProfileViewer.class)
-                .putExtra(Constants.EXTRAS_USERNAME, text)
+                        .putExtra(Constants.EXTRAS_USERNAME, text)
         );
     }
 
@@ -509,9 +507,9 @@ public final class PostViewer extends BaseLanguageActivity {
             };
 
             new AlertDialog.Builder(this).setTitle(R.string.post_viewer_download_dialog_title)
-                    .setMessage(R.string.post_viewer_download_message)
-                    .setNeutralButton(R.string.post_viewer_download_session, clickListener).setPositiveButton(R.string.post_viewer_download_current, clickListener)
-                    .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
+                                         .setMessage(R.string.post_viewer_download_message)
+                                         .setNeutralButton(R.string.post_viewer_download_session, clickListener).setPositiveButton(R.string.post_viewer_download_current, clickListener)
+                                         .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
         } else {
             Utils.batchDownload(this, viewerPostModel.getUsername(), DownloadMethod.DOWNLOAD_POST_VIEWER, Collections.singletonList(viewerPostModel));
         }
@@ -586,7 +584,7 @@ public final class PostViewer extends BaseLanguageActivity {
             viewerBinding.bottomPanel.viewerCaption.setText(postCaption);
         }
 
-        setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
+        setupPostInfoBar("@" + viewerPostModel.getUsername(), viewerPostModel.getItemType(),
                 viewerPostModel.getLocation());
 
         if (postModel instanceof PostModel) {
@@ -599,8 +597,7 @@ public final class PostViewer extends BaseLanguageActivity {
                         + ((ok && viewerPostModel.getLike() != liked) ? (liked ? 1L : -1L) : 0L)));
                 viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                         getApplicationContext(), R.color.btn_pink_background)));
-            }
-            else {
+            } else {
                 viewerBinding.btnLike.setText(resources.getString(R.string.like, viewerPostModel.getLikes()
                         + ((ok && viewerPostModel.getLike() != liked) ? (liked ? 1L : -1L) : 0L)));
                 viewerBinding.btnLike.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
@@ -610,8 +607,7 @@ public final class PostViewer extends BaseLanguageActivity {
                 viewerBinding.btnBookmark.setText(R.string.unbookmark);
                 viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                         getApplicationContext(), R.color.btn_orange_background)));
-            }
-            else {
+            } else {
                 viewerBinding.btnBookmark.setText(R.string.bookmark);
                 viewerBinding.btnBookmark.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                         getApplicationContext(), R.color.btn_lightorange_background)));
@@ -639,55 +635,55 @@ public final class PostViewer extends BaseLanguageActivity {
 
     private void setupPostInfoBar(final String from, final MediaItemType mediaItemType, final JSONObject location) {
         if (prevUsername == null || !prevUsername.equals(from)) {
-            viewerBinding.topPanel.ivProfilePic.setImageBitmap(null);
-            viewerBinding.topPanel.ivProfilePic.setImageDrawable(null);
-            viewerBinding.topPanel.ivProfilePic.setImageResource(0);
+            // viewerBinding.topPanel.ivProfilePic.setImageBitmap(null);
+            // viewerBinding.topPanel.ivProfilePic.setImageDrawable(null);
+            // viewerBinding.topPanel.ivProfilePic.setImageResource(0);
+            viewerBinding.topPanel.ivProfilePic.setImageRequest(null);
 
             if (!Utils.isEmpty(from) && from.charAt(0) == '@')
                 new ProfileFetcher(from.substring(1), result -> {
                     profileModel = result;
 
                     if (result != null) {
-                        final String hdProfilePic = result.getHdProfilePic();
-                        final String sdProfilePic = result.getSdProfilePic();
+                        // final String hdProfilePic = result.getHdProfilePic();
+                        // final String sdProfilePic = result.getSdProfilePic();
                         postUserId = result.getId();
 
-                        final boolean hdPicEmpty = Utils.isEmpty(hdProfilePic);
-                        glideRequestManager.load(hdPicEmpty ? sdProfilePic : hdProfilePic).listener(new RequestListener<Drawable>() {
-                            private boolean loaded = true;
-
-                            @Override
-                            public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
-                                viewerBinding.topPanel.ivProfilePic.setEnabled(false);
-                                viewerBinding.topPanel.ivProfilePic.setOnClickListener(null);
-                                if (loaded) {
-                                    loaded = false;
-                                    if (!Utils.isEmpty(sdProfilePic)) glideRequestManager.load(sdProfilePic).listener(this)
-                                            .into(viewerBinding.topPanel.ivProfilePic);
-                                }
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(final Drawable resource, final Object model, final Target<Drawable> target, final DataSource dataSource, final boolean isFirstResource) {
-                                viewerBinding.topPanel.ivProfilePic.setEnabled(true);
-                                viewerBinding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
-                                return false;
-                            }
-                        }).into(viewerBinding.topPanel.ivProfilePic);
+                        // final boolean hdPicEmpty = Utils.isEmpty(hdProfilePic);
+                        // glideRequestManager.load(hdPicEmpty ? sdProfilePic : hdProfilePic).listener(new RequestListener<Drawable>() {
+                        //     private boolean loaded = true;
+                        //
+                        //     @Override
+                        //     public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
+                        //         viewerBinding.topPanel.ivProfilePic.setEnabled(false);
+                        //         viewerBinding.topPanel.ivProfilePic.setOnClickListener(null);
+                        //         if (loaded) {
+                        //             loaded = false;
+                        //             if (!Utils.isEmpty(sdProfilePic)) glideRequestManager.load(sdProfilePic).listener(this)
+                        //                     .into(viewerBinding.topPanel.ivProfilePic);
+                        //         }
+                        //         return false;
+                        //     }
+                        //
+                        //     @Override
+                        //     public boolean onResourceReady(final Drawable resource, final Object model, final Target<Drawable> target, final DataSource dataSource, final boolean isFirstResource) {
+                        //         viewerBinding.topPanel.ivProfilePic.setEnabled(true);
+                        //         viewerBinding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
+                        //         return false;
+                        //     }
+                        // }).into(viewerBinding.topPanel.ivProfilePic);
+                        viewerBinding.topPanel.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
 
                         final View viewStoryPost = findViewById(R.id.viewStoryPost);
                         if (viewStoryPost != null) {
-                            viewStoryPost.setOnClickListener(new View.OnClickListener() {
-                                public void onClick(View v) {
-                                    if (result.isPrivate())
-                                        Toast.makeText(getApplicationContext(), R.string.share_private_post, Toast.LENGTH_LONG).show();
-                                    Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                                    sharingIntent.setType("text/plain");
-                                    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/"+postShortCode);
-                                    startActivity(Intent.createChooser(sharingIntent,
-                                            (result.isPrivate()) ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
-                                }
+                            viewStoryPost.setOnClickListener(v -> {
+                                if (result.isPrivate())
+                                    Toast.makeText(getApplicationContext(), R.string.share_private_post, Toast.LENGTH_LONG).show();
+                                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                                sharingIntent.setType("text/plain");
+                                sharingIntent.putExtra(Intent.EXTRA_TEXT, "https://instagram.com/p/" + postShortCode);
+                                startActivity(Intent.createChooser(sharingIntent,
+                                        (result.isPrivate()) ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
                             });
                         }
                     }
@@ -710,11 +706,10 @@ public final class PostViewer extends BaseLanguageActivity {
             viewerBinding.topPanel.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
             ));
-        }
-        else {
+        } else {
             viewerBinding.topPanel.location.setVisibility(View.VISIBLE);
             viewerBinding.topPanel.location.setText(location.optString("name"));
-            viewerBinding.topPanel.location.setOnClickListener(v -> searchUsername(location.optString("id")+"/"+location.optString("slug")));
+            viewerBinding.topPanel.location.setOnClickListener(v -> searchUsername(location.optString("id") + "/" + location.optString("slug")));
             viewerBinding.topPanel.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
             ));
@@ -736,7 +731,7 @@ public final class PostViewer extends BaseLanguageActivity {
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
-            final String url = "https://www.instagram.com/web/"+action+"/"+postModel.getPostId()+"/"+ (action == "save" ?
+            final String url = "https://www.instagram.com/web/" + action + "/" + postModel.getPostId() + "/" + (action == "save" ?
                     (saved ? "unsave/" : "save/") :
                     (liked ? "unlike/" : "like/"));
             try {
@@ -752,7 +747,7 @@ public final class PostViewer extends BaseLanguageActivity {
                 }
                 urlConnection.disconnect();
             } catch (Throwable ex) {
-                Log.e("austin_debug", action+": " + ex);
+                Log.e("austin_debug", action + ": " + ex);
             }
             return null;
         }
@@ -762,12 +757,11 @@ public final class PostViewer extends BaseLanguageActivity {
             if (ok == true && action == "likes") {
                 liked = !liked;
                 refreshPost();
-            }
-            else if (ok == true && action == "save") {
+            } else if (ok == true && action == "save") {
                 saved = !saved;
                 refreshPost();
-            }
-            else Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            } else
+                Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
         }
     }
 }

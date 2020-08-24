@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    tools:viewBindingIgnore="true">
+    android:orientation="vertical">
 
-    <include layout="@layout/item_feed_top" />
+    <include
+        android:id="@+id/item_feed_top"
+        layout="@layout/item_feed_top" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/media_list"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="wrap_content" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="24dp"
@@ -31,8 +31,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
             android:gravity="center"
-            android:textSize="20sp" />
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/rounder_corner_semi_black_bg"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
     </FrameLayout>
 
-    <include layout="@layout/item_feed_bottom" />
+    <include
+        android:id="@+id/item_feed_bottom"
+        layout="@layout/item_feed_bottom" />
 </LinearLayout>

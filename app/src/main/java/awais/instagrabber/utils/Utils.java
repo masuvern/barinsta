@@ -245,8 +245,7 @@ public final class Utils {
                                 || nextChar == '\r' || nextChar == '\n') {
                             break;
                         }
-                    }
-                    else if (currChar == '.')
+                    } else if (currChar == '.')
                         break;
 
                     // for merged hashtags
@@ -293,8 +292,7 @@ public final class Utils {
                         if (currRes > lastResMain && !low) {
                             lastResMain = currRes;
                             lastIndexMain = i;
-                        }
-                        else if (currRes < lastResMain && low) {
+                        } else if (currRes < lastResMain && low) {
                             lastResMain = currRes;
                             lastIndexMain = i;
                         }
@@ -302,8 +300,7 @@ public final class Utils {
                         if (currRes > lastResBase && !low) {
                             lastResBase = currRes;
                             lastIndexBase = i;
-                        }
-                        else if (currRes < lastResBase && low) {
+                        } else if (currRes < lastResBase && low) {
                             lastResBase = currRes;
                             lastIndexBase = i;
                         }
@@ -326,7 +323,8 @@ public final class Utils {
     public static String getHighQualityImage(final JSONObject resources) {
         String src = null;
         try {
-            if (resources.has("display_resources")) src = getHighQualityPost(resources.getJSONArray("display_resources"), false, false, false);
+            if (resources.has("display_resources"))
+                src = getHighQualityPost(resources.getJSONArray("display_resources"), false, false, false);
             else if (resources.has("image_versions2"))
                 src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, false);
             if (src == null) return resources.getString("display_url");
@@ -390,8 +388,9 @@ public final class Utils {
 
         } else if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
             final JSONArray carouselMedia = mediaObj.optJSONArray("carousel_media");
-            if (carouselMedia != null) thumbnail = Utils.getItemThumbnail(carouselMedia.getJSONObject(0)
-                    .getJSONObject("image_versions2").getJSONArray("candidates"));
+            if (carouselMedia != null)
+                thumbnail = Utils.getItemThumbnail(carouselMedia.getJSONObject(0)
+                                                                .getJSONObject("image_versions2").getJSONArray("candidates"));
         }
 
         return thumbnail;
@@ -624,13 +623,15 @@ public final class Utils {
                     final JSONArray seenUserIdsArray = visualMedia.getJSONArray("seen_user_ids");
                     final int seenUsersLen = seenUserIdsArray.length();
                     final String[] seenUserIds = new String[seenUsersLen];
-                    for (int j = 0; j < seenUsersLen; j++) seenUserIds[j] = seenUserIdsArray.getString(j);
+                    for (int j = 0; j < seenUsersLen; j++)
+                        seenUserIds[j] = seenUserIdsArray.getString(j);
 
                     RavenExpiringMediaActionSummaryModel expiringSummaryModel = null;
                     final JSONObject actionSummary = visualMedia.optJSONObject("expiring_media_action_summary");
-                    if (actionSummary != null) expiringSummaryModel = new RavenExpiringMediaActionSummaryModel(
-                            actionSummary.getLong("timestamp"), actionSummary.getInt("count"),
-                            getExpiringMediaType(actionSummary.getString("type")));
+                    if (actionSummary != null)
+                        expiringSummaryModel = new RavenExpiringMediaActionSummaryModel(
+                                actionSummary.getLong("timestamp"), actionSummary.getInt("count"),
+                                getExpiringMediaType(actionSummary.getString("type")));
 
                     final RavenMediaViewType viewType;
                     final String viewMode = visualMedia.getString("view_mode");
@@ -692,11 +693,11 @@ public final class Utils {
                     final JSONObject actionLog = itemObject.getJSONObject("action_log");
                     String desc = actionLog.getString("description");
                     JSONArray bold = actionLog.getJSONArray("bold");
-                    for (int q=0; q < bold.length(); ++q) {
+                    for (int q = 0; q < bold.length(); ++q) {
                         JSONObject boldItem = bold.getJSONObject(q);
-                        desc = desc.substring(0, boldItem.getInt("start") + q*7) + "<b>"
-                                + desc.substring(boldItem.getInt("start") + q*7, boldItem.getInt("end") + q*7)
-                                + "</b>" + desc.substring(boldItem.getInt("end") + q*7);
+                        desc = desc.substring(0, boldItem.getInt("start") + q * 7) + "<b>"
+                                + desc.substring(boldItem.getInt("start") + q * 7, boldItem.getInt("end") + q * 7)
+                                + "</b>" + desc.substring(boldItem.getInt("end") + q * 7);
                     }
                     actionLogModel = new DirectItemActionLogModel(desc);
                     break;
@@ -972,14 +973,17 @@ public final class Utils {
                                         saveFile,
                                         file -> {
                                             model.setDownloaded(true);
-                                            if (saved != null) saved.deselectSelection(selectedItem);
-                                            else if (mainActivity != null) mainActivity.mainHelper.deselectSelection(selectedItem);
+                                            if (saved != null)
+                                                saved.deselectSelection(selectedItem);
+                                            else if (mainActivity != null)
+                                                mainActivity.mainHelper.deselectSelection(selectedItem);
                                             else if (pv != null) pv.deselectSelection(selectedItem);
                                         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             }
                         } else {
                             if (saved != null) saved.deselectSelection(selectedItem);
-                            else if (mainActivity != null) mainActivity.mainHelper.deselectSelection(selectedItem);
+                            else if (mainActivity != null)
+                                mainActivity.mainHelper.deselectSelection(selectedItem);
                             else if (pv != null) pv.deselectSelection(selectedItem);
                         }
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -990,7 +994,7 @@ public final class Utils {
     }
 
     public static void dmDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
-                                     final List<? extends DirectItemMediaModel> itemsToDownload) {
+                                  final List<? extends DirectItemMediaModel> itemsToDownload) {
         if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
 
         if (itemsToDownload == null || itemsToDownload.size() < 1) return;
@@ -1002,7 +1006,7 @@ public final class Utils {
     }
 
     private static void dmDownloadImpl(@NonNull final Context context, @Nullable final String username,
-                                          final DownloadMethod method, final List<? extends DirectItemMediaModel> itemsToDownload) {
+                                       final DownloadMethod method, final List<? extends DirectItemMediaModel> itemsToDownload) {
         File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
@@ -1129,10 +1133,12 @@ public final class Utils {
             if (v == passwordParent) importExportBinding.cbPassword.performClick();
 
             else if (v == exportLoginsParent) importExportBinding.cbExportLogins.performClick();
-            else if (v == exportFavoritesParent) importExportBinding.cbExportFavorites.performClick();
+            else if (v == exportFavoritesParent)
+                importExportBinding.cbExportFavorites.performClick();
 
             else if (v == importLoginsParent) importExportBinding.cbImportLogins.performClick();
-            else if (v == importFavoritesParent) importExportBinding.cbImportFavorites.performClick();
+            else if (v == importFavoritesParent)
+                importExportBinding.cbImportFavorites.performClick();
 
             else if (v == exportSettingsParent) importExportBinding.cbExportSettings.performClick();
             else if (v == importSettingsParent) importExportBinding.cbImportSettings.performClick();
@@ -1151,9 +1157,12 @@ public final class Utils {
                             final File file = new File(path, "InstaGrabber_Settings_" + System.currentTimeMillis() + ".zaai");
                             final String password = passwordChecked ? text.toString() : null;
                             int flags = 0;
-                            if (importExportBinding.cbExportFavorites.isChecked()) flags |= ExportImportUtils.FLAG_FAVORITES;
-                            if (importExportBinding.cbExportSettings.isChecked()) flags |= ExportImportUtils.FLAG_SETTINGS;
-                            if (importExportBinding.cbExportLogins.isChecked()) flags |= ExportImportUtils.FLAG_COOKIES;
+                            if (importExportBinding.cbExportFavorites.isChecked())
+                                flags |= ExportImportUtils.FLAG_FAVORITES;
+                            if (importExportBinding.cbExportSettings.isChecked())
+                                flags |= ExportImportUtils.FLAG_SETTINGS;
+                            if (importExportBinding.cbExportLogins.isChecked())
+                                flags |= ExportImportUtils.FLAG_COOKIES;
 
                             ExportImportUtils.Export(password, flags, file, result -> {
                                 Toast.makeText(context, result ? R.string.dialog_export_success : R.string.dialog_export_failed, Toast.LENGTH_SHORT).show();
@@ -1166,9 +1175,12 @@ public final class Utils {
                 } else if (v == importExportBinding.btnImport) {
                     new DirectoryChooser().setInitialDirectory(folderPath).setShowZaAiConfigFiles(true).setInteractionListener(path -> {
                         int flags = 0;
-                        if (importExportBinding.cbImportFavorites.isChecked()) flags |= ExportImportUtils.FLAG_FAVORITES;
-                        if (importExportBinding.cbImportSettings.isChecked()) flags |= ExportImportUtils.FLAG_SETTINGS;
-                        if (importExportBinding.cbImportLogins.isChecked()) flags |= ExportImportUtils.FLAG_COOKIES;
+                        if (importExportBinding.cbImportFavorites.isChecked())
+                            flags |= ExportImportUtils.FLAG_FAVORITES;
+                        if (importExportBinding.cbImportSettings.isChecked())
+                            flags |= ExportImportUtils.FLAG_SETTINGS;
+                        if (importExportBinding.cbImportLogins.isChecked())
+                            flags |= ExportImportUtils.FLAG_COOKIES;
 
                         ExportImportUtils.Import(context, flags, new File(path), result -> {
                             ((AppCompatActivity) context).recreate();
@@ -1205,9 +1217,8 @@ public final class Utils {
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            return "ig_sig_key_version="+Constants.SIGNATURE_VERSION+"&signed_body=" + hexString.toString() + "." + message;
-        }
-        catch (Exception e) {
+            return "ig_sig_key_version=" + Constants.SIGNATURE_VERSION + "&signed_body=" + hexString.toString() + "." + message;
+        } catch (Exception e) {
             Log.e(TAG, "Error signing", e);
             return null;
         }
@@ -1251,9 +1262,10 @@ public final class Utils {
         final String scheme = itemUri.getScheme();
         if (isEmpty(scheme))
             mimeType = mimeTypeMap.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
-        else mimeType = scheme.equals(ContentResolver.SCHEME_CONTENT) ? contentResolver.getType(itemUri)
-                : mimeTypeMap.getMimeTypeFromExtension
-                (MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
+        else
+            mimeType = scheme.equals(ContentResolver.SCHEME_CONTENT) ? contentResolver.getType(itemUri)
+                    : mimeTypeMap.getMimeTypeFromExtension
+                    (MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
 
         if (isEmpty(mimeType)) return true;
         mimeType = mimeType.toLowerCase();
@@ -1417,5 +1429,13 @@ public final class Utils {
             simpleCache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(MAX_BYTES), exoDatabaseProvider);
         }
         return simpleCache;
+    }
+
+    public static int getResultingHeight(final int requiredWidth, final int height, final int width) {
+        return requiredWidth * height / width;
+    }
+
+    public static int getResultingWidth(final int requiredHeight, final int height, final int width) {
+        return requiredHeight * width / height;
     }
 }

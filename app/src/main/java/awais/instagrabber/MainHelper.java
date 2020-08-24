@@ -1,10 +1,10 @@
 package awais.instagrabber;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -32,14 +32,25 @@ import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
+import com.facebook.common.executors.UiThreadImmediateExecutorService;
+import com.facebook.datasource.BaseDataSubscriber;
+import com.facebook.datasource.DataSource;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.request.ImageRequest;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import awais.instagrabber.activities.CommentsViewer;
 import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.activities.PostViewer;
@@ -49,6 +60,7 @@ import awais.instagrabber.adapters.DiscoverAdapter;
 import awais.instagrabber.adapters.FeedAdapter;
 import awais.instagrabber.adapters.FeedStoriesAdapter;
 import awais.instagrabber.adapters.PostsAdapter;
+import awais.instagrabber.adapters.viewholder.feed.FeedItemViewHolder;
 import awais.instagrabber.asyncs.DiscoverFetcher;
 import awais.instagrabber.asyncs.FeedFetcher;
 import awais.instagrabber.asyncs.FeedStoriesFetcher;
@@ -63,6 +75,7 @@ import awais.instagrabber.customviews.MouseDrawer;
 import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
+import awais.instagrabber.customviews.helpers.PauseGlideOnFlingScrollListener;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.customviews.helpers.VideoAwareRecyclerScroller;
 import awais.instagrabber.interfaces.FetchListener;
@@ -74,8 +87,12 @@ import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.PostModel;
+import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.ViewerPostModel;
+import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.models.enums.ItemGetType;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.Utils;
@@ -87,13 +104,18 @@ import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
+    private static final String TAG = "MainHelper";
+    private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
+    private static final int RESIZED_VIDEO_HEIGHT = (int) (0.8 * Utils.displayMetrics.heightPixels);
+
     private static AsyncTask<?, ?, ?> currentlyExecuting;
     private AsyncTask<Void, Void, FeedStoryModel[]> prevStoriesFetcher;
-    private final boolean autoloadPosts;
     private FeedStoryModel[] stories;
     private boolean hasNextPage = false, feedHasNextPage = false, discoverHasMore = false;
     private String endCursor = null, feedEndCursor = null, discoverEndMaxId = null, topic = null, rankToken = null;
     private String[] topicIds = null;
+
+    private final boolean autoloadPosts;
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
@@ -112,7 +134,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     mainActivity.mainBinding.toolbar.toolbar.setTitle(mainActivity.userQuery);
                 else if (isLocation)
                     mainActivity.mainBinding.toolbar.toolbar.setTitle(mainActivity.locationModel.getName());
-                else mainActivity.mainBinding.toolbar.toolbar.setTitle("@"+ mainActivity.profileModel.getUsername());
+                else
+                    mainActivity.mainBinding.toolbar.toolbar.setTitle("@" + mainActivity.profileModel.getUsername());
 
                 final PostModel model = result[result.length - 1];
                 if (model != null) {
@@ -121,7 +144,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(
                                 mainActivity.profileModel != null ? mainActivity.profileModel.getId()
-                                    : (mainActivity.hashtagModel != null ? mainActivity.userQuery : mainActivity.locationModel.getId()), endCursor, this)
+                                        : (mainActivity.hashtagModel != null ? mainActivity.userQuery : mainActivity.locationModel.getId()), endCursor, this)
                                 .setUsername((isLocation || isHashtag) ? null : mainActivity.profileModel.getUsername())
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
@@ -129,8 +152,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     }
                     model.setPageCursor(false, null);
                 }
-            }
-            else {
+            } else {
                 mainActivity.mainBinding.profileView.swipeRefreshLayout.setRefreshing(false);
                 mainActivity.mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
                 mainActivity.mainBinding.profileView.privatePage2.setText(R.string.empty_acc);
@@ -146,22 +168,80 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         @Override
         public void onResult(final FeedModel[] result) {
-            if (result != null) {
-                final int oldSize = mainActivity.feedItems.size();
-                mainActivity.feedItems.addAll(Arrays.asList(result));
-                feedAdapter.notifyItemRangeInserted(oldSize, result.length);
-
-                mainActivity.mainBinding.feedView.feedPosts.post(() -> mainActivity.mainBinding.feedView.feedPosts.setNestedScrollingEnabled(true));
-
-                final PostModel feedPostModel = result[result.length - 1];
-                if (feedPostModel != null) {
-                    feedEndCursor = feedPostModel.getEndCursor();
-                    feedHasNextPage = feedPostModel.hasNextPage();
-                    feedPostModel.setPageCursor(false, null);
-                }
+            if (result == null) {
+                return;
             }
+            final int oldSize = mainActivity.feedItems.size();
+            final HashMap<String, FeedModel> thumbToFeedMap = new HashMap<>();
+            for (final FeedModel feedModel : result) {
+                thumbToFeedMap.put(feedModel.getThumbnailUrl(), feedModel);
+            }
+            final BaseDataSubscriber<Void> subscriber = new BaseDataSubscriber<Void>() {
+                int success = 0;
+                int failed = 0;
 
-            mainActivity.mainBinding.feedView.feedSwipeRefreshLayout.setRefreshing(false);
+                @Override
+                protected void onNewResultImpl(@NonNull final DataSource<Void> dataSource) {
+                    // dataSource
+                    final Map<String, Object> extras = dataSource.getExtras();
+                    if (extras == null) {
+                        return;
+                    }
+                    // Log.d(TAG, "extras: " + extras);
+                    final Uri thumbUri = (Uri) extras.get("uri_source");
+                    if (thumbUri == null) {
+                        return;
+                    }
+                    final Integer encodedWidth = (Integer) extras.get("encoded_width");
+                    final Integer encodedHeight = (Integer) extras.get("encoded_height");
+                    if (encodedWidth == null || encodedHeight == null) {
+                        return;
+                    }
+                    final FeedModel feedModel = thumbToFeedMap.get(thumbUri.toString());
+                    if (feedModel == null) {
+                        return;
+                    }
+                    int requiredWidth = Utils.displayMetrics.widthPixels;
+                    int resultingHeight = Utils.getResultingHeight(requiredWidth, encodedHeight, encodedWidth);
+                    if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO && resultingHeight >= MAX_VIDEO_HEIGHT) {
+                        // If its a video and the height is too large, need to reduce the height,
+                        // so that entire video fits on screen
+                        resultingHeight = RESIZED_VIDEO_HEIGHT;
+                        requiredWidth = Utils.getResultingWidth(RESIZED_VIDEO_HEIGHT, resultingHeight, requiredWidth);
+                    }
+                    feedModel.setImageWidth(requiredWidth);
+                    feedModel.setImageHeight(resultingHeight);
+                    success++;
+                    updateAdapter();
+                }
+
+                @Override
+                protected void onFailureImpl(@NonNull final DataSource<Void> dataSource) {
+                    failed++;
+                    updateAdapter();
+                }
+
+                public void updateAdapter() {
+                    if (failed + success != result.length) return;
+                    mainActivity.feedItems.addAll(Arrays.asList(result));
+                    feedAdapter.submitList(mainActivity.feedItems);
+                    feedAdapter.notifyItemRangeInserted(oldSize, result.length);
+
+                    mainActivity.mainBinding.feedView.feedPosts.post(() -> mainActivity.mainBinding.feedView.feedPosts.setNestedScrollingEnabled(true));
+
+                    final PostModel feedPostModel = result[result.length - 1];
+                    if (feedPostModel != null) {
+                        feedEndCursor = feedPostModel.getEndCursor();
+                        feedHasNextPage = feedPostModel.hasNextPage();
+                        feedPostModel.setPageCursor(false, null);
+                    }
+                    mainActivity.mainBinding.feedView.feedSwipeRefreshLayout.setRefreshing(false);
+                }
+            };
+            for (final FeedModel feedModel : result) {
+                final DataSource<Void> ds = Fresco.getImagePipeline().prefetchToBitmapCache(ImageRequest.fromUri(feedModel.getThumbnailUrl()), null);
+                ds.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
+            }
         }
     };
     private final FetchListener<DiscoverItemModel[]> discoverFetchListener = new FetchListener<DiscoverItemModel[]>() {
@@ -174,8 +254,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         public void onResult(final DiscoverItemModel[] result) {
             if (result == null || result.length == 0) {
                 Toast.makeText(mainActivity, R.string.discover_empty, Toast.LENGTH_SHORT).show();
-            }
-            else if (result != null) {
+            } else {
                 final int oldSize = mainActivity.discoverItems.size();
                 mainActivity.discoverItems.addAll(Arrays.asList(result));
                 discoverAdapter.notifyItemRangeInserted(oldSize, result.length);
@@ -201,7 +280,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 topicIds = result.getIds();
                 rankToken = result.getToken();
                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                        mainActivity, android.R.layout.simple_spinner_dropdown_item, result.getNames() );
+                        mainActivity, android.R.layout.simple_spinner_dropdown_item, result.getNames());
                 mainActivity.mainBinding.discoverType.setAdapter(spinnerArrayAdapter);
             }
         }
@@ -225,7 +304,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onClick(final RamboTextView view, final String text, final boolean isHashtag) {
             new AlertDialog.Builder(mainActivity).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
-                    .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
+                                                 .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
                 if (MainActivity.scanHack != null) MainActivity.scanHack.onResult(text);
             }).show();
         }
@@ -240,29 +319,31 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, false, false, result -> {
                     if (result != null && result.length > 0)
                         mainActivity.startActivity(new Intent(mainActivity, StoryViewer.class)
-                            .putExtra(Constants.EXTRAS_STORIES, result)
-                            .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
-                            .putExtra(Constants.FEED, stories)
-                            .putExtra(Constants.FEED_ORDER, index)
+                                .putExtra(Constants.EXTRAS_STORIES, result)
+                                .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+                                .putExtra(Constants.FEED, stories)
+                                .putExtra(Constants.FEED_ORDER, index)
                         );
-                    else Toast.makeText(mainActivity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(mainActivity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     });
-    @NonNull
-    private final MainActivity mainActivity;
+    private MainActivity mainActivity;
     private Resources resources;
     private final View collapsingToolbar;
     private final RecyclerLazyLoader lazyLoader;
-    private boolean isHashtag, isUser, isLocation;
+    private boolean isHashtag;
+    private boolean isLocation;
     private PostsAdapter postsAdapter;
     private FeedAdapter feedAdapter;
     private RecyclerLazyLoader feedLazyLoader, discoverLazyLoader;
     private DiscoverAdapter discoverAdapter;
     public SimpleExoPlayer currentFeedPlayer; // hack for remix drawer layout
     private String cookie = settingsHelper.getString(Constants.COOKIE);
-    public boolean isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+    private boolean isLoggedIn;
+    private RequestManager glide;
 
     public MainHelper(@NonNull final MainActivity mainActivity) {
         stopCurrentExecutor();
@@ -270,6 +351,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         this.mainActivity = mainActivity;
         this.resources = mainActivity.getResources();
         this.autoloadPosts = settingsHelper.getBoolean(AUTOLOAD_POSTS);
+        glide = Glide.with(mainActivity);
 
         mainActivity.mainBinding.profileView.swipeRefreshLayout.setOnRefreshListener(this);
         mainActivity.mainBinding.profileView.mainUrl.setMovementMethod(new LinkMovementMethod());
@@ -280,7 +362,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         final ImageView iconDiscover = (ImageView) iconSlider.getChildAt(2);
 
         final boolean isBottomToolbar = settingsHelper.getBoolean(BOTTOM_TOOLBAR);
-        isLoggedIn = !Utils.isEmpty(cookie);
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (!isLoggedIn) {
             mainActivity.mainBinding.drawerLayout.removeView(mainActivity.mainBinding.feedView.feedLayout);
             mainActivity.mainBinding.drawerLayout.removeView(mainActivity.mainBinding.discoverLayout);
@@ -474,16 +556,101 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         mainActivity.mainBinding.profileView.mainPosts.addOnScrollListener(lazyLoader);
     }
 
+    private final View.OnClickListener clickListener = v -> {
+        if (mainActivity == null) {
+            return;
+        }
+        final Object tag = v.getTag();
+        final Context context = v.getContext();
+
+        if (tag instanceof FeedModel) {
+            final FeedModel feedModel = (FeedModel) tag;
+
+            if (v instanceof RamboTextView) {
+                if (feedModel.isMentionClicked())
+                    feedModel.toggleCaption();
+                feedModel.setMentionClicked(false);
+                if (!FeedItemViewHolder.expandCollapseTextView((RamboTextView) v, feedModel.getPostCaption()))
+                    feedModel.toggleCaption();
+
+            } else {
+                final int id = v.getId();
+                switch (id) {
+                    case R.id.btnComments:
+                        mainActivity.startActivityForResult(new Intent(mainActivity, CommentsViewer.class)
+                                .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode())
+                                .putExtra(Constants.EXTRAS_POST, feedModel.getPostId())
+                                .putExtra(Constants.EXTRAS_USER, feedModel.getProfileModel().getId()), 6969);
+                        break;
+
+                    case R.id.viewStoryPost:
+                        mainActivity.startActivity(new Intent(mainActivity, PostViewer.class)
+                                .putExtra(Constants.EXTRAS_INDEX, feedModel.getPosition())
+                                .putExtra(Constants.EXTRAS_POST, new PostModel(feedModel.getShortCode(), false))
+                                .putExtra(Constants.EXTRAS_TYPE, ItemGetType.FEED_ITEMS));
+                        break;
+
+                    case R.id.btnDownload:
+                        ProfileModel profileModel = feedModel.getProfileModel();
+                        final String username = profileModel != null ? profileModel.getUsername() : null;
+
+                        final ViewerPostModel[] sliderItems = feedModel.getSliderItems();
+
+                        if (feedModel.getItemType() != MediaItemType.MEDIA_TYPE_SLIDER || sliderItems == null || sliderItems.length == 1)
+                            Utils.batchDownload(context, username, DownloadMethod.DOWNLOAD_FEED, Collections.singletonList(feedModel));
+                        else {
+                            final ArrayList<BasePostModel> postModels = new ArrayList<>();
+                            final DialogInterface.OnClickListener clickListener1 = (dialog, which) -> {
+                                postModels.clear();
+
+                                final boolean breakWhenFoundSelected = which == DialogInterface.BUTTON_POSITIVE;
+
+                                for (final ViewerPostModel sliderItem : sliderItems) {
+                                    if (sliderItem != null) {
+                                        if (!breakWhenFoundSelected)
+                                            postModels.add(sliderItem);
+                                        else if (sliderItem.isSelected()) {
+                                            postModels.add(sliderItem);
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // shows 0 items on first item of viewpager cause onPageSelected hasn't been called yet
+                                if (breakWhenFoundSelected && postModels.size() == 0)
+                                    postModels.add(sliderItems[0]);
+
+                                if (postModels.size() > 0)
+                                    Utils.batchDownload(context, username, DownloadMethod.DOWNLOAD_FEED, postModels);
+                            };
+
+                            new AlertDialog.Builder(context).setTitle(R.string.post_viewer_download_dialog_title)
+                                                            .setPositiveButton(R.string.post_viewer_download_current, clickListener1)
+                                                            .setNegativeButton(R.string.post_viewer_download_album, clickListener1).show();
+                        }
+                        break;
+
+                    case R.id.ivProfilePic:
+                        profileModel = feedModel.getProfileModel();
+                        if (profileModel != null)
+                            mentionClickListener.onClick(null, profileModel.getUsername(), false);
+                        break;
+                }
+            }
+        }
+    };
+
     private void setupFeed() {
         mainActivity.mainBinding.feedView.feedStories.setLayoutManager(new LinearLayoutManager(mainActivity, LinearLayoutManager.HORIZONTAL, false));
         mainActivity.mainBinding.feedView.feedStories.setAdapter(feedStoriesAdapter);
         refreshFeedStories();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivity);
+        mainActivity.mainBinding.feedView.feedPosts.setHasFixedSize(true);
         mainActivity.mainBinding.feedView.feedPosts.setLayoutManager(layoutManager);
-        mainActivity.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(mainActivity, mainActivity.feedItems, (view, text, isHashtag) ->
+        mainActivity.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(glide, clickListener, (view, text, isHashtag) ->
                 new AlertDialog.Builder(mainActivity).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
-                        .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
+                                                     .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
                     if (MainActivity.scanHack != null) {
                         mainActivity.mainBinding.drawerLayout.closeDrawers();
                         MainActivity.scanHack.onResult(text);
@@ -507,8 +674,11 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             }
         }));
 
-        mainActivity.mainBinding.feedView.feedPosts.addOnScrollListener(new VideoAwareRecyclerScroller(mainActivity, mainActivity.feedItems,
-                (itemPos, player) -> currentFeedPlayer = player));
+        final boolean shouldAutoPlay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
+        if (shouldAutoPlay) {
+            mainActivity.mainBinding.feedView.feedPosts.addOnScrollListener(new VideoAwareRecyclerScroller());
+        }
+        mainActivity.mainBinding.feedView.feedPosts.addOnScrollListener(new PauseGlideOnFlingScrollListener(glide));
 
         new FeedFetcher(feedFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -623,7 +793,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         } else {
                             mainActivity.addToStack();
                             mainActivity.userQuery = modelType == IntentModelType.HASHTAG ? ('#' + modelText) :
-                                    (modelType == IntentModelType.LOCATION ? modelText : ('@'+modelText));
+                                    (modelType == IntentModelType.LOCATION ? modelText : ('@' + modelText));
                             onRefresh();
                         }
                     }
@@ -646,9 +816,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         mainActivity.mainBinding.profileView.appBarLayout.setExpanded(true, true);
         mainActivity.mainBinding.profileView.privatePage.setVisibility(View.GONE);
         mainActivity.mainBinding.profileView.privatePage2.setTextSize(28);
-        mainActivity.mainBinding.profileView.mainProfileImage.setImageBitmap(null);
-        mainActivity.mainBinding.profileView.mainHashtagImage.setImageBitmap(null);
-        mainActivity.mainBinding.profileView.mainLocationImage.setImageBitmap(null);
+        // mainActivity.mainBinding.profileView.mainProfileImage.setImageBitmap(null);
+        // mainActivity.mainBinding.profileView.mainHashtagImage.setImageBitmap(null);
+        // mainActivity.mainBinding.profileView.mainLocationImage.setImageBitmap(null);
         mainActivity.mainBinding.profileView.mainUrl.setText(null);
         mainActivity.mainBinding.profileView.locationUrl.setText(null);
         mainActivity.mainBinding.profileView.mainFullName.setText(null);
@@ -702,7 +872,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         }
 
         isHashtag = mainActivity.userQuery.charAt(0) == '#';
-        isUser = mainActivity.userQuery.charAt(0) == '@';
+        final boolean isUser = mainActivity.userQuery.charAt(0) == '@';
         isLocation = mainActivity.userQuery.contains("/");
         collapsingToolbar.setVisibility(isUser ? View.VISIBLE : View.GONE);
 
@@ -731,15 +901,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, result -> {
                         mainActivity.storyModels = result;
-                        if (result != null && result.length > 0) mainActivity.mainBinding.profileView.mainHashtagImage.setStoriesBorder();
+                        if (result != null && result.length > 0)
+                            mainActivity.mainBinding.profileView.mainHashtagImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                    if (hashtagModel.getFollowing() == true) {
+                    if (hashtagModel.getFollowing()) {
                         mainActivity.mainBinding.profileView.btnFollowTag.setText(R.string.unfollow);
                         mainActivity.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 mainActivity, R.color.btn_purple_background)));
-                    }
-                    else {
+                    } else {
                         mainActivity.mainBinding.profileView.btnFollowTag.setText(R.string.follow);
                         mainActivity.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 mainActivity, R.color.btn_pink_background)));
@@ -749,8 +919,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         mainActivity.mainBinding.profileView.btnFollowTag.setText(R.string.unfavorite_short);
                         mainActivity.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 mainActivity, R.color.btn_purple_background)));
-                    }
-                    else {
+                    } else {
                         mainActivity.mainBinding.profileView.btnFollowTag.setText(R.string.favorite_short);
                         mainActivity.mainBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 mainActivity, R.color.btn_pink_background)));
@@ -758,7 +927,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 }
 
                 mainActivity.mainBinding.profileView.mainHashtagImage.setEnabled(false);
-                new MyTask().execute();
+                // new MyTask().execute();
+                mainActivity.mainBinding.profileView.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
                 mainActivity.mainBinding.profileView.mainHashtagImage.setEnabled(true);
 
                 final String postCount = String.valueOf(hashtagModel.getPostCount());
@@ -790,20 +960,21 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 final String profileId = profileModel.getId();
 
                 if (isLoggedIn || settingsHelper.getBoolean(Constants.STORIESIG)) {
-                  new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
-                          (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), false,
-                          result -> {
-                      mainActivity.storyModels = result;
-                      if (result != null && result.length > 0) mainActivity.mainBinding.profileView.mainProfileImage.setStoriesBorder();
-                  }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
+                            (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), false,
+                            result -> {
+                                mainActivity.storyModels = result;
+                                // if (result != null && result.length > 0)
+                                mainActivity.mainBinding.profileView.mainProfileImage.setStoriesBorder();
+                            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                  new HighlightsFetcher(profileId, (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
-                      if (result != null && result.length > 0) {
-                          mainActivity.mainBinding.profileView.highlightsList.setVisibility(View.VISIBLE);
-                          mainActivity.highlightsAdapter.setData(result);
-                      }
-                      else mainActivity.mainBinding.profileView.highlightsList.setVisibility(View.GONE);
-                  }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new HighlightsFetcher(profileId, (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
+                        if (result != null && result.length > 0) {
+                            mainActivity.mainBinding.profileView.highlightsList.setVisibility(View.VISIBLE);
+                            mainActivity.highlightsAdapter.setData(result);
+                        } else
+                            mainActivity.mainBinding.profileView.highlightsList.setVisibility(View.GONE);
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
                 if (isLoggedIn) {
@@ -817,13 +988,11 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             mainActivity.mainBinding.profileView.btnFollow.setText(R.string.unfollow);
                             mainActivity.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     mainActivity, R.color.btn_purple_background)));
-                        }
-                        else if (profileModel.getRequested() == true) {
+                        } else if (profileModel.getRequested() == true) {
                             mainActivity.mainBinding.profileView.btnFollow.setText(R.string.cancel);
                             mainActivity.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     mainActivity, R.color.btn_purple_background)));
-                        }
-                        else {
+                        } else {
                             mainActivity.mainBinding.profileView.btnFollow.setText(R.string.follow);
                             mainActivity.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     mainActivity, R.color.btn_pink_background)));
@@ -833,8 +1002,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             mainActivity.mainBinding.profileView.btnRestrict.setText(R.string.unrestrict);
                             mainActivity.mainBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     mainActivity, R.color.btn_green_background)));
-                        }
-                        else {
+                        } else {
                             mainActivity.mainBinding.profileView.btnRestrict.setText(R.string.restrict);
                             mainActivity.mainBinding.profileView.btnRestrict.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                     mainActivity, R.color.btn_orange_background)));
@@ -865,8 +1033,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                         mainActivity, R.color.btn_red_background)));
                             }
                         }
-                    }
-                    else {
+                    } else {
                         mainActivity.mainBinding.profileView.btnTagged.setVisibility(View.VISIBLE);
                         mainActivity.mainBinding.profileView.btnSaved.setVisibility(View.VISIBLE);
                         mainActivity.mainBinding.profileView.btnLiked.setVisibility(View.VISIBLE);
@@ -879,8 +1046,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         mainActivity.mainBinding.profileView.btnFollow.setText(R.string.unfavorite_short);
                         mainActivity.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 mainActivity, R.color.btn_purple_background)));
-                    }
-                    else {
+                    } else {
                         mainActivity.mainBinding.profileView.btnFollow.setText(R.string.favorite_short);
                         mainActivity.mainBinding.profileView.btnFollow.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 mainActivity, R.color.btn_pink_background)));
@@ -894,9 +1060,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
 
-                mainActivity.mainBinding.profileView.mainProfileImage.setEnabled(false);
-                new MyTask().execute();
-                mainActivity.mainBinding.profileView.mainProfileImage.setEnabled(true);
+                // mainActivity.mainBinding.profileView.mainProfileImage.setEnabled(false);
+                // new MyTask().execute();
+                mainActivity.mainBinding.profileView.mainProfileImage.setImageURI(profileModel.getSdProfilePic());
+                // mainActivity.mainBinding.profileView.mainProfileImage.setEnabled(true);
 
                 final long followersCount = profileModel.getFollowersCount();
                 final long followingCount = profileModel.getFollowingCount();
@@ -966,12 +1133,11 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         mainActivity.mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
                         mainActivity.mainBinding.profileView.privatePage2.setText(R.string.empty_acc);
                         mainActivity.mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
-                    }
-                    else {
+                    } else {
                         mainActivity.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                         mainActivity.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                         currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
-                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                                                                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                 } else {
                     mainActivity.mainBinding.profileView.mainFollowers.setClickable(false);
@@ -985,8 +1151,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 }
             }
             ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
-        else if (isLocation) {
+        } else if (isLocation) {
             mainActivity.profileModel = null;
             mainActivity.hashtagModel = null;
             mainActivity.mainBinding.toolbar.toolbar.setTitle(mainActivity.userQuery);
@@ -1008,13 +1173,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 if (isLoggedIn) {
                     new iStoryStatusFetcher(profileId.split("/")[0], null, true, false, false, false, result -> {
                         mainActivity.storyModels = result;
-                        if (result != null && result.length > 0) mainActivity.mainBinding.profileView.mainLocationImage.setStoriesBorder();
+                        if (result != null && result.length > 0)
+                            mainActivity.mainBinding.profileView.mainLocationImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
 
-                mainActivity.mainBinding.profileView.mainLocationImage.setEnabled(false);
-                new MyTask().execute();
-                mainActivity.mainBinding.profileView.mainLocationImage.setEnabled(true);
+                // mainActivity.mainBinding.profileView.mainLocationImage.setEnabled(false);
+                // new MyTask().execute();
+                mainActivity.mainBinding.profileView.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
+                // mainActivity.mainBinding.profileView.mainLocationImage.setEnabled(true);
 
                 final String postCount = String.valueOf(locationModel.getPostCount());
 
@@ -1031,8 +1198,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
                 if (Utils.isEmpty(biography)) {
                     mainActivity.mainBinding.profileView.locationBiography.setVisibility(View.GONE);
-                }
-                else if (Utils.hasMentions(biography)) {
+                } else if (Utils.hasMentions(biography)) {
                     mainActivity.mainBinding.profileView.locationBiography.setVisibility(View.VISIBLE);
                     biography = Utils.getMentionText(biography);
                     mainActivity.mainBinding.profileView.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
@@ -1050,8 +1216,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         intent.setData(Uri.parse(locationModel.getGeo()));
                         mainActivity.startActivity(intent);
                     });
-                }
-                else {
+                } else {
                     mainActivity.mainBinding.profileView.btnMap.setVisibility(View.GONE);
                     mainActivity.mainBinding.profileView.btnMap.setOnClickListener(null);
                 }
@@ -1061,7 +1226,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     mainActivity.mainBinding.profileView.locationUrl.setVisibility(View.GONE);
                 } else if (!url.startsWith("http")) {
                     mainActivity.mainBinding.profileView.locationUrl.setVisibility(View.VISIBLE);
-                    mainActivity.mainBinding.profileView.locationUrl.setText(Utils.getSpannableUrl("http://"+url));
+                    mainActivity.mainBinding.profileView.locationUrl.setText(Utils.getSpannableUrl("http://" + url));
                 } else {
                     mainActivity.mainBinding.profileView.locationUrl.setVisibility(View.VISIBLE);
                     mainActivity.mainBinding.profileView.locationUrl.setText(Utils.getSpannableUrl(url));
@@ -1075,8 +1240,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     mainActivity.mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_cancel);
                     mainActivity.mainBinding.profileView.privatePage2.setText(R.string.empty_acc);
                     mainActivity.mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     mainActivity.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                     mainActivity.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
                     currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
@@ -1102,14 +1266,12 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private void toggleSelection(final PostModel postModel) {
         if (postModel != null && postsAdapter != null && mainActivity.selectedItems.size() >= 100) {
             Toast.makeText(mainActivity, R.string.downloader_too_many, Toast.LENGTH_SHORT);
-        }
-        else if (postModel != null && postsAdapter != null) {
+        } else if (postModel != null && postsAdapter != null) {
             if (postModel.isSelected()) mainActivity.selectedItems.remove(postModel);
             else if (mainActivity.selectedItems.size() >= 100) {
                 Toast.makeText(mainActivity, R.string.downloader_too_many, Toast.LENGTH_SHORT);
                 return;
-            }
-            else mainActivity.selectedItems.add(postModel);
+            } else mainActivity.selectedItems.add(postModel);
             postModel.setSelected(!postModel.isSelected());
             notifyAdapter(postModel);
         }
@@ -1120,10 +1282,10 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
         else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
 
-        if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(postsAdapter.isSelecting);
+        if (mainActivity.downloadAction != null)
+            mainActivity.downloadAction.setVisible(postsAdapter.isSelecting);
     }
 
-    ///////////////////////////////////////////////////
     private void toggleDiscoverSelection(final DiscoverItemModel itemModel) {
         if (itemModel != null && discoverAdapter != null) {
             if (itemModel.isSelected()) mainActivity.selectedDiscoverItems.remove(itemModel);
@@ -1138,19 +1300,22 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         if (itemModel.getPosition() < 0) discoverAdapter.notifyDataSetChanged();
         else discoverAdapter.notifyItemChanged(itemModel.getPosition(), itemModel);
 
-        if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(discoverAdapter.isSelecting);
+        if (mainActivity.downloadAction != null)
+            mainActivity.downloadAction.setVisible(discoverAdapter.isSelecting);
     }
 
     public boolean isSelectionCleared() {
         if (postsAdapter != null && postsAdapter.isSelecting) {
-            for (final PostModel postModel : mainActivity.selectedItems) postModel.setSelected(false);
+            for (final PostModel postModel : mainActivity.selectedItems)
+                postModel.setSelected(false);
             mainActivity.selectedItems.clear();
             postsAdapter.isSelecting = false;
             postsAdapter.notifyDataSetChanged();
             if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(false);
             return false;
         } else if (discoverAdapter != null && discoverAdapter.isSelecting) {
-            for (final DiscoverItemModel itemModel : mainActivity.selectedDiscoverItems) itemModel.setSelected(false);
+            for (final DiscoverItemModel itemModel : mainActivity.selectedDiscoverItems)
+                itemModel.setSelected(false);
             mainActivity.selectedDiscoverItems.clear();
             discoverAdapter.isSelecting = false;
             discoverAdapter.notifyDataSetChanged();
@@ -1196,29 +1361,31 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         return returnvalue;
     }
 
-    class MyTask extends AsyncTask<Void, Bitmap, Void> {
-        private Bitmap mIcon_val;
-
-        protected Void doInBackground(Void... voids) {
-            try {
-                mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(
-                        (mainActivity.hashtagModel != null) ? mainActivity.hashtagModel.getSdProfilePic() : (
-                                (mainActivity.locationModel != null) ? mainActivity.locationModel.getSdProfilePic() :
-                                        mainActivity.profileModel.getSdProfilePic())
-                ).getContent());
-            } catch (Throwable ex) {
-                Log.e("austin_debug", "bitmap: " + ex);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            if (mainActivity.hashtagModel != null) mainActivity.mainBinding.profileView.mainHashtagImage.setImageBitmap(mIcon_val);
-            else if (mainActivity.locationModel != null) mainActivity.mainBinding.profileView.mainLocationImage.setImageBitmap(mIcon_val);
-            else mainActivity.mainBinding.profileView.mainProfileImage.setImageBitmap(mIcon_val);
-        }
-    }
+    // class MyTask extends AsyncTask<Void, Bitmap, Void> {
+    //     private Bitmap mIcon_val;
+    //
+    //     protected Void doInBackground(Void... voids) {
+    //         try {
+    //             mIcon_val = BitmapFactory.decodeStream((InputStream) new URL(
+    //                     (mainActivity.hashtagModel != null) ? mainActivity.hashtagModel.getSdProfilePic() : (
+    //                             (mainActivity.locationModel != null) ? mainActivity.locationModel.getSdProfilePic() :
+    //                                     mainActivity.profileModel.getSdProfilePic())
+    //             ).getContent());
+    //         } catch (Throwable ex) {
+    //             Log.e("austin_debug", "bitmap: " + ex);
+    //         }
+    //         return null;
+    //     }
+    //
+    //     @Override
+    //     protected void onPostExecute(Void result) {
+    //         if (mainActivity.hashtagModel != null)
+    //             mainActivity.mainBinding.profileView.mainHashtagImage.setImageBitmap(mIcon_val);
+    //         else if (mainActivity.locationModel != null)
+    //             mainActivity.mainBinding.profileView.mainLocationImage.setImageBitmap(mIcon_val);
+    //         else mainActivity.mainBinding.profileView.mainProfileImage.setImageBitmap(mIcon_val);
+    //     }
+    // }
 
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
@@ -1243,18 +1410,18 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 new ProfileAction().execute("followtag");
             } else if (v == mainActivity.mainBinding.profileView.btnTagged || (v == mainActivity.mainBinding.profileView.btnRestrict && !isLoggedIn)) {
                 mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "%"+ mainActivity.profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@"+ mainActivity.profileModel.getUsername())
+                        .putExtra(Constants.EXTRAS_INDEX, "%" + mainActivity.profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())
                 );
             } else if (v == mainActivity.mainBinding.profileView.btnSaved) {
                 mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "$"+ mainActivity.profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@"+ mainActivity.profileModel.getUsername())
+                        .putExtra(Constants.EXTRAS_INDEX, "$" + mainActivity.profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())
                 );
             } else if (v == mainActivity.mainBinding.profileView.btnLiked) {
                 mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "^"+ mainActivity.profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@"+ mainActivity.profileModel.getUsername())
+                        .putExtra(Constants.EXTRAS_INDEX, "^" + mainActivity.profileModel.getId())
+                        .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())
                 );
             }
         }
@@ -1266,17 +1433,17 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
-            final String url = "https://www.instagram.com/web/"+
-                    ((action == "followtag" && mainActivity.hashtagModel != null) ? ("tags/"+
-                            (mainActivity.hashtagModel.getFollowing() == true ? "unfollow/" : "follow/")+ mainActivity.hashtagModel.getName()+"/") : (
-                    ((action == "restrict" && mainActivity.profileModel != null) ? "restrict_action" : ("friendships/"+ mainActivity.profileModel.getId()))+"/"+
-                    ((action == "follow" && mainActivity.profileModel != null) ?
-                    ((mainActivity.profileModel.getFollowing() == true ||
-                            (mainActivity.profileModel.getFollowing() == false && mainActivity.profileModel.getRequested() == true))
-                            ? "unfollow/" : "follow/") :
-                    ((action == "restrict" && mainActivity.profileModel != null) ?
-                            (mainActivity.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
-                            (mainActivity.profileModel.getBlocked() == true ? "unblock/" : "block/")))));
+            final String url = "https://www.instagram.com/web/" +
+                    ((action == "followtag" && mainActivity.hashtagModel != null) ? ("tags/" +
+                            (mainActivity.hashtagModel.getFollowing() == true ? "unfollow/" : "follow/") + mainActivity.hashtagModel.getName() + "/") : (
+                            ((action == "restrict" && mainActivity.profileModel != null) ? "restrict_action" : ("friendships/" + mainActivity.profileModel.getId())) + "/" +
+                                    ((action == "follow" && mainActivity.profileModel != null) ?
+                                            ((mainActivity.profileModel.getFollowing() == true ||
+                                                    (mainActivity.profileModel.getFollowing() == false && mainActivity.profileModel.getRequested() == true))
+                                                    ? "unfollow/" : "follow/") :
+                                            ((action == "restrict" && mainActivity.profileModel != null) ?
+                                                    (mainActivity.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
+                                                    (mainActivity.profileModel.getBlocked() == true ? "unblock/" : "block/")))));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
@@ -1284,7 +1451,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
                 urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
                 if (action == "restrict") {
-                    final String urlParameters = "target_user_id="+ mainActivity.profileModel.getId();
+                    final String urlParameters = "target_user_id=" + mainActivity.profileModel.getId();
                     urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     urlConnection.setRequestProperty("Content-Length", "" +
                             urlParameters.getBytes().length);
@@ -1293,15 +1460,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     wr.writeBytes(urlParameters);
                     wr.flush();
                     wr.close();
-                }
-                else urlConnection.connect();
+                } else urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     ok = true;
-                }
-                else Toast.makeText(mainActivity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                } else
+                    Toast.makeText(mainActivity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 urlConnection.disconnect();
             } catch (Throwable ex) {
-                Log.e("austin_debug", action+": " + ex);
+                Log.e("austin_debug", action + ": " + ex);
             }
             return null;
         }

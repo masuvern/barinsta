@@ -176,4 +176,8 @@ public final class RamboTextView extends AppCompatTextView {
 
         return null;
     }
+
+    public boolean isCaptionExpanded() {
+        return isExpanded;
+    }
 }

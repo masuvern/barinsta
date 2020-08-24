@@ -16,8 +16,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="32dp"
-            android:layout_marginLeft="4dp"
             android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginLeft="4dp"
             app:srcCompat="@drawable/comments" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -32,7 +33,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/llVideoViews"
+        android:id="@+id/videoViewsContainer"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_toEndOf="@id/btnComments"
@@ -62,8 +63,8 @@
         android:layout_alignRight="@id/btnMute"
         android:layout_marginEnd="48dp"
         android:layout_marginRight="48dp"
-        android:layout_toEndOf="@id/llVideoViews"
-        android:layout_toRightOf="@id/llVideoViews">
+        android:layout_toEndOf="@id/videoViewsContainer"
+        android:layout_toRightOf="@id/videoViewsContainer">
 
         <View
             android:layout_width="1dip"
@@ -131,7 +132,7 @@
                 android:padding="12dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp"
-                tools:text="BOTTOM TEXT HAHA FUNNY MEME" />
+                tools:text="BOTTOM TEXT" />
         </FrameLayout>
     </ScrollView>
 </RelativeLayout>

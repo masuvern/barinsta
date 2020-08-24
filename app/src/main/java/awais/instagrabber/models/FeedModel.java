@@ -1,8 +1,8 @@
 package awais.instagrabber.models;
 
-import awais.instagrabber.models.enums.MediaItemType;
-
 import org.json.JSONObject;
+
+import awais.instagrabber.models.enums.MediaItemType;
 
 public final class FeedModel extends PostModel {
     private final ProfileModel profileModel;
@@ -10,6 +10,8 @@ public final class FeedModel extends PostModel {
     private boolean captionExpanded = false, mentionClicked = false;
     private final JSONObject location;
     private ViewerPostModel[] sliderItems;
+    private int imageWidth;
+    private int imageHeight;
 
     public FeedModel(final ProfileModel profileModel, final MediaItemType itemType, final long viewCount, final String postId,
                      final String displayUrl, final String thumbnailUrl, final String shortCode, final String postCaption,
@@ -60,5 +62,21 @@ public final class FeedModel extends PostModel {
 
     public void toggleCaption() {
         captionExpanded = !captionExpanded;
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public void setImageWidth(final int imageWidth) {
+        this.imageWidth = imageWidth;
+    }
+
+    public void setImageHeight(final int imageHeight) {
+        this.imageHeight = imageHeight;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
     }
 }
