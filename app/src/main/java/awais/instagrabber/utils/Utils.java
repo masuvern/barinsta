@@ -142,10 +142,10 @@ public final class Utils {
             final URI uri1 = new URI("https://instagram.com");
             final URI uri2 = new URI("https://instagram.com/");
             final URI uri3 = new URI("https://i.instagram.com/");
-            for (final String cookie : cookieRaw.split(";")) {
+            for (final String cookie : cookieRaw.split("; ")) {
                 final String[] strings = cookie.split("=", 2);
                 final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
-                httpCookie.setDomain("instagram.com");
+                httpCookie.setDomain(".instagram.com");
                 httpCookie.setPath("/");
                 httpCookie.setVersion(0);
                 cookieStore.add(uri1, httpCookie);
