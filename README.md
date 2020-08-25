@@ -12,9 +12,11 @@
 
 ### Download
 
-<a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="100"></a>
+Download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest) (recommended). Expand "Assets" and download the APK file. Or...
 
-Or you can download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
+<a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75"></a>
+
+(...[but they're *very* slow.](https://instagrabber.austinhuang.me/faq#f-droid))
 
 Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. ![GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
 
