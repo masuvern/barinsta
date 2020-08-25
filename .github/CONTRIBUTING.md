@@ -11,7 +11,7 @@ Our vision of InstaGrabber is an open source true alternative of the official In
 
 As we grow in popularity, it becomes apparent that we are short on hands. Every contribution counts!
 
-### I can code Java!
+## I want to help coding it!
 
 Great!
 
@@ -31,17 +31,17 @@ Even though Java is quite annoying, it is still possible to learn it by trying t
 
 If you have questions, don't be afraid to ask for help from any current maintainer!
 
-### I found a bug!
+## I found a bug!
 
-Bugs are inevitable during active development, as nobody can cover all the possible test cases. You can either email your crash dump to `instagrabber@austinhuang.me` (The crash reporter will fill in this address for you) or create a GitHub issue.
+**Please read [FAQ](https://instagrabber.austinhuang.me/faq) first.**
 
-If you're on GitHub, please follow the template.
+Bugs are inevitable during active development, as nobody can cover all the possible test cases. 
 
-If you're reporting by email, your email address will be published in the GitHub issue. You can contact me [privately](https://austinhuang.me/#hey-you-look-cool) or [through support channels](https://instagrabber.austinhuang.me/#what-can-i-do) to remove it.
+You can either email your crash dump to `instagrabber@austinhuang.me` (The crash reporter will fill in this address for you) or create a GitHub issue. If you're on GitHub, please follow the template. If you're reporting by email, your email address will be published in the GitHub issue. You can contact me [privately](https://austinhuang.me/#hey-you-look-cool) or [through support channels](https://instagrabber.austinhuang.me/#what-can-i-do) to remove it.
 
 Generally, reporting bugs directly in support channels is not recommended, as they can be difficult to find.
 
-### I want to help the project in some other way!
+### I want to help... in some other way.
 
 You can...
 
