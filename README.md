@@ -12,6 +12,8 @@
 
 ### Download
 
+**By installing, you indicate your acceptance of [Disclosure and Privacy Policy](https://instagrabber.austinhuang.me/disclosure).**
+
 Download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest) (recommended). Expand "Assets" and download the APK file. Or...
 
 <a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75"></a>
