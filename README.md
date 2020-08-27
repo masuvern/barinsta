@@ -37,7 +37,7 @@ Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.insta
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 * Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
 
-## Contributors
+### Contributors
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
