@@ -8,7 +8,7 @@
     {
       "login": "austinhuang0131",
       "name": "Austin Huang",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/16656689?v=4",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/16656689",
       "profile": "https://austinhuang.me",
       "contributions": [
         "code",
@@ -23,7 +23,7 @@
     {
       "login": "ammargitham",
       "name": "Ammar Githam",
-      "avatar_url": "https://avatars0.githubusercontent.com/u/8017365?v=4",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/8017365",
       "profile": "https://github.com/ammargitham",
       "contributions": [
         "code",
@@ -36,7 +36,7 @@
     {
       "login": "AwaisKing",
       "name": "AWAiS",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/5278488?v=4",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/5278488",
       "profile": "http://rerolledgeek.blogspot.com/",
       "contributions": [
         "code",
@@ -46,7 +46,7 @@
     {
       "login": "Shadowspear123",
       "name": "Shadowspear123",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/50462281?v=4",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/50462281",
       "profile": "https://github.com/Shadowspear123",
       "contributions": [
         "blog",
@@ -59,7 +59,7 @@
     {
       "login": "KevinNThomas",
       "name": "Kevin Thomas",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/15370181?v=4",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/15370181",
       "profile": "http://kevinthomas.dev",
       "contributions": [
         "financial"
@@ -68,7 +68,7 @@
     {
       "login": "e-edgren",
       "name": "Airikr",
-      "avatar_url": "https://avatars0.githubusercontent.com/u/53869451?v=4",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/53869451",
       "profile": "https://airikr.me/",
       "contributions": [
         "question",
@@ -78,7 +78,7 @@
     {
       "login": "Galang23",
       "name": "Galang23",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/13700948?v=4",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/13700948",
       "profile": "https://github.com/Galang23",
       "contributions": [
         "translation"
@@ -87,7 +87,7 @@
     {
       "login": "kernoeb",
       "name": "kernoeb",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/24623168?v=4",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/24623168",
       "profile": "https://becauseofprog.fr/",
       "contributions": [
         "translation"
@@ -96,8 +96,17 @@
     {
       "login": "Lego8486",
       "name": "Ten_Lego",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/47414485?v=4",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/47414485",
       "profile": "https://github.com/Lego8486",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "MoaufmKlo",
+      "name": "MoaufmKlo",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/45636897",
+      "profile": "https://github.com/MoaufmKlo",
       "contributions": [
         "translation"
       ]
@@ -105,7 +114,7 @@
     {
       "login": "peterge1998",
       "name": "peterge1998",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/47355238?v=4",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/47355238",
       "profile": "https://github.com/peterge1998",
       "contributions": [
         "translation"
@@ -114,7 +123,7 @@
     {
       "login": "RAMAR-RAR",
       "name": "RAMAR-RAR",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/47423745?v=4",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/47423745",
       "profile": "https://github.com/RAMAR-RAR",
       "contributions": [
         "translation"
@@ -123,14 +132,14 @@
     {
       "login": "wagnim",
       "name": "wagnim",
-      "avatar_url": "https://avatars0.githubusercontent.com/u/30241419?v=4",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/30241419",
       "profile": "https://github.com/wagnim",
       "contributions": [
         "translation"
       ]
     }
   ],
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 5,
   "projectName": "instagrabber",
   "projectOwner": "austinhuang0131",
   "repoType": "github",
