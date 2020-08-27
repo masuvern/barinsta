@@ -64,6 +64,70 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "e-edgren",
+      "name": "Airikr",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/53869451?v=4",
+      "profile": "https://airikr.me/",
+      "contributions": [
+        "question",
+        "ideas"
+      ]
+    },
+    {
+      "login": "Galang23",
+      "name": "Galang23",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/13700948?v=4",
+      "profile": "https://github.com/Galang23",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "kernoeb",
+      "name": "kernoeb",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/24623168?v=4",
+      "profile": "https://becauseofprog.fr/",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Lego8486",
+      "name": "Ten_Lego",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/47414485?v=4",
+      "profile": "https://github.com/Lego8486",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "peterge1998",
+      "name": "peterge1998",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/47355238?v=4",
+      "profile": "https://github.com/peterge1998",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "RAMAR-RAR",
+      "name": "RAMAR-RAR",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/47423745?v=4",
+      "profile": "https://github.com/RAMAR-RAR",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "wagnim",
+      "name": "wagnim",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/30241419?v=4",
+      "profile": "https://github.com/wagnim",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -71,5 +135,6 @@
   "projectOwner": "austinhuang0131",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "none"
 }
