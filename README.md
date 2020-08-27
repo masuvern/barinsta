@@ -1,7 +1,4 @@
 <img src="./app/play_icon.png" alt="InstaGrabber" align="right" width="25%"/>
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## InstaGrabber
 
@@ -40,6 +37,27 @@ Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.insta
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 * Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+Prominent contributors are listed here in the [all-contributors](https://allcontributors.org/) format. See [emoji key](https://allcontributors.org/docs/en/emoji-key).
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://austinhuang.me"><img src="https://avatars1.githubusercontent.com/u/16656689?v=4" width="100px;" alt=""/><br /><sub><b>Austin Huang</b></sub></a><br /><a href="https://github.com/austinhuang0131/instagrabber/commits?author=austinhuang0131" title="Code">💻</a> <a href="https://github.com/austinhuang0131/instagrabber/commits?author=austinhuang0131" title="Documentation">📖</a> <a href="#question-austinhuang0131" title="Answering Questions">💬</a> <a href="#translation-austinhuang0131" title="Translation">🌍</a> <a href="#userTesting-austinhuang0131" title="User Testing">📓</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ### License
 
 This app is originally made by [@AwaisKing](https://github.com/AwaisKing) on [GitLab](https://gitlab.com/AwaisKing/instagrabber).
@@ -70,22 +88,5 @@ This app is originally made by [@AwaisKing](https://github.com/AwaisKing) on [Gi
 [![Crowdin](https://badges.crowdin.net/instagrabber/localized.svg)](https://crowdin.com/project/instagrabber)
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com) [![gplv3](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0.html)
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://austinhuang.me"><img src="https://avatars1.githubusercontent.com/u/16656689?v=4" width="100px;" alt=""/><br /><sub><b>Austin Huang</b></sub></a><br /><a href="https://github.com/austinhuang0131/instagrabber/commits?author=austinhuang0131" title="Code">💻</a> <a href="https://github.com/austinhuang0131/instagrabber/commits?author=austinhuang0131" title="Documentation">📖</a> <a href="#question-austinhuang0131" title="Answering Questions">💬</a> <a href="#translation-austinhuang0131" title="Translation">🌍</a> <a href="#userTesting-austinhuang0131" title="User Testing">📓</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-enable -->
-<!-- prettier-ignore-end -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
