@@ -15,9 +15,7 @@
         "doc",
         "question",
         "translation",
-        "userTesting",
-        "ideas",
-        "maintenance"
+        "ideas"
       ]
     },
     {
@@ -81,6 +79,7 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/13700948",
       "profile": "https://github.com/Galang23",
       "contributions": [
+        "question",
         "translation"
       ]
     },
@@ -139,7 +138,7 @@
       ]
     }
   ],
-  "contributorsPerLine": 5,
+  "contributorsPerLine": 6,
   "projectName": "instagrabber",
   "projectOwner": "austinhuang0131",
   "repoType": "github",
