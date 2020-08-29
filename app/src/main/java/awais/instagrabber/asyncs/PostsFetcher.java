@@ -131,7 +131,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                     Utils.checkExistence(downloadDir, customDir, isSlider, models[i]);
                 }
 
-                if (models[models.length - 1] != null)
+                if (models.length > 0 && models[models.length - 1] != null)
                     models[models.length - 1].setPageCursor(hasNextPage, endCursor);
 
                 result = models;

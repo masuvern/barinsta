@@ -67,6 +67,7 @@ import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
@@ -220,8 +221,12 @@ public class DirectMessageThreadFragment extends Fragment {
                     case RAVEN_MEDIA:
                     case MEDIA:
                         final ProfileModel user = getUser(directItemModel.getUserId());
-                        Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
-                        Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                        String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl();
+                        if (url != null) {
+                            Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
+                            Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                        }
+                        else Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                         break;
                     case STORY_SHARE:
                         if (directItemModel.getReelShare() != null) {
