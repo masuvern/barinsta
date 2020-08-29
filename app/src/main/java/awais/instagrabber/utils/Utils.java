@@ -990,10 +990,10 @@ public final class Utils {
     }
 
     public static void dmDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
-                                     final List<? extends DirectItemMediaModel> itemsToDownload) {
+                                     final DirectItemMediaModel itemsToDownload) {
         if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
 
-        if (itemsToDownload == null || itemsToDownload.size() < 1) return;
+        if (itemsToDownload == null) return;
 
         if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
             dmDownloadImpl(context, username, method, itemsToDownload);
@@ -1002,7 +1002,7 @@ public final class Utils {
     }
 
     private static void dmDownloadImpl(@NonNull final Context context, @Nullable final String username,
-                                          final DownloadMethod method, final List<? extends DirectItemMediaModel> itemsToDownload) {
+                                          final DownloadMethod method, final DirectItemMediaModel selectedItem) {
         File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
@@ -1014,22 +1014,11 @@ public final class Utils {
             dir = new File(dir, username);
 
         if (dir.exists() || dir.mkdirs()) {
-            final Main main = method != DownloadMethod.DOWNLOAD_FEED && context instanceof Main ? (Main) context : null;
-
-            final int itemsToDownloadSize = itemsToDownload.size();
-
             final File finalDir = dir;
-            for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
-                final DirectItemMediaModel selectedItem = itemsToDownload.get(i);
-
-                if (main == null) {
-                    new DownloadAsync(context,
-                            selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
-                            getDownloadSaveFileDm(finalDir, selectedItem, ""),
-                            null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                }
-            }
+            new DownloadAsync(context,
+                    selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
+                    getDownloadSaveFileDm(finalDir, selectedItem, ""),
+                    null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else
             Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
     }

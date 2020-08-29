@@ -65,6 +65,7 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -99,6 +100,7 @@ public final class StoryViewer extends BaseLanguageActivity {
     private QuestionModel question;
     private String[] mentions;
     private QuizModel quiz;
+    private SwipeUpModel swipeUp;
     private StoryModel currentStory;
     private String url, username;
     private int slidePos = 0, lastSlidePos = 0;
@@ -220,14 +222,17 @@ public final class StoryViewer extends BaseLanguageActivity {
             return false;
         });
 
-        storyViewerBinding.spotify.setOnClickListener(v -> {
+        final View.OnClickListener linkActionListener = v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
                 final Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(tag.toString()));
                 startActivity(intent);
             }
-        });
+        };
+
+        storyViewerBinding.spotify.setOnClickListener(linkActionListener);
+        storyViewerBinding.swipeUp.setOnClickListener(linkActionListener);
 
         storyViewerBinding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
@@ -279,7 +284,7 @@ public final class StoryViewer extends BaseLanguageActivity {
                         .show();
             }
             else if (tag instanceof QuizModel) {
-                quiz = (QuizModel) quiz;
+                quiz = quiz;
                 String[] choices = new String[quiz.getChoices().length];
                 for (int q = 0; q < choices.length; ++q) {
                     choices[q] = (quiz.getMyChoice() == q ? "√ " :"") + quiz.getChoices()[q]+ " (" + quiz.getCounts()[q] + ")";
@@ -508,6 +513,13 @@ public final class StoryViewer extends BaseLanguageActivity {
         quiz = currentStory.getQuiz();
         storyViewerBinding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
         storyViewerBinding.quiz.setTag(quiz);
+
+        swipeUp = currentStory.getSwipeUp();
+        storyViewerBinding.swipeUp.setVisibility(swipeUp != null ? View.VISIBLE : View.GONE);
+        if (swipeUp != null) {
+            storyViewerBinding.swipeUp.setText(swipeUp.getText());
+            storyViewerBinding.swipeUp.setTag(swipeUp.getUrl());
+        }
 
         releasePlayer();
         final Intent intent = getIntent();

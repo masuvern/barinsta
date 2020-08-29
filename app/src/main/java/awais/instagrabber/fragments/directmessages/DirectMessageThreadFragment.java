@@ -221,12 +221,16 @@ public class DirectMessageThreadFragment extends Fragment {
                     case RAVEN_MEDIA:
                     case MEDIA:
                         final ProfileModel user = getUser(directItemModel.getUserId());
-                        String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl();
-                        if (url != null) {
-                            Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia()));
+                        final DirectItemModel.DirectItemMediaModel selectedItem =
+                                itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia();
+                        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl();
+                        if (url == null) {
+                            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
                             Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         }
-                        else Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                         break;
                     case STORY_SHARE:
                         if (directItemModel.getReelShare() != null) {
@@ -372,6 +376,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 }
                 directItemModel.setLiked();
             }
+            DirectMessageInboxFragment.refreshPlease = true;
             hasSentSomething = true;
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
