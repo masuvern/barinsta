@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
+import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.adapters.SimpleAdapter;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
@@ -112,8 +113,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             else Utils.showImportExportDialog(v.getContext());
 
         } else if (tag instanceof DataBox.FavoriteModel) {
-            if (MainActivity.scanHack != null) {
-                MainActivity.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
+            if (MainActivityBackup.scanHack != null) {
+                MainActivityBackup.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
                 dismiss();
             }
 

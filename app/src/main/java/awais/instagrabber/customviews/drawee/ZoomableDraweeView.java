@@ -33,6 +33,8 @@ import com.facebook.drawee.generic.GenericDraweeHierarchyInflater;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.DraweeView;
 
+import awais.instagrabber.customviews.helpers.SwipeGestureListener;
+
 
 /**
  * DraweeView that has zoomable capabilities.

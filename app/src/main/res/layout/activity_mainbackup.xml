@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/layout_include_toolbar" />
+
+        <awais.instagrabber.customviews.RemixDrawerLayout
+            android:id="@+id/drawerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- Profile View -->
+            <include
+                android:id="@+id/profile_view"
+                layout="@layout/layout_profile_view" />
+
+            <!-- Feed View -->
+            <include
+                android:id="@+id/feed_view"
+                layout="@layout/layout_feed_view" />
+
+            <!-- Discover View -->
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:id="@+id/discoverLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:animateLayoutChanges="true"
+                android:tag="@android:string/yes">
+
+                <com.google.android.material.appbar.AppBarLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    app:elevation="0dp">
+                    <com.google.android.material.appbar.CollapsingToolbarLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_scrollFlags="scroll|snap|enterAlways">
+
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/discoverType"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:entries="@array/discover_placeholder"/>
+                    </com.google.android.material.appbar.CollapsingToolbarLayout>
+                </com.google.android.material.appbar.AppBarLayout>
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/discoverSwipeRefreshLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:tag="@android:string/yes"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/discoverPosts"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="false"
+                        tools:listitem="@layout/item_feed_photo" />
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </awais.instagrabber.customviews.RemixDrawerLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/iconSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            app:srcCompat="@drawable/ic_feed"
+            app:tint="?android:textColorSecondary" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            app:srcCompat="@drawable/ic_profile"
+            app:tint="?android:textColorPrimary" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            app:srcCompat="@drawable/ic_discover"
+            app:tint="?android:textColorSecondary" />
+    </LinearLayout>
+</FrameLayout>

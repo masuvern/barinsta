@@ -28,6 +28,7 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.adapters.DirectMessageInboxAdapter;
 import awais.instagrabber.asyncs.direct_messages.InboxFetcher;
+import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding;
 import awais.instagrabber.interfaces.FetchListener;
@@ -39,7 +40,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private static final String TAG = "DirectMessagesInboxFrag";
 
     private FragmentActivity fragmentActivity;
-    private SwipeRefreshLayout root;
+    private NestedCoordinatorLayout root;
     private RecyclerView inboxList;
     private RecyclerLazyLoader lazyLoader;
     private LinearLayoutManager layoutManager;
@@ -51,7 +52,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private final FetchListener<InboxModel> fetchListener = new FetchListener<InboxModel>() {
         @Override
         public void doBefore() {
-            root.setRefreshing(true);
+            binding.swipeRefreshLayout.setRefreshing(true);
         }
 
         @Override
@@ -71,10 +72,11 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
                     listViewModel.getList().postValue(list);
                 }
             }
-            root.setRefreshing(false);
+            binding.swipeRefreshLayout.setRefreshing(false);
             stopCurrentExecutor();
         }
     };
+    private FragmentDirectMessagesInboxBinding binding;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -89,9 +91,9 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         if (root != null) {
             return root;
         }
-        final FragmentDirectMessagesInboxBinding binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
+        binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
         root = binding.getRoot();
-        root.setOnRefreshListener(this);
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
         inboxList = binding.inboxList;
         inboxList.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(requireContext());

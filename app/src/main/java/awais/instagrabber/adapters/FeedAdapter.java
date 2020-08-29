@@ -9,9 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
-import com.bumptech.glide.RequestManager;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-
 import awais.instagrabber.adapters.viewholder.feed.FeedItemViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedPhotoViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedSliderViewHolder;
@@ -27,11 +24,8 @@ import awais.instagrabber.utils.Utils;
 
 public final class FeedAdapter extends ListAdapter<FeedModel, FeedItemViewHolder> {
     private static final String TAG = "FeedAdapter";
-    // private final static String ellipsize = "… more";
-    private final RequestManager glide;
     private final View.OnClickListener clickListener;
     private final MentionClickListener mentionClickListener;
-    public SimpleExoPlayer pagerPlayer;
     private final View.OnLongClickListener longClickListener = v -> {
         final Object tag;
         if (v instanceof RamboTextView && (tag = v.getTag()) instanceof FeedModel)
@@ -51,11 +45,10 @@ public final class FeedAdapter extends ListAdapter<FeedModel, FeedItemViewHolder
         }
     };
 
-    public FeedAdapter(final RequestManager glide,
-                       final View.OnClickListener clickListener,
+    public FeedAdapter(final View.OnClickListener clickListener,
                        final MentionClickListener mentionClickListener) {
         super(diffCallback);
-        this.glide = glide;
+        // private final static String ellipsize = "… more";
         this.clickListener = clickListener;
         this.mentionClickListener = mentionClickListener;
     }
@@ -78,7 +71,7 @@ public final class FeedAdapter extends ListAdapter<FeedModel, FeedItemViewHolder
             default:
             case MEDIA_TYPE_IMAGE: {
                 final ItemFeedPhotoBinding binding = ItemFeedPhotoBinding.inflate(layoutInflater, parent, false);
-                return new FeedPhotoViewHolder(binding, glide, mentionClickListener, clickListener, longClickListener);
+                return new FeedPhotoViewHolder(binding, mentionClickListener, clickListener, longClickListener);
             }
         }
     }

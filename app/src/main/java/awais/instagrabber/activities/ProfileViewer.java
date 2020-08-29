@@ -62,7 +62,6 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.Utils;
@@ -140,13 +139,13 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 final HighlightModel highlightModel = (HighlightModel) tag;
                 new iStoryStatusFetcher(highlightModel.getId(), null, false, false,
                         (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
-                    if (result != null && result.length > 0)
-                        startActivity(new Intent(ProfileViewer.this, StoryViewer.class)
-                                .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
-                                .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
-                                .putExtra(Constants.EXTRAS_STORIES, result)
-                        );
-                    else
+                    if (result != null && result.length > 0) {
+                        // startActivity(new Intent(ProfileViewer.this, StoryViewer.class)
+                        //         .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+                        //         .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
+                        //         .putExtra(Constants.EXTRAS_STORIES, result)
+                        // );
+                    } else
                         Toast.makeText(ProfileViewer.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
@@ -188,11 +187,12 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 newintent = new Intent(this, ProfilePicViewer.class).putExtra(
                         ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
                         ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
-            } else
-                newintent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
-                                                               .putExtra(Constants.EXTRAS_STORIES, storyModels)
-                                                               .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
-            startActivity(newintent);
+            }
+            // else
+            //     newintent = new Intent(this, StoryViewer.class).putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+            //                                                    .putExtra(Constants.EXTRAS_STORIES, storyModels)
+            //                                                    .putExtra(Constants.EXTRAS_HASHTAG, (hashtagModel != null));
+            // startActivity(newintent);
         };
 
         profileBinding.profileView.swipeRefreshLayout.setOnRefreshListener(this);
@@ -213,26 +213,26 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(ProfileViewer.this, Utils.convertDpToPx(110));
         profileBinding.profileView.mainPosts.setLayoutManager(layoutManager);
         profileBinding.profileView.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
-        profileBinding.profileView.mainPosts.setAdapter(postsAdapter = new PostsAdapter(allItems, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                final PostModel postModel = (PostModel) tag;
-
-                if (postsAdapter.isSelecting) toggleSelection(postModel);
-                else startActivity(new Intent(ProfileViewer.this, PostViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, postModel.getPosition())
-                        .putExtra(Constants.EXTRAS_POST, postModel)
-                        .putExtra(Constants.EXTRAS_USER, userQuery)
-                        .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
-            }
-        }, v -> { // long click listener
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                postsAdapter.isSelecting = true;
-                toggleSelection((PostModel) tag);
-            }
-            return true;
-        }));
+        // profileBinding.profileView.mainPosts.setAdapter(postsAdapter = new PostsAdapter(allItems, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         final PostModel postModel = (PostModel) tag;
+        //
+        //         if (postsAdapter.isSelecting) toggleSelection(postModel);
+        //         else startActivity(new Intent(ProfileViewer.this, PostViewer.class)
+        //                 .putExtra(Constants.EXTRAS_INDEX, postModel.getPosition())
+        //                 .putExtra(Constants.EXTRAS_POST, postModel)
+        //                 .putExtra(Constants.EXTRAS_USER, userQuery)
+        //                 .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
+        //     }
+        // }, v -> { // long click listener
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         postsAdapter.isSelecting = true;
+        //         toggleSelection((PostModel) tag);
+        //     }
+        //     return true;
+        // }));
 
         this.lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if ((!autoloadPosts || isHashtag) && hasNextPage) {
@@ -279,7 +279,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         allItems.clear();
         selectedItems.clear();
         if (postsAdapter != null) {
-            postsAdapter.isSelecting = false;
+            // postsAdapter.isSelecting = false;
             postsAdapter.notifyDataSetChanged();
         }
         profileBinding.profileView.appBarLayout.setExpanded(true, true);
@@ -776,11 +776,11 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     }
 
     private void notifyAdapter(final PostModel postModel) {
-        if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
-        if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
-        else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
-
-        if (downloadAction != null) downloadAction.setVisible(postsAdapter.isSelecting);
+        // if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
+        // if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
+        // else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
+        //
+        // if (downloadAction != null) downloadAction.setVisible(postsAdapter.isSelecting);
     }
 
     @Override

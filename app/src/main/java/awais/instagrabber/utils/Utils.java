@@ -71,6 +71,7 @@ import javax.crypto.spec.SecretKeySpec;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
+import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.activities.ProfileViewer;
 import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.asyncs.DownloadAsync;
@@ -942,7 +943,7 @@ public final class Utils {
             dir = new File(dir, username);
 
         if (dir.exists() || dir.mkdirs()) {
-            final MainActivity mainActivity = method != DownloadMethod.DOWNLOAD_FEED && context instanceof MainActivity ? (MainActivity) context : null;
+            final MainActivityBackup mainActivity = method != DownloadMethod.DOWNLOAD_FEED && context instanceof MainActivityBackup ? (MainActivityBackup) context : null;
             final ProfileViewer pv = method == DownloadMethod.DOWNLOAD_MAIN && context instanceof ProfileViewer ? (ProfileViewer) context : null;
             final SavedViewer saved = method == DownloadMethod.DOWNLOAD_SAVED && context instanceof SavedViewer ? (SavedViewer) context : null;
 
@@ -973,19 +974,20 @@ public final class Utils {
                                         saveFile,
                                         file -> {
                                             model.setDownloaded(true);
-                                            if (saved != null)
-                                                saved.deselectSelection(selectedItem);
-                                            else if (mainActivity != null)
-                                                mainActivity.mainHelper.deselectSelection(selectedItem);
-                                            else if (pv != null) pv.deselectSelection(selectedItem);
+                                            // if (saved != null)
+                                            //     saved.deselectSelection(selectedItem);
+                                            // else if (mainActivity != null)
+                                            //     mainActivity.mainHelper.deselectSelection(selectedItem);
+                                            // else pv.deselectSelection(selectedItem);
                                         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             }
-                        } else {
-                            if (saved != null) saved.deselectSelection(selectedItem);
-                            else if (mainActivity != null)
-                                mainActivity.mainHelper.deselectSelection(selectedItem);
-                            else if (pv != null) pv.deselectSelection(selectedItem);
                         }
+                        // else {
+                        //     if (saved != null) saved.deselectSelection(selectedItem);
+                        //     else if (mainActivity != null)
+                        //         mainActivity.mainHelper.deselectSelection(selectedItem);
+                        //     else if (pv != null) pv.deselectSelection(selectedItem);
+                        // }
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }

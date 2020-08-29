@@ -25,11 +25,18 @@ import static awais.instagrabber.utils.Utils.logCollector;
 public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[]> {
     private final String id;
     private String username;
-    private final boolean isLoc, isHashtag, storiesig, highlight;
+    private final boolean isLoc;
+    private final boolean isHashtag;
+    private final boolean storiesig;
+    private final boolean highlight;
     private final FetchListener<StoryModel[]> fetchListener;
 
-    public iStoryStatusFetcher(final String id, final String username, final boolean isLoc,
-                               final boolean isHashtag, final boolean storiesig, final boolean highlight,
+    public iStoryStatusFetcher(final String id,
+                               final String username,
+                               final boolean isLoc,
+                               final boolean isHashtag,
+                               final boolean storiesig,
+                               final boolean highlight,
                                final FetchListener<StoryModel[]> fetchListener) {
         this.id = id;
         this.username = username;
@@ -43,9 +50,35 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
     @Override
     protected StoryModel[] doInBackground(final Void... voids) {
         StoryModel[] result = null;
-        final String url = "https://" + (storiesig ? "storiesig" : "i.instagram") + ".com/api/v1/"
-                + (isLoc ? "locations/" : (isHashtag ? "tags/" : (highlight ? "feed/reels_media?user_ids=" : "feed/user/")))
-                + id.replace(":", "%3A") + (highlight ? "" : (storiesig ? "/reel_media/" : "/story/"));
+        final String userId = id.replace(":", "%3A");
+        final StringBuilder builder = new StringBuilder();
+        builder.append("https://");
+        if (storiesig) {
+            builder.append("storiesig");
+        } else {
+            builder.append("i.instagram");
+        }
+        builder.append(".com/api/v1/");
+        if (isLoc) {
+            builder.append("locations/");
+        }
+        if (isHashtag) {
+            builder.append("tags/");
+        }
+        if (highlight) {
+            builder.append("feed/reels_media?user_ids=");
+        } else {
+            builder.append("feed/user/");
+        }
+        builder.append(userId);
+        if (!highlight) {
+            if (storiesig) {
+                builder.append("/reel_media/");
+            } else {
+                builder.append("/story/");
+            }
+        }
+        final String url = builder.toString();
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setInstanceFollowRedirects(true);
@@ -55,10 +88,12 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 JSONObject data = new JSONObject(Utils.readFromConnection(conn));
-                if (!storiesig && !highlight) data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
+                if (!storiesig && !highlight)
+                    data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
                 else if (highlight) data = data.getJSONObject("reels").optJSONObject(id);
 
-                if (username == null && !isLoc && !isHashtag) username = data.getJSONObject("user").getString("username");
+                if (username == null && !isLoc && !isHashtag)
+                    username = data.getJSONObject("user").getString("username");
 
                 JSONArray media;
                 if (data != null && (media = data.optJSONArray("items")) != null
@@ -105,8 +140,8 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                             JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0).optJSONObject("question_sticker");
                             if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
                                 models[i].setQuestion(new QuestionModel(
-                                    String.valueOf(tappableObject.getLong("question_id")),
-                                    tappableObject.getString("question")
+                                        String.valueOf(tappableObject.getLong("question_id")),
+                                        tappableObject.getString("question")
                                 ));
                         }
                         if (data.has("story_quizs")) {
@@ -117,7 +152,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                                 for (int q = 0; q < choices.length; ++q) {
                                     JSONObject tempchoice = tappableObject.getJSONArray("tallies").getJSONObject(q);
                                     choices[q] = (q == tappableObject.getInt("correct_answer") ? "*** " : "")
-                                            +tempchoice.getString("text");
+                                            + tempchoice.getString("text");
                                     counts[q] = tempchoice.getLong("count");
                                 }
                                 models[i].setQuiz(new QuizModel(
@@ -137,20 +172,20 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                                 + (locations == null ? 0 : locations.length())];
                         if (hashtags != null) {
                             for (int h = 0; h < hashtags.length(); ++h) {
-                                mentions[h] = "#"+hashtags.getJSONObject(h).getJSONObject("hashtag").getString("name");
+                                mentions[h] = "#" + hashtags.getJSONObject(h).getJSONObject("hashtag").getString("name");
                             }
                         }
                         if (atmarks != null) {
                             for (int h = 0; h < atmarks.length(); ++h) {
                                 mentions[h + (hashtags == null ? 0 : hashtags.length())] =
-                                        "@"+atmarks.getJSONObject(h).getJSONObject("user").getString("username");
+                                        "@" + atmarks.getJSONObject(h).getJSONObject("user").getString("username");
                             }
                         }
                         if (locations != null) {
                             for (int h = 0; h < locations.length(); ++h) {
                                 mentions[h + (hashtags == null ? 0 : hashtags.length()) + (atmarks == null ? 0 : atmarks.length())] =
                                         locations.getJSONObject(h).getJSONObject("location").getLong("pk")
-                                                +"/ ("+locations.getJSONObject(h).getJSONObject("location").getString("short_name")+")";
+                                                + "/ (" + locations.getJSONObject(h).getJSONObject("location").getString("short_name") + ")";
                             }
                         }
                         if (mentions.length != 0) models[i].setMentions(mentions);

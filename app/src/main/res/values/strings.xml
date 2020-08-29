@@ -234,4 +234,9 @@
     <string name="activity_count_usertags">%d usertags</string>
     <string name="activity_count_likes">%d likes</string>
     <string name="activity_notloggedin">You logged out before clicking this notification?!</string>
+    <string name="feed">Feed</string>
+    <string name="profile">Profile</string>
+    <string name="more">More</string>
+    <string name="title_dm">DM</string>
+    <string name="number_selected">%d selected</string>
 </resources>

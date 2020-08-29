@@ -161,7 +161,7 @@ public final class PostViewer extends BaseLanguageActivity {
                 if (player != null) {
                     final float intVol = player.getVolume() == 0f ? 1f : 0f;
                     player.setVolume(intVol);
-                    viewerBinding.bottomPanel.btnMute.setImageResource(intVol == 0f ? R.drawable.mute : R.drawable.vol);
+                    viewerBinding.bottomPanel.btnMute.setImageResource(intVol == 0f ? R.drawable.ic_volume_off_24 : R.drawable.ic_volume_up_24);
                     Utils.sessionVolumeFull = intVol == 1f;
                 }
             } else if (v == viewerBinding.btnLike) {
@@ -307,7 +307,7 @@ public final class PostViewer extends BaseLanguageActivity {
         isFromShare = postModel.getPosition() == -1 || postIdNull;
 
         viewerCaptionParent = (View) viewerBinding.bottomPanel.viewerCaption.getParent();
-        viewsContainer = (View) viewerBinding.bottomPanel.tvVideoViews.getParent();
+        viewsContainer = (View) viewerBinding.bottomPanel.videoViewsContainer;
 
         viewerBinding.mediaList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         viewerBinding.mediaList.setAdapter(mediaAdapter);
@@ -320,8 +320,8 @@ public final class PostViewer extends BaseLanguageActivity {
             if (itemGetType == ItemGetType.SAVED_ITEMS && SavedViewer.itemGetter != null) {
                 itemGetterItems = SavedViewer.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.SAVED_ITEMS && isFromShare);
-            } else if (itemGetType != null && MainActivity.itemGetter != null) {
-                itemGetterItems = MainActivity.itemGetter.get(itemGetType);
+            } else if (itemGetType != null && MainActivityBackup.itemGetter != null) {
+                itemGetterItems = MainActivityBackup.itemGetter.get(itemGetType);
                 isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.MAIN_ITEMS && isFromShare);
             } else {
                 itemGetterItems = null;
@@ -449,7 +449,7 @@ public final class PostViewer extends BaseLanguageActivity {
         player.prepare(mediaSource);
 
         player.setVolume(vol);
-        viewerBinding.bottomPanel.btnMute.setImageResource(vol == 0f ? R.drawable.vol : R.drawable.mute);
+        viewerBinding.bottomPanel.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
 
         viewerBinding.bottomPanel.btnMute.setOnClickListener(onClickListener);
     }

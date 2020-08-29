@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:foreground="?android:selectableItemBackground"
-    tools:viewBindingIgnore="true">
+    android:foreground="?android:selectableItemBackground">
 
-    <awais.instagrabber.customviews.FixedImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/postImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter" />
+        app:actualImageScaleType="fitCenter"
+        app:viewAspectRatio="1"/>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/isDownloaded"
@@ -31,12 +29,12 @@
         android:layout_margin="8dp"
         app:srcCompat="@drawable/video" />
 
-    <ProgressBar
-        android:id="@+id/progressView"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+    <!--<ProgressBar-->
+    <!--    android:id="@+id/progressView"-->
+    <!--    android:layout_width="45dp"-->
+    <!--    android:layout_height="45dp"-->
+    <!--    android:layout_gravity="center"-->
+    <!--    android:visibility="gone" />-->
 
     <FrameLayout
         android:id="@+id/selectedView"

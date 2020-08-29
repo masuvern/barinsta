@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/feed_nav_graph"
+    app:startDestination="@id/feedFragment">
+
+    <fragment
+        android:id="@+id/feedFragment"
+        android:name="awais.instagrabber.fragments.main.FeedFragment"
+        android:label="FeedFragment"
+        tools:layout="@layout/fragment_feed">
+        <action
+            android:id="@+id/action_feedFragment_to_storyViewerFragment"
+            app:destination="@id/storyViewerFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/storyViewerFragment"
+        android:name="awais.instagrabber.fragments.StoryViewerFragment"
+        android:label="StoryViewerFragment"
+        tools:layout="@layout/activity_story_viewer">
+        <argument
+            android:name="feedStoryIndex"
+            app:argType="integer"
+            app:nullable="false" />
+        <argument
+            android:name="highlight"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="isHashtag"
+            app:argType="boolean" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="awais.instagrabber.fragments.main.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
+</navigation>

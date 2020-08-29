@@ -1,14 +1,16 @@
 package awais.instagrabber.models;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.ObjectsCompat;
 
 import java.io.Serializable;
 import java.util.Date;
 
+import awais.instagrabber.adapters.MultiSelectListAdapter.Selectable;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Utils;
 
-public abstract class BasePostModel implements Serializable {
+public abstract class BasePostModel implements Serializable, Selectable {
     protected String postId;
     protected String displayUrl;
     protected String shortCode;
@@ -87,5 +89,18 @@ public abstract class BasePostModel implements Serializable {
     @NonNull
     public final String getPostDate() {
         return Utils.datetimeParser.format(new Date(timestamp * 1000L));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final BasePostModel that = (BasePostModel) o;
+        return ObjectsCompat.equals(postId, that.postId);
+    }
+
+    @Override
+    public int hashCode() {
+        return ObjectsCompat.hash(postId);
     }
 }

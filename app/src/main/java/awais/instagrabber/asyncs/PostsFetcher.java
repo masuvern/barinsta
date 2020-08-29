@@ -25,6 +25,7 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
+    private static final String TAG = "PostsFetcher";
     private final String endCursor;
     private final String id;
     private final FetchListener<PostModel[]> fetchListener;
@@ -60,13 +61,13 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                     "{\"tag_name\":\"" + id.substring(1).toLowerCase() + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else if (isLocation)
             url = "https://www.instagram.com/graphql/query/?query_hash=36bd0f2bf5911908de389b8ceaa3be6d&variables=" +
-                    "{\"id\":\""+ id.split("/")[0] +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
+                    "{\"id\":\"" + id.split("/")[0] + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else if (isSaved)
             url = "https://www.instagram.com/graphql/query/?query_hash=8c86fed24fa03a8a2eea2a70a80c7b6b&variables=" +
-                    "{\"id\":\""+ id.substring(1) +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
+                    "{\"id\":\"" + id.substring(1) + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else if (isTagged)
             url = "https://www.instagram.com/graphql/query/?query_hash=ff260833edf142911047af6024eb634a&variables=" +
-                    "{\"id\":\""+ id.substring(1) +"\",\"first\":150,\"after\":\"" + endCursor + "\"}";
+                    "{\"id\":\"" + id.substring(1) + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else
             url = "https://www.instagram.com/graphql/query/?query_id=17880160963012870&id=" + id + "&first=50&after=" + endCursor;
 
@@ -79,15 +80,16 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // to check if file exists
                 final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
-                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/" + username) : ""));
                 File customDir = null;
                 if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
                     final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
-                            (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                            (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/" + username) : ""));
                     if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
                 }
 
-                final JSONObject mediaPosts = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("data")
+                final JSONObject mediaPosts = new JSONObject(Utils.readFromConnection(conn))
+                        .getJSONObject("data")
                         .getJSONObject(isHashTag ? Constants.EXTRAS_HASHTAG :
                                 (isLocation ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_USER))
                         .getJSONObject(isHashTag ? "edge_hashtag_to_media" :
@@ -131,7 +133,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                     Utils.checkExistence(downloadDir, customDir, isSlider, models[i]);
                 }
 
-                if (models[models.length - 1] != null)
+                if (models.length != 0 && models[models.length - 1] != null)
                     models[models.length - 1].setPageCursor(hasNextPage, endCursor);
 
                 result = models;
@@ -141,7 +143,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
         } catch (Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_MAIN_POSTS_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
 
         return result;

@@ -1,14 +1,11 @@
 package awais.instagrabber.adapters.viewholder.feed;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
-import com.bumptech.glide.RequestManager;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
@@ -25,22 +22,15 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
     private static final String TAG = "FeedPhotoViewHolder";
 
     private final ItemFeedPhotoBinding binding;
-    private final RequestManager glide;
-    private final ColorDrawable drawable;
-    // private final PipelineDraweeControllerBuilder controllerBuilder;
-    // private final CustomTarget<Bitmap> customTarget;
 
     public FeedPhotoViewHolder(@NonNull final ItemFeedPhotoBinding binding,
-                               final RequestManager glide,
                                final MentionClickListener mentionClickListener,
                                final View.OnClickListener clickListener,
                                final View.OnLongClickListener longClickListener) {
         super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, mentionClickListener, clickListener, longClickListener);
         this.binding = binding;
-        this.glide = glide;
         binding.itemFeedBottom.videoViewsContainer.setVisibility(View.GONE);
         binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
-        drawable = new ColorDrawable(Color.WHITE);
         binding.imageViewer.setAllowTouchInterceptionWhileZoomed(false);
         final GenericDraweeHierarchy hierarchy = new GenericDraweeHierarchyBuilder(itemView.getContext().getResources())
                 .setActualImageScaleType(ScalingUtils.ScaleType.FIT_CENTER)
@@ -50,15 +40,13 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
 
     @Override
     public void bindItem(final FeedModel feedModel) {
-        // glide.clear(customTarget);
         if (feedModel == null) {
             return;
         }
         final ViewGroup.LayoutParams layoutParams = binding.imageViewer.getLayoutParams();
         final int requiredWidth = Utils.displayMetrics.widthPixels;
-        final int resultingHeight = Utils.getResultingHeight(requiredWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
-        layoutParams.width = requiredWidth;
-        layoutParams.height = resultingHeight;
+        layoutParams.width = feedModel.getImageWidth() == 0 ? requiredWidth : feedModel.getImageWidth();
+        layoutParams.height = feedModel.getImageHeight() == 0 ? requiredWidth + 1 : feedModel.getImageHeight();
         binding.imageViewer.requestLayout();
         final String thumbnailUrl = feedModel.getThumbnailUrl();
         String url = feedModel.getDisplayUrl();

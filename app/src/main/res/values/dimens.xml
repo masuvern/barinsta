@@ -19,4 +19,6 @@
     <dimen name="message_item_profile_size">@dimen/feed_profile_size</dimen>
     <dimen name="dm_media_img_max_height">500dp</dimen>
     <dimen name="dm_message_card_radius">8dp</dimen>
+
+    <dimen name="feed_item_bottom_icon_size">32dp</dimen>
 </resources>

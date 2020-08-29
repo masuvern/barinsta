@@ -62,24 +62,24 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
                     postModel.getSliderDisplayUrl(), postModel.getShortCode(), postModel.getPostCaption(), postModel.getTimestamp(),
                     postModel.getLike(), postModel.getBookmark(), postModel.getLikes()));
 
-        postsAdapter = new PostsAdapter(models, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                final PostModel postModel = (PostModel) tag;
-                if (postsAdapter.isSelecting) toggleSelection(postModel);
-                else {
-                    Utils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(postModel));
-                    finish();
-                }
-            }
-        }, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                postsAdapter.isSelecting = true;
-                toggleSelection((PostModel) tag);
-            }
-            return true;
-        });
+        // postsAdapter = new PostsAdapter(models, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         final PostModel postModel = (PostModel) tag;
+        //         if (postsAdapter.isSelecting) toggleSelection(postModel);
+        //         else {
+        //             Utils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(postModel));
+        //             finish();
+        //         }
+        //     }
+        // }, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         postsAdapter.isSelecting = true;
+        //         toggleSelection((PostModel) tag);
+        //     }
+        //     return true;
+        // });
 
         recyclerView.setAdapter(postsAdapter);
     }
@@ -109,10 +109,10 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
     }
 
     private void notifyAdapter(final PostModel postModel) {
-        if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
-        if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
-        else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
-
-        if (btnDownload != null) btnDownload.setVisible(postsAdapter.isSelecting);
+        // if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
+        // if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
+        // else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
+        //
+        // if (btnDownload != null) btnDownload.setVisible(postsAdapter.isSelecting);
     }
 }

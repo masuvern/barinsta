@@ -6,30 +6,36 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.PostsFetcher;
 import awais.instagrabber.asyncs.i.iLikedFetcher;
+import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.ActivitySavedBinding;
+import awais.instagrabber.fragments.main.viewmodels.ProfilePostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.ItemGetter;
-import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.ItemGetType;
@@ -48,22 +54,61 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
     //private CommentModel commentModel;
     private ActivitySavedBinding savedBinding;
     private String action, username, endCursor;
-    private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private RecyclerLazyLoader lazyLoader;
     private Resources resources;
     private ArrayList<PostModel> selectedItems = new ArrayList<>();
-    private final ArrayList<PostModel> allItems = new ArrayList<>();
-    private MenuItem downloadAction;
+    private ActionMode actionMode;
+    private ProfilePostsViewModel profilePostsViewModel;
 
+    private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if (postsAdapter == null) {
+                remove();
+                return;
+            }
+            postsAdapter.clearSelection();
+            remove();
+        }
+    };
+    private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
+            R.menu.multi_select_download_menu,
+            new PrimaryActionModeCallback.CallbacksHelper() {
+                @Override
+                public void onDestroy(final ActionMode mode) {
+                    onBackPressedCallback.handleOnBackPressed();
+                }
+
+                @Override
+                public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
+                    if (item.getItemId() == R.id.action_download) {
+                        if (postsAdapter == null || username == null) {
+                            return false;
+                        }
+                        Utils.batchDownload(SavedViewer.this,
+                                username,
+                                DownloadMethod.DOWNLOAD_MAIN,
+                                postsAdapter.getSelectedModels());
+                        checkAndResetAction();
+                        return true;
+                    }
+                    return false;
+                }
+            });
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
-            final int oldSize = allItems.size();
             if (result != null) {
-                allItems.addAll(Arrays.asList(result));
-
-                postsAdapter.notifyItemRangeInserted(oldSize, result.length);
-
+                final List<PostModel> current = profilePostsViewModel.getList().getValue();
+                final List<PostModel> resultList = Arrays.asList(result);
+                if (current == null) {
+                    profilePostsViewModel.getList().postValue(resultList);
+                } else {
+                    final List<PostModel> currentCopy = new ArrayList<>(current);
+                    currentCopy.addAll(resultList);
+                    profilePostsViewModel.getList().postValue(currentCopy);
+                }
                 savedBinding.mainPosts.post(() -> {
                     savedBinding.mainPosts.setNestedScrollingEnabled(true);
                     savedBinding.mainPosts.setVisibility(View.VISIBLE);
@@ -85,13 +130,12 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                     }
                     model.setPageCursor(false, null);
                 }
-            }
-            else {
+            } else {
                 savedBinding.swipeRefreshLayout.setRefreshing(false);
-                if (oldSize == 0) {
-                    Toast.makeText(getApplicationContext(), R.string.empty_list, Toast.LENGTH_SHORT).show();
-                    finish();
-                }
+                // if (oldSize == 0) {
+                //     Toast.makeText(getApplicationContext(), R.string.empty_list, Toast.LENGTH_SHORT).show();
+                //     finish();
+                // }
             }
         }
     };
@@ -117,26 +161,36 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             return;
         }
 
-        savedBinding.mainPosts.setAdapter(postsAdapter = new PostsAdapter(allItems, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                final PostModel postModel = (PostModel) tag;
+        profilePostsViewModel = new ViewModelProvider(this).get(ProfilePostsViewModel.class);
+        postsAdapter = new PostsAdapter((postModel, position) -> {
+            if (postsAdapter.isSelecting()) {
+                if (actionMode == null) return;
+                final String title = getString(R.string.number_selected, postsAdapter.getSelectedModels().size());
+                actionMode.setTitle(title);
+                return;
+            }
+            if (checkAndResetAction()) return;
+            startActivity(new Intent(this, PostViewer.class)
+                    .putExtra(Constants.EXTRAS_INDEX, position)
+                    .putExtra(Constants.EXTRAS_POST, postModel)
+                    .putExtra(Constants.EXTRAS_USER, username)
+                    .putExtra(Constants.EXTRAS_TYPE, ItemGetType.SAVED_ITEMS));
 
-                if (postsAdapter.isSelecting) toggleSelection(postModel);
-                else startActivity(new Intent(this, PostViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, postModel.getPosition())
-                        .putExtra(Constants.EXTRAS_POST, postModel)
-                        .putExtra(Constants.EXTRAS_USER, username)
-                        .putExtra(Constants.EXTRAS_TYPE, ItemGetType.SAVED_ITEMS));
+        }, (model, position) -> {
+            if (!postsAdapter.isSelecting()) {
+                checkAndResetAction();
+                return true;
             }
-        }, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                postsAdapter.isSelecting = true;
-                toggleSelection((PostModel) tag);
-            }
+            final OnBackPressedDispatcher onBackPressedDispatcher = getOnBackPressedDispatcher();
+            if (onBackPressedDispatcher.hasEnabledCallbacks()) return true;
+            actionMode = startActionMode(multiSelectAction);
+            final String title = getString(R.string.number_selected, 1);
+            actionMode.setTitle(title);
+            onBackPressedDispatcher.addCallback(onBackPressedCallback);
             return true;
-        }));
+        });
+        savedBinding.mainPosts.setAdapter(postsAdapter);
+        profilePostsViewModel.getList().observe(this, postsAdapter::submitList);
         savedBinding.swipeRefreshLayout.setRefreshing(true);
         setSupportActionBar(savedBinding.toolbar.toolbar);
         savedBinding.toolbar.toolbar.setTitle((action.charAt(0) == '$' ? R.string.saved :
@@ -149,27 +203,30 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                 stopCurrentExecutor();
 
                 currentlyExecuting = action.charAt(0) == '^'
-                    ? new iLikedFetcher(endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
-                    : new PostsFetcher(action, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        ? new iLikedFetcher(endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+                        : new PostsFetcher(action, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
             }
         });
         savedBinding.mainPosts.addOnScrollListener(lazyLoader);
 
         itemGetter = itemGetType -> {
-            if (itemGetType == ItemGetType.SAVED_ITEMS) return allItems;
+            if (itemGetType == ItemGetType.SAVED_ITEMS)
+                return profilePostsViewModel.getList().getValue();
             return null;
         };
 
-        if (action.charAt(0) == '^') new iLikedFetcher(postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        else new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (action.charAt(0) == '^')
+            new iLikedFetcher(postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else
+            new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.saved, menu);
 
-        downloadAction = menu.findItem(R.id.downloadAction);
+        final MenuItem downloadAction = menu.findItem(R.id.downloadAction);
         downloadAction.setVisible(false);
 
         menu.findItem(R.id.favouriteAction).setVisible(false);
@@ -183,27 +240,21 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
         return true;
     }
 
-    public void deselectSelection(final BasePostModel postModel) {
-        if (postModel instanceof PostModel) {
-            selectedItems.remove(postModel);
-            postModel.setSelected(false);
-            if (postsAdapter != null) notifyAdapter((PostModel) postModel);
-        }
-    }
-
     @Override
     public void onRefresh() {
         if (lazyLoader != null) lazyLoader.resetState();
         stopCurrentExecutor();
-        allItems.clear();
+        profilePostsViewModel.getList().postValue(Collections.emptyList());
         selectedItems.clear();
         if (postsAdapter != null) {
-            postsAdapter.isSelecting = false;
+            // postsAdapter.isSelecting = false;
             postsAdapter.notifyDataSetChanged();
         }
         savedBinding.swipeRefreshLayout.setRefreshing(true);
-        if (action.charAt(0) == '^') new iLikedFetcher(postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        else new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (action.charAt(0) == '^')
+            new iLikedFetcher(postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else
+            new PostsFetcher(action, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -225,26 +276,13 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
         }
     }
 
-    private void toggleSelection(final PostModel postModel) {
-        if (postModel != null && postsAdapter != null) {
-            if (postModel.isSelected()) selectedItems.remove(postModel);
-            else if (selectedItems.size() >= 100) {
-                Toast.makeText(SavedViewer.this, R.string.downloader_too_many, Toast.LENGTH_SHORT);
-                return;
-            }
-            else selectedItems.add(postModel);
-            postModel.setSelected(!postModel.isSelected());
-            notifyAdapter(postModel);
+    private boolean checkAndResetAction() {
+        final OnBackPressedDispatcher onBackPressedDispatcher = getOnBackPressedDispatcher();
+        if (!onBackPressedDispatcher.hasEnabledCallbacks() || actionMode == null) {
+            return false;
         }
-    }
-
-    private void notifyAdapter(final PostModel postModel) {
-        if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
-        if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
-        else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
-
-        if (downloadAction != null) {
-            downloadAction.setVisible(postsAdapter.isSelecting);
-        }
+        actionMode.finish();
+        actionMode = null;
+        return true;
     }
 }

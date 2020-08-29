@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".activities.PostViewer">
-
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/layout_include_toolbar" />
+    android:orientation="vertical">
 
     <FrameLayout
+        android:id="@+id/story_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@id/storiesList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/playerView"
@@ -25,7 +25,7 @@
             app:controller_layout_id="@layout/layout_controls"
             app:repeat_toggle_modes="none" />
 
-        <com.github.chrisbanes.photoview.PhotoView
+        <awais.instagrabber.customviews.drawee.ZoomableDraweeView
             android:id="@+id/imageViewer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -42,9 +42,9 @@
             android:id="@+id/postActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
-            android:background="#0000"
-            android:layout_gravity="bottom">
+            android:layout_gravity="bottom"
+            android:background="#0000">
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/viewStoryPost"
                 android:layout_width="match_parent"
@@ -54,6 +54,7 @@
                 android:textColor="@color/btn_green_text_color"
                 android:visibility="gone"
                 app:backgroundTint="@color/btn_green_background" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/poll"
                 android:layout_width="match_parent"
@@ -63,6 +64,7 @@
                 android:textColor="@color/btn_blue_text_color"
                 android:visibility="gone"
                 app:backgroundTint="@color/btn_blue_background" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/answer"
                 android:layout_width="match_parent"
@@ -72,6 +74,7 @@
                 android:textColor="@color/btn_blue_text_color"
                 android:visibility="gone"
                 app:backgroundTint="@color/btn_blue_background" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/quiz"
                 android:layout_width="match_parent"
@@ -81,6 +84,7 @@
                 android:textColor="@color/btn_blue_text_color"
                 android:visibility="gone"
                 app:backgroundTint="@color/btn_blue_background" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/mention"
                 android:layout_width="match_parent"
@@ -90,6 +94,7 @@
                 android:textColor="@color/btn_orange_text_color"
                 android:visibility="gone"
                 app:backgroundTint="@color/btn_orange_background" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/spotify"
                 android:layout_width="match_parent"
@@ -107,9 +112,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:orientation="horizontal"
-        android:paddingStart="5dp"
-        android:paddingLeft="5dp"
-        android:paddingEnd="5dp"
-        android:paddingRight="5dp" />
-</LinearLayout>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

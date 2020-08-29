@@ -151,14 +151,14 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
             final SimpleExoPlayer player = (SimpleExoPlayer) tag;
             final float intVol = player.getVolume() == 0f ? 1f : 0f;
             player.setVolume(intVol);
-            binding.itemFeedBottom.btnMute.setImageResource(intVol == 0f ? R.drawable.vol : R.drawable.mute);
+            binding.itemFeedBottom.btnMute.setImageResource(intVol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
             Utils.sessionVolumeFull = intVol == 1f;
         };
         final ViewerPostModel firstItem = sliderItems[0];
         if (firstItem.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
             binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
         }
-        binding.itemFeedBottom.btnMute.setImageResource(Utils.sessionVolumeFull ? R.drawable.mute : R.drawable.vol);
+        binding.itemFeedBottom.btnMute.setImageResource(Utils.sessionVolumeFull ? R.drawable.ic_volume_off_24 : R.drawable.ic_volume_up_24);
         binding.itemFeedBottom.btnMute.setOnClickListener(muteClickListener);
     }
 

@@ -50,7 +50,6 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.activities.ProfileViewer;
-import awais.instagrabber.activities.StoryViewer;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
@@ -225,21 +224,21 @@ public class DirectMessageThreadFragment extends Fragment {
                         break;
                     case STORY_SHARE:
                         if (directItemModel.getReelShare() != null) {
-                            StoryModel sm = new StoryModel(
-                                    directItemModel.getReelShare().getReelId(),
-                                    directItemModel.getReelShare().getMedia().getVideoUrl(),
-                                    directItemModel.getReelShare().getMedia().getMediaType(),
-                                    directItemModel.getTimestamp(),
-                                    directItemModel.getReelShare().getReelOwnerName(),
-                                    String.valueOf(directItemModel.getReelShare().getReelOwnerId()),
-                                    false
-                            );
-                            sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
-                            StoryModel[] sms = {sm};
-                            startActivity(new Intent(requireContext(), StoryViewer.class)
-                                    .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
-                                    .putExtra(Constants.EXTRAS_STORIES, sms)
-                            );
+                            // StoryModel sm = new StoryModel(
+                            //         directItemModel.getReelShare().getReelId(),
+                            //         directItemModel.getReelShare().getMedia().getVideoUrl(),
+                            //         directItemModel.getReelShare().getMedia().getMediaType(),
+                            //         directItemModel.getTimestamp(),
+                            //         directItemModel.getReelShare().getReelOwnerName(),
+                            //         String.valueOf(directItemModel.getReelShare().getReelOwnerId()),
+                            //         false
+                            // );
+                            // sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
+                            // StoryModel[] sms = {sm};
+                            // startActivity(new Intent(requireContext(), StoryViewer.class)
+                            //         .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
+                            //         .putExtra(Constants.EXTRAS_STORIES, sms)
+                            // );
                         } else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         }

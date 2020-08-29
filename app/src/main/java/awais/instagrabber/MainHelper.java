@@ -51,13 +51,11 @@ import java.util.Map;
 
 import awais.instagrabber.activities.CommentsViewer;
 import awais.instagrabber.activities.FollowViewer;
-import awais.instagrabber.activities.MainActivity;
+import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.activities.SavedViewer;
-import awais.instagrabber.activities.StoryViewer;
 import awais.instagrabber.adapters.DiscoverAdapter;
 import awais.instagrabber.adapters.FeedAdapter;
-import awais.instagrabber.adapters.FeedStoriesAdapter;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.adapters.viewholder.feed.FeedItemViewHolder;
 import awais.instagrabber.asyncs.DiscoverFetcher;
@@ -111,8 +109,14 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static AsyncTask<?, ?, ?> currentlyExecuting;
     private AsyncTask<Void, Void, FeedStoryModel[]> prevStoriesFetcher;
     private FeedStoryModel[] stories;
-    private boolean hasNextPage = false, feedHasNextPage = false, discoverHasMore = false;
-    private String endCursor = null, feedEndCursor = null, discoverEndMaxId = null, topic = null, rankToken = null;
+    private boolean hasNextPage = false;
+    private boolean feedHasNextPage = false;
+    private boolean discoverHasMore = false;
+    private String endCursor = null;
+    private String feedEndCursor = null;
+    private String discoverEndMaxId = null;
+    private String topic = null;
+    private String rankToken = null;
     private String[] topicIds = null;
 
     private final boolean autoloadPosts;
@@ -293,7 +297,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         @Override
         public void onResult(final FeedStoryModel[] result) {
-            feedStoriesAdapter.setData(result);
+            // feedStoriesAdapter.setData(result);
             if (result != null && result.length > 0) {
                 mainActivity.mainBinding.feedView.feedStories.setVisibility(View.VISIBLE);
                 stories = result;
@@ -305,32 +309,32 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         public void onClick(final RamboTextView view, final String text, final boolean isHashtag) {
             new AlertDialog.Builder(mainActivity).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
                                                  .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
-                if (MainActivity.scanHack != null) MainActivity.scanHack.onResult(text);
+                if (MainActivityBackup.scanHack != null) MainActivityBackup.scanHack.onResult(text);
             }).show();
         }
     };
-    private final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(null, new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            final Object tag = v.getTag();
-            if (tag instanceof FeedStoryModel) {
-                final FeedStoryModel feedStoryModel = (FeedStoryModel) tag;
-                final int index = indexOfIntArray(stories, feedStoryModel);
-                new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, false, false, result -> {
-                    if (result != null && result.length > 0)
-                        mainActivity.startActivity(new Intent(mainActivity, StoryViewer.class)
-                                .putExtra(Constants.EXTRAS_STORIES, result)
-                                .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
-                                .putExtra(Constants.FEED, stories)
-                                .putExtra(Constants.FEED_ORDER, index)
-                        );
-                    else
-                        Toast.makeText(mainActivity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        }
-    });
-    private MainActivity mainActivity;
+    // private final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(null, new View.OnClickListener() {
+    //     @Override
+    //     public void onClick(final View v) {
+    //         final Object tag = v.getTag();
+    //         if (tag instanceof FeedStoryModel) {
+    //             final FeedStoryModel feedStoryModel = (FeedStoryModel) tag;
+    //             final int index = indexOfIntArray(stories, feedStoryModel);
+    //             new iStoryStatusFetcher(feedStoryModel.getStoryMediaId(), null, false, false, false, false, result -> {
+    //                 if (result != null && result.length > 0)
+    //                     mainActivity.startActivity(new Intent(mainActivity, StoryViewer.class)
+    //                             .putExtra(Constants.EXTRAS_STORIES, result)
+    //                             .putExtra(Constants.EXTRAS_USERNAME, feedStoryModel.getProfileModel().getUsername())
+    //                             .putExtra(Constants.FEED, stories)
+    //                             .putExtra(Constants.FEED_ORDER, index)
+    //                     );
+    //                 else
+    //                     Toast.makeText(mainActivity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+    //             }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    //         }
+    //     }
+    // });
+    private MainActivityBackup mainActivity;
     private Resources resources;
     private final View collapsingToolbar;
     private final RecyclerLazyLoader lazyLoader;
@@ -345,7 +349,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private RequestManager glide;
     private VideoAwareRecyclerScroller videoAwareRecyclerScroller;
 
-    public MainHelper(@NonNull final MainActivity mainActivity) {
+    public MainHelper(@NonNull final MainActivityBackup mainActivity) {
         stopCurrentExecutor();
 
         this.mainActivity = mainActivity;
@@ -522,26 +526,27 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(mainActivity, Utils.convertDpToPx(110));
         mainActivity.mainBinding.profileView.mainPosts.setLayoutManager(layoutManager);
         mainActivity.mainBinding.profileView.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
-        mainActivity.mainBinding.profileView.mainPosts.setAdapter(postsAdapter = new PostsAdapter(mainActivity.allItems, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                final PostModel postModel = (PostModel) tag;
-
-                if (postsAdapter.isSelecting) toggleSelection(postModel);
-                else mainActivity.startActivity(new Intent(mainActivity, PostViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, postModel.getPosition())
-                        .putExtra(Constants.EXTRAS_POST, postModel)
-                        .putExtra(Constants.EXTRAS_USER, mainActivity.userQuery)
-                        .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
-            }
-        }, v -> { // long click listener
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                postsAdapter.isSelecting = true;
-                toggleSelection((PostModel) tag);
-            }
-            return true;
-        }));
+        // mainActivity.mainBinding.profileView.mainPosts.setAdapter(postsAdapter = new PostsAdapter(/*mainActivity.allItems,*/ v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         final PostModel postModel = (PostModel) tag;
+        //
+        //         if (postsAdapter.isSelecting) toggleSelection(postModel);
+        //         else mainActivity.startActivity(new Intent(mainActivity, PostViewer.class)
+        //                 .putExtra(Constants.EXTRAS_INDEX, postModel.getPosition())
+        //                 .putExtra(Constants.EXTRAS_POST, postModel)
+        //                 .putExtra(Constants.EXTRAS_USER, mainActivity.userQuery)
+        //                 .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
+        //     }
+        // }, v -> { // long click listener
+        //     // final Object tag = v.getTag();
+        //     // if (tag instanceof PostModel) {
+        //     //     postsAdapter.isSelecting = true;
+        //     //     toggleSelection((PostModel) tag);
+        //     // }
+        //     // return true;
+        //     return false;
+        // }));
 
         this.lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if ((!autoloadPosts || isHashtag) && hasNextPage) {
@@ -643,18 +648,18 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
     private void setupFeed() {
         mainActivity.mainBinding.feedView.feedStories.setLayoutManager(new LinearLayoutManager(mainActivity, LinearLayoutManager.HORIZONTAL, false));
-        mainActivity.mainBinding.feedView.feedStories.setAdapter(feedStoriesAdapter);
+        // mainActivity.mainBinding.feedView.feedStories.setAdapter(feedStoriesAdapter);
         refreshFeedStories();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivity);
         mainActivity.mainBinding.feedView.feedPosts.setHasFixedSize(true);
         mainActivity.mainBinding.feedView.feedPosts.setLayoutManager(layoutManager);
-        mainActivity.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(glide, clickListener, (view, text, isHashtag) ->
+        mainActivity.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(clickListener, (view, text, isHashtag) ->
                 new AlertDialog.Builder(mainActivity).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
                                                      .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
-                    if (MainActivity.scanHack != null) {
+                    if (MainActivityBackup.scanHack != null) {
                         mainActivity.mainBinding.drawerLayout.closeDrawers();
-                        MainActivity.scanHack.onResult(text);
+                        MainActivityBackup.scanHack.onResult(text);
                     }
                 }).show()));
 
@@ -727,25 +732,25 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             new DiscoverFetcher(topic, null, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
 
-        mainActivity.mainBinding.discoverPosts.setAdapter(discoverAdapter = new DiscoverAdapter(mainActivity.discoverItems, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof DiscoverItemModel) {
-                final DiscoverItemModel itemModel = (DiscoverItemModel) tag;
-
-                if (discoverAdapter.isSelecting) toggleDiscoverSelection(itemModel);
-                else mainActivity.startActivity(new Intent(mainActivity, PostViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, itemModel.getPosition())
-                        .putExtra(Constants.EXTRAS_TYPE, ItemGetType.DISCOVER_ITEMS)
-                        .putExtra(Constants.EXTRAS_POST, new PostModel(itemModel.getShortCode(), false)));
-            }
-        }, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof DiscoverItemModel) {
-                discoverAdapter.isSelecting = true;
-                toggleDiscoverSelection((DiscoverItemModel) tag);
-            }
-            return true;
-        }));
+        // mainActivity.mainBinding.discoverPosts.setAdapter(discoverAdapter = new DiscoverAdapter(mainActivity.discoverItems, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof DiscoverItemModel) {
+        //         final DiscoverItemModel itemModel = (DiscoverItemModel) tag;
+        //
+        //         if (discoverAdapter.isSelecting) toggleDiscoverSelection(itemModel);
+        //         else mainActivity.startActivity(new Intent(mainActivity, PostViewer.class)
+        //                 .putExtra(Constants.EXTRAS_INDEX, itemModel.getPosition())
+        //                 .putExtra(Constants.EXTRAS_TYPE, ItemGetType.DISCOVER_ITEMS)
+        //                 .putExtra(Constants.EXTRAS_POST, new PostModel(itemModel.getShortCode(), false)));
+        //     }
+        // }, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof DiscoverItemModel) {
+        //         discoverAdapter.isSelecting = true;
+        //         toggleDiscoverSelection((DiscoverItemModel) tag);
+        //     }
+        //     return true;
+        // }));
 
         mainActivity.mainBinding.discoverPosts.addOnScrollListener(discoverLazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (discoverHasMore) {
@@ -811,7 +816,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         mainActivity.allItems.clear();
         mainActivity.selectedItems.clear();
         if (postsAdapter != null) {
-            postsAdapter.isSelecting = false;
+            // postsAdapter.isSelecting = false;
             postsAdapter.notifyDataSetChanged();
         }
         mainActivity.mainBinding.profileView.appBarLayout.setExpanded(true, true);
@@ -1279,12 +1284,12 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     }
 
     private void notifyAdapter(final PostModel postModel) {
-        if (mainActivity.selectedItems.size() < 1) postsAdapter.isSelecting = false;
-        if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
-        else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
-
-        if (mainActivity.downloadAction != null)
-            mainActivity.downloadAction.setVisible(postsAdapter.isSelecting);
+        // if (mainActivity.selectedItems.size() < 1) postsAdapter.isSelecting = false;
+        // if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
+        // else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
+        //
+        // if (mainActivity.downloadAction != null)
+        //     mainActivity.downloadAction.setVisible(postsAdapter.isSelecting);
     }
 
     private void toggleDiscoverSelection(final DiscoverItemModel itemModel) {
@@ -1297,33 +1302,34 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     }
 
     private void notifyDiscoverAdapter(final DiscoverItemModel itemModel) {
-        if (mainActivity.selectedDiscoverItems.size() < 1) discoverAdapter.isSelecting = false;
-        if (itemModel.getPosition() < 0) discoverAdapter.notifyDataSetChanged();
-        else discoverAdapter.notifyItemChanged(itemModel.getPosition(), itemModel);
-
-        if (mainActivity.downloadAction != null)
-            mainActivity.downloadAction.setVisible(discoverAdapter.isSelecting);
+        // if (mainActivity.selectedDiscoverItems.size() < 1) discoverAdapter.isSelecting = false;
+        // if (itemModel.getPosition() < 0) discoverAdapter.notifyDataSetChanged();
+        // else discoverAdapter.notifyItemChanged(itemModel.getPosition(), itemModel);
+        //
+        // if (mainActivity.downloadAction != null)
+        //     mainActivity.downloadAction.setVisible(discoverAdapter.isSelecting);
     }
 
     public boolean isSelectionCleared() {
-        if (postsAdapter != null && postsAdapter.isSelecting) {
-            for (final PostModel postModel : mainActivity.selectedItems)
-                postModel.setSelected(false);
-            mainActivity.selectedItems.clear();
-            postsAdapter.isSelecting = false;
-            postsAdapter.notifyDataSetChanged();
-            if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(false);
-            return false;
-        } else if (discoverAdapter != null && discoverAdapter.isSelecting) {
-            for (final DiscoverItemModel itemModel : mainActivity.selectedDiscoverItems)
-                itemModel.setSelected(false);
-            mainActivity.selectedDiscoverItems.clear();
-            discoverAdapter.isSelecting = false;
-            discoverAdapter.notifyDataSetChanged();
-            if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(false);
-            return false;
-        }
-        return true;
+        // if (postsAdapter != null && postsAdapter.isSelecting()) {
+        //     for (final PostModel postModel : mainActivity.selectedItems)
+        //         postModel.setSelected(false);
+        //     mainActivity.selectedItems.clear();
+        //     // postsAdapter.isSelecting = false;
+        //     postsAdapter.notifyDataSetChanged();
+        //     if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(false);
+        //     return false;
+        // } else if (discoverAdapter != null && discoverAdapter.isSelecting) {
+        //     for (final DiscoverItemModel itemModel : mainActivity.selectedDiscoverItems)
+        //         itemModel.setSelected(false);
+        //     mainActivity.selectedDiscoverItems.clear();
+        //     discoverAdapter.isSelecting = false;
+        //     discoverAdapter.notifyDataSetChanged();
+        //     if (mainActivity.downloadAction != null) mainActivity.downloadAction.setVisible(false);
+        //     return false;
+        // }
+        // return true;
+        return false;
     }
 
     public void deselectSelection(final BasePostModel postModel) {
@@ -1364,7 +1370,8 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private final View.OnClickListener profileActionListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            final boolean iamme = (isLoggedIn && mainActivity.profileModel != null) && Utils.getUserIdFromCookie(cookie).equals(mainActivity.profileModel.getId());
+            final String userIdFromCookie = Utils.getUserIdFromCookie(MainHelper.this.cookie);
+            final boolean isSelf = (isLoggedIn && mainActivity.profileModel != null) && userIdFromCookie != null && userIdFromCookie.equals(mainActivity.profileModel.getId());
             if (!isLoggedIn && Utils.dataBox.getFavorite(mainActivity.userQuery) != null && v == mainActivity.mainBinding.profileView.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(mainActivity.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(mainActivity.userQuery).split("/")[1]),
@@ -1378,7 +1385,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 new ProfileAction().execute("follow");
             } else if (v == mainActivity.mainBinding.profileView.btnRestrict && isLoggedIn) {
                 new ProfileAction().execute("restrict");
-            } else if (v == mainActivity.mainBinding.profileView.btnSaved && !iamme) {
+            } else if (v == mainActivity.mainBinding.profileView.btnSaved && !isSelf) {
                 new ProfileAction().execute("block");
             } else if (v == mainActivity.mainBinding.profileView.btnFollowTag) {
                 new ProfileAction().execute("followtag");
@@ -1407,17 +1414,12 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
-            final String url = "https://www.instagram.com/web/" +
-                    ((action == "followtag" && mainActivity.hashtagModel != null) ? ("tags/" +
-                            (mainActivity.hashtagModel.getFollowing() == true ? "unfollow/" : "follow/") + mainActivity.hashtagModel.getName() + "/") : (
-                            ((action == "restrict" && mainActivity.profileModel != null) ? "restrict_action" : ("friendships/" + mainActivity.profileModel.getId())) + "/" +
-                                    ((action == "follow" && mainActivity.profileModel != null) ?
-                                            ((mainActivity.profileModel.getFollowing() == true ||
-                                                    (mainActivity.profileModel.getFollowing() == false && mainActivity.profileModel.getRequested() == true))
-                                                    ? "unfollow/" : "follow/") :
-                                            ((action == "restrict" && mainActivity.profileModel != null) ?
-                                                    (mainActivity.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
-                                                    (mainActivity.profileModel.getBlocked() == true ? "unblock/" : "block/")))));
+            final String url = "https://www.instagram.com/web/" + (action.equals("followtag") && mainActivity.hashtagModel != null ? "tags/" + (mainActivity.hashtagModel.getFollowing() ? "unfollow/" : "follow/") + mainActivity.hashtagModel.getName() + "/" : (action.equals("restrict") && mainActivity.profileModel != null ? "restrict_action" : "friendships/" + mainActivity.profileModel.getId()) + "/" + (action.equals("follow") ?
+                    mainActivity.profileModel.getFollowing() || mainActivity.profileModel.getRequested()
+                            ? "unfollow/" : "follow/" :
+                    action.equals("restrict") ?
+                            mainActivity.profileModel.getRestricted() ? "unrestrict/" : "restrict/" :
+                            mainActivity.profileModel.getBlocked() ? "unblock/" : "block/"));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");

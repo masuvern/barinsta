@@ -8,11 +8,6 @@
         android:id="@+id/item_feed_top"
         layout="@layout/item_feed_top" />
 
-    <!--<com.github.chrisbanes.photoview.PhotoView-->
-    <!--    android:id="@+id/imageViewer"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="wrap_content" />-->
-
     <awais.instagrabber.customviews.drawee.ZoomableDraweeView
         android:id="@+id/imageViewer"
         android:layout_width="match_parent"

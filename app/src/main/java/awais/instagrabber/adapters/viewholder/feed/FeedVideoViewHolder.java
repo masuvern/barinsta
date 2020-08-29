@@ -74,8 +74,9 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
 
     private void setThumbnail(final FeedModel feedModel) {
         final ViewGroup.LayoutParams layoutParams = binding.thumbnailParent.getLayoutParams();
-        layoutParams.width = feedModel.getImageWidth();
-        layoutParams.height = feedModel.getImageHeight();
+        final int requiredWidth = Utils.displayMetrics.widthPixels;
+        layoutParams.width = feedModel.getImageWidth() == 0 ? requiredWidth : feedModel.getImageWidth();
+        layoutParams.height = feedModel.getImageHeight() == 0 ? requiredWidth + 1 : feedModel.getImageHeight();
         binding.thumbnailParent.requestLayout();
         final ImageRequest thumbnailRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(feedModel.getThumbnailUrl()))
                                                                  .setProgressiveRenderingEnabled(true)
@@ -131,7 +132,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     }
 
     private void setMuteIcon(final float vol) {
-        binding.itemFeedBottom.btnMute.setImageResource(vol == 0f ? R.drawable.vol : R.drawable.mute);
+        binding.itemFeedBottom.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
     }
 
     public FeedModel getCurrentFeedModel() {

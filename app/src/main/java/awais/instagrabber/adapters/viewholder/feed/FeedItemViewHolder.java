@@ -11,8 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.RequestManager;
-
 import org.json.JSONObject;
 
 import awais.instagrabber.R;
@@ -30,8 +28,6 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
     private final ItemFeedTopBinding topBinding;
     private final ItemFeedBottomBinding bottomBinding;
     private final MentionClickListener mentionClickListener;
-
-    boolean captionExpanded = false;
 
     public FeedItemViewHolder(@NonNull final View root,
                               final ItemFeedTopBinding topBinding,
@@ -64,9 +60,6 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         bottomBinding.btnComments.setTag(feedModel);
         final ProfileModel profileModel = feedModel.getProfileModel();
         if (profileModel != null) {
-            // glide.load(profileModel.getSdProfilePic())
-            //         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            //         .into(topBinding.ivProfilePic);
             topBinding.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
             final int titleLen = profileModel.getUsername().length() + 1;
             final SpannableString spannableString = new SpannableString("@" + profileModel.getUsername());
