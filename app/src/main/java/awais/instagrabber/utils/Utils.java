@@ -1226,7 +1226,7 @@ public final class Utils {
 
         final int endIndex = (spaceIndex != -1 ? spaceIndex : length);
 
-        final String extractUrl = url.substring(startIndex, Math.min(length, endIndex) - 1);
+        final String extractUrl = url.substring(startIndex, Math.min(length, endIndex));
 
         final SpannableString spannableString = new SpannableString(url);
         spannableString.setSpan(new URLSpan(extractUrl), startIndex, endIndex, 0);
