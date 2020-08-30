@@ -426,7 +426,7 @@ public final class Utils {
             if (userObj != null) {
                 user = new ProfileModel(
                         userObj.getBoolean("is_private"),
-                        false, // temporary
+                        false,
                         userObj.optBoolean("is_verified"),
                         String.valueOf(userObj.get("pk")),
                         userObj.getString("username"),
@@ -467,6 +467,7 @@ public final class Utils {
         if ("animated_media".equals(itemType)) return DirectItemType.ANIMATED_MEDIA;
         if ("voice_media".equals(itemType)) return DirectItemType.VOICE_MEDIA;
         if ("story_share".equals(itemType)) return DirectItemType.STORY_SHARE;
+        if ("clip".equals(itemType)) return DirectItemType.CLIP;
         return DirectItemType.TEXT;
     }
 
@@ -703,6 +704,11 @@ public final class Utils {
 
                 case MEDIA_SHARE:
                     directMedia = getDirectMediaModel(itemObject.getJSONObject("media_share"));
+                    break;
+
+                case CLIP:
+                    Log.d("austin_debug", "clip: "+itemObject.getJSONObject("clip").getJSONObject("clip"));
+                    directMedia = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
                     break;
 
                 case MEDIA:

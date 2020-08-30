@@ -74,6 +74,7 @@ public final class DirectMessageInboxItemViewHolder extends RecyclerView.ViewHol
             case MEDIA:
             case MEDIA_SHARE:
             case RAVEN_MEDIA:
+            case CLIP:
                 messageText = context.getString(R.string.direct_messages_sent_media);
                 break;
             case ACTION_LOG:

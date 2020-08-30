@@ -205,6 +205,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 final DirectItemType itemType = directItemModel.getItemType();
                 switch (itemType) {
                     case MEDIA_SHARE:
+                    case CLIP:
                         startActivity(new Intent(requireContext(), PostViewer.class)
                                 .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode(), false)));
                         break;
@@ -281,6 +282,7 @@ public class DirectMessageThreadFragment extends Fragment {
 
                 switch (itemType) {
                     case MEDIA_SHARE:
+                    case CLIP:
                         firstOption = R.string.view_post;
                         break;
                     case LINK:
