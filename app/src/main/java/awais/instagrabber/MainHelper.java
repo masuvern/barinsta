@@ -1372,12 +1372,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         public void onClick(final View v) {
             final String userIdFromCookie = Utils.getUserIdFromCookie(MainHelper.this.cookie);
             final boolean isSelf = (isLoggedIn && mainActivity.profileModel != null) && userIdFromCookie != null && userIdFromCookie.equals(mainActivity.profileModel.getId());
-            if (!isLoggedIn && Utils.dataBox.getFavorite(mainActivity.userQuery) != null && v == mainActivity.mainBinding.profileView.btnFollow) {
+            if (!isLoggedIn
+                    && Utils.dataBox.getFavorite(mainActivity.userQuery) != null
+                    && v == mainActivity.mainBinding.profileView.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(mainActivity.userQuery,
                         Long.parseLong(Utils.dataBox.getFavorite(mainActivity.userQuery).split("/")[1]),
                         mainActivity.locationModel != null ? mainActivity.locationModel.getName() : mainActivity.userQuery.replaceAll("^@", "")));
                 onRefresh();
-            } else if (!isLoggedIn && (v == mainActivity.mainBinding.profileView.btnFollow || v == mainActivity.mainBinding.profileView.btnFollowTag)) {
+            } else if (!isLoggedIn
+                    && (v == mainActivity.mainBinding.profileView.btnFollow || v == mainActivity.mainBinding.profileView.btnFollowTag)) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(mainActivity.userQuery, System.currentTimeMillis(),
                         mainActivity.locationModel != null ? mainActivity.locationModel.getName() : mainActivity.userQuery.replaceAll("^@", "")));
                 onRefresh();
@@ -1389,7 +1392,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 new ProfileAction().execute("block");
             } else if (v == mainActivity.mainBinding.profileView.btnFollowTag) {
                 new ProfileAction().execute("followtag");
-            } else if (v == mainActivity.mainBinding.profileView.btnTagged || (v == mainActivity.mainBinding.profileView.btnRestrict && !isLoggedIn)) {
+            } else if (v == mainActivity.mainBinding.profileView.btnTagged || v == mainActivity.mainBinding.profileView.btnRestrict) {
                 mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
                         .putExtra(Constants.EXTRAS_INDEX, "%" + mainActivity.profileModel.getId())
                         .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())

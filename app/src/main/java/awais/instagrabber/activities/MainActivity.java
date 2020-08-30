@@ -31,6 +31,19 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class MainActivity extends BaseLanguageActivity {
     private static final String TAG = "MainActivity";
 
+    private static final List<Integer> SHOW_BOTTOM_VIEW_DESTINATIONS = Arrays.asList(
+            R.id.directMessagesInboxFragment,
+            R.id.feedFragment,
+            R.id.profileFragment,
+            R.id.discoverFragment,
+            R.id.morePreferencesFragment);
+    private static final List<Integer> KEEP_SCROLL_BEHAVIOUR_DESTINATIONS = Arrays.asList(
+            R.id.directMessagesInboxFragment,
+            R.id.feedFragment,
+            R.id.profileFragment,
+            R.id.discoverFragment,
+            R.id.morePreferencesFragment,
+            R.id.settingsPreferencesFragment);
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
 
@@ -69,17 +82,16 @@ public class MainActivity extends BaseLanguageActivity {
                 R.navigation.direct_messages_nav_graph,
                 R.navigation.feed_nav_graph,
                 R.navigation.profile_nav_graph,
-                R.navigation.discover_nav_graph
+                R.navigation.discover_nav_graph,
+                R.navigation.more_nav_graph
         ));
-
-        binding.bottomNavView.setSelectedItemId(R.id.feed_nav_graph);
         final LiveData<NavController> navControllerLiveData = setupWithNavController(
                 binding.bottomNavView,
                 navList,
                 getSupportFragmentManager(),
                 R.id.main_nav_host,
                 getIntent(),
-                1);
+                0);
         navControllerLiveData.observe(this, this::setupNavigation);
         currentNavControllerLiveData = navControllerLiveData;
     }
@@ -89,19 +101,12 @@ public class MainActivity extends BaseLanguageActivity {
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             binding.appBarLayout.setExpanded(true, true);
             final int destinationId = destination.getId();
-            final List<Integer> showBottomView = Arrays.asList(
-                    R.id.directMessagesInboxFragment,
-                    R.id.feedFragment,
-                    R.id.profileFragment,
-                    R.id.discoverFragment);
-
-            if (showBottomView.contains(destinationId)) {
+            binding.bottomNavView.setVisibility(SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId) ? View.VISIBLE : View.GONE);
+            if (KEEP_SCROLL_BEHAVIOUR_DESTINATIONS.contains(destinationId)) {
                 setScrollingBehaviour();
-                binding.bottomNavView.setVisibility(View.VISIBLE);
-                return;
+            } else {
+                removeScrollingBehaviour();
             }
-            removeScrollingBehaviour();
-            binding.bottomNavView.setVisibility(View.GONE);
         });
     }
 

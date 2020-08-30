@@ -64,4 +64,5 @@ public final class Constants {
             "\"gyroscope\", \"value\": \"gyroscope_enabled\" } ]";
     public static final String SIGNATURE_VERSION = "4";
     public static final String SIGNATURE_KEY = "9193488027538fd3450b83b7d05286d4ca9599a0f7eeed90d8c85925698a05dc";
+    public static final int LOGIN_RESULT_CODE = 5000;
 }

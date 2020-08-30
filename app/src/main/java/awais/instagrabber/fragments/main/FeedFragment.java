@@ -80,6 +80,7 @@ public class FeedFragment extends Fragment {
     private String feedEndCursor = null;
     private FeedViewModel feedViewModel;
     private VideoAwareRecyclerScroller videoAwareRecyclerScroller;
+    private boolean shouldRefresh = true;
 
     private final FetchListener<FeedModel[]> feedFetchListener = new FetchListener<FeedModel[]>() {
         @Override
@@ -164,14 +165,21 @@ public class FeedFragment extends Fragment {
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         if (root != null) {
+            shouldRefresh = false;
             return root;
         }
         binding = FragmentFeedBinding.inflate(inflater, container, false);
         root = binding.getRoot();
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
         // setupActionBar();
         setupFeedStories();
         setupFeed();
-        return root;
+        shouldRefresh = false;
     }
 
     @Override

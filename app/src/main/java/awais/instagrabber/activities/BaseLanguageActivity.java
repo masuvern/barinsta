@@ -15,7 +15,7 @@ public abstract class BaseLanguageActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        Utils.changeTheme(this);
+        Utils.changeTheme(getApplicationContext());
         super.onCreate(savedInstanceState);
     }
 }

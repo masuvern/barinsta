@@ -13,7 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dip"
             android:layout_alignParentTop="true"
-            android:background="?android:attr/dividerVertical" />
+            android:background="@android:color/darker_gray" />
 
         <View
             android:id="@+id/horizontalDivider"
@@ -23,9 +23,9 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
-            android:background="?android:attr/dividerVertical" />
+            android:background="@android:color/darker_gray" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
             android:background="?android:selectableItemBackground"
             android:text="@string/cancel" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnConfirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/btnNavUp"
-            android:background="#33B5E5" />
+            android:background="@android:color/darker_gray" />
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView

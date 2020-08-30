@@ -24,7 +24,7 @@
     <!--    android:title="@string/title_favorites"/>-->
 
     <item
-        android:id="@+id/moreFragment"
+        android:id="@+id/more_nav_graph"
         android:icon="@drawable/ic_more_horiz_24"
         android:title="@string/more" />
 </menu>

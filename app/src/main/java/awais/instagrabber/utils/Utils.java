@@ -59,6 +59,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -820,23 +821,25 @@ public final class Utils {
         }
         AppCompatDelegate.setDefaultNightMode(themeCode);
         // use amoled theme only if enabled in settings
-        if (isAmoledEnabled) {
-            // check if setting is set to 'Dark'
-            boolean isNight = themeCode == AppCompatDelegate.MODE_NIGHT_YES;
-            // if not dark check if themeCode is MODE_NIGHT_FOLLOW_SYSTEM or MODE_NIGHT_AUTO_BATTERY
-            if (!isNight && (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM || themeCode == AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)) {
-                // check if resulting theme would be NIGHT
-                final int uiMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-                isNight = uiMode == Configuration.UI_MODE_NIGHT_YES;
-            }
-            if (isNight) {
-                // set amoled theme
-                Log.d("InstaGrabber", "settings amoled theme");
-                context.setTheme(R.style.Theme_Amoled);
-                return;
-            }
+        if (isAmoledEnabled && isNight(context, themeCode)) {
+            // set amoled theme
+            Log.d(TAG, "settings amoled theme");
+            context.setTheme(R.style.Theme_Amoled);
         }
     }
+
+    public static boolean isNight(final Context context, final int themeCode) {
+        // check if setting is set to 'Dark'
+        boolean isNight = themeCode == AppCompatDelegate.MODE_NIGHT_YES;
+        // if not dark check if themeCode is MODE_NIGHT_FOLLOW_SYSTEM or MODE_NIGHT_AUTO_BATTERY
+        if (!isNight && (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM || themeCode == AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)) {
+            // check if resulting theme would be NIGHT
+            final int uiMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            isNight = uiMode == Configuration.UI_MODE_NIGHT_YES;
+        }
+        return isNight;
+    }
+
 
     public static void setTooltipText(final View view, @StringRes final int tooltipTextRes) {
         if (view != null && tooltipTextRes != 0 && tooltipTextRes != -1) {
@@ -1208,6 +1211,20 @@ public final class Utils {
         dialog[0] = new AlertDialog.Builder(context).setView(importExportBinding.getRoot()).show();
     }
 
+    public static Map<String, String> sign(final Map<String, Object> form) {
+        final String signed = sign(new JSONObject(form).toString());
+        if (signed == null) {
+            return null;
+        }
+        final String[] parts = signed.split("&");
+        final Map<String, String> map = new HashMap<>();
+        for (final String part : parts) {
+            final String[] partSplit = part.split("=");
+            map.put(partSplit[0], partSplit[1]);
+        }
+        return map;
+    }
+
     public static String sign(final String message) {
         try {
             final Mac hasher = Mac.getInstance("HmacSHA256");
@@ -1439,5 +1456,12 @@ public final class Utils {
 
     public static int getResultingWidth(final int requiredHeight, final int height, final int width) {
         return requiredHeight * width / height;
+    }
+
+    public static String getCsrfTokenFromCookie(final String cookie) {
+        if (cookie == null) {
+            return null;
+        }
+        return cookie.split("csrftoken=")[1].split(";")[0];
     }
 }

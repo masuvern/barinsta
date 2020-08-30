@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -19,11 +21,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -49,7 +51,6 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.PostViewer;
-import awais.instagrabber.activities.ProfileViewer;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
@@ -61,7 +62,6 @@ import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ImageUploadOptions;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
@@ -74,7 +74,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private static final String TAG = "DirectMessagesThreadFmt";
     private static final int PICK_IMAGE = 100;
 
-    private FragmentActivity fragmentActivity;
+    private AppCompatActivity fragmentActivity;
     private String threadId, threadTitle;
     private String cursor;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
@@ -83,7 +83,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
-    private AppCompatImageView dmInfo;
+    // private AppCompatImageView dmInfo;
     private boolean hasSentSomething, hasDeletedSomething;
     private boolean hasOlder = true;
 
@@ -157,7 +157,8 @@ public class DirectMessageThreadFragment extends Fragment {
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fragmentActivity = requireActivity();
+        fragmentActivity = (AppCompatActivity) requireActivity();
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -165,8 +166,8 @@ public class DirectMessageThreadFragment extends Fragment {
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
-        CoordinatorLayout containerTwo = (CoordinatorLayout) container.getParent();
-        dmInfo = containerTwo.findViewById(R.id.dmInfo);
+        final FragmentContainerView containerTwo = (FragmentContainerView) container.getParent();
+        // dmInfo = containerTwo.findViewById(R.id.dmInfo);
         final LinearLayout root = binding.getRoot();
         listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
         if (getArguments() == null) {
@@ -177,6 +178,10 @@ public class DirectMessageThreadFragment extends Fragment {
             threadId = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
         }
         threadTitle = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getTitle();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(threadTitle);
+        }
         binding.swipeRefreshLayout.setEnabled(false);
         messageList = binding.messageList;
         messageList.setHasFixedSize(true);
@@ -192,11 +197,11 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener).execute(); // serial because we don't want messages to be randomly ordered
         }));
-        dmInfo.setOnClickListener(v -> {
-            final NavDirections action =
-                    DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
-            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
-        });
+        // dmInfo.setOnClickListener(v -> {
+        //     final NavDirections action =
+        //             DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
+        //     NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+        // });
 
         final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
             if (which == 0) {
@@ -250,12 +255,11 @@ public class DirectMessageThreadFragment extends Fragment {
                     default:
                         Log.d("austin_debug", "unsupported type " + itemType);
                 }
-            }
-            else if (which == 1) {
+            } else if (which == 1) {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
-            }
-            else if (which == 2) {
-                if (String.valueOf(directItemModel.getUserId()).equals(myId)) new Unsend().execute();
+            } else if (which == 2) {
+                if (String.valueOf(directItemModel.getUserId()).equals(myId))
+                    new Unsend().execute();
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
             }
         };
@@ -318,6 +322,12 @@ public class DirectMessageThreadFragment extends Fragment {
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         return root;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull final Menu menu) {
+        final MenuItem item = menu.findItem(R.id.favourites);
+        item.setVisible(false);
     }
 
     @Override
@@ -423,7 +433,9 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void searchUsername(final String text) {
-        startActivity(new Intent(requireContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
+        // startActivity(new Intent(requireContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
+        final NavDirections action = DirectMessageThreadFragmentDirections.actionDirectMessagesThreadFragmentToProfileFragment("@" + text);
+        NavHostFragment.findNavController(this).navigate(action);
     }
 
     public static class DirectItemModelListViewModel extends ViewModel {
@@ -434,8 +446,7 @@ public class DirectMessageThreadFragment extends Fragment {
             if (list == null) {
                 list = new MutableLiveData<>();
                 isEmpty = true;
-            }
-            else isEmpty = false;
+            } else isEmpty = false;
             return list;
         }
 
@@ -451,10 +462,10 @@ public class DirectMessageThreadFragment extends Fragment {
 
     class Unsend extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... lmao) {
-            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/"+threadId+"/items/"+directItemModel.getItemId()+"/delete/";
+            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/" + threadId + "/items/" + directItemModel.getItemId() + "/delete/";
             try {
                 String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
-                        +"&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+                        + "&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);

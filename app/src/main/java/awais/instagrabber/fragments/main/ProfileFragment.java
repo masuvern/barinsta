@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -29,8 +30,10 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.FollowViewer;
@@ -47,17 +50,24 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.fragments.main.viewmodels.ProfilePostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.ItemGetType;
-import awais.instagrabber.services.ProfileService;
+import awais.instagrabber.repositories.responses.FriendshipRepositoryChangeResponseRootObject;
+import awais.instagrabber.services.FriendshipService;
+import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.Utils;
+import awaisomereport.LogCollector;
 
+import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class ProfileFragment extends Fragment {
@@ -74,8 +84,13 @@ public class ProfileFragment extends Fragment {
     private PostsAdapter postsAdapter;
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
-    private ProfileService profileService;
-
+    private FriendshipService friendshipService;
+    private boolean shouldRefresh = true;
+    private StoryModel[] storyModels;
+    private boolean hasNextPage;
+    private String endCursor;
+    private AsyncTask<Void, Void, PostModel[]> currentlyExecuting;
+    ;
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
@@ -118,11 +133,38 @@ public class ProfileFragment extends Fragment {
                 }
             });
 
+    private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
+        @Override
+        public void onResult(final PostModel[] result) {
+            binding.swipeRefreshLayout.setRefreshing(false);
+            if (result != null) {
+                binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
+                // final int oldSize = mainActivity.allItems.size();
+                final List<PostModel> postModels = profilePostsViewModel.getList().getValue();
+                final List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>() : new ArrayList<>(postModels);
+                finalList.addAll(Arrays.asList(result));
+                profilePostsViewModel.getList().postValue(finalList);
+                PostModel model = null;
+                if (result.length != 0) {
+                    model = result[result.length - 1];
+                }
+                if (model == null) return;
+                endCursor = model.getEndCursor();
+                hasNextPage = model.hasNextPage();
+                model.setPageCursor(false, null);
+                return;
+            }
+            binding.privatePage1.setImageResource(R.drawable.ic_cancel);
+            binding.privatePage2.setText(R.string.empty_acc);
+            binding.privatePage.setVisibility(View.VISIBLE);
+        }
+    };
+
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
-        profileService = ProfileService.getInstance();
+        friendshipService = FriendshipService.getInstance();
     }
 
     @Override
@@ -130,6 +172,15 @@ public class ProfileFragment extends Fragment {
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         if (root != null) {
+            if (getArguments() != null) {
+                final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
+                if (!fragmentArgs.getUsername().equals(username)) {
+                    shouldRefresh = true;
+                    return root;
+                }
+            }
+            setUsernameDelayed();
+            shouldRefresh = false;
             return root;
         }
         binding = FragmentProfileBinding.inflate(inflater, container, false);
@@ -139,7 +190,9 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
         init();
+        shouldRefresh = false;
     }
 
     @Override
@@ -162,12 +215,13 @@ public class ProfileFragment extends Fragment {
             setUsernameDelayed();
         }
         if (!isLoggedIn) {
-            binding.privatePage1.setImageResource(R.drawable.ic_info);
+            binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
             binding.privatePage.setVisibility(View.VISIBLE);
             return;
         }
         setupPosts();
+        setupCommonListeners();
         fetchProfile();
     }
 
@@ -205,18 +259,12 @@ public class ProfileFragment extends Fragment {
     private void fetchProfileDetails() {
         new ProfileFetcher(username.substring(1), profileModel -> {
             this.profileModel = profileModel;
-            new PostsFetcher(profileModel.getId(),
-                    null,
-                    result -> profilePostsViewModel.getList().postValue(Arrays.asList(result)))
-                    .setUsername(profileModel.getUsername())
-                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             setProfileDetails();
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void setProfileDetails() {
-        setupCommonListeners();
         if (profileModel == null) {
             binding.swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(requireContext(), R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
@@ -225,12 +273,18 @@ public class ProfileFragment extends Fragment {
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final String profileId = profileModel.getId();
         if (settingsHelper.getBoolean(Constants.STORIESIG)) {
-            new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
-                    (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), false,
+            new iStoryStatusFetcher(
+                    profileId,
+                    profileModel.getUsername(),
+                    false,
+                    false,
+                    (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)),
+                    false,
                     result -> {
-                        // mainActivity.storyModels = result;
-                        // if (result != null && result.length > 0)
-                        //     binding.mainProfileImage.setStoriesBorder();
+                        storyModels = result;
+                        if (result != null && result.length > 0) {
+                            binding.mainProfileImage.setStoriesBorder();
+                        }
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             new HighlightsFetcher(profileId, (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)), result -> {
@@ -412,9 +466,7 @@ public class ProfileFragment extends Fragment {
             } else {
                 binding.swipeRefreshLayout.setRefreshing(true);
                 binding.mainPosts.setVisibility(View.VISIBLE);
-                // currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
-                //         .setUsername(profileModel.getUsername())
-                //         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                fetchPosts();
             }
         } else {
             binding.mainFollowers.setClickable(false);
@@ -451,14 +503,53 @@ public class ProfileFragment extends Fragment {
                             new DataBox.FavoriteModel(username, System.currentTimeMillis(),
                                     username.replaceAll("^@", "")));
                 }
-                // onRefresh();
+                fetchProfileDetails();
                 return;
             }
-            profileService.followProfile(username);
+            if (profileModel.getFollowing() || profileModel.getRequested()) {
+                friendshipService.unfollow(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        Utils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepositoryChangeResponseRootObject>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepositoryChangeResponseRootObject result) {
+                                Log.d(TAG, "Unfollow success: " + result);
+                            }
+
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error unfollowing", t);
+                            }
+                        });
+            } else {
+                friendshipService.follow(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        Utils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepositoryChangeResponseRootObject>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepositoryChangeResponseRootObject result) {
+                                Log.d(TAG, "Follow success: " + result);
+                            }
+
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error following", t);
+                            }
+                        });
+            }
         });
 
-        // binding.btnRestrict.setOnClickListener(profileActionListener);
-        // binding.btnBlock.setOnClickListener(profileActionListener);
+        binding.btnRestrict.setOnClickListener(v -> {
+            if (!isLoggedIn) return;
+            // restrict
+            // new ProfileAction().execute("restrict");
+        });
+        binding.btnBlock.setOnClickListener(v -> {
+            if (!isLoggedIn) return;
+            // new MainHelper.ProfileAction().execute("block");
+        });
         binding.btnSaved.setOnClickListener(v -> startActivity(new Intent(requireContext(), SavedViewer.class)
                 .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
                 .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
@@ -516,8 +607,34 @@ public class ProfileFragment extends Fragment {
             onBackPressedDispatcher.addCallback(onBackPressedCallback);
             return true;
         });
-        binding.mainPosts.setAdapter(postsAdapter);
         profilePostsViewModel.getList().observe(fragmentActivity, postsAdapter::submitList);
+        binding.mainPosts.setAdapter(postsAdapter);
+        final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+            if (!hasNextPage) return;
+            binding.swipeRefreshLayout.setRefreshing(true);
+            fetchPosts();
+            endCursor = null;
+        });
+        binding.mainPosts.addOnScrollListener(lazyLoader);
+    }
+
+    private void fetchPosts() {
+        stopCurrentExecutor();
+        currentlyExecuting = new PostsFetcher(profileModel.getId(), endCursor, postsFetchListener)
+                .setUsername(profileModel.getUsername())
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public void stopCurrentExecutor() {
+        if (currentlyExecuting != null) {
+            try {
+                currentlyExecuting.cancel(true);
+            } catch (final Exception e) {
+                if (logCollector != null)
+                    logCollector.appendException(e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
+                Log.e(TAG, "", e);
+            }
+        }
     }
 
     private boolean checkAndResetAction() {

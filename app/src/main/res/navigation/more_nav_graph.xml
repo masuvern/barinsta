@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/more_nav_graph"
+    app:startDestination="@id/morePreferencesFragment">
+
+    <fragment
+        android:id="@+id/morePreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.MorePreferencesFragment"
+        android:label="More">
+        <action
+            android:id="@+id/action_morePreferencesFragment_to_settingsPreferencesFragment"
+            app:destination="@id/settingsPreferencesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.SettingsPreferencesFragment"
+        android:label="@string/action_settings" />
+</navigation>

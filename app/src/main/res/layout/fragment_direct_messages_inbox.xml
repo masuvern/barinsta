@@ -16,6 +16,6 @@
             android:id="@+id/inbox_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/layout_include_simple_item" />
+            tools:listitem="@layout/layout_dm_inbox_item" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </awais.instagrabber.customviews.helpers.NestedCoordinatorLayout>

@@ -25,6 +25,8 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
+    private static final String TAG = "FeedFetcher";
+
     private static final int maxItemsToLoad = 25; // max is 50, but that's too many posts, setting more than 30 is gay
     private final String endCursor;
     private final FetchListener<FeedModel[]> fetchListener;
@@ -61,8 +63,10 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
             final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
 
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject timelineFeed = new JSONObject(Utils.readFromConnection(urlConnection)).getJSONObject("data")
-                        .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_web_feed_timeline");
+                final String json = Utils.readFromConnection(urlConnection);
+                Log.d(TAG, json);
+                final JSONObject timelineFeed = new JSONObject(json).getJSONObject("data")
+                                                                    .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_web_feed_timeline");
 
                 final String endCursor;
                 final boolean hasNextPage;
@@ -83,7 +87,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                 for (int i = 0; i < feedLen; ++i) {
                     final JSONObject feedItem = feedItems.getJSONObject(i).getJSONObject("node");
                     final String mediaType = feedItem.optString("__typename");
-                    if (mediaType.isEmpty() || "GraphSuggestedUserFeedUnit".equals(mediaType)) continue;
+                    if (mediaType.isEmpty() || "GraphSuggestedUserFeedUnit".equals(mediaType))
+                        continue;
 
                     final boolean isVideo = feedItem.optBoolean("is_video");
                     final long videoViews = feedItem.optLong("video_view_count", 0);
@@ -93,7 +98,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                     final String resourceUrl;
 
                     if (isVideo) resourceUrl = feedItem.getString("video_url");
-                    else resourceUrl = feedItem.has("display_resources") ? Utils.getHighQualityImage(feedItem) : displayUrl;
+                    else
+                        resourceUrl = feedItem.has("display_resources") ? Utils.getHighQualityImage(feedItem) : displayUrl;
 
                     ProfileModel profileModel = null;
                     if (feedItem.has("owner")) {

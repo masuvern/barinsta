@@ -9,7 +9,7 @@
 
     <include
         android:id="@+id/container"
-        layout="@layout/layout_include_simple_item" />
+        layout="@layout/layout_dm_inbox_item" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChildComments"

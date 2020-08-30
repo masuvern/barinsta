@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
 import awais.instagrabber.adapters.viewholder.DirectMessageInboxItemViewHolder;
-import awais.instagrabber.databinding.LayoutIncludeSimpleItemBinding;
+import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 
 public final class DirectMessageInboxAdapter extends ListAdapter<InboxThreadModel, DirectMessageInboxItemViewHolder> {
@@ -35,7 +35,7 @@ public final class DirectMessageInboxAdapter extends ListAdapter<InboxThreadMode
     @Override
     public DirectMessageInboxItemViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
         final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        final LayoutIncludeSimpleItemBinding binding = LayoutIncludeSimpleItemBinding.inflate(layoutInflater, parent, false);
+        final LayoutDmInboxItemBinding binding = LayoutDmInboxItemBinding.inflate(layoutInflater, parent, false);
         return new DirectMessageInboxItemViewHolder(binding);
     }
 

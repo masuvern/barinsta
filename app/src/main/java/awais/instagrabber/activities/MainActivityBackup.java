@@ -41,7 +41,6 @@ import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.asyncs.UsernameFetcher;
 import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
 import awais.instagrabber.customviews.MouseDrawer;
-import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.databinding.ActivityMainbackupBinding;
 import awais.instagrabber.dialogs.AboutDialog;
 import awais.instagrabber.dialogs.QuickAccessDialog;
@@ -95,8 +94,7 @@ public final class MainActivityBackup extends BaseLanguageActivity {
                         //         .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
                         //         .putExtra(Constants.EXTRAS_STORIES, result)
                         // );
-                    }
-                    else
+                    } else
                         Toast.makeText(MainActivityBackup.this, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
@@ -105,7 +103,8 @@ public final class MainActivityBackup extends BaseLanguageActivity {
 
     private SuggestionsAdapter suggestionAdapter;
     private MenuItem searchAction;
-    public @NonNull ActivityMainbackupBinding mainBinding;
+    public @NonNull
+    ActivityMainbackupBinding mainBinding;
     public SearchView searchView;
     public MenuItem downloadAction, settingsAction, dmsAction, notifAction;
     public StoryModel[] storyModels;
@@ -253,7 +252,7 @@ public final class MainActivityBackup extends BaseLanguageActivity {
         final boolean isQueryNull = userQuery == null;
         if (isQueryNull) {
             allItems.clear();
-            mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_info);
+            mainBinding.profileView.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             mainBinding.profileView.privatePage2.setTextSize(20);
             mainBinding.profileView.privatePage2.setText(isLoggedIn ? R.string.no_acc_logged_in : R.string.no_acc);
             mainBinding.profileView.privatePage.setVisibility(View.VISIBLE);

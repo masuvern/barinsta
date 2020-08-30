@@ -36,7 +36,8 @@
     <string name="bottom_toolbar">Show toolbar at bottom</string>
     <string name="download_user_folder">Download posts to username folder in Downloads</string>
     <string name="autoload_posts">Auto-load all posts from user</string>
-    <string name="mark_as_seen_setting">Mark stories as seen after viewing\n(Story author will know you viewed it)</string>
+    <string name="mark_as_seen_setting">Mark stories as seen after viewing</string>
+    <string name="mark_as_seen_setting_summary">Story author will know you viewed it</string>
     <string name="activity_setting">Enable activity notifications</string>
     <string name="error_loading_profile">Error loading profile!\nTry logging in and search again.</string>
     <string name="error_creating_folders">Error creating Download folder(s).</string>
@@ -129,12 +130,12 @@
     <string name="refresh">Refresh</string>
     <string name="get_cookies">Get cookies</string>
     <string name="desktop_2fa">Desktop Mode</string>
-    <string name="time_settings_title_custom">Custom Format</string>
+    <string name="time_settings_title_custom">Use custom format</string>
     <string name="time_settings_title_separator">Separator</string>
     <string name="time_settings_title_time_format">Time Format</string>
     <string name="time_settings_title_date_format">Date Format</string>
     <string name="time_settings_title_preview">Preview</string>
-    <string name="time_settings_swap_time">Swap Time and\nDate positions</string>
+    <string name="time_settings_swap_time">Swap Time and Date positions</string>
     <string name="quick_access_info_dialog">Favorites panel is for adding your favorite hashtags and/or usernames.\n\nAnd the Quick Access panel is for quickly switching between accounts.\n\nNote 1: Make sure to Login into each account [Settings &gt; Login] to add account to the list!\n\nNote 2: Log out of the current account and then log into the other account.</string>
     <string name="quick_access_cannot_delete_curr">Cannot delete currently in use account</string>
     <string name="quick_access_confirm_delete">Are you sure you want to delete %s?</string>
@@ -239,4 +240,7 @@
     <string name="more">More</string>
     <string name="title_dm">DM</string>
     <string name="number_selected">%d selected</string>
+    <string name="relogin">Relogin</string>
+    <string name="relogin_summary">Refresh your cookies if facing any issues</string>
+    <string name="logout_success">Successfully logged out!</string>
 </resources>

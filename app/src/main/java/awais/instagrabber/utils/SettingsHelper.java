@@ -1,5 +1,6 @@
 package awais.instagrabber.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -83,10 +84,18 @@ public final class SettingsHelper {
         int themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 
         if (!fromHelper && sharedPreferences != null) {
-            themeCode = sharedPreferences.getInt(APP_THEME, themeCode);
-            if (themeCode == 1) themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
-            else if (themeCode == 3) themeCode = AppCompatDelegate.MODE_NIGHT_NO;
-            else if (themeCode == 0) themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+            themeCode = Integer.parseInt(sharedPreferences.getString(APP_THEME, String.valueOf(themeCode)));
+            switch (themeCode) {
+                case 1:
+                    themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
+                    break;
+                case 3:
+                    themeCode = AppCompatDelegate.MODE_NIGHT_NO;
+                    break;
+                case 0:
+                    themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+                    break;
+            }
         }
 
         if (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && Build.VERSION.SDK_INT < 29)
@@ -107,13 +116,13 @@ public final class SettingsHelper {
         if (sharedPreferences != null) sharedPreferences.edit().putBoolean(key, val).apply();
     }
 
-    @StringDef({COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID})
+    @StringDef({APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
             AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY})
     public @interface BooleanSettings {}
 
-    @StringDef({APP_THEME, APP_LANGUAGE, PREV_INSTALL_VERSION})
+    @StringDef({PREV_INSTALL_VERSION})
     public @interface IntegerSettings {}
 }

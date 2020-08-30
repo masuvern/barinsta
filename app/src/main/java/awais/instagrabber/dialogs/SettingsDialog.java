@@ -24,6 +24,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.text.SimpleDateFormat;
+
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
@@ -50,6 +52,7 @@ import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.STORIESIG;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
+@Deprecated
 public final class SettingsDialog extends BottomSheetDialogFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener,
         CompoundButton.OnCheckedChangeListener {
     private Activity activity;
@@ -65,7 +68,8 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         if (requestCode != 6200) return;
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) showDirectoryChooser();
-        else Toast.makeText(activity, R.string.direct_download_perms_ask, Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(activity, R.string.direct_download_perms_ask, Toast.LENGTH_SHORT).show();
     }
 
     private void showDirectoryChooser() {
@@ -73,10 +77,10 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         if (fragmentManager == null) fragmentManager = getChildFragmentManager();
 
         new DirectoryChooser().setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
-                .setInteractionListener(path -> {
-                    settingsHelper.putString(FOLDER_PATH, path);
-                    somethingChanged = true;
-                }).show(fragmentManager, null);
+                              .setInteractionListener(path -> {
+                                  settingsHelper.putString(FOLDER_PATH, path);
+                                  somethingChanged = true;
+                              }).show(fragmentManager, null);
     }
 
     @NonNull
@@ -115,12 +119,12 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         if (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) btnLogout.setEnabled(false);
 
         spAppTheme = contentView.findViewById(R.id.spAppTheme);
-        currentTheme = settingsHelper.getInteger(APP_THEME);
+        currentTheme = Integer.parseInt(settingsHelper.getString(APP_THEME));
         spAppTheme.setSelection(currentTheme);
         spAppTheme.setOnItemSelectedListener(this);
 
         spLanguage = contentView.findViewById(R.id.spLanguage);
-        currentLanguage = settingsHelper.getInteger(APP_LANGUAGE);
+        currentLanguage = Integer.parseInt(settingsHelper.getString(APP_LANGUAGE));
         spLanguage.setSelection(currentLanguage);
         spLanguage.setOnItemSelectedListener(this);
 
@@ -178,13 +182,13 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
     public void onItemSelected(final AdapterView<?> spinner, final View view, final int position, final long id) {
         if (spinner == spAppTheme) {
             if (position != currentTheme) {
-                settingsHelper.putInteger(APP_THEME, position);
+                settingsHelper.putString(APP_THEME, String.valueOf(position));
                 somethingChanged = true;
             }
         } else if (spinner == spLanguage) {
             selectedLanguage = position;
             if (position != currentLanguage) {
-                settingsHelper.putInteger(APP_LANGUAGE, position);
+                settingsHelper.putString(APP_LANGUAGE, String.valueOf(position));
                 somethingChanged = true;
             }
         }
@@ -205,7 +209,28 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
                 requestPermissions(Utils.PERMS, 6007);
             else Utils.showImportExportDialog(activity);
         } else if (v == btnTimeSettings) {
-            new TimeSettingsDialog().show(fragmentManager, null);
+            new TimeSettingsDialog(settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
+                    settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT),
+                    settingsHelper.getString(Constants.DATE_TIME_SELECTION),
+                    (isCustomFormat,
+                     formatSelection,
+                     spTimeFormatSelectedItemPosition,
+                     spSeparatorSelectedItemPosition,
+                     spDateFormatSelectedItemPosition,
+                     selectedFormat, currentFormat) -> {
+                        if (isCustomFormat) {
+                            settingsHelper.putString(Constants.CUSTOM_DATE_TIME_FORMAT, formatSelection);
+                        } else {
+                            final String formatSelectionUpdated = spTimeFormatSelectedItemPosition + ";"
+                                    + spSeparatorSelectedItemPosition + ';'
+                                    + spDateFormatSelectedItemPosition; // time;separator;date
+                            settingsHelper.putString(Constants.DATE_TIME_FORMAT, selectedFormat);
+                            settingsHelper.putString(Constants.DATE_TIME_SELECTION, formatSelectionUpdated);
+                        }
+                        settingsHelper.putBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
+                        Utils.datetimeParser = (SimpleDateFormat) currentFormat.clone();
+                    }
+            ).show(fragmentManager, null);
         } else if (v == btnReport) {
             CrashReporter.get(activity.getApplication()).zipLogs().startCrashEmailIntent(activity, true);
         } else if (v == btnSaveTo) {

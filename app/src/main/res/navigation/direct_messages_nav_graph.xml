@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"
             app:destination="@id/directMessagesSettingsFragment" />
+        <action
+            android:id="@+id/action_directMessagesThreadFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
     </fragment>
     <fragment
         android:id="@+id/directMessagesSettingsFragment"
@@ -40,5 +43,15 @@
         <argument
             android:name="title"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="awais.instagrabber.fragments.main.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
     </fragment>
 </navigation>

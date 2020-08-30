@@ -60,6 +60,7 @@ public class DiscoverFragment extends Fragment {
     private String discoverEndMaxId;
     private ActionMode actionMode;
     private DiscoverItemViewModel discoverItemViewModel;
+    private boolean shouldRefresh = true;
 
     private final FetchListener<DiscoverTopicModel> topicFetchListener = new FetchListener<DiscoverTopicModel>() {
         @Override
@@ -154,12 +155,18 @@ public class DiscoverFragment extends Fragment {
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         if (root != null) {
+            shouldRefresh = false;
             return root;
         }
         binding = FragmentDiscoverBinding.inflate(inflater, container, false);
         root = binding.getRoot();
-        setupExplore();
         return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
+        setupExplore();
     }
 
     private void setupExplore() {

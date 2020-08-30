@@ -2,6 +2,7 @@ package awais.instagrabber.services;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public abstract class BaseService {
@@ -17,6 +18,7 @@ public abstract class BaseService {
                     .build();
             builder = new Retrofit.Builder()
                     .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create())
                     .client(client);
         }
         return builder;

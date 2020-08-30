@@ -2,18 +2,16 @@ package awais.instagrabber.adapters.viewholder;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import awais.instagrabber.R;
-import awais.instagrabber.databinding.LayoutIncludeSimpleItemBinding;
+import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
@@ -21,19 +19,18 @@ import awais.instagrabber.models.enums.DirectItemType;
 
 public final class DirectMessageInboxItemViewHolder extends RecyclerView.ViewHolder {
     private final LinearLayout multipleProfilePicsContainer;
-    private final ImageView[] multipleProfilePics;
-    private final LayoutIncludeSimpleItemBinding binding;
+    private final SimpleDraweeView[] multipleProfilePics;
+    private final LayoutDmInboxItemBinding binding;
 
-    public DirectMessageInboxItemViewHolder(@NonNull final LayoutIncludeSimpleItemBinding binding) {
+    public DirectMessageInboxItemViewHolder(@NonNull final LayoutDmInboxItemBinding binding) {
         super(binding.getRoot());
         this.binding = binding;
-        binding.tvLikes.setVisibility(View.GONE);
-        multipleProfilePicsContainer = binding.container;
+        multipleProfilePicsContainer = binding.multiPicContainer;
         final LinearLayout containerChild = (LinearLayout) multipleProfilePicsContainer.getChildAt(1);
-        multipleProfilePics = new ImageView[]{
-                (ImageView) multipleProfilePicsContainer.getChildAt(0),
-                (ImageView) containerChild.getChildAt(0),
-                (ImageView) containerChild.getChildAt(1)
+        multipleProfilePics = new SimpleDraweeView[]{
+                (SimpleDraweeView) multipleProfilePicsContainer.getChildAt(0),
+                (SimpleDraweeView) containerChild.getChildAt(0),
+                (SimpleDraweeView) containerChild.getChildAt(1)
         };
         binding.tvDate.setSelected(true);
         binding.tvUsername.setSelected(true);
@@ -45,17 +42,17 @@ public final class DirectMessageInboxItemViewHolder extends RecyclerView.ViewHol
             return;
         }
         itemView.setTag(model);
-        final RequestManager glideRequestManager = Glide.with(itemView);
         final ProfileModel[] users = model.getUsers();
         if (users.length > 1) {
             binding.ivProfilePic.setVisibility(View.GONE);
             multipleProfilePicsContainer.setVisibility(View.VISIBLE);
-            for (int i = 0; i < Math.min(3, users.length); ++i)
-                glideRequestManager.load(users[i].getSdProfilePic()).into(multipleProfilePics[i]);
+            for (int i = 0; i < Math.min(3, users.length); ++i) {
+                multipleProfilePics[i].setImageURI(users[i].getSdProfilePic());
+            }
         } else {
             binding.ivProfilePic.setVisibility(View.VISIBLE);
             multipleProfilePicsContainer.setVisibility(View.GONE);
-            glideRequestManager.load(users.length == 1 ? users[0].getSdProfilePic() : null).into(binding.ivProfilePic);
+            binding.ivProfilePic.setImageURI(users.length == 1 ? users[0].getSdProfilePic() : null);
         }
         binding.tvUsername.setText(model.getThreadTitle());
         final DirectItemModel lastItemModel = itemModels[itemModels.length - 1];

@@ -63,7 +63,7 @@
                     android:paddingEnd="8dp"
                     android:paddingRight="8dp"
                     android:paddingBottom="4dp"
-                    app:srcCompat="@drawable/ic_info" />
+                    app:srcCompat="@drawable/ic_outline_info_24" />
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
