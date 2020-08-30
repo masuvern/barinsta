@@ -148,7 +148,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
 
         String endCursor = "";
         while (endCursor != null) {
-            final String url = "https://www.instagram.com/graphql/query/?query_hash=97b41c52301f77ce508f55e66d17620e&variables=" +
+            final String url = "https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables=" +
                     "{\"shortcode\":\"" + shortCode + "\",\"first\":50,\"after\":\"" + endCursor + "\"}";
 
             try {

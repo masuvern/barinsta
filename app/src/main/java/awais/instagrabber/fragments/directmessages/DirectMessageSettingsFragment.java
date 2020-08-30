@@ -199,7 +199,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                     titleText.clearFocus();
                 }
                 else if (action.equals("leave")) {
-                    DirectMessageInboxFragment.afterLeave = true;
+                    DirectMessageInboxFragment.refreshPlease = true;
                     NavHostFragment.findNavController(DirectMessageSettingsFragment.this).popBackStack(R.id.directMessagesInboxFragment, false);
                 }
             }

@@ -144,10 +144,10 @@ public final class Utils {
             final URI uri1 = new URI("https://instagram.com");
             final URI uri2 = new URI("https://instagram.com/");
             final URI uri3 = new URI("https://i.instagram.com/");
-            for (final String cookie : cookieRaw.split(";")) {
+            for (final String cookie : cookieRaw.split("; ")) {
                 final String[] strings = cookie.split("=", 2);
                 final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
-                httpCookie.setDomain("instagram.com");
+                httpCookie.setDomain(".instagram.com");
                 httpCookie.setPath("/");
                 httpCookie.setVersion(0);
                 cookieStore.add(uri1, httpCookie);
@@ -427,7 +427,7 @@ public final class Utils {
             if (userObj != null) {
                 user = new ProfileModel(
                         userObj.getBoolean("is_private"),
-                        false, // temporary
+                        false,
                         userObj.optBoolean("is_verified"),
                         String.valueOf(userObj.get("pk")),
                         userObj.getString("username"),
@@ -468,6 +468,7 @@ public final class Utils {
         if ("animated_media".equals(itemType)) return DirectItemType.ANIMATED_MEDIA;
         if ("voice_media".equals(itemType)) return DirectItemType.VOICE_MEDIA;
         if ("story_share".equals(itemType)) return DirectItemType.STORY_SHARE;
+        if ("clip".equals(itemType)) return DirectItemType.CLIP;
         return DirectItemType.TEXT;
     }
 
@@ -706,6 +707,11 @@ public final class Utils {
 
                 case MEDIA_SHARE:
                     directMedia = getDirectMediaModel(itemObject.getJSONObject("media_share"));
+                    break;
+
+                case CLIP:
+                    Log.d("austin_debug", "clip: "+itemObject.getJSONObject("clip").getJSONObject("clip"));
+                    directMedia = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
                     break;
 
                 case MEDIA:
@@ -999,10 +1005,10 @@ public final class Utils {
     }
 
     public static void dmDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
-                                  final List<? extends DirectItemMediaModel> itemsToDownload) {
+                                     final DirectItemMediaModel itemsToDownload) {
         if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
 
-        if (itemsToDownload == null || itemsToDownload.size() < 1) return;
+        if (itemsToDownload == null) return;
 
         if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
             dmDownloadImpl(context, username, method, itemsToDownload);
@@ -1011,7 +1017,7 @@ public final class Utils {
     }
 
     private static void dmDownloadImpl(@NonNull final Context context, @Nullable final String username,
-                                       final DownloadMethod method, final List<? extends DirectItemMediaModel> itemsToDownload) {
+                                          final DownloadMethod method, final DirectItemMediaModel selectedItem) {
         File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
@@ -1023,22 +1029,11 @@ public final class Utils {
             dir = new File(dir, username);
 
         if (dir.exists() || dir.mkdirs()) {
-            final MainActivity mainActivity = method != DownloadMethod.DOWNLOAD_FEED && context instanceof MainActivity ? (MainActivity) context : null;
-
-            final int itemsToDownloadSize = itemsToDownload.size();
-
             final File finalDir = dir;
-            for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
-                final DirectItemMediaModel selectedItem = itemsToDownload.get(i);
-
-                if (mainActivity == null) {
-                    new DownloadAsync(context,
-                            selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
-                            getDownloadSaveFileDm(finalDir, selectedItem, ""),
-                            null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                }
-            }
+            new DownloadAsync(context,
+                    selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
+                    getDownloadSaveFileDm(finalDir, selectedItem, ""),
+                    null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else
             Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
     }
@@ -1256,7 +1251,7 @@ public final class Utils {
 
         final int endIndex = (spaceIndex != -1 ? spaceIndex : length);
 
-        final String extractUrl = url.substring(startIndex, Math.min(length, endIndex) - 1);
+        final String extractUrl = url.substring(startIndex, Math.min(length, endIndex));
 
         final SpannableString spannableString = new SpannableString(url);
         spannableString.setSpan(new URLSpan(extractUrl), startIndex, endIndex, 0);

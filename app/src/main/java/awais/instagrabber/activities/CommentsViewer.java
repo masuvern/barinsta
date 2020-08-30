@@ -119,21 +119,25 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
         } else if (which == 3) {
             Utils.copyText(this, commentModel.getText().toString());
         } else if (which == 4) {
-            focus = commentsBinding.rvComments.findViewWithTag(commentModel);
-            focus.setBackgroundColor(0x80888888);
-            commentsBinding.commentCancelParent.setVisibility(View.VISIBLE);
-            String mention = "@"+profileModel.getUsername()+" ";
-            commentsBinding.commentText.setText(mention);
-            commentsBinding.commentText.requestFocus();
-            commentsBinding.commentText.setSelection(mention.length());
-            commentsBinding.commentText.postDelayed(new Runnable(){
-               @Override
-               public void run(){
-                   imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
-                   imm.showSoftInput(commentsBinding.commentText, 0);
-               }
+            if (commentModel == null) {
+                Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             }
-            ,200);
+            else {
+                focus = commentsBinding.rvComments.findViewWithTag(commentModel);
+                focus.setBackgroundColor(0x80888888);
+                commentsBinding.commentCancelParent.setVisibility(View.VISIBLE);
+                String mention = "@" + profileModel.getUsername() + " ";
+                commentsBinding.commentText.setText(mention);
+                commentsBinding.commentText.requestFocus();
+                commentsBinding.commentText.setSelection(mention.length());
+                commentsBinding.commentText.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        imm = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(commentsBinding.commentText, 0);
+                    }
+                }, 200);
+            }
         } else if (which == 5) {
             new CommentAction().execute((commentModel.getLiked() ? "unlike/" : "like/")+commentModel.getId());
         } else if (which == 6) {

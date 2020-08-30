@@ -46,6 +46,7 @@
             android:gravity="center_vertical"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:textColor="@color/feed_text_primary_color"
+            android:textSize="15sp" />
             tools:text="location" />
     </RelativeLayout>
 
