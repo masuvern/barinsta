@@ -52,7 +52,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentProfileBinding;
-import awais.instagrabber.fragments.main.viewmodels.ProfilePostsViewModel;
+import awais.instagrabber.fragments.main.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
@@ -81,7 +81,7 @@ public class ProfileFragment extends Fragment {
     private String cookie;
     private String username;
     private ProfileModel profileModel;
-    private ProfilePostsViewModel profilePostsViewModel;
+    private PostsViewModel postsViewModel;
     private PostsAdapter postsAdapter;
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
@@ -133,7 +133,6 @@ public class ProfileFragment extends Fragment {
                     return false;
                 }
             });
-
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
@@ -141,10 +140,10 @@ public class ProfileFragment extends Fragment {
             if (result != null) {
                 binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
                 // final int oldSize = mainActivity.allItems.size();
-                final List<PostModel> postModels = profilePostsViewModel.getList().getValue();
+                final List<PostModel> postModels = postsViewModel.getList().getValue();
                 final List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>() : new ArrayList<>(postModels);
                 finalList.addAll(Arrays.asList(result));
-                profilePostsViewModel.getList().postValue(finalList);
+                postsViewModel.getList().postValue(finalList);
                 PostModel model = null;
                 if (result.length != 0) {
                     model = result[result.length - 1];
@@ -202,8 +201,8 @@ public class ProfileFragment extends Fragment {
         if (usernameSettingHandler != null) {
             usernameSettingHandler.removeCallbacks(usernameSettingRunnable);
         }
-        if (profilePostsViewModel != null) {
-            profilePostsViewModel.getList().postValue(Collections.emptyList());
+        if (postsViewModel != null) {
+            postsViewModel.getList().postValue(Collections.emptyList());
         }
     }
 
@@ -608,7 +607,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupPosts() {
-        profilePostsViewModel = new ViewModelProvider(this).get(ProfilePostsViewModel.class);
+        postsViewModel = new ViewModelProvider(this).get(PostsViewModel.class);
         final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
         binding.mainPosts.setLayoutManager(layoutManager);
         binding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
@@ -641,7 +640,7 @@ public class ProfileFragment extends Fragment {
             onBackPressedDispatcher.addCallback(onBackPressedCallback);
             return true;
         });
-        profilePostsViewModel.getList().observe(fragmentActivity, postsAdapter::submitList);
+        postsViewModel.getList().observe(fragmentActivity, postsAdapter::submitList);
         binding.mainPosts.setAdapter(postsAdapter);
         final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (!hasNextPage) return;

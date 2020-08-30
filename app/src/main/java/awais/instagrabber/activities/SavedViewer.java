@@ -33,7 +33,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.ActivitySavedBinding;
-import awais.instagrabber.fragments.main.viewmodels.ProfilePostsViewModel;
+import awais.instagrabber.fragments.main.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.ItemGetter;
 import awais.instagrabber.models.PostModel;
@@ -58,7 +58,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
     private Resources resources;
     private ArrayList<PostModel> selectedItems = new ArrayList<>();
     private ActionMode actionMode;
-    private ProfilePostsViewModel profilePostsViewModel;
+    private PostsViewModel postsViewModel;
 
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
@@ -100,14 +100,14 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
         @Override
         public void onResult(final PostModel[] result) {
             if (result != null) {
-                final List<PostModel> current = profilePostsViewModel.getList().getValue();
+                final List<PostModel> current = postsViewModel.getList().getValue();
                 final List<PostModel> resultList = Arrays.asList(result);
                 if (current == null) {
-                    profilePostsViewModel.getList().postValue(resultList);
+                    postsViewModel.getList().postValue(resultList);
                 } else {
                     final List<PostModel> currentCopy = new ArrayList<>(current);
                     currentCopy.addAll(resultList);
-                    profilePostsViewModel.getList().postValue(currentCopy);
+                    postsViewModel.getList().postValue(currentCopy);
                 }
                 savedBinding.mainPosts.post(() -> {
                     savedBinding.mainPosts.setNestedScrollingEnabled(true);
@@ -160,7 +160,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             return;
         }
 
-        profilePostsViewModel = new ViewModelProvider(this).get(ProfilePostsViewModel.class);
+        postsViewModel = new ViewModelProvider(this).get(PostsViewModel.class);
         postsAdapter = new PostsAdapter((postModel, position) -> {
             if (postsAdapter.isSelecting()) {
                 if (actionMode == null) return;
@@ -189,7 +189,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             return true;
         });
         savedBinding.mainPosts.setAdapter(postsAdapter);
-        profilePostsViewModel.getList().observe(this, postsAdapter::submitList);
+        postsViewModel.getList().observe(this, postsAdapter::submitList);
         savedBinding.swipeRefreshLayout.setRefreshing(true);
         setSupportActionBar(savedBinding.toolbar.toolbar);
         savedBinding.toolbar.toolbar.setTitle((action.charAt(0) == '$' ? R.string.saved :
@@ -211,7 +211,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
 
         itemGetter = itemGetType -> {
             if (itemGetType == ItemGetType.SAVED_ITEMS)
-                return profilePostsViewModel.getList().getValue();
+                return postsViewModel.getList().getValue();
             return null;
         };
 
@@ -243,7 +243,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
     public void onRefresh() {
         if (lazyLoader != null) lazyLoader.resetState();
         stopCurrentExecutor();
-        profilePostsViewModel.getList().postValue(Collections.emptyList());
+        postsViewModel.getList().postValue(Collections.emptyList());
         selectedItems.clear();
         if (postsAdapter != null) {
             // postsAdapter.isSelecting = false;

@@ -7,7 +7,7 @@ import java.util.List;
 
 import awais.instagrabber.models.PostModel;
 
-public class ProfilePostsViewModel extends ViewModel {
+public class PostsViewModel extends ViewModel {
     private MutableLiveData<List<PostModel>> list;
 
     public MutableLiveData<List<PostModel>> getList() {

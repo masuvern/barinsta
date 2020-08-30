@@ -211,7 +211,8 @@ public class FeedFragment extends Fragment {
         //         });
         // builder.show();
         if (isHashtag) {
-            // hashtag...
+            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToHashTagFragment(text);
+            NavHostFragment.findNavController(this).navigate(action);
             return;
         }
         final NavDirections action = FeedFragmentDirections.actionFeedFragmentToProfileFragment("@" + text);
