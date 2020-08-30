@@ -18,7 +18,8 @@ public enum DirectItemType implements Serializable {
     REEL_SHARE(11),
     ACTION_LOG(12),
     PLACEHOLDER(13),
-    STORY_SHARE(14);
+    STORY_SHARE(14),
+    CLIP(15); // clip is just media_share but reel
 
     private final int id;
     private static Map<Integer, DirectItemType> map = new HashMap<>();

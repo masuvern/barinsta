@@ -16,7 +16,9 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
@@ -84,6 +86,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
             conn.setInstanceFollowRedirects(true);
             conn.setUseCaches(false);
             conn.setRequestProperty("User-Agent", storiesig ? Constants.A_USER_AGENT : Constants.I_USER_AGENT);
+            conn.setRequestProperty("Accept-Language", LocaleUtils.getCurrentLocale().getLanguage() + ",en-US;q=0.8");
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
@@ -121,6 +124,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                             models[i].setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));
                         }
 
+                        // assuming everything is spotify
                         if (!data.isNull("story_app_attribution"))
                             models[i].setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
 
@@ -136,6 +140,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                                     tappableObject.optInt("viewer_vote", -1)
                             ));
                         }
+
                         if (data.has("story_questions")) {
                             JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0).optJSONObject("question_sticker");
                             if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
@@ -144,6 +149,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                                         tappableObject.getString("question")
                                 ));
                         }
+
                         if (data.has("story_quizs")) {
                             JSONObject tappableObject = data.getJSONArray("story_quizs").getJSONObject(0).optJSONObject("quiz_sticker");
                             if (tappableObject != null) {
@@ -164,6 +170,18 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
                                 ));
                             }
                         }
+
+                        if (data.has("story_cta") && data.has("link_text")) {
+                            JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
+                            String swipeUpUrl = tappableObject.getString("webUri");
+                            if (swipeUpUrl.startsWith("http")) {
+                                models[i].setSwipeUp(new SwipeUpModel(
+                                        swipeUpUrl,
+                                        data.getString("link_text")
+                                ));
+                            }
+                        }
+
                         JSONArray hashtags = data.optJSONArray("story_hashtags");
                         JSONArray locations = data.optJSONArray("story_locations");
                         JSONArray atmarks = data.optJSONArray("reel_mentions");

@@ -47,7 +47,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private String endCursor;
     private AsyncTask<Void, Void, InboxModel> currentlyRunning;
     private InboxThreadModelListViewModel listViewModel;
-    public static boolean afterLeave = false;
+    public static boolean refreshPlease = false;
 
     private final FetchListener<InboxModel> fetchListener = new FetchListener<InboxModel>() {
         @Override
@@ -121,9 +121,9 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     @Override
     public void onResume() {
         super.onResume();
-        if (afterLeave) {
+        if (refreshPlease) {
             onRefresh();
-            afterLeave = false;
+            refreshPlease = false;
         }
     }
 

@@ -6,6 +6,7 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 
 public final class StoryModel implements Serializable {
     private final String storyMediaId, storyUrl, username, userId;
@@ -15,6 +16,7 @@ public final class StoryModel implements Serializable {
     private PollModel poll;
     private QuestionModel question;
     private QuizModel quiz;
+    private SwipeUpModel swipeUp;
     private String[] mentions;
     private int position;
     private boolean isCurrentSlide = false, canReply = false;
@@ -66,6 +68,8 @@ public final class StoryModel implements Serializable {
         return quiz;
     }
 
+    public SwipeUpModel getSwipeUp() { return swipeUp;}
+
     public String[] getMentions() {
         return mentions;
     }
@@ -104,6 +108,10 @@ public final class StoryModel implements Serializable {
 
     public void setMentions(final String[] mentions) {
         this.mentions = mentions;
+    }
+
+    public void setSwipeUp(final SwipeUpModel swipeUp) {
+        this.swipeUp = swipeUp;
     }
 
     public void setPosition(final int position) {

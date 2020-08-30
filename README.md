@@ -8,36 +8,19 @@
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/instagrabber/stargazers/)
 
-*As featured on [HowToMen](https://youtu.be/1Um2ZJG_mB4) and [GitHub Trending](https://github.com/ifyour/github-trending-archive/blob/master/archives/2020-08-05.md)*
+For documentation, visit [InstaGrabber.AustinHuang.me](https://instagrabber.austinhuang.me).
 
 ### Download
 
-<a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="100"></a>
+**By installing, you indicate your acceptance of [Disclosure and Privacy Policy](https://instagrabber.austinhuang.me/disclosure).**
 
-Or you can download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
+Download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest) (recommended). Expand "Assets" and download the APK file. Or...
+
+<a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75"></a>
+
+(...[but they're slow.](https://instagrabber.austinhuang.me/faq#f-droid))
 
 Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. ![GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
-
-### Presentation
-
-InstaGrabber is an alternative Instagram client for Android. You can...
-
-* **Search**: Profile / Hashtag / Location
-* **Profile**: View posts (timeline & face-tagged), copy bio, view stories\* (Highlight & status), follow\*, restrict\*, block\*, compare following/followers\*<sup>,3</sup>
-* **Hashtag**: View posts (newest only), view stories\*, follow\*
-* **Location**: View posts (newest only), view stories\*, open map
-* **Post**: View, download (+ batch download selected posts), copy captions, like/save\*
-* **Story**: View (with [storiesig](https://storiesig.com) support<sup>1</sup> and incognito mode<sup>2</sup>), download, interact with stickers\*, reply as DM\*
-* **Comment**: View (+ copy), write\*, reply\*, like\*, delete\*
-* **DM\***: View, download attachments, text reply
-* Viewing\* your own feed, discover, saved, and liked posts
-* Adding personal bookmarks to accounts/hashtags/locations locally
-
-We support private accounts!\*
-
-It can be used as a drop-in replacement for read (and some write) functionalities of the official Instagram app, with unnecessary components stripped.
-
-<sub>* Requires [login](#how-to-log-in). You must be a current follower of the desired private accounts, this app cannot hack people (which I have to state despite the obvious)!</sub>
 
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" alt="Profile" width="15%"/></a>
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" alt="Post" width="15%"/></a>
@@ -53,6 +36,43 @@ It can be used as a drop-in replacement for read (and some write) functionalitie
 * Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 * Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
+
+### Contributors
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-13-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+Prominent contributors are listed here in the [all-contributors](https://allcontributors.org/) specifications. See [emoji key](https://allcontributors.org/docs/en/emoji-key).
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://austinhuang.me"><img src="https://avatars1.githubusercontent.com/u/16656689?s=100" width="100px;" alt=""/><br /><sub><b>Austin Huang</b></sub></a><br /><a href="https://github.com/austinhuang0131/instagrabber/commits?author=austinhuang0131" title="Code">💻</a> <a href="https://github.com/austinhuang0131/instagrabber/commits?author=austinhuang0131" title="Documentation">📖</a> <a href="#question-austinhuang0131" title="Answering Questions">💬</a> <a href="#translation-austinhuang0131" title="Translation">🌍</a> <a href="#ideas-austinhuang0131" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/ammargitham"><img src="https://avatars0.githubusercontent.com/u/8017365?s=100" width="100px;" alt=""/><br /><sub><b>Ammar Githam</b></sub></a><br /><a href="https://github.com/austinhuang0131/instagrabber/commits?author=ammargitham" title="Code">💻</a> <a href="#design-ammargitham" title="Design">🎨</a> <a href="#ideas-ammargitham" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-ammargitham" title="Maintenance">🚧</a> <a href="#question-ammargitham" title="Answering Questions">💬</a></td>
+    <td align="center"><a href="http://rerolledgeek.blogspot.com/"><img src="https://avatars3.githubusercontent.com/u/5278488?s=100" width="100px;" alt=""/><br /><sub><b>AWAiS</b></sub></a><br /><a href="https://github.com/austinhuang0131/instagrabber/commits?author=AwaisKing" title="Code">💻</a> <a href="#ideas-AwaisKing" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/Shadowspear123"><img src="https://avatars1.githubusercontent.com/u/50462281?s=100" width="100px;" alt=""/><br /><sub><b>Shadowspear123</b></sub></a><br /><a href="#blog-Shadowspear123" title="Blogposts">📝</a> <a href="https://github.com/austinhuang0131/instagrabber/issues?q=author%3AShadowspear123" title="Bug reports">🐛</a> <a href="#ideas-Shadowspear123" title="Ideas, Planning, & Feedback">🤔</a> <a href="#question-Shadowspear123" title="Answering Questions">💬</a> <a href="#userTesting-Shadowspear123" title="User Testing">📓</a></td>
+    <td align="center"><a href="http://kevinthomas.dev"><img src="https://avatars2.githubusercontent.com/u/15370181?s=100" width="100px;" alt=""/><br /><sub><b>Kevin Thomas</b></sub></a><br /><a href="#financial-KevinNThomas" title="Financial">💵</a></td>
+    <td align="center"><a href="https://airikr.me/"><img src="https://avatars0.githubusercontent.com/u/53869451?s=100" width="100px;" alt=""/><br /><sub><b>Airikr</b></sub></a><br /><a href="#question-e-edgren" title="Answering Questions">💬</a> <a href="#ideas-e-edgren" title="Ideas, Planning, & Feedback">🤔</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/Galang23"><img src="https://avatars3.githubusercontent.com/u/13700948?s=100" width="100px;" alt=""/><br /><sub><b>Galang23</b></sub></a><br /><a href="#question-Galang23" title="Answering Questions">💬</a> <a href="#translation-Galang23" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://becauseofprog.fr/"><img src="https://avatars3.githubusercontent.com/u/24623168?s=100" width="100px;" alt=""/><br /><sub><b>kernoeb</b></sub></a><br /><a href="#translation-kernoeb" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/Lego8486"><img src="https://avatars1.githubusercontent.com/u/47414485?s=100" width="100px;" alt=""/><br /><sub><b>Ten_Lego</b></sub></a><br /><a href="#translation-Lego8486" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/MoaufmKlo"><img src="https://avatars1.githubusercontent.com/u/45636897?s=100" width="100px;" alt=""/><br /><sub><b>MoaufmKlo</b></sub></a><br /><a href="#translation-MoaufmKlo" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/peterge1998"><img src="https://avatars2.githubusercontent.com/u/47355238?s=100" width="100px;" alt=""/><br /><sub><b>peterge1998</b></sub></a><br /><a href="#translation-peterge1998" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/RAMAR-RAR"><img src="https://avatars3.githubusercontent.com/u/47423745?s=100" width="100px;" alt=""/><br /><sub><b>RAMAR-RAR</b></sub></a><br /><a href="#translation-RAMAR-RAR" title="Translation">🌍</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/wagnim"><img src="https://avatars0.githubusercontent.com/u/30241419?s=100" width="100px;" alt=""/><br /><sub><b>wagnim</b></sub></a><br /><a href="#translation-wagnim" title="Translation">🌍</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ### License
 
@@ -79,9 +99,8 @@ This app is originally made by [@AwaisKing](https://github.com/AwaisKing) on [Gi
 [![Snyk Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/austinhuang0131/instagrabber)](https://snyk.io/test/github/austinhuang0131/instagrabber)
 [![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
 [![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/austinhuang0131/instagrabber)](https://lgtm.com/projects/g/austinhuang0131/instagrabber)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f87cac1fbf674888b00bd91bc5eccce0)](https://app.codacy.com/manual/austinhuang0131/instagrabber)
+[![CodeFactor](https://www.codefactor.io/repository/github/austinhuang0131/instagrabber/badge)](https://www.codefactor.io/repository/github/austinhuang0131/instagrabber)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/e9cfcb7733f8477d92e5c0f30cac137a)](https://www.codacy.com/manual/austinhuang0131/instagrabber)
 [![Crowdin](https://badges.crowdin.net/instagrabber/localized.svg)](https://crowdin.com/project/instagrabber)
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/built-for-android.svg)](https://forthebadge.com) [![gplv3](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0.html)
-
-<sub>1. For anonymous users only, does not apply to users already logged in, and must be explicitly enabled in Settings. 2. Default enabled, but can be disabled. 3. Shameless plug: If you do not have an Android device but wants to do that, read [this](https://austinhuang.me/instagram-compare).</sub>
