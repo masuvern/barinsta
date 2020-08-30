@@ -307,7 +307,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     };
     private final MentionClickListener mentionClickListener = new MentionClickListener() {
         @Override
-        public void onClick(final RamboTextView view, final String text, final boolean isHashtag) {
+        public void onClick(final RamboTextView view, final String text, final boolean isHashtag, final boolean isLocation) {
             new AlertDialog.Builder(mainActivity).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
                                                  .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
                 if (MainActivityBackup.scanHack != null) MainActivityBackup.scanHack.onResult(text);
@@ -640,7 +640,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     case R.id.ivProfilePic:
                         profileModel = feedModel.getProfileModel();
                         if (profileModel != null)
-                            mentionClickListener.onClick(null, profileModel.getUsername(), false);
+                            mentionClickListener.onClick(null, profileModel.getUsername(), false, false);
                         break;
                 }
             }
@@ -655,7 +655,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
         final LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivity);
         mainActivity.mainBinding.feedView.feedPosts.setHasFixedSize(true);
         mainActivity.mainBinding.feedView.feedPosts.setLayoutManager(layoutManager);
-        mainActivity.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(clickListener, (view, text, isHashtag) ->
+        mainActivity.mainBinding.feedView.feedPosts.setAdapter(feedAdapter = new FeedAdapter(clickListener, (view, text, isHashtag, isLocation) ->
                 new AlertDialog.Builder(mainActivity).setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
                                                      .setTitle(text).setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok, (dialog, which) -> {
                     if (MainActivityBackup.scanHack != null) {

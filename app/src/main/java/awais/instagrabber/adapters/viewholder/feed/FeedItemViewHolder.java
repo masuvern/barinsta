@@ -8,12 +8,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONObject;
 
-import awais.instagrabber.R;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.databinding.ItemFeedBottomBinding;
@@ -65,7 +63,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             final SpannableString spannableString = new SpannableString("@" + profileModel.getUsername());
             spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
             topBinding.title.setText(spannableString);
-            topBinding.title.setMentionClickListener((view, text, isHashtag) -> mentionClickListener.onClick(null, profileModel.getUsername(), false));
+            topBinding.title.setMentionClickListener((view, text, isHashtag, isLocation) -> mentionClickListener.onClick(null, profileModel.getUsername(), false, false));
         }
         bottomBinding.tvPostDate.setText(feedModel.getPostDate());
         final long commentsCount = feedModel.getCommentsCount();
@@ -101,12 +99,10 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
             ));
-            topBinding.location.setOnClickListener(v -> {
-                new AlertDialog.Builder(v.getContext()).setTitle(location.optString("name"))
-                                                       .setMessage(R.string.comment_view_mention_location_search)
-                                                       .setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok,
-                        (dialog, which) -> mentionClickListener.onClick(null, location.optString("id") + "/" + location.optString("slug"), false)).show();
-            });
+            topBinding.location.setOnClickListener(v -> mentionClickListener.onClick(topBinding.location,
+                    location.optString("id") + "/" + location.optString("slug"),
+                    false,
+                    true));
         }
     }
 

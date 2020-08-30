@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_feedFragment_to_hashTagFragment"
             app:destination="@id/hashTagFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_locationFragment"
+            app:destination="@id/locationFragment" />
     </fragment>
     <fragment
         android:id="@+id/storyViewerFragment"
@@ -54,6 +57,16 @@
         tools:layout="@layout/fragment_hashtag">
         <argument
             android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/locationFragment"
+        android:name="awais.instagrabber.fragments.LocationFragment"
+        android:label=""
+        tools:layout="@layout/fragment_location" >
+        <argument
+            android:name="location"
             app:argType="string"
             app:nullable="false" />
     </fragment>

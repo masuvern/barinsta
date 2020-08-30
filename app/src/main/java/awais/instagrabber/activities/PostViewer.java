@@ -276,7 +276,7 @@ public final class PostViewer extends BaseLanguageActivity {
         resources = getResources();
 
         viewerBinding.topPanel.title.setMovementMethod(new LinkMovementMethod());
-        viewerBinding.topPanel.title.setMentionClickListener((view, text, isHashtag) -> searchUsername(text));
+        viewerBinding.topPanel.title.setMentionClickListener((view, text, isHashtag, isLocation) -> searchUsername(text));
         viewerBinding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
 
         viewerBinding.ivToggleFullScreen.setOnClickListener(onClickListener);
@@ -578,7 +578,7 @@ public final class PostViewer extends BaseLanguageActivity {
 
         if (Utils.hasMentions(postCaption)) {
             viewerBinding.bottomPanel.viewerCaption.setText(Utils.getMentionText(postCaption), TextView.BufferType.SPANNABLE);
-            viewerBinding.bottomPanel.viewerCaption.setMentionClickListener((view, text, isHashtag) -> searchUsername(text));
+            viewerBinding.bottomPanel.viewerCaption.setMentionClickListener((view, text, isHashtag, isLocation) -> searchUsername(text));
         } else {
             viewerBinding.bottomPanel.viewerCaption.setMentionClickListener(null);
             viewerBinding.bottomPanel.viewerCaption.setText(postCaption);

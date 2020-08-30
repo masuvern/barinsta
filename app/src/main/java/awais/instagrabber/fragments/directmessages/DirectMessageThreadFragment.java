@@ -314,7 +314,7 @@ public class DirectMessageThreadFragment extends Fragment {
                         .show();
             }
         };
-        final MentionClickListener mentionClickListener = (view, text, isHashtag) -> searchUsername(text);
+        final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> searchUsername(text);
         final DirectMessageItemsAdapter adapter = new DirectMessageItemsAdapter(users, leftUsers, onClickListener, mentionClickListener);
         messageList.setAdapter(adapter);
         listViewModel.getList().observe(fragmentActivity, adapter::submitList);

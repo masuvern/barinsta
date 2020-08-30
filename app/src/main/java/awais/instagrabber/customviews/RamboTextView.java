@@ -121,7 +121,7 @@ public final class RamboTextView extends AppCompatTextView {
             if (indexOfEllipsize != -1)
                 subSequence = subSequence.subSequence(0, indexOfEllipsize - 1);
 
-            mentionClickListener.onClick(this, subSequence.toString(), ishHashtag);
+            mentionClickListener.onClick(this, subSequence.toString(), ishHashtag, false);
         }
     }
 

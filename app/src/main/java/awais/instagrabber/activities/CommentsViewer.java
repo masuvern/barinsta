@@ -187,7 +187,7 @@ public final class CommentsViewer extends BaseLanguageActivity implements SwipeR
         }
     };
 
-    private final MentionClickListener mentionClickListener = (view, text, isHashtag) ->
+    private final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) ->
             new AlertDialog.Builder(this).setTitle(text)
                     .setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
                     .setNegativeButton(R.string.cancel, null).setPositiveButton(R.string.ok,

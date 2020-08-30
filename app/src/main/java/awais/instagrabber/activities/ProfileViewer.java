@@ -127,7 +127,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
     };
     private final MentionClickListener mentionClickListener = new MentionClickListener() {
         @Override
-        public void onClick(final RamboTextView view, final String text, final boolean isHashtag) {
+        public void onClick(final RamboTextView view, final String text, final boolean isHashtag, final boolean isLocation) {
             startActivity(new Intent(getApplicationContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
         }
     };

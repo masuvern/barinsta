@@ -44,7 +44,8 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.discoverFragment,
             R.id.morePreferencesFragment,
             R.id.settingsPreferencesFragment,
-            R.id.hashTagFragment);
+            R.id.hashTagFragment,
+            R.id.locationFragment);
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
 

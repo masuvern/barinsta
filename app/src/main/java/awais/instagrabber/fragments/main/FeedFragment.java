@@ -198,20 +198,14 @@ public class FeedFragment extends Fragment {
         }
     }
 
-    final MentionClickListener mentionClickListener = (view, text, isHashtag) -> {
-        // final AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
-        //         .setMessage(isHashtag ? R.string.comment_view_mention_hash_search : R.string.comment_view_mention_user_search)
-        //         .setTitle(text)
-        //         .setNegativeButton(R.string.cancel, null)
-        //         .setPositiveButton(R.string.ok, (dialog, which) -> {
-        //             // if (MainActivityBackup.scanHack != null) {
-        //             //     mainActivity.mainBinding.drawerLayout.closeDrawers();
-        //             //     MainActivityBackup.scanHack.onResult(text);
-        //             // }
-        //         });
-        // builder.show();
+    final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
         if (isHashtag) {
             final NavDirections action = FeedFragmentDirections.actionFeedFragmentToHashTagFragment(text);
+            NavHostFragment.findNavController(this).navigate(action);
+            return;
+        }
+        if (isLocation) {
+            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToLocationFragment(text);
             NavHostFragment.findNavController(this).navigate(action);
             return;
         }
@@ -294,7 +288,7 @@ public class FeedFragment extends Fragment {
             case R.id.ivProfilePic:
                 profileModel = feedModel.getProfileModel();
                 if (profileModel != null)
-                    mentionClickListener.onClick(null, profileModel.getUsername(), false);
+                    mentionClickListener.onClick(null, profileModel.getUsername(), false, false);
                 break;
         }
     };
