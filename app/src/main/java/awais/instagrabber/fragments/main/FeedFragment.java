@@ -152,55 +152,9 @@ public class FeedFragment extends Fragment {
             }
         }
     };
-
-    @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        fragmentActivity = (MainActivity) requireActivity();
-        storiesService = StoriesService.getInstance();
-    }
-
-    @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
-        if (root != null) {
-            shouldRefresh = false;
-            return root;
-        }
-        binding = FragmentFeedBinding.inflate(inflater, container, false);
-        root = binding.getRoot();
-        return root;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        if (!shouldRefresh) return;
-        // setupActionBar();
-        setupFeedStories();
-        setupFeed();
-        shouldRefresh = false;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (videoAwareRecyclerScroller != null) {
-            videoAwareRecyclerScroller.stopPlaying();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (videoAwareRecyclerScroller != null && SHOULD_AUTO_PLAY) {
-            videoAwareRecyclerScroller.startPlaying();
-        }
-    }
-
-    final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
+    private final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
         if (isHashtag) {
-            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToHashTagFragment(text);
+            final NavDirections action = FeedFragmentDirections.actionGlobalHashTagFragment(text);
             NavHostFragment.findNavController(this).navigate(action);
             return;
         }
@@ -209,10 +163,9 @@ public class FeedFragment extends Fragment {
             NavHostFragment.findNavController(this).navigate(action);
             return;
         }
-        final NavDirections action = FeedFragmentDirections.actionFeedFragmentToProfileFragment("@" + text);
+        final NavDirections action = FeedFragmentDirections.actionGlobalProfileFragment("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     };
-
     private final View.OnClickListener postViewClickListener = v -> {
         final Object tag = v.getTag();
         if (!(tag instanceof FeedModel)) return;
@@ -292,6 +245,51 @@ public class FeedFragment extends Fragment {
                 break;
         }
     };
+
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        fragmentActivity = (MainActivity) requireActivity();
+        storiesService = StoriesService.getInstance();
+    }
+
+    @Override
+    public View onCreateView(@NonNull final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle savedInstanceState) {
+        if (root != null) {
+            shouldRefresh = false;
+            return root;
+        }
+        binding = FragmentFeedBinding.inflate(inflater, container, false);
+        root = binding.getRoot();
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
+        // setupActionBar();
+        setupFeedStories();
+        setupFeed();
+        shouldRefresh = false;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (videoAwareRecyclerScroller != null) {
+            videoAwareRecyclerScroller.stopPlaying();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (videoAwareRecyclerScroller != null && SHOULD_AUTO_PLAY) {
+            videoAwareRecyclerScroller.startPlaying();
+        }
+    }
 
     private void setupFeed() {
         feedViewModel = new ViewModelProvider(fragmentActivity).get(FeedViewModel.class);

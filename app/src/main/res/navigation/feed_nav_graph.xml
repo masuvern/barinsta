@@ -5,6 +5,28 @@
     android:id="@+id/feed_nav_graph"
     app:startDestination="@id/feedFragment">
 
+    <include app:graph="@navigation/hashtag_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_hashTagFragment"
+        app:destination="@id/hashtag_nav_graph">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/profile_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/feedFragment"
         android:name="awais.instagrabber.fragments.main.FeedFragment"
@@ -13,12 +35,6 @@
         <action
             android:id="@+id/action_feedFragment_to_storyViewerFragment"
             app:destination="@id/storyViewerFragment" />
-        <action
-            android:id="@+id/action_feedFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
-        <action
-            android:id="@+id/action_feedFragment_to_hashTagFragment"
-            app:destination="@id/hashTagFragment" />
         <action
             android:id="@+id/action_feedFragment_to_locationFragment"
             app:destination="@id/locationFragment" />
@@ -41,30 +57,10 @@
             app:argType="boolean" />
     </fragment>
     <fragment
-        android:id="@+id/profileFragment"
-        android:name="awais.instagrabber.fragments.main.ProfileFragment"
-        android:label="ProfileFragment"
-        tools:layout="@layout/fragment_profile">
-        <argument
-            android:name="username"
-            app:argType="string"
-            app:nullable="false" />
-    </fragment>
-    <fragment
-        android:id="@+id/hashTagFragment"
-        android:name="awais.instagrabber.fragments.HashTagFragment"
-        android:label=""
-        tools:layout="@layout/fragment_hashtag">
-        <argument
-            android:name="hashtag"
-            app:argType="string"
-            app:nullable="false" />
-    </fragment>
-    <fragment
         android:id="@+id/locationFragment"
         android:name="awais.instagrabber.fragments.LocationFragment"
         android:label=""
-        tools:layout="@layout/fragment_location" >
+        tools:layout="@layout/fragment_location">
         <argument
             android:name="location"
             app:argType="string"

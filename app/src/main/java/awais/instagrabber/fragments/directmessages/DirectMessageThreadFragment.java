@@ -434,7 +434,7 @@ public class DirectMessageThreadFragment extends Fragment {
 
     private void searchUsername(final String text) {
         // startActivity(new Intent(requireContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
-        final NavDirections action = DirectMessageThreadFragmentDirections.actionDirectMessagesThreadFragmentToProfileFragment("@" + text);
+        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     }
 

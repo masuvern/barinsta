@@ -5,6 +5,17 @@
     android:id="@+id/direct_messages_nav_graph"
     app:startDestination="@id/directMessagesInboxFragment">
 
+    <include app:graph="@navigation/profile_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/directMessagesInboxFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageInboxFragment"
@@ -28,9 +39,6 @@
         <action
             android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"
             app:destination="@id/directMessagesSettingsFragment" />
-        <action
-            android:id="@+id/action_directMessagesThreadFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
     </fragment>
     <fragment
         android:id="@+id/directMessagesSettingsFragment"
@@ -43,15 +51,5 @@
         <argument
             android:name="title"
             app:argType="string" />
-    </fragment>
-    <fragment
-        android:id="@+id/profileFragment"
-        android:name="awais.instagrabber.fragments.main.ProfileFragment"
-        android:label="ProfileFragment"
-        tools:layout="@layout/fragment_profile">
-        <argument
-            android:name="username"
-            app:argType="string"
-            app:nullable="false" />
     </fragment>
 </navigation>

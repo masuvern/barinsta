@@ -29,6 +29,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +56,7 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.fragments.main.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
@@ -109,9 +112,7 @@ public class ProfileFragment extends Fragment {
             remove();
         }
     };
-    private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
-            R.menu.multi_select_download_menu,
-            new CallbacksHelper() {
+    private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(R.menu.multi_select_download_menu, new CallbacksHelper() {
                 @Override
                 public void onDestroy(final ActionMode mode) {
                     onBackPressedCallback.handleOnBackPressed();
@@ -158,6 +159,21 @@ public class ProfileFragment extends Fragment {
             binding.privatePage2.setText(R.string.empty_acc);
             binding.privatePage.setVisibility(View.VISIBLE);
         }
+    };
+    private final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
+        Log.d(TAG, "action...");
+        if (isHashtag) {
+            final NavDirections action = ProfileFragmentDirections.actionGlobalHashTagFragment(text);
+            NavHostFragment.findNavController(this).navigate(action);
+            return;
+        }
+        if (isLocation) {
+            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToLocationFragment(text);
+            NavHostFragment.findNavController(this).navigate(action);
+            return;
+        }
+        final NavDirections action = ProfileFragmentDirections.actionGlobalProfileFragment("@" + text);
+        NavHostFragment.findNavController(this).navigate(action);
     };
 
     @Override
@@ -409,7 +425,7 @@ public class ProfileFragment extends Fragment {
         if (Utils.hasMentions(biography)) {
             biography = Utils.getMentionText(biography);
             binding.mainBiography.setText(biography, TextView.BufferType.SPANNABLE);
-            // binding.mainBiography.setMentionClickListener(mentionClickListener);
+            binding.mainBiography.setMentionClickListener(mentionClickListener);
         } else {
             binding.mainBiography.setText(biography);
             binding.mainBiography.setMentionClickListener(null);
@@ -596,7 +612,6 @@ public class ProfileFragment extends Fragment {
                 .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
                 .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
         ));
-        // binding.btnFollowTag.setOnClickListener(profileActionListener);
     }
 
     private void setUsernameDelayed() {

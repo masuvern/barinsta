@@ -289,7 +289,7 @@ public class HashTagFragment extends Fragment {
     private void setTitle() {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(hashtag.substring(1));
+            actionBar.setTitle(hashtag);
         }
     }
 

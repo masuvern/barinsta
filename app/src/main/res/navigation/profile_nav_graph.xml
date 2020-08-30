@@ -4,9 +4,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/profile_nav_graph"
     app:startDestination="@id/profileFragment">
+
+    <include app:graph="@navigation/hashtag_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_hashTagFragment"
+        app:destination="@id/hashtag_nav_graph">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profileFragment">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="awais.instagrabber.fragments.main.ProfileFragment"
         android:label="@string/profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+        <!--<action-->
+        <!--    android:id="@+id/action_profileFragment_self"-->
+        <!--    app:destination="@id/profileFragment" />-->
+    </fragment>
 </navigation>
