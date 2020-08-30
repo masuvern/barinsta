@@ -1,6 +1,8 @@
 package awais.instagrabber.repositories.responses;
 
-public class FriendshipRepositoryChangeResponseFriendshipStatus {
+import androidx.annotation.NonNull;
+
+public class FriendshipRepoChangeResponseFriendshipStatus {
     private boolean following;
     private boolean followedBy;
     private boolean blocking;
@@ -10,14 +12,14 @@ public class FriendshipRepositoryChangeResponseFriendshipStatus {
     private boolean outgoingRequest;
     private boolean isBestie;
 
-    public FriendshipRepositoryChangeResponseFriendshipStatus(final boolean following,
-                                                              final boolean followedBy,
-                                                              final boolean blocking,
-                                                              final boolean muting,
-                                                              final boolean isPrivate,
-                                                              final boolean incomingRequest,
-                                                              final boolean outgoingRequest,
-                                                              final boolean isBestie) {
+    public FriendshipRepoChangeResponseFriendshipStatus(final boolean following,
+                                                        final boolean followedBy,
+                                                        final boolean blocking,
+                                                        final boolean muting,
+                                                        final boolean isPrivate,
+                                                        final boolean incomingRequest,
+                                                        final boolean outgoingRequest,
+                                                        final boolean isBestie) {
         this.following = following;
         this.followedBy = followedBy;
         this.blocking = blocking;
@@ -60,6 +62,7 @@ public class FriendshipRepositoryChangeResponseFriendshipStatus {
         return isBestie;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "FriendshipRepositoryChangeResponseFriendshipStatus{" +

@@ -59,7 +59,8 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.ItemGetType;
-import awais.instagrabber.repositories.responses.FriendshipRepositoryChangeResponseRootObject;
+import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
+import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
 import awais.instagrabber.services.FriendshipService;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
@@ -222,10 +223,10 @@ public class ProfileFragment extends Fragment {
         }
         setupPosts();
         setupCommonListeners();
-        fetchProfile();
+        fetchUsername();
     }
 
-    private void fetchProfile() {
+    private void fetchUsername() {
         final String uid = Utils.getUserIdFromCookie(cookie);
         if (username == null && uid != null) {
             final FetchListener<String> fetchListener = username -> {
@@ -339,36 +340,18 @@ public class ProfileFragment extends Fragment {
                             binding.btnRestrict,
                             ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_orange_background)));
                 }
-                if (profileModel.isReallyPrivate()) {
-                    binding.btnBlock.setVisibility(View.VISIBLE);
-                    binding.btnTagged.setVisibility(View.GONE);
-                    if (profileModel.getBlocked()) {
-                        binding.btnBlock.setText(R.string.unblock);
-                        ViewCompat.setBackgroundTintList(
-                                binding.btnBlock,
-                                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
-                    } else {
-                        binding.btnBlock.setText(R.string.block);
-                        ViewCompat.setBackgroundTintList(
-                                binding.btnBlock,
-                                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_red_background)));
-                    }
+                binding.btnBlock.setVisibility(View.VISIBLE);
+                binding.btnTagged.setVisibility(View.VISIBLE);
+                if (profileModel.getBlocked()) {
+                    binding.btnBlock.setText(R.string.unblock);
+                    ViewCompat.setBackgroundTintList(
+                            binding.btnBlock,
+                            ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
                 } else {
-                    binding.btnBlock.setVisibility(View.GONE);
-                    binding.btnSaved.setVisibility(View.VISIBLE);
-                    binding.btnTagged.setVisibility(View.VISIBLE);
-                    if (profileModel.getBlocked()) {
-                        binding.btnSaved.setText(R.string.unblock);
-                        ViewCompat.setBackgroundTintList(
-                                binding.btnSaved,
-                                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
-                    } else {
-                        binding.btnSaved.setText(R.string.block);
-                        ViewCompat.setBackgroundTintList(
-                                binding.btnSaved,
-                                ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_red_background))
-                        );
-                    }
+                    binding.btnBlock.setText(R.string.block);
+                    ViewCompat.setBackgroundTintList(
+                            binding.btnBlock,
+                            ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_red_background)));
                 }
             }
         } else {
@@ -511,10 +494,11 @@ public class ProfileFragment extends Fragment {
                         userIdFromCookie,
                         profileModel.getId(),
                         Utils.getCsrfTokenFromCookie(cookie),
-                        new ServiceCallback<FriendshipRepositoryChangeResponseRootObject>() {
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                             @Override
-                            public void onSuccess(final FriendshipRepositoryChangeResponseRootObject result) {
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
                                 Log.d(TAG, "Unfollow success: " + result);
+                                fetchProfileDetails();
                             }
 
                             @Override
@@ -527,10 +511,11 @@ public class ProfileFragment extends Fragment {
                         userIdFromCookie,
                         profileModel.getId(),
                         Utils.getCsrfTokenFromCookie(cookie),
-                        new ServiceCallback<FriendshipRepositoryChangeResponseRootObject>() {
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                             @Override
-                            public void onSuccess(final FriendshipRepositoryChangeResponseRootObject result) {
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
                                 Log.d(TAG, "Follow success: " + result);
+                                fetchProfileDetails();
                             }
 
                             @Override
@@ -543,12 +528,61 @@ public class ProfileFragment extends Fragment {
 
         binding.btnRestrict.setOnClickListener(v -> {
             if (!isLoggedIn) return;
-            // restrict
-            // new ProfileAction().execute("restrict");
+            final String action = profileModel.getRestricted() ? "Unrestrict" : "Restrict";
+            friendshipService.toggleRestrict(
+                    profileModel.getId(),
+                    !profileModel.getRestricted(),
+                    Utils.getCsrfTokenFromCookie(cookie),
+                    new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
+                            Log.d(TAG, action + " success: " + result);
+                            fetchProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error while performing " + action, t);
+                        }
+                    });
         });
         binding.btnBlock.setOnClickListener(v -> {
             if (!isLoggedIn) return;
-            // new MainHelper.ProfileAction().execute("block");
+            if (profileModel.getBlocked()) {
+                friendshipService.unblock(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        Utils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                Log.d(TAG, "Unblock success: " + result);
+                                fetchProfileDetails();
+                            }
+
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error unblocking", t);
+                            }
+                        });
+                return;
+            }
+            friendshipService.block(
+                    userIdFromCookie,
+                    profileModel.getId(),
+                    Utils.getCsrfTokenFromCookie(cookie),
+                    new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                            Log.d(TAG, "Block success: " + result);
+                            fetchProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error blocking", t);
+                        }
+                    });
         });
         binding.btnSaved.setOnClickListener(v -> startActivity(new Intent(requireContext(), SavedViewer.class)
                 .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())

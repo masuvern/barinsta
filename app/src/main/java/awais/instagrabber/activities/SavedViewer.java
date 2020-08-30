@@ -114,7 +114,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                     savedBinding.mainPosts.setVisibility(View.VISIBLE);
                 });
 
-                final PostModel model = result[result.length - 1];
+                final PostModel model = result.length > 0 ? result[result.length - 1] : null;
                 if (model != null) {
                     endCursor = model.getEndCursor();
 
@@ -130,13 +130,12 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                     }
                     model.setPageCursor(false, null);
                 }
-            } else {
-                savedBinding.swipeRefreshLayout.setRefreshing(false);
-                // if (oldSize == 0) {
-                //     Toast.makeText(getApplicationContext(), R.string.empty_list, Toast.LENGTH_SHORT).show();
-                //     finish();
-                // }
             }
+            savedBinding.swipeRefreshLayout.setRefreshing(false);
+            // if (oldSize == 0) {
+            //     Toast.makeText(getApplicationContext(), R.string.empty_list, Toast.LENGTH_SHORT).show();
+            //     finish();
+            // }
         }
     };
 

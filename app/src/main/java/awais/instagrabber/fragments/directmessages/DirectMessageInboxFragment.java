@@ -103,7 +103,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             NavHostFragment.findNavController(this).navigate(action);
         });
         inboxList.setAdapter(inboxAdapter);
-        listViewModel = new ViewModelProvider(fragmentActivity).get(InboxThreadModelListViewModel.class);
+        listViewModel = new ViewModelProvider(this).get(InboxThreadModelListViewModel.class);
         listViewModel.getList().observe(fragmentActivity, inboxAdapter::submitList);
         initData();
         return root;
@@ -125,6 +125,12 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             onRefresh();
             afterLeave = false;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        listViewModel.getList().postValue(Collections.emptyList());
     }
 
     private void initData() {
