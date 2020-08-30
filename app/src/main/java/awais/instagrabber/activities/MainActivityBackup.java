@@ -68,6 +68,7 @@ import static awais.instagrabber.utils.Utils.CHANNEL_ID;
 import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
+@Deprecated
 public final class MainActivityBackup extends BaseLanguageActivity {
     private static final int INITIAL_DELAY_MILLIS = 200;
     private static final int DELAY_MILLIS = 60000;

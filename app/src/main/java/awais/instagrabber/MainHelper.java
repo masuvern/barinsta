@@ -100,6 +100,7 @@ import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
+@Deprecated
 public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "MainHelper";
     private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
