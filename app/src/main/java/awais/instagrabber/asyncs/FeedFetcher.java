@@ -158,7 +158,10 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                                             null, null, null,
                                             node.optLong("video_view_count", -1), -1, false, false,
                                             feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
-                                            feedItem.optJSONObject("location"));
+                                            feedItem.isNull("location") ? null : feedItem.getJSONObject("location").optString("name"),
+                                            feedItem.isNull("location") ? null :
+                                                    (feedItem.getJSONObject("location").optString("id") + "/" +
+                                                            feedItem.getJSONObject("location").optString("slug")));
 
                                     sliderItems[j].setSliderDisplayUrl(node.getString("display_url"));
                                 }

@@ -242,7 +242,7 @@ public final class PostViewer extends BaseLanguageActivity {
         }
 
         setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
-                viewerPostModel.getLocation());
+                viewerPostModel.getLocationName(), viewerPostModel.getLocation());
 
         postCaption = postModel.getPostCaption();
         viewerCaptionParent.setVisibility(View.VISIBLE);
@@ -302,7 +302,7 @@ public final class PostViewer extends BaseLanguageActivity {
 
         final boolean postIdNull = postModel.getPostId() == null;
         if (!postIdNull)
-            setupPostInfoBar(intent.getStringExtra(Constants.EXTRAS_USER), postModel.getItemType(), null);
+            setupPostInfoBar(intent.getStringExtra(Constants.EXTRAS_USER), postModel.getItemType(), null, null);
 
         isFromShare = postModel.getPosition() == -1 || postIdNull;
 
@@ -586,7 +586,7 @@ public final class PostViewer extends BaseLanguageActivity {
         }
 
         setupPostInfoBar("@"+viewerPostModel.getUsername(), viewerPostModel.getItemType(),
-                viewerPostModel.getLocation());
+                viewerPostModel.getLocationName(), viewerPostModel.getLocation());
 
         if (postModel instanceof PostModel) {
             final PostModel postModel = (PostModel) this.postModel;
@@ -636,7 +636,7 @@ public final class PostViewer extends BaseLanguageActivity {
         }
     }
 
-    private void setupPostInfoBar(final String from, final MediaItemType mediaItemType, final JSONObject location) {
+    private void setupPostInfoBar(final String from, final MediaItemType mediaItemType, final String locationName, final String location) {
         if (prevUsername == null || !prevUsername.equals(from)) {
             viewerBinding.topPanel.ivProfilePic.setImageBitmap(null);
             viewerBinding.topPanel.ivProfilePic.setImageDrawable(null);
@@ -712,8 +712,8 @@ public final class PostViewer extends BaseLanguageActivity {
         }
         else {
             viewerBinding.topPanel.location.setVisibility(View.VISIBLE);
-            viewerBinding.topPanel.location.setText(location.optString("name"));
-            viewerBinding.topPanel.location.setOnClickListener(v -> searchUsername(location.optString("id")+"/"+location.optString("slug")));
+            viewerBinding.topPanel.location.setText(locationName);
+            viewerBinding.topPanel.location.setOnClickListener(v -> searchUsername(location));
             viewerBinding.topPanel.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
             ));

@@ -5,8 +5,7 @@ import org.json.JSONObject;
 import awais.instagrabber.models.enums.MediaItemType;
 
 public final class ViewerPostModel extends BasePostModel {
-    protected final String username;
-    protected final JSONObject location;
+    protected final String username, locationName, location;
     protected final long videoViews;
     protected String sliderDisplayUrl;
     protected long commentsCount, likes;
@@ -14,7 +13,7 @@ public final class ViewerPostModel extends BasePostModel {
 
     public ViewerPostModel(final MediaItemType itemType, final String postId, final String displayUrl, final String shortCode,
                            final String postCaption, final String username, final long videoViews, final long timestamp,
-                           boolean liked, boolean bookmarked, long likes, final JSONObject location) {
+                           boolean liked, boolean bookmarked, long likes, final String locationName, final String location) {
         this.itemType = itemType;
         this.postId = postId;
         this.displayUrl = displayUrl;
@@ -26,6 +25,7 @@ public final class ViewerPostModel extends BasePostModel {
         this.liked = liked;
         this.likes = likes;
         this.bookmarked = bookmarked;
+        this.locationName = locationName;
         this.location = location;
     }
 
@@ -41,7 +41,11 @@ public final class ViewerPostModel extends BasePostModel {
         return username;
     }
 
-    public JSONObject getLocation() {
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public String getLocation() {
         return location;
     }
 
