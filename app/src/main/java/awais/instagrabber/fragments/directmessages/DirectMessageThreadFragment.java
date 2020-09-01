@@ -77,17 +77,17 @@ public class DirectMessageThreadFragment extends Fragment {
     private static final int PICK_IMAGE = 100;
 
     private FragmentActivity fragmentActivity;
-    private String threadId, threadTitle;
-    private String cursor;
+    private String threadId, threadTitle, cursor, lastMessage;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private final String myId = Utils.getUserIdFromCookie(cookie);
     private FragmentDirectMessagesThreadBinding binding;
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
-    private AppCompatImageView dmInfo;
-    private boolean hasSentSomething, hasDeletedSomething;
+    private AppCompatImageView dmInfo, dmSeen;
+    private boolean hasDeletedSomething;
     private boolean hasOlder = true;
+    public static boolean hasSentSomething;
 
     private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel();
     private final List<ProfileModel> users = new ArrayList<>();
@@ -151,6 +151,10 @@ public class DirectMessageThreadFragment extends Fragment {
                     list.addAll(newList);
                 }
                 listViewModel.getList().postValue(list);
+
+                lastMessage = result.getNewestCursor();
+
+                if (Utils.settingsHelper.getBoolean(Constants.DM_MARK_AS_SEEN)) new ThreadAction().execute("seen", lastMessage);
             }
             binding.swipeRefreshLayout.setRefreshing(false);
         }
@@ -163,12 +167,21 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (hasSentSomething) {
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+    }
+
+    @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
         CoordinatorLayout containerTwo = (CoordinatorLayout) container.getParent();
         dmInfo = containerTwo.findViewById(R.id.dmInfo);
+        dmSeen = containerTwo.findViewById(R.id.dmSeen);
         final LinearLayout root = binding.getRoot();
         listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
         if (getArguments() == null) {
@@ -198,6 +211,11 @@ public class DirectMessageThreadFragment extends Fragment {
             final NavDirections action =
                     DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
             NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+        });
+
+        dmSeen.setOnClickListener(v -> {
+            new ThreadAction().execute("seen", lastMessage);
+            dmSeen.setVisibility(View.GONE);
         });
 
         final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
@@ -266,7 +284,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
             }
             else if (which == 2) {
-                if (String.valueOf(directItemModel.getUserId()).equals(myId)) new Unsend().execute();
+                if (String.valueOf(directItemModel.getUserId()).equals(myId)) new ThreadAction().execute("delete", directItemModel.getItemId());
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
             }
         };
@@ -462,9 +480,13 @@ public class DirectMessageThreadFragment extends Fragment {
         }
     }
 
-    class Unsend extends AsyncTask<Void, Void, Void> {
-        protected Void doInBackground(Void... lmao) {
-            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/"+threadId+"/items/"+directItemModel.getItemId()+"/delete/";
+    class ThreadAction extends AsyncTask<String, Void, Void> {
+        String action, argument;
+
+        protected Void doInBackground(String... rawAction) {
+            action = rawAction[0];
+            argument = rawAction[1];
+            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/"+threadId+"/items/"+argument+"/"+action+"/";
             try {
                 String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
                         +"&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
@@ -481,11 +503,12 @@ public class DirectMessageThreadFragment extends Fragment {
                 wr.close();
                 urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    hasDeletedSomething = true;
+                    if (action == "delete") hasDeletedSomething = true;
+                    else if (action == "seen") DirectMessageInboxFragment.refreshPlease = true;
                 }
                 urlConnection.disconnect();
             } catch (Throwable ex) {
-                Log.e("austin_debug", "unsend: " + ex);
+                Log.e("austin_debug", action + ": " + ex);
             }
             return null;
         }

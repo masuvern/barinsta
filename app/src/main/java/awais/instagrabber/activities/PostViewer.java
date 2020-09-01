@@ -652,19 +652,12 @@ public final class PostViewer extends BaseLanguageActivity {
                         postUserId = result.getId();
 
                         final boolean hdPicEmpty = Utils.isEmpty(hdProfilePic);
-                        glideRequestManager.load(hdPicEmpty ? sdProfilePic : hdProfilePic).listener(new RequestListener<Drawable>() {
-                            private boolean loaded = true;
-
+                        RequestListener<Drawable> profilePicListener = new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
                                 viewerBinding.topPanel.ivProfilePic.setEnabled(false);
                                 viewerBinding.topPanel.ivProfilePic.setOnClickListener(null);
-                                if (loaded) {
-                                    loaded = false;
-                                    if (!Utils.isEmpty(sdProfilePic)) glideRequestManager.load(sdProfilePic).listener(this)
-                                            .into(viewerBinding.topPanel.ivProfilePic);
-                                }
-                                return false;
+                                return true;
                             }
 
                             @Override
@@ -673,7 +666,9 @@ public final class PostViewer extends BaseLanguageActivity {
                                 viewerBinding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
                                 return false;
                             }
-                        }).into(viewerBinding.topPanel.ivProfilePic);
+                        };
+                        glideRequestManager.load(hdPicEmpty ? sdProfilePic : hdProfilePic).listener(profilePicListener)
+                            .error(glideRequestManager.load(sdProfilePic).listener(profilePicListener)).into(viewerBinding.topPanel.ivProfilePic);
 
                         final View viewStoryPost = findViewById(R.id.viewStoryPost);
                         if (viewStoryPost != null) {

@@ -15,12 +15,14 @@ import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.AUTOPLAY_VIDEOS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Constants.CHECK_ACTIVITY;
+import static awais.instagrabber.utils.Constants.CHECK_UPDATES;
 import static awais.instagrabber.utils.Constants.COOKIE;
 import static awais.instagrabber.utils.Constants.CUSTOM_DATE_TIME_FORMAT;
 import static awais.instagrabber.utils.Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED;
 import static awais.instagrabber.utils.Constants.DATE_TIME_FORMAT;
 import static awais.instagrabber.utils.Constants.DATE_TIME_SELECTION;
 import static awais.instagrabber.utils.Constants.DEVICE_UUID;
+import static awais.instagrabber.utils.Constants.DM_MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
@@ -76,7 +78,8 @@ public final class SettingsHelper {
         return BOTTOM_TOOLBAR.equals(key) ||
                 AUTOPLAY_VIDEOS.equals(key) ||
                 SHOW_QUICK_ACCESS_DIALOG.equals(key) ||
-                MUTED_VIDEOS.equals(key);
+                MUTED_VIDEOS.equals(key) ||
+                CHECK_UPDATES.equals(key);
     }
 
     public int getThemeCode(final boolean fromHelper) {
@@ -111,7 +114,8 @@ public final class SettingsHelper {
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY})
+            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN,
+            INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY, CHECK_UPDATES})
     public @interface BooleanSettings {}
 
     @StringDef({APP_THEME, APP_LANGUAGE, PREV_INSTALL_VERSION})

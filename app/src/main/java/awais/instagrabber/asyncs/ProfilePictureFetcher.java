@@ -86,6 +86,7 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
                     }
                 }
             }
+            if (Utils.isEmpty(out)) out = picUrl;
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_PROFILE_PICTURE_FETCHER, "doInBackground");

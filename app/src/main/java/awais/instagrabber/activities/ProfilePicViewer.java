@@ -103,9 +103,6 @@ public final class ProfilePicViewer extends BaseLanguageActivity {
                         errorHandled = true;
                         new ProfilePictureFetcher(username, id, fetchListener, profilePicUrl, (hashtagModel != null || locationModel != null))
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    } else {
-                        glideRequestManager.load(profilePicUrl).into(profileBinding.imageViewer);
-                        showImageInfo();
                     }
                     profileBinding.progressView.setVisibility(View.GONE);
                     return false;
@@ -153,7 +150,7 @@ public final class ProfilePicViewer extends BaseLanguageActivity {
                         profileBinding.imageInfo.setVisibility(View.VISIBLE);
                     }
                 }
-            }).into(profileBinding.imageViewer);
+            }).error(glideRequestManager.load(profilePicUrl)).into(profileBinding.imageViewer);
         };
 
         new ProfilePictureFetcher(username, id, fetchListener, profilePicUrl, (hashtagModel != null || locationModel != null))

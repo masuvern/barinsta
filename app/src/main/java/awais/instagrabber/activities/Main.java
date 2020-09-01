@@ -127,7 +127,7 @@ public final class Main extends BaseLanguageActivity {
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
 
-        FlavorTown.updateCheck(this);
+        if (settingsHelper.getBoolean(Constants.CHECK_UPDATES)) FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
 
         cookie = settingsHelper.getString(Constants.COOKIE);

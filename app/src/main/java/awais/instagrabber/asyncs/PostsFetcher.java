@@ -56,7 +56,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
 
         final String url;
         if (isHashTag)
-            url = "https://www.instagram.com/graphql/query/?query_hash=ded47faa9a1aaded10161a2ff32abb6b&variables=" +
+            url = "https://www.instagram.com/graphql/query/?query_hash=9b498c08113f1e09617a1703c22b2f32&variables=" +
                     "{\"tag_name\":\"" + id.substring(1).toLowerCase() + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         else if (isLocation)
             url = "https://www.instagram.com/graphql/query/?query_hash=36bd0f2bf5911908de389b8ceaa3be6d&variables=" +

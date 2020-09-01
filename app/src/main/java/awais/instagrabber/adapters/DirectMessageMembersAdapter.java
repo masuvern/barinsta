@@ -10,17 +10,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.List;
+
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.FollowsViewHolder;
 import awais.instagrabber.models.ProfileModel;
 
 public final class DirectMessageMembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ProfileModel[] profileModels;
+    private final List<Long> admins;
     private final View.OnClickListener onClickListener;
     private final LayoutInflater layoutInflater;
 
-    public DirectMessageMembersAdapter(final ProfileModel[] profileModels, final Context context, final View.OnClickListener onClickListener) {
+    public DirectMessageMembersAdapter(final ProfileModel[] profileModels, final List<Long> admins,
+                                       final Context context, final View.OnClickListener onClickListener) {
         this.profileModels = profileModels;
+        this.admins = admins;
         this.layoutInflater = LayoutInflater.from(context);
         this.onClickListener = onClickListener;
     }
@@ -43,6 +48,9 @@ public final class DirectMessageMembersAdapter extends RecyclerView.Adapter<Recy
 
             followHolder.tvUsername.setText(model.getUsername());
             followHolder.tvFullName.setText(model.getName());
+
+            if (admins != null && admins.contains(Long.parseLong(model.getId())))
+                followHolder.isAdmin.setVisibility(View.VISIBLE);
 
             Glide.with(layoutInflater.getContext()).load(model.getSdProfilePic()).into(followHolder.profileImage);
         }

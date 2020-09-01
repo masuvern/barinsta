@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -29,6 +30,8 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -46,16 +49,18 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     private static final String TAG = "DirectMessagesSettingsFrag";
 
     private FragmentActivity fragmentActivity;
-    private RecyclerView userList;
+    private RecyclerView userList, leftUserList;
     private EditText titleText;
+    private View leftTitle;
     private AppCompatImageView titleSend;
     private AppCompatButton btnLeave;
-    private LinearLayoutManager layoutManager;
+    private LinearLayoutManager layoutManager, layoutManagerDos;
     private String threadId, threadTitle;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+    private boolean amAdmin;
     private AsyncTask<Void, Void, InboxThreadModel> currentlyRunning;
-    private DirectMessageMembersAdapter memberAdapter;
-    private View.OnClickListener clickListener;
+    private DirectMessageMembersAdapter memberAdapter, leftAdapter;
+    private View.OnClickListener clickListener, basicClickListener;
 
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
         @Override
@@ -63,8 +68,15 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
 
         @Override
         public void onResult(final InboxThreadModel threadModel) {
-            memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(), requireContext(), clickListener);
+            final List<Long> adminList = Arrays.asList(threadModel.getAdmins());
+            amAdmin = adminList.contains(Long.parseLong(Utils.getUserIdFromCookie(cookie)));
+            memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(), adminList, requireContext(), amAdmin ? clickListener : basicClickListener);
             userList.setAdapter(memberAdapter);
+            if (threadModel.getLeftUsers() != null && threadModel.getLeftUsers().length > 0) {
+                leftTitle.setVisibility(View.VISIBLE);
+                leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(), null, requireContext(), basicClickListener);
+                leftUserList.setAdapter(leftAdapter);
+            }
         }
     };
 
@@ -73,15 +85,45 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
         super.onCreate(savedInstanceState);
         fragmentActivity = requireActivity();
 
-        clickListener = v -> {
+        basicClickListener = v -> {
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
-                // TODO: kick dialog
                 ProfileModel model = (ProfileModel) tag;
                 startActivity(
                         new Intent(requireContext(), ProfileViewer.class)
                                 .putExtra(Constants.EXTRAS_USERNAME, model.getUsername())
                 );
+            }
+        };
+
+        clickListener = v -> {
+            final Object tag = v.getTag();
+            if (tag instanceof ProfileModel) {
+                ProfileModel model = (ProfileModel) tag;
+                if (!amAdmin || model.getId().equals(Utils.getUserIdFromCookie(cookie))) {
+                    startActivity(
+                            new Intent(requireContext(), ProfileViewer.class)
+                                    .putExtra(Constants.EXTRAS_USERNAME, model.getUsername())
+                    );
+                }
+                else {
+                    new AlertDialog.Builder(requireContext()).setAdapter(
+                        new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, new String[]{
+                                getString(R.string.open_profile),
+                                getString(R.string.dms_action_kick),
+                        }),
+                        (d,w) -> {
+                            if (w == 0)
+                                startActivity(
+                                    new Intent(requireContext(), ProfileViewer.class)
+                                            .putExtra(Constants.EXTRAS_USERNAME, model.getUsername())
+                                );
+                            else if (w == 1) {
+                                new ChangeSettings().execute("remove_users", model.getId());
+                                onRefresh();
+                            }
+                    }).show();
+                }
             }
         };
     }
@@ -92,7 +134,18 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                              final Bundle savedInstanceState) {
         final FragmentDirectMessagesSettingsBinding binding = FragmentDirectMessagesSettingsBinding.inflate(inflater, container, false);
         final LinearLayout root = binding.getRoot();
-        layoutManager = new LinearLayoutManager(requireContext());
+        layoutManager = new LinearLayoutManager(requireContext()) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        layoutManagerDos = new LinearLayoutManager(requireContext()) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
 
         threadId = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getThreadId();
         threadTitle = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getTitle();
@@ -101,6 +154,12 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
         userList = binding.userList;
         userList.setHasFixedSize(true);
         userList.setLayoutManager(layoutManager);
+
+        leftUserList = binding.leftUserList;
+        leftUserList.setHasFixedSize(true);
+        leftUserList.setLayoutManager(layoutManagerDos);
+
+        leftTitle = binding.leftTitle;
 
         titleText = binding.titleText;
         titleText.setText(threadTitle);
@@ -154,11 +213,12 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     }
 
     class ChangeSettings extends AsyncTask<String, Void, Void> {
-        String action;
+        String action, argument;
         boolean ok = false;
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
+            if (rawAction.length == 2) argument = rawAction[1];
             final String url = "https://i.instagram.com/api/v1/direct_v2/threads/"+threadId+"/"+action+"/";
             try {
                 String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
@@ -167,6 +227,8 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                     urlParameters += "&title=" + URLEncoder.encode(titleText.getText().toString(), "UTF-8")
                             .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
                             .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
+                else if (action.startsWith("remove_users"))
+                    urlParameters += ("&user_ids=[" + argument + "]");
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
@@ -197,10 +259,14 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                     threadTitle = titleText.getText().toString();
                     titleSend.setVisibility(View.GONE);
                     titleText.clearFocus();
+                    DirectMessageThreadFragment.hasSentSomething = true;
                 }
                 else if (action.equals("leave")) {
                     DirectMessageInboxFragment.refreshPlease = true;
                     NavHostFragment.findNavController(DirectMessageSettingsFragment.this).popBackStack(R.id.directMessagesInboxFragment, false);
+                }
+                else {
+                    DirectMessageThreadFragment.hasSentSomething = true;
                 }
             }
             else Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();

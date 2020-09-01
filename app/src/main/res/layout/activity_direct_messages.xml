@@ -50,6 +50,22 @@
                     android:text="@string/app_name" />
 
                 <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/dmSeen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="4dp"
+                    android:paddingLeft="4dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingBottom="4dp"
+                    app:srcCompat="@android:drawable/ic_menu_view" />
+
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/dmInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

@@ -1234,7 +1234,17 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (v == main.mainBinding.profileView.btnFollow) {
-                new ProfileAction().execute("follow");
+                if (main.profileModel.isPrivate()) {
+                    new AlertDialog.Builder(main)
+                            .setTitle(R.string.priv_acc)
+                            .setMessage(R.string.priv_acc_confirm)
+                            .setNegativeButton(R.string.no, null)
+                            .setPositiveButton(R.string.yes, (dialog, which) -> new ProfileAction().execute("follow"))
+                            .show();
+                }
+                else {
+                    new ProfileAction().execute("follow");
+                }
             } else if (v == main.mainBinding.profileView.btnRestrict && isLoggedIn) {
                 new ProfileAction().execute("restrict");
             } else if (v == main.mainBinding.profileView.btnSaved && !iamme) {
