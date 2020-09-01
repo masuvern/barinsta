@@ -44,7 +44,7 @@
                 <TextView
                     android:id="@+id/toolbar_title"
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="250dp"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:text="@string/app_name" />
