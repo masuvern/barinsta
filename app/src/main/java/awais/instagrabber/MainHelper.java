@@ -1415,7 +1415,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                                                     : mainActivity.userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (v == mainActivity.mainBinding.profileView.btnFollow) {
-                new ProfileAction().execute("follow");
+                if (mainActivity.profileModel.isPrivate() && mainActivity.profileModel.getFollowing()) {
+                    new AlertDialog.Builder(main)
+                            .setTitle(R.string.priv_acc)
+                            .setMessage(R.string.priv_acc_confirm)
+                            .setNegativeButton(R.string.no, null)
+                            .setPositiveButton(R.string.yes, (dialog, which) -> new ProfileAction().execute("follow"))
+                            .show();
+                }
+                else new ProfileAction().execute("follow");
             } else if (v == mainActivity.mainBinding.profileView.btnRestrict && isLoggedIn) {
                 new ProfileAction().execute("restrict");
             } else if (v == mainActivity.mainBinding.profileView.btnSaved && !isSelf) {
