@@ -57,7 +57,7 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
@@ -148,9 +148,9 @@ public final class MainActivityBackup extends BaseLanguageActivity {
         isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
 
         itemGetter = itemGetType -> {
-            if (itemGetType == ItemGetType.MAIN_ITEMS) return allItems;
-            if (itemGetType == ItemGetType.DISCOVER_ITEMS) return discoverItems;
-            if (itemGetType == ItemGetType.FEED_ITEMS) return feedItems;
+            if (itemGetType == PostItemType.MAIN) return allItems;
+            if (itemGetType == PostItemType.DISCOVER) return discoverItems;
+            if (itemGetType == PostItemType.FEED) return feedItems;
             return null;
         };
 

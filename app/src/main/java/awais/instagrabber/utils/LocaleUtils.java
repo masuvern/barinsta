@@ -55,8 +55,10 @@ public final class LocaleUtils {
         if (Utils.settingsHelper == null)
             Utils.settingsHelper = new SettingsHelper(baseContext);
 
-        final int appLanguageIndex = Integer.parseInt(Utils.settingsHelper.getString(Constants.APP_LANGUAGE));
+        final String appLanguageSettings = Utils.settingsHelper.getString(Constants.APP_LANGUAGE);
+        if (Utils.isEmpty(appLanguageSettings)) return null;
 
+        final int appLanguageIndex = Integer.parseInt(appLanguageSettings);
         if (appLanguageIndex == 1) return "en";
         if (appLanguageIndex == 2) return "fr";
         if (appLanguageIndex == 3) return "es";

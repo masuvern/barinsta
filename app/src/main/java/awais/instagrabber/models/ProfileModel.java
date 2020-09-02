@@ -39,6 +39,10 @@ public final class ProfileModel implements Serializable {
         return new ProfileModel(false, false, false, userId, null, null, null, null, null, null, 0, 0, 0, false, false, false, false);
     }
 
+    public static ProfileModel getDefaultProfileModel(final String userId, final String username) {
+        return new ProfileModel(false, false, false, userId, username, null, null, null, null, null, 0, 0, 0, false, false, false, false);
+    }
+
     public boolean isPrivate() {
         return isPrivate;
     }

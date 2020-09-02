@@ -5,7 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -22,12 +21,14 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> {
-    private final FetchListener<LocationModel> fetchListener;
-    private final String idSlug;
+    private static final String TAG = "LocationFetcher";
 
-    public LocationFetcher(String idSlug, FetchListener<LocationModel> fetchListener) {
+    private final FetchListener<LocationModel> fetchListener;
+    private final String id;
+
+    public LocationFetcher(final String id, final FetchListener<LocationModel> fetchListener) {
         // idSlug = id + "/" + slug UPDATE: slug can be ignored tbh
-        this.idSlug = idSlug;
+        this.id = id;
         this.fetchListener = fetchListener;
     }
 
@@ -37,27 +38,29 @@ public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> 
         LocationModel result = null;
 
         try {
-            final HttpURLConnection conn = (HttpURLConnection) new URL("https://www.instagram.com/explore/locations/" + idSlug + "/?__a=1").openConnection();
+            final HttpURLConnection conn = (HttpURLConnection) new URL("https://www.instagram.com/explore/locations/" + id + "/?__a=1")
+                    .openConnection();
             conn.setUseCaches(true);
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject user = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject(Constants.EXTRAS_LOCATION);
+                final JSONObject location = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql")
+                                                                                          .getJSONObject(Constants.EXTRAS_LOCATION);
 
-                final JSONObject timelineMedia = user.getJSONObject("edge_location_to_media");
-                if (timelineMedia.has("edges")) {
-                    final JSONArray edges = timelineMedia.getJSONArray("edges");
-                }
-
+                final JSONObject timelineMedia = location.getJSONObject("edge_location_to_media");
+                // if (timelineMedia.has("edges")) {
+                //     final JSONArray edges = timelineMedia.getJSONArray("edges");
+                // }
                 result = new LocationModel(
-                        user.getString(Constants.EXTRAS_ID) + "/" + user.getString("slug"),
-                        user.getString("name"),
-                        user.getString("blurb"),
-                        user.getString("website"),
-                        user.getString("profile_pic_url"),
+                        location.getString(Constants.EXTRAS_ID),
+                        location.getString("slug"),
+                        location.getString("name"),
+                        location.getString("blurb"),
+                        location.getString("website"),
+                        location.getString("profile_pic_url"),
                         timelineMedia.getLong("count"),
-                        BigDecimal.valueOf(user.optDouble("lat", 0d)).toString(),
-                        BigDecimal.valueOf(user.optDouble("lng", 0d)).toString()
+                        BigDecimal.valueOf(location.optDouble("lat", 0d)).toString(),
+                        BigDecimal.valueOf(location.optDouble("lng", 0d)).toString()
                 );
             }
 
@@ -65,9 +68,10 @@ public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> 
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_LOCATION_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) {
+                Log.e(TAG, "", e);
+            }
         }
-
         return result;
     }
 

@@ -210,8 +210,10 @@ public class DirectMessageThreadFragment extends Fragment {
                 switch (itemType) {
                     case MEDIA_SHARE:
                     case CLIP:
-                        startActivity(new Intent(requireContext(), PostViewer.class)
-                                .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode(), false)));
+                        final long postId = directItemModel.getMediaModel().getPk();
+                        final boolean isId = true;
+                        // startActivity(new Intent(requireContext(), PostViewer.class)
+                        //         .putExtra(Constants.EXTRAS_POST, new PostModel(postId, false)));
                         break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);

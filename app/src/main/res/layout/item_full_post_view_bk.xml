@@ -4,25 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="3.2"
     android:animateLayoutChanges="true"
     android:orientation="vertical"
-    tools:context=".activities.PostViewer">
+    android:weightSum="3.2"
+    tools:context=".activities.PostViewer"
+    android:layout_marginTop="?attr/actionBarSize">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="4dp"
-        android:paddingLeft="4dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="4dp"
-        android:paddingRight="4dp"
-        android:paddingBottom="6dp">
-
-        <include
-            android:id="@+id/topPanel"
-            layout="@layout/item_feed_top" />
-    </FrameLayout>
+    <include
+        android:id="@+id/topPanel"
+        layout="@layout/item_feed_top" />
 
     <FrameLayout
         android:id="@+id/container"
@@ -38,7 +28,7 @@
             app:auto_show="true"
             app:repeat_toggle_modes="all" />
 
-        <com.github.chrisbanes.photoview.PhotoView
+        <awais.instagrabber.customviews.drawee.ZoomableDraweeView
             android:id="@+id/imageViewer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -63,7 +53,8 @@
                 android:layout_gravity="end|top"
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="4dp"
-                app:srcCompat="@drawable/ic_fullscreen" />
+                app:srcCompat="@drawable/ic_fullscreen"
+                app:tint="?android:textColorPrimary" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/btnDownload"
@@ -89,14 +80,15 @@
         android:paddingLeft="5dp"
         android:paddingEnd="5dp"
         android:paddingRight="5dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_child_post" />
 
     <include
         android:id="@+id/bottomPanel"
         layout="@layout/item_feed_bottom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/postActions"
@@ -104,26 +96,26 @@
         android:layout_height="0dp"
         android:layout_weight="0.3"
         android:background="#0000"
-        android:weightSum="2"
-        android:layout_alignParentBottom="true">
+        android:weightSum="2">
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnLike"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
             android:layout_marginStart="6dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_weight="1"
-            android:text="@string/like"
             android:textColor="@color/btn_lightpink_text_color"
             android:textSize="18sp"
-            app:backgroundTint="@color/btn_lightpink_background" />
+            app:backgroundTint="@color/btn_lightpink_background"
+            tools:text="@string/like" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnBookmark"
-            android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_marginLeft="8dp"
             android:layout_marginEnd="6dp"
             android:layout_marginRight="8dp"

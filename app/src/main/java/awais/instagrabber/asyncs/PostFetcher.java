@@ -13,6 +13,7 @@ import java.net.URL;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
@@ -85,13 +86,14 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                 if (commentObject != null && (commentObject = commentObject.optJSONObject("page_info")) != null)
                     endCursor = commentObject.optString("end_cursor");
 
+                final ProfileModel profileModel = ProfileModel.getDefaultProfileModel(null, username);
                 if (mediaItemType != MediaItemType.MEDIA_TYPE_SLIDER) {
                     final ViewerPostModel postModel = new ViewerPostModel(mediaItemType,
                             media.getString(Constants.EXTRAS_ID),
                             isVideo ? media.getString("video_url") : Utils.getHighQualityImage(media),
                             shortCode,
                             Utils.isEmpty(postCaption) ? null : postCaption,
-                            username,
+                            profileModel,
                             isVideo && media.has("video_view_count") ? media.getLong("video_view_count") : -1,
                             timestamp, media.getBoolean("viewer_has_liked"), media.getBoolean("viewer_has_saved"),
                             media.getJSONObject("edge_media_preview_like").getLong("count"),
@@ -119,7 +121,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                                 isChildVideo ? node.getString("video_url") : Utils.getHighQualityImage(node),
                                 node.getString(Constants.EXTRAS_SHORTCODE),
                                 postCaption,
-                                username,
+                                profileModel,
                                 isChildVideo && node.has("video_view_count") ? node.getLong("video_view_count") : -1,
                                 timestamp, media.getBoolean("viewer_has_liked"), media.getBoolean("viewer_has_saved"),
                                 media.getJSONObject("edge_media_preview_like").getLong("count"),

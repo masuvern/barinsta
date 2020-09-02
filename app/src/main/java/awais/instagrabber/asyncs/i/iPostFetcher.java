@@ -13,6 +13,7 @@ import java.net.URL;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
@@ -25,6 +26,8 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> {
+    private static final String TAG = "iPostFetcher";
+
     private final String id;
     private final FetchListener<ViewerPostModel[]> fetchListener;
 
@@ -43,18 +46,54 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-
-                final JSONObject media = new JSONObject(Utils.readFromConnection(conn)).getJSONArray("items").getJSONObject(0);
-
-                final String username = media.has("user") ? media.getJSONObject("user").getString(Constants.EXTRAS_USERNAME) : null;
+                final JSONObject media = new JSONObject(Utils.readFromConnection(conn))
+                        .getJSONArray("items")
+                        .getJSONObject(0);
+                ProfileModel profileModel = null;
+                if (media.has("user")) {
+                    final JSONObject user = media.getJSONObject("user");
+                    final JSONObject friendshipStatus = user.optJSONObject("friendship_status");
+                    boolean following = false;
+                    boolean isRestricted = false;
+                    boolean outgoingRequest = false;
+                    if (friendshipStatus != null) {
+                        following = friendshipStatus.optBoolean("following");
+                        isRestricted = friendshipStatus.optBoolean("is_restricted");
+                        outgoingRequest = friendshipStatus.optBoolean("outgoing_request");
+                    }
+                    profileModel = new ProfileModel(
+                            user.optBoolean("is_private"),
+                            user.optBoolean("is_private"),
+                            user.optBoolean("is_verified"),
+                            null,
+                            user.getString(Constants.EXTRAS_USERNAME),
+                            user.optString("fullname"),
+                            null,
+                            null,
+                            user.getString("profile_pic_url"),
+                            null,
+                            -1,
+                            -1,
+                            -1,
+                            following,
+                            isRestricted,
+                            false,
+                            outgoingRequest
+                    );
+                }
+                if (profileModel == null) {
+                    return new ViewerPostModel[]{};
+                }
 
                 // to check if file exists
-                final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
-                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                final boolean shouldDownloadToUserFolder = Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER);
+                final File downloadDir = new File(
+                        Environment.getExternalStorageDirectory(),
+                        "Download" + (shouldDownloadToUserFolder ? "/" + profileModel.getUsername() : ""));
                 File customDir = null;
                 if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
-                            (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH)
+                            + (shouldDownloadToUserFolder ? "/" + profileModel.getUsername() : "");
                     if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
                 }
 
@@ -75,22 +114,33 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
 
                 final long commentsCount = media.optLong("comment_count");
 
+                final JSONObject location = media.optJSONObject("location");
+                String locationId = null;
+                String locationName = null;
+                if (location != null) {
+                    locationName = location.optString("name");
+                    if (location.has("id")) {
+                        locationId = location.getString("id");
+                    } else if (location.has("pk")) {
+                        locationId = location.getString("pk");
+                    }
+                }
+                // final String locationString = location.optString("id") + "/" + location.optString("slug");
                 if (mediaItemType != MediaItemType.MEDIA_TYPE_SLIDER) {
-                    final ViewerPostModel postModel = new ViewerPostModel(mediaItemType,
+                    final ViewerPostModel postModel = new ViewerPostModel(
+                            mediaItemType,
                             media.getString(Constants.EXTRAS_ID),
-                            isVideo
-                                    ? Utils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
+                            isVideo ? Utils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
                                     : Utils.getHighQualityImage(media),
                             media.getString("code"),
                             Utils.isEmpty(postCaption) ? null : postCaption,
-                            username,
+                            profileModel,
                             isVideo && media.has("view_count") ? media.getLong("view_count") : -1,
-                            timestamp, media.optBoolean("has_liked"), media.optBoolean("has_viewer_saved"),
+                            timestamp, media.optBoolean("has_liked"),
+                            media.optBoolean("has_viewer_saved"),
                             media.getLong("like_count"),
-                            media.isNull("location") ? null : media.getJSONObject("location").optString("name"),
-                            media.isNull("location") ? null :
-                                    (media.getJSONObject("location").optString("id") + "/" +
-                                            media.getJSONObject("location").optString("slug")));
+                            locationName,
+                            locationId);
 
                     postModel.setCommentsCount(commentsCount);
 
@@ -106,23 +156,22 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                         final JSONObject node = children.getJSONObject(i);
                         final boolean isChildVideo = node.has("video_duration");
 
-                        postModels[i] = new ViewerPostModel(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                        postModels[i] = new ViewerPostModel(
+                                isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
+                                             : MediaItemType.MEDIA_TYPE_IMAGE,
                                 media.getString(Constants.EXTRAS_ID),
-                                isChildVideo
-                                        ? Utils.getHighQualityPost(node.optJSONArray("video_versions"), true, true, false)
-                                        : Utils.getHighQualityImage(node),
+                                isChildVideo ? Utils.getHighQualityPost(node.optJSONArray("video_versions"), true, true, false)
+                                             : Utils.getHighQualityImage(node),
                                 media.getString("code"),
                                 postCaption,
-                                username,
+                                profileModel,
                                 -1,
-                                timestamp, media.optBoolean("has_liked"), media.optBoolean("has_viewer_saved"),
+                                timestamp, media.optBoolean("has_liked"),
+                                media.optBoolean("has_viewer_saved"),
                                 media.getLong("like_count"),
-                                media.isNull("location") ? null : media.getJSONObject("location").optString("name"),
-                                media.isNull("location") ? null :
-                                        (media.getJSONObject("location").optString("id") + "/" +
-                                                media.getJSONObject("location").optString("slug")));
+                                locationName,
+                                locationId);
                         postModels[i].setSliderDisplayUrl(Utils.getHighQualityImage(node));
-
                         Utils.checkExistence(downloadDir, customDir, true, postModels[i]);
                     }
 
@@ -135,7 +184,9 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
         } catch (Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground (i)");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) {
+                Log.e(TAG, "", e);
+            }
         }
         return result;
     }

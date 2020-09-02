@@ -109,7 +109,10 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(
                                 profileModel != null ? profileModel.getId()
-                                        : (hashtagModel != null ? ("#" + hashtagModel.getName()) : locationModel.getId()), endCursor, this)
+                                                     : (hashtagModel != null ? ("#" + hashtagModel.getName()) : locationModel.getId()),
+                                false,
+                                endCursor,
+                                this)
                                 .setUsername((isLocation || isHashtag) ? null : profileModel.getUsername())
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
@@ -138,7 +141,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             if (tag instanceof HighlightModel) {
                 final HighlightModel highlightModel = (HighlightModel) tag;
                 new iStoryStatusFetcher(highlightModel.getId(), null, false, false,
-                        (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
+                                        (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), true, result -> {
                     if (result != null && result.length > 0) {
                         // startActivity(new Intent(ProfileViewer.this, StoryViewer.class)
                         //         .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
@@ -180,12 +183,14 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         resources = getResources();
 
         profileDialogAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                new String[]{resources.getString(R.string.view_pfp), resources.getString(R.string.show_stories)});
+                                                  new String[]{resources.getString(R.string.view_pfp), resources.getString(R.string.show_stories)});
         profileDialogListener = (dialog, which) -> {
             final Intent newintent;
             if (which == 0 || storyModels == null || storyModels.length < 1) {
                 newintent = new Intent(this, ProfilePicViewer.class).putExtra(
-                        ((hashtagModel != null) ? Constants.EXTRAS_HASHTAG : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
+                        ((hashtagModel != null)
+                         ? Constants.EXTRAS_HASHTAG
+                         : (locationModel != null ? Constants.EXTRAS_LOCATION : Constants.EXTRAS_PROFILE)),
                         ((hashtagModel != null) ? hashtagModel : (locationModel != null ? locationModel : profileModel)));
             }
             // else
@@ -239,7 +244,11 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 profileBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                 stopCurrentExecutor();
                 currentlyExecuting = new PostsFetcher(profileModel != null ? profileModel.getId()
-                        : (hashtagModel != null ? ("#" + hashtagModel.getName()) : locationModel.getId()), endCursor, postsFetchListener)
+                                                                           : (hashtagModel != null
+                                                                              ? ("#" + hashtagModel.getName())
+                                                                              : locationModel.getId()),
+                                                      isHashtag,
+                                                      endCursor, postsFetchListener)
                         .setUsername((isHashtag || isLocation) ? null : profileModel.getUsername())
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
@@ -429,12 +438,12 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
 
                 if (isLoggedIn || Utils.settingsHelper.getBoolean(Constants.STORIESIG)) {
                     new iStoryStatusFetcher(profileId, profileModel.getUsername(), false, false,
-                            (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
-                            stories -> {
-                                storyModels = stories;
-                                if (stories != null && stories.length > 0)
-                                    profileBinding.profileView.mainProfileImage.setStoriesBorder();
-                            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                            (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), false,
+                                            stories -> {
+                                                storyModels = stories;
+                                                if (stories != null && stories.length > 0)
+                                                    profileBinding.profileView.mainProfileImage.setStoriesBorder();
+                                            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                     new HighlightsFetcher(profileId, (!isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG)), hls -> {
                         if (hls != null && hls.length > 0) {
@@ -555,7 +564,8 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
                 profileBinding.profileView.mainFollowing.setText(span);
 
-                profileBinding.profileView.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername() : profileModel.getName());
+                profileBinding.profileView.mainFullName
+                        .setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername() : profileModel.getName());
 
                 CharSequence biography = profileModel.getBiography();
                 profileBinding.profileView.mainBiography.setCaptionIsExpandable(true);
@@ -586,9 +596,11 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
 
                     if (isLoggedIn) {
                         final View.OnClickListener followClickListener = v -> startActivity(new Intent(ProfileViewer.this, FollowViewer.class)
-                                .putExtra(Constants.EXTRAS_FOLLOWERS, v == profileBinding.profileView.mainFollowers)
-                                .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
-                                .putExtra(Constants.EXTRAS_ID, profileId));
+                                                                                                    .putExtra(Constants.EXTRAS_FOLLOWERS,
+                                                                                                              v == profileBinding.profileView.mainFollowers)
+                                                                                                    .putExtra(Constants.EXTRAS_NAME,
+                                                                                                              profileModel.getUsername())
+                                                                                                    .putExtra(Constants.EXTRAS_ID, profileId));
 
                         profileBinding.profileView.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
                         profileBinding.profileView.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
@@ -749,12 +761,16 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
         favouriteAction.setOnMenuItemClickListener(item -> {
             if (Utils.dataBox.getFavorite(userQuery) == null) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(userQuery, System.currentTimeMillis(),
-                        locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
+                                                                    locationModel != null
+                                                                    ? locationModel.getName()
+                                                                    : userQuery.replaceAll("^@", "")));
                 favouriteAction.setIcon(R.drawable.ic_like);
             } else {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(userQuery,
-                        Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
-                        locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
+                                                                    Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
+                                                                    locationModel != null
+                                                                    ? locationModel.getName()
+                                                                    : userQuery.replaceAll("^@", "")));
                 favouriteAction.setIcon(R.drawable.ic_not_liked);
             }
             return true;
@@ -834,12 +850,16 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             final boolean iamme = (isLoggedIn && profileModel != null) && Utils.getUserIdFromCookie(cookie).equals(profileModel.getId());
             if (!isLoggedIn && Utils.dataBox.getFavorite(userQuery) != null && v == profileBinding.profileView.btnFollow) {
                 Utils.dataBox.delFavorite(new DataBox.FavoriteModel(userQuery,
-                        Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
-                        locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
+                                                                    Long.parseLong(Utils.dataBox.getFavorite(userQuery).split("/")[1]),
+                                                                    locationModel != null
+                                                                    ? locationModel.getName()
+                                                                    : userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (!isLoggedIn && (v == profileBinding.profileView.btnFollow || v == profileBinding.profileView.btnFollowTag)) {
                 Utils.dataBox.addFavorite(new DataBox.FavoriteModel(userQuery, System.currentTimeMillis(),
-                        locationModel != null ? locationModel.getName() : userQuery.replaceAll("^@", "")));
+                                                                    locationModel != null
+                                                                    ? locationModel.getName()
+                                                                    : userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (v == profileBinding.profileView.btnFollow) {
                 new ProfileAction().execute("follow");
@@ -851,18 +871,18 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 new ProfileAction().execute("followtag");
             } else if (v == profileBinding.profileView.btnTagged || (v == profileBinding.profileView.btnRestrict && !isLoggedIn)) {
                 startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
+                                      .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
+                                      .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             } else if (v == profileBinding.profileView.btnSaved) {
                 startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
+                                      .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
+                                      .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             } else if (v == profileBinding.profileView.btnLiked) {
                 startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, "^" + profileModel.getId())
-                        .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
+                                      .putExtra(Constants.EXTRAS_INDEX, "^" + profileModel.getId())
+                                      .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             }
         }
@@ -877,14 +897,16 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             final String url = "https://www.instagram.com/web/" +
                     ((action.equals("followtag") && hashtagModel != null) ? ("tags/" +
                             (hashtagModel.getFollowing() ? "unfollow/" : "follow/") + hashtagModel.getName() + "/") : (
-                            ((action.equals("restrict") && profileModel != null) ? "restrict_action" : ("friendships/" + profileModel.getId())) + "/" +
-                                    ((action.equals("follow") && profileModel != null) ?
-                                            ((profileModel.getFollowing() ||
-                                                    (!profileModel.getFollowing() && profileModel.getRequested()))
-                                                    ? "unfollow/" : "follow/") :
-                                            ((action.equals("restrict") && profileModel != null) ?
-                                                    (profileModel.getRestricted() ? "unrestrict/" : "restrict/") :
-                                                    (profileModel.getBlocked() ? "unblock/" : "block/")))));
+                             ((action.equals("restrict") && profileModel != null)
+                              ? "restrict_action"
+                              : ("friendships/" + profileModel.getId())) + "/" +
+                                     ((action.equals("follow") && profileModel != null) ?
+                                      ((profileModel.getFollowing() ||
+                                              (!profileModel.getFollowing() && profileModel.getRequested()))
+                                       ? "unfollow/" : "follow/") :
+                                      ((action.equals("restrict") && profileModel != null) ?
+                                       (profileModel.getRestricted() ? "unrestrict/" : "restrict/") :
+                                       (profileModel.getBlocked() ? "unblock/" : "block/")))));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");

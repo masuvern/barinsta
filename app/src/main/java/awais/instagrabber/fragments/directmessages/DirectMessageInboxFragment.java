@@ -48,6 +48,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private AsyncTask<Void, Void, InboxModel> currentlyRunning;
     private InboxThreadModelListViewModel listViewModel;
     public static boolean refreshPlease = false;
+    private boolean shouldRefresh = true;
 
     private final FetchListener<InboxModel> fetchListener = new FetchListener<InboxModel>() {
         @Override
@@ -89,6 +90,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         if (root != null) {
+            shouldRefresh = false;
             return root;
         }
         binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
@@ -99,14 +101,20 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         layoutManager = new LinearLayoutManager(requireContext());
         inboxList.setLayoutManager(layoutManager);
         final DirectMessageInboxAdapter inboxAdapter = new DirectMessageInboxAdapter(inboxThreadModel -> {
-            final NavDirections action = DirectMessageInboxFragmentDirections.actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
+            final NavDirections action = DirectMessageInboxFragmentDirections
+                    .actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
             NavHostFragment.findNavController(this).navigate(action);
         });
         inboxList.setAdapter(inboxAdapter);
         listViewModel = new ViewModelProvider(this).get(InboxThreadModelListViewModel.class);
         listViewModel.getList().observe(fragmentActivity, inboxAdapter::submitList);
-        initData();
         return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
+        initData();
     }
 
     @Override
@@ -130,7 +138,9 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     @Override
     public void onDestroy() {
         super.onDestroy();
-        listViewModel.getList().postValue(Collections.emptyList());
+        if (listViewModel != null) {
+            listViewModel.getList().postValue(Collections.emptyList());
+        }
     }
 
     private void initData() {

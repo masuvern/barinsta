@@ -96,11 +96,11 @@ public abstract class BasePostModel implements Serializable, Selectable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final BasePostModel that = (BasePostModel) o;
-        return ObjectsCompat.equals(postId, that.postId);
+        return ObjectsCompat.equals(postId, that.postId) && ObjectsCompat.equals(shortCode, that.shortCode);
     }
 
     @Override
     public int hashCode() {
-        return ObjectsCompat.hash(postId);
+        return ObjectsCompat.hash(postId, shortCode);
     }
 }

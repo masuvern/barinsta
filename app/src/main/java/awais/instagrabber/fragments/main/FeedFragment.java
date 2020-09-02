@@ -37,7 +37,6 @@ import java.util.Map;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.CommentsViewer;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.adapters.FeedAdapter;
 import awais.instagrabber.adapters.FeedStoriesAdapter;
 import awais.instagrabber.adapters.viewholder.feed.FeedItemViewHolder;
@@ -57,7 +56,6 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.services.StoriesService;
@@ -70,7 +68,7 @@ public class FeedFragment extends Fragment {
     private static final String TAG = "FeedFragment";
     private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
     private static final int RESIZED_VIDEO_HEIGHT = (int) (0.8 * Utils.displayMetrics.heightPixels);
-    public static final boolean SHOULD_AUTO_PLAY = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
+    private static final boolean SHOULD_AUTO_PLAY = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
 
     private MainActivity fragmentActivity;
     private CoordinatorLayout root;
@@ -112,12 +110,16 @@ public class FeedFragment extends Fragment {
                     final FeedModel feedModel = thumbToFeedMap.get(thumbUri.toString());
                     if (feedModel == null) return;
                     int requiredWidth = Utils.displayMetrics.widthPixels;
-                    int resultingHeight = Utils.getResultingHeight(requiredWidth, encodedHeight, encodedWidth);
-                    if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO && resultingHeight >= MAX_VIDEO_HEIGHT) {
+                    int resultingHeight = Utils
+                            .getResultingHeight(requiredWidth, encodedHeight, encodedWidth);
+                    if (feedModel
+                            .getItemType() == MediaItemType.MEDIA_TYPE_VIDEO && resultingHeight >= MAX_VIDEO_HEIGHT) {
                         // If its a video and the height is too large, need to reduce the height,
                         // so that entire video fits on screen
                         resultingHeight = RESIZED_VIDEO_HEIGHT;
-                        requiredWidth = Utils.getResultingWidth(RESIZED_VIDEO_HEIGHT, resultingHeight, requiredWidth);
+                        requiredWidth = Utils.getResultingWidth(RESIZED_VIDEO_HEIGHT,
+                                                                resultingHeight,
+                                                                requiredWidth);
                     }
                     feedModel.setImageWidth(requiredWidth);
                     feedModel.setImageHeight(resultingHeight);
@@ -133,7 +135,9 @@ public class FeedFragment extends Fragment {
 
                 public void updateAdapter() {
                     if (failed + success != result.length) return;
-                    final List<FeedModel> finalList = currentFeedModelList == null || currentFeedModelList.isEmpty() ? new ArrayList<>() : new ArrayList<>(currentFeedModelList);
+                    final List<FeedModel> finalList = currentFeedModelList == null || currentFeedModelList.isEmpty()
+                                                      ? new ArrayList<>()
+                                                      : new ArrayList<>(currentFeedModelList);
                     finalList.addAll(Arrays.asList(result));
                     feedViewModel.getList().postValue(finalList);
                     final PostModel feedPostModel = result[result.length - 1];
@@ -147,7 +151,8 @@ public class FeedFragment extends Fragment {
             };
 
             for (final FeedModel feedModel : result) {
-                final DataSource<Void> ds = Fresco.getImagePipeline().prefetchToBitmapCache(ImageRequest.fromUri(feedModel.getThumbnailUrl()), null);
+                final DataSource<Void> ds = Fresco.getImagePipeline()
+                                                  .prefetchToBitmapCache(ImageRequest.fromUri(feedModel.getThumbnailUrl()), null);
                 ds.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
             }
         }
@@ -159,7 +164,7 @@ public class FeedFragment extends Fragment {
             return;
         }
         if (isLocation) {
-            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToLocationFragment(text);
+            final NavDirections action = FeedFragmentDirections.actionGlobalLocationFragment(text);
             NavHostFragment.findNavController(this).navigate(action);
             return;
         }
@@ -172,8 +177,7 @@ public class FeedFragment extends Fragment {
 
         final FeedModel feedModel = (FeedModel) tag;
         if (v instanceof RamboTextView) {
-            if (feedModel.isMentionClicked())
-                feedModel.toggleCaption();
+            if (feedModel.isMentionClicked()) feedModel.toggleCaption();
             feedModel.setMentionClicked(false);
             if (!FeedItemViewHolder.expandCollapseTextView((RamboTextView) v, feedModel.getPostCaption()))
                 feedModel.toggleCaption();
@@ -184,16 +188,31 @@ public class FeedFragment extends Fragment {
         switch (id) {
             case R.id.btnComments:
                 startActivity(new Intent(requireContext(), CommentsViewer.class)
-                        .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode())
-                        .putExtra(Constants.EXTRAS_POST, feedModel.getPostId())
-                        .putExtra(Constants.EXTRAS_USER, feedModel.getProfileModel().getId()));
+                                      .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode())
+                                      .putExtra(Constants.EXTRAS_POST, feedModel.getPostId())
+                                      .putExtra(Constants.EXTRAS_USER, feedModel.getProfileModel().getId()));
                 break;
 
             case R.id.viewStoryPost:
-                startActivity(new Intent(requireContext(), PostViewer.class)
-                        .putExtra(Constants.EXTRAS_INDEX, feedModel.getPosition())
-                        .putExtra(Constants.EXTRAS_POST, new PostModel(feedModel.getShortCode(), false))
-                        .putExtra(Constants.EXTRAS_TYPE, ItemGetType.FEED_ITEMS));
+                // startActivity(new Intent(requireContext(), PostViewer.class)
+                //         .putExtra(Constants.EXTRAS_INDEX, feedModel.getPosition())
+                //         .putExtra(Constants.EXTRAS_POST, new PostModel(feedModel.getShortCode(), false))
+                //         .putExtra(Constants.EXTRAS_TYPE, ItemGetType.FEED_ITEMS));
+                final List<FeedModel> feedModels = feedViewModel.getList().getValue();
+                if (feedModels == null || feedModels.size() == 0) return;
+                if (feedModels.get(0) == null) return;
+                final String postId = feedModels.get(0).getPostId();
+                final boolean isId = postId != null;
+                final String[] idsOrShortCodes = new String[feedModels.size()];
+                for (int i = 0; i < feedModels.size(); i++) {
+                    idsOrShortCodes[i] = isId ? feedModels.get(i).getPostId()
+                                              : feedModels.get(i).getShortCode();
+                }
+                final NavDirections action = FeedFragmentDirections.actionGlobalPostViewFragment(
+                        feedModel.getPosition(),
+                        idsOrShortCodes,
+                        isId);
+                NavHostFragment.findNavController(this).navigate(action);
                 break;
 
             case R.id.btnDownload:
@@ -202,8 +221,12 @@ public class FeedFragment extends Fragment {
 
                 final ViewerPostModel[] sliderItems = feedModel.getSliderItems();
 
-                if (feedModel.getItemType() != MediaItemType.MEDIA_TYPE_SLIDER || sliderItems == null || sliderItems.length == 1)
-                    Utils.batchDownload(requireContext(), username, DownloadMethod.DOWNLOAD_FEED, Collections.singletonList(feedModel));
+                if (feedModel
+                        .getItemType() != MediaItemType.MEDIA_TYPE_SLIDER || sliderItems == null || sliderItems.length == 1)
+                    Utils.batchDownload(requireContext(),
+                                        username,
+                                        DownloadMethod.DOWNLOAD_FEED,
+                                        Collections.singletonList(feedModel));
                 else {
                     final ArrayList<BasePostModel> postModels = new ArrayList<>();
                     final DialogInterface.OnClickListener clickListener1 = (dialog, which) -> {
@@ -213,8 +236,7 @@ public class FeedFragment extends Fragment {
 
                         for (final ViewerPostModel sliderItem : sliderItems) {
                             if (sliderItem != null) {
-                                if (!breakWhenFoundSelected)
-                                    postModels.add(sliderItem);
+                                if (!breakWhenFoundSelected) postModels.add(sliderItem);
                                 else if (sliderItem.isSelected()) {
                                     postModels.add(sliderItem);
                                     break;
@@ -223,16 +245,21 @@ public class FeedFragment extends Fragment {
                         }
 
                         // shows 0 items on first item of viewpager cause onPageSelected hasn't been called yet
-                        if (breakWhenFoundSelected && postModels.size() == 0)
+                        if (breakWhenFoundSelected && postModels.size() == 0) {
                             postModels.add(sliderItems[0]);
-
-                        if (postModels.size() > 0)
-                            Utils.batchDownload(requireContext(), username, DownloadMethod.DOWNLOAD_FEED, postModels);
+                        }
+                        if (postModels.size() > 0) {
+                            Utils.batchDownload(requireContext(),
+                                                username,
+                                                DownloadMethod.DOWNLOAD_FEED,
+                                                postModels);
+                        }
                     };
 
                     new AlertDialog.Builder(requireContext())
-                            .setTitle(R.string.post_viewer_download_dialog_title)
-                            .setPositiveButton(R.string.post_viewer_download_current, clickListener1)
+                            .setTitle(R.string.post_viewer_download_dialog_title).setPositiveButton(
+                            R.string.post_viewer_download_current,
+                            clickListener1)
                             .setNegativeButton(R.string.post_viewer_download_album, clickListener1)
                             .show();
                 }
@@ -240,8 +267,7 @@ public class FeedFragment extends Fragment {
 
             case R.id.ivProfilePic:
                 profileModel = feedModel.getProfileModel();
-                if (profileModel != null)
-                    mentionClickListener.onClick(null, profileModel.getUsername(), false, false);
+                if (profileModel != null) mentionClickListener.onClick(null, profileModel.getUsername(), false, false);
                 break;
         }
     };
@@ -251,6 +277,7 @@ public class FeedFragment extends Fragment {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         storiesService = StoriesService.getInstance();
+        // feedService = FeedService.getInstance();
     }
 
     @Override
@@ -273,6 +300,7 @@ public class FeedFragment extends Fragment {
         setupFeedStories();
         setupFeed();
         shouldRefresh = false;
+        // feedService.getFeed(11, null);
     }
 
     @Override
@@ -315,17 +343,15 @@ public class FeedFragment extends Fragment {
 
     private void fetchFeed() {
         binding.feedSwipeRefreshLayout.setRefreshing(true);
-        new FeedFetcher(feedEndCursor, feedFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new FeedFetcher(feedEndCursor, feedFetchListener)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         feedEndCursor = null;
     }
 
     private void setupFeedStories() {
         final FeedStoriesViewModel feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter((model, position) -> {
-            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(
-                    position,
-                    null,
-                    false);
+            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false);
             NavHostFragment.findNavController(this).navigate(action);
         });
         binding.feedStoriesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));

@@ -47,7 +47,7 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
             return;
         }
 
-        username = postModels[0].getUsername();
+        username = postModels[0].getProfileModel().getUsername();
         toolbar.setTitle(username);
         toolbar.setSubtitle(postModels[0].getShortCode());
 

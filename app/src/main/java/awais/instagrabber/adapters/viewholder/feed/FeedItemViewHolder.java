@@ -2,15 +2,12 @@ package awais.instagrabber.adapters.viewholder.feed;
 
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.json.JSONObject;
 
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.customviews.RamboTextView;
@@ -37,7 +34,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         this.topBinding = topBinding;
         this.bottomBinding = bottomBinding;
         this.mentionClickListener = mentionClickListener;
-        topBinding.title.setMovementMethod(new LinkMovementMethod());
+        // topBinding.title.setMovementMethod(new LinkMovementMethod());
         bottomBinding.btnComments.setOnClickListener(clickListener);
         topBinding.viewStoryPost.setOnClickListener(clickListener);
         topBinding.ivProfilePic.setOnClickListener(clickListener);
@@ -63,14 +60,16 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             final SpannableString spannableString = new SpannableString("@" + profileModel.getUsername());
             spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
             topBinding.title.setText(spannableString);
-            topBinding.title.setMentionClickListener((view, text, isHashtag, isLocation) -> mentionClickListener.onClick(null, profileModel.getUsername(), false, false));
+            topBinding.title.setMentionClickListener(
+                    (view, text, isHashtag, isLocation) -> mentionClickListener.onClick(null, profileModel.getUsername(), false, false));
         }
         bottomBinding.tvPostDate.setText(feedModel.getPostDate());
         final long commentsCount = feedModel.getCommentsCount();
         bottomBinding.commentsCount.setText(String.valueOf(commentsCount));
 
-        final JSONObject location = feedModel.getLocation();
-        setLocation(location);
+        final String locationName = feedModel.getLocationName();
+        final String locationId = feedModel.getLocationId();
+        setLocation(locationName, locationId);
         CharSequence postCaption = feedModel.getPostCaption();
         final boolean captionEmpty = Utils.isEmpty(postCaption);
         bottomBinding.viewerCaption.setVisibility(captionEmpty ? View.GONE : View.VISIBLE);
@@ -87,22 +86,19 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         bindItem(feedModel);
     }
 
-    private void setLocation(final JSONObject location) {
-        if (location == null) {
+    private void setLocation(final String locationName, final String locationId) {
+        if (Utils.isEmpty(locationName)) {
             topBinding.location.setVisibility(View.GONE);
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
             ));
         } else {
             topBinding.location.setVisibility(View.VISIBLE);
-            topBinding.location.setText(location.optString("name"));
+            topBinding.location.setText(locationName);
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
             ));
-            topBinding.location.setOnClickListener(v -> mentionClickListener.onClick(topBinding.location,
-                    location.optString("id") + "/" + location.optString("slug"),
-                    false,
-                    true));
+            topBinding.location.setOnClickListener(v -> mentionClickListener.onClick(topBinding.location, locationId, false, true));
         }
     }
 

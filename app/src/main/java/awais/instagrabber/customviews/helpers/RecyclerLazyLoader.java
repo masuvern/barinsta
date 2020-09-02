@@ -17,9 +17,13 @@ public final class RecyclerLazyLoader extends RecyclerView.OnScrollListener {
     private final LazyLoadListener lazyLoadListener;
     private final RecyclerView.LayoutManager layoutManager;
 
-    public RecyclerLazyLoader(@NonNull final RecyclerView.LayoutManager layoutManager, final LazyLoadListener lazyLoadListener) {
+    public RecyclerLazyLoader(@NonNull final RecyclerView.LayoutManager layoutManager, final LazyLoadListener lazyLoadListener, final int threshold) {
         this.layoutManager = layoutManager;
         this.lazyLoadListener = lazyLoadListener;
+        if (threshold > 0) {
+            this.visibleThreshold = threshold;
+            return;
+        }
         if (layoutManager instanceof GridLayoutManager) {
             this.visibleThreshold = 5 * Math.max(3, ((GridLayoutManager) layoutManager).getSpanCount());
         } else if (layoutManager instanceof LinearLayoutManager) {
@@ -27,6 +31,10 @@ public final class RecyclerLazyLoader extends RecyclerView.OnScrollListener {
         } else {
             this.visibleThreshold = 5;
         }
+    }
+
+    public RecyclerLazyLoader(@NonNull final RecyclerView.LayoutManager layoutManager, final LazyLoadListener lazyLoadListener) {
+        this(layoutManager, lazyLoadListener, -1);
     }
 
     @Override
@@ -54,7 +62,8 @@ public final class RecyclerLazyLoader extends RecyclerView.OnScrollListener {
         }
 
         if (!loading && lastVisibleItemPosition + visibleThreshold > totalItemCount) {
-            if (lazyLoadListener != null) lazyLoadListener.onLoadMore(++currentPage, totalItemCount);
+            if (lazyLoadListener != null)
+                lazyLoadListener.onLoadMore(++currentPage, totalItemCount);
             loading = true;
         }
     }

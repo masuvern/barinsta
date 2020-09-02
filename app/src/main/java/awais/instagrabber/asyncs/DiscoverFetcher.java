@@ -67,7 +67,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
     private ArrayList<DiscoverItemModel> fetchItems(ArrayList<DiscoverItemModel> discoverItemModels, final String maxId) {
         try {
             final String url = "https://www.instagram.com/explore/grid/?is_prefetch=false&omit_cover_media=true&module=explore_popular" +
-                    "&use_sectional_payload=false&cluster_id="+cluster+"&include_fixed_destinations=true&session_id="+rankToken+maxId;
+                    "&use_sectional_payload=false&cluster_id=" + cluster + "&include_fixed_destinations=true&session_id=" + rankToken + maxId;
 
             final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
 
@@ -130,10 +130,10 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_DISCOVER_FETCHER, "fetchItems",
-                        new Pair<>("maxId", maxId),
-                        new Pair<>("lastId", lastId),
-                        new Pair<>("isFirst", isFirst),
-                        new Pair<>("nextMaxId", nextMaxId));
+                                             new Pair<>("maxId", maxId),
+                                             new Pair<>("lastId", lastId),
+                                             new Pair<>("isFirst", isFirst),
+                                             new Pair<>("nextMaxId", nextMaxId));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
 
@@ -163,19 +163,21 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
         final MediaItemType mediaType = Utils.getMediaItemType(media.getInt("media_type"));
 
         final DiscoverItemModel model = new DiscoverItemModel(mediaType,
-                media.getString(Constants.EXTRAS_ID),
-                media.getString("code"),
-                Utils.getThumbnailUrl(media, mediaType));
+                                                              media.getString("pk"),
+                                                              media.getString("code"),
+                                                              Utils.getThumbnailUrl(media, mediaType));
 
         final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
-                (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/" + username) : ""));
 
         // to check if file exists
         File customDir = null;
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
             final String customPath = settingsHelper.getString(FOLDER_PATH);
             if (!Utils.isEmpty(customPath)) customDir = new File(customPath +
-                    (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                                                                         (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER)
+                                                                          ? ("/" + username)
+                                                                          : ""));
         }
 
         Utils.checkExistence(downloadDir, customDir, mediaType == MediaItemType.MEDIA_TYPE_SLIDER, model);

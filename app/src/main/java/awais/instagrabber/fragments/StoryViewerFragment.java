@@ -33,6 +33,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -57,7 +59,6 @@ import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.CommentAction;
 import awais.instagrabber.asyncs.DownloadAsync;
@@ -72,7 +73,6 @@ import awais.instagrabber.fragments.main.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.fragments.main.viewmodels.StoriesViewModel;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
@@ -121,6 +121,7 @@ public class StoryViewerFragment extends Fragment {
     private int currentFeedStoryIndex;
     private StoriesViewModel storiesViewModel;
     private String currentStoryMediaId;
+    private boolean shouldRefresh = true;
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
     private StoryViewerFragmentArgs fragmentArgs;
@@ -137,6 +138,7 @@ public class StoryViewerFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
         if (root != null) {
+            shouldRefresh = false;
             return root;
         }
         binding = ActivityStoryViewerBinding.inflate(inflater, container, false);
@@ -146,6 +148,7 @@ public class StoryViewerFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
         init();
     }
 
@@ -274,8 +277,8 @@ public class StoryViewerFragment extends Fragment {
                     return;
                 }
                 final FeedStoryModel feedStoryModel = isRightSwipe
-                        ? feedStoryModels.get(index - 1)
-                        : feedStoryModels.size() == index + 1 ? null : feedStoryModels.get(index + 1);
+                                                      ? feedStoryModels.get(index - 1)
+                                                      : feedStoryModels.size() == index + 1 ? null : feedStoryModels.get(index + 1);
                 if (feedStoryModel != null) {
                     if (fetching) {
                         Toast.makeText(requireContext(), R.string.be_patient, Toast.LENGTH_SHORT).show();
@@ -324,8 +327,8 @@ public class StoryViewerFragment extends Fragment {
                 } catch (final Exception e) {
                     if (logCollector != null)
                         logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-                                new Pair<>("swipeEvent", swipeEvent),
-                                new Pair<>("diffX", diffX));
+                                                     new Pair<>("swipeEvent", swipeEvent),
+                                                     new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;
@@ -342,9 +345,17 @@ public class StoryViewerFragment extends Fragment {
         });
         binding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
-            if (tag instanceof CharSequence)
-                startActivity(new Intent(requireContext(), PostViewer.class)
-                        .putExtra(Constants.EXTRAS_POST, new PostModel(tag.toString(), tag.toString().matches("^[\\d]+$"))));
+            if (!(tag instanceof CharSequence)) return;
+            final String postId = tag.toString();
+            final boolean isId = tag.toString().matches("^[\\d]+$");
+            final String[] idsOrShortCodes = new String[]{postId};
+            final NavDirections action = HashTagFragmentDirections.actionGlobalPostViewFragment(
+                    0,
+                    idsOrShortCodes,
+                    isId);
+            NavHostFragment.findNavController(this).navigate(action);
+            // startActivity(new Intent(requireContext(), PostViewer.class)
+            //                       .putExtra(Constants.EXTRAS_POST, new PostModel(, ));
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();
@@ -352,10 +363,15 @@ public class StoryViewerFragment extends Fragment {
                 poll = (PollModel) tag;
                 if (poll.getMyChoice() > -1) {
                     new AlertDialog.Builder(requireContext()).setTitle(R.string.voted_story_poll)
-                                                             .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, new String[]{
-                                                                     (poll.getMyChoice() == 0 ? "√ " : "") + poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
-                                                                     (poll.getMyChoice() == 1 ? "√ " : "") + poll.getRightChoice() + " (" + poll.getRightCount() + ")"
-                                                             }), null)
+                                                             .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1,
+                                                                                            new String[]{
+                                                                                                    (poll.getMyChoice() == 0 ? "√ " : "") + poll
+                                                                                                            .getLeftChoice() + " (" + poll
+                                                                                                            .getLeftCount() + ")",
+                                                                                                    (poll.getMyChoice() == 1 ? "√ " : "") + poll
+                                                                                                            .getRightChoice() + " (" + poll
+                                                                                                            .getRightCount() + ")"
+                                                                                            }), null)
                                                              .setPositiveButton(R.string.ok, null)
                                                              .show();
                 } else {
@@ -567,13 +583,15 @@ public class StoryViewerFragment extends Fragment {
                 dir = new File(dir, currentStoryUsername);
 
             if (dir.exists() || dir.mkdirs()) {
-                final String storyUrl = currentStory.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO ? currentStory.getVideoUrl() : currentStory.getStoryUrl();
+                final String storyUrl = currentStory.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
+                                        ? currentStory.getVideoUrl()
+                                        : currentStory.getStoryUrl();
                 final File saveFile = new File(dir, currentStory.getStoryMediaId() + "_" + currentStory.getTimestamp()
                         + Utils.getExtensionFromModel(storyUrl, currentStory));
 
                 new DownloadAsync(requireContext(), storyUrl, saveFile, result -> {
                     final int toastRes = result != null && result.exists() ? R.string.downloader_complete
-                            : R.string.downloader_error_download_file;
+                                                                           : R.string.downloader_error_download_file;
                     Toast.makeText(requireContext(), toastRes, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -598,8 +616,16 @@ public class StoryViewerFragment extends Fragment {
                                                   .setImageRequest(requestBuilder)
                                                   .setOldController(binding.imageViewer.getController())
                                                   .setControllerListener(new BaseControllerListener<ImageInfo>() {
+
                                                       @Override
-                                                      public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
+                                                      public void onFailure(final String id, final Throwable throwable) {
+                                                          binding.progressView.setVisibility(View.GONE);
+                                                      }
+
+                                                      @Override
+                                                      public void onFinalImageSet(final String id,
+                                                                                  final ImageInfo imageInfo,
+                                                                                  final Animatable animatable) {
                                                           if (menuDownload != null) {
                                                               menuDownload.setVisible(true);
                                                           }
@@ -627,7 +653,10 @@ public class StoryViewerFragment extends Fragment {
                 .createMediaSource(Uri.parse(url));
         mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
             @Override
-            public void onLoadCompleted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
+            public void onLoadCompleted(final int windowIndex,
+                                        @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                        final LoadEventInfo loadEventInfo,
+                                        final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
                 if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie))
                     menuDm.setVisible(true);
@@ -635,7 +664,10 @@ public class StoryViewerFragment extends Fragment {
             }
 
             @Override
-            public void onLoadStarted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
+            public void onLoadStarted(final int windowIndex,
+                                      @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                      final LoadEventInfo loadEventInfo,
+                                      final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
                 if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie))
                     menuDm.setVisible(true);
@@ -643,12 +675,20 @@ public class StoryViewerFragment extends Fragment {
             }
 
             @Override
-            public void onLoadCanceled(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
+            public void onLoadCanceled(final int windowIndex,
+                                       @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                       final LoadEventInfo loadEventInfo,
+                                       final MediaLoadData mediaLoadData) {
                 binding.progressView.setVisibility(View.GONE);
             }
 
             @Override
-            public void onLoadError(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData, final IOException error, final boolean wasCanceled) {
+            public void onLoadError(final int windowIndex,
+                                    @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                    final LoadEventInfo loadEventInfo,
+                                    final MediaLoadData mediaLoadData,
+                                    final IOException error,
+                                    final boolean wasCanceled) {
                 if (menuDownload != null) menuDownload.setVisible(false);
                 if (menuDm != null) menuDm.setVisible(false);
                 binding.progressView.setVisibility(View.GONE);

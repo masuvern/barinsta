@@ -2,8 +2,10 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/hashtag_nav_graph"
-    app:startDestination="@id/hashTagFragment">
+    android:id="@+id/location_nav_graph"
+    app:startDestination="@id/locationFragment">
+
+    <!--<include app:graph="@navigation/post_view_nav_graph" />-->
 
     <action
         android:id="@+id/action_global_postViewFragment"
@@ -20,20 +22,20 @@
     </action>
 
     <fragment
-        android:id="@+id/hashTagFragment"
-        android:name="awais.instagrabber.fragments.HashTagFragment"
+        android:id="@+id/locationFragment"
+        android:name="awais.instagrabber.fragments.LocationFragment"
         android:label=""
-        tools:layout="@layout/fragment_hashtag">
+        tools:layout="@layout/fragment_location">
         <argument
-            android:name="hashtag"
+            android:name="locationId"
             app:argType="string"
             app:nullable="false" />
     </fragment>
     <action
-        android:id="@+id/action_global_hashTagFragment"
-        app:destination="@id/hashTagFragment">
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/locationFragment">
         <argument
-            android:name="hashtag"
+            android:name="locationId"
             app:argType="string"
             app:nullable="false" />
     </action>

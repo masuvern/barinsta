@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/discover_nav_graph"
     app:startDestination="@id/discoverFragment">
+
+    <include app:graph="@navigation/post_view_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/post_view_nav_graph">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
 
     <fragment
         android:id="@+id/discoverFragment"
         android:name="awais.instagrabber.fragments.main.DiscoverFragment"
-        android:label="DiscoverFragment" />
+        android:label="DiscoverFragment"
+        tools:layout="@layout/fragment_discover" />
 </navigation>

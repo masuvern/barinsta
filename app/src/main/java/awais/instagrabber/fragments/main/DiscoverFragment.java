@@ -1,6 +1,5 @@
 package awais.instagrabber.fragments.main;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ActionMode;
@@ -19,6 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,6 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.adapters.DiscoverAdapter;
 import awais.instagrabber.asyncs.DiscoverFetcher;
 import awais.instagrabber.asyncs.i.iTopicFetcher;
@@ -40,10 +40,7 @@ import awais.instagrabber.fragments.main.viewmodels.DiscoverItemViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.DiscoverTopicModel;
-import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
 public class DiscoverFragment extends Fragment {
@@ -134,9 +131,9 @@ public class DiscoverFragment extends Fragment {
                     if (item.getItemId() == R.id.action_download) {
                         if (discoverAdapter == null) return false;
                         Utils.batchDownload(requireContext(),
-                                null,
-                                DownloadMethod.DOWNLOAD_DISCOVER,
-                                discoverAdapter.getSelectedModels());
+                                            null,
+                                            DownloadMethod.DOWNLOAD_DISCOVER,
+                                            discoverAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }
@@ -183,7 +180,8 @@ public class DiscoverFragment extends Fragment {
                     binding.discoverSwipeRefreshLayout.setRefreshing(true);
                     if (lazyLoader != null) lazyLoader.resetState();
                     discoverItemViewModel.getList().postValue(Collections.emptyList());
-                    new DiscoverFetcher(currentTopic, null, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    new DiscoverFetcher(currentTopic, null, rankToken, discoverFetchListener, false)
+                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
 
@@ -205,10 +203,25 @@ public class DiscoverFragment extends Fragment {
                 return;
             }
             if (checkAndResetAction()) return;
-            startActivity(new Intent(requireContext(), PostViewer.class)
-                    .putExtra(Constants.EXTRAS_INDEX, position)
-                    .putExtra(Constants.EXTRAS_TYPE, ItemGetType.DISCOVER_ITEMS)
-                    .putExtra(Constants.EXTRAS_POST, new PostModel(model.getShortCode(), false)));
+            // startActivity(new Intent(requireContext(), PostViewer.class)
+            //         .putExtra(Constants.EXTRAS_INDEX, position)
+            //         .putExtra(Constants.EXTRAS_TYPE, PostItemType.DISCOVER)
+            //         .putExtra(Constants.EXTRAS_POST, new PostModel(model.getShortCode(), false)));
+            final List<DiscoverItemModel> discoverItemModels = discoverItemViewModel.getList().getValue();
+            if (discoverItemModels == null || discoverItemModels.size() == 0) return;
+            if (discoverItemModels.get(0) == null) return;
+            final String postId = discoverItemModels.get(0).getPostId();
+            final boolean isId = postId != null;
+            final String[] idsOrShortCodes = new String[discoverItemModels.size()];
+            for (int i = 0; i < discoverItemModels.size(); i++) {
+                idsOrShortCodes[i] = isId ? discoverItemModels.get(i).getPostId()
+                                          : discoverItemModels.get(i).getShortCode();
+            }
+            final NavDirections action = DiscoverFragmentDirections.actionGlobalPostViewFragment(
+                    position,
+                    idsOrShortCodes,
+                    isId);
+            NavHostFragment.findNavController(this).navigate(action);
         }, (model, position) -> {
             if (!discoverAdapter.isSelecting()) {
                 checkAndResetAction();
@@ -229,7 +242,8 @@ public class DiscoverFragment extends Fragment {
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (discoverHasMore) {
                 binding.discoverSwipeRefreshLayout.setRefreshing(true);
-                new DiscoverFetcher(currentTopic, discoverEndMaxId, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new DiscoverFetcher(currentTopic, discoverEndMaxId, rankToken, discoverFetchListener, false)
+                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 discoverEndMaxId = null;
             }
         });

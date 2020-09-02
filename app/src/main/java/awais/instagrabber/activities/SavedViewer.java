@@ -38,7 +38,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.ItemGetter;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -87,9 +87,9 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                             return false;
                         }
                         Utils.batchDownload(SavedViewer.this,
-                                username,
-                                DownloadMethod.DOWNLOAD_MAIN,
-                                postsAdapter.getSelectedModels());
+                                            username,
+                                            DownloadMethod.DOWNLOAD_MAIN,
+                                            postsAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }
@@ -123,7 +123,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                         currentlyExecuting = new iLikedFetcher(endCursor, postsFetchListener)
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else if (autoloadPosts && hasNextPage)
-                        currentlyExecuting = new PostsFetcher(action, endCursor, this)
+                        currentlyExecuting = new PostsFetcher(action, false, endCursor, this)
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     else {
                         savedBinding.swipeRefreshLayout.setRefreshing(false);
@@ -170,10 +170,10 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
             }
             if (checkAndResetAction()) return;
             startActivity(new Intent(this, PostViewer.class)
-                    .putExtra(Constants.EXTRAS_INDEX, position)
-                    .putExtra(Constants.EXTRAS_POST, postModel)
-                    .putExtra(Constants.EXTRAS_USER, username)
-                    .putExtra(Constants.EXTRAS_TYPE, ItemGetType.SAVED_ITEMS));
+                                  .putExtra(Constants.EXTRAS_INDEX, position)
+                                  .putExtra(Constants.EXTRAS_POST, postModel)
+                                  .putExtra(Constants.EXTRAS_USER, username)
+                                  .putExtra(Constants.EXTRAS_TYPE, PostItemType.SAVED));
 
         }, (model, position) -> {
             if (!postsAdapter.isSelecting()) {
@@ -193,7 +193,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
         savedBinding.swipeRefreshLayout.setRefreshing(true);
         setSupportActionBar(savedBinding.toolbar.toolbar);
         savedBinding.toolbar.toolbar.setTitle((action.charAt(0) == '$' ? R.string.saved :
-                (action.charAt(0) == '%' ? R.string.tagged : R.string.liked)));
+                                               (action.charAt(0) == '%' ? R.string.tagged : R.string.liked)));
         savedBinding.toolbar.toolbar.setSubtitle(username);
 
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
@@ -202,15 +202,16 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
                 stopCurrentExecutor();
 
                 currentlyExecuting = action.charAt(0) == '^'
-                        ? new iLikedFetcher(endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
-                        : new PostsFetcher(action, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                     ? new iLikedFetcher(endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+                                     : new PostsFetcher(action, false, endCursor, postsFetchListener)
+                                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 endCursor = null;
             }
         });
         savedBinding.mainPosts.addOnScrollListener(lazyLoader);
 
         itemGetter = itemGetType -> {
-            if (itemGetType == ItemGetType.SAVED_ITEMS)
+            if (itemGetType == PostItemType.SAVED)
                 return postsViewModel.getList().getValue();
             return null;
         };

@@ -1,6 +1,5 @@
 package awais.instagrabber.fragments;
 
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -25,6 +24,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +34,6 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.HashtagFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
@@ -50,7 +50,6 @@ import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -104,9 +103,9 @@ public class HashTagFragment extends Fragment {
                             return false;
                         }
                         Utils.batchDownload(requireContext(),
-                                hashtag,
-                                DownloadMethod.DOWNLOAD_MAIN,
-                                postsAdapter.getSelectedModels());
+                                            hashtag,
+                                            DownloadMethod.DOWNLOAD_MAIN,
+                                            postsAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }
@@ -191,11 +190,26 @@ public class HashTagFragment extends Fragment {
                 return;
             }
             if (checkAndResetAction()) return;
-            startActivity(new Intent(requireContext(), PostViewer.class)
-                    .putExtra(Constants.EXTRAS_INDEX, position)
-                    .putExtra(Constants.EXTRAS_POST, postModel)
-                    .putExtra(Constants.EXTRAS_USER, hashtag)
-                    .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
+            // startActivity(new Intent(requireContext(), PostViewer.class)
+            //                       .putExtra(Constants.EXTRAS_INDEX, position)
+            //                       .putExtra(Constants.EXTRAS_POST, postModel)
+            //                       .putExtra(Constants.EXTRAS_USER, hashtag)
+            //                       .putExtra(Constants.EXTRAS_TYPE, PostItemType.MAIN));
+            final List<PostModel> postModels = postsViewModel.getList().getValue();
+            if (postModels == null || postModels.size() == 0) return;
+            if (postModels.get(0) == null) return;
+            final String postId = postModels.get(0).getPostId();
+            final boolean isId = postId != null;
+            final String[] idsOrShortCodes = new String[postModels.size()];
+            for (int i = 0; i < postModels.size(); i++) {
+                idsOrShortCodes[i] = isId ? postModels.get(i).getPostId()
+                                          : postModels.get(i).getShortCode();
+            }
+            final NavDirections action = HashTagFragmentDirections.actionGlobalPostViewFragment(
+                    position,
+                    idsOrShortCodes,
+                    isId);
+            NavHostFragment.findNavController(this).navigate(action);
 
         }, (model, position) -> {
             if (!postsAdapter.isSelecting()) {
@@ -242,7 +256,7 @@ public class HashTagFragment extends Fragment {
         stopCurrentExecutor();
         binding.btnFollowTag.setVisibility(View.VISIBLE);
         binding.swipeRefreshLayout.setRefreshing(true);
-        currentlyExecuting = new PostsFetcher(hashtag, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        currentlyExecuting = new PostsFetcher(hashtag, false, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         if (isLoggedIn) {
             new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, stories -> {
                 storyModels = stories;
@@ -254,16 +268,16 @@ public class HashTagFragment extends Fragment {
             binding.btnFollowTag.setText(hashtagModel.getFollowing() ? R.string.unfollow : R.string.follow);
             ViewCompat.setBackgroundTintList(binding.btnFollowTag, ColorStateList.valueOf(
                     ContextCompat.getColor(requireContext(), hashtagModel.getFollowing()
-                            ? R.color.btn_purple_background
-                            : R.color.btn_pink_background)));
+                                                             ? R.color.btn_purple_background
+                                                             : R.color.btn_pink_background)));
         } else {
             binding.btnFollowTag.setText(Utils.dataBox.getFavorite(hashtag) != null
-                    ? R.string.unfavorite_short
-                    : R.string.favorite_short);
+                                         ? R.string.unfavorite_short
+                                         : R.string.favorite_short);
             ViewCompat.setBackgroundTintList(binding.btnFollowTag, ColorStateList.valueOf(
                     ContextCompat.getColor(requireContext(), Utils.dataBox.getFavorite(hashtag) != null
-                            ? R.color.btn_purple_background
-                            : R.color.btn_pink_background)));
+                                                             ? R.color.btn_purple_background
+                                                             : R.color.btn_pink_background)));
         }
         binding.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
         final String postCount = String.valueOf(hashtagModel.getPostCount());

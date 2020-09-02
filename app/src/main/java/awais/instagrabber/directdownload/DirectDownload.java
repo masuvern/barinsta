@@ -136,7 +136,7 @@ public final class DirectDownload extends Activity {
                             if (notificationManager != null) notificationManager.cancel(1900000000);
                             if (result != null) {
                                 if (result.length == 1) {
-                                    Utils.batchDownload(context, result[0].getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
+                                    Utils.batchDownload(context, result[0].getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
                                             Arrays.asList(result));
                                 } else if (result.length > 1) {
                                     context.startActivity(new Intent(context, MultiDirectDialog.class)

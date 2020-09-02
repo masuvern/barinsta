@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -32,19 +32,16 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -60,7 +57,7 @@ import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.i.iPostFetcher;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
-import awais.instagrabber.databinding.ActivityViewerBinding;
+import awais.instagrabber.databinding.ItemFullPostViewBkBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.BasePostModel;
@@ -68,16 +65,17 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
+@Deprecated
 public final class PostViewer extends BaseLanguageActivity {
-    private ActivityViewerBinding viewerBinding;
-    private String url, prevUsername, commentsEndCursor;
+    private ItemFullPostViewBkBinding viewerBinding;
+    private String url, prevUsername;
     private ProfileModel profileModel;
     private BasePostModel postModel;
     private ViewerPostModel viewerPostModel;
@@ -90,7 +88,7 @@ public final class PostViewer extends BaseLanguageActivity {
     private Resources resources;
     private boolean session = false, isFromShare, liked, saved, ok = false;
     private int slidePos = 0, lastSlidePos = 0;
-    private ItemGetType itemGetType;
+    private PostItemType postItemType;
     @SuppressLint("ClickableViewAccessibility")
     final View.OnTouchListener gestureTouchListener = new View.OnTouchListener() {
         private float startX;
@@ -117,13 +115,13 @@ public final class PostViewer extends BaseLanguageActivity {
         }
     };
     private final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
-        final String username = viewerPostModel.getUsername();
+        final String username = viewerPostModel.getProfileModel().getUsername();
 
         if (which == 0) {
             searchUsername(username);
         } else if (profileModel != null && which == 1) {
             startActivity(new Intent(this, ProfilePicViewer.class)
-                    .putExtra(Constants.EXTRAS_PROFILE, profileModel));
+                                  .putExtra(Constants.EXTRAS_PROFILE, profileModel));
         }
     };
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -131,7 +129,8 @@ public final class PostViewer extends BaseLanguageActivity {
         public void onClick(final View v) {
             if (v == viewerBinding.topPanel.ivProfilePic) {
                 new AlertDialog.Builder(PostViewer.this).setAdapter(profileDialogAdapter, profileDialogListener)
-                                                        .setNeutralButton(R.string.cancel, null).setTitle(viewerPostModel.getUsername()).show();
+                                                        .setNeutralButton(R.string.cancel, null)
+                                                        .setTitle(viewerPostModel.getProfileModel().getUsername()).show();
 
             } else if (v == viewerBinding.ivToggleFullScreen) {
                 toggleFullscreen();
@@ -185,7 +184,6 @@ public final class PostViewer extends BaseLanguageActivity {
             ActivityCompat.requestPermissions(this, Utils.PERMS, 8020);
     };
     private final PostsMediaAdapter mediaAdapter = new PostsMediaAdapter(null, onClickListener);
-    private RequestManager glideRequestManager;
     private LinearLayout.LayoutParams containerLayoutParams;
     private final FetchListener<ViewerPostModel[]> pfl = result -> {
         if (result == null || result.length < 1) {
@@ -208,25 +206,28 @@ public final class PostViewer extends BaseLanguageActivity {
 
         viewerCaptionParent.setOnTouchListener(gestureTouchListener);
         viewerBinding.playerView.setOnTouchListener(gestureTouchListener);
-        viewerBinding.imageViewer.setOnSingleFlingListener((e1, e2, velocityX, velocityY) -> {
-            final float diffX = e2.getX() - e1.getX();
-            if (Math.abs(diffX) > Math.abs(e2.getY() - e1.getY()) && Math.abs(diffX) > SwipeGestureListener.SWIPE_THRESHOLD
-                    && Math.abs(velocityX) > SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD) {
-                swipeEvent.onSwipe(diffX > 0);
-                return true;
-            }
-            return false;
-        });
+        // viewerBinding.imageViewer.setOnSingleFlingListener((e1, e2, velocityX, velocityY) -> {
+        //     final float diffX = e2.getX() - e1.getX();
+        //     if (Math.abs(diffX) > Math.abs(e2.getY() - e1.getY()) && Math.abs(diffX) > SwipeGestureListener.SWIPE_THRESHOLD
+        //             && Math.abs(velocityX) > SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD) {
+        //         swipeEvent.onSwipe(diffX > 0);
+        //         return true;
+        //     }
+        //     return false;
+        // });
 
         final long commentsCount = viewerPostModel.getCommentsCount();
         viewerBinding.bottomPanel.commentsCount.setText(String.valueOf(commentsCount));
         viewerBinding.bottomPanel.btnComments.setVisibility(View.VISIBLE);
 
         viewerBinding.bottomPanel.btnComments.setOnClickListener(v ->
-                startActivityForResult(new Intent(this, CommentsViewer.class)
-                        .putExtra(Constants.EXTRAS_SHORTCODE, postModel.getShortCode())
-                        .putExtra(Constants.EXTRAS_POST, viewerPostModel.getPostId())
-                        .putExtra(Constants.EXTRAS_USER, postUserId), 6969));
+                                                                         startActivityForResult(new Intent(this, CommentsViewer.class)
+                                                                                                        .putExtra(Constants.EXTRAS_SHORTCODE,
+                                                                                                                  postModel.getShortCode())
+                                                                                                        .putExtra(Constants.EXTRAS_POST,
+                                                                                                                  viewerPostModel.getPostId())
+                                                                                                        .putExtra(Constants.EXTRAS_USER, postUserId),
+                                                                                                6969));
         viewerBinding.bottomPanel.btnComments.setClickable(true);
         viewerBinding.bottomPanel.btnComments.setEnabled(true);
 
@@ -241,8 +242,8 @@ public final class PostViewer extends BaseLanguageActivity {
             }
         }
 
-        setupPostInfoBar("@" + viewerPostModel.getUsername(), viewerPostModel.getItemType(),
-                viewerPostModel.getLocationName(), viewerPostModel.getLocation());
+        setupPostInfoBar("@" + viewerPostModel.getProfileModel().getUsername(), viewerPostModel.getItemType(),
+                         viewerPostModel.getLocationName(), viewerPostModel.getLocation());
 
         postCaption = postModel.getPostCaption();
         viewerCaptionParent.setVisibility(View.VISIBLE);
@@ -255,10 +256,8 @@ public final class PostViewer extends BaseLanguageActivity {
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewerBinding = ActivityViewerBinding.inflate(getLayoutInflater());
+        viewerBinding = ItemFullPostViewBkBinding.inflate(getLayoutInflater());
         setContentView(viewerBinding.getRoot());
-
-        glideRequestManager = Glide.with(this);
 
         final Intent intent = getIntent();
         if (intent == null || !intent.hasExtra(Constants.EXTRAS_POST)
@@ -270,7 +269,7 @@ public final class PostViewer extends BaseLanguageActivity {
         containerLayoutParams = (LinearLayout.LayoutParams) viewerBinding.container.getLayoutParams();
 
         if (intent.hasExtra(Constants.EXTRAS_TYPE))
-            itemGetType = (ItemGetType) intent.getSerializableExtra(Constants.EXTRAS_TYPE);
+            postItemType = (PostItemType) intent.getSerializableExtra(Constants.EXTRAS_TYPE);
 
         resources = getResources();
 
@@ -295,7 +294,7 @@ public final class PostViewer extends BaseLanguageActivity {
         viewerBinding.btnDownload.setOnClickListener(downloadClickListener);
 
         profileDialogAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                new String[]{resources.getString(R.string.open_profile), resources.getString(R.string.view_pfp)});
+                                                  new String[]{resources.getString(R.string.open_profile), resources.getString(R.string.view_pfp)});
 
         postModel.setPosition(intent.getIntExtra(Constants.EXTRAS_INDEX, -1));
 
@@ -314,17 +313,17 @@ public final class PostViewer extends BaseLanguageActivity {
 
         swipeEvent = isRight -> {
             final List<? extends BasePostModel> itemGetterItems;
-            final boolean isMainSwipe;
+            final boolean isSwipeable;
 
-            if (itemGetType == ItemGetType.SAVED_ITEMS && SavedViewer.itemGetter != null) {
-                itemGetterItems = SavedViewer.itemGetter.get(itemGetType);
-                isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.SAVED_ITEMS && isFromShare);
-            } else if (itemGetType != null && MainActivityBackup.itemGetter != null) {
-                itemGetterItems = MainActivityBackup.itemGetter.get(itemGetType);
-                isMainSwipe = !(itemGetterItems.size() < 1 || itemGetType == ItemGetType.MAIN_ITEMS && isFromShare);
+            if (postItemType == PostItemType.SAVED && SavedViewer.itemGetter != null) {
+                itemGetterItems = SavedViewer.itemGetter.get(postItemType);
+                isSwipeable = !(itemGetterItems.size() < 1 || postItemType == PostItemType.SAVED && isFromShare);
+            } else if (postItemType != null && MainActivityBackup.itemGetter != null) {
+                itemGetterItems = MainActivityBackup.itemGetter.get(postItemType);
+                isSwipeable = !(itemGetterItems.size() < 1 || postItemType == PostItemType.MAIN && isFromShare);
             } else {
                 itemGetterItems = null;
-                isMainSwipe = false;
+                isSwipeable = false;
             }
 
             final BasePostModel[] basePostModels = mediaAdapter.getPostModels();
@@ -334,7 +333,7 @@ public final class PostViewer extends BaseLanguageActivity {
 
             if (isRight) {
                 --slidePos;
-                if (!isMainSwipe && slidePos < 0) slidePos = 0;
+                if (!isSwipeable && slidePos < 0) slidePos = 0;
                 if (slides > 0 && slidePos >= 0) {
                     if (basePostModels[slidePos] instanceof ViewerPostModel) {
                         viewerPostModel = (ViewerPostModel) basePostModels[slidePos];
@@ -342,10 +341,10 @@ public final class PostViewer extends BaseLanguageActivity {
                     refreshPost();
                     return;
                 }
-                if (isMainSwipe && --position < 0) position = itemGetterItems.size() - 1;
+                if (isSwipeable && --position < 0) position = itemGetterItems.size() - 1;
             } else {
                 ++slidePos;
-                if (!isMainSwipe && slidePos >= slides) slidePos = slides - 1;
+                if (!isSwipeable && slidePos >= slides) slidePos = slides - 1;
                 if (slides > 0 && slidePos < slides) {
                     if (basePostModels[slidePos] instanceof ViewerPostModel) {
                         viewerPostModel = (ViewerPostModel) basePostModels[slidePos];
@@ -353,10 +352,10 @@ public final class PostViewer extends BaseLanguageActivity {
                     refreshPost();
                     return;
                 }
-                if (isMainSwipe && ++position >= itemGetterItems.size()) position = 0;
+                if (isSwipeable && ++position >= itemGetterItems.size()) position = 0;
             }
 
-            if (isMainSwipe) {
+            if (isSwipeable) {
                 slidePos = 0;
                 ok = false;
                 Log.d("AWAISKING_APP", "swipe left <<< post[" + position + "]: " + postModel + " -- " + slides);
@@ -386,8 +385,7 @@ public final class PostViewer extends BaseLanguageActivity {
 
         viewerBinding.playerView.setVisibility(View.GONE);
         viewerBinding.playerView.setPlayer(null);
-        viewerBinding.imageViewer.setImageResource(0);
-        viewerBinding.imageViewer.setImageDrawable(null);
+        viewerBinding.imageViewer.setController(null);
 
         if (postModel.getShortCode() != null)
             new PostFetcher(postModel.getShortCode(), pfl).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -408,7 +406,7 @@ public final class PostViewer extends BaseLanguageActivity {
         viewerBinding.bottomPanel.btnMute.setVisibility(View.VISIBLE);
         viewerBinding.progressView.setVisibility(View.GONE);
         viewerBinding.imageViewer.setVisibility(View.GONE);
-        viewerBinding.imageViewer.setImageDrawable(null);
+        viewerBinding.imageViewer.setController(null);
 
         if (viewerPostModel.getVideoViews() > -1) {
             viewsContainer.setVisibility(View.VISIBLE);
@@ -426,22 +424,36 @@ public final class PostViewer extends BaseLanguageActivity {
                 .createMediaSource(Uri.parse(url));
         mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
             @Override
-            public void onLoadCompleted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
+            public void onLoadCompleted(final int windowIndex,
+                                        @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                        final LoadEventInfo loadEventInfo,
+                                        final MediaLoadData mediaLoadData) {
                 viewerBinding.progressView.setVisibility(View.GONE);
             }
 
             @Override
-            public void onLoadStarted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
+            public void onLoadStarted(final int windowIndex,
+                                      @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                      final LoadEventInfo loadEventInfo,
+                                      final MediaLoadData mediaLoadData) {
                 viewerBinding.progressView.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void onLoadCanceled(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
+            public void onLoadCanceled(final int windowIndex,
+                                       @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                       final LoadEventInfo loadEventInfo,
+                                       final MediaLoadData mediaLoadData) {
                 viewerBinding.progressView.setVisibility(View.GONE);
             }
 
             @Override
-            public void onLoadError(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData, final IOException error, final boolean wasCanceled) {
+            public void onLoadError(final int windowIndex,
+                                    @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                    final LoadEventInfo loadEventInfo,
+                                    final MediaLoadData mediaLoadData,
+                                    final IOException error,
+                                    final boolean wasCanceled) {
                 viewerBinding.progressView.setVisibility(View.GONE);
             }
         });
@@ -459,26 +471,31 @@ public final class PostViewer extends BaseLanguageActivity {
         viewerBinding.progressView.setVisibility(View.VISIBLE);
         viewerBinding.bottomPanel.btnMute.setVisibility(View.GONE);
         viewerBinding.bottomPanel.btnDownload.setVisibility(View.VISIBLE);
-
-        viewerBinding.imageViewer.setImageDrawable(null);
         viewerBinding.imageViewer.setVisibility(View.VISIBLE);
-        viewerBinding.imageViewer.setZoomable(true);
-        viewerBinding.imageViewer.setZoomTransitionDuration(420);
-        viewerBinding.imageViewer.setMaximumScale(7.2f);
 
-        glideRequestManager.load(url).listener(new RequestListener<Drawable>() {
-            @Override
-            public boolean onLoadFailed(@Nullable final GlideException e, final Object model, final Target<Drawable> target, final boolean isFirstResource) {
-                viewerBinding.progressView.setVisibility(View.GONE);
-                return false;
-            }
+        final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
+                                                               .setLocalThumbnailPreviewsEnabled(true)
+                                                               .setProgressiveRenderingEnabled(true)
+                                                               .build();
+        viewerBinding.imageViewer.setController(
+                Fresco.newDraweeControllerBuilder()
+                      .setImageRequest(requestBuilder)
+                      .setOldController(viewerBinding.imageViewer.getController())
+                      .setLowResImageRequest(ImageRequest.fromUri(url))
+                      .setControllerListener(new BaseControllerListener<ImageInfo>() {
 
-            @Override
-            public boolean onResourceReady(final Drawable resource, final Object model, final Target<Drawable> target, final DataSource dataSource, final boolean isFirstResource) {
-                viewerBinding.progressView.setVisibility(View.GONE);
-                return false;
-            }
-        }).into(viewerBinding.imageViewer);
+                          @Override
+                          public void onFailure(final String id, final Throwable throwable) {
+                              viewerBinding.progressView.setVisibility(View.GONE);
+                          }
+
+                          @Override
+                          public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
+                              viewerBinding.progressView.setVisibility(View.GONE);
+                          }
+                      })
+                      .build()
+        );
     }
 
     private void showDownloadDialog() {
@@ -502,15 +519,17 @@ public final class PostViewer extends BaseLanguageActivity {
                 }
 
                 if (postModels.size() > 0)
-                    Utils.batchDownload(this, viewerPostModel.getUsername(), DownloadMethod.DOWNLOAD_POST_VIEWER, postModels);
+                    Utils.batchDownload(this, viewerPostModel.getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_POST_VIEWER, postModels);
             };
 
             new AlertDialog.Builder(this).setTitle(R.string.post_viewer_download_dialog_title)
                                          .setMessage(R.string.post_viewer_download_message)
-                                         .setNeutralButton(R.string.post_viewer_download_session, clickListener).setPositiveButton(R.string.post_viewer_download_current, clickListener)
+                                         .setNeutralButton(R.string.post_viewer_download_session, clickListener)
+                                         .setPositiveButton(R.string.post_viewer_download_current, clickListener)
                                          .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
         } else {
-            Utils.batchDownload(this, viewerPostModel.getUsername(), DownloadMethod.DOWNLOAD_POST_VIEWER, Collections.singletonList(viewerPostModel));
+            Utils.batchDownload(this, viewerPostModel.getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_POST_VIEWER,
+                                Collections.singletonList(viewerPostModel));
         }
     }
 
@@ -582,9 +601,9 @@ public final class PostViewer extends BaseLanguageActivity {
             viewerBinding.bottomPanel.viewerCaption.setMentionClickListener(null);
             viewerBinding.bottomPanel.viewerCaption.setText(postCaption);
         }
-      
-        setupPostInfoBar("@" + viewerPostModel.getUsername(), viewerPostModel.getItemType(),
-                viewerPostModel.getLocationName(), viewerPostModel.getLocation());
+
+        setupPostInfoBar("@" + viewerPostModel.getProfileModel().getUsername(), viewerPostModel.getItemType(),
+                         viewerPostModel.getLocationName(), viewerPostModel.getLocation());
 
         if (postModel instanceof PostModel) {
             final PostModel postModel = (PostModel) this.postModel;
@@ -682,7 +701,9 @@ public final class PostViewer extends BaseLanguageActivity {
                                 sharingIntent.setType("text/plain");
                                 sharingIntent.putExtra(Intent.EXTRA_TEXT, "https://instagram.com/p/" + postShortCode);
                                 startActivity(Intent.createChooser(sharingIntent,
-                                        (result.isPrivate()) ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
+                                                                   (result.isPrivate())
+                                                                   ? getString(R.string.share_private_post)
+                                                                   : getString(R.string.share_public_post)));
                             });
                         }
                     }
@@ -691,7 +712,7 @@ public final class PostViewer extends BaseLanguageActivity {
         }
 
         final String titlePrefix = resources.getString(mediaItemType == MediaItemType.MEDIA_TYPE_VIDEO ?
-                R.string.post_viewer_video_post : R.string.post_viewer_image_post);
+                                                       R.string.post_viewer_video_post : R.string.post_viewer_image_post);
         if (Utils.isEmpty(from)) viewerBinding.topPanel.title.setText(titlePrefix);
         else {
             final int titleLen = from.length();
@@ -731,15 +752,15 @@ public final class PostViewer extends BaseLanguageActivity {
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
             final String url = "https://www.instagram.com/web/" + action + "/" + postModel.getPostId() + "/" + (action == "save" ?
-                    (saved ? "unsave/" : "save/") :
-                    (liked ? "unlike/" : "like/"));
+                                                                                                                (saved ? "unsave/" : "save/") :
+                                                                                                                (liked ? "unlike/" : "like/"));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
                 urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
                 urlConnection.setRequestProperty("x-csrftoken",
-                        settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                                                 settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
                 urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     ok = true;

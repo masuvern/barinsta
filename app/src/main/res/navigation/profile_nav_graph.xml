@@ -16,11 +16,28 @@
             app:nullable="false" />
     </action>
 
+    <include app:graph="@navigation/post_view_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/post_view_nav_graph">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
+
     <action
         android:id="@+id/action_global_profileFragment"
         app:destination="@id/profileFragment">
         <argument
             android:name="username"
+            android:defaultValue=""
             app:argType="string"
             app:nullable="false" />
     </action>
@@ -29,13 +46,11 @@
         android:id="@+id/profileFragment"
         android:name="awais.instagrabber.fragments.main.ProfileFragment"
         android:label="@string/profile"
-        tools:layout="@layout/fragment_profile" >
+        tools:layout="@layout/fragment_profile">
         <argument
             android:name="username"
+            android:defaultValue=""
             app:argType="string"
-            app:nullable="false" />
-        <!--<action-->
-        <!--    android:id="@+id/action_profileFragment_self"-->
-        <!--    app:destination="@id/profileFragment" />-->
+            app:nullable="true" />
     </fragment>
 </navigation>

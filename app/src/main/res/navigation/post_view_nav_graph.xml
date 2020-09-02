@@ -2,8 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/feed_nav_graph"
-    app:startDestination="@id/feedFragment">
+    android:id="@+id/post_view_nav_graph"
+    app:startDestination="@id/postViewFragment">
 
     <include app:graph="@navigation/hashtag_nav_graph" />
 
@@ -15,8 +15,7 @@
             app:argType="string"
             app:nullable="false" />
     </action>
-
-    <include app:graph="@navigation/profile_nav_graph" />
+    <!--<include app:graph="@navigation/profile_nav_graph" />-->
 
     <action
         android:id="@+id/action_global_profileFragment"
@@ -37,12 +36,23 @@
             app:argType="string"
             app:nullable="false" />
     </action>
-
-    <include app:graph="@navigation/post_view_nav_graph" />
-
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewFragment"
+        tools:layout="@layout/item_full_post_view">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </fragment>
     <action
         android:id="@+id/action_global_postViewFragment"
-        app:destination="@id/post_view_nav_graph">
+        app:destination="@id/postViewFragment">
         <argument
             android:name="index"
             app:argType="integer" />
@@ -54,30 +64,4 @@
             app:argType="boolean" />
     </action>
 
-    <fragment
-        android:id="@+id/feedFragment"
-        android:name="awais.instagrabber.fragments.main.FeedFragment"
-        android:label="FeedFragment"
-        tools:layout="@layout/fragment_feed">
-        <action
-            android:id="@+id/action_feedFragment_to_storyViewerFragment"
-            app:destination="@id/storyViewerFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/storyViewerFragment"
-        android:name="awais.instagrabber.fragments.StoryViewerFragment"
-        android:label="StoryViewerFragment"
-        tools:layout="@layout/activity_story_viewer">
-        <argument
-            android:name="feedStoryIndex"
-            app:argType="integer"
-            app:nullable="false" />
-        <argument
-            android:name="highlight"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isHashtag"
-            app:argType="boolean" />
-    </fragment>
 </navigation>

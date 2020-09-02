@@ -24,6 +24,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +34,6 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
@@ -49,7 +50,6 @@ import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.ItemGetType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -64,7 +64,7 @@ public class LocationFragment extends Fragment {
     private FragmentLocationBinding binding;
     private NestedCoordinatorLayout root;
     private boolean shouldRefresh = true;
-    private String location;
+    private String locationId;
     private LocationModel locationModel;
     private PostsViewModel postsViewModel;
     private PostsAdapter postsAdapter;
@@ -89,29 +89,29 @@ public class LocationFragment extends Fragment {
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
-            R.menu.multi_select_download_menu,
-            new PrimaryActionModeCallback.CallbacksHelper() {
-                @Override
-                public void onDestroy(final ActionMode mode) {
-                    onBackPressedCallback.handleOnBackPressed();
-                }
+            R.menu.multi_select_download_menu, new PrimaryActionModeCallback.CallbacksHelper() {
+        @Override
+        public void onDestroy(final ActionMode mode) {
+            onBackPressedCallback.handleOnBackPressed();
+        }
 
-                @Override
-                public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
-                    if (item.getItemId() == R.id.action_download) {
-                        if (postsAdapter == null || location == null) {
-                            return false;
-                        }
-                        Utils.batchDownload(requireContext(),
-                                location,
-                                DownloadMethod.DOWNLOAD_MAIN,
-                                postsAdapter.getSelectedModels());
-                        checkAndResetAction();
-                        return true;
-                    }
+        @Override
+        public boolean onActionItemClicked(final ActionMode mode,
+                                           final MenuItem item) {
+            if (item.getItemId() == R.id.action_download) {
+                if (postsAdapter == null || locationId == null) {
                     return false;
                 }
-            });
+                Utils.batchDownload(requireContext(),
+                                    locationId,
+                                    DownloadMethod.DOWNLOAD_MAIN,
+                                    postsAdapter.getSelectedModels());
+                checkAndResetAction();
+                return true;
+            }
+            return false;
+        }
+    });
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
@@ -119,7 +119,8 @@ public class LocationFragment extends Fragment {
             if (result == null) return;
             binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
             final List<PostModel> postModels = postsViewModel.getList().getValue();
-            final List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>() : new ArrayList<>(postModels);
+            final List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>()
+                                                                                         : new ArrayList<>(postModels);
             finalList.addAll(Arrays.asList(result));
             postsViewModel.getList().postValue(finalList);
             PostModel model = null;
@@ -141,7 +142,9 @@ public class LocationFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater,
+                             @Nullable final ViewGroup container,
+                             @Nullable final Bundle savedInstanceState) {
         if (root != null) {
             shouldRefresh = false;
             return root;
@@ -171,7 +174,7 @@ public class LocationFragment extends Fragment {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         final LocationFragmentArgs fragmentArgs = LocationFragmentArgs.fromBundle(getArguments());
-        location = fragmentArgs.getLocation();
+        locationId = fragmentArgs.getLocationId();
         setTitle();
         setupPosts();
         fetchLocationModel();
@@ -190,11 +193,26 @@ public class LocationFragment extends Fragment {
                 return;
             }
             if (checkAndResetAction()) return;
-            startActivity(new Intent(requireContext(), PostViewer.class)
-                    .putExtra(Constants.EXTRAS_INDEX, position)
-                    .putExtra(Constants.EXTRAS_POST, postModel)
-                    .putExtra(Constants.EXTRAS_USER, location)
-                    .putExtra(Constants.EXTRAS_TYPE, ItemGetType.MAIN_ITEMS));
+            final List<PostModel> postModels = postsViewModel.getList().getValue();
+            if (postModels == null || postModels.size() == 0) return;
+            if (postModels.get(0) == null) return;
+            final String postId = postModels.get(0).getPostId();
+            final boolean isId = postId != null;
+            final String[] idsOrShortCodes = new String[postModels.size()];
+            for (int i = 0; i < postModels.size(); i++) {
+                idsOrShortCodes[i] = isId ? postModels.get(i).getPostId()
+                                          : postModels.get(i).getShortCode();
+            }
+            final NavDirections action = LocationFragmentDirections.actionGlobalPostViewFragment(
+                    position,
+                    idsOrShortCodes,
+                    isId);
+            NavHostFragment.findNavController(this).navigate(action);
+            // startActivity(new Intent(requireContext(), PostViewer.class)
+            //                       .putExtra(Constants.EXTRAS_INDEX, position)
+            //                       .putExtra(Constants.EXTRAS_POST, postModel)
+            //                       .putExtra(Constants.EXTRAS_USER, locationId)
+            //                       .putExtra(Constants.EXTRAS_TYPE, PostItemType.MAIN));
 
         }, (model, position) -> {
             if (!postsAdapter.isSelecting()) {
@@ -204,7 +222,8 @@ public class LocationFragment extends Fragment {
             if (onBackPressedCallback.isEnabled()) {
                 return true;
             }
-            final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
+            final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity
+                    .getOnBackPressedDispatcher();
             onBackPressedCallback.setEnabled(true);
             actionMode = fragmentActivity.startActionMode(multiSelectAction);
             final String title = getString(R.string.number_selected, 1);
@@ -226,7 +245,7 @@ public class LocationFragment extends Fragment {
     private void fetchLocationModel() {
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
-        currentlyExecuting = new LocationFetcher(location.split("/")[0], result -> {
+        currentlyExecuting = new LocationFetcher(locationId, result -> {
             locationModel = result;
             binding.swipeRefreshLayout.setRefreshing(false);
             if (locationModel == null) {
@@ -243,16 +262,24 @@ public class LocationFragment extends Fragment {
         final String locationId = locationModel.getId();
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) {
-            new iStoryStatusFetcher(locationId.split("/")[0], null, true, false, false, false, stories -> {
-                storyModels = stories;
-                if (stories != null && stories.length > 0) {
-                    binding.mainLocationImage.setStoriesBorder();
-                }
-            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new iStoryStatusFetcher(
+                    locationId,
+                    null,
+                    true,
+                    false,
+                    false,
+                    false,
+                    stories -> {
+                        storyModels = stories;
+                        if (stories != null && stories.length > 0) {
+                            binding.mainLocationImage.setStoriesBorder();
+                        }
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
         binding.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
         final String postCount = String.valueOf(locationModel.getPostCount());
-        final SpannableStringBuilder span = new SpannableStringBuilder(getString(R.string.main_posts_count, postCount));
+        final SpannableStringBuilder span = new SpannableStringBuilder(getString(R.string.main_posts_count,
+                                                                                 postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         binding.mainLocPostCount.setText(span);
@@ -301,7 +328,7 @@ public class LocationFragment extends Fragment {
 
     private void fetchPosts() {
         stopCurrentExecutor();
-        currentlyExecuting = new PostsFetcher(locationModel.getId(), endCursor, postsFetchListener)
+        currentlyExecuting = new PostsFetcher(locationModel.getId(), true, endCursor, postsFetchListener)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -310,8 +337,8 @@ public class LocationFragment extends Fragment {
             try {
                 currentlyExecuting.cancel(true);
             } catch (final Exception e) {
-                if (logCollector != null)
-                    logCollector.appendException(e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
+                if (logCollector != null) logCollector.appendException(
+                        e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
                 Log.e(TAG, "", e);
             }
         }

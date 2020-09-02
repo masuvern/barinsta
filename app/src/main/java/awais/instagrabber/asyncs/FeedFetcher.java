@@ -64,7 +64,7 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
 
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 final String json = Utils.readFromConnection(urlConnection);
-                Log.d(TAG, json);
+                // Log.d(TAG, json);
                 final JSONObject timelineFeed = new JSONObject(json).getJSONObject("data")
                                                                     .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_web_feed_timeline");
 
@@ -104,15 +104,24 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                     ProfileModel profileModel = null;
                     if (feedItem.has("owner")) {
                         final JSONObject owner = feedItem.getJSONObject("owner");
-                        profileModel = new ProfileModel(owner.optBoolean("is_private"),
+                        profileModel = new ProfileModel(
+                                owner.optBoolean("is_private"),
                                 false, // if you can see it then you def follow
                                 owner.optBoolean("is_verified"),
                                 owner.getString(Constants.EXTRAS_ID),
                                 owner.getString(Constants.EXTRAS_USERNAME),
                                 owner.optString("full_name"),
-                                null, null,
+                                null,
+                                null,
                                 owner.getString("profile_pic_url"),
-                                null, 0, 0, 0, false, false, false, false);
+                                null,
+                                0,
+                                0,
+                                0,
+                                false,
+                                false,
+                                false,
+                                false);
                     }
 
                     JSONObject tempJsonObject = feedItem.optJSONObject("edge_media_preview_comment");
@@ -128,7 +137,21 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                             captionText = tempJsonObject.getString("text");
                     }
 
-                    final FeedModel feedModel = new FeedModel(profileModel,
+                    final JSONObject location = feedItem.optJSONObject("location");
+                    // Log.d(TAG, "location: " + (location == null ? null : location.toString()));
+                    String locationId = null;
+                    String locationName = null;
+                    if (location != null) {
+                        locationName = location.optString("name");
+                        if (location.has("id")) {
+                            locationId = location.getString("id");
+                        } else if (location.has("pk")) {
+                            locationId = location.getString("pk");
+                        }
+                        // Log.d(TAG, "locationId: " + locationId);
+                    }
+                    final FeedModel feedModel = new FeedModel(
+                            profileModel,
                             isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                             videoViews,
                             feedItem.getString(Constants.EXTRAS_ID),
@@ -141,7 +164,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                             feedItem.getBoolean("viewer_has_liked"),
                             feedItem.getBoolean("viewer_has_saved"),
                             feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
-                            feedItem.optJSONObject("location"));
+                            locationName,
+                            locationId);
 
                     final boolean isSlider = "GraphSidecar".equals(mediaType) && feedItem.has("edge_sidecar_to_children");
 
@@ -161,13 +185,16 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                                             isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                             node.getString(Constants.EXTRAS_ID),
                                             isChildVideo ? node.getString("video_url") : Utils.getHighQualityImage(node),
-                                            null, null, null,
-                                            node.optLong("video_view_count", -1), -1, false, false,
+                                            null,
+                                            null,
+                                            null,
+                                            node.optLong("video_view_count", -1),
+                                            -1,
+                                            false,
+                                            false,
                                             feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
-                                            feedItem.isNull("location") ? null : feedItem.getJSONObject("location").optString("name"),
-                                            feedItem.isNull("location") ? null :
-                                                    (feedItem.getJSONObject("location").optString("id") + "/" +
-                                                            feedItem.getJSONObject("location").optString("slug")));
+                                            locationName,
+                                            locationId);
 
                                     sliderItems[j].setSliderDisplayUrl(node.getString("display_url"));
                                 }
@@ -193,7 +220,9 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_FEED_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) {
+                Log.e(TAG, "", e);
+            }
         }
 
         return result;
