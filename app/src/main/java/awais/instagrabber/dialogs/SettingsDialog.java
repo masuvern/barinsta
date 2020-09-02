@@ -42,7 +42,9 @@ import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.AUTOPLAY_VIDEOS;
 import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Constants.CHECK_ACTIVITY;
+import static awais.instagrabber.utils.Constants.CHECK_UPDATES;
 import static awais.instagrabber.utils.Constants.COOKIE;
+import static awais.instagrabber.utils.Constants.DM_MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
@@ -137,22 +139,26 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         final AppCompatCheckBox cbAutoplayVideos = contentView.findViewById(R.id.cbAutoplayVideos);
         final AppCompatCheckBox cbDownloadUsername = contentView.findViewById(R.id.cbDownloadUsername);
         final AppCompatCheckBox cbMarkAsSeen = contentView.findViewById(R.id.cbMarkAsSeen);
+        final AppCompatCheckBox cbMarkDmAsSeen = contentView.findViewById(R.id.cbMarkDmAsSeen);
         final AppCompatCheckBox cbActivity = contentView.findViewById(R.id.cbActivity);
         final AppCompatCheckBox cbInstadp = contentView.findViewById(R.id.cbInstadp);
         final AppCompatCheckBox cbStoriesig = contentView.findViewById(R.id.cbStoriesig);
         final AppCompatCheckBox cbAmoledTheme = contentView.findViewById(R.id.cbAmoledTheme);
+        final AppCompatCheckBox cbUpdates = contentView.findViewById(R.id.cbUpdates);
 
         cbSaveTo.setChecked(settingsHelper.getBoolean(FOLDER_SAVE_TO));
         cbMuteVideos.setChecked(settingsHelper.getBoolean(MUTED_VIDEOS));
         cbBottomToolbar.setChecked(settingsHelper.getBoolean(BOTTOM_TOOLBAR));
         cbAutoplayVideos.setChecked(settingsHelper.getBoolean(AUTOPLAY_VIDEOS));
         cbMarkAsSeen.setChecked(settingsHelper.getBoolean(MARK_AS_SEEN));
+        cbMarkDmAsSeen.setChecked(settingsHelper.getBoolean(DM_MARK_AS_SEEN));
         cbInstadp.setChecked(settingsHelper.getBoolean(INSTADP));
         cbStoriesig.setChecked(settingsHelper.getBoolean(STORIESIG));
         cbAmoledTheme.setChecked(settingsHelper.getBoolean(AMOLED_THEME));
         cbActivity.setChecked(settingsHelper.getBoolean(CHECK_ACTIVITY));
         cbAutoloadPosts.setChecked(settingsHelper.getBoolean(AUTOLOAD_POSTS));
         cbDownloadUsername.setChecked(settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER));
+        cbUpdates.setChecked(settingsHelper.getBoolean(CHECK_UPDATES));
 
         setupListener(cbSaveTo);
         setupListener(cbMuteVideos);
@@ -161,10 +167,12 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         setupListener(cbAutoplayVideos);
         setupListener(cbDownloadUsername);
         setupListener(cbMarkAsSeen);
+        setupListener(cbMarkDmAsSeen);
         setupListener(cbInstadp);
         setupListener(cbStoriesig);
         setupListener(cbAmoledTheme);
         setupListener(cbActivity);
+        setupListener(cbUpdates);
 
         btnSaveTo.setEnabled(cbSaveTo.isChecked());
 
@@ -254,10 +262,12 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         else if (id == R.id.cbMuteVideos) settingsHelper.putBoolean(MUTED_VIDEOS, checked);
         else if (id == R.id.cbAutoloadPosts) settingsHelper.putBoolean(AUTOLOAD_POSTS, checked);
         else if (id == R.id.cbMarkAsSeen) settingsHelper.putBoolean(MARK_AS_SEEN, checked);
+        else if (id == R.id.cbMarkDmAsSeen) settingsHelper.putBoolean(DM_MARK_AS_SEEN, checked);
         else if (id == R.id.cbInstadp) settingsHelper.putBoolean(INSTADP, checked);
         else if (id == R.id.cbStoriesig) settingsHelper.putBoolean(STORIESIG, checked);
         else if (id == R.id.cbAmoledTheme) settingsHelper.putBoolean(AMOLED_THEME, checked);
         else if (id == R.id.cbActivity) settingsHelper.putBoolean(CHECK_ACTIVITY, checked);
+        else if (id == R.id.cbUpdates) settingsHelper.putBoolean(CHECK_UPDATES, checked);
         else if (id == R.id.cbSaveTo) {
             settingsHelper.putBoolean(FOLDER_SAVE_TO, checked);
             btnSaveTo.setEnabled(checked);

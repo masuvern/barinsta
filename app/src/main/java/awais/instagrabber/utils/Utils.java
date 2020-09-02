@@ -475,7 +475,7 @@ public final class Utils {
     @NonNull
     public static InboxThreadModel createInboxThreadModel(@NonNull final JSONObject data, final boolean inThreadView) throws Exception {
         final InboxReadState readState = data.getInt("read_state") == 0 ? InboxReadState.STATE_READ : InboxReadState.STATE_UNREAD;
-        final String threadType = data.getString("thread_type");// private = dms, [??] = group
+        final String threadType = data.getString("thread_type"); // they're all "private", group is identified by boolean "is_group"
 
         final String threadId = data.getString("thread_id");
         final String threadV2Id = data.getString("thread_v2_id");
@@ -487,7 +487,7 @@ public final class Utils {
         final String threadPrevCursor = data.has("prev_cursor") ? data.getString("prev_cursor") : null;
 
         final boolean threadHasOlder = data.getBoolean("has_older");
-        final boolean threadHasNewer = data.getBoolean("has_newer");
+        final long unreadCount = data.optLong("read_state", 0);
 
         final long lastActivityAt = data.optLong("last_activity_at");
         final boolean named = data.optBoolean("named");
@@ -503,6 +503,8 @@ public final class Utils {
         final int usersLen = users.length();
         final JSONArray leftusers = data.getJSONArray("left_users");
         final int leftusersLen = leftusers.length();
+        final JSONArray admins = data.getJSONArray("admin_user_ids");
+        final int adminsLen = admins.length();
 
         final ProfileModel[] userModels = new ProfileModel[usersLen];
         for (int j = 0; j < usersLen; ++j) {
@@ -530,6 +532,11 @@ public final class Utils {
                     null, null,
                     userObject.getString("profile_pic_url"),
                     null, 0, 0, 0, false, false, false, false);
+        }
+
+        final Long[] adminIDs = new Long[adminsLen];
+        for (int j = 0; j < adminsLen; ++j) {
+            adminIDs[j] = admins.getLong(j);
         }
 
         final JSONArray items = data.getJSONArray("items");
@@ -710,7 +717,6 @@ public final class Utils {
                     break;
 
                 case CLIP:
-                    Log.d("austin_debug", "clip: "+itemObject.getJSONObject("clip").getJSONObject("clip"));
                     directMedia = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
                     break;
 
@@ -779,10 +785,10 @@ public final class Utils {
         return new InboxThreadModel(readState, threadId, threadV2Id, threadType, threadTitle,
                 threadNewestCursor, threadOldestCursor, threadNextCursor, threadPrevCursor,
                 null, // todo
-                userModels, leftuserModels,
+                userModels, leftuserModels, adminIDs,
                 itemModels.toArray(new DirectItemModel[0]),
                 muted, isPin, named, canonical,
-                pending, threadHasOlder, threadHasNewer, isSpam, isGroup, archived, lastActivityAt);
+                pending, threadHasOlder, unreadCount, isSpam, isGroup, archived, lastActivityAt);
     }
 
     private static RavenExpiringMediaType getExpiringMediaType(final String type) {

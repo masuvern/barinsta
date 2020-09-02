@@ -101,5 +101,6 @@ public final class DirectMessageInboxItemViewHolder extends RecyclerView.ViewHol
         }
         binding.tvComment.setText(HtmlCompat.fromHtml(messageText.toString(), HtmlCompat.FROM_HTML_MODE_COMPACT));
         binding.tvDate.setText(lastItemModel.getDateTime());
+        binding.unread.setVisibility(model.getUnreadCount() > 0L ? View.VISIBLE : View.GONE);
     }
 }

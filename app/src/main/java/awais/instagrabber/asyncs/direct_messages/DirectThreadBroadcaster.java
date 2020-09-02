@@ -161,7 +161,7 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
             super(ItemType.TEXT);
             this.text = URLEncoder.encode(text, "UTF-8")
                     .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
-                    .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
+                    .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~").replaceAll("%0A", "\n");
         }
 
         @Override
@@ -197,7 +197,7 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
             super(ItemType.REELSHARE);
             this.text = URLEncoder.encode(text, "UTF-8")
                     .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
-                    .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
+                    .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~").replaceAll("%0A", "\n");
             this.mediaId = mediaId;
             this.reelId = reelId; // or user id, usually same
         }

@@ -12,16 +12,17 @@ public final class InboxThreadModel implements Serializable {
     private final String threadId, threadV2Id, threadType, threadTitle, newestCursor, oldestCursor, nextCursor, prevCursor;
     private final ProfileModel inviter;
     private final ProfileModel[] users, leftUsers;
+    private final Long[] admins;
     private final DirectItemModel[] items;
-    private final boolean muted, isPin, isSpam, isGroup, named, pending, archived, canonical, hasOlder, hasNewer;
-    private final long lastActivityAt;
+    private final boolean muted, isPin, isSpam, isGroup, named, pending, archived, canonical, hasOlder;
+    private final long unreadCount, lastActivityAt;
 
     public InboxThreadModel(final InboxReadState readState, final String threadId, final String threadV2Id, final String threadType, final String threadTitle,
                             final String newestCursor, final String oldestCursor, final String nextCursor, final String prevCursor,
-                            final ProfileModel inviter, final ProfileModel[] users,
-                            final ProfileModel[] leftUsers, final DirectItemModel[] items, final boolean muted,
+                            final ProfileModel inviter, final ProfileModel[] users, final ProfileModel[] leftUsers,
+                            final Long[] admins, final DirectItemModel[] items, final boolean muted,
                             final boolean isPin, final boolean named, final boolean canonical, final boolean pending,
-                            final boolean hasOlder, final boolean hasNewer, final boolean isSpam, final boolean isGroup,
+                            final boolean hasOlder, final long unreadCount, final boolean isSpam, final boolean isGroup,
                             final boolean archived, final long lastActivityAt) {
         this.readState = readState;
         this.threadId = threadId;
@@ -35,6 +36,7 @@ public final class InboxThreadModel implements Serializable {
         this.inviter = inviter;
         this.users = users;
         this.leftUsers = leftUsers;
+        this.admins = admins;
         this.items = items; // todo
         this.muted = muted;
         this.isPin = isPin;
@@ -42,7 +44,7 @@ public final class InboxThreadModel implements Serializable {
         this.canonical = canonical;
         this.pending = pending;
         this.hasOlder = hasOlder;
-        this.hasNewer = hasNewer;
+        this.unreadCount = unreadCount;
         this.isSpam = isSpam;
         this.isGroup = isGroup;
         this.archived = archived;
@@ -97,6 +99,8 @@ public final class InboxThreadModel implements Serializable {
         return leftUsers;
     }
 
+    public Long[] getAdmins() { return admins; }
+
     public DirectItemModel[] getItems() {
         return items;
     }
@@ -129,9 +133,7 @@ public final class InboxThreadModel implements Serializable {
         return hasOlder;
     }
 
-    public boolean isHasNewer() {
-        return hasNewer;
-    }
+    public long getUnreadCount() { return unreadCount; }
 
     public boolean isSpam() {
         return isSpam;

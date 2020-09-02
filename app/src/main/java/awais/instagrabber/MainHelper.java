@@ -1414,6 +1414,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                                                     ? mainActivity.locationModel.getName()
                                                                     : mainActivity.userQuery.replaceAll("^@", "")));
                 onRefresh();
+<<<<<<< HEAD
             } else if (v == mainActivity.mainBinding.profileView.btnFollow) {
                 if (mainActivity.profileModel.isPrivate() && mainActivity.profileModel.getFollowing()) {
                     new AlertDialog.Builder(main)
@@ -1425,6 +1426,25 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 }
                 else new ProfileAction().execute("follow");
             } else if (v == mainActivity.mainBinding.profileView.btnRestrict && isLoggedIn) {
+||||||| merged common ancestors
+            } else if (v == main.mainBinding.profileView.btnFollow) {
+                new ProfileAction().execute("follow");
+            } else if (v == main.mainBinding.profileView.btnRestrict && isLoggedIn) {
+=======
+            } else if (v == main.mainBinding.profileView.btnFollow) {
+                if (main.profileModel.isPrivate() && main.profileModel.getFollowing()) {
+                    new AlertDialog.Builder(main)
+                            .setTitle(R.string.priv_acc)
+                            .setMessage(R.string.priv_acc_confirm)
+                            .setNegativeButton(R.string.no, null)
+                            .setPositiveButton(R.string.yes, (dialog, which) -> new ProfileAction().execute("follow"))
+                            .show();
+                }
+                else {
+                    new ProfileAction().execute("follow");
+                }
+            } else if (v == main.mainBinding.profileView.btnRestrict && isLoggedIn) {
+>>>>>>> 44db2db57f4461bbffa160e26cd734fb07f3b930
                 new ProfileAction().execute("restrict");
             } else if (v == mainActivity.mainBinding.profileView.btnSaved && !isSelf) {
                 new ProfileAction().execute("block");
@@ -1455,6 +1475,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
+<<<<<<< HEAD
             final String url = "https://www.instagram.com/web/" + (action.equals("followtag") && mainActivity.hashtagModel != null
                                                                    ? "tags/" + (mainActivity.hashtagModel.getFollowing()
                                                                                 ? "unfollow/"
@@ -1480,6 +1501,31 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                                                                                                                              .getBlocked()
                                                                                                                                      ? "unblock/"
                                                                                                                                      : "block/"));
+||||||| merged common ancestors
+            final String url = "https://www.instagram.com/web/"+
+                    ((action == "followtag" && main.hashtagModel != null) ? ("tags/"+
+                            (main.hashtagModel.getFollowing() == true ? "unfollow/" : "follow/")+main.hashtagModel.getName()+"/") : (
+                    ((action == "restrict" && main.profileModel != null) ? "restrict_action" : ("friendships/"+main.profileModel.getId()))+"/"+
+                    ((action == "follow" && main.profileModel != null) ?
+                    ((main.profileModel.getFollowing() == true ||
+                            (main.profileModel.getFollowing() == false && main.profileModel.getRequested() == true))
+                            ? "unfollow/" : "follow/") :
+                    ((action == "restrict" && main.profileModel != null) ?
+                            (main.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
+                            (main.profileModel.getBlocked() == true ? "unblock/" : "block/")))));
+=======
+            final String url = "https://www.instagram.com/web/"+
+                    ((action == "followtag" && main.hashtagModel != null) ? ("tags/"+
+                            (main.hashtagModel.getFollowing() ? "unfollow/" : "follow/")+main.hashtagModel.getName()+"/") : (
+                    ((action == "restrict" && main.profileModel != null) ? "restrict_action" : ("friendships/"+main.profileModel.getId()))+"/"+
+                    ((action == "follow" && main.profileModel != null) ?
+                    ((main.profileModel.getFollowing() ||
+                            (main.profileModel.getFollowing() == false && main.profileModel.getRequested() == true))
+                            ? "unfollow/" : "follow/") :
+                    ((action == "restrict" && main.profileModel != null) ?
+                            (main.profileModel.getRestricted() ? "unrestrict/" : "restrict/") :
+                            (main.profileModel.getBlocked() ? "unblock/" : "block/")))));
+>>>>>>> 44db2db57f4461bbffa160e26cd734fb07f3b930
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");

@@ -18,11 +18,13 @@ import androidx.navigation.ui.NavigationUI;
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.ActivityDirectMessagesBinding;
 import awais.instagrabber.fragments.directmessages.DirectMessageThreadFragmentArgs;
+import awais.instagrabber.utils.Constants;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DirectMessagesActivity extends BaseLanguageActivity implements NavController.OnDestinationChangedListener {
 
     private TextView toolbarTitle;
-    private AppCompatImageView infoButton;
+    private AppCompatImageView dmInfo, dmSeen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,8 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
-        infoButton = binding.dmInfo;
+        dmInfo = binding.dmInfo;
+        dmSeen = binding.dmSeen;
 
         final NavController navController = Navigation.findNavController(this, R.id.direct_messages_nav_host_fragment);
         navController.addOnDestinationChangedListener(this);
@@ -51,7 +54,8 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
         switch (destination.getId()) {
             case R.id.directMessagesInboxFragment:
                 setToolbarTitle(R.string.action_dms);
-                infoButton.setVisibility(View.GONE);
+                dmInfo.setVisibility(View.GONE);
+                dmSeen.setVisibility(View.GONE);
                 return;
             case R.id.directMessagesThreadFragment:
                 if (arguments == null) {
@@ -59,14 +63,16 @@ public class DirectMessagesActivity extends BaseLanguageActivity implements NavC
                 }
                 final String title = DirectMessageThreadFragmentArgs.fromBundle(arguments).getTitle();
                 setToolbarTitle(title);
-                infoButton.setVisibility(View.VISIBLE);
+                dmInfo.setVisibility(View.VISIBLE);
+                dmSeen.setVisibility(settingsHelper.getBoolean(Constants.DM_MARK_AS_SEEN) ? View.GONE : View.VISIBLE);
                 return;
             case R.id.directMessagesSettingsFragment:
                 if (arguments == null) {
                     return;
                 }
                 setToolbarTitle(R.string.action_settings);
-                infoButton.setVisibility(View.GONE);
+                dmInfo.setVisibility(View.GONE);
+                dmSeen.setVisibility(View.GONE);
                 return;
         }
     }

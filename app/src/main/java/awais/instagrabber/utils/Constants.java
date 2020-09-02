@@ -20,10 +20,12 @@ public final class Constants {
     public static final String SHOW_FEED = "show_feed";
     public static final String CUSTOM_DATE_TIME_FORMAT_ENABLED = "data_time_custom_enabled";
     public static final String MARK_AS_SEEN = "mark_as_seen";
+    public static final String DM_MARK_AS_SEEN = "dm_mark_as_seen";
     public static final String INSTADP = "instadp";
     public static final String STORIESIG = "storiesig";
     public static final String AMOLED_THEME = "amoled_theme";
     public static final String CHECK_ACTIVITY = "check_activity";
+    public static final String CHECK_UPDATES = "check_updates";
     // never Export
     public static final String COOKIE = "cookie";
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
@@ -50,9 +52,9 @@ public final class Constants {
     // spoof
     public static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) " +
             "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 " +
-            "Instagram 154.0.0.32.123 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 238093938)";
+            "Instagram 156.0.0.26.109 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 240726452)";
     public static final String I_USER_AGENT =
-            "Instagram 154.0.0.32.123 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 238093938)";
+            "Instagram 156.0.0.26.109 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 240726452)";
     public static final String A_USER_AGENT = "https://InstaGrabber.AustinHuang.me / mailto:InstaGrabber@AustinHuang.me";
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
     public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +

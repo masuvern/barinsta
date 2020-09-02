@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -169,8 +170,16 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
                 urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
                 urlConnection.setRequestProperty("x-csrftoken",
                         Utils.settingsHelper.getString(Constants.COOKIE).split("csrftoken=")[1].split(";")[0]);
+                final String urlParameters = "timestamp="+(System.currentTimeMillis()/1000);
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty("Content-Length", "" +
+                        urlParameters.getBytes().length);
+                urlConnection.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
                 urlConnection.connect();
-                urlConnection.disconnect();
             } catch (Throwable ex) {
                 Log.e("austin_debug", "seen: " + ex);
             }
