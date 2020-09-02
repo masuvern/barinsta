@@ -6,7 +6,7 @@ import java.util.List;
 
 import awais.instagrabber.models.ViewerPostModel;
 
-public class ViewPostViewModel extends BasePostViewModel<ViewerPostModel> {
+public class ViewerPostViewModel extends BasePostViewModel<ViewerPostModel> {
     private MutableLiveData<List<ViewerPostModel>> list;
 
     public MutableLiveData<List<ViewerPostModel>> getList() {

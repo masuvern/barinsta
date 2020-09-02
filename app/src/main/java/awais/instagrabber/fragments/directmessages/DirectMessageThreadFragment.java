@@ -84,7 +84,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
     // private AppCompatImageView dmInfo, dmSeen;
-    private boolean hasSentSomething, hasDeletedSomething;
+    private boolean hasDeletedSomething;
     private boolean hasOlder = true;
     public static boolean hasSentSomething;
 

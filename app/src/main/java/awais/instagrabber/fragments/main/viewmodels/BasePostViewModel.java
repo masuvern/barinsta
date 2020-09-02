@@ -5,15 +5,9 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import awais.instagrabber.models.DiscoverItemModel;
+import awais.instagrabber.models.BasePostModel;
 
-public class DiscoverItemViewModel extends ViewModel {
-    private MutableLiveData<List<DiscoverItemModel>> list;
-
-    public MutableLiveData<List<DiscoverItemModel>> getList() {
-        if (list == null) {
-            list = new MutableLiveData<>();
-        }
-        return list;
-    }
+public class BasePostViewModel extends ViewModel {
+    // this file was somehow identical to DiscoverItemViewModel
+    // pretty sure you didn't meant to do that
 }
