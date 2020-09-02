@@ -1234,7 +1234,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                         main.locationModel != null ? main.locationModel.getName() : main.userQuery.replaceAll("^@", "")));
                 onRefresh();
             } else if (v == main.mainBinding.profileView.btnFollow) {
-                if (main.profileModel.isPrivate()) {
+                if (main.profileModel.isPrivate() && main.profileModel.getFollowing()) {
                     new AlertDialog.Builder(main)
                             .setTitle(R.string.priv_acc)
                             .setMessage(R.string.priv_acc_confirm)
@@ -1278,15 +1278,15 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             action = rawAction[0];
             final String url = "https://www.instagram.com/web/"+
                     ((action == "followtag" && main.hashtagModel != null) ? ("tags/"+
-                            (main.hashtagModel.getFollowing() == true ? "unfollow/" : "follow/")+main.hashtagModel.getName()+"/") : (
+                            (main.hashtagModel.getFollowing() ? "unfollow/" : "follow/")+main.hashtagModel.getName()+"/") : (
                     ((action == "restrict" && main.profileModel != null) ? "restrict_action" : ("friendships/"+main.profileModel.getId()))+"/"+
                     ((action == "follow" && main.profileModel != null) ?
-                    ((main.profileModel.getFollowing() == true ||
+                    ((main.profileModel.getFollowing() ||
                             (main.profileModel.getFollowing() == false && main.profileModel.getRequested() == true))
                             ? "unfollow/" : "follow/") :
                     ((action == "restrict" && main.profileModel != null) ?
-                            (main.profileModel.getRestricted() == true ? "unrestrict/" : "restrict/") :
-                            (main.profileModel.getBlocked() == true ? "unblock/" : "block/")))));
+                            (main.profileModel.getRestricted() ? "unrestrict/" : "restrict/") :
+                            (main.profileModel.getBlocked() ? "unblock/" : "block/")))));
             try {
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
