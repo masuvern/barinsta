@@ -107,15 +107,13 @@ public class DiscoverFragment extends Fragment {
             }
         }
     };
-    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
-            if (discoverAdapter == null) {
-                remove();
-                return;
-            }
-            discoverAdapter.clearSelection();
+            setEnabled(false);
             remove();
+            if (discoverAdapter == null) return;
+            discoverAdapter.clearSelection();
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
@@ -164,6 +162,7 @@ public class DiscoverFragment extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
         setupExplore();
+        shouldRefresh = false;
     }
 
     private void setupExplore() {
@@ -228,13 +227,13 @@ public class DiscoverFragment extends Fragment {
                 return true;
             }
             final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
-            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            if (onBackPressedCallback.isEnabled()) {
                 return true;
             }
             actionMode = fragmentActivity.startActionMode(multiSelectAction);
             final String title = getString(R.string.number_selected, 1);
             actionMode.setTitle(title);
-            onBackPressedDispatcher.addCallback(onBackPressedCallback);
+            onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
             return true;
         });
         binding.discoverPosts.setAdapter(discoverAdapter);
@@ -251,12 +250,17 @@ public class DiscoverFragment extends Fragment {
     }
 
     private boolean checkAndResetAction() {
-        final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
-        if (!onBackPressedDispatcher.hasEnabledCallbacks() || actionMode == null) {
+        if (!onBackPressedCallback.isEnabled() && actionMode == null) {
             return false;
         }
-        actionMode.finish();
-        actionMode = null;
+        if (onBackPressedCallback.isEnabled()) {
+            onBackPressedCallback.setEnabled(false);
+            onBackPressedCallback.remove();
+        }
+        if (actionMode != null) {
+            actionMode.finish();
+            actionMode = null;
+        }
         return true;
     }
 }

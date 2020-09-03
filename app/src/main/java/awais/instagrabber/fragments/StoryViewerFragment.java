@@ -150,6 +150,7 @@ public class StoryViewerFragment extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
         init();
+        shouldRefresh = false;
     }
 
     @Override

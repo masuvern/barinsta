@@ -50,6 +50,7 @@ import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -78,14 +79,10 @@ public class HashTagFragment extends Fragment {
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
-            if (postsAdapter == null) {
-                setEnabled(false);
-                remove();
-                return;
-            }
-            postsAdapter.clearSelection();
             setEnabled(false);
             remove();
+            if (postsAdapter == null) return;
+            postsAdapter.clearSelection();
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
@@ -256,7 +253,9 @@ public class HashTagFragment extends Fragment {
         stopCurrentExecutor();
         binding.btnFollowTag.setVisibility(View.VISIBLE);
         binding.swipeRefreshLayout.setRefreshing(true);
-        currentlyExecuting = new PostsFetcher(hashtag, false, endCursor, postsFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if (Utils.isEmpty(hashtag)) return;
+        currentlyExecuting = new PostsFetcher(hashtag.substring(1), PostItemType.HASHTAG, endCursor, postsFetchListener)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         if (isLoggedIn) {
             new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, stories -> {
                 storyModels = stories;

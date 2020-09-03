@@ -4,11 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activities.SavedViewer">
+    tools:context=".fragments.SavedViewerFragment">
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/layout_include_toolbar" />
+    <!--<include-->
+    <!--    android:id="@+id/toolbar"-->
+    <!--    layout="@layout/layout_include_toolbar" />-->
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"

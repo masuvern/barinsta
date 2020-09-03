@@ -41,7 +41,6 @@ import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.HighlightsFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
@@ -61,6 +60,7 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
 import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
 import awais.instagrabber.services.FriendshipService;
@@ -100,48 +100,42 @@ public class ProfileFragment extends Fragment {
             final String finalUsername = username.startsWith("@") ? username.substring(1)
                                                                   : username;
             actionBar.setTitle(finalUsername);
+            actionBar.setSubtitle(null);
         }
     };
-    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
-            if (postsAdapter == null) {
-                remove();
-                return;
-            }
-            postsAdapter.clearSelection();
+            setEnabled(false);
             remove();
+            if (postsAdapter == null) return;
+            postsAdapter.clearSelection();
         }
     };
-    private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(R.menu.multi_select_download_menu,
-                                                                                              new CallbacksHelper() {
-                                                                                                  @Override
-                                                                                                  public void onDestroy(
-                                                                                                          final ActionMode mode) {
-                                                                                                      onBackPressedCallback
-                                                                                                              .handleOnBackPressed();
-                                                                                                  }
+    private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
+            R.menu.multi_select_download_menu,
+            new CallbacksHelper() {
+                @Override
+                public void onDestroy(final ActionMode mode) {
+                    onBackPressedCallback.handleOnBackPressed();
+                }
 
-                                                                                                  @Override
-                                                                                                  public boolean onActionItemClicked(
-                                                                                                          final ActionMode mode,
-                                                                                                          final MenuItem item) {
-                                                                                                      if (item.getItemId() == R.id.action_download) {
-                                                                                                          if (postsAdapter == null || username == null) {
-                                                                                                              return false;
-                                                                                                          }
-                                                                                                          Utils.batchDownload(
-                                                                                                                  requireContext(),
-                                                                                                                  username,
-                                                                                                                  DownloadMethod.DOWNLOAD_MAIN,
-                                                                                                                  postsAdapter
-                                                                                                                          .getSelectedModels());
-                                                                                                          checkAndResetAction();
-                                                                                                          return true;
-                                                                                                      }
-                                                                                                      return false;
-                                                                                                  }
-                                                                                              });
+                @Override
+                public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
+                    if (item.getItemId() == R.id.action_download) {
+                        if (postsAdapter == null || username == null) {
+                            return false;
+                        }
+                        Utils.batchDownload(requireContext(),
+                                            username,
+                                            DownloadMethod.DOWNLOAD_MAIN,
+                                            postsAdapter.getSelectedModels());
+                        checkAndResetAction();
+                        return true;
+                    }
+                    return false;
+                }
+            });
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
@@ -201,9 +195,18 @@ public class ProfileFragment extends Fragment {
                              final Bundle savedInstanceState) {
         if (root != null) {
             if (getArguments() != null) {
-                final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs
-                        .fromBundle(getArguments());
-                if (!fragmentArgs.getUsername().equals(username)) {
+                final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
+                final String username = fragmentArgs.getUsername();
+                if (Utils.isEmpty(username) && profileModel != null) {
+                    final String profileModelUsername = profileModel.getUsername();
+                    final boolean isSame = ("@" + profileModelUsername).equals(this.username);
+                    if (isSame) {
+                        setUsernameDelayed();
+                        shouldRefresh = false;
+                        return root;
+                    }
+                }
+                if (username == null || !username.equals(this.username)) {
                     shouldRefresh = true;
                     return root;
                 }
@@ -264,8 +267,7 @@ public class ProfileFragment extends Fragment {
                 fetchProfileDetails();
                 // adds cookies to database for quick access
                 final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
-                if (Utils.dataBox.getCookieCount() == 0 || cookieModel == null || Utils
-                        .isEmpty(cookieModel.getUsername()))
+                if (Utils.dataBox.getCookieCount() == 0 || cookieModel == null || Utils.isEmpty(cookieModel.getUsername()))
                     Utils.dataBox.addUserCookie(new DataBox.CookieModel(uid, username, cookie));
             };
             boolean found = false;
@@ -279,8 +281,7 @@ public class ProfileFragment extends Fragment {
             }
             if (!found) {
                 // if not in database, fetch info from instagram
-                new UsernameFetcher(uid, fetchListener)
-                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new UsernameFetcher(uid, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
             return;
         }
@@ -298,8 +299,7 @@ public class ProfileFragment extends Fragment {
     private void setProfileDetails() {
         if (profileModel == null) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(requireContext(), R.string.error_loading_profile, Toast.LENGTH_SHORT)
-                 .show();
+            Toast.makeText(requireContext(), R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
             return;
         }
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
@@ -309,7 +309,7 @@ public class ProfileFragment extends Fragment {
                                     profileModel.getUsername(),
                                     false,
                                     false,
-                                    (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)),
+                                    !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
                                     false,
                                     result -> {
                                         storyModels = result;
@@ -319,7 +319,7 @@ public class ProfileFragment extends Fragment {
                                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             new HighlightsFetcher(profileId,
-                                  (!isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG)),
+                                  !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
                                   result -> {
                                       if (result != null && result.length > 0) {
                                           binding.highlightsList.setVisibility(View.VISIBLE);
@@ -336,9 +336,7 @@ public class ProfileFragment extends Fragment {
                 binding.btnLiked.setVisibility(View.VISIBLE);
                 binding.btnSaved.setText(R.string.saved);
                 ViewCompat.setBackgroundTintList(binding.btnSaved,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(
-                                                         requireContext(),
-                                                         R.color.btn_orange_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_orange_background)));
             } else {
                 binding.btnTagged.setVisibility(View.GONE);
                 binding.btnSaved.setVisibility(View.GONE);
@@ -347,74 +345,54 @@ public class ProfileFragment extends Fragment {
                 if (profileModel.getFollowing()) {
                     binding.btnFollow.setText(R.string.unfollow);
                     ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_purple_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_purple_background)));
                 } else if (profileModel.getRequested()) {
                     binding.btnFollow.setText(R.string.cancel);
                     ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_purple_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_purple_background)));
                 } else {
                     binding.btnFollow.setText(R.string.follow);
                     ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_pink_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_pink_background)));
                 }
                 binding.btnRestrict.setVisibility(View.VISIBLE);
                 if (profileModel.getRestricted()) {
                     binding.btnRestrict.setText(R.string.unrestrict);
                     ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_green_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
                 } else {
                     binding.btnRestrict.setText(R.string.restrict);
                     ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_orange_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_orange_background)));
                 }
                 binding.btnBlock.setVisibility(View.VISIBLE);
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 if (profileModel.getBlocked()) {
                     binding.btnBlock.setText(R.string.unblock);
                     ViewCompat.setBackgroundTintList(binding.btnBlock,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_green_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
                 } else {
                     binding.btnBlock.setText(R.string.block);
                     ViewCompat.setBackgroundTintList(binding.btnBlock,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(
-                                                             requireContext(),
-                                                             R.color.btn_red_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_red_background)));
                 }
             }
         } else {
             if (Utils.dataBox.getFavorite(username) != null) {
                 binding.btnFollow.setText(R.string.unfavorite_short);
                 ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(
-                                                         requireContext(),
-                                                         R.color.btn_purple_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_purple_background)));
             } else {
                 binding.btnFollow.setText(R.string.favorite_short);
                 ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(
-                                                         requireContext(),
-                                                         R.color.btn_pink_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_pink_background)));
             }
             binding.btnFollow.setVisibility(View.VISIBLE);
             if (!profileModel.isReallyPrivate()) {
                 binding.btnRestrict.setVisibility(View.VISIBLE);
                 binding.btnRestrict.setText(R.string.tagged);
                 ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(
-                                                         requireContext(),
-                                                         R.color.btn_blue_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_blue_background)));
             }
         }
 
@@ -480,10 +458,8 @@ public class ProfileFragment extends Fragment {
             if (isLoggedIn) {
                 final View.OnClickListener followClickListener = v -> startActivity(new Intent(
                         requireContext(),
-                        FollowViewer.class).putExtra(Constants.EXTRAS_FOLLOWERS,
-                                                     v == binding.mainFollowers)
-                                           .putExtra(Constants.EXTRAS_NAME,
-                                                     profileModel.getUsername())
+                        FollowViewer.class).putExtra(Constants.EXTRAS_FOLLOWERS, v == binding.mainFollowers)
+                                           .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
                                            .putExtra(Constants.EXTRAS_ID, profileId));
 
                 binding.mainFollowers
@@ -517,144 +493,149 @@ public class ProfileFragment extends Fragment {
     private void setupCommonListeners() {
 
         final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
-        final boolean isSelf = isLoggedIn && profileModel != null && userIdFromCookie != null && userIdFromCookie
-                .equals(profileModel.getId());
+        // final boolean isSelf = isLoggedIn && profileModel != null && userIdFromCookie != null && userIdFromCookie
+        //         .equals(profileModel.getId());
         final String favorite = Utils.dataBox.getFavorite(username);
 
         binding.btnFollow.setOnClickListener(v -> {
             if (!isLoggedIn) {
                 if (favorite != null && v == binding.btnFollow) {
-                    Utils.dataBox.delFavorite(new DataBox.FavoriteModel(username,
-                                                                        Long.parseLong(favorite.split(
-                                                                                "/")[1]),
-                                                                        username.replaceAll("^@",
-                                                                                            "")));
+                    Utils.dataBox.delFavorite(new DataBox.FavoriteModel(
+                            username,
+                            Long.parseLong(favorite.split("/")[1]),
+                            username.replaceAll("^@", "")));
                 } else if (v == binding.btnFollow) {
-                    Utils.dataBox.addFavorite(new DataBox.FavoriteModel(username,
-                                                                        System.currentTimeMillis(),
-                                                                        username.replaceAll("^@",
-                                                                                            "")));
+                    Utils.dataBox.addFavorite(new DataBox.FavoriteModel(
+                            username,
+                            System.currentTimeMillis(),
+                            username.replaceAll("^@", "")));
                 }
                 fetchProfileDetails();
                 return;
             }
             if (profileModel.getFollowing() || profileModel.getRequested()) {
-                friendshipService.unfollow(userIdFromCookie,
-                                           profileModel.getId(),
-                                           Utils.getCsrfTokenFromCookie(cookie),
-                                           new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                                               @Override
-                                               public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                                   Log.d(TAG, "Unfollow success: " + result);
-                                                   fetchProfileDetails();
-                                               }
+                friendshipService.unfollow(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        Utils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                Log.d(TAG, "Unfollow success: " + result);
+                                fetchProfileDetails();
+                            }
 
-                                               @Override
-                                               public void onFailure(final Throwable t) {
-                                                   Log.e(TAG, "Error unfollowing", t);
-                                               }
-                                           });
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error unfollowing", t);
+                            }
+                        });
             } else {
-                friendshipService.follow(userIdFromCookie,
-                                         profileModel.getId(),
-                                         Utils.getCsrfTokenFromCookie(cookie),
-                                         new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                                             @Override
-                                             public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                                 Log.d(TAG, "Follow success: " + result);
-                                                 fetchProfileDetails();
-                                             }
+                friendshipService.follow(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        Utils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                Log.d(TAG, "Follow success: " + result);
+                                fetchProfileDetails();
+                            }
 
-                                             @Override
-                                             public void onFailure(final Throwable t) {
-                                                 Log.e(TAG, "Error following", t);
-                                             }
-                                         });
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error following", t);
+                            }
+                        });
             }
         });
 
         binding.btnRestrict.setOnClickListener(v -> {
             if (!isLoggedIn) return;
             final String action = profileModel.getRestricted() ? "Unrestrict" : "Restrict";
-            friendshipService.toggleRestrict(profileModel.getId(),
-                                             !profileModel.getRestricted(),
-                                             Utils.getCsrfTokenFromCookie(cookie),
-                                             new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
-                                                 @Override
-                                                 public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
-                                                     Log.d(TAG, action + " success: " + result);
-                                                     fetchProfileDetails();
-                                                 }
+            friendshipService.toggleRestrict(
+                    profileModel.getId(),
+                    !profileModel.getRestricted(),
+                    Utils.getCsrfTokenFromCookie(cookie),
+                    new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
+                            Log.d(TAG, action + " success: " + result);
+                            fetchProfileDetails();
+                        }
 
-                                                 @Override
-                                                 public void onFailure(final Throwable t) {
-                                                     Log.e(TAG,
-                                                           "Error while performing " + action,
-                                                           t);
-                                                 }
-                                             });
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error while performing " + action, t);
+                        }
+                    });
         });
         binding.btnBlock.setOnClickListener(v -> {
             if (!isLoggedIn) return;
             if (profileModel.getBlocked()) {
-                friendshipService.unblock(userIdFromCookie,
-                                          profileModel.getId(),
-                                          Utils.getCsrfTokenFromCookie(cookie),
-                                          new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                                              @Override
-                                              public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                                  Log.d(TAG, "Unblock success: " + result);
-                                                  fetchProfileDetails();
-                                              }
+                friendshipService.unblock(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        Utils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                Log.d(TAG, "Unblock success: " + result);
+                                fetchProfileDetails();
+                            }
 
-                                              @Override
-                                              public void onFailure(final Throwable t) {
-                                                  Log.e(TAG, "Error unblocking", t);
-                                              }
-                                          });
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error unblocking", t);
+                            }
+                        });
                 return;
             }
-            friendshipService.block(userIdFromCookie,
-                                    profileModel.getId(),
-                                    Utils.getCsrfTokenFromCookie(cookie),
-                                    new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                                        @Override
-                                        public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                            Log.d(TAG, "Block success: " + result);
-                                            fetchProfileDetails();
-                                        }
+            friendshipService.block(
+                    userIdFromCookie,
+                    profileModel.getId(),
+                    Utils.getCsrfTokenFromCookie(cookie),
+                    new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                            Log.d(TAG, "Block success: " + result);
+                            fetchProfileDetails();
+                        }
 
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            Log.e(TAG, "Error blocking", t);
-                                        }
-                                    });
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error blocking", t);
+                        }
+                    });
         });
-        binding.btnSaved.setOnClickListener(v -> startActivity(new Intent(requireContext(),
-                                                                          SavedViewer.class)
-                                                                       .putExtra(Constants.EXTRAS_INDEX,
-                                                                                 "$" + profileModel
-                                                                                         .getId())
-                                                                       .putExtra(Constants.EXTRAS_USER,
-                                                                                 "@" + profileModel
-                                                                                         .getUsername())));
-        binding.btnLiked.setOnClickListener(v -> startActivity(new Intent(requireContext(),
-                                                                          SavedViewer.class)
-                                                                       .putExtra(Constants.EXTRAS_INDEX,
-                                                                                 "^" + profileModel
-                                                                                         .getId())
-                                                                       .putExtra(Constants.EXTRAS_USER,
-                                                                                 "@" + profileModel
-                                                                                         .getUsername())));
+        binding.btnSaved.setOnClickListener(v -> {
+            // startActivity(new Intent(requireContext(), SavedViewerFragment.class)
+            //                       .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
+            //                       .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername()));
+            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
+                                                                                                              profileModel.getId(),
+                                                                                                              PostItemType.SAVED);
+            NavHostFragment.findNavController(this).navigate(action);
+        });
+        binding.btnLiked.setOnClickListener(v -> {
+            // startActivity(new Intent(requireContext(), SavedViewerFragment.class)
+            //                       .putExtra(Constants.EXTRAS_INDEX, "^" + profileModel.getId())
+            //                       .putExtra(Constants.EXTRAS_USER, username));
+            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
+                                                                                                              profileModel.getId(),
+                                                                                                              PostItemType.LIKED);
+            NavHostFragment.findNavController(this).navigate(action);
+        });
 
-        binding.btnTagged.setOnClickListener(v -> startActivity(new Intent(requireContext(),
-                                                                           SavedViewer.class)
-                                                                        .putExtra(Constants.EXTRAS_INDEX,
-                                                                                  "%" + profileModel
-                                                                                          .getId())
-                                                                        .putExtra(Constants.EXTRAS_USER,
-                                                                                  "@" + profileModel
-                                                                                          .getUsername())));
+        binding.btnTagged.setOnClickListener(v -> {
+            // startActivity(new Intent(requireContext(), SavedViewerFragment.class)
+            //                       .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
+            //                       .putExtra(Constants.EXTRAS_USER, username));
+            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
+                                                                                                              profileModel.getId(),
+                                                                                                              PostItemType.TAGGED);
+            NavHostFragment.findNavController(this).navigate(action);
+        });
     }
 
     private void setUsernameDelayed() {
@@ -666,9 +647,7 @@ public class ProfileFragment extends Fragment {
 
     private void setupPosts() {
         postsViewModel = new ViewModelProvider(this).get(PostsViewModel.class);
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(),
-                                                                                    Utils.convertDpToPx(
-                                                                                            110));
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
         binding.mainPosts.setLayoutManager(layoutManager);
         binding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         postsAdapter = new PostsAdapter((postModel, position) -> {
@@ -680,11 +659,6 @@ public class ProfileFragment extends Fragment {
                 return;
             }
             if (checkAndResetAction()) return;
-            // startActivity(new Intent(requireContext(), PostViewer.class)
-            //                       .putExtra(Constants.EXTRAS_INDEX, position)
-            //                       .putExtra(Constants.EXTRAS_POST, postModel)
-            //                       .putExtra(Constants.EXTRAS_USER, username)
-            //                       .putExtra(Constants.EXTRAS_TYPE, PostItemType.MAIN));
             final List<PostModel> postModels = postsViewModel.getList().getValue();
             if (postModels == null || postModels.size() == 0) return;
             if (postModels.get(0) == null) return;
@@ -706,33 +680,31 @@ public class ProfileFragment extends Fragment {
                 checkAndResetAction();
                 return true;
             }
-            final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity
-                    .getOnBackPressedDispatcher();
-            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            if (onBackPressedCallback.isEnabled()) {
                 return true;
             }
+            final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
+            onBackPressedCallback.setEnabled(true);
             actionMode = fragmentActivity.startActionMode(multiSelectAction);
             final String title = getString(R.string.number_selected, 1);
             actionMode.setTitle(title);
-            onBackPressedDispatcher.addCallback(onBackPressedCallback);
+            onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
             return true;
         });
         postsViewModel.getList().observe(fragmentActivity, postsAdapter::submitList);
         binding.mainPosts.setAdapter(postsAdapter);
-        final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager,
-                                                                     (page, totalItemsCount) -> {
-                                                                         if (!hasNextPage) return;
-                                                                         binding.swipeRefreshLayout
-                                                                                 .setRefreshing(true);
-                                                                         fetchPosts();
-                                                                         endCursor = null;
-                                                                     });
+        final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+            if (!hasNextPage) return;
+            binding.swipeRefreshLayout.setRefreshing(true);
+            fetchPosts();
+            endCursor = null;
+        });
         binding.mainPosts.addOnScrollListener(lazyLoader);
     }
 
     private void fetchPosts() {
         stopCurrentExecutor();
-        currentlyExecuting = new PostsFetcher(profileModel.getId(), false, endCursor, postsFetchListener)
+        currentlyExecuting = new PostsFetcher(profileModel.getId(), PostItemType.MAIN, endCursor, postsFetchListener)
                 .setUsername(profileModel.getUsername())
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -742,22 +714,24 @@ public class ProfileFragment extends Fragment {
             try {
                 currentlyExecuting.cancel(true);
             } catch (final Exception e) {
-                if (logCollector != null) logCollector.appendException(e,
-                                                                       LogCollector.LogFile.MAIN_HELPER,
-                                                                       "stopCurrentExecutor");
+                if (logCollector != null) logCollector.appendException(e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
                 Log.e(TAG, "", e);
             }
         }
     }
 
     private boolean checkAndResetAction() {
-        final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity
-                .getOnBackPressedDispatcher();
-        if (!onBackPressedDispatcher.hasEnabledCallbacks() || actionMode == null) {
+        if (!onBackPressedCallback.isEnabled() && actionMode == null) {
             return false;
         }
-        actionMode.finish();
-        actionMode = null;
+        if (onBackPressedCallback.isEnabled()) {
+            onBackPressedCallback.setEnabled(false);
+            onBackPressedCallback.remove();
+        }
+        if (actionMode != null) {
+            actionMode.finish();
+            actionMode = null;
+        }
         return true;
     }
 }

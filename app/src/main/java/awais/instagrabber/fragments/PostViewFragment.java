@@ -139,9 +139,11 @@ public class PostViewFragment extends Fragment {
                 if (mediaService != null) {
                     final String userId = Utils.getUserIdFromCookie(COOKIE);
                     final String csrfToken = Utils.getCsrfTokenFromCookie(COOKIE);
+                    v.setEnabled(false);
                     final ServiceCallback<Boolean> likeCallback = new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
+                            v.setEnabled(true);
                             if (result) {
                                 postModel.setManualLike(!postModel.getLike());
                                 adapter.notifyItemChanged(postPosition);
@@ -152,6 +154,7 @@ public class PostViewFragment extends Fragment {
 
                         @Override
                         public void onFailure(final Throwable t) {
+                            v.setEnabled(true);
                             Log.e(TAG, "Error during like/unlike", t);
                         }
                     };
@@ -166,9 +169,11 @@ public class PostViewFragment extends Fragment {
                 if (mediaService != null) {
                     final String userId = Utils.getUserIdFromCookie(COOKIE);
                     final String csrfToken = Utils.getCsrfTokenFromCookie(COOKIE);
+                    v.setEnabled(false);
                     final ServiceCallback<Boolean> saveCallback = new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
+                            v.setEnabled(true);
                             if (result) {
                                 postModel.setBookmarked(!postModel.getBookmark());
                                 adapter.notifyItemChanged(postPosition);
@@ -179,6 +184,7 @@ public class PostViewFragment extends Fragment {
 
                         @Override
                         public void onFailure(final Throwable t) {
+                            v.setEnabled(true);
                             Log.e(TAG, "Error during save/unsave", t);
                         }
                     };
@@ -219,6 +225,7 @@ public class PostViewFragment extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
         init();
+        shouldRefresh = false;
     }
 
     private void setupViewPager() {
@@ -252,9 +259,7 @@ public class PostViewFragment extends Fragment {
         idOrCodeList = Arrays.asList(idOrCodeArray);
         viewerPostViewModel.getList().setValue(createPlaceholderModels(idOrCodeArray.length));
         isId = fragmentArgs.getIsId();
-        // binding.getRoot().postDelayed(() -> binding.getRoot().setCurrentItem(currentPostIndex), 500);
         fetchPost();
-        // binding.getRoot().setCurrentItem(currentPostIndex);
     }
 
     private List<ViewerPostModelWrapper> createPlaceholderModels(final int size) {
@@ -274,17 +279,6 @@ public class PostViewFragment extends Fragment {
             if (viewerPostModels != null && viewerPostModels
                     .getViewerPostModels() != null && viewerPostModels
                     .getViewerPostModels().length > 0) {
-                // final ViewerPostModel viewerPostModel = viewerPostModels[0];
-                // if (viewerPostModel != null) {
-                //     final String postId = viewerPostModel.getPostId();
-                //     try {
-                //         if (postId != null && Integer.parseInt(postId) > 0) {
-                //             // already fetched, don't fetch again
-                //             Log.d(TAG, "returning without fetching");
-                //             return;
-                //         }
-                //     } catch (NumberFormatException ignored) {}
-                // }
                 Log.d(TAG, "returning without fetching");
                 return;
             }

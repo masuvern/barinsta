@@ -71,10 +71,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.MainActivityBackup;
-import awais.instagrabber.activities.ProfileViewer;
-import awais.instagrabber.activities.SavedViewer;
 import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
@@ -265,8 +261,8 @@ public final class Utils {
 
                 final int endLen = currChar != '#' ? i : i + 1; // for merged hashtags
                 stringBuilder.setSpan(new CommentMentionClickSpan(), startLen,
-                        Math.min(commentLength, endLen), // fixed - crash when end index is greater than comment length ( @kernoeb )
-                        Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+                                      Math.min(commentLength, endLen), // fixed - crash when end index is greater than comment length ( @kernoeb )
+                                      Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
             }
         }
 
@@ -315,8 +311,8 @@ public final class Utils {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
-                        new Pair<>("resourcesNull", resources == null),
-                        new Pair<>("isVideo", isVideo));
+                                             new Pair<>("resourcesNull", resources == null),
+                                             new Pair<>("isVideo", isVideo));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return null;
@@ -333,7 +329,7 @@ public final class Utils {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
-                        new Pair<>("resourcesNull", resources == null));
+                                             new Pair<>("resourcesNull", resources == null));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return src;
@@ -346,7 +342,7 @@ public final class Utils {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "getLowQualityImage",
-                        new Pair<>("resourcesNull", resources == null));
+                                             new Pair<>("resourcesNull", resources == null));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return src;
@@ -443,13 +439,13 @@ public final class Utils {
             if (Utils.isEmpty(id)) id = null;
 
             mediaModel = new DirectItemMediaModel(mediaType,
-                    mediaObj.optLong("expiring_at"),
-                    mediaObj.optLong("pk"),
-                    id,
-                    getThumbnailUrl(mediaObj, mediaType),
-                    mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? getVideoUrl(mediaObj) : null,
-                    user,
-                    mediaObj.optString("code"));
+                                                  mediaObj.optLong("expiring_at"),
+                                                  mediaObj.optLong("pk"),
+                                                  id,
+                                                  getThumbnailUrl(mediaObj, mediaType),
+                                                  mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? getVideoUrl(mediaObj) : null,
+                                                  user,
+                                                  mediaObj.optString("code"));
         }
         return mediaModel;
     }
@@ -510,28 +506,28 @@ public final class Utils {
         for (int j = 0; j < usersLen; ++j) {
             final JSONObject userObject = users.getJSONObject(j);
             userModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
-                    false,
-                    userObject.optBoolean("is_verified"),
-                    String.valueOf(userObject.get("pk")),
-                    userObject.getString("username"),
-                    userObject.getString("full_name"),
-                    null, null,
-                    userObject.getString("profile_pic_url"),
-                    null, 0, 0, 0, false, false, false, false);
+                                             false,
+                                             userObject.optBoolean("is_verified"),
+                                             String.valueOf(userObject.get("pk")),
+                                             userObject.getString("username"),
+                                             userObject.getString("full_name"),
+                                             null, null,
+                                             userObject.getString("profile_pic_url"),
+                                             null, 0, 0, 0, false, false, false, false);
         }
 
         final ProfileModel[] leftuserModels = new ProfileModel[leftusersLen];
         for (int j = 0; j < leftusersLen; ++j) {
             final JSONObject userObject = leftusers.getJSONObject(j);
             leftuserModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
-                    false,
-                    userObject.optBoolean("is_verified"),
-                    String.valueOf(userObject.get("pk")),
-                    userObject.getString("username"),
-                    userObject.getString("full_name"),
-                    null, null,
-                    userObject.getString("profile_pic_url"),
-                    null, 0, 0, 0, false, false, false, false);
+                                                 false,
+                                                 userObject.optBoolean("is_verified"),
+                                                 String.valueOf(userObject.get("pk")),
+                                                 userObject.getString("username"),
+                                                 userObject.getString("full_name"),
+                                                 null, null,
+                                                 userObject.getString("profile_pic_url"),
+                                                 null, 0, 0, 0, false, false, false, false);
         }
 
         final Long[] adminIDs = new Long[adminsLen];
@@ -564,9 +560,10 @@ public final class Utils {
                     final JSONObject stickerImage = animatedMedia.getJSONObject("images").getJSONObject("fixed_height");
 
                     animatedMediaModel = new DirectItemAnimatedMediaModel(animatedMedia.getBoolean("is_random"),
-                            animatedMedia.getBoolean("is_sticker"), animatedMedia.getString("id"),
-                            stickerImage.getString("url"), stickerImage.optString("webp"), stickerImage.optString("mp4"),
-                            stickerImage.getInt("height"), stickerImage.getInt("width"));
+                                                                          animatedMedia.getBoolean("is_sticker"), animatedMedia.getString("id"),
+                                                                          stickerImage.getString("url"), stickerImage.optString("webp"),
+                                                                          stickerImage.optString("mp4"),
+                                                                          stickerImage.getInt("height"), stickerImage.getInt("width"));
                 }
                 break;
 
@@ -586,8 +583,8 @@ public final class Utils {
                     }
 
                     voiceMediaModel = new DirectItemVoiceMediaModel(voiceMedia.getString("id"),
-                            audio.getString("audio_src"), audio.getLong("duration"),
-                            waveformData);
+                                                                    audio.getString("audio_src"), audio.getLong("duration"),
+                                                                    waveformData);
                 }
                 break;
 
@@ -606,9 +603,9 @@ public final class Utils {
                     }
 
                     linkModel = new DirectItemLinkModel(linkObj.getString("text"),
-                            linkObj.getString("client_context"),
-                            linkObj.optString("mutation_token"),
-                            itemLinkContext);
+                                                        linkObj.getString("client_context"),
+                                                        linkObj.optString("mutation_token"),
+                                                        itemLinkContext);
                 }
                 break;
 
@@ -672,23 +669,23 @@ public final class Utils {
                 case VIDEO_CALL_EVENT: {
                     final JSONObject videoCallEvent = itemObject.getJSONObject("video_call_event");
                     videoCallEventModel = new DirectItemVideoCallEventModel(videoCallEvent.getLong("vc_id"),
-                            videoCallEvent.optBoolean("thread_has_audio_only_call"),
-                            videoCallEvent.getString("action"),
-                            videoCallEvent.getString("description"));
+                                                                            videoCallEvent.optBoolean("thread_has_audio_only_call"),
+                                                                            videoCallEvent.getString("action"),
+                                                                            videoCallEvent.getString("description"));
                 }
                 break;
 
                 case PROFILE: {
                     final JSONObject profile = itemObject.getJSONObject("profile");
                     profileModel = new ProfileModel(profile.getBoolean("is_private"),
-                            false,
-                            profile.getBoolean("is_verified"),
-                            Long.toString(profile.getLong("pk")),
-                            profile.getString("username"),
-                            profile.getString("full_name"),
-                            null, null,
-                            profile.getString("profile_pic_url"),
-                            null, 0, 0, 0, false, false, false, false);
+                                                    false,
+                                                    profile.getBoolean("is_verified"),
+                                                    Long.toString(profile.getLong("pk")),
+                                                    profile.getString("username"),
+                                                    profile.getString("full_name"),
+                                                    null, null,
+                                                    profile.getString("profile_pic_url"),
+                                                    null, 0, 0, 0, false, false, false, false);
                 }
                 break;
 
@@ -783,12 +780,12 @@ public final class Utils {
         itemModels.trimToSize();
 
         return new InboxThreadModel(readState, threadId, threadV2Id, threadType, threadTitle,
-                threadNewestCursor, threadOldestCursor, threadNextCursor, threadPrevCursor,
-                null, // todo
-                userModels, leftuserModels, adminIDs,
-                itemModels.toArray(new DirectItemModel[0]),
-                muted, isPin, named, canonical,
-                pending, threadHasOlder, unreadCount, isSpam, isGroup, archived, lastActivityAt);
+                                    threadNewestCursor, threadOldestCursor, threadNextCursor, threadPrevCursor,
+                                    null, // todo
+                                    userModels, leftuserModels, adminIDs,
+                                    itemModels.toArray(new DirectItemModel[0]),
+                                    muted, isPin, named, canonical,
+                                    pending, threadHasOlder, unreadCount, isSpam, isGroup, archived, lastActivityAt);
     }
 
     private static RavenExpiringMediaType getExpiringMediaType(final String type) {
@@ -945,8 +942,10 @@ public final class Utils {
             ActivityCompat.requestPermissions((Activity) context, Utils.PERMS, 8020);
     }
 
-    private static void batchDownloadImpl(@NonNull final Context context, @Nullable final String username,
-                                          final DownloadMethod method, final List<? extends BasePostModel> itemsToDownload) {
+    private static void batchDownloadImpl(@NonNull final Context context,
+                                          @Nullable final String username,
+                                          final DownloadMethod method,
+                                          final List<? extends BasePostModel> itemsToDownload) {
         File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
@@ -957,61 +956,54 @@ public final class Utils {
         if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !isEmpty(username))
             dir = new File(dir, username);
 
-        if (dir.exists() || dir.mkdirs()) {
-            final MainActivityBackup mainActivity = method != DownloadMethod.DOWNLOAD_FEED && context instanceof MainActivityBackup ? (MainActivityBackup) context : null;
-            final ProfileViewer pv = method == DownloadMethod.DOWNLOAD_MAIN && context instanceof ProfileViewer ? (ProfileViewer) context : null;
-            final SavedViewer saved = method == DownloadMethod.DOWNLOAD_SAVED && context instanceof SavedViewer ? (SavedViewer) context : null;
-
-            final int itemsToDownloadSize = itemsToDownload.size();
-
-            final File finalDir = dir;
-            for (int i = itemsToDownloadSize - 1; i >= 0; i--) {
-                final BasePostModel selectedItem = itemsToDownload.get(i);
-
-                if (mainActivity == null && saved == null && pv == null) {
-                    new DownloadAsync(context,
-                            selectedItem.getDisplayUrl(),
-                            getDownloadSaveFile(finalDir, selectedItem, ""),
-                            null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                } else {
-                    new PostFetcher(selectedItem.getShortCode(), result -> {
-                        if (result != null) {
-                            final int resultsSize = result.length;
-                            final boolean multiResult = resultsSize > 1;
-
-                            for (int j = 0; j < resultsSize; j++) {
-                                final BasePostModel model = result[j];
-                                final File saveFile = getDownloadSaveFile(finalDir, model, multiResult ? "_slide_" + (j + 1) : "");
-
-                                new DownloadAsync(context,
-                                        model.getDisplayUrl(),
-                                        saveFile,
-                                        file -> {
-                                            model.setDownloaded(true);
-                                            // if (saved != null)
-                                            //     saved.deselectSelection(selectedItem);
-                                            // else if (mainActivity != null)
-                                            //     mainActivity.mainHelper.deselectSelection(selectedItem);
-                                            // else pv.deselectSelection(selectedItem);
-                                        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            }
-                        }
-                        // else {
-                        //     if (saved != null) saved.deselectSelection(selectedItem);
-                        //     else if (mainActivity != null)
-                        //         mainActivity.mainHelper.deselectSelection(selectedItem);
-                        //     else if (pv != null) pv.deselectSelection(selectedItem);
-                        // }
-                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                }
-            }
-        } else
+        if (!dir.exists() && !dir.mkdirs()) {
             Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        boolean checkEachPost = false;
+        switch (method) {
+            case DOWNLOAD_SAVED:
+            case DOWNLOAD_MAIN:
+                checkEachPost = true;
+                break;
+            case DOWNLOAD_FEED:
+                checkEachPost = false;
+                break;
+        }
+        final int itemsToDownloadSize = itemsToDownload.size();
+        for (int i = 0; i < itemsToDownloadSize; i++) {
+            final BasePostModel selectedItem = itemsToDownload.get(i);
+            if (!checkEachPost) {
+                final boolean isSlider = itemsToDownloadSize > 1;
+                final File saveFile = getDownloadSaveFile(dir, selectedItem, isSlider ? "_slide_" + (i + 1) : "");
+                new DownloadAsync(context,
+                                  selectedItem.getDisplayUrl(),
+                                  saveFile,
+                                  file -> selectedItem.setDownloaded(true))
+                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                final File finalDir = dir;
+                new PostFetcher(selectedItem.getShortCode(), result -> {
+                    if (result != null) {
+                        final int resultsSize = result.length;
+                        final boolean multiResult = resultsSize > 1;
+                        for (int j = 0; j < resultsSize; j++) {
+                            final BasePostModel model = result[j];
+                            final File saveFile = getDownloadSaveFile(finalDir, model, multiResult ? "_slide_" + (j + 1) : "");
+                            new DownloadAsync(context,
+                                              model.getDisplayUrl(),
+                                              saveFile,
+                                              file -> model.setDownloaded(true))
+                                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        }
+                    }
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        }
     }
 
     public static void dmDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
-                                     final DirectItemMediaModel itemsToDownload) {
+                                  final DirectItemMediaModel itemsToDownload) {
         if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
 
         if (itemsToDownload == null) return;
@@ -1023,7 +1015,7 @@ public final class Utils {
     }
 
     private static void dmDownloadImpl(@NonNull final Context context, @Nullable final String username,
-                                          final DownloadMethod method, final DirectItemMediaModel selectedItem) {
+                                       final DownloadMethod method, final DirectItemMediaModel selectedItem) {
         File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
         if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
@@ -1035,11 +1027,10 @@ public final class Utils {
             dir = new File(dir, username);
 
         if (dir.exists() || dir.mkdirs()) {
-            final File finalDir = dir;
             new DownloadAsync(context,
-                    selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
-                    getDownloadSaveFileDm(finalDir, selectedItem, ""),
-                    null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                              selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
+                              getDownloadSaveFileDm(dir, selectedItem, ""),
+                              null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else
             Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
     }
@@ -1104,8 +1095,8 @@ public final class Utils {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.UTILS, "checkExistence",
-                        new Pair<>("isSlider", isSlider),
-                        new Pair<>("model", model));
+                                             new Pair<>("isSlider", isSlider),
+                                             new Pair<>("model", model));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
 
@@ -1132,7 +1123,7 @@ public final class Utils {
         final View importSettingsParent = (View) importExportBinding.cbImportSettings.getParent();
 
         importExportBinding.cbPassword.setOnCheckedChangeListener((buttonView, isChecked) ->
-                importExportBinding.etPassword.etPassword.setEnabled(isChecked));
+                                                                          importExportBinding.etPassword.etPassword.setEnabled(isChecked));
 
         final AlertDialog[] dialog = new AlertDialog[1];
         final View.OnClickListener onClickListener = v -> {
@@ -1171,7 +1162,8 @@ public final class Utils {
                                 flags |= ExportImportUtils.FLAG_COOKIES;
 
                             ExportImportUtils.Export(password, flags, file, result -> {
-                                Toast.makeText(context, result ? R.string.dialog_export_success : R.string.dialog_export_failed, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, result ? R.string.dialog_export_success : R.string.dialog_export_failed, Toast.LENGTH_SHORT)
+                                     .show();
                                 if (dialog[0] != null && dialog[0].isShowing()) dialog[0].dismiss();
                             });
 
@@ -1190,7 +1182,8 @@ public final class Utils {
 
                         ExportImportUtils.Import(context, flags, new File(path), result -> {
                             ((AppCompatActivity) context).recreate();
-                            Toast.makeText(context, result ? R.string.dialog_import_success : R.string.dialog_import_failed, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, result ? R.string.dialog_import_success : R.string.dialog_import_failed, Toast.LENGTH_SHORT)
+                                 .show();
                             if (dialog[0] != null && dialog[0].isShowing()) dialog[0].dismiss();
                         });
 
@@ -1284,8 +1277,8 @@ public final class Utils {
             mimeType = mimeTypeMap.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
         else
             mimeType = scheme.equals(ContentResolver.SCHEME_CONTENT) ? contentResolver.getType(itemUri)
-                    : mimeTypeMap.getMimeTypeFromExtension
-                    (MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
+                                                                     : mimeTypeMap.getMimeTypeFromExtension
+                                                                             (MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
 
         if (isEmpty(mimeType)) return true;
         mimeType = mimeType.toLowerCase();

@@ -52,6 +52,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.ActivityProfileBinding;
+import awais.instagrabber.fragments.SavedViewerFragment;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.BasePostModel;
@@ -62,6 +63,7 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.Utils;
@@ -109,8 +111,8 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     if (autoloadPosts && hasNextPage)
                         currentlyExecuting = new PostsFetcher(
                                 profileModel != null ? profileModel.getId()
-                                                     : (hashtagModel != null ? ("#" + hashtagModel.getName()) : locationModel.getId()),
-                                false,
+                                                     : (hashtagModel != null ? (hashtagModel.getName()) : locationModel.getId()),
+                                profileModel != null ? PostItemType.MAIN : (hashtagModel != null ? PostItemType.HASHTAG : PostItemType.LOCATION),
                                 endCursor,
                                 this)
                                 .setUsername((isLocation || isHashtag) ? null : profileModel.getUsername())
@@ -247,7 +249,9 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                                                                            : (hashtagModel != null
                                                                               ? ("#" + hashtagModel.getName())
                                                                               : locationModel.getId()),
-                                                      isHashtag,
+                                                      profileModel != null
+                                                      ? PostItemType.MAIN
+                                                      : (hashtagModel != null ? PostItemType.HASHTAG : PostItemType.LOCATION),
                                                       endCursor, postsFetchListener)
                         .setUsername((isHashtag || isLocation) ? null : profileModel.getUsername())
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -371,7 +375,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     return;
                 }
 
-                currentlyExecuting = new PostsFetcher(userQuery, postsFetchListener)
+                currentlyExecuting = new PostsFetcher(userQuery, PostItemType.HASHTAG, null, postsFetchListener)
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 profileBinding.profileView.btnFollowTag.setVisibility(View.VISIBLE);
@@ -383,7 +387,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                             profileBinding.profileView.mainHashtagImage.setStoriesBorder();
                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-                    if (hashtagModel.getFollowing() == true) {
+                    if (hashtagModel.getFollowing()) {
                         profileBinding.profileView.btnFollowTag.setText(R.string.unfollow);
                         profileBinding.profileView.btnFollowTag.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(
                                 ProfileViewer.this, R.color.btn_purple_background)));
@@ -614,8 +618,9 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     } else {
                         profileBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                         profileBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
-                        currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
-                                                                                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        currentlyExecuting = new PostsFetcher(profileId, PostItemType.MAIN, null, postsFetchListener)
+                                .setUsername(profileModel.getUsername())
+                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                 } else {
                     profileBinding.profileView.mainFollowers.setClickable(false);
@@ -720,7 +725,7 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                 } else {
                     profileBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                     profileBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
-                    currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
+                    currentlyExecuting = new PostsFetcher(profileId, PostItemType.LOCATION, null, postsFetchListener)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -870,17 +875,17 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
             } else if (v == profileBinding.profileView.btnFollowTag) {
                 new ProfileAction().execute("followtag");
             } else if (v == profileBinding.profileView.btnTagged || (v == profileBinding.profileView.btnRestrict && !isLoggedIn)) {
-                startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
+                startActivity(new Intent(ProfileViewer.this, SavedViewerFragment.class)
                                       .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
                                       .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             } else if (v == profileBinding.profileView.btnSaved) {
-                startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
+                startActivity(new Intent(ProfileViewer.this, SavedViewerFragment.class)
                                       .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
                                       .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );
             } else if (v == profileBinding.profileView.btnLiked) {
-                startActivity(new Intent(ProfileViewer.this, SavedViewer.class)
+                startActivity(new Intent(ProfileViewer.this, SavedViewerFragment.class)
                                       .putExtra(Constants.EXTRAS_INDEX, "^" + profileModel.getId())
                                       .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername())
                 );

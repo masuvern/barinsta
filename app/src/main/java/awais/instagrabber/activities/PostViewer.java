@@ -313,10 +313,11 @@ public final class PostViewer extends BaseLanguageActivity {
             final List<? extends BasePostModel> itemGetterItems;
             final boolean isSwipeable;
 
-            if (postItemType == PostItemType.SAVED && SavedViewer.itemGetter != null) {
-                itemGetterItems = SavedViewer.itemGetter.get(postItemType);
-                isSwipeable = !(itemGetterItems.size() < 1 || postItemType == PostItemType.SAVED && isFromShare);
-            } else if (postItemType != null && MainActivityBackup.itemGetter != null) {
+            // if (postItemType == PostItemType.SAVED && SavedViewerFragment.itemGetter != null) {
+            //     itemGetterItems = SavedViewerFragment.itemGetter.get(postItemType);
+            //     isSwipeable = !(itemGetterItems.size() < 1 || postItemType == PostItemType.SAVED && isFromShare);
+            // } else
+                if (postItemType != null && MainActivityBackup.itemGetter != null) {
                 itemGetterItems = MainActivityBackup.itemGetter.get(postItemType);
                 isSwipeable = !(itemGetterItems.size() < 1 || postItemType == PostItemType.MAIN && isFromShare);
             } else {

@@ -52,5 +52,26 @@
             android:defaultValue=""
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_profileFragment_to_savedViewerFragment"
+            app:destination="@id/savedViewerFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/savedViewerFragment"
+        android:name="awais.instagrabber.fragments.SavedViewerFragment"
+        android:label="Saved"
+        tools:layout="@layout/fragment_saved">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="profileId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="type"
+            app:argType="awais.instagrabber.models.enums.PostItemType"
+            app:nullable="false" />
     </fragment>
 </navigation>

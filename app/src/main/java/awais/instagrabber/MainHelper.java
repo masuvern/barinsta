@@ -53,7 +53,7 @@ import awais.instagrabber.activities.CommentsViewer;
 import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.activities.PostViewer;
-import awais.instagrabber.activities.SavedViewer;
+import awais.instagrabber.fragments.SavedViewerFragment;
 import awais.instagrabber.adapters.DiscoverAdapter;
 import awais.instagrabber.adapters.FeedAdapter;
 import awais.instagrabber.adapters.PostsAdapter;
@@ -152,7 +152,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                                                   : (mainActivity.hashtagModel != null
                                                                      ? mainActivity.userQuery
                                                                      : mainActivity.locationModel.getId()),
-                                false,
+                                mainActivity.profileModel != null
+                                ? PostItemType.MAIN
+                                : (mainActivity.hashtagModel != null ? PostItemType.HASHTAG : PostItemType.LOCATION),
                                 endCursor,
                                 this)
                                 .setUsername((isLocation || isHashtag) ? null : mainActivity.profileModel.getUsername())
@@ -568,7 +570,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                                                                                         : (mainActivity.hashtagModel != null
                                                                                            ? mainActivity.userQuery
                                                                                            : mainActivity.locationModel.getId()),
-                                                      false,
+                                                      mainActivity.profileModel != null
+                                                      ? PostItemType.MAIN
+                                                      : (mainActivity.hashtagModel != null ? PostItemType.HASHTAG : PostItemType.LOCATION),
                                                       endCursor,
                                                       postsFetchListener)
                         .setUsername((isHashtag || isLocation) ? null : mainActivity.profileModel.getUsername())
@@ -920,7 +924,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     return;
                 }
 
-                currentlyExecuting = new PostsFetcher(mainActivity.userQuery, postsFetchListener)
+                currentlyExecuting = new PostsFetcher(mainActivity.userQuery, PostItemType.HASHTAG, null, postsFetchListener)
                         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 mainActivity.mainBinding.profileView.btnFollowTag.setVisibility(View.VISIBLE);
@@ -1167,8 +1171,9 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     } else {
                         mainActivity.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                         mainActivity.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
-                        currentlyExecuting = new PostsFetcher(profileId, postsFetchListener).setUsername(profileModel.getUsername())
-                                                                                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        currentlyExecuting = new PostsFetcher(profileId, PostItemType.MAIN, null, postsFetchListener)
+                                .setUsername(profileModel.getUsername())
+                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     }
                 } else {
                     mainActivity.mainBinding.profileView.mainFollowers.setClickable(false);
@@ -1274,7 +1279,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 } else {
                     mainActivity.mainBinding.profileView.swipeRefreshLayout.setRefreshing(true);
                     mainActivity.mainBinding.profileView.mainPosts.setVisibility(View.VISIBLE);
-                    currentlyExecuting = new PostsFetcher(profileId, postsFetchListener)
+                    currentlyExecuting = new PostsFetcher(profileId, PostItemType.LOCATION, null, postsFetchListener)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -1422,8 +1427,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                             .setNegativeButton(R.string.no, null)
                             .setPositiveButton(R.string.yes, (dialog, which) -> new ProfileAction().execute("follow"))
                             .show();
-                }
-                else new ProfileAction().execute("follow");
+                } else new ProfileAction().execute("follow");
             } else if (v == mainActivity.mainBinding.profileView.btnRestrict && isLoggedIn) {
                 new ProfileAction().execute("restrict");
             } else if (v == mainActivity.mainBinding.profileView.btnSaved && !isSelf) {
@@ -1431,17 +1435,17 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
             } else if (v == mainActivity.mainBinding.profileView.btnFollowTag) {
                 new ProfileAction().execute("followtag");
             } else if (v == mainActivity.mainBinding.profileView.btnTagged || v == mainActivity.mainBinding.profileView.btnRestrict) {
-                mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
+                mainActivity.startActivity(new Intent(mainActivity, SavedViewerFragment.class)
                                                    .putExtra(Constants.EXTRAS_INDEX, "%" + mainActivity.profileModel.getId())
                                                    .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())
                 );
             } else if (v == mainActivity.mainBinding.profileView.btnSaved) {
-                mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
+                mainActivity.startActivity(new Intent(mainActivity, SavedViewerFragment.class)
                                                    .putExtra(Constants.EXTRAS_INDEX, "$" + mainActivity.profileModel.getId())
                                                    .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())
                 );
             } else if (v == mainActivity.mainBinding.profileView.btnLiked) {
-                mainActivity.startActivity(new Intent(mainActivity, SavedViewer.class)
+                mainActivity.startActivity(new Intent(mainActivity, SavedViewerFragment.class)
                                                    .putExtra(Constants.EXTRAS_INDEX, "^" + mainActivity.profileModel.getId())
                                                    .putExtra(Constants.EXTRAS_USER, "@" + mainActivity.profileModel.getUsername())
                 );

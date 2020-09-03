@@ -6,6 +6,7 @@
     app:startDestination="@id/discoverFragment">
 
     <include app:graph="@navigation/post_view_nav_graph" />
+    <include app:graph="@navigation/profile_nav_graph" />
 
     <action
         android:id="@+id/action_global_postViewFragment"

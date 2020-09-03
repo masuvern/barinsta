@@ -6,5 +6,9 @@ public enum PostItemType implements Serializable {
     MAIN,
     DISCOVER,
     FEED,
-    SAVED
+    SAVED,
+    LIKED,
+    TAGGED,
+    HASHTAG,
+    LOCATION
 }

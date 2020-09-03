@@ -50,6 +50,7 @@ import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -328,7 +329,7 @@ public class LocationFragment extends Fragment {
 
     private void fetchPosts() {
         stopCurrentExecutor();
-        currentlyExecuting = new PostsFetcher(locationModel.getId(), true, endCursor, postsFetchListener)
+        currentlyExecuting = new PostsFetcher(locationModel.getId(), PostItemType.LOCATION, endCursor, postsFetchListener)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
