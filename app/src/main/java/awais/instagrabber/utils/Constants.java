@@ -6,9 +6,9 @@ public final class Constants {
     public static final String DATE_TIME_FORMAT = "date_time_format";
     public static final String DATE_TIME_SELECTION = "date_time_selection";
     public static final String CUSTOM_DATE_TIME_FORMAT = "date_time_custom_format";
+    public static final String APP_THEME = "app_theme_v19";
+    public static final String APP_LANGUAGE = "app_language_v19";
     // int prefs
-    public static final String APP_THEME = "app_theme";
-    public static final String APP_LANGUAGE = "app_language";
     public static final String PREV_INSTALL_VERSION = "prevVersion";
     // boolean prefs
     public static final String DOWNLOAD_USER_FOLDER = "download_user_folder";
