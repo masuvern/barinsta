@@ -220,14 +220,12 @@ public final class PostViewer extends BaseLanguageActivity {
         viewerBinding.bottomPanel.commentsCount.setText(String.valueOf(commentsCount));
         viewerBinding.bottomPanel.btnComments.setVisibility(View.VISIBLE);
 
-        viewerBinding.bottomPanel.btnComments.setOnClickListener(v ->
-                                                                         startActivityForResult(new Intent(this, CommentsViewer.class)
-                                                                                                        .putExtra(Constants.EXTRAS_SHORTCODE,
-                                                                                                                  postModel.getShortCode())
-                                                                                                        .putExtra(Constants.EXTRAS_POST,
-                                                                                                                  viewerPostModel.getPostId())
-                                                                                                        .putExtra(Constants.EXTRAS_USER, postUserId),
-                                                                                                6969));
+        viewerBinding.bottomPanel.btnComments.setOnClickListener(v -> startActivityForResult(
+                new Intent(this, CommentsViewer.class)
+                        .putExtra(Constants.EXTRAS_SHORTCODE, postModel.getShortCode())
+                        .putExtra(Constants.EXTRAS_POST, viewerPostModel.getPostId())
+                        .putExtra(Constants.EXTRAS_USER, postUserId),
+                6969));
         viewerBinding.bottomPanel.btnComments.setClickable(true);
         viewerBinding.bottomPanel.btnComments.setEnabled(true);
 

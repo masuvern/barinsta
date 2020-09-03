@@ -78,6 +78,10 @@ public final class ViewerPostModel extends BasePostModel {
         return liked;
     }
 
+    public void setBookmarked(final boolean bookmarked) {
+        this.bookmarked = bookmarked;
+    }
+
     public void setSliderDisplayUrl(final String sliderDisplayUrl) {
         this.sliderDisplayUrl = sliderDisplayUrl;
     }

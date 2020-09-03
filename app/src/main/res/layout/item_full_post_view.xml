@@ -7,8 +7,7 @@
     android:layout_marginTop="?attr/actionBarSize"
     android:animateLayoutChanges="true"
     android:orientation="vertical"
-    android:weightSum="3.2"
-    tools:context=".activities.PostViewer">
+    android:weightSum="3.2">
 
     <include
         android:id="@+id/topPanel"
@@ -49,15 +48,16 @@
             android:layout_gravity="center"
             android:visibility="gone" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivToggleFullScreen"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="end|top"
-            android:background="?selectableItemBackgroundBorderless"
-            android:padding="4dp"
-            app:srcCompat="@drawable/ic_fullscreen"
-            app:tint="?android:textColorPrimary" />
+        <!-- Removing for now, will add in later versions -->
+        <!--<androidx.appcompat.widget.AppCompatImageView-->
+        <!--    android:id="@+id/ivToggleFullScreen"-->
+        <!--    android:layout_width="48dp"-->
+        <!--    android:layout_height="48dp"-->
+        <!--    android:layout_gravity="end|top"-->
+        <!--    android:background="?selectableItemBackgroundBorderless"-->
+        <!--    android:padding="4dp"-->
+        <!--    app:srcCompat="@drawable/ic_fullscreen"-->
+        <!--    app:tint="?android:textColorPrimary" />-->
     </FrameLayout>
 
     <include

@@ -38,6 +38,8 @@ import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.ViewerPostModelWrapper;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.services.MediaService;
+import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
@@ -46,6 +48,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class PostViewFragment extends Fragment {
     private static final String TAG = "PostViewFragment";
+    private static final String COOKIE = settingsHelper.getString(Constants.COOKIE);
 
     private FragmentActivity fragmentActivity;
     private FragmentPostViewBinding binding;
@@ -58,14 +61,14 @@ public class PostViewFragment extends Fragment {
     private boolean hasInitialResult = false;
     private PostViewAdapter adapter;
     private boolean session;
+    private MediaService mediaService;
 
     private FetchListener<ViewerPostModel[]> pfl = result -> {
         if (result == null) return;
         if (result.length <= 0) return;
-        final List<ViewerPostModelWrapper> viewerPostModels = viewerPostViewModel.getList()
-                                                                                 .getValue();
-        final List<ViewerPostModelWrapper> temp = viewerPostModels == null ? new ArrayList<>(
-                idOrCodeList.size()) : new ArrayList<>(viewerPostModels);
+        final List<ViewerPostModelWrapper> viewerPostModels = viewerPostViewModel.getList().getValue();
+        final List<ViewerPostModelWrapper> temp = viewerPostModels == null ? new ArrayList<>(idOrCodeList.size())
+                                                                           : new ArrayList<>(viewerPostModels);
         final ViewerPostModel firstPost = result[0];
         if (firstPost == null) return;
         String idOrCode = isId ? firstPost.getPostId() : firstPost.getShortCode();
@@ -104,15 +107,6 @@ public class PostViewFragment extends Fragment {
         NavHostFragment.findNavController(this).navigate(action);
     };
     private OnPostViewChildViewClickListener clickListener = (v, wrapper, postPosition, childPosition) -> {
-        // final FeedModel feedModel = (FeedModel) tag;
-        // if (v.getId() == ) {
-        // if (feedModel.isMentionClicked())
-        //     feedModel.toggleCaption();
-        // feedModel.setMentionClicked(false);
-        // if (!FeedItemViewHolder.expandCollapseTextView((RamboTextView) v, feedModel.getPostCaption()))
-        //     feedModel.toggleCaption();
-        // return;
-        // }
         final ViewerPostModel postModel = wrapper.getViewerPostModels()[0];
         final String username = postModel.getProfileModel().getUsername();
         final int id = v.getId();
@@ -125,8 +119,7 @@ public class PostViewFragment extends Fragment {
                                                 postModel.getShortCode())
                                       .putExtra(Constants.EXTRAS_POST, postModel.getPostId())
                                       .putExtra(Constants.EXTRAS_USER,
-                                                Utils.getUserIdFromCookie(settingsHelper.getString(
-                                                        Constants.COOKIE))));
+                                                Utils.getUserIdFromCookie(COOKIE)));
                 break;
             case R.id.btnDownload:
                 if (checkSelfPermission(requireContext(),
@@ -142,15 +135,69 @@ public class PostViewFragment extends Fragment {
             case R.id.title:
                 mentionListener.onClick(null, username, false, false);
                 break;
+            case R.id.btnLike:
+                if (mediaService != null) {
+                    final String userId = Utils.getUserIdFromCookie(COOKIE);
+                    final String csrfToken = Utils.getCsrfTokenFromCookie(COOKIE);
+                    final ServiceCallback<Boolean> likeCallback = new ServiceCallback<Boolean>() {
+                        @Override
+                        public void onSuccess(final Boolean result) {
+                            if (result) {
+                                postModel.setManualLike(!postModel.getLike());
+                                adapter.notifyItemChanged(postPosition);
+                                return;
+                            }
+                            Log.e(TAG, "like/unlike unsuccessful!");
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error during like/unlike", t);
+                        }
+                    };
+                    if (!postModel.getLike()) {
+                        mediaService.like(postModel.getPostId(), userId, csrfToken, likeCallback);
+                    } else {
+                        mediaService.unlike(postModel.getPostId(), userId, csrfToken, likeCallback);
+                    }
+                }
+                break;
+            case R.id.btnBookmark:
+                if (mediaService != null) {
+                    final String userId = Utils.getUserIdFromCookie(COOKIE);
+                    final String csrfToken = Utils.getCsrfTokenFromCookie(COOKIE);
+                    final ServiceCallback<Boolean> saveCallback = new ServiceCallback<Boolean>() {
+                        @Override
+                        public void onSuccess(final Boolean result) {
+                            if (result) {
+                                postModel.setBookmarked(!postModel.getBookmark());
+                                adapter.notifyItemChanged(postPosition);
+                                return;
+                            }
+                            Log.e(TAG, "save/unsave unsuccessful!");
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error during save/unsave", t);
+                        }
+                    };
+                    if (!postModel.getBookmark()) {
+                        mediaService.save(postModel.getPostId(), userId, csrfToken, saveCallback);
+                    } else {
+                        mediaService.unsave(postModel.getPostId(), userId, csrfToken, saveCallback);
+                    }
+                }
+                break;
         }
     };
-    private PostViewAdapter.OnPostCaptionLongClickListener captionLongClickListener = text -> Utils
-            .copyText(requireContext(), text);
+    private PostViewAdapter.OnPostCaptionLongClickListener captionLongClickListener = text -> Utils.copyText(requireContext(), text);
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = getActivity();
+        mediaService = MediaService.getInstance();
     }
 
     @Nullable

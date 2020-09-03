@@ -1,10 +1,14 @@
 package awais.instagrabber.adapters.viewholder;
 
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -83,6 +87,39 @@ public class PostViewerViewHolder extends RecyclerView.ViewHolder {
             binding.bottomPanel.viewerCaption.setText(postCaption);
         }
         binding.bottomPanel.tvPostDate.setText(firstPost.getPostDate());
+        setupLikes(firstPost);
+        setupSave(firstPost);
+    }
+
+    private void setupLikes(final ViewerPostModel firstPost) {
+        final boolean liked = firstPost.getLike();
+        final long likeCount = firstPost.getLikes();
+        final Resources resources = itemView.getContext().getResources();
+        if (liked) {
+            final String unlikeString = resources.getString(R.string.unlike, String.valueOf(likeCount));
+            binding.btnLike.setText(unlikeString);
+            ViewCompat.setBackgroundTintList(binding.btnLike,
+                                             ColorStateList.valueOf(ContextCompat.getColor(itemView.getContext(), R.color.btn_pink_background)));
+        } else {
+            final String likeString = resources.getString(R.string.like, String.valueOf(likeCount));
+            binding.btnLike.setText(likeString);
+            ViewCompat.setBackgroundTintList(binding.btnLike,
+                                             ColorStateList.valueOf(ContextCompat.getColor(itemView.getContext(), R.color.btn_lightpink_background)));
+        }
+    }
+
+    private void setupSave(final ViewerPostModel firstPost) {
+        final boolean saved = firstPost.getBookmark();
+        if (saved) {
+            binding.btnBookmark.setText(R.string.unbookmark);
+            ViewCompat.setBackgroundTintList(binding.btnBookmark,
+                                             ColorStateList.valueOf(ContextCompat.getColor(itemView.getContext(), R.color.btn_orange_background)));
+        } else {
+            binding.btnBookmark.setText(R.string.bookmark);
+            ViewCompat.setBackgroundTintList(
+                    binding.btnBookmark,
+                    ColorStateList.valueOf(ContextCompat.getColor(itemView.getContext(), R.color.btn_lightorange_background)));
+        }
     }
 
     private void setupListeners(final ViewerPostModelWrapper wrapper,
@@ -98,6 +135,8 @@ public class PostViewerViewHolder extends RecyclerView.ViewHolder {
         binding.topPanel.ivProfilePic.setOnClickListener(onClickListener);
         binding.bottomPanel.btnDownload.setOnClickListener(onClickListener);
         binding.bottomPanel.viewerCaption.setOnClickListener(onClickListener);
+        binding.btnLike.setOnClickListener(onClickListener);
+        binding.btnBookmark.setOnClickListener(onClickListener);
         binding.bottomPanel.viewerCaption.setOnLongClickListener(v -> {
             longClickListener.onLongClick(binding.bottomPanel.viewerCaption.getText().toString());
             return true;
@@ -152,8 +191,8 @@ public class PostViewerViewHolder extends RecyclerView.ViewHolder {
                         if (player == null) return;
                         final float vol = player.getVolume() == 0f ? 1f : 0f;
                         player.setVolume(vol);
-                        binding.bottomPanel.btnMute
-                                .setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
+                        binding.bottomPanel.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24
+                                                                               : R.drawable.ic_volume_off_24);
                         Utils.sessionVolumeFull = vol == 1f;
                     }
                 }
