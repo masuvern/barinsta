@@ -84,7 +84,7 @@ public final class PostViewer extends BaseLanguageActivity {
     private View viewsContainer, viewerCaptionParent;
     private GestureDetectorCompat gestureDetector;
     private SwipeEvent swipeEvent;
-    private CharSequence postCaption = null, postShortCode, postUserId;
+    private CharSequence postCaption = null, postUserId;
     private Resources resources;
     private boolean session = false, isFromShare, liked, saved, ok = false;
     private int slidePos = 0, lastSlidePos = 0;
@@ -698,7 +698,7 @@ public final class PostViewer extends BaseLanguageActivity {
                                     Toast.makeText(getApplicationContext(), R.string.share_private_post, Toast.LENGTH_LONG).show();
                                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                                 sharingIntent.setType("text/plain");
-                                sharingIntent.putExtra(Intent.EXTRA_TEXT, "https://instagram.com/p/" + postShortCode);
+                                sharingIntent.putExtra(Intent.EXTRA_TEXT, "https://instagram.com/p/" + postModel.getShortCode());
                                 startActivity(Intent.createChooser(sharingIntent,
                                                                    (result.isPrivate())
                                                                    ? getString(R.string.share_private_post)
