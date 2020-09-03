@@ -1,15 +1,16 @@
 package awais.instagrabber.fragments.main.viewmodels;
 
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import awais.instagrabber.models.ViewerPostModel;
+import awais.instagrabber.models.ViewerPostModelWrapper;
 
-public class ViewerPostViewModel extends BasePostViewModel<ViewerPostModel> {
-    private MutableLiveData<List<ViewerPostModel>> list;
+public class ViewerPostViewModel extends ViewModel {
+    private MutableLiveData<List<ViewerPostModelWrapper>> list;
 
-    public MutableLiveData<List<ViewerPostModel>> getList() {
+    public MutableLiveData<List<ViewerPostModelWrapper>> getList() {
         if (list == null) {
             list = new MutableLiveData<>();
         }
