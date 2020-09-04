@@ -456,16 +456,14 @@ public class ProfileFragment extends Fragment {
             binding.mainFollowers.setClickable(true);
 
             if (isLoggedIn) {
-                final View.OnClickListener followClickListener = v -> startActivity(new Intent(
-                        requireContext(),
-                        FollowViewer.class).putExtra(Constants.EXTRAS_FOLLOWERS, v == binding.mainFollowers)
-                                           .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
-                                           .putExtra(Constants.EXTRAS_ID, profileId));
+                final View.OnClickListener followClickListener = v -> startActivity(
+                        new Intent(requireContext(), FollowViewer.class)
+                                .putExtra(Constants.EXTRAS_FOLLOWERS, v == binding.mainFollowers)
+                                .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
+                                .putExtra(Constants.EXTRAS_ID, profileId));
 
-                binding.mainFollowers
-                        .setOnClickListener(followersCount > 0 ? followClickListener : null);
-                binding.mainFollowing
-                        .setOnClickListener(followingCount > 0 ? followClickListener : null);
+                binding.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
+                binding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
             }
 
             if (profileModel.getPostCount() == 0) {

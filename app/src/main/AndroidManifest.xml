@@ -141,14 +141,14 @@
         <!--        android:value=".activities.MainActivity" />-->
         <!--</activity>-->
 
-        <activity
-            android:name=".activities.CommentsViewer"
-            android:parentActivityName=".activities.PostViewer">
+        <!--<activity-->
+        <!--    android:name=".activities.CommentsViewerFragment"-->
+        <!--    android:parentActivityName=".activities.PostViewer">-->
 
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.PostViewer" />
-        </activity>
+        <!--    <meta-data-->
+        <!--        android:name="android.support.PARENT_ACTIVITY"-->
+        <!--        android:value=".activities.PostViewer" />-->
+        <!--</activity>-->
 
         <!--<activity-->
         <!--    android:name=".activities.StoryViewer"-->

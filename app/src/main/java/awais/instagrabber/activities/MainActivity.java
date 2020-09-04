@@ -14,9 +14,11 @@ import androidx.navigation.NavController;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
@@ -46,7 +48,9 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.settingsPreferencesFragment,
             R.id.hashTagFragment,
             R.id.locationFragment,
-            R.id.savedViewerFragment);
+            R.id.savedViewerFragment,
+            R.id.commentsViewerFragment);
+    private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
 
@@ -110,6 +114,11 @@ public class MainActivity extends BaseLanguageActivity {
             } else {
                 removeScrollingBehaviour();
             }
+            if (REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS.contains(destinationId)) {
+                removeCollapsingToolbarScrollFlags();
+            } else {
+                setCollapsingToolbarScrollFlags();
+            }
         });
     }
 
@@ -123,6 +132,22 @@ public class MainActivity extends BaseLanguageActivity {
         final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.mainNavHost.getLayoutParams();
         layoutParams.setBehavior(null);
         binding.mainNavHost.requestLayout();
+    }
+
+    private void setCollapsingToolbarScrollFlags() {
+        final CollapsingToolbarLayout collapsingToolbarLayout = binding.collapsingToolbarLayout;
+        final AppBarLayout.LayoutParams toolbarLayoutLayoutParams = (AppBarLayout.LayoutParams) collapsingToolbarLayout.getLayoutParams();
+        toolbarLayoutLayoutParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                                                         | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+                                                         | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+        binding.collapsingToolbarLayout.requestLayout();
+    }
+
+    private void removeCollapsingToolbarScrollFlags() {
+        final CollapsingToolbarLayout collapsingToolbarLayout = binding.collapsingToolbarLayout;
+        final AppBarLayout.LayoutParams toolbarLayoutLayoutParams = (AppBarLayout.LayoutParams) collapsingToolbarLayout.getLayoutParams();
+        toolbarLayoutLayoutParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL);
+        binding.collapsingToolbarLayout.requestLayout();
     }
 
     @Override

@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -1220,9 +1221,13 @@ public final class Utils {
     }
 
     public static String sign(final String message) {
+        return sign(Constants.SIGNATURE_KEY, message);
+    }
+
+    public static String sign(final String key, final String message) {
         try {
             final Mac hasher = Mac.getInstance("HmacSHA256");
-            hasher.init(new SecretKeySpec(Constants.SIGNATURE_KEY.getBytes(), "HmacSHA256"));
+            hasher.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
             byte[] hash = hasher.doFinal(message.getBytes());
             final StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
@@ -1457,5 +1462,30 @@ public final class Utils {
             return null;
         }
         return cookie.split("csrftoken=")[1].split(";")[0];
+    }
+
+    // public static long random(final long lower, final long upper) {
+    //     final long result = lower + new Random().nextLong() * (upper - lower + 1);
+    //     return result;
+    // }
+
+    public static long random(long origin, long bound) {
+        final Random random = new Random();
+        long r = random.nextLong();
+        long n = bound - origin, m = n - 1;
+        if ((n & m) == 0L)  // power of two
+            r = (r & m) + origin;
+        else if (n > 0L) {  // reject over-represented candidates
+            for (long u = r >>> 1;            // ensure nonnegative
+                 u + m - (r = u % n) < 0L;    // rejection check
+                 u = random.nextLong() >>> 1) // retry
+                ;
+            r += origin;
+        }
+        else {              // range not representable as long
+            while (r < origin || r >= bound)
+                r = random.nextLong();
+        }
+        return r;
     }
 }

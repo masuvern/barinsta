@@ -65,7 +65,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                             user.optBoolean("is_private"),
                             user.optBoolean("is_private"),
                             user.optBoolean("is_verified"),
-                            null,
+                            user.optString("pk"),
                             user.getString(Constants.EXTRAS_USERNAME),
                             user.optString("fullname"),
                             null,

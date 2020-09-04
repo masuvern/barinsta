@@ -21,6 +21,7 @@ import awais.instagrabber.fragments.directmessages.DirectMessageThreadFragmentAr
 import awais.instagrabber.utils.Constants;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
+@Deprecated
 public class DirectMessagesActivity extends BaseLanguageActivity implements NavController.OnDestinationChangedListener {
 
     private TextView toolbarTitle;

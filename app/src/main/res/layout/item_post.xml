@@ -9,7 +9,7 @@
         android:id="@+id/postImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:actualImageScaleType="fitCenter"
+        app:actualImageScaleType="centerCrop"
         app:viewAspectRatio="1"/>
 
     <androidx.appcompat.widget.AppCompatImageView

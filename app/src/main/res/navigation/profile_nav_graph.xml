@@ -32,6 +32,8 @@
             app:argType="boolean" />
     </action>
 
+    <include app:graph="@navigation/comments_nav_graph" />
+
     <action
         android:id="@+id/action_global_profileFragment"
         app:destination="@id/profileFragment">

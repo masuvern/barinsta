@@ -49,7 +49,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import awais.instagrabber.activities.CommentsViewer;
+import awais.instagrabber.activities.CommentsViewerFragment;
 import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.activities.PostViewer;
@@ -604,7 +604,7 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                 final int id = v.getId();
                 switch (id) {
                     case R.id.btnComments:
-                        mainActivity.startActivityForResult(new Intent(mainActivity, CommentsViewer.class)
+                        mainActivity.startActivityForResult(new Intent(mainActivity, CommentsViewerFragment.class)
                                                                     .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode())
                                                                     .putExtra(Constants.EXTRAS_POST, feedModel.getPostId())
                                                                     .putExtra(Constants.EXTRAS_USER, feedModel.getProfileModel().getId()), 6969);

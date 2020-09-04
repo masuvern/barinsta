@@ -72,6 +72,7 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Utils.logCollector;
 
+@Deprecated
 public final class ProfileViewer extends BaseLanguageActivity implements SwipeRefreshLayout.OnRefreshListener {
     private final ArrayList<PostModel> allItems = new ArrayList<>(), selectedItems = new ArrayList<>();
     private static AsyncTask<?, ?, ?> currentlyExecuting;

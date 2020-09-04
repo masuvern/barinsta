@@ -1,7 +1,6 @@
 package awais.instagrabber.fragments;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.CommentsViewer;
 import awais.instagrabber.adapters.PostViewAdapter;
 import awais.instagrabber.adapters.PostViewAdapter.OnPostViewChildViewClickListener;
 import awais.instagrabber.asyncs.PostFetcher;
@@ -114,12 +112,18 @@ public class PostViewFragment extends Fragment {
             case R.id.viewerCaption:
                 break;
             case R.id.btnComments:
-                startActivity(new Intent(requireContext(), CommentsViewer.class)
-                                      .putExtra(Constants.EXTRAS_SHORTCODE,
-                                                postModel.getShortCode())
-                                      .putExtra(Constants.EXTRAS_POST, postModel.getPostId())
-                                      .putExtra(Constants.EXTRAS_USER,
-                                                Utils.getUserIdFromCookie(COOKIE)));
+                // startActivity(new Intent(requireContext(), CommentsViewerFragment.class)
+                //                       .putExtra(Constants.EXTRAS_SHORTCODE, postModel.getShortCode())
+                //                       .putExtra(Constants.EXTRAS_POST, postModel.getPostId())
+                //                       .putExtra(Constants.EXTRAS_USER, Utils.getUserIdFromCookie(COOKIE)));
+                String postId = postModel.getPostId();
+                if (postId.contains("_")) postId = postId.substring(0, postId.indexOf("_"));
+                final NavDirections commentsAction = PostViewFragmentDirections.actionGlobalCommentsViewerFragment(
+                        postModel.getShortCode(),
+                        postId,
+                        postModel.getProfileModel().getId()
+                );
+                NavHostFragment.findNavController(this).navigate(commentsAction);
                 break;
             case R.id.btnDownload:
                 if (checkSelfPermission(requireContext(),

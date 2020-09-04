@@ -2,8 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/post_view_nav_graph"
-    app:startDestination="@id/postViewFragment">
+    android:id="@+id/comments_nav_graph"
+    app:startDestination="@id/commentsViewerFragment">
 
     <include app:graph="@navigation/hashtag_nav_graph" />
 
@@ -15,6 +15,7 @@
             app:argType="string"
             app:nullable="false" />
     </action>
+
     <!--<include app:graph="@navigation/profile_nav_graph" />-->
 
     <action
@@ -26,20 +27,28 @@
             app:nullable="true" />
     </action>
 
-    <include app:graph="@navigation/location_nav_graph" />
-
-    <action
-        android:id="@+id/action_global_locationFragment"
-        app:destination="@id/location_nav_graph">
+    <fragment
+        android:id="@+id/commentsViewerFragment"
+        android:name="awais.instagrabber.activities.CommentsViewerFragment"
+        android:label="Comments"
+        tools:layout="@layout/fragment_comments">
         <argument
-            android:name="locationId"
+            android:name="shortCode"
             app:argType="string"
             app:nullable="false" />
-    </action>
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
 
     <action
         android:id="@+id/action_global_commentsViewerFragment"
-        app:destination="@id/comments_nav_graph">
+        app:destination="@id/commentsViewerFragment">
         <argument
             android:name="shortCode"
             app:argType="string"
@@ -53,33 +62,4 @@
             app:argType="string"
             app:nullable="false" />
     </action>
-
-    <fragment
-        android:id="@+id/postViewFragment"
-        android:name="awais.instagrabber.fragments.PostViewFragment"
-        tools:layout="@layout/item_full_post_view">
-        <argument
-            android:name="index"
-            app:argType="integer" />
-        <argument
-            android:name="idOrCodeArray"
-            app:argType="string[]" />
-        <argument
-            android:name="isId"
-            app:argType="boolean" />
-    </fragment>
-    <action
-        android:id="@+id/action_global_postViewFragment"
-        app:destination="@id/postViewFragment">
-        <argument
-            android:name="index"
-            app:argType="integer" />
-        <argument
-            android:name="idOrCodeArray"
-            app:argType="string[]" />
-        <argument
-            android:name="isId"
-            app:argType="boolean" />
-    </action>
-
 </navigation>

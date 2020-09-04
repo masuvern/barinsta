@@ -15,8 +15,8 @@
         android:id="@+id/rvChildComments"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="80dp"
-        android:layout_marginLeft="80dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginLeft="40dp"
         app:layoutManager="LinearLayoutManager"
         tools:itemCount="5"
         tools:listitem="@layout/item_comment_small" />
@@ -25,6 +25,8 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_gravity="bottom"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
-        android:background="#80888888" />
+        android:background="#32888888" />
 </LinearLayout>

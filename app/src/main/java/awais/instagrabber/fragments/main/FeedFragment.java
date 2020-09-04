@@ -1,7 +1,6 @@
 package awais.instagrabber.fragments.main;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.CommentsViewer;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapter;
 import awais.instagrabber.adapters.FeedStoriesAdapter;
@@ -187,17 +185,14 @@ public class FeedFragment extends Fragment {
         final int id = v.getId();
         switch (id) {
             case R.id.btnComments:
-                startActivity(new Intent(requireContext(), CommentsViewer.class)
-                                      .putExtra(Constants.EXTRAS_SHORTCODE, feedModel.getShortCode())
-                                      .putExtra(Constants.EXTRAS_POST, feedModel.getPostId())
-                                      .putExtra(Constants.EXTRAS_USER, feedModel.getProfileModel().getId()));
+                final NavDirections commentsAction = FeedFragmentDirections.actionGlobalCommentsViewerFragment(
+                        feedModel.getShortCode(),
+                        feedModel.getPostId(),
+                        feedModel.getProfileModel().getId()
+                );
+                NavHostFragment.findNavController(this).navigate(commentsAction);
                 break;
-
             case R.id.viewStoryPost:
-                // startActivity(new Intent(requireContext(), PostViewer.class)
-                //         .putExtra(Constants.EXTRAS_INDEX, feedModel.getPosition())
-                //         .putExtra(Constants.EXTRAS_POST, new PostModel(feedModel.getShortCode(), false))
-                //         .putExtra(Constants.EXTRAS_TYPE, ItemGetType.FEED_ITEMS));
                 final List<FeedModel> feedModels = feedViewModel.getList().getValue();
                 if (feedModels == null || feedModels.size() == 0) return;
                 if (feedModels.get(0) == null) return;
@@ -296,11 +291,9 @@ public class FeedFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
-        // setupActionBar();
         setupFeedStories();
         setupFeed();
         shouldRefresh = false;
-        // feedService.getFeed(11, null);
     }
 
     @Override
