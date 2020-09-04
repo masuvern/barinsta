@@ -36,6 +36,8 @@ Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.insta
 * Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 * Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
+* Gitter: [InstaGrabber/General](https://gitter.im/instagrabber/general)
+  * Above 4 are bridged to each other
 
 ### Contributors
 
