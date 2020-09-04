@@ -1,6 +1,5 @@
 package awais.instagrabber.fragments.main;
 
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -39,7 +38,6 @@ import java.util.List;
 
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.HighlightsFetcher;
@@ -456,11 +454,16 @@ public class ProfileFragment extends Fragment {
             binding.mainFollowers.setClickable(true);
 
             if (isLoggedIn) {
-                final View.OnClickListener followClickListener = v -> startActivity(
-                        new Intent(requireContext(), FollowViewer.class)
-                                .putExtra(Constants.EXTRAS_FOLLOWERS, v == binding.mainFollowers)
-                                .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
-                                .putExtra(Constants.EXTRAS_ID, profileId));
+                final View.OnClickListener followClickListener = v -> {
+                    // startActivity(new Intent(requireContext(), FollowViewerFragment.class)
+                    //                       .putExtra(Constants.EXTRAS_FOLLOWERS, v == binding.mainFollowers)
+                    //                       .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
+                    //                       .putExtra(Constants.EXTRAS_ID, profileId));
+                    final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToFollowViewerFragment(profileId,
+                                                                                                                       v == binding.mainFollowers,
+                                                                                                                       profileModel.getUsername());
+                    NavHostFragment.findNavController(this).navigate(action);
+                };
 
                 binding.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
                 binding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);

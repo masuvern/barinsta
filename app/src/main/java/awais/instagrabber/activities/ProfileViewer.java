@@ -600,15 +600,14 @@ public final class ProfileViewer extends BaseLanguageActivity implements SwipeRe
                     profileBinding.profileView.mainFollowers.setClickable(true);
 
                     if (isLoggedIn) {
-                        final View.OnClickListener followClickListener = v -> startActivity(new Intent(ProfileViewer.this, FollowViewer.class)
-                                                                                                    .putExtra(Constants.EXTRAS_FOLLOWERS,
-                                                                                                              v == profileBinding.profileView.mainFollowers)
-                                                                                                    .putExtra(Constants.EXTRAS_NAME,
-                                                                                                              profileModel.getUsername())
-                                                                                                    .putExtra(Constants.EXTRAS_ID, profileId));
-
-                        profileBinding.profileView.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
-                        profileBinding.profileView.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
+                        // final View.OnClickListener followClickListener = v -> startActivity(
+                        //         new Intent(ProfileViewer.this, FollowViewerFragment.class)
+                        //                 .putExtra(Constants.EXTRAS_FOLLOWERS, v == profileBinding.profileView.mainFollowers)
+                        //                 .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
+                        //                 .putExtra(Constants.EXTRAS_ID, profileId));
+                        //
+                        // profileBinding.profileView.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
+                        // profileBinding.profileView.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
                     }
 
                     if (profileModel.getPostCount() == 0) {

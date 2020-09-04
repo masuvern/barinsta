@@ -50,10 +50,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import awais.instagrabber.activities.CommentsViewerFragment;
-import awais.instagrabber.activities.FollowViewer;
 import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.activities.PostViewer;
-import awais.instagrabber.fragments.SavedViewerFragment;
 import awais.instagrabber.adapters.DiscoverAdapter;
 import awais.instagrabber.adapters.FeedAdapter;
 import awais.instagrabber.adapters.PostsAdapter;
@@ -75,6 +73,7 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.PauseGlideOnFlingScrollListener;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.customviews.helpers.VideoAwareRecyclerScroller;
+import awais.instagrabber.fragments.SavedViewerFragment;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.BasePostModel;
@@ -1151,16 +1150,16 @@ public final class MainHelper implements SwipeRefreshLayout.OnRefreshListener {
                     mainActivity.mainBinding.profileView.mainFollowers.setClickable(true);
 
                     if (isLoggedIn) {
-                        final View.OnClickListener followClickListener = v -> mainActivity.startActivity(new Intent(mainActivity, FollowViewer.class)
-                                                                                                                 .putExtra(Constants.EXTRAS_FOLLOWERS,
-                                                                                                                           v == mainActivity.mainBinding.profileView.mainFollowers)
-                                                                                                                 .putExtra(Constants.EXTRAS_NAME,
-                                                                                                                           profileModel.getUsername())
-                                                                                                                 .putExtra(Constants.EXTRAS_ID,
-                                                                                                                           profileId));
-
-                        mainActivity.mainBinding.profileView.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
-                        mainActivity.mainBinding.profileView.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
+                        // final View.OnClickListener followClickListener = v -> mainActivity.startActivity(new Intent(mainActivity, FollowViewerFragment.class)
+                        //                                                                                          .putExtra(Constants.EXTRAS_FOLLOWERS,
+                        //                                                                                                    v == mainActivity.mainBinding.profileView.mainFollowers)
+                        //                                                                                          .putExtra(Constants.EXTRAS_NAME,
+                        //                                                                                                    profileModel.getUsername())
+                        //                                                                                          .putExtra(Constants.EXTRAS_ID,
+                        //                                                                                                    profileId));
+                        //
+                        // mainActivity.mainBinding.profileView.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
+                        // mainActivity.mainBinding.profileView.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
                     }
 
                     if (profileModel.getPostCount() == 0) {

@@ -57,6 +57,9 @@
         <action
             android:id="@+id/action_profileFragment_to_savedViewerFragment"
             app:destination="@id/savedViewerFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_followViewerFragment"
+            app:destination="@id/followViewerFragment" />
     </fragment>
     <fragment
         android:id="@+id/savedViewerFragment"
@@ -75,5 +78,32 @@
             android:name="type"
             app:argType="awais.instagrabber.models.enums.PostItemType"
             app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/followViewerFragment"
+        android:name="awais.instagrabber.activities.FollowViewerFragment"
+        android:label="Followers"
+        tools:layout="@layout/fragment_followers_viewer">
+        <argument
+            android:name="profileId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isFollowersList"
+            app:argType="boolean"
+            app:nullable="false" />
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_followViewerFragment_to_profileFragment"
+            app:destination="@id/profileFragment">
+            <argument
+                android:name="username"
+                android:defaultValue=""
+                app:argType="string"
+                app:nullable="true" />
+        </action>
     </fragment>
 </navigation>
