@@ -20,10 +20,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
@@ -43,7 +43,7 @@ import awais.instagrabber.models.DiscoverTopicModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.utils.Utils;
 
-public class DiscoverFragment extends Fragment {
+public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private MainActivity fragmentActivity;
     private CoordinatorLayout root;
@@ -58,6 +58,7 @@ public class DiscoverFragment extends Fragment {
     private ActionMode actionMode;
     private DiscoverItemViewModel discoverItemViewModel;
     private boolean shouldRefresh = true;
+    private boolean isPullToRefresh;
 
     private final FetchListener<DiscoverTopicModel> topicFetchListener = new FetchListener<DiscoverTopicModel>() {
         @Override
@@ -77,28 +78,28 @@ public class DiscoverFragment extends Fragment {
             }
         }
     };
-    private final FetchListener<DiscoverItemModel[]> discoverFetchListener = new FetchListener<DiscoverItemModel[]>() {
+    private final FetchListener<DiscoverItemModel[]> postsFetchListener = new FetchListener<DiscoverItemModel[]>() {
         @Override
-        public void doBefore() {
-            binding.discoverSwipeRefreshLayout.setRefreshing(true);
-        }
+        public void doBefore() {}
 
         @Override
         public void onResult(final DiscoverItemModel[] result) {
-            binding.discoverSwipeRefreshLayout.setRefreshing(false);
-            if (result == null || result.length == 0) {
+            if (result == null || result.length <= 0) {
+                binding.discoverSwipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(requireContext(), R.string.discover_empty, Toast.LENGTH_SHORT).show();
                 return;
             }
-            final List<DiscoverItemModel> current = discoverItemViewModel.getList().getValue();
+            List<DiscoverItemModel> current = discoverItemViewModel.getList().getValue();
             final List<DiscoverItemModel> resultList = Arrays.asList(result);
-            if (current == null) {
-                discoverItemViewModel.getList().postValue(resultList);
+            current = current == null ? new ArrayList<>() : new ArrayList<>(current); // copy to modifiable list
+            if (isPullToRefresh) {
+                current = resultList;
+                isPullToRefresh = false;
             } else {
-                final List<DiscoverItemModel> currentCopy = new ArrayList<>(current);
-                currentCopy.addAll(resultList);
-                discoverItemViewModel.getList().postValue(currentCopy);
+                current.addAll(resultList);
             }
+            discoverItemViewModel.getList().postValue(current);
+            binding.discoverSwipeRefreshLayout.setRefreshing(false);
             final DiscoverItemModel discoverItemModel = result[result.length - 1];
             if (discoverItemModel != null) {
                 discoverEndMaxId = discoverItemModel.getNextMaxId();
@@ -161,8 +162,17 @@ public class DiscoverFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
+        binding.discoverSwipeRefreshLayout.setOnRefreshListener(this);
         setupExplore();
         shouldRefresh = false;
+    }
+
+    @Override
+    public void onRefresh() {
+        isPullToRefresh = true;
+        discoverEndMaxId = null;
+        lazyLoader.resetState();
+        fetchPosts();
     }
 
     private void setupExplore() {
@@ -170,30 +180,17 @@ public class DiscoverFragment extends Fragment {
         final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
         binding.discoverPosts.setLayoutManager(layoutManager);
         binding.discoverPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
-        new iTopicFetcher(topicFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         binding.discoverType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                if (topicIds != null) {
-                    currentTopic = topicIds[pos];
-                    binding.discoverSwipeRefreshLayout.setRefreshing(true);
-                    if (lazyLoader != null) lazyLoader.resetState();
-                    discoverItemViewModel.getList().postValue(Collections.emptyList());
-                    new DiscoverFetcher(currentTopic, null, rankToken, discoverFetchListener, false)
-                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                }
+                if (topicIds == null || topicIds.length <= 0) return;
+                currentTopic = topicIds[pos];
+                onRefresh();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-        binding.discoverSwipeRefreshLayout.setOnRefreshListener(() -> {
-            lazyLoader.resetState();
-            discoverItemViewModel.getList().postValue(Collections.emptyList());
-            new DiscoverFetcher(currentTopic, null, rankToken, discoverFetchListener, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        });
-
         discoverAdapter = new DiscoverAdapter((model, position) -> {
             if (discoverAdapter.isSelecting()) {
                 if (actionMode == null) return;
@@ -236,13 +233,21 @@ public class DiscoverFragment extends Fragment {
         discoverItemViewModel.getList().observe(fragmentActivity, discoverAdapter::submitList);
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (discoverHasMore) {
-                binding.discoverSwipeRefreshLayout.setRefreshing(true);
-                new DiscoverFetcher(currentTopic, discoverEndMaxId, rankToken, discoverFetchListener, false)
-                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                discoverEndMaxId = null;
+                fetchPosts();
             }
-        });
+        }, 3);
         binding.discoverPosts.addOnScrollListener(lazyLoader);
+        fetchTopics();
+    }
+
+    private void fetchTopics() {
+        new iTopicFetcher(topicFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void fetchPosts() {
+        binding.discoverSwipeRefreshLayout.setRefreshing(true);
+        new DiscoverFetcher(currentTopic, discoverEndMaxId, rankToken, postsFetchListener, false)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private boolean checkAndResetAction() {
