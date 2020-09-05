@@ -165,10 +165,6 @@ public class StoryViewerFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(@NonNull final Menu menu) {
         // hide menu items from activity
-        final MenuItem item = menu.findItem(R.id.favourites);
-        if (item != null) {
-            item.setVisible(false);
-        }
     }
 
     @Override

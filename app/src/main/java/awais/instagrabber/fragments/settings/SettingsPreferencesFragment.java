@@ -43,13 +43,6 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(@NonNull final Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        final MenuItem item = menu.findItem(R.id.favourites);
-        item.setVisible(false);
-    }
-
-    @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         screen.addPreference(getLanguagePreference());
         screen.addPreference(getThemePreference());

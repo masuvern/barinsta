@@ -364,8 +364,6 @@ public class DirectMessageThreadFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(@NonNull final Menu menu) {
-        final MenuItem item = menu.findItem(R.id.favourites);
-        item.setVisible(false);
     }
 
     @Override

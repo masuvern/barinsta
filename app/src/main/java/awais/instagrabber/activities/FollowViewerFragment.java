@@ -236,10 +236,6 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.follow, menu);
-        final MenuItem favItem = menu.findItem(R.id.favourites);
-        if (favItem != null) {
-            favItem.setVisible(false);
-        }
         final MenuItem menuSearch = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) menuSearch.getActionView();
         searchView.setQueryHint(getResources().getString(R.string.action_search));

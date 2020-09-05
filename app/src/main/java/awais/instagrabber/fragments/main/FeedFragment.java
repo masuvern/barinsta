@@ -19,6 +19,7 @@ import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.facebook.common.executors.UiThreadImmediateExecutorService;
 import com.facebook.datasource.BaseDataSubscriber;
@@ -62,7 +63,7 @@ import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class FeedFragment extends Fragment {
+public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "FeedFragment";
     private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
     private static final int RESIZED_VIDEO_HEIGHT = (int) (0.8 * Utils.displayMetrics.heightPixels);
@@ -77,6 +78,7 @@ public class FeedFragment extends Fragment {
     private FeedViewModel feedViewModel;
     private VideoAwareRecyclerScroller videoAwareRecyclerScroller;
     private boolean shouldRefresh = true;
+    private boolean isPullToRefresh;
 
     private final FetchListener<FeedModel[]> feedFetchListener = new FetchListener<FeedModel[]>() {
         @Override
@@ -86,7 +88,10 @@ public class FeedFragment extends Fragment {
 
         @Override
         public void onResult(final FeedModel[] result) {
-            if (result == null) return;
+            if (result == null || result.length <= 0) {
+                binding.feedSwipeRefreshLayout.setRefreshing(false);
+                return;
+            }
             final List<FeedModel> currentFeedModelList = feedViewModel.getList().getValue();
             final Map<String, FeedModel> thumbToFeedMap = new HashMap<>();
             for (final FeedModel feedModel : result) {
@@ -133,10 +138,15 @@ public class FeedFragment extends Fragment {
 
                 public void updateAdapter() {
                     if (failed + success != result.length) return;
-                    final List<FeedModel> finalList = currentFeedModelList == null || currentFeedModelList.isEmpty()
-                                                      ? new ArrayList<>()
-                                                      : new ArrayList<>(currentFeedModelList);
-                    finalList.addAll(Arrays.asList(result));
+                    List<FeedModel> finalList = currentFeedModelList == null || currentFeedModelList.isEmpty()
+                                                ? new ArrayList<>()
+                                                : new ArrayList<>(currentFeedModelList);
+                    final List<FeedModel> resultList = Arrays.asList(result);
+                    if (isPullToRefresh) {
+                        finalList = resultList;
+                    } else {
+                        finalList.addAll(resultList);
+                    }
                     feedViewModel.getList().postValue(finalList);
                     final PostModel feedPostModel = result[result.length - 1];
                     if (feedPostModel != null) {
@@ -266,6 +276,7 @@ public class FeedFragment extends Fragment {
                 break;
         }
     };
+    private FeedStoriesViewModel feedStoriesViewModel;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -291,6 +302,7 @@ public class FeedFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
+        binding.feedSwipeRefreshLayout.setOnRefreshListener(this);
         setupFeedStories();
         setupFeed();
         shouldRefresh = false;
@@ -310,6 +322,14 @@ public class FeedFragment extends Fragment {
         if (videoAwareRecyclerScroller != null && SHOULD_AUTO_PLAY) {
             videoAwareRecyclerScroller.startPlaying();
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        isPullToRefresh = true;
+        feedEndCursor = null;
+        fetchFeed();
+        fetchStories();
     }
 
     private void setupFeed() {
@@ -336,13 +356,11 @@ public class FeedFragment extends Fragment {
 
     private void fetchFeed() {
         binding.feedSwipeRefreshLayout.setRefreshing(true);
-        new FeedFetcher(feedEndCursor, feedFetchListener)
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        feedEndCursor = null;
+        new FeedFetcher(feedEndCursor, feedFetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void setupFeedStories() {
-        final FeedStoriesViewModel feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+        feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter((model, position) -> {
             final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false);
             NavHostFragment.findNavController(this).navigate(action);
@@ -350,6 +368,10 @@ public class FeedFragment extends Fragment {
         binding.feedStoriesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
         binding.feedStoriesRecyclerView.setAdapter(feedStoriesAdapter);
         feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);
+        fetchStories();
+    }
+
+    private void fetchStories() {
         storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
