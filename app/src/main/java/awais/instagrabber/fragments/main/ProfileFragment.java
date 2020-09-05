@@ -32,6 +32,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ import java.util.List;
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
+import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.HighlightsFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
@@ -54,6 +57,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentProfileBinding;
+import awais.instagrabber.fragments.main.viewmodels.HighlightsViewModel;
 import awais.instagrabber.fragments.main.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -96,6 +100,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private AsyncTask<Void, Void, PostModel[]> currentlyExecuting;
     private MenuItem favMenuItem;
     private boolean isPullToRefresh;
+    private HighlightsAdapter highlightsAdapter;
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -186,6 +191,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         action.setUsername("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     };
+    private HighlightsViewModel highlightsViewModel;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -257,6 +263,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (postsViewModel != null) {
             postsViewModel.getList().postValue(Collections.emptyList());
         }
+        if (highlightsViewModel != null) {
+            highlightsViewModel.getList().postValue(Collections.emptyList());
+        }
     }
 
     private void init() {
@@ -274,6 +283,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             return;
         }
         setupPosts();
+        setupHighlights();
         setupCommonListeners();
         fetchUsername();
     }
@@ -348,9 +358,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             new HighlightsFetcher(profileId,
                                   !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
                                   result -> {
-                                      if (result != null && result.length > 0) {
+                                      if (result != null) {
                                           binding.highlightsList.setVisibility(View.VISIBLE);
-                                          // highlightsAdapter.setData(result);
+                                          highlightsViewModel.getList().postValue(result);
                                       } else binding.highlightsList.setVisibility(View.GONE);
                                   }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
@@ -727,6 +737,37 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             endCursor = null;
         });
         binding.mainPosts.addOnScrollListener(lazyLoader);
+    }
+
+    private void setupHighlights() {
+        highlightsViewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
+        highlightsAdapter = new HighlightsAdapter((model, position) -> {
+            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false);
+            NavHostFragment.findNavController(this).navigate(action);
+            // new iStoryStatusFetcher(
+            //         model.getId(),
+            //         null,
+            //         false,
+            //         false,
+            //         !isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG),
+            //         true,
+            //         result -> {
+            //             if (result == null || result.length <= 0) {
+            //                 Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            //                 return;
+            //             }
+            //             feedStoriesViewModel.getHighlights().postValue(Arrays.asList(result));
+            //             // startActivity(new Intent(ProfileViewer.this, StoryViewer.class)
+            //             //         .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
+            //             //         .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
+            //             //         .putExtra(Constants.EXTRAS_STORIES, result)
+            //             // );
+            //         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        });
+        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false);
+        binding.highlightsList.setLayoutManager(layoutManager);
+        binding.highlightsList.setAdapter(highlightsAdapter);
+        highlightsViewModel.getList().observe(getViewLifecycleOwner(), highlightModels -> highlightsAdapter.submitList(highlightModels));
     }
 
     private void fetchPosts() {

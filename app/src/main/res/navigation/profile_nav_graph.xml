@@ -60,6 +60,9 @@
         <action
             android:id="@+id/action_profileFragment_to_followViewerFragment"
             app:destination="@id/followViewerFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_storyViewerFragment"
+            app:destination="@id/storyViewerFragment" />
     </fragment>
     <fragment
         android:id="@+id/savedViewerFragment"
@@ -105,5 +108,22 @@
                 app:argType="string"
                 app:nullable="true" />
         </action>
+    </fragment>
+    <fragment
+        android:id="@+id/storyViewerFragment"
+        android:name="awais.instagrabber.fragments.StoryViewerFragment"
+        android:label="StoryViewerFragment"
+        tools:layout="@layout/activity_story_viewer">
+        <argument
+            android:name="feedStoryIndex"
+            app:argType="integer"
+            app:nullable="false" />
+        <argument
+            android:name="highlight"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="isHashtag"
+            app:argType="boolean" />
     </fragment>
 </navigation>

@@ -200,12 +200,13 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/myActions"
                     android:clipToPadding="false"
-                    android:orientation="horizontal"
                     android:paddingStart="5dp"
                     android:paddingLeft="5dp"
                     android:paddingEnd="5dp"
                     android:paddingRight="5dp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:itemCount="2"
+                    tools:visibility="visible" />
 
                 <LinearLayout
                     android:id="@+id/profileInfo"

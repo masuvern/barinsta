@@ -7,11 +7,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
-import awais.instagrabber.adapters.viewholder.HighlightViewHolder;
+import awais.instagrabber.adapters.viewholder.FeedStoryViewHolder;
 import awais.instagrabber.databinding.ItemHighlightBinding;
 import awais.instagrabber.models.FeedStoryModel;
 
-public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, HighlightViewHolder> {
+public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedStoryViewHolder> {
     private final OnFeedStoryClickListener listener;
 
     private static final DiffUtil.ItemCallback<FeedStoryModel> diffCallback = new DiffUtil.ItemCallback<FeedStoryModel>() {
@@ -33,14 +33,14 @@ public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, Highli
 
     @NonNull
     @Override
-    public HighlightViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+    public FeedStoryViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         final ItemHighlightBinding binding = ItemHighlightBinding.inflate(layoutInflater, parent, false);
-        return new HighlightViewHolder(binding);
+        return new FeedStoryViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final HighlightViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final FeedStoryViewHolder holder, final int position) {
         final FeedStoryModel model = getItem(position);
         holder.bind(model, position, listener);
     }
