@@ -93,8 +93,10 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
             }
         }
         final ChildMediaItemsAdapter itemsAdapter = new ChildMediaItemsAdapter(sliderItems,
-                cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory,
-                playerChangeListener);
+                                                                               cacheDataSourceFactory != null
+                                                                               ? cacheDataSourceFactory
+                                                                               : dataSourceFactory,
+                                                                               playerChangeListener);
         binding.mediaList.setAdapter(itemsAdapter);
 
         //noinspection deprecation
@@ -176,10 +178,10 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
         }
         final ViewSwitcher viewSwitcher = (ViewSwitcher) binding.mediaList.getChildAt(position);
         loadPlayer(binding.getRoot().getContext(),
-                position, sliderItem.getDisplayUrl(),
-                viewSwitcher,
-                cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory,
-                playerChangeListener);
+                   position, sliderItem.getDisplayUrl(),
+                   viewSwitcher,
+                   cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory,
+                   playerChangeListener);
     }
 
     public void startPlayingVideo() {
@@ -329,7 +331,7 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
 
         @Override
         public boolean isViewFromObject(@NonNull final View view, @NonNull final Object object) {
-            return view == object;
+            return view.equals(object);
         }
 
         public ViewerPostModel getItemAtPosition(final int position) {

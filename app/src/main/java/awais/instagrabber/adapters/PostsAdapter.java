@@ -12,7 +12,7 @@ import awais.instagrabber.models.PostModel;
 
 public final class PostsAdapter extends MultiSelectListAdapter<PostModel, PostViewHolder> {
 
-    private static final DiffUtil.ItemCallback<PostModel> diffCallback = new DiffUtil.ItemCallback<PostModel>() {
+    private static final DiffUtil.ItemCallback<PostModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<PostModel>() {
         @Override
         public boolean areItemsTheSame(@NonNull final PostModel oldItem, @NonNull final PostModel newItem) {
             return oldItem.getPostId().equals(newItem.getPostId());
@@ -26,7 +26,7 @@ public final class PostsAdapter extends MultiSelectListAdapter<PostModel, PostVi
 
     public PostsAdapter(final OnItemClickListener<PostModel> clickListener,
                         final OnItemLongClickListener<PostModel> longClickListener) {
-        super(diffCallback, clickListener, longClickListener);
+        super(DIFF_CALLBACK, clickListener, longClickListener);
     }
 
     @NonNull
@@ -40,6 +40,6 @@ public final class PostsAdapter extends MultiSelectListAdapter<PostModel, PostVi
     @Override
     public void onBindViewHolder(@NonNull final PostViewHolder holder, final int position) {
         final PostModel postModel = getItem(position);
-        holder.bind(postModel, position, internalOnItemClickListener, internalOnLongItemClickListener);
+        holder.bind(postModel, position, getInternalOnItemClickListener(), getInternalOnLongItemClickListener());
     }
 }

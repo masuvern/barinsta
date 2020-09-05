@@ -39,7 +39,7 @@ public class RespondAction extends AsyncTask<String, Void, Boolean> {
                 + storyModel.getStoryMediaId().split("_")[0] + "/" + questionModel.getId() + "/story_question_response/";
         HttpURLConnection urlConnection = null;
         try {
-            JSONObject ogbody = new JSONObject("{\"client_context\":\"" + UUID.randomUUID().toString()
+            final JSONObject ogbody = new JSONObject("{\"client_context\":\"" + UUID.randomUUID().toString()
                     + "\",\"mutation_token\":\"" + UUID.randomUUID().toString()
                     + "\",\"_csrftoken\":\"" + cookie.split("csrftoken=")[1].split(";")[0]
                     + "\",\"_uid\":\"" + Utils.getUserIdFromCookie(cookie)

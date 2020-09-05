@@ -76,6 +76,7 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
                            final boolean isParent,
                            final View.OnClickListener onClickListener,
                            final MentionClickListener mentionClickListener) {
+        super();
         this.commentModels = this.filteredCommentModels = commentModels;
         this.isParent = isParent;
         this.onClickListener = onClickListener;

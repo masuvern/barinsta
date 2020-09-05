@@ -24,7 +24,7 @@ public class SeenAction extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         final String url = "https://www.instagram.com/stories/reel/seen";
         try {
-            String urlParameters = "reelMediaId=" + storyModel.getStoryMediaId().split("_")[0]
+            final String urlParameters = "reelMediaId=" + storyModel.getStoryMediaId().split("_")[0]
                     + "&reelMediaOwnerId=" + storyModel.getUserId()
                     + "&reelId=" + storyModel.getUserId()
                     + "&reelMediaTakenAt=" + storyModel.getTimestamp()

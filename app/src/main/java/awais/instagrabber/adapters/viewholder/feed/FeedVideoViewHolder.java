@@ -41,7 +41,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     private FeedModel feedModel;
     private SimpleExoPlayer player;
 
-    final Runnable loadRunnable = new Runnable() {
+    private final Runnable loadRunnable = new Runnable() {
         @Override
         public void run() {
             loadPlayer(feedModel);

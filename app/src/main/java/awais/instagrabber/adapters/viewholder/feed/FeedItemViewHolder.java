@@ -114,23 +114,23 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
 
         final TextView.BufferType bufferType = caption instanceof Spanned ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL;
 
-        if (!textView.isCaptionExpanded()) {
-            int i = Utils.indexOfChar(caption, '\r', 0);
-            if (i == -1) i = Utils.indexOfChar(caption, '\n', 0);
-            if (i == -1) i = MAX_CHARS;
-
-            final int captionLen = caption.length();
-            final int minTrim = Math.min(MAX_CHARS, i);
-            if (captionLen <= minTrim) return false;
-
-            if (Utils.hasMentions(caption))
-                textView.setText(Utils.getMentionText(caption), TextView.BufferType.SPANNABLE);
-            textView.setCaptionIsExpandable(true);
-            textView.setCaptionIsExpanded(true);
-        } else {
+        if (textView.isCaptionExpanded()) {
             textView.setText(caption, bufferType);
             textView.setCaptionIsExpanded(false);
+            return true;
         }
+        int i = Utils.indexOfChar(caption, '\r', 0);
+        if (i == -1) i = Utils.indexOfChar(caption, '\n', 0);
+        if (i == -1) i = MAX_CHARS;
+
+        final int captionLen = caption.length();
+        final int minTrim = Math.min(MAX_CHARS, i);
+        if (captionLen <= minTrim) return false;
+
+        if (Utils.hasMentions(caption))
+            textView.setText(Utils.getMentionText(caption), TextView.BufferType.SPANNABLE);
+        textView.setCaptionIsExpandable(true);
+        textView.setCaptionIsExpanded(true);
         return true;
     }
 

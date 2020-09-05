@@ -44,8 +44,8 @@ public final class DiscoverAdapter extends MultiSelectListAdapter<DiscoverItemMo
         if (itemModel != null) {
             itemModel.setPosition(position);
             holder.itemView.setTag(itemModel);
-            holder.itemView.setOnClickListener(v -> internalOnItemClickListener.onItemClick(itemModel, position));
-            holder.itemView.setOnLongClickListener(v -> internalOnLongItemClickListener.onItemLongClick(itemModel, position));
+            holder.itemView.setOnClickListener(v -> getInternalOnItemClickListener().onItemClick(itemModel, position));
+            holder.itemView.setOnLongClickListener(v -> getInternalOnLongItemClickListener().onItemLongClick(itemModel, position));
             final MediaItemType mediaType = itemModel.getItemType();
             holder.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO || mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
             holder.typeIcon.setImageResource(mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? R.drawable.slider : R.drawable.video);

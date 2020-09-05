@@ -176,7 +176,7 @@ public final class DiscoverFetcher extends AsyncTask<Void, Void, DiscoverItemMod
             final String customPath = settingsHelper.getString(FOLDER_PATH);
             if (!Utils.isEmpty(customPath)) customDir = new File(customPath +
                                                                          (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER)
-                                                                          ? ("/" + username)
+                                                                          ? "/" + username
                                                                           : ""));
         }
 
