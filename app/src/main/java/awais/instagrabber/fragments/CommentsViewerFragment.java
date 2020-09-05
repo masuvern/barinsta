@@ -1,4 +1,4 @@
-package awais.instagrabber.activities;
+package awais.instagrabber.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,6 +33,9 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import awais.instagrabber.R;
+import awais.instagrabber.activities.CommentsViewerFragmentArgs;
+import awais.instagrabber.activities.CommentsViewerFragmentDirections;
+import awais.instagrabber.activities.ProfilePicViewer;
 import awais.instagrabber.adapters.CommentsAdapter;
 import awais.instagrabber.asyncs.CommentsFetcher;
 import awais.instagrabber.databinding.FragmentCommentsBinding;

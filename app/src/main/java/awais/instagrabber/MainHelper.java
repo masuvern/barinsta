@@ -49,7 +49,7 @@
 // import java.util.HashMap;
 // import java.util.Map;
 //
-// import awais.instagrabber.activities.CommentsViewerFragment;
+// import awais.instagrabber.fragments.CommentsViewerFragment;
 // import awais.instagrabber.activities.MainActivityBackup;
 // import awais.instagrabber.activities.PostViewer;
 // import awais.instagrabber.adapters.DiscoverAdapter;

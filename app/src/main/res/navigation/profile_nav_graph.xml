@@ -81,7 +81,7 @@
     </fragment>
     <fragment
         android:id="@+id/followViewerFragment"
-        android:name="awais.instagrabber.activities.FollowViewerFragment"
+        android:name="awais.instagrabber.fragments.FollowViewerFragment"
         android:label="Followers"
         tools:layout="@layout/fragment_followers_viewer">
         <argument
