@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <!--<item-->
     <!--    android:id="@+id/favourites"-->
     <!--    android:enabled="true"-->
@@ -14,4 +15,11 @@
     <!--    android:title="@string/action_dms"-->
     <!--    app:showAsAction="always" />-->
 
+    <item
+        android:id="@+id/search"
+        android:enabled="true"
+        android:icon="@drawable/ic_search_24"
+        android:title="@string/action_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
 </menu>

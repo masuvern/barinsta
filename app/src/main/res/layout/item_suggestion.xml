@@ -1,52 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:foreground="?android:selectableItemBackground"
-    tools:viewBindingIgnore="true"
-    android:padding="2dp">
+    android:padding="8dp">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/ivProfilePic"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter" />
+        app:actualImageScaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tvUsername"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:roundAsCircle="true"
+        tools:src="@mipmap/ic_launcher" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
-        android:layout_marginLeft="44dp"
-        android:orientation="vertical">
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingLeft="4dp"
+        android:paddingEnd="4dp"
+        android:paddingRight="4dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintBottom_toTopOf="@id/tvFullName"
+        app:layout_constraintEnd_toStartOf="@id/isVerified"
+        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="username" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvUsername"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat"
-            app:autoSizeMaxTextSize="24sp"
-            app:autoSizeTextType="uniform" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvFullName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            app:autoSizeMaxTextSize="18sp"
-            app:autoSizeTextType="uniform" />
-    </LinearLayout>
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvFullName"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingLeft="4dp"
+        android:paddingEnd="4dp"
+        android:paddingRight="4dp"
+        tools:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+        tools:text="full name" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/isVerified"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_gravity="end"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:visibility="gone"
-        app:srcCompat="@drawable/verified" />
-</FrameLayout>
+        app:layout_constraintBaseline_toBaselineOf="@id/tvUsername"
+        app:layout_constraintBottom_toTopOf="@id/tvFullName"
+        app:layout_constraintStart_toEndOf="@id/tvUsername"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/verified"
+        tools:visibility="visible" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -75,9 +75,9 @@ public final class SuggestionsFetcher extends AsyncTask<String, String, Suggesti
 
                     // name
                     suggestionModels.add(new SuggestionModel(false,
-                            place.getJSONObject("location").getString("pk")+"/"+place.getString("slug"),
+                            place.getJSONObject("location").getString("pk"),  // +"/"+place.getString("slug"),
                             place.getString("title"),
-                            place.optString("profile_pic_url", null),
+                            place.optString("profile_pic_url"),
                             SuggestionType.TYPE_LOCATION,
                             placesArrayJSONObject.optInt("position", suggestionModels.size() - 1)));
                 }

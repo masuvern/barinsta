@@ -8,13 +8,12 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
         <item name="actionModeCloseDrawable">@drawable/ic_close_24</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.AppTheme.Dark.ActionBar</item>
     </style>
 
-    <style name="Theme.Amoled" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Amoled" parent="AppTheme">
         <item name="android:colorBackground">@color/background_amoled</item>
         <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog.Dark</item>
-        <item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>
     </style>
 
     <style name="AppTheme.BottomSheetDialog.Dark" parent="Theme.MaterialComponents.BottomSheetDialog" />

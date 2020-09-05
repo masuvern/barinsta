@@ -97,7 +97,7 @@ public class NavigationExtensions {
             }
             return false;
         });
-        setupItemReselected(bottomNavigationView, graphIdToTagMap, fragmentManager);
+        // setupItemReselected(bottomNavigationView, graphIdToTagMap, fragmentManager);
         setupDeepLinks(bottomNavigationView, navGraphIds, fragmentManager, containerId, intent);
         final int finalFirstFragmentGraphId = firstFragmentGraphId;
         fragmentManager.addOnBackStackChangedListener(() -> {

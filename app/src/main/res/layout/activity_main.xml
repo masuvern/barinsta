@@ -25,12 +25,13 @@
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
-                style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
+                style="@style/Widget.AppTheme.Toolbar.PrimarySurface"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="none"
-                app:popupTheme="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
-                app:title="@string/app_name" />
+                app:popupTheme="@style/Widget.AppTheme.Toolbar.PrimarySurface"
+                app:title="@string/app_name"
+                tools:menu="@menu/main_menu" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

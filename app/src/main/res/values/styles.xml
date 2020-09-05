@@ -36,6 +36,10 @@
 
     <style name="ThemeOverlay.App.BottomNavigationView" parent="" />
 
+    <style name="Widget.AppTheme.Toolbar.PrimarySurface" parent="Widget.MaterialComponents.Toolbar.PrimarySurface" />
+
+    <style name="ThemeOverlay.AppTheme.Dark.ActionBar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
     <style name="Widget.App.ActionMode" parent="Widget.AppCompat.ActionMode">
         <item name="titleTextStyle">?attr/textAppearanceHeadline6</item>
         <item name="subtitleTextStyle">?attr/textAppearanceSubtitle1</item>
