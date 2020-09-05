@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.multidex.MultiDexApplication;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.net.CookieHandler;
 import java.text.SimpleDateFormat;
@@ -36,7 +37,12 @@ public final class InstaGrabberApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fresco.initialize(this);
+        final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
+                .newBuilder(this)
+                // .setMainDiskCacheConfig(diskCacheConfig)
+                .setDownsampleEnabled(true)
+                .build();
+        Fresco.initialize(this, imagePipelineConfig);
 
         if (BuildConfig.DEBUG) {
             try {
@@ -74,8 +80,8 @@ public final class InstaGrabberApplication extends MultiDexApplication {
         if (datetimeParser == null)
             datetimeParser = new SimpleDateFormat(
                     settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED) ?
-                            settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT) :
-                            settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
+                    settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT) :
+                    settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
 
         settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
     }

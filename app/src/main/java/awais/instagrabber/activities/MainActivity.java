@@ -50,7 +50,8 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.locationFragment,
             R.id.savedViewerFragment,
             R.id.commentsViewerFragment,
-            R.id.followViewerFragment);
+            R.id.followViewerFragment,
+            R.id.directMessagesSettingsFragment);
     private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;

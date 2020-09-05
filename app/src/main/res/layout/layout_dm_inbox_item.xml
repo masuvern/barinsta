@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,10 +8,14 @@
     android:orientation="horizontal">
 
     <FrameLayout
+        android:id="@+id/profile_pic_container"
         android:layout_width="@dimen/simple_item_picture_size"
         android:layout_height="@dimen/simple_item_picture_size"
         android:gravity="center"
-        android:padding="4dp">
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/ivProfilePic"
@@ -24,7 +28,8 @@
             android:id="@+id/multi_pic_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:layout_width="@dimen/simple_item_picture_size_half"
@@ -49,74 +54,67 @@
         </LinearLayout>
     </FrameLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp">
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvUsername"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:ellipsize="marquee"
+        android:gravity="bottom"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="?android:textColorPrimary"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        app:layout_constraintEnd_toStartOf="@id/tvDate"
+        app:layout_constraintStart_toEndOf="@id/profile_pic_container"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="username" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvUsername"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:ellipsize="marquee"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="?android:textColorPrimary"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/tvDate"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="username" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvDate"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:ellipsize="marquee"
+        android:gravity="bottom|end"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvUsername"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="long date................................" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvDate"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:ellipsize="marquee"
-            android:gravity="center_vertical|end"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textStyle="italic"
-            app:layout_constraintBottom_toTopOf="@id/comment_container"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tvUsername"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="long date................................" />
+    <!--<androidx.appcompat.widget.AppCompatImageView-->
+    <!--    android:id="@+id/notTextType"-->
+    <!--    android:layout_width="4dp"-->
+    <!--    android:layout_height="4dp"-->
+    <!--    android:layout_gravity="center_vertical"-->
+    <!--    android:layout_marginEnd="4dp"-->
+    <!--    android:layout_marginRight="4dp"-->
+    <!--    android:visibility="gone"-->
+    <!--    app:tint="@color/feed_text_primary_color" />-->
+    <!--<FrameLayout-->
+    <!--    android:id="@+id/comment_container"-->
+    <!--    android:layout_width="0dp"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:orientation="horizontal">-->
 
-        <LinearLayout
-            android:id="@+id/comment_container"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvUsername">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/notTextType"
-                android:layout_width="4dp"
-                android:layout_height="4dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp"
-                android:visibility="gone"
-                app:srcCompat="@android:drawable/ic_notification_overlay"
-                app:tint="@color/feed_text_primary_color" />
-
-            <awais.instagrabber.customviews.RamboTextView
-                android:id="@+id/tvComment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:autoLink="web|email"
-                android:ellipsize="end"
-                android:linksClickable="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                tools:text="comment" />
-        </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</LinearLayout>
+    <!--    -->
+    <!--</FrameLayout>-->
+    <awais.instagrabber.customviews.RamboTextView
+        android:id="@+id/tvComment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center_vertical"
+        android:autoLink="web|email"
+        android:ellipsize="end"
+        android:linksClickable="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/profile_pic_container"
+        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+        tools:text="comment" />
+</androidx.constraintlayout.widget.ConstraintLayout>

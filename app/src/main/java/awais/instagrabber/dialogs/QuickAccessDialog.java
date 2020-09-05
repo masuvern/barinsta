@@ -21,8 +21,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.ArrayList;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.activities.MainActivityBackup;
 import awais.instagrabber.adapters.SimpleAdapter;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
@@ -113,10 +111,10 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             else Utils.showImportExportDialog(v.getContext());
 
         } else if (tag instanceof DataBox.FavoriteModel) {
-            if (MainActivityBackup.scanHack != null) {
-                MainActivityBackup.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
-                dismiss();
-            }
+            // if (MainActivityBackup.scanHack != null) {
+            //     MainActivityBackup.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
+            //     dismiss();
+            // }
 
         } else if (tag instanceof DataBox.CookieModel) {
             final DataBox.CookieModel cookieModel = (DataBox.CookieModel) tag;
@@ -140,8 +138,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
                 Utils.dataBox.delFavorite(favoriteModel);
                 favoritesAdapter.setItems(Utils.dataBox.getAllFavorites());
             })
-            .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
-            favoriteModel.getQuery())).show();
+                                             .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
+                                                                                                        favoriteModel.getQuery())).show();
 
         } else if (tag instanceof DataBox.CookieModel) {
             final DataBox.CookieModel cookieModel = (DataBox.CookieModel) tag;
@@ -153,8 +151,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
                     Utils.dataBox.delUserCookie(cookieModel);
                     rvQuickAccess.findViewWithTag(cookieModel).setVisibility(View.GONE);
                 })
-                        .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
-                        cookieModel.getUsername())).show();
+                                                 .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
+                                                                                                            cookieModel.getUsername())).show();
         }
 
         return true;

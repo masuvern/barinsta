@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -50,7 +50,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.PostViewer;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
@@ -60,7 +59,6 @@ import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ImageUploadOptions;
-import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
@@ -76,14 +74,16 @@ public class DirectMessageThreadFragment extends Fragment {
     private static final int PICK_IMAGE = 100;
 
     private AppCompatActivity fragmentActivity;
-    private String threadId, threadTitle, cursor, lastMessage;
+    private String threadId;
+    private String threadTitle;
+    private String cursor;
+    private String lastMessage;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
     private final String myId = Utils.getUserIdFromCookie(cookie);
     private FragmentDirectMessagesThreadBinding binding;
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
-    // private AppCompatImageView dmInfo, dmSeen;
     private boolean hasDeletedSomething;
     private boolean hasOlder = true;
     public static boolean hasSentSomething;
@@ -158,6 +158,8 @@ public class DirectMessageThreadFragment extends Fragment {
             binding.swipeRefreshLayout.setRefreshing(false);
         }
     };
+    private LinearLayout root;
+    private boolean shouldRefresh = true;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -167,26 +169,28 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (hasSentSomething) {
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
-    }
-
-    @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
-        binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
-        final FragmentContainerView containerTwo = (FragmentContainerView) container.getParent();
-        // dmInfo = containerTwo.findViewById(R.id.dmInfo);
-        // dmSeen = containerTwo.findViewById(R.id.dmSeen);
-        final LinearLayout root = binding.getRoot();
-        listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
-        if (getArguments() == null) {
+        if (root != null) {
+            shouldRefresh = false;
             return root;
         }
+        binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
+        root = binding.getRoot();
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
+        init();
+        shouldRefresh = false;
+    }
+
+    private void init() {
+        listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
+        if (getArguments() == null) return;
         if (!DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId().equals(threadId)) {
             listViewModel.empty();
             threadId = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
@@ -203,25 +207,14 @@ public class DirectMessageThreadFragment extends Fragment {
         binding.image.setOnClickListener(clickListener);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         layoutManager.setReverseLayout(true);
-        // layoutManager.setStackFromEnd(true);
         messageList.setLayoutManager(layoutManager);
         messageList.addOnScrollListener(new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (Utils.isEmpty(cursor) || !hasOlder) {
                 return;
             }
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener).execute(); // serial because we don't want messages to be randomly ordered
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener)
+                    .execute(); // serial because we don't want messages to be randomly ordered
         }));
-        // dmInfo.setOnClickListener(v -> {
-        //     final NavDirections action =
-        //             DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
-        //     NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
-        // });
-
-        // dmSeen.setOnClickListener(v -> {
-        //     new ThreadAction().execute("seen", lastMessage);
-        //     dmSeen.setVisibility(View.GONE);
-        // });
-
         final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
             if (which == 0) {
                 final DirectItemType itemType = directItemModel.getItemType();
@@ -248,11 +241,12 @@ public class DirectMessageThreadFragment extends Fragment {
                         final ProfileModel user = getUser(directItemModel.getUserId());
                         final DirectItemModel.DirectItemMediaModel selectedItem =
                                 itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia();
-                        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl();
+                        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
+                                           ? selectedItem.getVideoUrl()
+                                           : selectedItem.getThumbUrl();
                         if (url == null) {
                             Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        }
-                        else {
+                        } else {
                             Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
                             Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         }
@@ -283,7 +277,7 @@ public class DirectMessageThreadFragment extends Fragment {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         break;
                     default:
-                        Log.d("austin_debug", "unsupported type " + itemType);
+                        Log.d(TAG, "unsupported type " + itemType);
                 }
             } else if (which == 1) {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
@@ -350,15 +344,49 @@ public class DirectMessageThreadFragment extends Fragment {
         messageList.setAdapter(adapter);
         listViewModel.getList().observe(fragmentActivity, adapter::submitList);
         if (listViewModel.isEmpty()) {
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
-        return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (hasSentSomething) {
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(threadTitle);
+        }
     }
 
     @Override
     public void onPrepareOptionsMenu(@NonNull final Menu menu) {
         final MenuItem item = menu.findItem(R.id.favourites);
         item.setVisible(false);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
+        inflater.inflate(R.menu.dm_thread_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        final int itemId = item.getItemId();
+        switch (itemId) {
+            case R.id.info:
+                final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
+                NavHostFragment.findNavController(this).navigate(action);
+                return true;
+            case R.id.mark_as_seen:
+                new ThreadAction().execute("seen", lastMessage);
+                item.setVisible(false);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -409,7 +437,8 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             DirectMessageInboxFragment.refreshPlease = true;
             hasSentSomething = true;
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
     }
 
@@ -433,7 +462,9 @@ public class DirectMessageThreadFragment extends Fragment {
                     // Broadcast
                     final DirectThreadBroadcaster.ImageBroadcastOptions options = new DirectThreadBroadcaster.ImageBroadcastOptions(true, uploadId);
                     hasSentSomething = true;
-                    broadcast(options, broadcastResponse -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
+                    broadcast(options,
+                              broadcastResponse -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                                      .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
                 } catch (JSONException e) {
                     Log.e(TAG, "Error parsing json response", e);
                 }
@@ -446,7 +477,8 @@ public class DirectMessageThreadFragment extends Fragment {
         }
     }
 
-    private void broadcast(final DirectThreadBroadcaster.BroadcastOptions broadcastOptions, final DirectThreadBroadcaster.OnBroadcastCompleteListener listener) {
+    private void broadcast(final DirectThreadBroadcaster.BroadcastOptions broadcastOptions,
+                           final DirectThreadBroadcaster.OnBroadcastCompleteListener listener) {
         final DirectThreadBroadcaster broadcaster = new DirectThreadBroadcaster(threadId);
         broadcaster.setOnTaskCompleteListener(listener);
         broadcaster.execute(broadcastOptions);
@@ -529,7 +561,8 @@ public class DirectMessageThreadFragment extends Fragment {
         protected void onPostExecute(Void result) {
             if (hasDeletedSomething) {
                 directItemModel = null;
-                new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     }

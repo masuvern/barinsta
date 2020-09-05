@@ -1,6 +1,7 @@
 package awais.instagrabber.adapters.viewholder;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -8,7 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.common.ResizeOptions;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
@@ -50,14 +55,27 @@ public final class DirectMessageInboxItemViewHolder extends RecyclerView.ViewHol
                 multipleProfilePics[i].setImageURI(users[i].getSdProfilePic());
             }
         } else {
-            binding.ivProfilePic.setVisibility(View.VISIBLE);
-            multipleProfilePicsContainer.setVisibility(View.GONE);
-            binding.ivProfilePic.setImageURI(users.length == 1 ? users[0].getSdProfilePic() : null);
+            final String uriString = users.length == 1 ? users[0].getSdProfilePic() : null;
+            if (uriString == null) {
+                binding.ivProfilePic.setVisibility(View.GONE);
+            } else {
+                binding.ivProfilePic.setVisibility(View.VISIBLE);
+                multipleProfilePicsContainer.setVisibility(View.GONE);
+                final ImageRequest request = ImageRequestBuilder.newBuilderWithSource(Uri.parse(uriString))
+                                                                .setResizeOptions(new ResizeOptions(50, 50))
+                                                                .build();
+                binding.ivProfilePic.setController(
+                        Fresco.newDraweeControllerBuilder()
+                              .setOldController(binding.ivProfilePic.getController())
+                              .setImageRequest(request)
+                              .build()
+                );
+            }
         }
         binding.tvUsername.setText(model.getThreadTitle());
         final DirectItemModel lastItemModel = itemModels[itemModels.length - 1];
         final DirectItemType itemType = lastItemModel.getItemType();
-        binding.notTextType.setVisibility(itemType != DirectItemType.TEXT ? View.VISIBLE : View.GONE);
+        // binding.notTextType.setVisibility(itemType != DirectItemType.TEXT ? View.VISIBLE : View.GONE);
         final Context context = itemView.getContext();
         final CharSequence messageText;
         switch (itemType) {

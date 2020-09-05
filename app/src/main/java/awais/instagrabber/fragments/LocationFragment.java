@@ -209,12 +209,6 @@ public class LocationFragment extends Fragment {
                     idsOrShortCodes,
                     isId);
             NavHostFragment.findNavController(this).navigate(action);
-            // startActivity(new Intent(requireContext(), PostViewer.class)
-            //                       .putExtra(Constants.EXTRAS_INDEX, position)
-            //                       .putExtra(Constants.EXTRAS_POST, postModel)
-            //                       .putExtra(Constants.EXTRAS_USER, locationId)
-            //                       .putExtra(Constants.EXTRAS_TYPE, PostItemType.MAIN));
-
         }, (model, position) -> {
             if (!postsAdapter.isSelecting()) {
                 checkAndResetAction();

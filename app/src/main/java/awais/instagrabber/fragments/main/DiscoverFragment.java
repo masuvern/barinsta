@@ -202,10 +202,6 @@ public class DiscoverFragment extends Fragment {
                 return;
             }
             if (checkAndResetAction()) return;
-            // startActivity(new Intent(requireContext(), PostViewer.class)
-            //         .putExtra(Constants.EXTRAS_INDEX, position)
-            //         .putExtra(Constants.EXTRAS_TYPE, PostItemType.DISCOVER)
-            //         .putExtra(Constants.EXTRAS_POST, new PostModel(model.getShortCode(), false)));
             final List<DiscoverItemModel> discoverItemModels = discoverItemViewModel.getList().getValue();
             if (discoverItemModels == null || discoverItemModels.size() == 0) return;
             if (discoverItemModels.get(0) == null) return;

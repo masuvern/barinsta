@@ -249,4 +249,6 @@
     <string name="relogin">Relogin</string>
     <string name="relogin_summary">Refresh your cookies if facing any issues</string>
     <string name="logout_success">Successfully logged out!</string>
+    <string name="dm_thread_info">Info</string>
+    <string name="mark_as_seen">Mark as seen</string>
 </resources>

@@ -76,9 +76,10 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
     final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
         if (which == 0)
             searchUsername(notificationModel.getUsername());
-        else if (which == 1 && commentDialogList.length == 2)
-            startActivity(new Intent(getApplicationContext(), PostViewer.class)
-                    .putExtra(Constants.EXTRAS_POST, new PostModel(notificationModel.getShortcode(), false)));
+        else if (which == 1 && commentDialogList.length == 2) {
+            // startActivity(new Intent(getApplicationContext(), PostViewer.class)
+            //         .putExtra(Constants.EXTRAS_POST, new PostModel(notificationModel.getShortcode(), false)));
+        }
         else if (which == 1) new ProfileAction().execute("/approve/");
         else if (which == 2) new ProfileAction().execute("/ignore/");
     };
@@ -123,7 +124,7 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
 
 
     private void searchUsername(final String text) {
-        startActivity(new Intent(getApplicationContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
+        // startActivity(new Intent(getApplicationContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
     }
 
     class ProfileAction extends AsyncTask<String, Void, Void> {

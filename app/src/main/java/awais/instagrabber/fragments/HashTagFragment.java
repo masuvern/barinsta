@@ -187,11 +187,6 @@ public class HashTagFragment extends Fragment {
                 return;
             }
             if (checkAndResetAction()) return;
-            // startActivity(new Intent(requireContext(), PostViewer.class)
-            //                       .putExtra(Constants.EXTRAS_INDEX, position)
-            //                       .putExtra(Constants.EXTRAS_POST, postModel)
-            //                       .putExtra(Constants.EXTRAS_USER, hashtag)
-            //                       .putExtra(Constants.EXTRAS_TYPE, PostItemType.MAIN));
             final List<PostModel> postModels = postsViewModel.getList().getValue();
             if (postModels == null || postModels.size() == 0) return;
             if (postModels.get(0) == null) return;

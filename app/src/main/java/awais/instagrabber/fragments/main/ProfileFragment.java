@@ -12,6 +12,8 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -179,12 +181,14 @@ public class ProfileFragment extends Fragment {
         action.setUsername("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     };
+    private MenuItem favMenuItem;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -223,6 +227,12 @@ public class ProfileFragment extends Fragment {
         if (!shouldRefresh) return;
         init();
         shouldRefresh = false;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
+        inflater.inflate(R.menu.profile_menu, menu);
+        favMenuItem = menu.findItem(R.id.favourites);
     }
 
     @Override
@@ -289,6 +299,12 @@ public class ProfileFragment extends Fragment {
     private void fetchProfileDetails() {
         new ProfileFetcher(username.substring(1), profileModel -> {
             this.profileModel = profileModel;
+            final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
+            final boolean isSelf = isLoggedIn
+                    && profileModel != null
+                    && userIdFromCookie != null
+                    && userIdFromCookie.equals(profileModel.getId());
+            favMenuItem.setVisible(isSelf);
             setProfileDetails();
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -423,8 +439,8 @@ public class ProfileFragment extends Fragment {
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
         binding.mainFollowing.setText(span);
 
-        binding.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel
-                .getUsername() : profileModel.getName());
+        binding.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername()
+                                                                           : profileModel.getName());
 
         CharSequence biography = profileModel.getBiography();
         binding.mainBiography.setCaptionIsExpandable(true);
@@ -455,13 +471,10 @@ public class ProfileFragment extends Fragment {
 
             if (isLoggedIn) {
                 final View.OnClickListener followClickListener = v -> {
-                    // startActivity(new Intent(requireContext(), FollowViewerFragment.class)
-                    //                       .putExtra(Constants.EXTRAS_FOLLOWERS, v == binding.mainFollowers)
-                    //                       .putExtra(Constants.EXTRAS_NAME, profileModel.getUsername())
-                    //                       .putExtra(Constants.EXTRAS_ID, profileId));
-                    final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToFollowViewerFragment(profileId,
-                                                                                                                       v == binding.mainFollowers,
-                                                                                                                       profileModel.getUsername());
+                    final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToFollowViewerFragment(
+                            profileId,
+                            v == binding.mainFollowers,
+                            profileModel.getUsername());
                     NavHostFragment.findNavController(this).navigate(action);
                 };
 

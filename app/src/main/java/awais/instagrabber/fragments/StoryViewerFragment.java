@@ -355,8 +355,6 @@ public class StoryViewerFragment extends Fragment {
                     idsOrShortCodes,
                     isId);
             NavHostFragment.findNavController(this).navigate(action);
-            // startActivity(new Intent(requireContext(), PostViewer.class)
-            //                       .putExtra(Constants.EXTRAS_POST, new PostModel(, ));
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();
