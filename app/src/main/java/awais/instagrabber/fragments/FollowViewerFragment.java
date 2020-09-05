@@ -25,8 +25,6 @@ import java.util.Arrays;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.FollowViewerFragmentArgs;
-import awais.instagrabber.activities.FollowViewerFragmentDirections;
 import awais.instagrabber.adapters.FollowAdapter;
 import awais.instagrabber.asyncs.FollowFetcher;
 import awais.instagrabber.databinding.FragmentFollowersViewerBinding;
