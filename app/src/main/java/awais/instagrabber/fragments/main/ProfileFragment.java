@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +74,7 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "ProfileFragment";
 
     private MainActivity fragmentActivity;
@@ -93,7 +94,9 @@ public class ProfileFragment extends Fragment {
     private boolean hasNextPage;
     private String endCursor;
     private AsyncTask<Void, Void, PostModel[]> currentlyExecuting;
-    ;
+    private MenuItem favMenuItem;
+    private boolean isPullToRefresh;
+
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null && !Utils.isEmpty(username)) {
@@ -140,27 +143,29 @@ public class ProfileFragment extends Fragment {
         @Override
         public void onResult(final PostModel[] result) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            if (result != null) {
-                binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
-                // final int oldSize = mainActivity.allItems.size();
-                final List<PostModel> postModels = postsViewModel.getList().getValue();
-                final List<PostModel> finalList = postModels == null || postModels
-                        .isEmpty() ? new ArrayList<>() : new ArrayList<>(postModels);
-                finalList.addAll(Arrays.asList(result));
-                postsViewModel.getList().postValue(finalList);
-                PostModel model = null;
-                if (result.length != 0) {
-                    model = result[result.length - 1];
-                }
-                if (model == null) return;
-                endCursor = model.getEndCursor();
-                hasNextPage = model.hasNextPage();
-                model.setPageCursor(false, null);
+            if (result == null || result.length <= 0) {
+                binding.privatePage1.setImageResource(R.drawable.ic_cancel);
+                binding.privatePage2.setText(R.string.empty_acc);
+                binding.privatePage.setVisibility(View.VISIBLE);
                 return;
             }
-            binding.privatePage1.setImageResource(R.drawable.ic_cancel);
-            binding.privatePage2.setText(R.string.empty_acc);
-            binding.privatePage.setVisibility(View.VISIBLE);
+            binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
+            final List<PostModel> postModels = postsViewModel.getList().getValue();
+            List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>()
+                                                                                   : new ArrayList<>(postModels);
+            final List<PostModel> resultList = Arrays.asList(result);
+            if (isPullToRefresh) {
+                finalList = resultList;
+                isPullToRefresh = false;
+            } else {
+                finalList.addAll(resultList);
+            }
+            postsViewModel.getList().postValue(finalList);
+            final PostModel lastPostModel = result[result.length - 1];
+            if (lastPostModel == null) return;
+            endCursor = lastPostModel.getEndCursor();
+            hasNextPage = lastPostModel.hasNextPage();
+            lastPostModel.setPageCursor(false, null);
         }
     };
     private final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
@@ -181,7 +186,6 @@ public class ProfileFragment extends Fragment {
         action.setUsername("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     };
-    private MenuItem favMenuItem;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -225,6 +229,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
         init();
         shouldRefresh = false;
     }
@@ -233,6 +238,14 @@ public class ProfileFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.profile_menu, menu);
         favMenuItem = menu.findItem(R.id.favourites);
+    }
+
+    @Override
+    public void onRefresh() {
+        isPullToRefresh = true;
+        endCursor = null;
+        fetchProfileDetails();
+        fetchPosts();
     }
 
     @Override
@@ -718,6 +731,7 @@ public class ProfileFragment extends Fragment {
 
     private void fetchPosts() {
         stopCurrentExecutor();
+        binding.swipeRefreshLayout.setRefreshing(true);
         currentlyExecuting = new PostsFetcher(profileModel.getId(), PostItemType.MAIN, endCursor, postsFetchListener)
                 .setUsername(profileModel.getUsername())
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

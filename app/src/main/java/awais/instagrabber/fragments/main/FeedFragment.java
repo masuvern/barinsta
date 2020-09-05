@@ -144,6 +144,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     final List<FeedModel> resultList = Arrays.asList(result);
                     if (isPullToRefresh) {
                         finalList = resultList;
+                        isPullToRefresh = false;
                     } else {
                         finalList.addAll(resultList);
                     }
