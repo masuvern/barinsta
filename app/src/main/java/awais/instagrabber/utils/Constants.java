@@ -68,4 +68,6 @@ public final class Constants {
     public static final String SIGNATURE_KEY = "9193488027538fd3450b83b7d05286d4ca9599a0f7eeed90d8c85925698a05dc";
     public static final String BREADCRUMB_KEY = "iN4$aGr0m";
     public static final int LOGIN_RESULT_CODE = 5000;
+    public static final String FDROID_SHA1_FINGERPRINT = "C1661EB8FD09F618307E687786D5E5056F65084D";
+    public static final String SKIPPED_VERSION = "skipped_version";
 }

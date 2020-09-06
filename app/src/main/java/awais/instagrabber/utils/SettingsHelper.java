@@ -1,6 +1,5 @@
 package awais.instagrabber.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -32,6 +31,7 @@ import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
 import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
+import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
 import static awais.instagrabber.utils.Constants.STORIESIG;
 
 public final class SettingsHelper {
@@ -119,12 +119,13 @@ public final class SettingsHelper {
         if (sharedPreferences != null) sharedPreferences.edit().putBoolean(key, val).apply();
     }
 
-    @StringDef({APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID})
+    @StringDef(
+            {APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID, SKIPPED_VERSION})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-            AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN,
-            INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY, CHECK_UPDATES})
+                       AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN,
+                       INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY, CHECK_UPDATES})
     public @interface BooleanSettings {}
 
     @StringDef({PREV_INSTALL_VERSION})

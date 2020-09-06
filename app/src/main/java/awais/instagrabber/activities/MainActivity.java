@@ -40,6 +40,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
@@ -91,6 +92,8 @@ public class MainActivity extends BaseLanguageActivity {
         }
         setupScrollingListener();
         setupSuggestions();
+        FlavorTown.updateCheck(this);
+        FlavorTown.changelogCheck(this);
     }
 
     private void setupSuggestions() {
