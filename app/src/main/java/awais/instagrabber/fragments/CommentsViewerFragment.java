@@ -1,7 +1,6 @@
 package awais.instagrabber.fragments;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,15 +27,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.ProfilePicViewer;
 import awais.instagrabber.adapters.CommentsAdapter;
 import awais.instagrabber.asyncs.CommentsFetcher;
 import awais.instagrabber.databinding.FragmentCommentsBinding;
+import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.CommentModel;
 import awais.instagrabber.models.ProfileModel;
@@ -181,7 +182,14 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                 openProfile(profileModel.getUsername());
                 break;
             case 1: // view profile pic
-                startActivity(new Intent(requireContext(), ProfilePicViewer.class).putExtra(Constants.EXTRAS_PROFILE, profileModel));
+                final FragmentManager fragmentManager = getParentFragmentManager();
+                final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(),
+                                                                                       profileModel.getUsername(),
+                                                                                       profileModel.getHdProfilePic());
+                final FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                  .add(fragment, "profilePicDialog")
+                  .commit();
                 break;
             case 2: // copy username
                 Utils.copyText(requireContext(), profileModel.getUsername());

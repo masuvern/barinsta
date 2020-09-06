@@ -44,8 +44,6 @@ import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.customviews.helpers.VideoAwareRecyclerScroller;
 import awais.instagrabber.databinding.FragmentFeedBinding;
-import awais.instagrabber.viewmodels.FeedStoriesViewModel;
-import awais.instagrabber.viewmodels.FeedViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.BasePostModel;
@@ -60,6 +58,8 @@ import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.services.StoriesService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.FeedStoriesViewModel;
+import awais.instagrabber.viewmodels.FeedViewModel;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -363,7 +363,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private void setupFeedStories() {
         feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter((model, position) -> {
-            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false);
+            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, null, null);
             NavHostFragment.findNavController(this).navigate(action);
         });
         binding.feedStoriesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));

@@ -70,9 +70,6 @@ import awais.instagrabber.asyncs.VoteAction;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.ActivityStoryViewerBinding;
-import awais.instagrabber.viewmodels.FeedStoriesViewModel;
-import awais.instagrabber.viewmodels.HighlightsViewModel;
-import awais.instagrabber.viewmodels.StoriesViewModel;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
@@ -85,6 +82,9 @@ import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.services.StoriesService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.FeedStoriesViewModel;
+import awais.instagrabber.viewmodels.HighlightsViewModel;
+import awais.instagrabber.viewmodels.StoriesViewModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
@@ -123,11 +123,12 @@ public class StoryViewerFragment extends Fragment {
     private int currentFeedStoryIndex;
     private StoriesViewModel storiesViewModel;
     private boolean shouldRefresh = true;
-
-    private final String cookie = settingsHelper.getString(Constants.COOKIE);
     private StoryViewerFragmentArgs fragmentArgs;
     private ViewModel viewModel;
     private boolean isHighlight;
+    private boolean isLoggedIn;
+
+    private final String cookie = settingsHelper.getString(Constants.COOKIE);
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -235,14 +236,17 @@ public class StoryViewerFragment extends Fragment {
     }
 
     private void init() {
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (getArguments() == null) return;
         fragmentArgs = StoryViewerFragmentArgs.fromBundle(getArguments());
         currentFeedStoryIndex = fragmentArgs.getFeedStoryIndex();
         highlight = fragmentArgs.getHighlight();
         isHighlight = !Utils.isEmpty(highlight);
-        viewModel = isHighlight
-                    ? new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
-                    : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+        if (currentFeedStoryIndex >= 0) {
+            viewModel = isHighlight
+                        ? new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
+                        : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+        }
         // feedStoryModels = feedStoriesViewModel.getList().getValue();
         // feedStoryModels == null || feedStoryModels.isEmpty() ||
         setupStories();
@@ -265,21 +269,24 @@ public class StoryViewerFragment extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     private void setupListeners() {
         final boolean hasFeedStories;
-        final List<?> models;
-        if (isHighlight) {
-            final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
-            models = highlightsViewModel.getList().getValue();
-            // final HighlightModel model = models.get(currentFeedStoryIndex);
-            // currentStoryMediaId = model.getId();
-            // currentStoryUsername = model.getTitle();
-        } else {
-            final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-            models = feedStoriesViewModel.getList().getValue();
-            // final FeedStoryModel model = models.get(currentFeedStoryIndex);
-            // currentStoryMediaId = model.getStoryMediaId();
-            // currentStoryUsername = model.getProfileModel().getUsername();
+        List<?> models = null;
+        if (currentFeedStoryIndex > 0) {
+            if (isHighlight) {
+                final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
+                models = highlightsViewModel.getList().getValue();
+                // final HighlightModel model = models.get(currentFeedStoryIndex);
+                // currentStoryMediaId = model.getId();
+                // currentStoryUsername = model.getTitle();
+            } else {
+                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                models = feedStoriesViewModel.getList().getValue();
+                // final FeedStoryModel model = models.get(currentFeedStoryIndex);
+                // currentStoryMediaId = model.getStoryMediaId();
+                // currentStoryUsername = model.getProfileModel().getUsername();
+            }
         }
         hasFeedStories = models != null && !models.isEmpty();
+        final List<?> finalModels = models;
         swipeEvent = isRightSwipe -> {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             final int storiesLen = storyModels == null ? 0 : storyModels.size();
@@ -292,13 +299,13 @@ public class StoryViewerFragment extends Fragment {
                 if (settingsHelper.getBoolean(MARK_AS_SEEN)) {
                     new SeenAction(cookie, currentStory).execute();
                 }
-                if ((isRightSwipe && index == 0) || (isLeftSwipe && index == models.size() - 1)) {
+                if ((isRightSwipe && index == 0) || (isLeftSwipe && index == finalModels.size() - 1)) {
                     Toast.makeText(requireContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 final Object feedStoryModel = isRightSwipe
-                                              ? models.get(index - 1)
-                                              : models.size() == index + 1 ? null : models.get(index + 1);
+                                              ? finalModels.get(index - 1)
+                                              : finalModels.size() == index + 1 ? null : finalModels.get(index + 1);
                 if (feedStoryModel != null) {
                     if (fetching) {
                         Toast.makeText(requireContext(), R.string.be_patient, Toast.LENGTH_SHORT).show();
@@ -459,21 +466,27 @@ public class StoryViewerFragment extends Fragment {
         if (menuDm != null) menuDm.setVisible(false);
         binding.imageViewer.setController(null);
         releasePlayer();
-        String currentStoryMediaId;
-        if (isHighlight) {
-            final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
-            final List<HighlightModel> models = highlightsViewModel.getList().getValue();
-            if (models == null) return;
-            final HighlightModel model = models.get(currentFeedStoryIndex);
-            currentStoryMediaId = model.getId();
-            currentStoryUsername = model.getTitle();
-        } else {
-            final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-            final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
-            if (models == null) return;
-            final FeedStoryModel model = models.get(currentFeedStoryIndex);
-            currentStoryMediaId = model.getStoryMediaId();
-            currentStoryUsername = model.getProfileModel().getUsername();
+        String currentStoryMediaId = null;
+        String username = null;
+        if (currentFeedStoryIndex >= 0) {
+            if (isHighlight) {
+                final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
+                final List<HighlightModel> models = highlightsViewModel.getList().getValue();
+                if (models == null) return;
+                final HighlightModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getId();
+                currentStoryUsername = model.getTitle();
+            } else {
+                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+                if (models == null) return;
+                final FeedStoryModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getStoryMediaId();
+                currentStoryUsername = model.getProfileModel().getUsername();
+            }
+        } else if (!Utils.isEmpty(fragmentArgs.getProfileId()) && !Utils.isEmpty(fragmentArgs.getUsername())) {
+            currentStoryMediaId = fragmentArgs.getProfileId();
+            username = fragmentArgs.getUsername();
         }
         isHashtag = fragmentArgs.getIsHashtag();
         final boolean hasUsername = !Utils.isEmpty(currentStoryUsername);
@@ -493,27 +506,34 @@ public class StoryViewerFragment extends Fragment {
             }
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
-        storiesService.getUserStory(currentStoryMediaId, null, false, false, false, isHighlight, new ServiceCallback<List<StoryModel>>() {
-            @Override
-            public void onSuccess(final List<StoryModel> storyModels) {
-                fetching = false;
-                if (storyModels == null || storyModels.isEmpty()) {
-                    storiesViewModel.getList().setValue(Collections.emptyList());
-                    currentStory = null;
-                    binding.storiesList.setVisibility(View.GONE);
-                    return;
-                }
-                binding.storiesList.setVisibility(View.VISIBLE);
-                storiesViewModel.getList().setValue(storyModels);
-                currentStory = storyModels.get(0);
-                refreshStory();
-            }
+        if (currentStoryMediaId == null) return;
+        storiesService.getUserStory(currentStoryMediaId,
+                                    username,
+                                    !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
+                                    false,
+                                    false,
+                                    isHighlight,
+                                    new ServiceCallback<List<StoryModel>>() {
+                                        @Override
+                                        public void onSuccess(final List<StoryModel> storyModels) {
+                                            fetching = false;
+                                            if (storyModels == null || storyModels.isEmpty()) {
+                                                storiesViewModel.getList().setValue(Collections.emptyList());
+                                                currentStory = null;
+                                                binding.storiesList.setVisibility(View.GONE);
+                                                return;
+                                            }
+                                            binding.storiesList.setVisibility(View.VISIBLE);
+                                            storiesViewModel.getList().setValue(storyModels);
+                                            currentStory = storyModels.get(0);
+                                            refreshStory();
+                                        }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error", t);
-            }
-        });
+                                        @Override
+                                        public void onFailure(final Throwable t) {
+                                            Log.e(TAG, "Error", t);
+                                        }
+                                    });
     }
 
     private void refreshStory() {

@@ -168,14 +168,14 @@
         <!--        android:value=".activities.MainActivity" />-->
         <!--</activity>-->
 
-        <activity
-            android:name=".activities.ProfilePicViewer"
-            android:parentActivityName=".activities.MainActivity">
+        <!--<activity-->
+        <!--    android:name=".activities.ProfilePicViewer"-->
+        <!--    android:parentActivityName=".activities.MainActivity">-->
 
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.MainActivity" />
-        </activity>
+        <!--    <meta-data-->
+        <!--        android:name="android.support.PARENT_ACTIVITY"-->
+        <!--        android:value=".activities.MainActivity" />-->
+        <!--</activity>-->
 
         <!--<activity-->
         <!--    android:name=".activities.ProfileViewer"-->

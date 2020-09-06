@@ -125,5 +125,13 @@
         <argument
             android:name="isHashtag"
             app:argType="boolean" />
+        <argument
+            android:name="profileId"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 </navigation>

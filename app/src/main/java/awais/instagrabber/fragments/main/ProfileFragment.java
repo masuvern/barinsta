@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.main;
 
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -25,10 +26,13 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -57,8 +61,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentProfileBinding;
-import awais.instagrabber.viewmodels.HighlightsViewModel;
-import awais.instagrabber.viewmodels.PostsViewModel;
+import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.PostModel;
@@ -73,6 +76,8 @@ import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.HighlightsViewModel;
+import awais.instagrabber.viewmodels.PostsViewModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -354,7 +359,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                             binding.mainProfileImage.setStoriesBorder();
                                         }
                                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
             new HighlightsFetcher(profileId,
                                   !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
                                   result -> {
@@ -533,7 +537,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         // final boolean isSelf = isLoggedIn && profileModel != null && userIdFromCookie != null && userIdFromCookie
         //         .equals(profileModel.getId());
         final String favorite = Utils.dataBox.getFavorite(username);
-
         binding.btnFollow.setOnClickListener(v -> {
             if (!isLoggedIn) {
                 if (favorite != null && v == binding.btnFollow) {
@@ -586,7 +589,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         });
             }
         });
-
         binding.btnRestrict.setOnClickListener(v -> {
             if (!isLoggedIn) return;
             final String action = profileModel.getRestricted() ? "Unrestrict" : "Restrict";
@@ -663,16 +665,48 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.LIKED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-
         binding.btnTagged.setOnClickListener(v -> {
-            // startActivity(new Intent(requireContext(), SavedViewerFragment.class)
-            //                       .putExtra(Constants.EXTRAS_INDEX, "%" + profileModel.getId())
-            //                       .putExtra(Constants.EXTRAS_USER, username));
             final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
                                                                                                               profileModel.getId(),
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
+        binding.mainProfileImage.setOnClickListener(v -> {
+            if (storyModels == null || storyModels.length <= 0) {
+                // show profile pic
+                showProfilePicDialog();
+                return;
+            }
+            // show dialog
+            final String[] options = {getString(R.string.view_pfp), getString(R.string.show_stories)};
+            final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
+                if (which == AlertDialog.BUTTON_NEUTRAL) {
+                    dialog.dismiss();
+                    return;
+                }
+                if (which == 1) {
+                    // show stories
+                    final NavDirections action = ProfileFragmentDirections
+                            .actionProfileFragmentToStoryViewerFragment(-1, null, false, profileModel.getId(), username);
+                    NavHostFragment.findNavController(this).navigate(action);
+                    return;
+                }
+                showProfilePicDialog();
+            };
+            new AlertDialog.Builder(requireContext())
+                    .setItems(options, profileDialogListener)
+                    .setNeutralButton(R.string.cancel, null)
+                    .show();
+        });
+    }
+
+    private void showProfilePicDialog() {
+        final FragmentManager fragmentManager = getParentFragmentManager();
+        final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(), username, profileModel.getHdProfilePic());
+        final FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+          .add(fragment, "profilePicDialog")
+          .commit();
     }
 
     private void setUsernameDelayed() {
@@ -742,27 +776,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void setupHighlights() {
         highlightsViewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
         highlightsAdapter = new HighlightsAdapter((model, position) -> {
-            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false);
+            final NavDirections action = ProfileFragmentDirections
+                    .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, null, null);
             NavHostFragment.findNavController(this).navigate(action);
-            // new iStoryStatusFetcher(
-            //         model.getId(),
-            //         null,
-            //         false,
-            //         false,
-            //         !isLoggedIn && Utils.settingsHelper.getBoolean(Constants.STORIESIG),
-            //         true,
-            //         result -> {
-            //             if (result == null || result.length <= 0) {
-            //                 Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-            //                 return;
-            //             }
-            //             feedStoriesViewModel.getHighlights().postValue(Arrays.asList(result));
-            //             // startActivity(new Intent(ProfileViewer.this, StoryViewer.class)
-            //             //         .putExtra(Constants.EXTRAS_USERNAME, userQuery.replace("@", ""))
-            //             //         .putExtra(Constants.EXTRAS_HIGHLIGHT, highlightModel.getTitle())
-            //             //         .putExtra(Constants.EXTRAS_STORIES, result)
-            //             // );
-            //         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
         final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false);
         binding.highlightsList.setLayoutManager(layoutManager);
