@@ -1,15 +1,15 @@
 package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.DropDownPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -45,6 +45,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         screen.addPreference(getLanguagePreference());
+        screen.addPreference(getDefaultTabPreference());
         screen.addPreference(getThemePreference());
         screen.addPreference(getAmoledThemePreference());
         screen.addPreference(getDownloadUserFolderPreference());
@@ -83,6 +84,34 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setEntries(R.array.languages);
         preference.setIconSpaceReserved(false);
         preference.setEntryValues(values);
+        preference.setOnPreferenceChangeListener((preference1, newValue) -> {
+            shouldRecreate();
+            return true;
+        });
+        return preference;
+    }
+
+    private Preference getDefaultTabPreference() {
+        final DropDownPreference preference = new DropDownPreference(requireContext());
+        preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            return preference;
+        }
+        final TypedArray mainNavIds = getResources().obtainTypedArray(R.array.main_nav_ids);
+        final int length = mainNavIds.length();
+        final String[] values = new String[length];
+        for (int i = 0; i < length; i++) {
+            final int resourceId = mainNavIds.getResourceId(i, -1);
+            if (resourceId < 0) continue;
+            values[i] = String.valueOf(resourceId);
+        }
+        mainNavIds.recycle();
+        preference.setKey(Constants.DEFAULT_TAB);
+        preference.setTitle(R.string.select_default_tab);
+        preference.setEntries(R.array.main_nav_ids_values);
+        preference.setEntryValues(values);
+        preference.setIconSpaceReserved(false);
         preference.setOnPreferenceChangeListener((preference1, newValue) -> {
             shouldRecreate();
             return true;
@@ -199,7 +228,8 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setTitle(R.string.time_settings);
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(preference1 -> {
-            new TimeSettingsDialog(settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
+            new TimeSettingsDialog(
+                    settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
                     settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT),
                     settingsHelper.getString(Constants.DATE_TIME_SELECTION),
                     (isCustomFormat,

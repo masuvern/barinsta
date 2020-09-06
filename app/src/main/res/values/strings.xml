@@ -47,14 +47,14 @@
     <string name="show_feed">Show user feed (Works only when user is logged in)</string>
     <string name="save_to_folder">Save to custom folder</string>
     <string name="select_folder">Select folder</string>
-    <string name="theme_settings">Theme Settings</string>
+    <string name="theme_settings">Theme</string>
     <string name="login_settings">Only affects logged-in users:</string>
     <string name="anonymous_settings">Only affects anonymous users:</string>
     <string name="privacy_warning">Privacy</string>
     <string name="instadp_settings">Use Instadp for high definition profile pictures</string>
     <string name="storiesig_settings">Use storiesig for stories and highlights from public users</string>
     <string name="import_export">Import/Export</string>
-    <string name="select_language">Select language</string>
+    <string name="select_language">Language</string>
     <string name="what_to_do_dialog">What to do?</string>
     <string name="main_posts_count">%s\nPosts</string>
     <string name="main_posts_followers">%s\nFollowers</string>
@@ -98,7 +98,7 @@
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="send_logs">Send Debug Logs</string>
-    <string name="time_settings">Post Time Settings</string>
+    <string name="time_settings">Post time format</string>
     <string name="project_link">Visit Project Page</string>
     <string name="telegram_link">Join Telegram Group</string>
     <string name="matrix_link">Join Matrix Room</string>
@@ -253,4 +253,5 @@
     <string name="mark_as_seen">Mark as seen</string>
     <string name="skip_update_checkbox">Do not show again until next update</string>
     <string name="version">Version</string>
+    <string name="select_default_tab">Default tab</string>
 </resources>

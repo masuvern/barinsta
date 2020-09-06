@@ -70,4 +70,5 @@ public final class Constants {
     public static final int LOGIN_RESULT_CODE = 5000;
     public static final String FDROID_SHA1_FINGERPRINT = "C1661EB8FD09F618307E687786D5E5056F65084D";
     public static final String SKIPPED_VERSION = "skipped_version";
+    public static final String DEFAULT_TAB = "default_tab";
 }

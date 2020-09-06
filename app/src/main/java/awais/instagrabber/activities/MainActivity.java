@@ -2,11 +2,13 @@ package awais.instagrabber.activities;
 
 
 import android.annotation.SuppressLint;
+import android.content.res.TypedArray;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
@@ -68,7 +72,10 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.commentsViewerFragment,
             R.id.followViewerFragment,
             R.id.directMessagesSettingsFragment);
+    private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
     private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
+    private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
+
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
     private MenuItem searchMenuItem;
@@ -77,6 +84,15 @@ public class MainActivity extends BaseLanguageActivity {
     private SearchView searchView;
     private boolean showSearch = true;
     private Handler suggestionsFetchHandler;
+    private int firstFragmentGraphIndex;
+
+    static {
+        NAV_TO_MENU_ID_MAP.put(R.navigation.direct_messages_nav_graph, R.id.direct_messages_nav_graph);
+        NAV_TO_MENU_ID_MAP.put(R.navigation.feed_nav_graph, R.id.feed_nav_graph);
+        NAV_TO_MENU_ID_MAP.put(R.navigation.profile_nav_graph, R.id.profile_nav_graph);
+        NAV_TO_MENU_ID_MAP.put(R.navigation.discover_nav_graph, R.id.discover_nav_graph);
+        NAV_TO_MENU_ID_MAP.put(R.navigation.more_nav_graph, R.id.more_nav_graph);
+    }
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -88,7 +104,7 @@ public class MainActivity extends BaseLanguageActivity {
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
         if (savedInstanceState == null) {
-            setupBottomNavigationBar();
+            setupBottomNavigationBar(true);
         }
         setupScrollingListener();
         setupSuggestions();
@@ -255,21 +271,41 @@ public class MainActivity extends BaseLanguageActivity {
         return true;
     }
 
-    private void setupBottomNavigationBar() {
-        final List<Integer> mainNavList = new ArrayList<>(Arrays.asList(
-                R.navigation.direct_messages_nav_graph,
-                R.navigation.feed_nav_graph,
-                R.navigation.profile_nav_graph,
-                R.navigation.discover_nav_graph,
-                R.navigation.more_nav_graph
-        ));
+    private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
+        final TypedArray navIds = getResources().obtainTypedArray(R.array.main_nav_ids);
+        final List<Integer> mainNavList = new ArrayList<>(navIds.length());
+        final int length = navIds.length();
+        for (int i = 0; i < length; i++) {
+            final int resourceId = navIds.getResourceId(i, -1);
+            if (resourceId < 0) continue;
+            mainNavList.add(resourceId);
+        }
+        navIds.recycle();
+        if (setDefaultFromSettings) {
+            final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
+            if (!Utils.isEmpty(defaultTabIdString)) {
+                try {
+                    final int defaultNavId = Integer.parseInt(defaultTabIdString);
+                    final int index = mainNavList.indexOf(defaultNavId);
+                    if (index >= 0) {
+                        firstFragmentGraphIndex = index;
+                        final Integer menuId = NAV_TO_MENU_ID_MAP.get(defaultNavId);
+                        if (menuId != null) {
+                            binding.bottomNavView.setSelectedItemId(menuId);
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Error parsing id", e);
+                }
+            }
+        }
         final LiveData<NavController> navControllerLiveData = setupWithNavController(
                 binding.bottomNavView,
                 mainNavList,
                 getSupportFragmentManager(),
                 R.id.main_nav_host,
                 getIntent(),
-                0);
+                firstFragmentGraphIndex);
         navControllerLiveData.observe(this, this::setupNavigation);
         currentNavControllerLiveData = navControllerLiveData;
     }
@@ -336,9 +372,21 @@ public class MainActivity extends BaseLanguageActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull final Bundle outState) {
+        outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        setupBottomNavigationBar();
+        final String key = (String) savedInstanceState.get(FIRST_FRAGMENT_GRAPH_INDEX_KEY);
+        if (key != null) {
+            try {
+                firstFragmentGraphIndex = Integer.parseInt(key);
+            } catch (NumberFormatException ignored) { }
+        }
+        setupBottomNavigationBar(false);
     }
 
     @Override
