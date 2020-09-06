@@ -42,11 +42,6 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private DialogProfilepicBinding binding;
     private String url;
-    private boolean fallbackToProfile;
-    private FetchListener<String> fetchListener;
-    private boolean errorHandled;
-    private boolean isHashtag;
-    private boolean destroyed;
 
     public ProfilePicDialogFragment(final String id, final String name, final String fallbackUrl) {
         this.id = id;
@@ -109,7 +104,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
     }
 
     private void fetchPhoto() {
-        fetchListener = profileUrl -> {
+        final FetchListener<String> fetchListener = profileUrl -> {
             url = profileUrl;
             if (Utils.isEmpty(url)) {
                 url = fallbackUrl;
