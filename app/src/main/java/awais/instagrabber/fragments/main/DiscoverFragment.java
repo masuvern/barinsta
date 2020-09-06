@@ -36,7 +36,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDiscoverBinding;
-import awais.instagrabber.fragments.main.viewmodels.DiscoverItemViewModel;
+import awais.instagrabber.viewmodels.DiscoverItemViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.DiscoverTopicModel;

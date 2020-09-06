@@ -30,7 +30,7 @@ import awais.instagrabber.adapters.PostViewAdapter.OnPostViewChildViewClickListe
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.i.iPostFetcher;
 import awais.instagrabber.databinding.FragmentPostViewBinding;
-import awais.instagrabber.fragments.main.viewmodels.ViewerPostViewModel;
+import awais.instagrabber.viewmodels.ViewerPostViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ViewerPostModel;

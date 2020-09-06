@@ -1,4 +1,4 @@
-package awais.instagrabber.fragments.main.viewmodels;
+package awais.instagrabber.viewmodels;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;

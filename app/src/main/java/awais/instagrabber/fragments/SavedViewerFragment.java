@@ -40,7 +40,7 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentSavedBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
-import awais.instagrabber.fragments.main.viewmodels.PostsViewModel;
+import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.DownloadMethod;

@@ -1,4 +1,4 @@
-package awais.instagrabber.fragments.main.viewmodels;
+package awais.instagrabber.viewmodels;
 
 import awais.instagrabber.models.FeedModel;
 
