@@ -59,7 +59,7 @@ public final class SavedViewer extends BaseLanguageActivity implements SwipeRefr
         @Override
         public void onResult(final PostModel[] result) {
             final int oldSize = allItems.size();
-            if (result != null) {
+            if (result != null && result.length > 0) {
                 allItems.addAll(Arrays.asList(result));
 
                 postsAdapter.notifyItemRangeInserted(oldSize, result.length);
