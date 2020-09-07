@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -223,11 +224,18 @@ public class DirectMessageThreadFragment extends Fragment {
                     case CLIP:
                         final long postId = directItemModel.getMediaModel().getPk();
                         final boolean isId = true;
-                        // startActivity(new Intent(requireContext(), PostViewer.class)
-                        //         .putExtra(Constants.EXTRAS_POST, new PostModel(postId, false)));
+                        final NavController navController = NavHostFragment.findNavController(this);
+                        final NavDirections action = DirectMessageThreadFragmentDirections
+                                .actionGlobalPostViewFragment(
+                                        0,
+                                        new String[]{String.valueOf(postId)},
+                                        isId
+                                );
+                        navController.navigate(action);
                         break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);
+                        linkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         linkIntent.setData(Uri.parse(directItemModel.getLinkModel().getLinkContext().getLinkUrl()));
                         startActivity(linkIntent);
                         break;
@@ -545,8 +553,8 @@ public class DirectMessageThreadFragment extends Fragment {
                 wr.close();
                 urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    if (action == "delete") hasDeletedSomething = true;
-                    else if (action == "seen") DirectMessageInboxFragment.refreshPlease = true;
+                    if (action.equals("delete")) hasDeletedSomething = true;
+                    else if (action.equals("seen")) DirectMessageInboxFragment.refreshPlease = true;
                 }
                 urlConnection.disconnect();
             } catch (Throwable ex) {

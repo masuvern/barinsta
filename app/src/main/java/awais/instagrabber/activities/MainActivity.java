@@ -157,6 +157,12 @@ public class MainActivity extends BaseLanguageActivity {
         return false;
     }
 
+    @Override
+    protected void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
     private void setupSuggestions() {
         suggestionsFetchHandler = new Handler();
         suggestionAdapter = new SuggestionsAdapter(this, (type, query) -> {
