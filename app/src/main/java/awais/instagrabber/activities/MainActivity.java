@@ -112,7 +112,8 @@ public class MainActivity extends BaseLanguageActivity {
         }
         setupScrollingListener();
         setupSuggestions();
-        FlavorTown.updateCheck(this);
+        final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
+        if (checkUpdates) FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
 
         final Intent intent = getIntent();

@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.FragmentActivity;
-import androidx.preference.DropDownPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -21,6 +20,7 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.TimeSettingsDialog;
@@ -44,26 +44,47 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
-        screen.addPreference(getLanguagePreference());
-        screen.addPreference(getDefaultTabPreference());
-        screen.addPreference(getThemePreference());
-        screen.addPreference(getAmoledThemePreference());
-        screen.addPreference(getDownloadUserFolderPreference());
-        screen.addPreference(getSaveToCustomFolderPreference());
-        screen.addPreference(getAutoPlayVideosPreference());
-        screen.addPreference(getAlwaysMuteVideosPreference());
-        screen.addPreference(getPostTimePreference());
+
+        final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
+        screen.addPreference(generalCategory);
+        generalCategory.setTitle(getString(R.string.pref_category_general));
+        generalCategory.setIconSpaceReserved(false);
+        generalCategory.addPreference(getDefaultTabPreference());
+        generalCategory.addPreference(getUpdateCheckPreference());
+        generalCategory.addPreference(getAutoPlayVideosPreference());
+        generalCategory.addPreference(getAlwaysMuteVideosPreference());
+
+        final PreferenceCategory themeCategory = new PreferenceCategory(requireContext());
+        screen.addPreference(themeCategory);
+        themeCategory.setTitle(getString(R.string.pref_category_theme));
+        themeCategory.setIconSpaceReserved(false);
+        themeCategory.addPreference(getThemePreference());
+        themeCategory.addPreference(getAmoledThemePreference());
+
+        final PreferenceCategory downloadsCategory = new PreferenceCategory(requireContext());
+        screen.addPreference(downloadsCategory);
+        downloadsCategory.setTitle(getString(R.string.pref_category_downloads));
+        downloadsCategory.setIconSpaceReserved(false);
+        downloadsCategory.addPreference(getDownloadUserFolderPreference());
+        downloadsCategory.addPreference(getSaveToCustomFolderPreference());
+
+        final PreferenceCategory localeCategory = new PreferenceCategory(requireContext());
+        screen.addPreference(localeCategory);
+        localeCategory.setTitle(getString(R.string.pref_category_locale));
+        localeCategory.setIconSpaceReserved(false);
+        localeCategory.addPreference(getLanguagePreference());
+        localeCategory.addPreference(getPostTimePreference());
 
         final PreferenceCategory loggedInUsersPreferenceCategory = new PreferenceCategory(requireContext());
-        loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
         screen.addPreference(loggedInUsersPreferenceCategory);
+        loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
         loggedInUsersPreferenceCategory.setTitle(R.string.login_settings);
         loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
         loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
 
         final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(requireContext());
-        anonUsersPreferenceCategory.setIconSpaceReserved(false);
         screen.addPreference(anonUsersPreferenceCategory);
+        anonUsersPreferenceCategory.setIconSpaceReserved(false);
         anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
         anonUsersPreferenceCategory.addPreference(getUseInstaDpPreference());
         anonUsersPreferenceCategory.addPreference(getUseStoriesIgPreference());
@@ -71,8 +92,8 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     @NonNull
-    private DropDownPreference getLanguagePreference() {
-        final DropDownPreference preference = new DropDownPreference(requireContext());
+    private Preference getLanguagePreference() {
+        final ListPreference preference = new ListPreference(requireContext());
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final int length = getResources().getStringArray(R.array.languages).length;
         final String[] values = new String[length];
@@ -81,6 +102,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         }
         preference.setKey(Constants.APP_LANGUAGE);
         preference.setTitle(R.string.select_language);
+        preference.setDialogTitle(R.string.select_language);
         preference.setEntries(R.array.languages);
         preference.setIconSpaceReserved(false);
         preference.setEntryValues(values);
@@ -92,7 +114,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getDefaultTabPreference() {
-        final DropDownPreference preference = new DropDownPreference(requireContext());
+        final ListPreference preference = new ListPreference(requireContext());
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final FragmentActivity activity = getActivity();
         if (activity == null) {
@@ -108,7 +130,8 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         }
         mainNavIds.recycle();
         preference.setKey(Constants.DEFAULT_TAB);
-        preference.setTitle(R.string.select_default_tab);
+        preference.setTitle(R.string.pref_start_screen);
+        preference.setDialogTitle(R.string.pref_start_screen);
         preference.setEntries(R.array.main_nav_ids_values);
         preference.setEntryValues(values);
         preference.setIconSpaceReserved(false);
@@ -119,9 +142,17 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         return preference;
     }
 
+    private Preference getUpdateCheckPreference() {
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        preference.setKey(Constants.CHECK_UPDATES);
+        preference.setTitle(R.string.update_check);
+        preference.setIconSpaceReserved(false);
+        return preference;
+    }
+
     @NonNull
-    private DropDownPreference getThemePreference() {
-        final DropDownPreference preference = new DropDownPreference(requireContext());
+    private Preference getThemePreference() {
+        final ListPreference preference = new ListPreference(requireContext());
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final int length = getResources().getStringArray(R.array.theme_presets).length;
         final String[] values = new String[length];
@@ -130,6 +161,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         }
         preference.setKey(Constants.APP_THEME);
         preference.setTitle(R.string.theme_settings);
+        preference.setDialogTitle(R.string.theme_settings);
         preference.setEntries(R.array.theme_presets);
         preference.setIconSpaceReserved(false);
         preference.setEntryValues(values);
@@ -226,6 +258,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     private Preference getPostTimePreference() {
         final Preference preference = new Preference(requireContext());
         preference.setTitle(R.string.time_settings);
+        preference.setSummary(Utils.datetimeParser.format(new Date()));
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(preference1 -> {
             new TimeSettingsDialog(
@@ -249,6 +282,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
                         }
                         settingsHelper.putBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
                         Utils.datetimeParser = (SimpleDateFormat) currentFormat.clone();
+                        preference.setSummary(Utils.datetimeParser.format(new Date()));
                     }
             ).show(getParentFragmentManager(), null);
             return true;
