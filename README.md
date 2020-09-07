@@ -14,11 +14,9 @@ For documentation, visit [InstaGrabber.AustinHuang.me](https://instagrabber.aust
 
 **By installing, you indicate your acceptance of [Disclosure and Privacy Policy](https://instagrabber.austinhuang.me/disclosure).**
 
-Download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest) (recommended). Expand "Assets" and download the APK file. Or...
-
 <a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75"></a>
 
-(...[but they're slow.](https://instagrabber.austinhuang.me/faq#f-droid))
+Or, download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
 
 Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. ![GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
 
@@ -36,6 +34,8 @@ Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.insta
 * Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
 * Telegram: [@Grabber_App](https://t.me/grabber_app)
 * Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
+* Gitter: [InstaGrabber/General](https://gitter.im/instagrabber/general)
+  * Above 4 are bridged to each other.
 
 ### Contributors
 
