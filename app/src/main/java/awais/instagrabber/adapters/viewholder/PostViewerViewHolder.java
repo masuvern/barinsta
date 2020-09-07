@@ -79,9 +79,9 @@ public class PostViewerViewHolder extends RecyclerView.ViewHolder {
         binding.bottomPanel.commentsCount.setText(String.valueOf(firstPost.getCommentsCount()));
         final CharSequence postCaption = firstPost.getPostCaption();
         if (Utils.hasMentions(postCaption)) {
+            binding.bottomPanel.viewerCaption.setMentionClickListener(mentionClickListener);
             binding.bottomPanel.viewerCaption
                     .setText(Utils.getMentionText(postCaption), TextView.BufferType.SPANNABLE);
-            binding.bottomPanel.viewerCaption.setMentionClickListener(mentionClickListener);
         } else {
             binding.bottomPanel.viewerCaption.setMentionClickListener(null);
             binding.bottomPanel.viewerCaption.setText(postCaption);

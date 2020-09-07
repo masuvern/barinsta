@@ -323,20 +323,18 @@ public class MainActivity extends BaseLanguageActivity {
         navIds.recycle();
         if (setDefaultFromSettings) {
             final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
-            if (!Utils.isEmpty(defaultTabIdString)) {
-                try {
-                    final int defaultNavId = Integer.parseInt(defaultTabIdString);
-                    final int index = mainNavList.indexOf(defaultNavId);
-                    if (index >= 0) {
-                        firstFragmentGraphIndex = index;
-                        final Integer menuId = NAV_TO_MENU_ID_MAP.get(defaultNavId);
-                        if (menuId != null) {
-                            binding.bottomNavView.setSelectedItemId(menuId);
-                        }
+            try {
+                final int defaultNavId = Utils.isEmpty(defaultTabIdString) ? mainNavList.get(2) : Integer.parseInt(defaultTabIdString);
+                final int index = mainNavList.indexOf(defaultNavId);
+                if (index >= 0) {
+                    firstFragmentGraphIndex = index;
+                    final Integer menuId = NAV_TO_MENU_ID_MAP.get(defaultNavId);
+                    if (menuId != null) {
+                        binding.bottomNavView.setSelectedItemId(menuId);
                     }
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "Error parsing id", e);
                 }
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Error parsing id", e);
             }
         }
         final LiveData<NavController> navControllerLiveData = setupWithNavController(
@@ -374,7 +372,7 @@ public class MainActivity extends BaseLanguageActivity {
 
     private void setupMenu(final int backStackSize, final int destinationId) {
         if (searchMenuItem == null) return;
-        if (backStackSize == 2 && destinationId != R.id.morePreferencesFragment) {
+        if (backStackSize >= 2 && destinationId == R.id.profileFragment) {
             showSearch = true;
             searchMenuItem.setVisible(true);
             return;

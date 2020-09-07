@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_dms"
+        android:icon="@drawable/ic_send_24"
+        android:title="@string/action_dms"
+        android:titleCondensed="@string/action_dms"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_download"
         android:icon="@drawable/ic_download"
         android:title="@string/action_download"
         android:titleCondensed="@string/action_download"
         app:showAsAction="always" />
-    <item
-        android:id="@+id/action_dms"
-        android:icon="@drawable/ic_send_24"
-        android:title="@string/action_dms"
-        android:titleCondensed="@string/action_dms"
-        app:showAsAction="ifRoom" />
 </menu>

@@ -76,7 +76,7 @@
     <fragment
         android:id="@+id/feedFragment"
         android:name="awais.instagrabber.fragments.main.FeedFragment"
-        android:label="FeedFragment"
+        android:label="@string/feed"
         tools:layout="@layout/fragment_feed">
         <action
             android:id="@+id/action_feedFragment_to_storyViewerFragment"

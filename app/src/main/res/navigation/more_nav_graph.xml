@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/morePreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.MorePreferencesFragment"
-        android:label="More">
+        android:label="@string/more">
         <action
             android:id="@+id/action_morePreferencesFragment_to_settingsPreferencesFragment"
             app:destination="@id/settingsPreferencesFragment" />

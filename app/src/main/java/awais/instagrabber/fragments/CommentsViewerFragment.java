@@ -152,7 +152,11 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                 public void afterTextChanged(final Editable s) {}
             });
             binding.commentField.setStartIconOnClickListener(v -> {
-                commentModel = null;
+                if (commentModel != null) {
+                    final View focus = binding.rvComments.findViewWithTag(commentModel);
+                    focus.setBackgroundColor(0x00000000);
+                    commentModel = null;
+                }
                 binding.commentText.setText("");
             });
             binding.commentField.setEndIconOnClickListener(newCommentListener);

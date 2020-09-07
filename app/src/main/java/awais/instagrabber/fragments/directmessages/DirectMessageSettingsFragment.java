@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,6 +39,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageMembersAdapter;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
 import awais.instagrabber.databinding.FragmentDirectMessagesSettingsBinding;
+import awais.instagrabber.fragments.PostViewFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
@@ -95,8 +97,9 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
                 ProfileModel model = (ProfileModel) tag;
-                // startActivity(new Intent(requireContext(), ProfileViewer.class)
-                //                       .putExtra(Constants.EXTRAS_USERNAME, model.getUsername()));
+                /*final NavDirections action = PostViewFragmentDirections
+                        .actionGlobalProfileFragment("@" + model.getUsername());
+                NavHostFragment.findNavController(this).navigate(action);*/
             }
         };
 
@@ -104,27 +107,23 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
                 ProfileModel model = (ProfileModel) tag;
-                if (!amAdmin || model.getId().equals(Utils.getUserIdFromCookie(cookie))) {
-                    // startActivity(new Intent(requireContext(), ProfileViewer.class)
-                    //                       .putExtra(Constants.EXTRAS_USERNAME, model.getUsername()));
-                } else {
-                    final ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, new String[]{
-                            getString(R.string.open_profile),
-                            getString(R.string.dms_action_kick),
-                    });
-                    final DialogInterface.OnClickListener clickListener = (d, w) -> {
-                        if (w == 0) {
-                            // startActivity(new Intent(requireContext(), ProfileViewer.class)
-                            //                       .putExtra(Constants.EXTRAS_USERNAME, model.getUsername()));
-                        } else if (w == 1) {
-                            new ChangeSettings().execute("remove_users", model.getId());
-                            onRefresh();
-                        }
-                    };
-                    new AlertDialog.Builder(requireContext())
-                            .setAdapter(adapter, clickListener)
-                            .show();
-                }
+                final ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, new String[]{
+                        getString(R.string.open_profile),
+                        getString(R.string.dms_action_kick),
+                });
+                final DialogInterface.OnClickListener clickListener = (d, w) -> {
+                    if (w == 0) {
+                        /*final NavDirections action = PostViewFragmentDirections
+                                .actionGlobalProfileFragment("@" + model.getUsername());
+                        NavHostFragment.findNavController(this).navigate(action);*/
+                    } else if (w == 1) {
+                        new ChangeSettings().execute("remove_users", model.getId());
+                        onRefresh();
+                    }
+                };
+                new AlertDialog.Builder(requireContext())
+                        .setAdapter(adapter, clickListener)
+                        .show();
             }
         };
     }

@@ -346,7 +346,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final String profileId = profileModel.getId();
-        if (settingsHelper.getBoolean(Constants.STORIESIG)) {
+        if (settingsHelper.getBoolean(Constants.STORIESIG) || isLoggedIn) {
             new iStoryStatusFetcher(profileId,
                                     profileModel.getUsername(),
                                     false,

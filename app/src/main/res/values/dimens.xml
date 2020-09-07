@@ -13,7 +13,7 @@
     <dimen name="story_item_width">45dp</dimen>
 
     <dimen name="simple_item_picture_size">80dp</dimen>
-    <dimen name="simple_item_picture_size_half">40dp</dimen>
+    <dimen name="simple_item_picture_size_half">35dp</dimen>
 
     <dimen name="message_item_size">@dimen/simple_item_picture_size</dimen>
     <dimen name="message_item_profile_size">@dimen/feed_profile_size</dimen>

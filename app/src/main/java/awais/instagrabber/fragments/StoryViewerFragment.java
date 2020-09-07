@@ -270,7 +270,7 @@ public class StoryViewerFragment extends Fragment {
     private void setupListeners() {
         final boolean hasFeedStories;
         List<?> models = null;
-        if (currentFeedStoryIndex > 0) {
+        if (currentFeedStoryIndex >= 0) {
             if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 models = highlightsViewModel.getList().getValue();
@@ -498,11 +498,11 @@ public class StoryViewerFragment extends Fragment {
                 // actionBar.setOnClickListener(v -> {
                 //     searchUsername(username);
                 // });
-                if (isHighlight) {
-                    actionBar.setSubtitle(getString(R.string.title_highlight, highlight));
-                } else {
-                    actionBar.setSubtitle(R.string.title_user_story);
-                }
+//                if (isHighlight) {
+//                    actionBar.setSubtitle(getString(R.string.title_highlight, highlight));
+//                } else {
+//                    actionBar.setSubtitle(R.string.title_user_story);
+//                }
             }
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
@@ -596,11 +596,9 @@ public class StoryViewerFragment extends Fragment {
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
 
-        if (Utils.isEmpty(highlight)) {
-            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
-            }
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
         }
 
         if (settingsHelper.getBoolean(MARK_AS_SEEN)) new SeenAction(cookie, currentStory).execute();

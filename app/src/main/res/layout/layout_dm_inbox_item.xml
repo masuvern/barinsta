@@ -52,6 +52,13 @@
                     app:roundAsCircle="true" />
             </LinearLayout>
         </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/unread"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_gravity="right"
+            app:srcCompat="@drawable/circle" />
     </FrameLayout>
 
     <androidx.appcompat.widget.AppCompatTextView

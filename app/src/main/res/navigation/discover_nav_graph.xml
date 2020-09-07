@@ -26,6 +26,6 @@
     <fragment
         android:id="@+id/discoverFragment"
         android:name="awais.instagrabber.fragments.main.DiscoverFragment"
-        android:label="DiscoverFragment"
+        android:label="@string/title_discover"
         tools:layout="@layout/fragment_discover" />
 </navigation>
