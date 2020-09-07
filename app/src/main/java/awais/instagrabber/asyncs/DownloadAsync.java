@@ -188,7 +188,7 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
             MediaScannerConnection.scanFile(context, new String[]{result.getAbsolutePath()}, null, null);
 
             if (notificationManager != null) {
-                final Uri uri = FileProvider.getUriForFile(context, "me.austinhuang.instagrabber.provider", result);
+                final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", result);
 
                 final ContentResolver contentResolver = context.getContentResolver();
                 Bitmap bitmap = null;

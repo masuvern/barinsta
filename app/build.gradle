@@ -5,13 +5,13 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId 'me.austinhuang.instagrabber'
+        applicationId 'me.austinhuang.instagrabbr'
 
         minSdkVersion 16
         targetSdkVersion 29
 
-        versionCode 48
-        versionName '18.2'
+        versionCode 49
+        versionName '19.0-a1'
 
         multiDexEnabled true
 

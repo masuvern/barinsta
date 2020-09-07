@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
@@ -104,8 +105,8 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
         @Override
         public void onResult(final PostModel[] result) {
+            final List<PostModel> current = postsViewModel.getList().getValue();
             if (result != null) {
-                final List<PostModel> current = postsViewModel.getList().getValue();
                 final List<PostModel> resultList = Arrays.asList(result);
                 if (current == null) {
                     postsViewModel.getList().postValue(resultList);
@@ -130,6 +131,10 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                     }
                     model.setPageCursor(false, null);
                 }
+            }
+            else if (current == null) {
+                Toast.makeText(requireContext(), R.string.empty_list, Toast.LENGTH_SHORT).show();
+                NavHostFragment.findNavController(SavedViewerFragment.this).popBackStack();
             }
             binding.swipeRefreshLayout.setRefreshing(false);
         }
