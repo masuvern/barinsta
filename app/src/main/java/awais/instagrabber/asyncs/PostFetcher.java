@@ -11,7 +11,6 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
@@ -26,6 +25,8 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> {
+    private static final String TAG = "PostFetcher";
+
     private final String shortCode;
     private final FetchListener<ViewerPostModel[]> fetchListener;
 
@@ -46,17 +47,41 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
 
                 final JSONObject media = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql")
-                        .getJSONObject("shortcode_media");
+                                                                                       .getJSONObject("shortcode_media");
 
-                final String username = media.has("owner") ? media.getJSONObject("owner").getString(Constants.EXTRAS_USERNAME) : null;
-
+                ProfileModel profileModel = null;
+                if (media.has("owner")) {
+                    final JSONObject owner = media.getJSONObject("owner");
+                    profileModel = new ProfileModel(
+                            owner.optBoolean("is_private"),
+                            owner.optBoolean("is_private"),
+                            owner.optBoolean("is_verified"),
+                            owner.optString("id"),
+                            owner.optString("username"),
+                            owner.optString("full_name"),
+                            null,
+                            null,
+                            owner.optString("profile_pic_url"),
+                            owner.optString("profile_pic_url"),
+                            owner.optInt("edge_owner_to_timeline_media"),
+                            owner.optInt("edge_followed_by"),
+                            -1,
+                            owner.optBoolean("followed_by_viewer"),
+                            owner.optBoolean("restricted_by_viewer"),
+                            owner.optBoolean("blocked_by_viewer"),
+                            owner.optBoolean("requested_by_viewer")
+                    );
+                }
+                final String username = profileModel == null ? "" : profileModel.getUsername();
                 // to check if file exists
                 final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
-                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/" + username) : ""));
                 File customDir = null;
                 if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
                     final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
-                            (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
+                                                                                     (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER)
+                                                                                      ? ("/" + username)
+                                                                                      : ""));
                     if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
                 }
 
@@ -76,19 +101,20 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                 else {
                     final JSONArray captions = mediaToCaption.optJSONArray("edges");
                     postCaption = captions != null && captions.length() > 0 ?
-                            captions.getJSONObject(0).getJSONObject("node").optString("text") : null;
+                                  captions.getJSONObject(0).getJSONObject("node").optString("text") : null;
                 }
 
                 JSONObject commentObject = media.optJSONObject("edge_media_to_parent_comment");
                 final long commentsCount = commentObject != null ? commentObject.optLong("count") : 0;
 
                 String endCursor = null;
-                if (commentObject != null && (commentObject = commentObject.optJSONObject("page_info")) != null)
+                if (commentObject != null && (commentObject = commentObject.optJSONObject("page_info")) != null) {
                     endCursor = commentObject.optString("end_cursor");
+                }
 
-                final ProfileModel profileModel = ProfileModel.getDefaultProfileModel(null, username);
                 if (mediaItemType != MediaItemType.MEDIA_TYPE_SLIDER) {
-                    final ViewerPostModel postModel = new ViewerPostModel(mediaItemType,
+                    final ViewerPostModel postModel = new ViewerPostModel(
+                            mediaItemType,
                             media.getString(Constants.EXTRAS_ID),
                             isVideo ? media.getString("video_url") : Utils.getHighQualityImage(media),
                             shortCode,
@@ -99,7 +125,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                             media.getJSONObject("edge_media_preview_like").getLong("count"),
                             media.isNull("location") ? null : media.getJSONObject("location").optString("name"),
                             media.isNull("location") ? null :
-                                    (media.getJSONObject("location").optString("id") + "/" +
+                            (media.getJSONObject("location").optString("id") + "/" +
                                     media.getJSONObject("location").optString("slug")));
 
                     postModel.setCommentsCount(commentsCount);
@@ -116,7 +142,8 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                         final JSONObject node = children.getJSONObject(i).getJSONObject("node");
                         final boolean isChildVideo = node.getBoolean("is_video");
 
-                        postModels[i] = new ViewerPostModel(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                        postModels[i] = new ViewerPostModel(
+                                isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                 media.getString(Constants.EXTRAS_ID),
                                 isChildVideo ? node.getString("video_url") : Utils.getHighQualityImage(node),
                                 node.getString(Constants.EXTRAS_SHORTCODE),
@@ -127,8 +154,8 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
                                 media.getJSONObject("edge_media_preview_like").getLong("count"),
                                 media.isNull("location") ? null : media.getJSONObject("location").optString("name"),
                                 media.isNull("location") ? null :
-                                        (media.getJSONObject("location").optString("id") + "/" +
-                                                media.getJSONObject("location").optString("slug")));
+                                (media.getJSONObject("location").optString("id") + "/" +
+                                        media.getJSONObject("location").optString("slug")));
                         postModels[i].setSliderDisplayUrl(node.getString("display_url"));
 
                         Utils.checkExistence(downloadDir, customDir, true, postModels[i]);
@@ -142,9 +169,10 @@ public final class PostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> 
 
             conn.disconnect();
         } catch (Exception e) {
-            if (logCollector != null)
+            if (logCollector != null) {
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            }
+            Log.e(TAG, "Error fetching post", e);
         }
         return result;
     }

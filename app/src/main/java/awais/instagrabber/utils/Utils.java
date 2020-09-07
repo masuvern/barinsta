@@ -170,59 +170,6 @@ public final class Utils {
         return null;
     }
 
-    @Nullable
-    public static IntentModel stripString(@NonNull String clipString) {
-        final int wwwDel = clipString.contains("www.") ? 4 : 0;
-        final boolean isHttps = clipString.startsWith("https");
-
-        IntentModelType type = IntentModelType.UNKNOWN;
-        if (clipString.contains("instagram.com/")) {
-            clipString = clipString.substring((isHttps ? 22 : 21) + wwwDel);
-
-            final char firstChar = clipString.charAt(0);
-            if (clipString.startsWith("p/") || clipString.startsWith("reel/") || clipString.startsWith("tv/")) {
-                clipString = clipString.substring(clipString.startsWith("p/") ? 2 : (clipString.startsWith("tv/") ? 3 : 5));
-                type = IntentModelType.POST;
-            } else if (clipString.startsWith("explore/tags/")) {
-                clipString = clipString.substring(13);
-                type = IntentModelType.HASHTAG;
-            } else if (clipString.startsWith("explore/locations/")) {
-                clipString = clipString.substring(18);
-                type = IntentModelType.LOCATION;
-            } else if (clipString.startsWith("_u/")) { // usually exists in embeds
-                clipString = clipString.substring(3);
-                type = IntentModelType.USERNAME;
-            }
-
-            clipString = cleanString(clipString);
-        } else if (clipString.contains("ig.me/u/")) {
-            clipString = clipString.substring((isHttps ? 16 : 15) + wwwDel);
-            clipString = cleanString(clipString);
-            type = IntentModelType.USERNAME;
-
-        } else return null;
-
-        final int clipLen = clipString.length() - 1;
-        if (clipString.charAt(clipLen) == '/')
-            clipString = clipString.substring(0, clipLen);
-
-        if (!clipString.contains("/")) return new IntentModel(type, clipString);
-        else return null;
-    }
-
-    @NonNull
-    public static String cleanString(@NonNull final String clipString) {
-        final int queryIndex = clipString.indexOf('?');
-        final int paramIndex = clipString.indexOf('#');
-        int startIndex = -1;
-        if (queryIndex > 0 && paramIndex > 0) {
-            if (queryIndex < paramIndex) startIndex = queryIndex;
-            else if (paramIndex < queryIndex) startIndex = paramIndex;
-        } else if (queryIndex == -1 && paramIndex > 0) startIndex = paramIndex;
-        else if (paramIndex == -1 && queryIndex > 0) startIndex = queryIndex;
-        return startIndex != -1 ? clipString.substring(0, startIndex) : clipString;
-    }
-
     @NonNull
     public static CharSequence getMentionText(@NonNull final CharSequence text) {
         final int commentLength = text.length();

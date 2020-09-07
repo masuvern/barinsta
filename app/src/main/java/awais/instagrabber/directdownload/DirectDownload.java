@@ -33,6 +33,7 @@ import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.CHANNEL_ID;
@@ -109,7 +110,7 @@ public final class DirectDownload extends Activity {
             }
 
             if (data != null && !Utils.isEmpty(data)) {
-                final IntentModel model = Utils.stripString(data);
+                final IntentModel model = IntentUtils.parseUrl(data);
                 if (model != null && model.getType() == IntentModelType.POST) {
                     final String text = model.getText();
 

@@ -17,7 +17,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
-
         <activity
             android:name=".activities.MainActivity"
             android:launchMode="singleTop"
@@ -29,18 +28,15 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.WEB_SEARCH" />
-
+                <!--<action android:name="android.intent.action.SEARCH" />-->
+                <!--<action android:name="android.intent.action.WEB_SEARCH" />-->
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -49,18 +45,15 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-
                 <data android:host="ig.me" />
                 <data android:host="www.ig.me" />
                 <data android:host="instagram.com" />
                 <data android:host="www.instagram.com" />
-
                 <data android:pathPrefix="/" />
                 <data android:pathPrefix="/p" />
                 <data android:pathPrefix="/explore/tags" />
             </intent-filter>
         </activity>
-
         <activity
             android:name="awaisomereport.ErrorReporterActivity"
             android:allowEmbedded="false"
@@ -77,7 +70,6 @@
             android:screenOrientation="portrait"
             android:taskAffinity="awais.instagrabber.errorreport"
             android:theme="@android:style/Theme.DeviceDefault.Dialog" />
-
         <activity
             android:name=".directdownload.MultiDirectDialog"
             android:allowEmbedded="false"
@@ -93,7 +85,6 @@
             android:noHistory="false"
             android:taskAffinity="awais.instagrabber.multidialog"
             android:theme="@style/FlyingGayDialog" />
-
         <activity
             android:name=".directdownload.DirectDownload"
             android:allowEmbedded="false"
@@ -110,7 +101,6 @@
             android:lockTaskMode="never"
             android:noHistory="false"
             android:theme="@style/CompletelyTransparent">
-
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEARCH" />
@@ -121,7 +111,6 @@
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
-
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -131,97 +120,21 @@
                 <data android:scheme="https" />
             </intent-filter>
         </activity>
-
-        <!--<activity-->
-        <!--    android:name=".activities.PostViewer"-->
-        <!--    android:parentActivityName=".activities.MainActivity">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.MainActivity" />-->
-        <!--</activity>-->
-
-        <!--<activity-->
-        <!--    android:name=".activities.CommentsViewerFragment"-->
-        <!--    android:parentActivityName=".activities.PostViewer">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.PostViewer" />-->
-        <!--</activity>-->
-
-        <!--<activity-->
-        <!--    android:name=".activities.StoryViewer"-->
-        <!--    android:parentActivityName=".activities.MainActivity">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.MainActivity" />-->
-        <!--</activity>-->
-
-        <!--<activity-->
-        <!--    android:name=".activities.FollowViewerFragment"-->
-        <!--    android:parentActivityName=".activities.MainActivity">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.MainActivity" />-->
-        <!--</activity>-->
-
-        <!--<activity-->
-        <!--    android:name=".activities.ProfilePicViewer"-->
-        <!--    android:parentActivityName=".activities.MainActivity">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.MainActivity" />-->
-        <!--</activity>-->
-
-        <!--<activity-->
-        <!--    android:name=".activities.ProfileViewer"-->
-        <!--    android:parentActivityName=".activities.PostViewer">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.PostViewer" />-->
-        <!--</activity>-->
-
-        <!--<activity-->
-        <!--    android:name=".activities.SavedViewerFragment"-->
-        <!--    android:parentActivityName=".activities.MainActivity">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.MainActivity" />-->
-        <!--</activity>-->
-
         <activity
             android:name=".activities.NotificationsViewer"
             android:parentActivityName=".activities.MainActivity">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
         </activity>
-
         <activity
             android:name=".activities.Login"
             android:label="@string/login"
             android:parentActivityName=".activities.MainActivity">
-
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
         </activity>
-
-        <!--<activity-->
-        <!--    android:name=".activities.DirectMessagesActivity"-->
-        <!--    android:parentActivityName=".activities.MainActivity">-->
-
-        <!--    <meta-data-->
-        <!--        android:name="android.support.PARENT_ACTIVITY"-->
-        <!--        android:value=".activities.MainActivity" />-->
-        <!--</activity>-->
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -30,7 +30,6 @@ import awais.instagrabber.adapters.PostViewAdapter.OnPostViewChildViewClickListe
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.i.iPostFetcher;
 import awais.instagrabber.databinding.FragmentPostViewBinding;
-import awais.instagrabber.viewmodels.ViewerPostViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ViewerPostModel;
@@ -40,6 +39,7 @@ import awais.instagrabber.services.MediaService;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.ViewerPostViewModel;
 
 import static androidx.core.content.ContextCompat.checkSelfPermission;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -71,8 +71,10 @@ public class PostViewFragment extends Fragment {
         if (firstPost == null) return;
         String idOrCode = isId ? firstPost.getPostId() : firstPost.getShortCode();
         if (idOrCode == null) return;
-        // some values are appended to the post/short code with `_`
-        idOrCode = idOrCode.substring(0, idOrCode.indexOf('_'));
+        if (isId) {
+            // the post id is appended with `_` in the result
+            idOrCode = idOrCode.substring(0, idOrCode.indexOf('_'));
+        }
         final int index = idOrCodeList.indexOf(idOrCode);
         if (index < 0) return;
         final ViewerPostModelWrapper viewerPostModelWrapper = temp.get(index);

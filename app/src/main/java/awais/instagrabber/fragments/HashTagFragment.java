@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
@@ -44,7 +45,6 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentHashtagBinding;
-import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostModel;
@@ -53,6 +53,7 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.PostsViewModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -297,7 +298,11 @@ public class HashTagFragment extends Fragment {
     private void setTitle() {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(hashtag);
+            Log.d(TAG, "setting title: " + hashtag);
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> {
+                actionBar.setTitle(hashtag);
+            }, 200);
         }
     }
 

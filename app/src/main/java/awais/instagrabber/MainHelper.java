@@ -811,7 +811,7 @@
 //                 if (data != null && !Utils.isEmpty(data)) {
 //                     if (data.indexOf('\n') > 0) data = data.substring(data.lastIndexOf('\n') + 1);
 //
-//                     final IntentModel model = Utils.stripString(data);
+//                     final IntentModel model = Utils.parseUrl(data);
 //                     if (model != null) {
 //                         final String modelText = model.getText();
 //                         final IntentModelType modelType = model.getType();

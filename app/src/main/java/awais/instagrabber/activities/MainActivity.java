@@ -2,8 +2,10 @@ package awais.instagrabber.activities;
 
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.MatrixCursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,10 +43,12 @@ import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.customviews.helpers.CustomHideBottomViewOnScrollBehavior;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.FlavorTown;
+import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
@@ -110,6 +114,46 @@ public class MainActivity extends BaseLanguageActivity {
         setupSuggestions();
         FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
+
+        final Intent intent = getIntent();
+        handleIntent(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        searchMenuItem = menu.findItem(R.id.search);
+        if (!showSearch) {
+            searchMenuItem.setVisible(false);
+            return true;
+        }
+        return setupSearchView();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull final Bundle outState) {
+        outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        final String key = (String) savedInstanceState.get(FIRST_FRAGMENT_GRAPH_INDEX_KEY);
+        if (key != null) {
+            try {
+                firstFragmentGraphIndex = Integer.parseInt(key);
+            } catch (NumberFormatException ignored) { }
+        }
+        setupBottomNavigationBar(false);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (currentNavControllerLiveData != null && currentNavControllerLiveData.getValue() != null) {
+            return currentNavControllerLiveData.getValue().navigateUp();
+        }
+        return false;
     }
 
     private void setupSuggestions() {
@@ -142,17 +186,6 @@ public class MainActivity extends BaseLanguageActivity {
         final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();
         layoutParams.setBehavior(new CustomHideBottomViewOnScrollBehavior());
         binding.bottomNavView.requestLayout();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        searchMenuItem = menu.findItem(R.id.search);
-        if (!showSearch) {
-            searchMenuItem.setVisible(false);
-            return true;
-        }
-        return setupSearchView();
     }
 
     private boolean setupSearchView() {
@@ -371,29 +404,92 @@ public class MainActivity extends BaseLanguageActivity {
         binding.collapsingToolbarLayout.requestLayout();
     }
 
-    @Override
-    protected void onSaveInstanceState(@NonNull final Bundle outState) {
-        outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
-        super.onSaveInstanceState(outState);
+    private void handleIntent(final Intent intent) {
+        if (intent == null) return;
+        final String action = intent.getAction();
+        final String type = intent.getType();
+        // Log.d(TAG, action + " " + type);
+        if (Intent.ACTION_MAIN.equals(action)) return;
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if (type.equals("text/plain")) {
+                handleUrl(intent.getStringExtra(Intent.EXTRA_TEXT));
+            }
+            return;
+        }
+        if (Intent.ACTION_VIEW.equals(action)) {
+            final Uri data = intent.getData();
+            if (data == null) return;
+            handleUrl(data.toString());
+        }
     }
 
-    @Override
-    protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        final String key = (String) savedInstanceState.get(FIRST_FRAGMENT_GRAPH_INDEX_KEY);
-        if (key != null) {
-            try {
-                firstFragmentGraphIndex = Integer.parseInt(key);
-            } catch (NumberFormatException ignored) { }
-        }
-        setupBottomNavigationBar(false);
+    private void handleUrl(final String url) {
+        if (url == null) return;
+        // Log.d(TAG, url);
+        final IntentModel intentModel = IntentUtils.parseUrl(url);
+        if (intentModel == null) return;
+        showView(intentModel);
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        if (currentNavControllerLiveData != null && currentNavControllerLiveData.getValue() != null) {
-            return currentNavControllerLiveData.getValue().navigateUp();
+    private void showView(final IntentModel intentModel) {
+        switch (intentModel.getType()) {
+            case USERNAME:
+                showProfileView(intentModel);
+                break;
+            case POST:
+                showPostView(intentModel);
+                break;
+            case LOCATION:
+                showLocationView(intentModel);
+                break;
+            case HASHTAG:
+                showHashtagView(intentModel);
+                break;
+            case UNKNOWN:
+            default:
+                Log.w(TAG, "Unknown model type received!");
         }
-        return false;
+    }
+
+    private void showProfileView(@NonNull final IntentModel intentModel) {
+        final String username = intentModel.getText();
+        // Log.d(TAG, "username: " + username);
+        final NavController navController = currentNavControllerLiveData.getValue();
+        if (currentNavControllerLiveData == null || navController == null) return;
+        final Bundle bundle = new Bundle();
+        bundle.putString("username", "@" + username);
+        navController.navigate(R.id.action_global_profileFragment, bundle);
+    }
+
+    private void showPostView(@NonNull final IntentModel intentModel) {
+        final String shortCode = intentModel.getText();
+        // Log.d(TAG, "shortCode: " + shortCode);
+        final NavController navController = currentNavControllerLiveData.getValue();
+        if (currentNavControllerLiveData == null || navController == null) return;
+        final Bundle bundle = new Bundle();
+        bundle.putStringArray("idOrCodeArray", new String[]{shortCode});
+        bundle.putInt("index", 0);
+        bundle.putBoolean("isId", false);
+        navController.navigate(R.id.action_global_postViewFragment, bundle);
+    }
+
+    private void showLocationView(@NonNull final IntentModel intentModel) {
+        final String locationId = intentModel.getText();
+        // Log.d(TAG, "locationId: " + locationId);
+        final NavController navController = currentNavControllerLiveData.getValue();
+        if (currentNavControllerLiveData == null || navController == null) return;
+        final Bundle bundle = new Bundle();
+        bundle.putString("locationId", locationId);
+        navController.navigate(R.id.action_global_locationFragment, bundle);
+    }
+
+    private void showHashtagView(@NonNull final IntentModel intentModel) {
+        final String hashtag = intentModel.getText();
+        // Log.d(TAG, "hashtag: " + hashtag);
+        final NavController navController = currentNavControllerLiveData.getValue();
+        if (currentNavControllerLiveData == null || navController == null) return;
+        final Bundle bundle = new Bundle();
+        bundle.putString("hashtag", "#" + hashtag);
+        navController.navigate(R.id.action_global_hashTagFragment, bundle);
     }
 }
