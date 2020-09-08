@@ -20,7 +20,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,7 +38,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageMembersAdapter;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
 import awais.instagrabber.databinding.FragmentDirectMessagesSettingsBinding;
-import awais.instagrabber.fragments.PostViewFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
@@ -49,22 +47,17 @@ import awais.instagrabber.utils.Utils;
 public class DirectMessageSettingsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "DirectMsgsSettingsFrag";
 
-    private FragmentActivity fragmentActivity;
     private RecyclerView userList;
     private RecyclerView leftUserList;
     private EditText titleText;
     private View leftTitle;
     private AppCompatImageView titleSend;
-    private AppCompatButton btnLeave;
-    private LinearLayoutManager layoutManager;
-    private LinearLayoutManager layoutManagerDos;
-    private String threadId, threadTitle;
+    private String threadId;
+    private String threadTitle;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-    private boolean amAdmin;
     private AsyncTask<Void, Void, InboxThreadModel> currentlyRunning;
-    private DirectMessageMembersAdapter memberAdapter;
-    private DirectMessageMembersAdapter leftAdapter;
-    private View.OnClickListener clickListener, basicClickListener;
+    private View.OnClickListener clickListener;
+    private View.OnClickListener basicClickListener;
 
     private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
         @Override
@@ -75,15 +68,16 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             final List<Long> adminList = Arrays.asList(threadModel.getAdmins());
             final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
             if (userIdFromCookie == null) return;
-            amAdmin = adminList.contains(Long.parseLong(userIdFromCookie));
-            memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(),
-                                                            adminList,
-                                                            requireContext(),
-                                                            amAdmin ? clickListener : basicClickListener);
+            final boolean amAdmin = adminList.contains(Long.parseLong(userIdFromCookie));
+            final DirectMessageMembersAdapter memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(),
+                                                                                              adminList,
+                                                                                              requireContext(),
+                                                                                              amAdmin ? clickListener : basicClickListener);
             userList.setAdapter(memberAdapter);
             if (threadModel.getLeftUsers() != null && threadModel.getLeftUsers().length > 0) {
                 leftTitle.setVisibility(View.VISIBLE);
-                leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(), null, requireContext(), basicClickListener);
+                final DirectMessageMembersAdapter leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(), null, requireContext(),
+                                                                                                basicClickListener);
                 leftUserList.setAdapter(leftAdapter);
             }
         }
@@ -92,14 +86,12 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fragmentActivity = requireActivity();
         basicClickListener = v -> {
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
                 ProfileModel model = (ProfileModel) tag;
-                /*final NavDirections action = PostViewFragmentDirections
-                        .actionGlobalProfileFragment("@" + model.getUsername());
-                NavHostFragment.findNavController(this).navigate(action);*/
+                final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + model.getUsername());
+                NavHostFragment.findNavController(this).navigate(action);
             }
         };
 
@@ -113,11 +105,10 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                 });
                 final DialogInterface.OnClickListener clickListener = (d, w) -> {
                     if (w == 0) {
-                        /*final NavDirections action = PostViewFragmentDirections
-                                .actionGlobalProfileFragment("@" + model.getUsername());
-                        NavHostFragment.findNavController(this).navigate(action);*/
+                        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + model.getUsername());
+                        NavHostFragment.findNavController(this).navigate(action);
                     } else if (w == 1) {
-                        new ChangeSettings().execute("remove_users", model.getId());
+                        new ChangeSettings(titleText.getText().toString()).execute("remove_users", model.getId());
                         onRefresh();
                     }
                 };
@@ -134,13 +125,13 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                              final Bundle savedInstanceState) {
         final FragmentDirectMessagesSettingsBinding binding = FragmentDirectMessagesSettingsBinding.inflate(inflater, container, false);
         final LinearLayout root = binding.getRoot();
-        layoutManager = new LinearLayoutManager(requireContext()) {
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext()) {
             @Override
             public boolean canScrollVertically() {
                 return false;
             }
         };
-        layoutManagerDos = new LinearLayoutManager(requireContext()) {
+        final LinearLayoutManager layoutManagerDos = new LinearLayoutManager(requireContext()) {
             @Override
             public boolean canScrollVertically() {
                 return false;
@@ -167,9 +158,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
         titleText.setText(threadTitle);
 
         titleSend = binding.titleSend;
-        titleSend.setOnClickListener(v -> {
-            new ChangeSettings().execute("update_title");
-        });
+        titleSend.setOnClickListener(v -> new ChangeSettings(titleText.getText().toString()).execute("update_title"));
 
         titleText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -184,13 +173,13 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             }
         });
 
-        btnLeave = binding.btnLeave;
-        btnLeave.setOnClickListener(v -> {
-            new AlertDialog.Builder(requireContext()).setTitle(R.string.dms_action_leave_question)
-                                                     .setPositiveButton(R.string.yes, (x, y) -> new ChangeSettings().execute("leave"))
-                                                     .setNegativeButton(R.string.no, null)
-                                                     .show();
-        });
+        final AppCompatButton btnLeave = binding.btnLeave;
+        btnLeave.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.dms_action_leave_question)
+                .setPositiveButton(R.string.yes,
+                                   (x, y) -> new ChangeSettings(titleText.getText().toString()).execute("leave"))
+                .setNegativeButton(R.string.no, null)
+                .show());
 
         currentlyRunning = new DirectMessageInboxThreadFetcher(threadId, null, null, fetchListener).execute();
         return root;
@@ -217,6 +206,11 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     class ChangeSettings extends AsyncTask<String, Void, Void> {
         String action, argument;
         boolean ok = false;
+        private String text;
+
+        public ChangeSettings(final String text) {
+            this.text = text;
+        }
 
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
@@ -225,11 +219,11 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             try {
                 String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
                         + "&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
-                if (action.equals("update_title"))
-                    urlParameters += "&title=" + URLEncoder.encode(titleText.getText().toString(), "UTF-8")
+                if (action.equals("update_title")) {
+                    urlParameters += "&title=" + URLEncoder.encode(text, "UTF-8")
                                                            .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
                                                            .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
-                else if (action.startsWith("remove_users"))
+                } else if (action.startsWith("remove_users"))
                     urlParameters += ("&user_ids=[" + argument + "]");
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
