@@ -84,15 +84,17 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
             loggedInUsersPreferenceCategory.setTitle(R.string.login_settings);
             loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
+            loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
         }
-
-        final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(requireContext());
-        screen.addPreference(anonUsersPreferenceCategory);
-        anonUsersPreferenceCategory.setIconSpaceReserved(false);
-        anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
-        anonUsersPreferenceCategory.addPreference(getUseInstaDpPreference());
-        anonUsersPreferenceCategory.addPreference(getUseStoriesIgPreference());
+        else {
+            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(requireContext());
+            screen.addPreference(anonUsersPreferenceCategory);
+            anonUsersPreferenceCategory.setIconSpaceReserved(false);
+            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
+            anonUsersPreferenceCategory.addPreference(getUseInstaDpPreference());
+            anonUsersPreferenceCategory.addPreference(getUseStoriesIgPreference());
+        }
 
     }
 
@@ -229,6 +231,15 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setKey(Constants.MARK_AS_SEEN);
         preference.setTitle(R.string.mark_as_seen_setting);
         preference.setSummary(R.string.mark_as_seen_setting_summary);
+        preference.setIconSpaceReserved(false);
+        return preference;
+    }
+
+    private Preference getMarkDMSeenPreference() {
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        preference.setKey(Constants.DM_MARK_AS_SEEN);
+        preference.setTitle(R.string.dm_mark_as_seen_setting);
+        preference.setSummary(R.string.dm_mark_as_seen_setting_summary);
         preference.setIconSpaceReserved(false);
         return preference;
     }
