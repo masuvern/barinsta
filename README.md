@@ -15,8 +15,7 @@ For documentation, visit [InstaGrabber.AustinHuang.me](https://instagrabber.aust
 **By installing, you indicate your acceptance of [Disclosure and Privacy Policy](https://instagrabber.austinhuang.me/disclosure).**
 
 <a href="https://f-droid.org/en/packages/me.austinhuang.instagrabber/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="75"></a>
-
-Or, download from [GitHub releases](https://github.com/austinhuang0131/instagrabber/releases/latest). Expand "Assets" and download the APK file.
+<a href="https://github.com/austinhuang0131/instagrabber/releases/latest"><img src="https://raw.githubusercontent.com/andOTP/andOTP/master/assets/badges/get-it-on-github.png" height="75"></a>
 
 Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. ![GitHub](https://img.shields.io/github/release/austinhuang0131/instagrabber.svg?logo=github)
 
