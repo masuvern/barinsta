@@ -31,9 +31,12 @@
     <string name="title_user_story">Storia Utente</string>
     <string name="title_changelog">Changelog</string>
     <string name="bottom_toolbar">Mostra barra degli strumenti in basso</string>
+    <string name="update_check">Cerca nuovi aggiornamenti su GitHub all\'avvio</string>
     <string name="download_user_folder">Scarica i post nella cartella nome utente in Download</string>
     <string name="autoload_posts">Carica automaticamente tutti i post dall\'utente</string>
     <string name="mark_as_seen_setting">Segna le storie come viste dopo aver visualizzato\n(L\'autore della storia saprà che l\'hai vista)</string>
+    <string name="dm_mark_as_seen_setting">Contrassegna automaticamente il DM come visto dopo aver visualizzato\n(Gli altri membri sapranno che l\'hai visto)</string>
+    <string name="activity_setting">Abilita notifiche attività</string>
     <string name="error_loading_profile">Errore durante il caricamento del profilo!\nProvare ad accedere e cercare nuovamente.</string>
     <string name="error_creating_folders">Errore durante la creazione delle cartelle di download.</string>
     <string name="show_feed">Mostra feed utente (funziona solo quando l\'utente ha effettuato l\'accesso)</string>
@@ -80,6 +83,7 @@
     <string name="story_quizzed">Hai già risposto!</string>
     <string name="story_mentions">Menzioni</string>
     <string name="priv_acc">Questo profilo è privato</string>
+    <string name="priv_acc_confirm">Non sarai in grado di accedere ai post dopo non seguire! Sei sicuro?</string>
     <string name="no_acc">Puoi accedere tramite Impostazioni nell\'angolo in basso a destra. Oppure, puoi visualizzare gli account pubblici senza effettuare il login!</string>
     <string name="no_acc_logged_in">È possibile scorrere a sinistra/destra per esplorare/feed, o cercare qualcosa qui sotto!</string>
     <string name="empty_acc">Questo profilo non ha post</string>
@@ -166,6 +170,11 @@
     <string name="dms_inbox_raven_media_suggested">Consigliato</string>
     <string name="dms_inbox_raven_media_screenshot">Effettuato screenshot</string>
     <string name="dms_inbox_raven_media_cant_deliver">Non consegnato</string>
+    <string name="dms_action_success">Ottimo successo!</string>
+    <string name="dms_action_leave">Lascia</string>
+    <string name="dms_action_leave_question">Lascia questa chat?</string>
+    <string name="dms_action_kick">Espelli</string>
+    <string name="dms_left_users">Lascia utenti</string>
     <string name="direct_download">Scarica direttamente</string>
     <string name="direct_download_desc">Scarica i post direttamente sul telefono!</string>
     <string name="direct_download_loading">Recupero post</string>
