@@ -168,6 +168,7 @@ public final class Utils {
         return null;
     }
 
+
     @NonNull
     public static CharSequence getMentionText(@NonNull final CharSequence text) {
         final int commentLength = text.length();
@@ -1326,7 +1327,7 @@ public final class Utils {
                 "org.telegram.messenger",
                 "org.thunderdog.challegram",
                 "ir.ilmili.telegraph",
-                "org.telegram.BifToGram",
+                // "org.telegram.BifToGram", see GitHub issue 124
                 "org.vidogram.messenger",
                 "com.xplus.messenger",
                 "com.ellipi.messenger",
