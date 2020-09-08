@@ -24,6 +24,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.LiveData;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -126,6 +127,14 @@ public class MainActivity extends BaseLanguageActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         searchMenuItem = menu.findItem(R.id.search);
+        if (showSearch && currentNavControllerLiveData != null && currentNavControllerLiveData.getValue() != null) {
+            final NavController navController = currentNavControllerLiveData.getValue();
+            final NavDestination currentDestination = navController.getCurrentDestination();
+            if (currentDestination != null) {
+                final int destinationId = currentDestination.getId();
+                showSearch = destinationId == R.id.profileFragment;
+            }
+        }
         if (!showSearch) {
             searchMenuItem.setVisible(false);
             return true;
@@ -291,15 +300,6 @@ public class MainActivity extends BaseLanguageActivity {
             @Override
             public boolean onQueryTextSubmit(final String query) {
                 return onQueryTextChange(query);
-                // menu.findItem(R.id.action_about).setVisible(true);
-                // menu.findItem(R.id.action_settings).setVisible(true);
-                // closeAnyOpenDrawer();
-                // addToStack();
-                // userQuery = (query.contains("@") || query.contains("#")) ? query : ("@" + query);
-                // searchAction.collapseActionView();
-                // searchView.setIconified(true);
-                // searchView.setIconified(true);
-                // mainHelper.onRefresh();
             }
 
             @Override
