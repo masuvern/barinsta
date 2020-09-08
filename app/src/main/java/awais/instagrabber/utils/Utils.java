@@ -180,7 +180,6 @@ public final class Utils {
         if (clipString.contains("instagram.com/")) {
             clipString = clipString.substring((isHttps ? 22 : 21) + wwwDel);
 
-            final char firstChar = clipString.charAt(0);
             if (clipString.startsWith("p/") || clipString.startsWith("reel/") || clipString.startsWith("tv/")) {
                 clipString = clipString.substring(clipString.startsWith("p/") ? 2 : (clipString.startsWith("tv/") ? 3 : 5));
                 type = IntentModelType.POST;
@@ -188,7 +187,7 @@ public final class Utils {
                 clipString = clipString.substring(13);
                 type = IntentModelType.HASHTAG;
             } else if (clipString.startsWith("explore/locations/")) {
-                clipString = clipString.substring(18);
+                clipString = clipString.substring(18); // <- to fix
                 type = IntentModelType.LOCATION;
             } else if (clipString.startsWith("_u/")) { // usually exists in embeds
                 clipString = clipString.substring(3);
