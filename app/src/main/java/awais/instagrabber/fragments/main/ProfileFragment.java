@@ -210,6 +210,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
+        cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (root != null) {
             if (getArguments() != null) {
                 final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
@@ -274,8 +276,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void init() {
-        cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (getArguments() != null) {
             final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
             username = fragmentArgs.getUsername();
