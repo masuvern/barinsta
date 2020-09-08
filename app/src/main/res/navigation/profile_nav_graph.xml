@@ -44,6 +44,17 @@
             app:nullable="false" />
     </action>
 
+    <include app:graph="@navigation/location_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/location_nav_graph">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="awais.instagrabber.fragments.main.ProfileFragment"

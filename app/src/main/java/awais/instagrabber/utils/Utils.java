@@ -77,7 +77,6 @@ import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.databinding.DialogImportExportBinding;
 import awais.instagrabber.models.BasePostModel;
-import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -86,7 +85,6 @@ import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.InboxReadState;
-import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
@@ -1023,8 +1021,10 @@ public final class Utils {
 
         try {
             final String displayUrl = model.getDisplayUrl();
-            final int index = displayUrl.indexOf('?');
-
+            int index = displayUrl.indexOf('?');
+            if (index < 0) {
+                return;
+            }
             final String fileName = model.getPostId() + '_';
             final String extension = displayUrl.substring(index - 4, index);
 
@@ -1428,8 +1428,7 @@ public final class Utils {
                  u = random.nextLong() >>> 1) // retry
                 ;
             r += origin;
-        }
-        else {              // range not representable as long
+        } else {              // range not representable as long
             while (r < origin || r >= bound)
                 r = random.nextLong();
         }

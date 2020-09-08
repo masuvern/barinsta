@@ -281,7 +281,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             username = fragmentArgs.getUsername();
             setUsernameDelayed();
         }
-        if (!isLoggedIn) {
+        if (Utils.isEmpty(username) && !isLoggedIn) {
             binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
             binding.privatePage.setVisibility(View.VISIBLE);
@@ -733,8 +733,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             final List<PostModel> postModels = postsViewModel.getList().getValue();
             if (postModels == null || postModels.size() == 0) return;
             if (postModels.get(0) == null) return;
-            final String postId = postModels.get(0).getPostId();
-            final boolean isId = postId != null;
+            final String postId = isLoggedIn ? postModels.get(0).getPostId() : postModels.get(0).getShortCode();
+            final boolean isId = isLoggedIn && postId != null;
             final String[] idsOrShortCodes = new String[postModels.size()];
             for (int i = 0; i < postModels.size(); i++) {
                 idsOrShortCodes[i] = isId ? postModels.get(i).getPostId()
