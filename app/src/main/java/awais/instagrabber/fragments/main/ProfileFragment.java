@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -487,6 +488,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             binding.mainUrl.setVisibility(View.VISIBLE);
             binding.mainUrl.setText(Utils.getSpannableUrl(url));
+            binding.mainUrl.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
         binding.mainFullName.setSelected(true);
