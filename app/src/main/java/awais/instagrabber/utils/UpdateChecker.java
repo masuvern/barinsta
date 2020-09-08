@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONObject;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -26,16 +28,18 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
             version = "";
 
             HttpURLConnection conn =
-                    (HttpURLConnection) new URL("https://github.com/austinhuang0131/instagrabber/releases/latest").openConnection();
-            conn.setInstanceFollowRedirects(false);
+                    (HttpURLConnection) new URL("https://f-droid.org/api/v1/packages/me.austinhuang.instagrabber").openConnection();
             conn.setUseCaches(false);
             conn.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
             conn.connect();
 
             final int responseCode = conn.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-                version = conn.getHeaderField("Location").split("/v")[1];
-                return !version.equals(BuildConfig.VERSION_NAME);
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                final JSONObject data = new JSONObject(Utils.readFromConnection(conn));
+                if (BuildConfig.VERSION_CODE < data.getInt("suggestedVersionCode")) {
+                    version = data.getJSONArray("packages").getString("versionName");
+                    return true;
+                }
             }
 
             conn.disconnect();
