@@ -67,7 +67,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static final String TAG = "FeedFragment";
     private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
     private static final int RESIZED_VIDEO_HEIGHT = (int) (0.8 * Utils.displayMetrics.heightPixels);
-    private static final boolean SHOULD_AUTO_PLAY = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
 
     private MainActivity fragmentActivity;
     private CoordinatorLayout root;
@@ -80,6 +79,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private boolean shouldRefresh = true;
     private boolean isPullToRefresh;
 
+    private final boolean shouldAutoPlay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
     private final FetchListener<FeedModel[]> feedFetchListener = new FetchListener<FeedModel[]>() {
         @Override
         public void doBefore() {
@@ -320,7 +320,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public void onResume() {
         super.onResume();
-        if (videoAwareRecyclerScroller != null && SHOULD_AUTO_PLAY) {
+        if (videoAwareRecyclerScroller != null && shouldAutoPlay) {
             videoAwareRecyclerScroller.startPlaying();
         }
     }
@@ -347,7 +347,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 fetchFeed();
             }
         });
-        if (SHOULD_AUTO_PLAY) {
+        if (shouldAutoPlay) {
             videoAwareRecyclerScroller = new VideoAwareRecyclerScroller();
             binding.feedRecyclerView.addOnScrollListener(videoAwareRecyclerScroller);
         }
