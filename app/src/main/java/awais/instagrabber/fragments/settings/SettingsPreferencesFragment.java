@@ -41,13 +41,13 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+
     }
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
-
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
         screen.addPreference(generalCategory);
         generalCategory.setTitle(getString(R.string.pref_category_general));
@@ -141,10 +141,6 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setEntries(R.array.main_nav_ids_values);
         preference.setEntryValues(values);
         preference.setIconSpaceReserved(false);
-        preference.setOnPreferenceChangeListener((preference1, newValue) -> {
-            shouldRecreate();
-            return true;
-        });
         return preference;
     }
 
