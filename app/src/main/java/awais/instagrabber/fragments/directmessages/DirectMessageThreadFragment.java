@@ -284,7 +284,8 @@ public class DirectMessageThreadFragment extends Fragment {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
             }
             else if (which == 2) {
-                if (String.valueOf(directItemModel.getUserId()).equals(myId)) new ThreadAction().execute("delete", directItemModel.getItemId());
+                if (directItemModel == null) Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                else if (String.valueOf(directItemModel.getUserId()).equals(myId)) new ThreadAction().execute("delete", directItemModel.getItemId());
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
             }
         };
