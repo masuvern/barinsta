@@ -6,11 +6,6 @@
         android:title="@string/profile" />
 
     <item
-        android:id="@+id/discover_nav_graph"
-        android:icon="@drawable/ic_discover"
-        android:title="@string/title_discover" />
-
-    <item
         android:id="@+id/more_nav_graph"
         android:icon="@drawable/ic_more_horiz_24"
         android:title="@string/more" />
