@@ -106,7 +106,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
      * expands or collapses {@link RamboTextView} [stg idek why i wrote this documentation]
      *
      * @param textView the {@link RamboTextView} view, to expand and collapse
-     * @param caption
+     * @param caption caption
      * @return isExpanded
      */
     public static boolean expandCollapseTextView(@NonNull final RamboTextView textView, final CharSequence caption) {
