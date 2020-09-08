@@ -1350,7 +1350,7 @@ public final class Utils {
                 "org.telegram.messenger",
                 "org.thunderdog.challegram",
                 "ir.ilmili.telegraph",
-                "org.telegram.BifToGram",
+                // "org.telegram.BifToGram", see GitHub issue 124
                 "org.vidogram.messenger",
                 "com.xplus.messenger",
                 "com.ellipi.messenger",
