@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -223,7 +224,7 @@ public class HashTagFragment extends Fragment {
         postsViewModel.getList().observe(fragmentActivity, postsAdapter::submitList);
         binding.mainPosts.setAdapter(postsAdapter);
         final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!hasNextPage) return;
+            if (!hasNextPage || getContext() == null) return;
             binding.swipeRefreshLayout.setRefreshing(true);
             fetchPosts();
             endCursor = null;
@@ -235,6 +236,7 @@ public class HashTagFragment extends Fragment {
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
         currentlyExecuting = new HashtagFetcher(hashtag.substring(1), result -> {
+            if (getContext() == null) return;
             hashtagModel = result;
             binding.swipeRefreshLayout.setRefreshing(false);
             if (hashtagModel == null) {
