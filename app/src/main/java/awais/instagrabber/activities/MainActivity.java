@@ -324,7 +324,7 @@ public class MainActivity extends BaseLanguageActivity {
         if (setDefaultFromSettings) {
             final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
-                final int defaultNavId = Utils.isEmpty(defaultTabIdString) ? mainNavList.get(2) : Integer.parseInt(defaultTabIdString);
+                final int defaultNavId = Utils.isEmpty(defaultTabIdString) ? R.navigation.profile_nav_graph : Integer.parseInt(defaultTabIdString);
                 final int index = mainNavList.indexOf(defaultNavId);
                 if (index >= 0) {
                     firstFragmentGraphIndex = index;
