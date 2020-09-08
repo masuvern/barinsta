@@ -89,6 +89,7 @@ public class MainActivity extends BaseLanguageActivity {
     private boolean showSearch = true;
     private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
+    private boolean isLoggedIn;
 
     static {
         NAV_TO_MENU_ID_MAP.put(R.navigation.direct_messages_nav_graph, R.id.direct_messages_nav_graph);
@@ -107,6 +108,7 @@ public class MainActivity extends BaseLanguageActivity {
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
@@ -312,7 +314,13 @@ public class MainActivity extends BaseLanguageActivity {
     }
 
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
-        final TypedArray navIds = getResources().obtainTypedArray(R.array.main_nav_ids);
+        int main_nav_ids = R.array.main_nav_ids;
+        if (!isLoggedIn) {
+            main_nav_ids = R.array.logged_out_main_nav_ids;
+            binding.bottomNavView.getMenu().clear();
+            binding.bottomNavView.inflateMenu(R.menu.logged_out_bottom_navigation_menu);
+        }
+        final TypedArray navIds = getResources().obtainTypedArray(main_nav_ids);
         final List<Integer> mainNavList = new ArrayList<>(navIds.length());
         final int length = navIds.length();
         for (int i = 0; i < length; i++) {
@@ -324,7 +332,9 @@ public class MainActivity extends BaseLanguageActivity {
         if (setDefaultFromSettings) {
             final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
-                final int defaultNavId = Utils.isEmpty(defaultTabIdString) ? R.navigation.profile_nav_graph : Integer.parseInt(defaultTabIdString);
+                final int defaultNavId = Utils.isEmpty(defaultTabIdString) || !isLoggedIn
+                                         ? R.navigation.profile_nav_graph
+                                         : Integer.parseInt(defaultTabIdString);
                 final int index = mainNavList.indexOf(defaultNavId);
                 if (index >= 0) {
                     firstFragmentGraphIndex = index;

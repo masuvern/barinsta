@@ -35,11 +35,14 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class SettingsPreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = "SettingsPrefsFrag";
     private static AppCompatTextView customPathTextView;
+    private boolean isLoggedIn;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
     }
 
     @Override
@@ -75,12 +78,14 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         localeCategory.addPreference(getLanguagePreference());
         localeCategory.addPreference(getPostTimePreference());
 
-        final PreferenceCategory loggedInUsersPreferenceCategory = new PreferenceCategory(requireContext());
-        screen.addPreference(loggedInUsersPreferenceCategory);
-        loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
-        loggedInUsersPreferenceCategory.setTitle(R.string.login_settings);
-        loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
-        loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
+        if (isLoggedIn) {
+            final PreferenceCategory loggedInUsersPreferenceCategory = new PreferenceCategory(requireContext());
+            screen.addPreference(loggedInUsersPreferenceCategory);
+            loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
+            loggedInUsersPreferenceCategory.setTitle(R.string.login_settings);
+            loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
+            loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
+        }
 
         final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(requireContext());
         screen.addPreference(anonUsersPreferenceCategory);
@@ -115,6 +120,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getDefaultTabPreference() {
         final ListPreference preference = new ListPreference(requireContext());
+        preference.setEnabled(isLoggedIn);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final FragmentActivity activity = getActivity();
         if (activity == null) {
