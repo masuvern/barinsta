@@ -40,7 +40,7 @@ public final class RamboTextView extends AppCompatTextView {
 
     private final Handler handler = new Handler();
     private final Runnable longPressRunnable = () -> {
-        longClickListener.onLongClick(this);
+        if (longClickListener != null) longClickListener.onLongClick(this);
     };
 
     public RamboTextView(final Context context) {
