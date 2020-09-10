@@ -30,7 +30,6 @@ import awais.instagrabber.activities.Login;
 import awais.instagrabber.adapters.AccountSwitcherListAdapter;
 import awais.instagrabber.adapters.AccountSwitcherListAdapter.OnAccountClickListener;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
-import awais.instagrabber.dialogs.AboutDialog;
 import awais.instagrabber.repositories.responses.UserInfo;
 import awais.instagrabber.services.ProfileService;
 import awais.instagrabber.services.ServiceCallback;
@@ -107,8 +106,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             return true;
         }));
         final Preference aboutPreference = getPreference(R.string.action_about, R.drawable.ic_outline_info_24, preference -> {
-            final AboutDialog aboutDialog = new AboutDialog();
-            aboutDialog.show(getChildFragmentManager(), "About");
+            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToAboutFragment();
+            NavHostFragment.findNavController(this).navigate(navDirections);
             return true;
         });
         generalCategory.addPreference(aboutPreference);

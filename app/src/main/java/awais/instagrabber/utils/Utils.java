@@ -64,8 +64,6 @@ public final class Utils {
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
 
-    private static String telegramPackage;
-
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
             displayMetrics = Resources.getSystem().getDisplayMetrics();
@@ -280,42 +278,6 @@ public final class Utils {
     public static void errorFinish(@NonNull final Activity activity) {
         Toast.makeText(activity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
         activity.finish();
-    }
-
-    @Nullable
-    public static String getInstalledTelegramPackage(@Nullable final Context context) {
-        if (telegramPackage != null) return telegramPackage;
-        if (context == null) return null;
-        final String[] packages = {
-                "org.telegram.messenger",
-                "org.thunderdog.challegram",
-                "ir.ilmili.telegraph",
-                // "org.telegram.BifToGram", see GitHub issue 124
-                "org.vidogram.messenger",
-                "com.xplus.messenger",
-                "com.ellipi.messenger",
-                "org.telegram.plus",
-                "com.iMe.android",
-                "org.viento.colibri",
-                "org.viento.colibrix",
-                "ml.parsgram",
-                "com.ringtoon.app.tl",
-        };
-        final PackageManager packageManager = context.getPackageManager();
-        for (final String pkg : packages) {
-            try {
-                final PackageInfo packageInfo = packageManager.getPackageInfo(pkg, 0);
-                if (packageInfo.applicationInfo.enabled) return pkg;
-            } catch (final Exception e) {
-                try {
-                    if (packageManager.getApplicationInfo(pkg, 0).enabled) {
-                        telegramPackage = pkg;
-                        return pkg;
-                    }
-                } catch (final Exception ignored) {}
-            }
-        }
-        return null;
     }
 
     public static SimpleCache getSimpleCacheInstance(final Context context) {

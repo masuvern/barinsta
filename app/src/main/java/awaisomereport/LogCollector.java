@@ -25,7 +25,7 @@ public final class LogCollector {
 
     public LogCollector(@NonNull final Application app) {
         logDir = new File(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? app.getDataDir() : app.getFilesDir(),
-                "ur_mom_gay_logs");
+                "crashlogs");
 
         if (logDir.exists()) deleteRecursive(logDir);
 

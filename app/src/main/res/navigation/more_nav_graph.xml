@@ -11,9 +11,16 @@
         <action
             android:id="@+id/action_morePreferencesFragment_to_settingsPreferencesFragment"
             app:destination="@id/settingsPreferencesFragment" />
+        <action
+            android:id="@+id/action_morePreferencesFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.SettingsPreferencesFragment"
         android:label="@string/action_settings" />
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="awais.instagrabber.fragments.settings.AboutFragment"
+        android:label="@string/action_about" />
 </navigation>

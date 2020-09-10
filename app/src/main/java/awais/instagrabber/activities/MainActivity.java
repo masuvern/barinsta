@@ -72,6 +72,7 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.discoverFragment,
             R.id.morePreferencesFragment,
             R.id.settingsPreferencesFragment,
+            R.id.aboutFragment,
             R.id.hashTagFragment,
             R.id.locationFragment,
             R.id.savedViewerFragment,

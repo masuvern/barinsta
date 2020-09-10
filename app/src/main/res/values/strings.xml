@@ -231,7 +231,8 @@
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
     <string name="use_amoled_dark_theme">Use AMOLED mode for Dark theme</string>
     <string name="action_notif">Activity</string>
-    <string name="license" translatable="false">InstaGrabber\nCopyright (C) 2019  AWAiS\nCopyright (C) 2020  Austin Huang, Ammar Githam\n\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/.\n\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR \'\'AS IS\'\' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nSee project page for third-party attributions.</string>
+    <string name="license" translatable="false">Copyright (C) 2019  AWAiS\nCopyright (C) 2020  Austin Huang, Ammar Githam\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/.</string>
+    <string name="liability" translatable="false">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</string>
     <string name="select_picture">Select Picture</string>
     <string name="uploading">Uploading...</string>
     <string name="activity_count_prefix">You have:</string>
@@ -259,4 +260,13 @@
     <string name="pref_category_downloads">Downloads</string>
     <string name="pref_category_locale">Locale</string>
     <string name="add_account">Add account</string>
+    <string name="about_category_license">License (English only)</string>
+    <string name="about_documentation">Visit our website</string>
+    <string name="about_documentation_summary">Get support, discuss, meet others, and have fun!</string>
+    <string name="about_repository">See our source code on GitHub</string>
+    <string name="about_repository_summary">Audit, star, report bugs, contribute, and have fun (again)!</string>
+    <string name="about_feedback">Send feedback by email</string>
+    <string name="about_feedback_summary" translatable="false">instagrabber@austinhuang.me</string>
+    <string name="about_category_3pt">Third-Party Libraries</string>
+    <string name="about_category_3pt_summary">The following third-party libraries are used in this app:</string>
 </resources>

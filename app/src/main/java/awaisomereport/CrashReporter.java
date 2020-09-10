@@ -39,8 +39,6 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
 
     private CrashReporter(@NonNull final Application application) {
         this.application = application;
-        // set your email(s) here to receive crash reports
-        // this.email = "<email>";
         this.email = "instagrabber@austinhuang.me";
         this.crashLogsZip = new File(application.getExternalCacheDir(), "crash_logs.zip");
     }
@@ -70,7 +68,9 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
                 .append("\r\nDEVICE			: ").append(Build.DEVICE)
                 .append("\r\nPRODUCT		: ").append(Build.PRODUCT)
                 .append("\r\nHOST			: ").append(Build.HOST)
-                .append("\r\nTAGS			: ").append(Build.TAGS);
+                .append("\r\nTAGS			: ").append(Build.TAGS)
+                .append("\r\nINSTRUCTION	: Please attach details on how to produce this crash. Your help is appreciated.")
+                .append("\r\nPRIVACY    	: Your email address and crash report will be made PUBLIC on the GitHub repository.");
 
         reportBuilder.append("\r\n\r\nStack:\r\n==============\r\n");
         final Writer result = new StringWriter();
@@ -107,7 +107,7 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
 
     public synchronized CrashReporter zipLogs() {
         final File logDir = Utils.logCollector != null ? Utils.logCollector.getLogDir() :
-                new File(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? application.getDataDir() : application.getFilesDir(), "ur_mom_gay_logs");
+                new File(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? application.getDataDir() : application.getFilesDir(), "crashlogs");
 
         try (final FileOutputStream fos = new FileOutputStream(crashLogsZip);
              final ZipOutputStream zos = new ZipOutputStream(fos)) {
