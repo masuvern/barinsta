@@ -25,11 +25,9 @@ import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
 import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.dataBox;
 import static awais.instagrabber.utils.Utils.datetimeParser;
-import static awais.instagrabber.utils.Utils.getInstalledTelegramPackage;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
-import static awais.instagrabber.utils.Utils.telegramPackage;
 
 public final class InstaGrabberApplication extends MultiDexApplication {
     private static final String TAG = "InstaGrabberApplication";
@@ -60,8 +58,6 @@ public final class InstaGrabberApplication extends MultiDexApplication {
         CookieHandler.setDefault(NET_COOKIE_MANAGER);
 
         final Context appContext = getApplicationContext();
-
-        telegramPackage = getInstalledTelegramPackage(appContext);
 
         if (dataBox == null)
             dataBox = DataBox.getInstance(appContext);

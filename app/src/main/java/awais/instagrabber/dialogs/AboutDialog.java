@@ -37,10 +37,10 @@ public final class AboutDialog extends BottomSheetDialogFragment {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             if (v == btnTelegram) {
                 intent.setData(Uri.parse("https://t.me/grabber_app"));
-                if (!TextUtils.isEmpty(Utils.telegramPackage))
-                    intent.setPackage(Utils.telegramPackage);
-            }
-            else if (v == btnMatrix) {
+                final String telegramPackage = Utils.getInstalledTelegramPackage(getContext());
+                if (!TextUtils.isEmpty(telegramPackage))
+                    intent.setPackage(telegramPackage);
+            } else if (v == btnMatrix) {
                 intent.setData(Uri.parse("https://matrix.to/#/#instagrabber:matrix.org"));
             } else
                 intent.setData(Uri.parse("https://instagrabber.austinhuang.me"));

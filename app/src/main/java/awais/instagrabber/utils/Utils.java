@@ -59,11 +59,12 @@ public final class Utils {
     public static NotificationManagerCompat notificationManager;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
     public static boolean isChannelCreated = false;
-    public static String telegramPackage;
     public static ClipboardManager clipboardManager;
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
+
+    private static String telegramPackage;
 
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
@@ -282,7 +283,9 @@ public final class Utils {
     }
 
     @Nullable
-    public static String getInstalledTelegramPackage(@NonNull final Context context) {
+    public static String getInstalledTelegramPackage(@Nullable final Context context) {
+        if (telegramPackage != null) return telegramPackage;
+        if (context == null) return null;
         final String[] packages = {
                 "org.telegram.messenger",
                 "org.thunderdog.challegram",
@@ -298,7 +301,6 @@ public final class Utils {
                 "ml.parsgram",
                 "com.ringtoon.app.tl",
         };
-
         final PackageManager packageManager = context.getPackageManager();
         for (final String pkg : packages) {
             try {
@@ -306,13 +308,13 @@ public final class Utils {
                 if (packageInfo.applicationInfo.enabled) return pkg;
             } catch (final Exception e) {
                 try {
-                    if (packageManager.getApplicationInfo(pkg, 0).enabled) return pkg;
-                } catch (final Exception e1) {
-                    // meh
-                }
+                    if (packageManager.getApplicationInfo(pkg, 0).enabled) {
+                        telegramPackage = pkg;
+                        return pkg;
+                    }
+                } catch (final Exception ignored) {}
             }
         }
-
         return null;
     }
 
