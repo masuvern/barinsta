@@ -43,7 +43,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
         screen.addPreference(generalCategory);
-        generalCategory.setTitle(getString(R.string.pref_category_general));
+        generalCategory.setTitle(R.string.pref_category_general);
         generalCategory.setIconSpaceReserved(false);
         generalCategory.addPreference(getDefaultTabPreference());
         generalCategory.addPreference(getUpdateCheckPreference());
@@ -52,21 +52,21 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
 
         final PreferenceCategory themeCategory = new PreferenceCategory(requireContext());
         screen.addPreference(themeCategory);
-        themeCategory.setTitle(getString(R.string.pref_category_theme));
+        themeCategory.setTitle(R.string.pref_category_theme);
         themeCategory.setIconSpaceReserved(false);
         themeCategory.addPreference(getThemePreference());
         themeCategory.addPreference(getAmoledThemePreference());
 
         final PreferenceCategory downloadsCategory = new PreferenceCategory(requireContext());
         screen.addPreference(downloadsCategory);
-        downloadsCategory.setTitle(getString(R.string.pref_category_downloads));
+        downloadsCategory.setTitle(R.string.pref_category_downloads);
         downloadsCategory.setIconSpaceReserved(false);
         downloadsCategory.addPreference(getDownloadUserFolderPreference());
         downloadsCategory.addPreference(getSaveToCustomFolderPreference());
 
         final PreferenceCategory localeCategory = new PreferenceCategory(requireContext());
         screen.addPreference(localeCategory);
-        localeCategory.setTitle(getString(R.string.pref_category_locale));
+        localeCategory.setTitle(R.string.pref_category_locale);
         localeCategory.setIconSpaceReserved(false);
         localeCategory.addPreference(getLanguagePreference());
         localeCategory.addPreference(getPostTimePreference());

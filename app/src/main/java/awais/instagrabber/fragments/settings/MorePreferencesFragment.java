@@ -56,7 +56,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         // screen.addPreference(new MoreHeaderPreference(requireContext()));
 
         final PreferenceCategory accountCategory = new PreferenceCategory(requireContext());
-        accountCategory.setTitle("Account");
+        accountCategory.setTitle(R.string.account);
+        accountCategory.setSummary(R.string.account_hint);
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
         // To re-login, user can just add the same account back from account switcher dialog
@@ -116,11 +117,16 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         divider.setLayoutResource(R.layout.item_pref_divider);
         screen.addPreference(divider);
 
-        final Preference versionPreference = getPreference(R.string.version, BuildConfig.VERSION_NAME, -1, preference -> {
+        final Preference versionPreference = getPreference(R.string.version,
+                BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", -1, preference -> {
             FlavorTown.updateCheck((AppCompatActivity) requireActivity(), true);
             return true;
         });
         screen.addPreference(versionPreference);
+
+        final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
+        reminderPreference.setEnabled(false);
+        screen.addPreference(reminderPreference);
     }
 
     @Override

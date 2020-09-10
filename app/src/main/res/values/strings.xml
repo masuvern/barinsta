@@ -259,6 +259,8 @@
     <string name="pref_category_theme">Theme</string>
     <string name="pref_category_downloads">Downloads</string>
     <string name="pref_category_locale">Locale</string>
+    <string name="account">Account</string>
+    <string name="account_hint">Current login not working? Simply add the account again.</string>
     <string name="add_account">Add account</string>
     <string name="about_category_license">License (English only)</string>
     <string name="about_documentation">Visit our website</string>
@@ -267,6 +269,8 @@
     <string name="about_repository_summary">Audit, star, report bugs, contribute, and have fun (again)!</string>
     <string name="about_feedback">Send feedback by email</string>
     <string name="about_feedback_summary" translatable="false">instagrabber@austinhuang.me</string>
-    <string name="about_category_3pt">Third-Party Libraries</string>
-    <string name="about_category_3pt_summary">The following third-party libraries are used in this app:</string>
+    <string name="about_category_3pt">Third-Party Attributions</string>
+    <string name="about_category_3pt_summary">The following third-party open-source libraries are used:</string>
+    <string name="reminder">Reminder</string>
+    <string name="reminder_summary">Please use this app responsibly. Downloaded images should only be used for purposes allowed by applicable laws.</string>
 </resources>
