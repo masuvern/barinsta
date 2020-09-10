@@ -18,6 +18,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import awais.instagrabber.R;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public final class AboutDialog extends BottomSheetDialogFragment {
@@ -36,7 +37,7 @@ public final class AboutDialog extends BottomSheetDialogFragment {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             if (v == btnTelegram) {
                 intent.setData(Uri.parse("https://t.me/grabber_app"));
-                if (!Utils.isEmpty(Utils.telegramPackage))
+                if (!TextUtils.isEmpty(Utils.telegramPackage))
                     intent.setPackage(Utils.telegramPackage);
             }
             else if (v == btnMatrix) {
@@ -50,7 +51,7 @@ public final class AboutDialog extends BottomSheetDialogFragment {
         btnMatrix.setOnClickListener(onClickListener);
 
         final String description = getString(R.string.description);
-        if (!Utils.isEmpty(description)) {
+        if (!TextUtils.isEmpty(description)) {
             final SpannableStringBuilder descriptionText = new SpannableStringBuilder(description, 0, description.length());
 
             int lastIndex = descriptionText.length() / 2;
@@ -72,7 +73,7 @@ public final class AboutDialog extends BottomSheetDialogFragment {
                 }
             }
 
-            lastIndex = Utils.indexOfChar(descriptionText, '@', lastIndex) - 12;
+            lastIndex = TextUtils.indexOfChar(descriptionText, '@', lastIndex) - 12;
             descriptionText.setSpan(new URLSpan("mailto:instagrabber@austinhuang.me"), lastIndex, lastIndex + 27, 0);
 
             final TextView textView = (TextView) infoContainer.getChildAt(0);

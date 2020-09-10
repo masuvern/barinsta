@@ -12,7 +12,7 @@ import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectMessageRavenMediaViewHolder extends DirectMessageItemViewHolder {
 
@@ -33,7 +33,7 @@ public class DirectMessageRavenMediaViewHolder extends DirectMessageItemViewHold
         final DirectItemModel.DirectItemRavenMediaModel ravenMediaModel = directItemModel.getRavenMediaModel();
         DirectItemModel.DirectItemMediaModel mediaModel = directItemModel.getMediaModel();
         final boolean isExpired = ravenMediaModel == null || (mediaModel = ravenMediaModel.getMedia()) == null ||
-                Utils.isEmpty(mediaModel.getThumbUrl()) && mediaModel.getPk() < 1;
+                TextUtils.isEmpty(mediaModel.getThumbUrl()) && mediaModel.getPk() < 1;
 
         DirectItemModel.RavenExpiringMediaActionSummaryModel mediaActionSummary = null;
         if (ravenMediaModel != null) {

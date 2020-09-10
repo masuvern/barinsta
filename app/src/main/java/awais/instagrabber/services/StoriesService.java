@@ -22,7 +22,7 @@ import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.repositories.StoriesRepository;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -149,7 +149,7 @@ public class StoriesService extends BaseService {
 
                             final JSONArray videoResources = data.optJSONArray("video_versions");
                             if (isVideo && videoResources != null)
-                                model.setVideoUrl(Utils.getHighQualityPost(videoResources, true, true, false));
+                                model.setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
 
                             if (data.has("story_feed_media")) {
                                 model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));

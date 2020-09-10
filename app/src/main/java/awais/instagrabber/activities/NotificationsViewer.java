@@ -1,7 +1,6 @@
 package awais.instagrabber.activities;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,9 +27,9 @@ import awais.instagrabber.databinding.ActivityNotificationBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.NotificationModel;
-import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.notificationManager;
@@ -47,7 +46,7 @@ public final class NotificationsViewer extends BaseLanguageActivity implements S
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         notificationManager.cancel(1800000000);
-        if (Utils.isEmpty(cookie)) {
+        if (TextUtils.isEmpty(cookie)) {
             Toast.makeText(this, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
         super.onCreate(savedInstanceState);

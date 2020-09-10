@@ -15,7 +15,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 
 public final class HighlightsFetcher extends AsyncTask<Void, Void, List<HighlightModel>> {
     private final String id;
@@ -41,7 +41,7 @@ public final class HighlightsFetcher extends AsyncTask<Void, Void, List<Highligh
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONArray highlightsReel = new JSONObject(Utils.readFromConnection(conn)).getJSONArray("tray");
+                final JSONArray highlightsReel = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONArray("tray");
 
                 final int length = highlightsReel.length();
                 final List<HighlightModel> highlightModels = new ArrayList<>();

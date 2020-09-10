@@ -20,7 +20,8 @@ import androidx.annotation.Nullable;
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.ActivityLoginBinding;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class Login extends BaseLanguageActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private final WebViewClient webViewClient = new WebViewClient() {
@@ -32,8 +33,8 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
         @Override
         public void onPageFinished(final WebView view, final String url) {
             webViewUrl = url;
-            final String mainCookie = Utils.getCookie(url);
-            if (Utils.isEmpty(mainCookie) || !mainCookie.contains("; ds_user_id=")) {
+            final String mainCookie = CookieUtils.getCookie(url);
+            if (TextUtils.isEmpty(mainCookie) || !mainCookie.contains("; ds_user_id=")) {
                 ready = true;
                 return;
             }
@@ -75,8 +76,8 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
             return;
         }
         if (v == loginBinding.cookies) {
-            final String mainCookie = Utils.getCookie(webViewUrl);
-            if (Utils.isEmpty(mainCookie) || !mainCookie.contains("; ds_user_id=")) {
+            final String mainCookie = CookieUtils.getCookie(webViewUrl);
+            if (TextUtils.isEmpty(mainCookie) || !mainCookie.contains("; ds_user_id=")) {
                 Toast.makeText(this, R.string.login_error_loading_cookies, Toast.LENGTH_SHORT).show();
                 return;
             }

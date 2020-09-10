@@ -11,7 +11,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.BaseLanguageActivity;
@@ -23,6 +22,7 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 
 public final class MultiDirectDialog extends BaseLanguageActivity {
@@ -86,7 +86,7 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        Utils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, selectedItems);
+        DownloadUtils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, selectedItems);
         finish();
         return true;
     }

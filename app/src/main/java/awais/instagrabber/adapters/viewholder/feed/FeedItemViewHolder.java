@@ -16,7 +16,7 @@ import awais.instagrabber.databinding.ItemFeedTopBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
     public static final int MAX_CHARS = 255;
@@ -71,11 +71,11 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         final String locationId = feedModel.getLocationId();
         setLocation(locationName, locationId);
         CharSequence postCaption = feedModel.getPostCaption();
-        final boolean captionEmpty = Utils.isEmpty(postCaption);
+        final boolean captionEmpty = TextUtils.isEmpty(postCaption);
         bottomBinding.viewerCaption.setVisibility(captionEmpty ? View.GONE : View.VISIBLE);
         if (!captionEmpty) {
-            if (Utils.hasMentions(postCaption)) {
-                postCaption = Utils.getMentionText(postCaption);
+            if (TextUtils.hasMentions(postCaption)) {
+                postCaption = TextUtils.getMentionText(postCaption);
                 feedModel.setPostCaption(postCaption);
                 bottomBinding.viewerCaption.setText(postCaption, TextView.BufferType.SPANNABLE);
             } else {
@@ -87,7 +87,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setLocation(final String locationName, final String locationId) {
-        if (Utils.isEmpty(locationName)) {
+        if (TextUtils.isEmpty(locationName)) {
             topBinding.location.setVisibility(View.GONE);
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
@@ -110,7 +110,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
      * @return isExpanded
      */
     public static boolean expandCollapseTextView(@NonNull final RamboTextView textView, final CharSequence caption) {
-        if (Utils.isEmpty(caption)) return false;
+        if (TextUtils.isEmpty(caption)) return false;
 
         final TextView.BufferType bufferType = caption instanceof Spanned ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL;
 
@@ -119,16 +119,16 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             textView.setCaptionIsExpanded(false);
             return true;
         }
-        int i = Utils.indexOfChar(caption, '\r', 0);
-        if (i == -1) i = Utils.indexOfChar(caption, '\n', 0);
+        int i = TextUtils.indexOfChar(caption, '\r', 0);
+        if (i == -1) i = TextUtils.indexOfChar(caption, '\n', 0);
         if (i == -1) i = MAX_CHARS;
 
         final int captionLen = caption.length();
         final int minTrim = Math.min(MAX_CHARS, i);
         if (captionLen <= minTrim) return false;
 
-        if (Utils.hasMentions(caption))
-            textView.setText(Utils.getMentionText(caption), TextView.BufferType.SPANNABLE);
+        if (TextUtils.hasMentions(caption))
+            textView.setText(TextUtils.getMentionText(caption), TextView.BufferType.SPANNABLE);
         textView.setCaptionIsExpandable(true);
         textView.setCaptionIsExpanded(true);
         return true;

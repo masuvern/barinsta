@@ -76,7 +76,10 @@ import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootRespo
 import awais.instagrabber.services.FriendshipService;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DataBox;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.PostsViewModel;
@@ -112,7 +115,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (actionBar != null && !Utils.isEmpty(username)) {
+        if (actionBar != null && !TextUtils.isEmpty(username)) {
             final String finalUsername = username.startsWith("@") ? username.substring(1)
                                                                   : username;
             actionBar.setTitle(finalUsername);
@@ -142,10 +145,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         if (postsAdapter == null || username == null) {
                             return false;
                         }
-                        Utils.batchDownload(requireContext(),
-                                            username,
-                                            DownloadMethod.DOWNLOAD_MAIN,
-                                            postsAdapter.getSelectedModels());
+                        DownloadUtils.batchDownload(requireContext(),
+                                                    username,
+                                                    DownloadMethod.DOWNLOAD_MAIN,
+                                                    postsAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }
@@ -213,12 +216,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (root != null) {
             if (getArguments() != null) {
                 final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
                 final String username = fragmentArgs.getUsername();
-                if (Utils.isEmpty(username) && profileModel != null) {
+                if (TextUtils.isEmpty(username) && profileModel != null) {
                     final String profileModelUsername = profileModel.getUsername();
                     final boolean isSame = ("@" + profileModelUsername).equals(this.username);
                     if (isSame) {
@@ -283,7 +286,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             username = fragmentArgs.getUsername();
             setUsernameDelayed();
         }
-        if (Utils.isEmpty(username) && !isLoggedIn) {
+        if (TextUtils.isEmpty(username) && !isLoggedIn) {
             binding.infoContainer.setVisibility(View.GONE);
             binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
@@ -300,10 +303,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void fetchUsername() {
-        final String uid = Utils.getUserIdFromCookie(cookie);
-        if (Utils.isEmpty(username) && uid != null) {
+        final String uid = CookieUtils.getUserIdFromCookie(cookie);
+        if (TextUtils.isEmpty(username) && uid != null) {
             final FetchListener<String> fetchListener = username -> {
-                if (Utils.isEmpty(username)) return;
+                if (TextUtils.isEmpty(username)) return;
                 this.username = username;
                 setUsernameDelayed();
                 fetchProfileDetails();
@@ -312,7 +315,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
             if (cookieModel != null) {
                 final String username = cookieModel.getUsername();
-                if (!Utils.isEmpty(username)) {
+                if (!TextUtils.isEmpty(username)) {
                     found = true;
                     fetchListener.onResult("@" + username);
                 }
@@ -330,7 +333,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         new ProfileFetcher(username.substring(1), profileModel -> {
             if (getContext() == null) return;
             this.profileModel = profileModel;
-            final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
+            final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
             final boolean isSelf = isLoggedIn
                     && profileModel != null
                     && userIdFromCookie != null
@@ -375,7 +378,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         if (isLoggedIn) {
-            final String myId = Utils.getUserIdFromCookie(cookie);
+            final String myId = CookieUtils.getUserIdFromCookie(cookie);
             if (profileId.equals(myId)) {
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 binding.btnSaved.setVisibility(View.VISIBLE);
@@ -471,14 +474,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
         binding.mainFollowing.setText(span);
 
-        binding.mainFullName.setText(Utils.isEmpty(profileModel.getName()) ? profileModel.getUsername()
-                                                                           : profileModel.getName());
+        binding.mainFullName.setText(TextUtils.isEmpty(profileModel.getName()) ? profileModel.getUsername()
+                                                                               : profileModel.getName());
 
         CharSequence biography = profileModel.getBiography();
         binding.mainBiography.setCaptionIsExpandable(true);
         binding.mainBiography.setCaptionIsExpanded(true);
-        if (Utils.hasMentions(biography)) {
-            biography = Utils.getMentionText(biography);
+        if (TextUtils.hasMentions(biography)) {
+            biography = TextUtils.getMentionText(biography);
             binding.mainBiography.setText(biography, TextView.BufferType.SPANNABLE);
             binding.mainBiography.setMentionClickListener(mentionClickListener);
         } else {
@@ -487,11 +490,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         final String url = profileModel.getUrl();
-        if (Utils.isEmpty(url)) {
+        if (TextUtils.isEmpty(url)) {
             binding.mainUrl.setVisibility(View.GONE);
         } else {
             binding.mainUrl.setVisibility(View.VISIBLE);
-            binding.mainUrl.setText(Utils.getSpannableUrl(url));
+            binding.mainUrl.setText(TextUtils.getSpannableUrl(url));
             binding.mainUrl.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
@@ -539,7 +542,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupCommonListeners() {
 
-        final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
+        final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         // final boolean isSelf = isLoggedIn && profileModel != null && userIdFromCookie != null && userIdFromCookie
         //         .equals(profileModel.getId());
         final String favorite = Utils.dataBox.getFavorite(username);
@@ -563,7 +566,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 friendshipService.unfollow(
                         userIdFromCookie,
                         profileModel.getId(),
-                        Utils.getCsrfTokenFromCookie(cookie),
+                        CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                             @Override
                             public void onSuccess(final FriendshipRepoChangeRootResponse result) {
@@ -580,7 +583,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 friendshipService.follow(
                         userIdFromCookie,
                         profileModel.getId(),
-                        Utils.getCsrfTokenFromCookie(cookie),
+                        CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                             @Override
                             public void onSuccess(final FriendshipRepoChangeRootResponse result) {
@@ -601,7 +604,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             friendshipService.toggleRestrict(
                     profileModel.getId(),
                     !profileModel.getRestricted(),
-                    Utils.getCsrfTokenFromCookie(cookie),
+                    CookieUtils.getCsrfTokenFromCookie(cookie),
                     new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
                         @Override
                         public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
@@ -621,7 +624,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 friendshipService.unblock(
                         userIdFromCookie,
                         profileModel.getId(),
-                        Utils.getCsrfTokenFromCookie(cookie),
+                        CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                             @Override
                             public void onSuccess(final FriendshipRepoChangeRootResponse result) {
@@ -639,7 +642,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             friendshipService.block(
                     userIdFromCookie,
                     profileModel.getId(),
-                    Utils.getCsrfTokenFromCookie(cookie),
+                    CookieUtils.getCsrfTokenFromCookie(cookie),
                     new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                         @Override
                         public void onSuccess(final FriendshipRepoChangeRootResponse result) {

@@ -15,7 +15,8 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.TextUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -40,7 +41,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, ProfileModel> {
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject user = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject(Constants.EXTRAS_USER);
+                final JSONObject user = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject(Constants.EXTRAS_USER);
 
                 boolean isPrivate = user.getBoolean("is_private");
                 boolean reallyPrivate = isPrivate;
@@ -51,7 +52,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, ProfileModel> {
                 }
 
                 String url = user.optString("external_url");
-                if (Utils.isEmpty(url)) url = null;
+                if (TextUtils.isEmpty(url)) url = null;
 
                 result = new ProfileModel(isPrivate,
                         reallyPrivate,

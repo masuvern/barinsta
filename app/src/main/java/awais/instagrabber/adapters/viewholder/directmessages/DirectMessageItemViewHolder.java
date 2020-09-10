@@ -18,13 +18,16 @@ import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolder {
     private static final int MESSAGE_INCOMING = 69;
     private static final int MESSAGE_OUTGOING = 420;
 
-    private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel(Utils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)));
+    private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel(
+            CookieUtils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)));
     private final LayoutDmBaseBinding binding;
     private final String strDmYou;
     private final int itemMargin;
@@ -56,7 +59,7 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
         if (user != null && user != myProfileHolder) {
             text = user.getUsername();
         } else if (user == myProfileHolder) text = "";
-        text = (Utils.isEmpty(text) ? "" : text + " - ") + directItemModel.getDateTime();
+        text = (TextUtils.isEmpty(text) ? "" : text + " - ") + directItemModel.getDateTime();
         binding.tvUsername.setText(text);
         binding.tvUsername.setGravity(type == MESSAGE_INCOMING ? Gravity.START : Gravity.END);
         binding.ivProfilePic.setVisibility(type == MESSAGE_INCOMING ? View.VISIBLE : View.GONE);

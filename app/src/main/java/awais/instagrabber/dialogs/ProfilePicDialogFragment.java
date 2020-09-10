@@ -31,7 +31,8 @@ import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.ProfilePictureFetcher;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 
 public class ProfilePicDialogFragment extends DialogFragment {
     private static final String TAG = "ProfilePicDlgFragment";
@@ -87,11 +88,11 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void init() {
         binding.download.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(requireContext(), Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(requireContext(), DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
                 downloadProfilePicture();
                 return;
             }
-            requestPermissions(Utils.PERMS, 8020);
+            requestPermissions(DownloadUtils.PERMS, 8020);
         });
     }
 
@@ -106,7 +107,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
     private void fetchPhoto() {
         final FetchListener<String> fetchListener = profileUrl -> {
             url = profileUrl;
-            if (Utils.isEmpty(url)) {
+            if (TextUtils.isEmpty(url)) {
                 url = fallbackUrl;
             }
             final DraweeController controller = Fresco

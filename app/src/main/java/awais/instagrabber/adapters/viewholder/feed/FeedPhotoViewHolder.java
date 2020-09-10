@@ -16,6 +16,7 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import awais.instagrabber.databinding.ItemFeedPhotoBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public class FeedPhotoViewHolder extends FeedItemViewHolder {
@@ -50,7 +51,7 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
         binding.imageViewer.requestLayout();
         final String thumbnailUrl = feedModel.getThumbnailUrl();
         String url = feedModel.getDisplayUrl();
-        if (Utils.isEmpty(url)) url = thumbnailUrl;
+        if (TextUtils.isEmpty(url)) url = thumbnailUrl;
         final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
                                                                .setLocalThumbnailPreviewsEnabled(true)
                                                                .setProgressiveRenderingEnabled(true)

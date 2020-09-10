@@ -21,7 +21,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import awais.instagrabber.models.ImageUploadOptions;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.NumberUtils;
 
 public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUploader.ImageUploadResponse> {
     private static final String TAG = "ImageUploader";
@@ -51,7 +52,7 @@ public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUplo
             final String contentLength = String.valueOf(bytes.length);
             final Map<String, String> headers = new HashMap<>();
             final String uploadId = String.valueOf(new Date().getTime());
-            final long random = Utils.random(LOWER, UPPER + 1);
+            final long random = NumberUtils.random(LOWER, UPPER + 1);
             final String name = String.format("%s_0_%s", uploadId, random);
             final String waterfallId = options.getWaterfallId() != null ? options.getWaterfallId() : UUID.randomUUID().toString();
             headers.put("X-Entity-Type", "image/jpeg");
@@ -68,7 +69,7 @@ public class ImageUploader extends AsyncTask<ImageUploadOptions, Void, ImageUplo
             connection.setRequestMethod("POST");
             connection.setUseCaches(false);
             connection.setDoOutput(true);
-            Utils.setConnectionHeaders(connection, headers);
+            NetworkUtils.setConnectionHeaders(connection, headers);
             out = new BufferedOutputStream(connection.getOutputStream());
             out.write(bytes);
             out.flush();

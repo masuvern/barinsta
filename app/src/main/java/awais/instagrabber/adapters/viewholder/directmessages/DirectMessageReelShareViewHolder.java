@@ -9,7 +9,7 @@ import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectMessageReelShareViewHolder extends DirectMessageItemViewHolder {
 
@@ -29,10 +29,10 @@ public class DirectMessageReelShareViewHolder extends DirectMessageItemViewHolde
     public void bindItem(final DirectItemModel directItemModel) {
         final DirectItemModel.DirectItemReelShareModel reelShare = directItemModel.getReelShare();
         CharSequence text = reelShare.getText();
-        if (Utils.isEmpty(text)) {
+        if (TextUtils.isEmpty(text)) {
             binding.tvMessage.setVisibility(View.GONE);
         } else {
-            if (Utils.hasMentions(text)) text = Utils.getMentionText(text); // for mentions
+            if (TextUtils.hasMentions(text)) text = TextUtils.getMentionText(text); // for mentions
             binding.tvMessage.setText(text);
         }
         final DirectItemModel.DirectItemMediaModel reelShareMedia = reelShare.getMedia();

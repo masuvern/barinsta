@@ -37,9 +37,9 @@ import awais.instagrabber.R;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.utils.Utils;
 
-import static awais.instagrabber.utils.Utils.CHANNEL_ID;
-import static awais.instagrabber.utils.Utils.CHANNEL_NAME;
-import static awais.instagrabber.utils.Utils.NOTIF_GROUP_NAME;
+import static awais.instagrabber.utils.Constants.CHANNEL_ID;
+import static awais.instagrabber.utils.Constants.CHANNEL_NAME;
+import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
 import static awais.instagrabber.utils.Utils.isChannelCreated;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.notificationManager;

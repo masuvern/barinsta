@@ -15,7 +15,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -40,7 +40,7 @@ public final class HashtagFetcher extends AsyncTask<Void, Void, HashtagModel> {
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject user = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject(Constants.EXTRAS_HASHTAG);
+                final JSONObject user = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject(Constants.EXTRAS_HASHTAG);
 
                 final JSONObject timelineMedia = user.getJSONObject("edge_hashtag_to_media");
                 if (timelineMedia.has("edges")) {

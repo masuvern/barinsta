@@ -30,7 +30,7 @@ import awais.instagrabber.asyncs.FollowFetcher;
 import awais.instagrabber.databinding.FragmentFollowersViewerBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FollowModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 import awaisomereport.LogCollector;
 import thoughtbot.expandableadapter.ExpandableGroup;
 
@@ -89,7 +89,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         isFollowersList = fragmentArgs.getIsFollowersList();
         username = fragmentArgs.getUsername();
         namePost = username;
-        if (Utils.isEmpty(username)) {
+        if (TextUtils.isEmpty(username)) {
             // this usually should not occur
             username = "You";
             namePost = "You're";

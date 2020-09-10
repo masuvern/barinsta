@@ -21,7 +21,7 @@ import awais.instagrabber.utils.SettingsHelper;
 import awaisomereport.CrashReporter;
 import awaisomereport.LogCollector;
 
-import static awais.instagrabber.utils.Utils.NET_COOKIE_MANAGER;
+import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
 import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.dataBox;
 import static awais.instagrabber.utils.Utils.datetimeParser;

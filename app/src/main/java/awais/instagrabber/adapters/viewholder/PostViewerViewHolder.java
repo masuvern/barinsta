@@ -29,6 +29,7 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.ViewerPostModelWrapper;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public class PostViewerViewHolder extends RecyclerView.ViewHolder {
@@ -71,17 +72,17 @@ public class PostViewerViewHolder extends RecyclerView.ViewHolder {
         if (profileModel == null) return;
         binding.topPanel.title.setText(profileModel.getUsername());
         final String locationName = firstPost.getLocationName();
-        if (!Utils.isEmpty(locationName)) {
+        if (!TextUtils.isEmpty(locationName)) {
             binding.topPanel.location.setVisibility(View.VISIBLE);
             binding.topPanel.location.setText(locationName);
         } else binding.topPanel.location.setVisibility(View.GONE);
         binding.topPanel.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
         binding.bottomPanel.commentsCount.setText(String.valueOf(firstPost.getCommentsCount()));
         final CharSequence postCaption = firstPost.getPostCaption();
-        if (Utils.hasMentions(postCaption)) {
+        if (TextUtils.hasMentions(postCaption)) {
             binding.bottomPanel.viewerCaption.setMentionClickListener(mentionClickListener);
             binding.bottomPanel.viewerCaption
-                    .setText(Utils.getMentionText(postCaption), TextView.BufferType.SPANNABLE);
+                    .setText(TextUtils.getMentionText(postCaption), TextView.BufferType.SPANNABLE);
         } else {
             binding.bottomPanel.viewerCaption.setMentionClickListener(null);
             binding.bottomPanel.viewerCaption.setText(postCaption);
@@ -141,7 +142,7 @@ public class PostViewerViewHolder extends RecyclerView.ViewHolder {
             longClickListener.onLongClick(binding.bottomPanel.viewerCaption.getText().toString());
             return true;
         });
-        if (!Utils.isEmpty(location)) {
+        if (!TextUtils.isEmpty(location)) {
             binding.topPanel.location.setOnClickListener(v -> mentionClickListener
                     .onClick(binding.topPanel.location, location, false, true));
         }

@@ -68,6 +68,9 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public class DirectMessageThreadFragment extends Fragment {
@@ -80,7 +83,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private String cursor;
     private String lastMessage;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-    private final String myId = Utils.getUserIdFromCookie(cookie);
+    private final String myId = CookieUtils.getUserIdFromCookie(cookie);
     private FragmentDirectMessagesThreadBinding binding;
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
@@ -97,7 +100,7 @@ public class DirectMessageThreadFragment extends Fragment {
     private final View.OnClickListener clickListener = v -> {
         if (v == binding.commentSend) {
             final String text = binding.commentText.getText().toString();
-            if (Utils.isEmpty(text)) {
+            if (TextUtils.isEmpty(text)) {
                 Toast.makeText(requireContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -120,7 +123,7 @@ public class DirectMessageThreadFragment extends Fragment {
 
         @Override
         public void onResult(final InboxThreadModel result) {
-            if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || Utils.isEmpty(cursor)))
+            if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || TextUtils.isEmpty(cursor)))
                 Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
 
             if (result != null) {
@@ -210,7 +213,7 @@ public class DirectMessageThreadFragment extends Fragment {
         layoutManager.setReverseLayout(true);
         messageList.setLayoutManager(layoutManager);
         messageList.addOnScrollListener(new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (Utils.isEmpty(cursor) || !hasOlder) {
+            if (TextUtils.isEmpty(cursor) || !hasOlder) {
                 return;
             }
             new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener)
@@ -255,7 +258,7 @@ public class DirectMessageThreadFragment extends Fragment {
                         if (url == null) {
                             Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                         } else {
-                            Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
+                            DownloadUtils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
                             Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         }
                         break;

@@ -1,7 +1,5 @@
 package awais.instagrabber.utils;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -13,20 +11,12 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Environment;
 import android.text.Editable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -35,728 +25,45 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStreamReader;
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.asyncs.DownloadAsync;
-import awais.instagrabber.asyncs.PostFetcher;
-import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.databinding.DialogImportExportBinding;
-import awais.instagrabber.models.BasePostModel;
-import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.models.direct_messages.DirectItemModel;
-import awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemRavenMediaModel;
-import awais.instagrabber.models.direct_messages.InboxThreadModel;
-import awais.instagrabber.models.enums.DirectItemType;
-import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.InboxReadState;
-import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.models.enums.NotificationType;
-import awais.instagrabber.models.enums.RavenExpiringMediaType;
-import awais.instagrabber.models.enums.RavenMediaViewType;
 import awaisomereport.LogCollector;
 
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemActionLogModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemAnimatedMediaModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemLinkContext;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemLinkModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemMediaModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemReelShareModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemVideoCallEventModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.DirectItemVoiceMediaModel;
-import static awais.instagrabber.models.direct_messages.DirectItemModel.RavenExpiringMediaActionSummaryModel;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 
 public final class Utils {
     private static final String TAG = "Utils";
-    private static final int MAX_BYTES = 10 * 1024 * 1024;
+    private static final int VIDEO_CACHE_MAX_BYTES = 10 * 1024 * 1024;
 
     public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
     public static DataBox dataBox;
     public static boolean sessionVolumeFull = false;
-    @SuppressLint("StaticFieldLeak")
     public static NotificationManagerCompat notificationManager;
-    public static final CookieManager COOKIE_MANAGER = CookieManager.getInstance();
-    public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    public static final java.net.CookieManager NET_COOKIE_MANAGER = new java.net.CookieManager(null, CookiePolicy.ACCEPT_ALL);
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-    public static final String CHANNEL_ID = "InstaGrabber", CHANNEL_NAME = "Instagrabber",
-            NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
     public static boolean isChannelCreated = false;
     public static String telegramPackage;
     public static ClipboardManager clipboardManager;
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
-
-    public static void setupCookies(final String cookieRaw) {
-        final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
-        if (cookieStore == null || isEmpty(cookieRaw)) {
-            return;
-        }
-        if (cookieRaw.equals("LOGOUT")) {
-            cookieStore.removeAll();
-            dataBox.deleteAllUserCookies();
-            return;
-        }
-        try {
-            final URI uri1 = new URI("https://instagram.com");
-            final URI uri2 = new URI("https://instagram.com/");
-            final URI uri3 = new URI("https://i.instagram.com/");
-            for (final String cookie : cookieRaw.split("; ")) {
-                final String[] strings = cookie.split("=", 2);
-                final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
-                httpCookie.setDomain(".instagram.com");
-                httpCookie.setPath("/");
-                httpCookie.setVersion(0);
-                cookieStore.add(uri1, httpCookie);
-                cookieStore.add(uri2, httpCookie);
-                cookieStore.add(uri3, httpCookie);
-            }
-        } catch (final URISyntaxException e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.UTILS, "setupCookies");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-        }
-    }
-
-    @Nullable
-    public static String getUserIdFromCookie(final String cookie) {
-        if (!isEmpty(cookie)) {
-            final int uidIndex = cookie.indexOf("ds_user_id=");
-            if (uidIndex > 0) {
-                String uid = cookie.split("ds_user_id=")[1].split(";")[0];
-                return !isEmpty(uid) ? uid : null;
-            }
-        }
-        return null;
-    }
-
-
-    @NonNull
-    public static CharSequence getMentionText(@NonNull final CharSequence text) {
-        final int commentLength = text.length();
-        final SpannableStringBuilder stringBuilder = new SpannableStringBuilder(text, 0, commentLength);
-
-        for (int i = 0; i < commentLength; ++i) {
-            char currChar = text.charAt(i);
-
-            if (currChar == '@' || currChar == '#') {
-                final int startLen = i;
-
-                do {
-                    if (++i == commentLength) break;
-                    currChar = text.charAt(i);
-
-                    if (currChar == '.' && i + 1 < commentLength) {
-                        final char nextChar = text.charAt(i + 1);
-                        if (nextChar == '.' || nextChar == ' ' || nextChar == '#' || nextChar == '@' || nextChar == '/'
-                                || nextChar == '\r' || nextChar == '\n') {
-                            break;
-                        }
-                    } else if (currChar == '.')
-                        break;
-
-                    // for merged hashtags
-                    if (currChar == '#') {
-                        --i;
-                        break;
-                    }
-                } while (currChar != ' ' && currChar != '\r' && currChar != '\n' && currChar != '>' && currChar != '<'
-                        && currChar != ':' && currChar != ';' && currChar != '\'' && currChar != '"' && currChar != '['
-                        && currChar != ']' && currChar != '\\' && currChar != '=' && currChar != '-' && currChar != '!'
-                        && currChar != '$' && currChar != '%' && currChar != '^' && currChar != '&' && currChar != '*'
-                        && currChar != '(' && currChar != ')' && currChar != '{' && currChar != '}' && currChar != '/'
-                        && currChar != '|' && currChar != '?' && currChar != '`' && currChar != '~'
-                );
-
-                final int endLen = currChar != '#' ? i : i + 1; // for merged hashtags
-                stringBuilder.setSpan(new CommentMentionClickSpan(), startLen,
-                                      Math.min(commentLength, endLen), // fixed - crash when end index is greater than comment length ( @kernoeb )
-                                      Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-        }
-
-        return stringBuilder;
-    }
-
-    // isI: true if the content was requested from i.instagram.com instead of graphql
-    @Nullable
-    public static String getHighQualityPost(final JSONArray resources, final boolean isVideo, final boolean isI, final boolean low) {
-        try {
-            final int resourcesLen = resources.length();
-
-            final String[] sources = new String[resourcesLen];
-            int lastResMain = low ? 1000000 : 0, lastIndexMain = -1;
-            int lastResBase = low ? 1000000 : 0, lastIndexBase = -1;
-            for (int i = 0; i < resourcesLen; ++i) {
-                final JSONObject item = resources.getJSONObject(i);
-                if (item != null && (!isVideo || item.has(Constants.EXTRAS_PROFILE) || isI)) {
-                    sources[i] = item.getString(isI ? "url" : "src");
-                    final int currRes = item.getInt(isI ? "width" : "config_width") * item.getInt(isI ? "height" : "config_height");
-
-                    final String profile = isVideo ? item.optString(Constants.EXTRAS_PROFILE) : null;
-
-                    if (!isVideo || "MAIN".equals(profile)) {
-                        if (currRes > lastResMain && !low) {
-                            lastResMain = currRes;
-                            lastIndexMain = i;
-                        } else if (currRes < lastResMain && low) {
-                            lastResMain = currRes;
-                            lastIndexMain = i;
-                        }
-                    } else {
-                        if (currRes > lastResBase && !low) {
-                            lastResBase = currRes;
-                            lastIndexBase = i;
-                        } else if (currRes < lastResBase && low) {
-                            lastResBase = currRes;
-                            lastIndexBase = i;
-                        }
-                    }
-                }
-            }
-
-            if (lastIndexMain >= 0) return sources[lastIndexMain];
-            else if (lastIndexBase >= 0) return sources[lastIndexBase];
-        } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
-                                             new Pair<>("resourcesNull", resources == null),
-                                             new Pair<>("isVideo", isVideo));
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-        }
-        return null;
-    }
-
-    public static String getHighQualityImage(final JSONObject resources) {
-        String src = null;
-        try {
-            if (resources.has("display_resources"))
-                src = getHighQualityPost(resources.getJSONArray("display_resources"), false, false, false);
-            else if (resources.has("image_versions2"))
-                src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, false);
-            if (src == null) return resources.getString("display_url");
-        } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
-                                             new Pair<>("resourcesNull", resources == null));
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-        }
-        return src;
-    }
-
-    public static String getLowQualityImage(final JSONObject resources) {
-        String src = null;
-        try {
-            src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, true);
-        } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.UTILS, "getLowQualityImage",
-                                             new Pair<>("resourcesNull", resources == null));
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-        }
-        return src;
-    }
-
-    public static String getItemThumbnail(@NonNull final JSONArray jsonArray) {
-        String thumbnail = null;
-        final int imageResLen = jsonArray.length();
-
-        for (int i = 0; i < imageResLen; ++i) {
-            final JSONObject imageResource = jsonArray.optJSONObject(i);
-            try {
-                final int width = imageResource.getInt("width");
-                final int height = imageResource.getInt("height");
-                final float ratio = Float.parseFloat(String.format(Locale.ENGLISH, "%.2f", (float) height / width));
-                if (ratio >= 0.95f && ratio <= 1.0f) {
-                    thumbnail = imageResource.getString("url");
-                    break;
-                }
-            } catch (final Exception e) {
-                if (logCollector != null)
-                    logCollector.appendException(e, LogCollector.LogFile.UTILS, "getItemThumbnail");
-                if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-                thumbnail = null;
-            }
-        }
-
-        if (Utils.isEmpty(thumbnail)) thumbnail = jsonArray.optJSONObject(0).optString("url");
-
-        return thumbnail;
-    }
-
-    @Nullable
-    public static String getThumbnailUrl(@NonNull final JSONObject mediaObj, final MediaItemType mediaType) throws Exception {
-        String thumbnail = null;
-
-        if (mediaType == MediaItemType.MEDIA_TYPE_IMAGE || mediaType == MediaItemType.MEDIA_TYPE_VIDEO) {
-            final JSONObject imageVersions = mediaObj.optJSONObject("image_versions2");
-            if (imageVersions != null)
-                thumbnail = Utils.getItemThumbnail(imageVersions.getJSONArray("candidates"));
-
-        } else if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
-            final JSONArray carouselMedia = mediaObj.optJSONArray("carousel_media");
-            if (carouselMedia != null)
-                thumbnail = Utils.getItemThumbnail(carouselMedia.getJSONObject(0)
-                                                                .getJSONObject("image_versions2").getJSONArray("candidates"));
-        }
-
-        return thumbnail;
-    }
-
-    public static String getVideoUrl(@NonNull final JSONObject mediaObj) throws Exception {
-        String thumbnail = null;
-
-        final JSONArray imageVersions = mediaObj.optJSONArray("video_versions");
-        if (imageVersions != null)
-            thumbnail = Utils.getItemThumbnail(imageVersions);
-
-        return thumbnail;
-    }
-
-    @Nullable
-    public static MediaItemType getMediaItemType(final int mediaType) {
-        if (mediaType == 1) return MediaItemType.MEDIA_TYPE_IMAGE;
-        if (mediaType == 2) return MediaItemType.MEDIA_TYPE_VIDEO;
-        if (mediaType == 8) return MediaItemType.MEDIA_TYPE_SLIDER;
-        if (mediaType == 11) return MediaItemType.MEDIA_TYPE_VOICE;
-        return null;
-    }
-
-    public static DirectItemMediaModel getDirectMediaModel(final JSONObject mediaObj) throws Exception {
-        final DirectItemMediaModel mediaModel;
-        if (mediaObj == null) mediaModel = null;
-        else {
-            final JSONObject userObj = mediaObj.optJSONObject("user");
-
-            ProfileModel user = null;
-            if (userObj != null) {
-                user = new ProfileModel(
-                        userObj.getBoolean("is_private"),
-                        false,
-                        userObj.optBoolean("is_verified"),
-                        String.valueOf(userObj.get("pk")),
-                        userObj.getString("username"),
-                        userObj.getString("full_name"),
-                        null, null,
-                        userObj.getString("profile_pic_url"),
-                        null, 0, 0, 0, false, false, false, false);
-            }
-
-            final MediaItemType mediaType = getMediaItemType(mediaObj.optInt("media_type", -1));
-
-            String id = mediaObj.optString("id");
-            if (Utils.isEmpty(id)) id = null;
-
-            mediaModel = new DirectItemMediaModel(mediaType,
-                                                  mediaObj.optLong("expiring_at"),
-                                                  mediaObj.optLong("pk"),
-                                                  id,
-                                                  getThumbnailUrl(mediaObj, mediaType),
-                                                  mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? getVideoUrl(mediaObj) : null,
-                                                  user,
-                                                  mediaObj.optString("code"));
-        }
-        return mediaModel;
-    }
-
-    private static DirectItemType getDirectItemType(final String itemType) {
-        if ("placeholder".equals(itemType)) return DirectItemType.PLACEHOLDER;
-        if ("media".equals(itemType)) return DirectItemType.MEDIA;
-        if ("link".equals(itemType)) return DirectItemType.LINK;
-        if ("like".equals(itemType)) return DirectItemType.LIKE;
-        if ("reel_share".equals(itemType)) return DirectItemType.REEL_SHARE;
-        if ("media_share".equals(itemType)) return DirectItemType.MEDIA_SHARE;
-        if ("action_log".equals(itemType)) return DirectItemType.ACTION_LOG;
-        if ("raven_media".equals(itemType)) return DirectItemType.RAVEN_MEDIA;
-        if ("profile".equals(itemType)) return DirectItemType.PROFILE;
-        if ("video_call_event".equals(itemType)) return DirectItemType.VIDEO_CALL_EVENT;
-        if ("animated_media".equals(itemType)) return DirectItemType.ANIMATED_MEDIA;
-        if ("voice_media".equals(itemType)) return DirectItemType.VOICE_MEDIA;
-        if ("story_share".equals(itemType)) return DirectItemType.STORY_SHARE;
-        if ("clip".equals(itemType)) return DirectItemType.CLIP;
-        return DirectItemType.TEXT;
-    }
-
-    @NonNull
-    public static InboxThreadModel createInboxThreadModel(@NonNull final JSONObject data, final boolean inThreadView) throws Exception {
-        final InboxReadState readState = data.getInt("read_state") == 0 ? InboxReadState.STATE_READ : InboxReadState.STATE_UNREAD;
-        final String threadType = data.getString("thread_type"); // they're all "private", group is identified by boolean "is_group"
-
-        final String threadId = data.getString("thread_id");
-        final String threadV2Id = data.getString("thread_v2_id");
-        final String threadTitle = data.getString("thread_title");
-
-        final String threadNewestCursor = data.getString("newest_cursor");
-        final String threadOldestCursor = data.getString("oldest_cursor");
-        final String threadNextCursor = data.has("next_cursor") ? data.getString("next_cursor") : null;
-        final String threadPrevCursor = data.has("prev_cursor") ? data.getString("prev_cursor") : null;
-
-        final boolean threadHasOlder = data.getBoolean("has_older");
-        final long unreadCount = data.optLong("read_state", 0);
-
-        final long lastActivityAt = data.optLong("last_activity_at");
-        final boolean named = data.optBoolean("named");
-        final boolean muted = data.optBoolean("muted");
-        final boolean isPin = data.optBoolean("is_pin");
-        final boolean isSpam = data.optBoolean("is_spam");
-        final boolean isGroup = data.optBoolean("is_group");
-        final boolean pending = data.optBoolean("pending");
-        final boolean archived = data.optBoolean("archived");
-        final boolean canonical = data.optBoolean("canonical");
-
-        final JSONArray users = data.getJSONArray("users");
-        final int usersLen = users.length();
-        final JSONArray leftusers = data.getJSONArray("left_users");
-        final int leftusersLen = leftusers.length();
-        final JSONArray admins = data.getJSONArray("admin_user_ids");
-        final int adminsLen = admins.length();
-
-        final ProfileModel[] userModels = new ProfileModel[usersLen];
-        for (int j = 0; j < usersLen; ++j) {
-            final JSONObject userObject = users.getJSONObject(j);
-            userModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
-                                             false,
-                                             userObject.optBoolean("is_verified"),
-                                             String.valueOf(userObject.get("pk")),
-                                             userObject.getString("username"),
-                                             userObject.getString("full_name"),
-                                             null, null,
-                                             userObject.getString("profile_pic_url"),
-                                             null, 0, 0, 0, false, false, false, false);
-        }
-
-        final ProfileModel[] leftuserModels = new ProfileModel[leftusersLen];
-        for (int j = 0; j < leftusersLen; ++j) {
-            final JSONObject userObject = leftusers.getJSONObject(j);
-            leftuserModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
-                                                 false,
-                                                 userObject.optBoolean("is_verified"),
-                                                 String.valueOf(userObject.get("pk")),
-                                                 userObject.getString("username"),
-                                                 userObject.getString("full_name"),
-                                                 null, null,
-                                                 userObject.getString("profile_pic_url"),
-                                                 null, 0, 0, 0, false, false, false, false);
-        }
-
-        final Long[] adminIDs = new Long[adminsLen];
-        for (int j = 0; j < adminsLen; ++j) {
-            adminIDs[j] = admins.getLong(j);
-        }
-
-        final JSONArray items = data.getJSONArray("items");
-        final int itemsLen = items.length();
-
-        final ArrayList<DirectItemModel> itemModels = new ArrayList<>(itemsLen);
-        for (int i = 0; i < itemsLen; ++i) {
-            final JSONObject itemObject = items.getJSONObject(i);
-
-            CharSequence text = null;
-            ProfileModel profileModel = null;
-            DirectItemLinkModel linkModel = null;
-            DirectItemMediaModel directMedia = null;
-            DirectItemReelShareModel reelShareModel = null;
-            DirectItemActionLogModel actionLogModel = null;
-            DirectItemAnimatedMediaModel animatedMediaModel = null;
-            DirectItemVoiceMediaModel voiceMediaModel = null;
-            DirectItemRavenMediaModel ravenMediaModel = null;
-            DirectItemVideoCallEventModel videoCallEventModel = null;
-
-            final DirectItemType itemType = getDirectItemType(itemObject.getString("item_type"));
-            switch (itemType) {
-                case ANIMATED_MEDIA: {
-                    final JSONObject animatedMedia = itemObject.getJSONObject("animated_media");
-                    final JSONObject stickerImage = animatedMedia.getJSONObject("images").getJSONObject("fixed_height");
-
-                    animatedMediaModel = new DirectItemAnimatedMediaModel(animatedMedia.getBoolean("is_random"),
-                                                                          animatedMedia.getBoolean("is_sticker"), animatedMedia.getString("id"),
-                                                                          stickerImage.getString("url"), stickerImage.optString("webp"),
-                                                                          stickerImage.optString("mp4"),
-                                                                          stickerImage.getInt("height"), stickerImage.getInt("width"));
-                }
-                break;
-
-                case VOICE_MEDIA: {
-                    final JSONObject voiceMedia = itemObject.getJSONObject("voice_media").getJSONObject("media");
-                    final JSONObject audio = voiceMedia.getJSONObject("audio");
-
-                    int[] waveformData = null;
-                    final JSONArray waveformDataArray = audio.optJSONArray("waveform_data");
-                    if (waveformDataArray != null) {
-                        final int waveformDataLen = waveformDataArray.length();
-                        waveformData = new int[waveformDataLen];
-                        // 0.011775206
-                        for (int j = 0; j < waveformDataLen; ++j) {
-                            waveformData[j] = (int) (waveformDataArray.optDouble(j) * 10);
-                        }
-                    }
-
-                    voiceMediaModel = new DirectItemVoiceMediaModel(voiceMedia.getString("id"),
-                                                                    audio.getString("audio_src"), audio.getLong("duration"),
-                                                                    waveformData);
-                }
-                break;
-
-                case LINK: {
-                    final JSONObject linkObj = itemObject.getJSONObject("link");
-
-                    DirectItemLinkContext itemLinkContext = null;
-                    final JSONObject linkContext = linkObj.optJSONObject("link_context");
-                    if (linkContext != null) {
-                        itemLinkContext = new DirectItemLinkContext(
-                                linkContext.getString("link_url"),
-                                linkContext.optString("link_title"),
-                                linkContext.optString("link_summary"),
-                                linkContext.optString("link_image_url")
-                        );
-                    }
-
-                    linkModel = new DirectItemLinkModel(linkObj.getString("text"),
-                                                        linkObj.getString("client_context"),
-                                                        linkObj.optString("mutation_token"),
-                                                        itemLinkContext);
-                }
-                break;
-
-                case REEL_SHARE: {
-                    final JSONObject reelShare = itemObject.getJSONObject("reel_share");
-                    reelShareModel = new DirectItemReelShareModel(
-                            reelShare.optBoolean("is_reel_persisted"),
-                            reelShare.getLong("reel_owner_id"),
-                            reelShare.getJSONObject("media").getJSONObject("user").getString("username"),
-                            reelShare.getString("text"),
-                            reelShare.getString("type"),
-                            reelShare.getString("reel_type"),
-                            reelShare.optString("reel_name"),
-                            reelShare.optString("reel_id"),
-                            getDirectMediaModel(reelShare.optJSONObject("media")));
-                }
-                break;
-
-                case RAVEN_MEDIA: {
-                    final JSONObject visualMedia = itemObject.getJSONObject("visual_media");
-
-                    final JSONArray seenUserIdsArray = visualMedia.getJSONArray("seen_user_ids");
-                    final int seenUsersLen = seenUserIdsArray.length();
-                    final String[] seenUserIds = new String[seenUsersLen];
-                    for (int j = 0; j < seenUsersLen; j++)
-                        seenUserIds[j] = seenUserIdsArray.getString(j);
-
-                    RavenExpiringMediaActionSummaryModel expiringSummaryModel = null;
-                    final JSONObject actionSummary = visualMedia.optJSONObject("expiring_media_action_summary");
-                    if (actionSummary != null)
-                        expiringSummaryModel = new RavenExpiringMediaActionSummaryModel(
-                                actionSummary.getLong("timestamp"), actionSummary.getInt("count"),
-                                getExpiringMediaType(actionSummary.getString("type")));
-
-                    final RavenMediaViewType viewType;
-                    final String viewMode = visualMedia.getString("view_mode");
-                    switch (viewMode) {
-                        case "replayable":
-                            viewType = RavenMediaViewType.REPLAYABLE;
-                            break;
-                        case "permanent":
-                            viewType = RavenMediaViewType.PERMANENT;
-                            break;
-                        case "once":
-                        default:
-                            viewType = RavenMediaViewType.ONCE;
-                    }
-
-                    ravenMediaModel = new DirectItemRavenMediaModel(
-                            visualMedia.optLong(viewType == RavenMediaViewType.PERMANENT ? "url_expire_at_secs" : "replay_expiring_at_us"),
-                            visualMedia.optInt("playback_duration_secs"),
-                            visualMedia.getInt("seen_count"),
-                            seenUserIds,
-                            viewType,
-                            getDirectMediaModel(visualMedia.optJSONObject("media")),
-                            expiringSummaryModel);
-
-                }
-                break;
-
-                case VIDEO_CALL_EVENT: {
-                    final JSONObject videoCallEvent = itemObject.getJSONObject("video_call_event");
-                    videoCallEventModel = new DirectItemVideoCallEventModel(videoCallEvent.getLong("vc_id"),
-                                                                            videoCallEvent.optBoolean("thread_has_audio_only_call"),
-                                                                            videoCallEvent.getString("action"),
-                                                                            videoCallEvent.getString("description"));
-                }
-                break;
-
-                case PROFILE: {
-                    final JSONObject profile = itemObject.getJSONObject("profile");
-                    profileModel = new ProfileModel(profile.getBoolean("is_private"),
-                                                    false,
-                                                    profile.getBoolean("is_verified"),
-                                                    Long.toString(profile.getLong("pk")),
-                                                    profile.getString("username"),
-                                                    profile.getString("full_name"),
-                                                    null, null,
-                                                    profile.getString("profile_pic_url"),
-                                                    null, 0, 0, 0, false, false, false, false);
-                }
-                break;
-
-                case PLACEHOLDER:
-                    final JSONObject placeholder = itemObject.getJSONObject("placeholder");
-                    text = placeholder.getString("title") + "<br><small>" + placeholder.getString("message") + "</small>";
-                    break;
-
-                case ACTION_LOG:
-                    if (inThreadView && itemObject.optInt("hide_in_thread", 0) != 0)
-                        continue;
-                    final JSONObject actionLog = itemObject.getJSONObject("action_log");
-                    String desc = actionLog.getString("description");
-                    JSONArray bold = actionLog.getJSONArray("bold");
-                    for (int q = 0; q < bold.length(); ++q) {
-                        JSONObject boldItem = bold.getJSONObject(q);
-                        desc = desc.substring(0, boldItem.getInt("start") + q * 7) + "<b>"
-                                + desc.substring(boldItem.getInt("start") + q * 7, boldItem.getInt("end") + q * 7)
-                                + "</b>" + desc.substring(boldItem.getInt("end") + q * 7);
-                    }
-                    actionLogModel = new DirectItemActionLogModel(desc);
-                    break;
-
-                case MEDIA_SHARE:
-                    directMedia = getDirectMediaModel(itemObject.getJSONObject("media_share"));
-                    break;
-
-                case CLIP:
-                    directMedia = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
-                    break;
-
-                case MEDIA:
-                    directMedia = getDirectMediaModel(itemObject.optJSONObject("media"));
-                    break;
-
-                case LIKE:
-                    text = itemObject.getString("like");
-                    break;
-
-                case STORY_SHARE:
-                    final JSONObject storyShare = itemObject.getJSONObject("story_share");
-                    if (!storyShare.has("media"))
-                        text = "<small>" + storyShare.optString("message") + "</small>";
-                    else {
-                        reelShareModel = new DirectItemReelShareModel(
-                                storyShare.optBoolean("is_reel_persisted"),
-                                storyShare.getJSONObject("media").getJSONObject("user").getLong("pk"),
-                                storyShare.getJSONObject("media").getJSONObject("user").getString("username"),
-                                storyShare.getString("text"),
-                                storyShare.getString("story_share_type"),
-                                storyShare.getString("reel_type"),
-                                storyShare.optString("reel_name"),
-                                storyShare.optString("reel_id"),
-                                getDirectMediaModel(storyShare.optJSONObject("media")));
-                    }
-                    break;
-
-                case TEXT:
-                    if (!itemObject.has("text"))
-                        Log.d("AWAISKING_APP", "itemObject: " + itemObject); // todo
-                    text = itemObject.optString("text");
-                    break;
-            }
-
-            String[] liked = null;
-            if (!itemObject.isNull("reactions") && !itemObject.getJSONObject("reactions").isNull("likes")) {
-                JSONArray rawLiked = itemObject.getJSONObject("reactions").getJSONArray("likes");
-                liked = new String[rawLiked.length()];
-                for (int l = 0; l < rawLiked.length(); ++l) {
-                    liked[l] = String.valueOf(rawLiked.getJSONObject(l).getLong("sender_id"));
-                }
-            }
-
-            itemModels.add(new DirectItemModel(
-                    itemObject.getLong("user_id"),
-                    itemObject.getLong("timestamp"),
-                    itemObject.getString("item_id"),
-                    liked,
-                    itemType,
-                    text,
-                    linkModel,
-                    profileModel,
-                    reelShareModel,
-                    directMedia,
-                    actionLogModel,
-                    voiceMediaModel,
-                    ravenMediaModel,
-                    videoCallEventModel,
-                    animatedMediaModel));
-        }
-
-        itemModels.trimToSize();
-
-        return new InboxThreadModel(readState, threadId, threadV2Id, threadType, threadTitle,
-                                    threadNewestCursor, threadOldestCursor, threadNextCursor, threadPrevCursor,
-                                    null, // todo
-                                    userModels, leftuserModels, adminIDs,
-                                    itemModels.toArray(new DirectItemModel[0]),
-                                    muted, isPin, named, canonical,
-                                    pending, threadHasOlder, unreadCount, isSpam, isGroup, archived, lastActivityAt);
-    }
-
-    private static RavenExpiringMediaType getExpiringMediaType(final String type) {
-        if ("raven_sent".equals(type)) return RavenExpiringMediaType.RAVEN_SENT;
-        if ("raven_opened".equals(type)) return RavenExpiringMediaType.RAVEN_OPENED;
-        if ("raven_blocked".equals(type)) return RavenExpiringMediaType.RAVEN_BLOCKED;
-        if ("raven_sending".equals(type)) return RavenExpiringMediaType.RAVEN_SENDING;
-        if ("raven_replayed".equals(type)) return RavenExpiringMediaType.RAVEN_REPLAYED;
-        if ("raven_delivered".equals(type)) return RavenExpiringMediaType.RAVEN_DELIVERED;
-        if ("raven_suggested".equals(type)) return RavenExpiringMediaType.RAVEN_SUGGESTED;
-        if ("raven_screenshot".equals(type)) return RavenExpiringMediaType.RAVEN_SCREENSHOT;
-        if ("raven_cannot_deliver".equals(type)) return RavenExpiringMediaType.RAVEN_CANNOT_DELIVER;
-        //if ("raven_unknown".equals(type)) [default?]
-        return RavenExpiringMediaType.RAVEN_UNKNOWN;
-    }
-
-    public static NotificationType getNotifType(final String itemType) {
-        if ("GraphLikeAggregatedStory".equals(itemType)) return NotificationType.LIKE;
-        if ("GraphFollowAggregatedStory".equals(itemType)) return NotificationType.FOLLOW;
-        if ("GraphCommentMediaStory".equals(itemType)) return NotificationType.COMMENT;
-        if ("GraphMentionStory".equals(itemType)) return NotificationType.MENTION;
-        return null;
-    }
 
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
@@ -797,7 +104,6 @@ public final class Utils {
         return isNight;
     }
 
-
     public static void setTooltipText(final View view, @StringRes final int tooltipTextRes) {
         if (view != null && tooltipTextRes != 0 && tooltipTextRes != -1) {
             final Context context = view.getContext();
@@ -811,48 +117,6 @@ public final class Utils {
         }
     }
 
-    @NonNull
-    public static String millisToString(final long timeMs) {
-        final long totalSeconds = timeMs / 1000;
-
-        final long seconds = totalSeconds % 60;
-        final long minutes = totalSeconds / 60 % 60;
-        final long hours = totalSeconds / 3600;
-
-        final String strSec = Long.toString(seconds);
-        final String strMin = Long.toString(minutes);
-
-        final String strRetSec = strSec.length() > 1 ? strSec : "0" + seconds;
-        final String strRetMin = strMin.length() > 1 ? strMin : "0" + minutes;
-
-        final String retMinSec = strRetMin + ':' + strRetSec;
-
-        if (hours > 0)
-            return Long.toString(hours) + ':' + retMinSec;
-        return retMinSec;
-    }
-
-    // extracted from String class
-    public static int indexOfChar(@NonNull final CharSequence sequence, final int ch, final int startIndex) {
-        final int max = sequence.length();
-        if (startIndex < max) {
-            if (ch < Character.MIN_SUPPLEMENTARY_CODE_POINT) {
-                for (int i = startIndex; i < max; i++) if (sequence.charAt(i) == ch) return i;
-            } else if (Character.isValidCodePoint(ch)) {
-                final char hi = (char) ((ch >>> 10) + (Character.MIN_HIGH_SURROGATE - (Character.MIN_SUPPLEMENTARY_CODE_POINT >>> 10)));
-                final char lo = (char) ((ch & 0x3ff) + Character.MIN_LOW_SURROGATE);
-                for (int i = startIndex; i < max; i++)
-                    if (sequence.charAt(i) == hi && sequence.charAt(i + 1) == lo) return i;
-            }
-        }
-        return -1;
-    }
-
-    public static boolean hasMentions(final CharSequence text) {
-        if (isEmpty(text)) return false;
-        return Utils.indexOfChar(text, '@', 0) != -1 || Utils.indexOfChar(text, '#', 0) != -1;
-    }
-
     public static void copyText(final Context context, final CharSequence string) {
         final boolean ctxNotNull = context != null;
         if (ctxNotNull && clipboardManager == null)
@@ -860,205 +124,10 @@ public final class Utils {
 
         int toastMessage = R.string.clipboard_error;
         if (clipboardManager != null) {
-            clipboardManager.setPrimaryClip(ClipData.newPlainText(Utils.CHANNEL_NAME, string));
+            clipboardManager.setPrimaryClip(ClipData.newPlainText(Constants.CHANNEL_NAME, string));
             toastMessage = R.string.clipboard_copied;
         }
         if (ctxNotNull) Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    @NonNull
-    public static String readFromConnection(@NonNull final HttpURLConnection conn) throws Exception {
-        final StringBuilder sb = new StringBuilder();
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-            String line;
-            while ((line = br.readLine()) != null) sb.append(line).append('\n');
-        }
-        return sb.toString();
-    }
-
-    public static void batchDownload(@NonNull final Context context, @Nullable String username, final DownloadMethod method,
-                                     final List<? extends BasePostModel> itemsToDownload) {
-        if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
-
-        if (itemsToDownload == null || itemsToDownload.size() < 1) return;
-
-        if (username != null && username.charAt(0) == '@') username = username.substring(1);
-
-        if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-            batchDownloadImpl(context, username, method, itemsToDownload);
-        else if (context instanceof Activity)
-            ActivityCompat.requestPermissions((Activity) context, Utils.PERMS, 8020);
-    }
-
-    private static void batchDownloadImpl(@NonNull final Context context,
-                                          @Nullable final String username,
-                                          final DownloadMethod method,
-                                          final List<? extends BasePostModel> itemsToDownload) {
-        File dir = new File(Environment.getExternalStorageDirectory(), "Download");
-
-        if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-            final String customPath = settingsHelper.getString(FOLDER_PATH);
-            if (!Utils.isEmpty(customPath)) dir = new File(customPath);
-        }
-
-        if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !isEmpty(username))
-            dir = new File(dir, username);
-
-        if (!dir.exists() && !dir.mkdirs()) {
-            Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        boolean checkEachPost = false;
-        switch (method) {
-            case DOWNLOAD_SAVED:
-            case DOWNLOAD_MAIN:
-                checkEachPost = true;
-                break;
-            case DOWNLOAD_FEED:
-                checkEachPost = false;
-                break;
-        }
-        final int itemsToDownloadSize = itemsToDownload.size();
-        for (int i = 0; i < itemsToDownloadSize; i++) {
-            final BasePostModel selectedItem = itemsToDownload.get(i);
-            if (!checkEachPost) {
-                final boolean isSlider = itemsToDownloadSize > 1;
-                final File saveFile = getDownloadSaveFile(dir, selectedItem, isSlider ? "_slide_" + (i + 1) : "");
-                new DownloadAsync(context,
-                                  selectedItem.getDisplayUrl(),
-                                  saveFile,
-                                  file -> selectedItem.setDownloaded(true))
-                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            } else {
-                final File finalDir = dir;
-                new PostFetcher(selectedItem.getShortCode(), result -> {
-                    if (result != null) {
-                        final int resultsSize = result.length;
-                        final boolean multiResult = resultsSize > 1;
-                        for (int j = 0; j < resultsSize; j++) {
-                            final BasePostModel model = result[j];
-                            final File saveFile = getDownloadSaveFile(finalDir, model, multiResult ? "_slide_" + (j + 1) : "");
-                            new DownloadAsync(context,
-                                              model.getDisplayUrl(),
-                                              saveFile,
-                                              file -> model.setDownloaded(true))
-                                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        }
-                    }
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        }
-    }
-
-    public static void dmDownload(@NonNull final Context context, @Nullable final String username, final DownloadMethod method,
-                                  final DirectItemMediaModel itemsToDownload) {
-        if (settingsHelper == null) settingsHelper = new SettingsHelper(context);
-
-        if (itemsToDownload == null) return;
-
-        if (ContextCompat.checkSelfPermission(context, Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-            dmDownloadImpl(context, username, method, itemsToDownload);
-        else if (context instanceof Activity)
-            ActivityCompat.requestPermissions((Activity) context, Utils.PERMS, 8020);
-    }
-
-    private static void dmDownloadImpl(@NonNull final Context context, @Nullable final String username,
-                                       final DownloadMethod method, final DirectItemMediaModel selectedItem) {
-        File dir = new File(Environment.getExternalStorageDirectory(), "Download");
-
-        if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-            final String customPath = settingsHelper.getString(FOLDER_PATH);
-            if (!Utils.isEmpty(customPath)) dir = new File(customPath);
-        }
-
-        if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !isEmpty(username))
-            dir = new File(dir, username);
-
-        if (dir.exists() || dir.mkdirs()) {
-            new DownloadAsync(context,
-                              selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
-                              getDownloadSaveFileDm(dir, selectedItem, ""),
-                              null).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } else
-            Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
-    }
-
-    @NonNull
-    private static File getDownloadSaveFile(final File finalDir, @NonNull final BasePostModel model, final String sliderPrefix) {
-        final String displayUrl = model.getDisplayUrl();
-        return new File(finalDir, model.getPostId() + '_' + model.getPosition() + sliderPrefix +
-                getExtensionFromModel(displayUrl, model));
-    }
-
-    @NonNull
-    private static File getDownloadSaveFileDm(final File finalDir, @NonNull final DirectItemMediaModel model, final String sliderPrefix) {
-        final String displayUrl = model.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? model.getVideoUrl() : model.getThumbUrl();
-        return new File(finalDir, model.getId() + sliderPrefix +
-                getExtensionFromModel(displayUrl, model));
-    }
-
-    @NonNull
-    public static String getExtensionFromModel(@NonNull final String url, final Object model) {
-        final String extension;
-        final int index = url.indexOf('?');
-
-        if (index != -1) extension = url.substring(index - 4, index);
-        else {
-            final boolean isVideo;
-            if (model instanceof StoryModel)
-                isVideo = ((StoryModel) model).getItemType() == MediaItemType.MEDIA_TYPE_VIDEO;
-            else if (model instanceof BasePostModel)
-                isVideo = ((BasePostModel) model).getItemType() == MediaItemType.MEDIA_TYPE_VIDEO;
-            else
-                isVideo = false;
-            extension = isVideo || url.contains(".mp4") ? ".mp4" : ".jpg";
-        }
-
-        return extension;
-    }
-
-    public static void checkExistence(final File downloadDir, final File customDir, final boolean isSlider,
-                                      @NonNull final BasePostModel model) {
-        boolean exists = false;
-
-        try {
-            final String displayUrl = model.getDisplayUrl();
-            int index = displayUrl.indexOf('?');
-            if (index < 0) {
-                return;
-            }
-            final String fileName = model.getPostId() + '_';
-            final String extension = displayUrl.substring(index - 4, index);
-
-            final String fileWithoutPrefix = fileName + '0' + extension;
-            exists = new File(downloadDir, fileWithoutPrefix).exists();
-            if (!exists) {
-                final String fileWithPrefix = fileName + "[\\d]+(|_slide_[\\d]+)(\\.mp4|\\" + extension + ")";
-                final FilenameFilter filenameFilter = (dir, name) -> Pattern.matches(fileWithPrefix, name);
-
-                File[] files = downloadDir.listFiles(filenameFilter);
-                if ((files == null || files.length < 1) && customDir != null)
-                    files = customDir.listFiles(filenameFilter);
-
-                if (files != null && files.length >= 1) exists = true;
-            }
-        } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.UTILS, "checkExistence",
-                                             new Pair<>("isSlider", isSlider),
-                                             new Pair<>("model", model));
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-        }
-
-        model.setDownloaded(exists);
-    }
-
-    public static boolean hasKey(final String key, final String username, final String name) {
-        if (!Utils.isEmpty(key)) {
-            final boolean hasUserName = username != null && username.toLowerCase().contains(key);
-            if (!hasUserName && name != null) return name.toLowerCase().contains(key);
-        }
-        return true;
     }
 
     public static void showImportExportDialog(final Context context) {
@@ -1097,7 +166,7 @@ public final class Utils {
                 if (v == importExportBinding.btnSaveTo) {
                     final Editable text = importExportBinding.etPassword.etPassword.getText();
                     final boolean passwordChecked = importExportBinding.cbPassword.isChecked();
-                    if (passwordChecked && isEmpty(text))
+                    if (passwordChecked && TextUtils.isEmpty(text))
                         Toast.makeText(context, R.string.dialog_export_err_password_empty, Toast.LENGTH_SHORT).show();
                     else {
                         new DirectoryChooser().setInitialDirectory(folderPath).setInteractionListener(path -> {
@@ -1191,130 +260,20 @@ public final class Utils {
         }
     }
 
-    public static CharSequence getSpannableUrl(final String url) {
-        if (Utils.isEmpty(url)) return url;
-        final int httpIndex = url.indexOf("http:");
-        final int httpsIndex = url.indexOf("https:");
-        if (httpIndex == -1 && httpsIndex == -1) return url;
-
-        final int length = url.length();
-
-        final int startIndex = httpIndex != -1 ? httpIndex : httpsIndex;
-        final int spaceIndex = url.indexOf(' ', startIndex + 1);
-
-        final int endIndex = (spaceIndex != -1 ? spaceIndex : length);
-
-        final String extractUrl = url.substring(startIndex, Math.min(length, endIndex));
-
-        final SpannableString spannableString = new SpannableString(url);
-        spannableString.setSpan(new URLSpan(extractUrl), startIndex, endIndex, 0);
-
-        return spannableString;
-    }
-
-    public static boolean isEmpty(final CharSequence charSequence) {
-        if (charSequence == null || charSequence.length() < 1) return true;
-        if (charSequence instanceof String) {
-            String str = (String) charSequence;
-            if ("".equals(str) || "null".equals(str) || str.isEmpty()) return true;
-            str = str.trim();
-            return "".equals(str) || "null".equals(str) || str.isEmpty();
-        }
-        return "null".contentEquals(charSequence) || "".contentEquals(charSequence) || charSequence.length() < 1;
-    }
-
     public static boolean isImage(final Uri itemUri, final ContentResolver contentResolver) {
         String mimeType;
         if (itemUri == null) return false;
         final String scheme = itemUri.getScheme();
-        if (isEmpty(scheme))
+        if (TextUtils.isEmpty(scheme))
             mimeType = mimeTypeMap.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
         else
             mimeType = scheme.equals(ContentResolver.SCHEME_CONTENT) ? contentResolver.getType(itemUri)
                                                                      : mimeTypeMap.getMimeTypeFromExtension
                                                                              (MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
 
-        if (isEmpty(mimeType)) return true;
+        if (TextUtils.isEmpty(mimeType)) return true;
         mimeType = mimeType.toLowerCase();
         return mimeType.startsWith("image");
-    }
-
-    @Nullable
-    public static String getCookie(@Nullable final String webViewUrl) {
-        int lastLongestCookieLength = 0;
-        String mainCookie = null;
-
-        String cookie;
-        if (!Utils.isEmpty(webViewUrl)) {
-            cookie = Utils.COOKIE_MANAGER.getCookie(webViewUrl);
-            if (cookie != null) {
-                final int cookieLen = cookie.length();
-                if (cookieLen > lastLongestCookieLength) {
-                    mainCookie = cookie;
-                    lastLongestCookieLength = cookieLen;
-                }
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("https://instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("https://instagram.com/");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("http://instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("http://instagram.com/");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("https://www.instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("https://www.instagram.com/");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("http://www.instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = Utils.COOKIE_MANAGER.getCookie("http://www.instagram.com/");
-        if (cookie != null && cookie.length() > lastLongestCookieLength) mainCookie = cookie;
-
-        return mainCookie;
     }
 
     public static void errorFinish(@NonNull final Activity activity) {
@@ -1357,35 +316,6 @@ public final class Utils {
         return null;
     }
 
-    public static void setConnectionHeaders(final HttpURLConnection connection, final Map<String, String> headers) {
-        if (connection == null || headers == null || headers.isEmpty()) {
-            return;
-        }
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            connection.setRequestProperty(header.getKey(), header.getValue());
-        }
-    }
-
-    public static String getQueryString(final Map<String, String> queryParamsMap) {
-        if (queryParamsMap == null || queryParamsMap.isEmpty()) {
-            return "";
-        }
-        final Set<Map.Entry<String, String>> params = queryParamsMap.entrySet();
-        final StringBuilder builder = new StringBuilder();
-        for (final Map.Entry<String, String> param : params) {
-            if (isEmpty(param.getKey())) {
-                continue;
-            }
-            if (builder.length() != 0) {
-                builder.append("&");
-            }
-            builder.append(param.getKey());
-            builder.append("=");
-            builder.append(param.getValue() != null ? param.getValue() : "");
-        }
-        return builder.toString();
-    }
-
     public static SimpleCache getSimpleCacheInstance(final Context context) {
         if (context == null) {
             return null;
@@ -1393,47 +323,8 @@ public final class Utils {
         final ExoDatabaseProvider exoDatabaseProvider = new ExoDatabaseProvider(context);
         final File cacheDir = context.getCacheDir();
         if (simpleCache == null && cacheDir != null) {
-            simpleCache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(MAX_BYTES), exoDatabaseProvider);
+            simpleCache = new SimpleCache(cacheDir, new LeastRecentlyUsedCacheEvictor(VIDEO_CACHE_MAX_BYTES), exoDatabaseProvider);
         }
         return simpleCache;
-    }
-
-    public static int getResultingHeight(final int requiredWidth, final int height, final int width) {
-        return requiredWidth * height / width;
-    }
-
-    public static int getResultingWidth(final int requiredHeight, final int height, final int width) {
-        return requiredHeight * width / height;
-    }
-
-    public static String getCsrfTokenFromCookie(final String cookie) {
-        if (cookie == null) {
-            return null;
-        }
-        return cookie.split("csrftoken=")[1].split(";")[0];
-    }
-
-    // public static long random(final long lower, final long upper) {
-    //     final long result = lower + new Random().nextLong() * (upper - lower + 1);
-    //     return result;
-    // }
-
-    public static long random(long origin, long bound) {
-        final Random random = new Random();
-        long r = random.nextLong();
-        long n = bound - origin, m = n - 1;
-        if ((n & m) == 0L)  // power of two
-            r = (r & m) + origin;
-        else if (n > 0L) {  // reject over-represented candidates
-            for (long u = r >>> 1;            // ensure nonnegative
-                 u + m - (r = u % n) < 0L;    // rejection check
-                 u = random.nextLong() >>> 1) // retry
-                ;
-            r += origin;
-        } else {              // range not representable as long
-            while (r < origin || r >= bound)
-                r = random.nextLong();
-        }
-        return r;
     }
 }

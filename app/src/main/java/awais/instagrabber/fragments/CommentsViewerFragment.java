@@ -44,6 +44,8 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.services.MediaService;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
@@ -134,7 +136,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         binding.swipeRefreshLayout.setRefreshing(true);
         resources = getResources();
-        if (!Utils.isEmpty(cookie)) {
+        if (!TextUtils.isEmpty(cookie)) {
             binding.commentField.setStartIconVisible(false);
             binding.commentField.setEndIconVisible(false);
             binding.commentField.setVisibility(View.VISIBLE);
@@ -219,7 +221,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                 break;
             case 5: // like/unlike comment
                 if (!commentModel.getLiked()) {
-                    mediaService.commentLike(commentModel.getId(), Utils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
+                    mediaService.commentLike(commentModel.getId(), CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
                             commentModel = null;
@@ -238,7 +240,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                     });
                     return;
                 }
-                mediaService.commentUnlike(commentModel.getId(), Utils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
+                mediaService.commentUnlike(commentModel.getId(), CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
                     @Override
                     public void onSuccess(final Boolean result) {
                         commentModel = null;
@@ -257,10 +259,10 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                 });
                 break;
             case 6: // delete comment
-                final String userId = Utils.getUserIdFromCookie(cookie);
+                final String userId = CookieUtils.getUserIdFromCookie(cookie);
                 if (userId == null) return;
                 mediaService.deleteComment(
-                        postId, userId, commentModel.getId(), Utils.getCsrfTokenFromCookie(cookie),
+                        postId, userId, commentModel.getId(), CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<Boolean>() {
                             @Override
                             public void onSuccess(final Boolean result) {
@@ -293,8 +295,8 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
 
             String[] commentDialogList;
 
-            final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
-            if (!Utils.isEmpty(cookie)
+            final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+            if (!TextUtils.isEmpty(cookie)
                     && userIdFromCookie != null
                     && (userIdFromCookie.equals(commentModel.getProfileModel().getId()) || userIdFromCookie.equals(userId))) {
                 commentDialogList = new String[]{
@@ -307,7 +309,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                                                 : resources.getString(R.string.comment_viewer_like_comment),
                         resources.getString(R.string.comment_viewer_delete_comment)
                 };
-            } else if (!Utils.isEmpty(cookie)) {
+            } else if (!TextUtils.isEmpty(cookie)) {
                 commentDialogList = new String[]{
                         resources.getString(R.string.open_profile),
                         resources.getString(R.string.view_pfp),
@@ -344,17 +346,17 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
 
     private final View.OnClickListener newCommentListener = v -> {
         final Editable text = binding.commentText.getText();
-        if (text == null || Utils.isEmpty(text.toString())) {
+        if (text == null || TextUtils.isEmpty(text.toString())) {
             Toast.makeText(requireContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
             return;
         }
-        final String userId = Utils.getUserIdFromCookie(cookie);
+        final String userId = CookieUtils.getUserIdFromCookie(cookie);
         if (userId == null) return;
         String replyToId = null;
         if (commentModel != null) {
             replyToId = commentModel.getId();
         }
-        mediaService.comment(postId, text.toString(), userId, replyToId, Utils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
+        mediaService.comment(postId, text.toString(), userId, replyToId, CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
             @Override
             public void onSuccess(final Boolean result) {
                 commentModel = null;

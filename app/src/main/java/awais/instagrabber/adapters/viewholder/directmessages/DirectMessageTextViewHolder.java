@@ -12,7 +12,7 @@ import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmTextBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectMessageTextViewHolder extends DirectMessageItemViewHolder {
 
@@ -32,8 +32,8 @@ public class DirectMessageTextViewHolder extends DirectMessageItemViewHolder {
     public void bindItem(final DirectItemModel directItemModel) {
         final Context context = itemView.getContext();
         CharSequence text = directItemModel.getText();
-        text = Utils.getSpannableUrl(text.toString()); // for urls
-        if (Utils.hasMentions(text)) text = Utils.getMentionText(text); // for mentions
+        text = TextUtils.getSpannableUrl(text.toString()); // for urls
+        if (TextUtils.hasMentions(text)) text = TextUtils.getMentionText(text); // for mentions
         if (text instanceof Spanned)
             binding.tvMessage.setText(text, TextView.BufferType.SPANNABLE);
         else if (text == "") {

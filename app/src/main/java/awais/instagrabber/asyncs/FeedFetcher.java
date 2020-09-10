@@ -19,7 +19,9 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -63,7 +65,7 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
             final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
 
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final String json = Utils.readFromConnection(urlConnection);
+                final String json = NetworkUtils.readFromConnection(urlConnection);
                 // Log.d(TAG, json);
                 final JSONObject timelineFeed = new JSONObject(json).getJSONObject("data")
                                                                     .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_web_feed_timeline");
@@ -94,12 +96,12 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                     final long videoViews = feedItem.optLong("video_view_count", 0);
 
                     final String displayUrl = feedItem.optString("display_url");
-                    if (Utils.isEmpty(displayUrl)) continue;
+                    if (TextUtils.isEmpty(displayUrl)) continue;
                     final String resourceUrl;
 
                     if (isVideo) resourceUrl = feedItem.getString("video_url");
                     else
-                        resourceUrl = feedItem.has("display_resources") ? Utils.getHighQualityImage(feedItem) : displayUrl;
+                        resourceUrl = feedItem.has("display_resources") ? ResponseBodyUtils.getHighQualityImage(feedItem) : displayUrl;
 
                     ProfileModel profileModel = null;
                     if (feedItem.has("owner")) {
@@ -184,7 +186,7 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                                     sliderItems[j] = new ViewerPostModel(
                                             isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                             node.getString(Constants.EXTRAS_ID),
-                                            isChildVideo ? node.getString("video_url") : Utils.getHighQualityImage(node),
+                                            isChildVideo ? node.getString("video_url") : ResponseBodyUtils.getHighQualityImage(node),
                                             null,
                                             null,
                                             null,

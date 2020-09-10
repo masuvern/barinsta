@@ -20,7 +20,9 @@ import awais.instagrabber.models.direct_messages.InboxModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awaisomereport.LogCollector.LogFile;
@@ -32,7 +34,7 @@ public final class InboxFetcher extends AsyncTask<Void, Void, InboxModel> {
     private final FetchListener<InboxModel> fetchListener;
 
     public InboxFetcher(final String endCursor, final FetchListener<InboxModel> fetchListener) {
-        this.endCursor = Utils.isEmpty(endCursor) ? "" : "?cursor=" + endCursor;
+        this.endCursor = TextUtils.isEmpty(endCursor) ? "" : "?cursor=" + endCursor;
         this.fetchListener = fetchListener;
     }
 
@@ -63,7 +65,7 @@ public final class InboxFetcher extends AsyncTask<Void, Void, InboxModel> {
                 conn.disconnect();
                 return null;
             }
-            JSONObject data = new JSONObject(Utils.readFromConnection(conn));
+            JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn));
             // try (FileWriter fileWriter = new FileWriter(new File("/sdcard/test.json"))) {
             //     fileWriter.write(data.toString(2));
             // }
@@ -88,7 +90,7 @@ public final class InboxFetcher extends AsyncTask<Void, Void, InboxModel> {
                 inboxThreadModels = new InboxThreadModel[threadsLen];
 
                 for (int i = 0; i < threadsLen; ++i)
-                    inboxThreadModels[i] = Utils.createInboxThreadModel(threadsArray.getJSONObject(i), false);
+                    inboxThreadModels[i] = ResponseBodyUtils.createInboxThreadModel(threadsArray.getJSONObject(i), false);
             }
 
             result = new InboxModel(hasOlder, hasPendingTopRequests,

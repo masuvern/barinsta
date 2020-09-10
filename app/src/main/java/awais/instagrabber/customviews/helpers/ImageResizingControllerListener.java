@@ -8,7 +8,7 @@ import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.view.DraweeView;
 import com.facebook.imagepipeline.image.ImageInfo;
 
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NumberUtils;
 
 public class ImageResizingControllerListener<T extends DraweeView<GenericDraweeHierarchy>> extends BaseControllerListener<ImageInfo> {
     private static final String TAG = "ImageResizingController";
@@ -34,7 +34,7 @@ public class ImageResizingControllerListener<T extends DraweeView<GenericDraweeH
             // final float aspectRatio = ((float) width) / height;
             final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
             // final int deviceWidth = Utils.displayMetrics.widthPixels;
-            final int resultingHeight = Utils.getResultingHeight(requiredWidth, height, width);
+            final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, height, width);
             layoutParams.width = requiredWidth;
             layoutParams.height = resultingHeight;
             imageView.requestLayout();

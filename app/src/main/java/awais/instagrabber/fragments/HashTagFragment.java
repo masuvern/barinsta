@@ -1,6 +1,5 @@
 package awais.instagrabber.fragments;
 
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -53,6 +52,9 @@ import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.PostsViewModel;
 import awaisomereport.LogCollector;
@@ -101,10 +103,10 @@ public class HashTagFragment extends Fragment {
                         if (postsAdapter == null || hashtag == null) {
                             return false;
                         }
-                        Utils.batchDownload(requireContext(),
-                                            hashtag,
-                                            DownloadMethod.DOWNLOAD_MAIN,
-                                            postsAdapter.getSelectedModels());
+                        DownloadUtils.batchDownload(requireContext(),
+                                                    hashtag,
+                                                    DownloadMethod.DOWNLOAD_MAIN,
+                                                    postsAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }
@@ -168,7 +170,7 @@ public class HashTagFragment extends Fragment {
     private void init() {
         if (getArguments() == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         final HashTagFragmentArgs fragmentArgs = HashTagFragmentArgs.fromBundle(getArguments());
         hashtag = fragmentArgs.getHashtag();
         setTitle();
@@ -251,7 +253,7 @@ public class HashTagFragment extends Fragment {
         stopCurrentExecutor();
         binding.btnFollowTag.setVisibility(View.VISIBLE);
         binding.swipeRefreshLayout.setRefreshing(true);
-        if (Utils.isEmpty(hashtag)) return;
+        if (TextUtils.isEmpty(hashtag)) return;
         currentlyExecuting = new PostsFetcher(hashtag.substring(1), PostItemType.HASHTAG, endCursor, postsFetchListener)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         if (isLoggedIn) {

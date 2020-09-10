@@ -81,6 +81,9 @@ import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.services.StoriesService;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
@@ -175,10 +178,10 @@ public class StoryViewerFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_download:
-                if (ContextCompat.checkSelfPermission(requireContext(), Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
+                if (ContextCompat.checkSelfPermission(requireContext(), DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
                     downloadStory();
                 else
-                    ActivityCompat.requestPermissions(requireActivity(), Utils.PERMS, 8020);
+                    ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
                 return true;
             case R.id.action_dms:
                 final EditText input = new EditText(requireContext());
@@ -236,12 +239,12 @@ public class StoryViewerFragment extends Fragment {
     }
 
     private void init() {
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (getArguments() == null) return;
         fragmentArgs = StoryViewerFragmentArgs.fromBundle(getArguments());
         currentFeedStoryIndex = fragmentArgs.getFeedStoryIndex();
         highlight = fragmentArgs.getHighlight();
-        isHighlight = !Utils.isEmpty(highlight);
+        isHighlight = !TextUtils.isEmpty(highlight);
         if (currentFeedStoryIndex >= 0) {
             viewModel = isHighlight
                         ? new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
@@ -394,7 +397,7 @@ public class StoryViewerFragment extends Fragment {
                                     poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
-                                if (!Utils.isEmpty(cookie))
+                                if (!TextUtils.isEmpty(cookie))
                                     new VoteAction(currentStory, poll, cookie, choice -> {
                                         if (choice > -1) {
                                             poll.setMyChoice(choice);
@@ -439,7 +442,7 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(requireContext())
                         .setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, choices), (d, w) -> {
-                            if (quiz.getMyChoice() == -1 && !Utils.isEmpty(cookie))
+                            if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie))
                                 new QuizAction(currentStory, quiz, cookie, choice -> {
                                     if (choice > -1) {
                                         quiz.setMyChoice(choice);
@@ -484,12 +487,12 @@ public class StoryViewerFragment extends Fragment {
                 currentStoryMediaId = model.getStoryMediaId();
                 currentStoryUsername = model.getProfileModel().getUsername();
             }
-        } else if (!Utils.isEmpty(fragmentArgs.getProfileId()) && !Utils.isEmpty(fragmentArgs.getUsername())) {
+        } else if (!TextUtils.isEmpty(fragmentArgs.getProfileId()) && !TextUtils.isEmpty(fragmentArgs.getUsername())) {
             currentStoryMediaId = fragmentArgs.getProfileId();
             username = fragmentArgs.getUsername();
         }
         isHashtag = fragmentArgs.getIsHashtag();
-        final boolean hasUsername = !Utils.isEmpty(currentStoryUsername);
+        final boolean hasUsername = !TextUtils.isEmpty(currentStoryUsername);
         if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -572,7 +575,7 @@ public class StoryViewerFragment extends Fragment {
         binding.poll.setTag(poll);
 
         question = currentStory.getQuestion();
-        binding.answer.setVisibility((question != null && !Utils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
+        binding.answer.setVisibility((question != null && !TextUtils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
         binding.answer.setTag(question);
 
         mentions = currentStory.getMentions();
@@ -611,10 +614,10 @@ public class StoryViewerFragment extends Fragment {
 
             if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
                 final String customPath = settingsHelper.getString(FOLDER_PATH);
-                if (!Utils.isEmpty(customPath)) dir = new File(customPath);
+                if (!TextUtils.isEmpty(customPath)) dir = new File(customPath);
             }
 
-            if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !Utils.isEmpty(currentStoryUsername))
+            if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(currentStoryUsername))
                 dir = new File(dir, currentStoryUsername);
 
             if (dir.exists() || dir.mkdirs()) {
@@ -622,7 +625,7 @@ public class StoryViewerFragment extends Fragment {
                                         ? currentStory.getVideoUrl()
                                         : currentStory.getStoryUrl();
                 final File saveFile = new File(dir, currentStory.getStoryMediaId() + "_" + currentStory.getTimestamp()
-                        + Utils.getExtensionFromModel(storyUrl, currentStory));
+                        + DownloadUtils.getExtensionFromModel(storyUrl, currentStory));
 
                 new DownloadAsync(requireContext(), storyUrl, saveFile, result -> {
                     final int toastRes = result != null && result.exists() ? R.string.downloader_complete
@@ -664,7 +667,7 @@ public class StoryViewerFragment extends Fragment {
                                                           if (menuDownload != null) {
                                                               menuDownload.setVisible(true);
                                                           }
-                                                          if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie)) {
+                                                          if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie)) {
                                                               menuDm.setVisible(true);
                                                           }
                                                           binding.progressView.setVisibility(View.GONE);
@@ -693,7 +696,7 @@ public class StoryViewerFragment extends Fragment {
                                         final LoadEventInfo loadEventInfo,
                                         final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie))
+                if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie))
                     menuDm.setVisible(true);
                 binding.progressView.setVisibility(View.GONE);
             }
@@ -704,7 +707,7 @@ public class StoryViewerFragment extends Fragment {
                                       final LoadEventInfo loadEventInfo,
                                       final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null && !Utils.isEmpty(cookie))
+                if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie))
                     menuDm.setVisible(true);
                 binding.progressView.setVisibility(View.VISIBLE);
             }

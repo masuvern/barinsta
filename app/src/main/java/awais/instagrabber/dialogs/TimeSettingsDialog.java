@@ -23,7 +23,7 @@ import java.util.GregorianCalendar;
 
 import awais.instagrabber.databinding.DialogTimeSettingsBinding;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class TimeSettingsDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener,
         View.OnClickListener, TextWatcher {
@@ -89,7 +89,7 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
             final boolean isSwapTime = !timeSettingsBinding.cbSwapTimeDate.isChecked();
 
             selectedFormat = (isSwapTime ? timeStr : dateStr)
-                    + (Utils.isEmpty(sepStr) || timeSettingsBinding.spSeparator.getSelectedItemPosition() == 0 ? " " : " '" + sepStr + "' ")
+                    + (TextUtils.isEmpty(sepStr) || timeSettingsBinding.spSeparator.getSelectedItemPosition() == 0 ? " " : " '" + sepStr + "' ")
                     + (isSwapTime ? dateStr : timeStr);
 
             timeSettingsBinding.btnConfirm.setEnabled(true);
@@ -102,7 +102,7 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
         try {
             //noinspection ConstantConditions
             final String string = timeSettingsBinding.etCustomFormat.getText().toString();
-            if (Utils.isEmpty(string)) throw new NullPointerException();
+            if (TextUtils.isEmpty(string)) throw new NullPointerException();
             currentFormat = new SimpleDateFormat(string, LocaleUtils.getCurrentLocale());
             final String format = currentFormat.format(magicDate);
             timeSettingsBinding.timePreview.setText(format);

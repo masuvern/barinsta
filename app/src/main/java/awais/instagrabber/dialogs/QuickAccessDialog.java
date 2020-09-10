@@ -23,7 +23,10 @@ import java.util.ArrayList;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SimpleAdapter;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DataBox;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -58,7 +61,7 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         btnFavorite = contentView.findViewById(R.id.btnFavorite);
         btnImportExport = contentView.findViewById(R.id.importExport);
 
-        isQuery = !Utils.isEmpty(userQuery);
+        isQuery = !TextUtils.isEmpty(userQuery);
         btnFavorite.setVisibility(isQuery ? View.VISIBLE : View.GONE);
         Utils.setTooltipText(btnImportExport, R.string.import_export);
 
@@ -75,12 +78,12 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         rvFavorites.setAdapter(favoritesAdapter);
 
         final String cookieStr = settingsHelper.getString(Constants.COOKIE);
-        if (!Utils.isEmpty(cookieStr)
+        if (!TextUtils.isEmpty(cookieStr)
                 || Utils.dataBox.getCookieCount() > 0 // fallback for export / import
         ) {
             rvQuickAccess.addItemDecoration(itemDecoration);
             final ArrayList<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
-            if (!Utils.isEmpty(cookieStr) && allCookies != null) {
+            if (!TextUtils.isEmpty(cookieStr) && allCookies != null) {
                 for (final DataBox.CookieModel cookie : allCookies) {
                     if (cookieStr.equals(cookie.getCookie())) {
                         cookie.setSelected(true);
@@ -106,8 +109,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
                 favoritesAdapter.setItems(Utils.dataBox.getAllFavorites());
             }
         } else if (v == btnImportExport) {
-            if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
-                requestPermissions(Utils.PERMS, 6007);
+            if (ContextCompat.checkSelfPermission(activity, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
+                requestPermissions(DownloadUtils.PERMS, 6007);
             else Utils.showImportExportDialog(v.getContext());
 
         } else if (tag instanceof DataBox.FavoriteModel) {
@@ -120,7 +123,7 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             final DataBox.CookieModel cookieModel = (DataBox.CookieModel) tag;
             if (!cookieModel.isSelected()) {
                 settingsHelper.putString(Constants.COOKIE, cookieModel.getCookie());
-                Utils.setupCookies(cookieModel.getCookie());
+                CookieUtils.setupCookies(cookieModel.getCookie());
                 cookieChanged = true;
             }
             dismiss();

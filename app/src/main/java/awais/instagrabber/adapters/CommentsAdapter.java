@@ -18,7 +18,7 @@ import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.CommentModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolder> implements Filterable {
 
@@ -38,7 +38,7 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
             results.values = commentModels;
 
             final int commentsLen = commentModels == null ? 0 : commentModels.length;
-            if (commentModels != null && commentsLen > 0 && !Utils.isEmpty(filter)) {
+            if (commentModels != null && commentsLen > 0 && !TextUtils.isEmpty(filter)) {
                 final String query = filter.toString().toLowerCase();
                 final ArrayList<CommentModel> filterList = new ArrayList<>(commentsLen);
 

@@ -20,7 +20,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.FollowsViewHolder;
 import awais.instagrabber.interfaces.OnGroupClickListener;
 import awais.instagrabber.models.FollowModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 import thoughtbot.expandableadapter.ExpandableGroup;
 import thoughtbot.expandableadapter.ExpandableList;
 import thoughtbot.expandableadapter.ExpandableListPosition;
@@ -34,7 +34,7 @@ public final class FollowAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         @Override
         protected FilterResults performFiltering(final CharSequence filter) {
             if (expandableList.groups != null) {
-                final boolean isFilterEmpty = Utils.isEmpty(filter);
+                final boolean isFilterEmpty = TextUtils.isEmpty(filter);
                 final String query = isFilterEmpty ? null : filter.toString().toLowerCase();
 
                 for (int x = 0; x < expandableList.groups.size(); ++x) {
@@ -46,11 +46,18 @@ public final class FollowAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         final FollowModel followModel = items.get(i);
 
                         if (isFilterEmpty) followModel.setShown(true);
-                        else followModel.setShown(Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()));
+                        else followModel.setShown(hasKey(query, followModel.getUsername(), followModel.getFullName()));
                     }
                 }
             }
             return null;
+        }
+
+        private boolean hasKey(final String key, final String username, final String name) {
+            if (TextUtils.isEmpty(key)) return true;
+            final boolean hasUserName = username != null && username.toLowerCase().contains(key);
+            if (!hasUserName && name != null) return name.toLowerCase().contains(key);
+            return true;
         }
 
         @Override

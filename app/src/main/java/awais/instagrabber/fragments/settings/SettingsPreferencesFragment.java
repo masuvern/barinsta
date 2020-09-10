@@ -2,11 +2,9 @@ package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Bundle;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.FragmentActivity;
@@ -25,7 +23,9 @@ import java.util.Date;
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.TimeSettingsDialog;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DirectoryChooser;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
@@ -40,7 +40,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
         screen.addPreference(generalCategory);
         generalCategory.setTitle(getString(R.string.pref_category_general));
@@ -331,7 +331,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             btnSaveTo.setOnClickListener(v -> {
                 if (onSelectFolderButtonClickListener == null) return;
                 onSelectFolderButtonClickListener.onClick(result -> {
-                    if (Utils.isEmpty(result)) return;
+                    if (TextUtils.isEmpty(result)) return;
                     customPathTextView.setText(result);
                 });
             });

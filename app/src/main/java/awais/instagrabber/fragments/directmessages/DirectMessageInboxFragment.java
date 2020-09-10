@@ -34,7 +34,7 @@ import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.direct_messages.InboxModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectMessageInboxFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "DirectMessagesInboxFrag";
@@ -145,7 +145,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
 
     private void initData() {
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!Utils.isEmpty(endCursor))
+            if (!TextUtils.isEmpty(endCursor))
                 currentlyRunning = new InboxFetcher(endCursor, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             endCursor = null;
         });

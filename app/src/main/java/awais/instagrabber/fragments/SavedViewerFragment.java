@@ -41,6 +41,8 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentSavedBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.PostModel;
@@ -92,10 +94,10 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                         if (postsAdapter == null || username == null) {
                             return false;
                         }
-                        Utils.batchDownload(requireContext(),
-                                            username,
-                                            DownloadMethod.DOWNLOAD_SAVED,
-                                            postsAdapter.getSelectedModels());
+                        DownloadUtils.batchDownload(requireContext(),
+                                                    username,
+                                                    DownloadMethod.DOWNLOAD_SAVED,
+                                                    postsAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }
@@ -257,7 +259,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                 break;
             case SAVED:
             case TAGGED:
-                if (Utils.isEmpty(profileId)) return;
+                if (TextUtils.isEmpty(profileId)) return;
                 asyncTask = new PostsFetcher(profileId, type, endCursor, postsFetchListener);
                 break;
             default:
@@ -285,7 +287,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 8020 && grantResults[0] == PackageManager.PERMISSION_GRANTED && selectedItems.size() > 0)
-            Utils.batchDownload(requireContext(), null, DownloadMethod.DOWNLOAD_SAVED, selectedItems);
+            DownloadUtils.batchDownload(requireContext(), null, DownloadMethod.DOWNLOAD_SAVED, selectedItems);
     }
 
     public static void stopCurrentExecutor() {

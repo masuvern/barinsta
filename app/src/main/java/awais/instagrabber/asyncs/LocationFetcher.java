@@ -15,7 +15,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -44,8 +44,8 @@ public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> 
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject location = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("graphql")
-                                                                                          .getJSONObject(Constants.EXTRAS_LOCATION);
+                final JSONObject location = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("graphql")
+                                                                                                 .getJSONObject(Constants.EXTRAS_LOCATION);
 
                 final JSONObject timelineMedia = location.getJSONObject("edge_location_to_media");
                 // if (timelineMedia.has("edges")) {

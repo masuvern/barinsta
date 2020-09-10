@@ -17,6 +17,10 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
@@ -46,7 +50,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject media = new JSONObject(Utils.readFromConnection(conn))
+                final JSONObject media = new JSONObject(NetworkUtils.readFromConnection(conn))
                         .getJSONArray("items")
                         .getJSONObject(0);
                 ProfileModel profileModel = null;
@@ -94,7 +98,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                 if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
                     final String customPath = Utils.settingsHelper.getString(FOLDER_PATH)
                             + (shouldDownloadToUserFolder ? "/" + profileModel.getUsername() : "");
-                    if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
+                    if (!TextUtils.isEmpty(customPath)) customDir = new File(customPath);
                 }
 
                 final long timestamp = media.getLong("taken_at");
@@ -130,10 +134,10 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                     final ViewerPostModel postModel = new ViewerPostModel(
                             mediaItemType,
                             media.getString(Constants.EXTRAS_ID),
-                            isVideo ? Utils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
-                                    : Utils.getHighQualityImage(media),
+                            isVideo ? ResponseBodyUtils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
+                                    : ResponseBodyUtils.getHighQualityImage(media),
                             media.getString("code"),
-                            Utils.isEmpty(postCaption) ? null : postCaption,
+                            TextUtils.isEmpty(postCaption) ? null : postCaption,
                             profileModel,
                             isVideo && media.has("view_count") ? media.getLong("view_count") : -1,
                             timestamp, media.optBoolean("has_liked"),
@@ -144,7 +148,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
 
                     postModel.setCommentsCount(commentsCount);
 
-                    Utils.checkExistence(downloadDir, customDir, false, postModel);
+                    DownloadUtils.checkExistence(downloadDir, customDir, false, postModel);
 
                     result = new ViewerPostModel[]{postModel};
 
@@ -160,8 +164,8 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                                 isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
                                              : MediaItemType.MEDIA_TYPE_IMAGE,
                                 media.getString(Constants.EXTRAS_ID),
-                                isChildVideo ? Utils.getHighQualityPost(node.optJSONArray("video_versions"), true, true, false)
-                                             : Utils.getHighQualityImage(node),
+                                isChildVideo ? ResponseBodyUtils.getHighQualityPost(node.optJSONArray("video_versions"), true, true, false)
+                                             : ResponseBodyUtils.getHighQualityImage(node),
                                 media.getString("code"),
                                 postCaption,
                                 profileModel,
@@ -171,8 +175,8 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                                 media.getLong("like_count"),
                                 locationName,
                                 locationId);
-                        postModels[i].setSliderDisplayUrl(Utils.getHighQualityImage(node));
-                        Utils.checkExistence(downloadDir, customDir, true, postModels[i]);
+                        postModels[i].setSliderDisplayUrl(ResponseBodyUtils.getHighQualityImage(node));
+                        DownloadUtils.checkExistence(downloadDir, customDir, true, postModels[i]);
                     }
 
                     postModels[0].setCommentsCount(commentsCount);

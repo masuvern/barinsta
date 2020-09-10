@@ -17,6 +17,9 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
@@ -92,14 +95,14 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                                                                                      (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER)
                                                                                       ? ("/" + username)
                                                                                       : ""));
-                    if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
+                    if (!TextUtils.isEmpty(customPath)) customDir = new File(customPath);
                 }
 
                 final boolean isHashtag = type == PostItemType.HASHTAG;
                 final boolean isLocation = type == PostItemType.LOCATION;
                 final boolean isSaved = type == PostItemType.SAVED;
                 final boolean isTagged = type == PostItemType.TAGGED;
-                final JSONObject mediaPosts = new JSONObject(Utils.readFromConnection(conn))
+                final JSONObject mediaPosts = new JSONObject(NetworkUtils.readFromConnection(conn))
                         .getJSONObject("data")
                         .getJSONObject(isHashtag
                                        ? Constants.EXTRAS_HASHTAG
@@ -143,7 +146,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, PostModel[]> {
                                               mediaNode.getLong("taken_at_timestamp"), mediaNode.optBoolean("viewer_has_liked"),
                                               mediaNode.optBoolean("viewer_has_saved"), mediaNode.getJSONObject("edge_liked_by").getLong("count"));
 
-                    Utils.checkExistence(downloadDir, customDir, isSlider, models[i]);
+                    DownloadUtils.checkExistence(downloadDir, customDir, isSlider, models[i]);
                 }
 
                 if (models.length != 0 && models[models.length - 1] != null)

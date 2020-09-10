@@ -26,6 +26,7 @@ import awais.instagrabber.databinding.ItemFeedVideoBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -99,7 +100,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
         binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
         final ViewGroup.LayoutParams layoutParams = binding.playerView.getLayoutParams();
         final int requiredWidth = Utils.displayMetrics.widthPixels;
-        final int resultingHeight = Utils.getResultingHeight(requiredWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
+        final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
         layoutParams.width = requiredWidth;
         layoutParams.height = resultingHeight;
         binding.playerView.requestLayout();

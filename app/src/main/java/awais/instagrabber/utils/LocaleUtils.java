@@ -22,7 +22,7 @@ public final class LocaleUtils {
 
         final String lang = LocaleUtils.getCorrespondingLanguageCode(baseContext);
 
-        currentLocale = Utils.isEmpty(lang) ? defaultLocale : new Locale(lang);
+        currentLocale = TextUtils.isEmpty(lang) ? defaultLocale : new Locale(lang);
         Locale.setDefault(currentLocale);
 
         final Resources res = baseContext.getResources();
@@ -56,7 +56,7 @@ public final class LocaleUtils {
             Utils.settingsHelper = new SettingsHelper(baseContext);
 
         final String appLanguageSettings = Utils.settingsHelper.getString(Constants.APP_LANGUAGE);
-        if (Utils.isEmpty(appLanguageSettings)) return null;
+        if (TextUtils.isEmpty(appLanguageSettings)) return null;
 
         final int appLanguageIndex = Integer.parseInt(appLanguageSettings);
         if (appLanguageIndex == 1) return "en";

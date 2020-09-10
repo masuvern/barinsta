@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.Date;
 
 import awais.instagrabber.models.enums.NotificationType;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public final class NotificationModel {
@@ -16,7 +17,7 @@ public final class NotificationModel {
     public NotificationModel(final String id, final String text, final long timestamp, final String username,
                              final String profilePicUrl, final String shortcode, final String previewUrl, final NotificationType type) {
         this.id = id;
-        this.text = Utils.hasMentions(text) ? Utils.getMentionText(text) : text;
+        this.text = TextUtils.hasMentions(text) ? TextUtils.getMentionText(text) : text;
         this.timestamp = timestamp;
         this.username = username;
         this.profilePicUrl = profilePicUrl;

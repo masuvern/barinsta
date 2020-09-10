@@ -44,6 +44,9 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentLocationBinding;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.LocationModel;
@@ -103,10 +106,10 @@ public class LocationFragment extends Fragment {
                 if (postsAdapter == null || locationId == null) {
                     return false;
                 }
-                Utils.batchDownload(requireContext(),
-                                    locationId,
-                                    DownloadMethod.DOWNLOAD_MAIN,
-                                    postsAdapter.getSelectedModels());
+                DownloadUtils.batchDownload(requireContext(),
+                                            locationId,
+                                            DownloadMethod.DOWNLOAD_MAIN,
+                                            postsAdapter.getSelectedModels());
                 checkAndResetAction();
                 return true;
             }
@@ -173,7 +176,7 @@ public class LocationFragment extends Fragment {
     private void init() {
         if (getArguments() == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         final LocationFragmentArgs fragmentArgs = LocationFragmentArgs.fromBundle(getArguments());
         locationId = fragmentArgs.getLocationId();
         setTitle();
@@ -284,11 +287,11 @@ public class LocationFragment extends Fragment {
         binding.locationBiography.setCaptionIsExpandable(true);
         binding.locationBiography.setCaptionIsExpanded(true);
 
-        if (Utils.isEmpty(biography)) {
+        if (TextUtils.isEmpty(biography)) {
             binding.locationBiography.setVisibility(View.GONE);
-        } else if (Utils.hasMentions(biography)) {
+        } else if (TextUtils.hasMentions(biography)) {
             binding.locationBiography.setVisibility(View.VISIBLE);
-            biography = Utils.getMentionText(biography);
+            biography = TextUtils.getMentionText(biography);
             binding.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
             // binding.locationBiography.setMentionClickListener(mentionClickListener);
         } else {
@@ -310,14 +313,14 @@ public class LocationFragment extends Fragment {
         }
 
         final String url = locationModel.getUrl();
-        if (Utils.isEmpty(url)) {
+        if (TextUtils.isEmpty(url)) {
             binding.locationUrl.setVisibility(View.GONE);
         } else if (!url.startsWith("http")) {
             binding.locationUrl.setVisibility(View.VISIBLE);
-            binding.locationUrl.setText(Utils.getSpannableUrl("http://" + url));
+            binding.locationUrl.setText(TextUtils.getSpannableUrl("http://" + url));
         } else {
             binding.locationUrl.setVisibility(View.VISIBLE);
-            binding.locationUrl.setText(Utils.getSpannableUrl(url));
+            binding.locationUrl.setText(TextUtils.getSpannableUrl(url));
         }
     }
 

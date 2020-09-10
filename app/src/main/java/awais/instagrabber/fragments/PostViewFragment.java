@@ -38,6 +38,8 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.services.MediaService;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.ViewerPostViewModel;
 
@@ -129,13 +131,13 @@ public class PostViewFragment extends Fragment {
                 break;
             case R.id.btnDownload:
                 if (checkSelfPermission(requireContext(),
-                                        Utils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+                                        DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
                     showDownloadDialog(Arrays.asList(wrapper.getViewerPostModels()),
                                        childPosition,
                                        username);
                     return;
                 }
-                requestPermissions(Utils.PERMS, 8020);
+                requestPermissions(DownloadUtils.PERMS, 8020);
                 break;
             case R.id.ivProfilePic:
             case R.id.title:
@@ -143,8 +145,8 @@ public class PostViewFragment extends Fragment {
                 break;
             case R.id.btnLike:
                 if (mediaService != null) {
-                    final String userId = Utils.getUserIdFromCookie(COOKIE);
-                    final String csrfToken = Utils.getCsrfTokenFromCookie(COOKIE);
+                    final String userId = CookieUtils.getUserIdFromCookie(COOKIE);
+                    final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
                     v.setEnabled(false);
                     final ServiceCallback<Boolean> likeCallback = new ServiceCallback<Boolean>() {
                         @Override
@@ -173,8 +175,8 @@ public class PostViewFragment extends Fragment {
                 break;
             case R.id.btnBookmark:
                 if (mediaService != null) {
-                    final String userId = Utils.getUserIdFromCookie(COOKIE);
-                    final String csrfToken = Utils.getCsrfTokenFromCookie(COOKIE);
+                    final String userId = CookieUtils.getUserIdFromCookie(COOKIE);
+                    final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
                     v.setEnabled(false);
                     final ServiceCallback<Boolean> saveCallback = new ServiceCallback<Boolean>() {
                         @Override
@@ -312,10 +314,10 @@ public class PostViewFragment extends Fragment {
                     postModelsToDownload.add(postModels.get(childPosition));
                 }
                 if (postModelsToDownload.size() > 0) {
-                    Utils.batchDownload(requireContext(),
-                                        username,
-                                        DownloadMethod.DOWNLOAD_POST_VIEWER,
-                                        postModelsToDownload);
+                    DownloadUtils.batchDownload(requireContext(),
+                                                username,
+                                                DownloadMethod.DOWNLOAD_POST_VIEWER,
+                                                postModelsToDownload);
                 }
             };
             new AlertDialog.Builder(requireContext())
@@ -325,10 +327,10 @@ public class PostViewFragment extends Fragment {
                     .setPositiveButton(R.string.post_viewer_download_current, clickListener)
                     .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
         } else {
-            Utils.batchDownload(requireContext(),
-                                username,
-                                DownloadMethod.DOWNLOAD_POST_VIEWER,
-                                Collections.singletonList(postModels.get(childPosition)));
+            DownloadUtils.batchDownload(requireContext(),
+                                        username,
+                                        DownloadMethod.DOWNLOAD_POST_VIEWER,
+                                        Collections.singletonList(postModels.get(childPosition)));
         }
     }
 }

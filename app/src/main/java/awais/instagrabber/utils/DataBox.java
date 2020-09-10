@@ -77,7 +77,7 @@ public final class DataBox extends SQLiteOpenHelper {
     public final void addFavorite(@NonNull final FavoriteModel favoriteModel) {
         final String query = favoriteModel.getQuery();
         final String display = favoriteModel.getDisplayName();
-        if (!Utils.isEmpty(query)) {
+        if (!TextUtils.isEmpty(query)) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
                 try {
@@ -105,7 +105,7 @@ public final class DataBox extends SQLiteOpenHelper {
 
     public final synchronized void delFavorite(@NonNull final FavoriteModel favoriteModel) {
         final String query = favoriteModel.getQuery();
-        if (!Utils.isEmpty(query)) {
+        if (!TextUtils.isEmpty(query)) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
                 try {
@@ -202,7 +202,7 @@ public final class DataBox extends SQLiteOpenHelper {
                                       final String cookie,
                                       final String fullName,
                                       final String profilePicUrl) {
-        if (Utils.isEmpty(uid)) return;
+        if (TextUtils.isEmpty(uid)) return;
         try (final SQLiteDatabase db = getWritableDatabase()) {
             db.beginTransaction();
             try {
@@ -229,7 +229,7 @@ public final class DataBox extends SQLiteOpenHelper {
 
     public final synchronized void delUserCookie(@NonNull final CookieModel cookieModel) {
         final String cookieModelUid = cookieModel.getUid();
-        if (!Utils.isEmpty(cookieModelUid)) {
+        if (!TextUtils.isEmpty(cookieModelUid)) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
                 try {

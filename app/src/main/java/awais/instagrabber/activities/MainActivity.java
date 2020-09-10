@@ -48,9 +48,10 @@ import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.IntentUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -105,7 +106,7 @@ public class MainActivity extends BaseLanguageActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        Utils.setupCookies(cookie);
+        CookieUtils.setupCookies(cookie);
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
@@ -268,7 +269,7 @@ public class MainActivity extends BaseLanguageActivity {
 
             private final Runnable runnable = () -> {
                 cancelSuggestionsAsync();
-                if (Utils.isEmpty(currentSearchQuery)) {
+                if (TextUtils.isEmpty(currentSearchQuery)) {
                     suggestionAdapter.changeCursor(null);
                     return;
                 }
@@ -315,7 +316,7 @@ public class MainActivity extends BaseLanguageActivity {
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             binding.bottomNavView.getMenu().clear();
@@ -333,7 +334,7 @@ public class MainActivity extends BaseLanguageActivity {
         if (setDefaultFromSettings || !isLoggedIn) {
             final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
-                final int defaultNavId = Utils.isEmpty(defaultTabIdString) || !isLoggedIn
+                final int defaultNavId = TextUtils.isEmpty(defaultTabIdString) || !isLoggedIn
                                          ? R.navigation.profile_nav_graph
                                          : Integer.parseInt(defaultTabIdString);
                 final int index = mainNavList.indexOf(defaultNavId);

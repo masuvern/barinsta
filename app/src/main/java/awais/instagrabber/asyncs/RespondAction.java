@@ -13,6 +13,7 @@ import java.util.UUID;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -42,7 +43,7 @@ public class RespondAction extends AsyncTask<String, Void, Boolean> {
             final JSONObject ogbody = new JSONObject("{\"client_context\":\"" + UUID.randomUUID().toString()
                     + "\",\"mutation_token\":\"" + UUID.randomUUID().toString()
                     + "\",\"_csrftoken\":\"" + cookie.split("csrftoken=")[1].split(";")[0]
-                    + "\",\"_uid\":\"" + Utils.getUserIdFromCookie(cookie)
+                    + "\",\"_uid\":\"" + CookieUtils.getUserIdFromCookie(cookie)
                     + "\",\"__uuid\":\"" + settingsHelper.getString(Constants.DEVICE_UUID)
                     + "\"}");
             String choice = rawChoice[0].replaceAll("\"", ("\\\""));

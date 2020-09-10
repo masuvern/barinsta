@@ -33,11 +33,12 @@ import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.IntentUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
-import static awais.instagrabber.utils.Utils.CHANNEL_ID;
-import static awais.instagrabber.utils.Utils.CHANNEL_NAME;
+import static awais.instagrabber.utils.Constants.CHANNEL_ID;
+import static awais.instagrabber.utils.Constants.CHANNEL_NAME;
 import static awais.instagrabber.utils.Utils.isChannelCreated;
 import static awais.instagrabber.utils.Utils.notificationManager;
 
@@ -84,14 +85,14 @@ public final class DirectDownload extends Activity {
                     handler.removeCallbacks(this);
                 }
             });
-            ActivityCompat.requestPermissions(this, Utils.PERMS, 8020);
+            ActivityCompat.requestPermissions(this, DownloadUtils.PERMS, 8020);
         }
         finish();
     }
 
     private synchronized void doDownload() {
         final String action = intent.getAction();
-        if (!Utils.isEmpty(action) && !Intent.ACTION_MAIN.equals(action)) {
+        if (!TextUtils.isEmpty(action) && !Intent.ACTION_MAIN.equals(action)) {
             boolean error = true;
 
             String data = null;
@@ -109,7 +110,7 @@ public final class DirectDownload extends Activity {
                 if (intentData != null) data = intentData.toString();
             }
 
-            if (data != null && !Utils.isEmpty(data)) {
+            if (data != null && !TextUtils.isEmpty(data)) {
                 final IntentModel model = IntentUtils.parseUrl(data);
                 if (model != null && model.getType() == IntentModelType.POST) {
                     final String text = model.getText();
@@ -137,8 +138,8 @@ public final class DirectDownload extends Activity {
                             if (notificationManager != null) notificationManager.cancel(1900000000);
                             if (result != null) {
                                 if (result.length == 1) {
-                                    Utils.batchDownload(context, result[0].getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
-                                            Arrays.asList(result));
+                                    DownloadUtils.batchDownload(context, result[0].getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
+                                                                Arrays.asList(result));
                                 } else if (result.length > 1) {
                                     context.startActivity(new Intent(context, MultiDirectDialog.class)
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)

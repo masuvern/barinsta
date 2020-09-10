@@ -19,7 +19,8 @@ import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -90,7 +91,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                JSONObject data = new JSONObject(Utils.readFromConnection(conn));
+                JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn));
                 if (!storiesig && !highlight)
                     data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
                 else if (highlight) data = data.getJSONObject("reels").optJSONObject(id);
@@ -118,7 +119,7 @@ public final class iStoryStatusFetcher extends AsyncTask<Void, Void, StoryModel[
 
                         final JSONArray videoResources = data.optJSONArray("video_versions");
                         if (isVideo && videoResources != null)
-                            models[i].setVideoUrl(Utils.getHighQualityPost(videoResources, true, true, false));
+                            models[i].setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
 
                         if (data.has("story_feed_media")) {
                             models[i].setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));

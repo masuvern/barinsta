@@ -45,8 +45,8 @@ public final class ExportImportUtils {
     public static void Export(@Nullable final String password, @ExportImportFlags final int flags, @NonNull final File filePath,
                               final FetchListener<Boolean> fetchListener) {
         final String exportString = ExportImportUtils.getExportString(flags);
-        if (!Utils.isEmpty(exportString)) {
-            final boolean isPass = !Utils.isEmpty(password);
+        if (!TextUtils.isEmpty(exportString)) {
+            final boolean isPass = !TextUtils.isEmpty(password);
             byte[] exportBytes = null;
 
             if (isPass) {
@@ -100,7 +100,7 @@ public final class ExportImportUtils {
                 new AlertDialog.Builder(context).setView(editText).setTitle(R.string.password)
                                                 .setPositiveButton(R.string.confirm, (dialog, which) -> {
                                                     final CharSequence text = editText.getText();
-                                                    if (!Utils.isEmpty(text)) {
+                                                    if (!TextUtils.isEmpty(text)) {
                                                         try {
                                                             final byte[] passwordBytes = text.toString().getBytes();
                                                             final byte[] bytes = new byte[32];
@@ -228,16 +228,16 @@ public final class ExportImportUtils {
                 json.put(Constants.APP_LANGUAGE, settingsHelper.getString(Constants.APP_LANGUAGE));
 
                 String str = settingsHelper.getString(Constants.FOLDER_PATH);
-                if (!Utils.isEmpty(str)) json.put(Constants.FOLDER_PATH, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.FOLDER_PATH, str);
 
                 str = settingsHelper.getString(Constants.DATE_TIME_FORMAT);
-                if (!Utils.isEmpty(str)) json.put(Constants.DATE_TIME_FORMAT, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.DATE_TIME_FORMAT, str);
 
                 str = settingsHelper.getString(Constants.DATE_TIME_SELECTION);
-                if (!Utils.isEmpty(str)) json.put(Constants.DATE_TIME_SELECTION, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.DATE_TIME_SELECTION, str);
 
                 str = settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT);
-                if (!Utils.isEmpty(str)) json.put(Constants.CUSTOM_DATE_TIME_FORMAT, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.CUSTOM_DATE_TIME_FORMAT, str);
 
                 json.put(Constants.DOWNLOAD_USER_FOLDER, settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER));
                 json.put(Constants.MUTED_VIDEOS, settingsHelper.getBoolean(Constants.MUTED_VIDEOS));

@@ -8,7 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 
 public class SeenAction extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "SeenAction";
@@ -41,7 +41,7 @@ public class SeenAction extends AsyncTask<Void, Void, Void> {
             wr.flush();
             wr.close();
             urlConnection.connect();
-            Log.d(TAG, urlConnection.getResponseCode() + " " + Utils.readFromConnection(urlConnection));
+            Log.d(TAG, urlConnection.getResponseCode() + " " + NetworkUtils.readFromConnection(urlConnection));
             urlConnection.disconnect();
         } catch (Throwable ex) {
             Log.e(TAG, "Error", ex);

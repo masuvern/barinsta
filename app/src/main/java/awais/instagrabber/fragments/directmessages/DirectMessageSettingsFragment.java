@@ -42,6 +42,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.Utils;
 
 public class DirectMessageSettingsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -66,7 +67,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
         @Override
         public void onResult(final InboxThreadModel threadModel) {
             final List<Long> adminList = Arrays.asList(threadModel.getAdmins());
-            final String userIdFromCookie = Utils.getUserIdFromCookie(cookie);
+            final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
             if (userIdFromCookie == null) return;
             final boolean amAdmin = adminList.contains(Long.parseLong(userIdFromCookie));
             final DirectMessageMembersAdapter memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(),

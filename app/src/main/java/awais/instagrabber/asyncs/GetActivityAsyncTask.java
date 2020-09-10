@@ -9,7 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.TextUtils;
 
 public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsyncTask.NotificationCounts> {
     private static final String TAG = "GetActivityAsyncTask";
@@ -24,7 +25,7 @@ public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsync
     }
 
     protected NotificationCounts doInBackground(Void... voids) {
-        if (Utils.isEmpty(cookie)) {
+        if (TextUtils.isEmpty(cookie)) {
             return null;
         }
         final String url = "https://www.instagram.com/graphql/query/?query_hash=0f318e8cfff9cc9ef09f88479ff571fb"
@@ -39,9 +40,9 @@ public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsync
             if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 return null;
             }
-            final JSONObject data = new JSONObject(Utils.readFromConnection(urlConnection)).getJSONObject("data")
-                    .getJSONObject("user").getJSONObject("edge_activity_count").getJSONArray("edges").getJSONObject(0)
-                    .getJSONObject("node");
+            final JSONObject data = new JSONObject(NetworkUtils.readFromConnection(urlConnection)).getJSONObject("data")
+                                                                                                  .getJSONObject("user").getJSONObject("edge_activity_count").getJSONArray("edges").getJSONObject(0)
+                                                                                                  .getJSONObject("node");
             return new NotificationCounts(
                     data.getInt("relationships"),
                     data.getInt("usertags"),

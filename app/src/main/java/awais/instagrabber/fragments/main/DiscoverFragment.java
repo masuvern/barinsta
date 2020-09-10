@@ -36,6 +36,7 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDiscoverBinding;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.viewmodels.DiscoverItemViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.DiscoverItemModel;
@@ -129,10 +130,10 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
                 public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
                     if (item.getItemId() == R.id.action_download) {
                         if (discoverAdapter == null) return false;
-                        Utils.batchDownload(requireContext(),
-                                            null,
-                                            DownloadMethod.DOWNLOAD_DISCOVER,
-                                            discoverAdapter.getSelectedModels());
+                        DownloadUtils.batchDownload(requireContext(),
+                                                    null,
+                                                    DownloadMethod.DOWNLOAD_DISCOVER,
+                                                    discoverAdapter.getSelectedModels());
                         checkAndResetAction();
                         return true;
                     }

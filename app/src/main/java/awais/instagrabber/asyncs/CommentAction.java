@@ -11,6 +11,8 @@ import java.net.URL;
 
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -38,7 +40,7 @@ public class CommentAction extends AsyncTask<String, Void, String> {
             urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
             urlConnection.setUseCaches(false);
             final String urlParameters = Utils.sign("{\"_csrftoken\":\"" + cookie.split("csrftoken=")[1].split(";")[0]
-                    + "\",\"_uid\":\"" + Utils.getUserIdFromCookie(cookie)
+                    + "\",\"_uid\":\"" + CookieUtils.getUserIdFromCookie(cookie)
                     + "\",\"__uuid\":\"" + settingsHelper.getString(Constants.DEVICE_UUID)
                     + "\",\"recipient_users\":\"[" + storyModel.getUserId() // <- string of array of number (not joking)
                     + "]\"}");
@@ -53,7 +55,7 @@ public class CommentAction extends AsyncTask<String, Void, String> {
             wr.close();
             urlConnection.connect();
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                return new JSONObject(Utils.readFromConnection(urlConnection)).getString("thread_id");
+                return new JSONObject(NetworkUtils.readFromConnection(urlConnection)).getString("thread_id");
             }
 
         } catch (Throwable ex) {

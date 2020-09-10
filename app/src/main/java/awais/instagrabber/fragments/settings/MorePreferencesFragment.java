@@ -34,8 +34,10 @@ import awais.instagrabber.repositories.responses.UserInfo;
 import awais.instagrabber.services.ProfileService;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.adapters.AccountSwitcherListAdapter.OnAccountLongClickListener;
@@ -50,7 +52,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         // screen.addPreference(new MoreHeaderPreference(requireContext()));
 
         final PreferenceCategory accountCategory = new PreferenceCategory(requireContext());
@@ -76,7 +78,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                             + "To remove just one account, long tap the account from the account switcher dialog.\n"
                                             + "Do you want to continue?")
                         .setPositiveButton(R.string.yes, (dialog, which) -> {
-                            Utils.setupCookies("LOGOUT");
+                            CookieUtils.setupCookies("LOGOUT");
                             shouldRecreate();
                             Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
                             settingsHelper.putString(Constants.COOKIE, "");
@@ -122,13 +124,13 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         if (resultCode == Constants.LOGIN_RESULT_CODE) {
             if (data == null) return;
             final String cookie = data.getStringExtra("cookie");
-            Utils.setupCookies(cookie);
+            CookieUtils.setupCookies(cookie);
             settingsHelper.putString(Constants.COOKIE, cookie);
             // No use as the timing of show is unreliable
             // Toast.makeText(requireContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
 
             // adds cookies to database for quick access
-            final String uid = Utils.getUserIdFromCookie(cookie);
+            final String uid = CookieUtils.getUserIdFromCookie(cookie);
             final ProfileService profileService = ProfileService.getInstance();
             profileService.getUserInfo(uid, new ServiceCallback<UserInfo>() {
                 @Override
@@ -204,7 +206,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                     .create();
             accountSwitchDialog.setOnDismissListener(dialog -> {
                 if (tappedModel == null) return;
-                Utils.setupCookies(tappedModel.getCookie());
+                CookieUtils.setupCookies(tappedModel.getCookie());
                 settingsHelper.putString(Constants.COOKIE, tappedModel.getCookie());
             });
         }
@@ -230,7 +232,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     private void sortUserList(final String cookie, final List<DataBox.CookieModel> allUsers) {
         boolean sortByName = true;
         for (final DataBox.CookieModel user : allUsers) {
-            if (Utils.isEmpty(user.getFullName())) {
+            if (TextUtils.isEmpty(user.getFullName())) {
                 sortByName = false;
                 break;
             }
@@ -280,7 +282,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         if (icon <= 0) preference.setIconSpaceReserved(false);
         if (icon > 0) preference.setIcon(icon);
         preference.setTitle(title);
-        if (!Utils.isEmpty(summary)) {
+        if (!TextUtils.isEmpty(summary)) {
             preference.setSummary(summary);
         }
         preference.setOnPreferenceClickListener(clickListener);
@@ -316,7 +318,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             final View root = holder.itemView;
             if (onClickListener != null) root.setOnClickListener(onClickListener);
             final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
-            final String uid = Utils.getUserIdFromCookie(cookie);
+            final String uid = CookieUtils.getUserIdFromCookie(cookie);
             final DataBox.CookieModel user = Utils.dataBox.getCookie(uid);
             if (user == null) return;
             binding.fullName.setText(user.getFullName());

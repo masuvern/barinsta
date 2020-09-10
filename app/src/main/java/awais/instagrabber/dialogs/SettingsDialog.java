@@ -30,8 +30,11 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DirectoryChooser;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.LocaleUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.CrashReporter;
 
@@ -118,7 +121,7 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         btnTimeSettings.setOnClickListener(this);
         btnPrivacy.setOnClickListener(this);
 
-        if (Utils.isEmpty(settingsHelper.getString(Constants.COOKIE))) btnLogout.setEnabled(false);
+        if (TextUtils.isEmpty(settingsHelper.getString(Constants.COOKIE))) btnLogout.setEnabled(false);
 
         spAppTheme = contentView.findViewById(R.id.spAppTheme);
         currentTheme = Integer.parseInt(settingsHelper.getString(APP_THEME));
@@ -208,13 +211,13 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
             startActivity(new Intent(v.getContext(), Login.class));
             somethingChanged = true;
         } else if (v == btnLogout) {
-            Utils.setupCookies("LOGOUT");
+            CookieUtils.setupCookies("LOGOUT");
             settingsHelper.putString(Constants.COOKIE, "");
             somethingChanged = true;
             this.dismiss();
         } else if (v == btnImportExport) {
-            if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
-                requestPermissions(Utils.PERMS, 6007);
+            if (ContextCompat.checkSelfPermission(activity, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
+                requestPermissions(DownloadUtils.PERMS, 6007);
             else Utils.showImportExportDialog(activity);
         } else if (v == btnTimeSettings) {
             new TimeSettingsDialog(settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
@@ -242,8 +245,8 @@ public final class SettingsDialog extends BottomSheetDialogFragment implements V
         } else if (v == btnReport) {
             CrashReporter.get(activity.getApplication()).zipLogs().startCrashEmailIntent(activity, true);
         } else if (v == btnSaveTo) {
-            if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
-                requestPermissions(Utils.PERMS, 6200);
+            if (ContextCompat.checkSelfPermission(activity, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
+                requestPermissions(DownloadUtils.PERMS, 6200);
             else showDirectoryChooser();
         } else if (v == btnPrivacy) {
             final Intent intent = new Intent(Intent.ACTION_VIEW);

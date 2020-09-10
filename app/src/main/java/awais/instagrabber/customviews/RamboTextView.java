@@ -25,7 +25,7 @@ import androidx.appcompat.widget.AppCompatTextView;
 import awais.instagrabber.R;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class RamboTextView extends AppCompatTextView {
     private static final String TAG = "RamboTextView";
@@ -138,7 +138,7 @@ public final class RamboTextView extends AppCompatTextView {
             CharSequence subSequence = s.subSequence(start, s.getSpanEnd(clickableSpan));
 
             // for feed ellipsize
-            final int indexOfEllipsize = Utils.indexOfChar(subSequence, '…', 0);
+            final int indexOfEllipsize = TextUtils.indexOfChar(subSequence, '…', 0);
             if (indexOfEllipsize != -1)
                 subSequence = subSequence.subSequence(0, indexOfEllipsize - 1);
 

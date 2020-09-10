@@ -128,7 +128,7 @@ public class MediaService extends BaseService {
         form.put("_uuid", UUID.randomUUID().toString());
         form.put("comment_text", comment);
         form.put("containermodule", module);
-        if (!Utils.isEmpty(replyToCommentId)) {
+        if (!awais.instagrabber.utils.TextUtils.isEmpty(replyToCommentId)) {
             form.put("replied_to_comment_id", replyToCommentId);
         }
         final Map<String, String> signedForm = Utils.sign(form);

@@ -9,7 +9,7 @@ import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 import static androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT;
 
@@ -34,7 +34,7 @@ public class DirectMessageStoryShareViewHolder extends DirectMessageItemViewHold
             binding.tvMessage.setVisibility(View.VISIBLE);
         } else {
             final String text = reelShare.getText();
-            if (!Utils.isEmpty(text)) {
+            if (!TextUtils.isEmpty(text)) {
                 binding.tvMessage.setText(text);
                 binding.tvMessage.setVisibility(View.VISIBLE);
             }

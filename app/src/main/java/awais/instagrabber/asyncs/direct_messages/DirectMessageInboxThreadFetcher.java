@@ -18,7 +18,9 @@ import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awaisomereport.LogCollector.LogFile;
@@ -48,10 +50,10 @@ public final class DirectMessageInboxThreadFetcher extends AsyncTask<Void, Void,
         final Map<String, String> queryParamsMap = new HashMap<>();
         queryParamsMap.put("visual_message_return_type", "unseen");
         if (direction != null) queryParamsMap.put("direction", direction.getValue());
-        if (!Utils.isEmpty(endCursor)) {
+        if (!TextUtils.isEmpty(endCursor)) {
             queryParamsMap.put("cursor", endCursor);
         }
-        final String queryString = Utils.getQueryString(queryParamsMap);
+        final String queryString = NetworkUtils.getQueryString(queryParamsMap);
         final String url = "https://i.instagram.com/api/v1/direct_v2/threads/" + id + "/?" + queryString;
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -60,8 +62,8 @@ public final class DirectMessageInboxThreadFetcher extends AsyncTask<Void, Void,
             conn.setUseCaches(false);
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject data = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("thread");
-                result = Utils.createInboxThreadModel(data, true);
+                final JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("thread");
+                result = ResponseBodyUtils.createInboxThreadModel(data, true);
             }
 
             conn.disconnect();

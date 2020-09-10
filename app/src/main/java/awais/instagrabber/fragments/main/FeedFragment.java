@@ -57,6 +57,8 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.services.StoriesService;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.FeedViewModel;
@@ -113,16 +115,16 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     final FeedModel feedModel = thumbToFeedMap.get(thumbUri.toString());
                     if (feedModel == null) return;
                     int requiredWidth = Utils.displayMetrics.widthPixels;
-                    int resultingHeight = Utils
+                    int resultingHeight = NumberUtils
                             .getResultingHeight(requiredWidth, encodedHeight, encodedWidth);
                     if (feedModel
                             .getItemType() == MediaItemType.MEDIA_TYPE_VIDEO && resultingHeight >= MAX_VIDEO_HEIGHT) {
                         // If its a video and the height is too large, need to reduce the height,
                         // so that entire video fits on screen
                         resultingHeight = RESIZED_VIDEO_HEIGHT;
-                        requiredWidth = Utils.getResultingWidth(RESIZED_VIDEO_HEIGHT,
-                                                                resultingHeight,
-                                                                requiredWidth);
+                        requiredWidth = NumberUtils.getResultingWidth(RESIZED_VIDEO_HEIGHT,
+                                                                      resultingHeight,
+                                                                      requiredWidth);
                     }
                     feedModel.setImageWidth(requiredWidth);
                     feedModel.setImageHeight(resultingHeight);
@@ -229,10 +231,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                 if (feedModel
                         .getItemType() != MediaItemType.MEDIA_TYPE_SLIDER || sliderItems == null || sliderItems.length == 1)
-                    Utils.batchDownload(requireContext(),
-                                        username,
-                                        DownloadMethod.DOWNLOAD_FEED,
-                                        Collections.singletonList(feedModel));
+                    DownloadUtils.batchDownload(requireContext(),
+                                                username,
+                                                DownloadMethod.DOWNLOAD_FEED,
+                                                Collections.singletonList(feedModel));
                 else {
                     final ArrayList<BasePostModel> postModels = new ArrayList<>();
                     final DialogInterface.OnClickListener clickListener1 = (dialog, which) -> {
@@ -255,10 +257,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                             postModels.add(sliderItems[0]);
                         }
                         if (postModels.size() > 0) {
-                            Utils.batchDownload(requireContext(),
-                                                username,
-                                                DownloadMethod.DOWNLOAD_FEED,
-                                                postModels);
+                            DownloadUtils.batchDownload(requireContext(),
+                                                        username,
+                                                        DownloadMethod.DOWNLOAD_FEED,
+                                                        postModels);
                         }
                     };
 
