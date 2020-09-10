@@ -133,6 +133,7 @@ public final class Utils {
         }
         if (cookieRaw.equals("LOGOUT")) {
             cookieStore.removeAll();
+            dataBox.deleteAllUserCookies();
             return;
         }
         try {

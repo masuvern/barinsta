@@ -20,6 +20,7 @@ import java.util.List;
 import awais.instagrabber.R;
 
 public class NavigationExtensions {
+    // private static final String TAG = "NavigationExtensions";
 
     @NonNull
     public static LiveData<NavController> setupWithNavController(@NonNull final BottomNavigationView bottomNavigationView,
@@ -48,7 +49,6 @@ public class NavigationExtensions {
                 detachNavHostFragment(fragmentManager, navHostFragment);
             }
         }
-
         final String[] selectedItemTag = {graphIdToTagMap.get(bottomNavigationView.getSelectedItemId())};
         final String firstFragmentTag = graphIdToTagMap.get(firstFragmentGraphId);
         final boolean[] isOnFirstFragment = {selectedItemTag[0] != null && selectedItemTag[0].equals(firstFragmentTag)};
@@ -61,7 +61,8 @@ public class NavigationExtensions {
                 fragmentManager.popBackStack(firstFragmentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 Fragment fragment = fragmentManager.findFragmentByTag(newlySelectedItemTag);
                 if (fragment == null) {
-                    throw new RuntimeException("null cannot be cast to non-null NavHostFragment");
+                    return false;
+                    // throw new RuntimeException("null cannot be cast to non-null NavHostFragment");
                 }
                 final NavHostFragment selectedFragment = (NavHostFragment) fragment;
                 if (!firstFragmentTag.equals(newlySelectedItemTag)) {
@@ -158,7 +159,8 @@ public class NavigationExtensions {
             final String newlySelectedItemTag = graphIdToTagMap.get(item.getItemId());
             final Fragment fragmentByTag = fragmentManager.findFragmentByTag(newlySelectedItemTag);
             if (fragmentByTag == null) {
-                throw new NullPointerException("null cannot be cast to non-null type NavHostFragment");
+                return;
+                // throw new NullPointerException("null cannot be cast to non-null type NavHostFragment");
             }
             final NavHostFragment selectedFragment = (NavHostFragment) fragmentByTag;
             final NavController navController = selectedFragment.getNavController();

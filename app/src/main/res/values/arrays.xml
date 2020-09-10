@@ -109,7 +109,6 @@
     </string-array>
     <array name="logged_out_main_nav_ids">
         <item>@navigation/profile_nav_graph</item>
-        <item>@navigation/discover_nav_graph</item>
         <item>@navigation/more_nav_graph</item>
     </array>
 </resources>

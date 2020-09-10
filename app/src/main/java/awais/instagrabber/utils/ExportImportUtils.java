@@ -97,28 +97,30 @@ public final class ExportImportUtils {
                 final AppCompatEditText editText = new AppCompatEditText(context);
                 editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32)});
                 editText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                new AlertDialog.Builder(context).setView(editText).setTitle(R.string.password).setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    final CharSequence text = editText.getText();
-                    if (!Utils.isEmpty(text)) {
-                        try {
-                            final byte[] passwordBytes = text.toString().getBytes();
-                            final byte[] bytes = new byte[32];
-                            System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
-                            saveToSettings(new String(PasswordUtils.dec(builder.toString(), bytes)), flags, fetchListener);
-                        } catch (final Exception e) {
-                            if (fetchListener != null) fetchListener.onResult(false);
-                            if (logCollector != null)
-                                logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import::pass");
-                            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-                        }
+                new AlertDialog.Builder(context).setView(editText).setTitle(R.string.password)
+                                                .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                                                    final CharSequence text = editText.getText();
+                                                    if (!Utils.isEmpty(text)) {
+                                                        try {
+                                                            final byte[] passwordBytes = text.toString().getBytes();
+                                                            final byte[] bytes = new byte[32];
+                                                            System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
+                                                            saveToSettings(new String(PasswordUtils.dec(builder.toString(), bytes)), flags,
+                                                                           fetchListener);
+                                                        } catch (final Exception e) {
+                                                            if (fetchListener != null) fetchListener.onResult(false);
+                                                            if (logCollector != null)
+                                                                logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import::pass");
+                                                            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                                                        }
 
-                    } else
-                        Toast.makeText(context, R.string.dialog_export_err_password_empty, Toast.LENGTH_SHORT).show();
-                }).show();
+                                                    } else
+                                                        Toast.makeText(context, R.string.dialog_export_err_password_empty, Toast.LENGTH_SHORT).show();
+                                                }).show();
 
             } else if (configType == 'Z') {
                 saveToSettings(new String(Base64.decode(builder.toString(), Base64.DEFAULT | Base64.NO_PADDING | Base64.NO_WRAP)),
-                        flags, fetchListener);
+                               flags, fetchListener);
 
             } else {
                 Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
@@ -156,8 +158,12 @@ public final class ExportImportUtils {
                 final int cookiesLen = cookies.length();
                 for (int i = 0; i < cookiesLen; ++i) {
                     final JSONObject cookieObject = cookies.getJSONObject(i);
-                    Utils.dataBox.addUserCookie(new DataBox.CookieModel(cookieObject.getString("i"),
-                            cookieObject.getString("u"), cookieObject.getString("c")));
+                    // final DataBox.CookieModel cookieModel = new DataBox.CookieModel(cookieObject.getString("i"),
+                    //                                                                 cookieObject.getString("u"),
+                    //                                                                 cookieObject.getString("c"),
+                    //                                                                 fullName,
+                    //                                                                 profilePic);
+                    // Utils.dataBox.addOrUpdateUser(cookieModel.getUid(), cookieModel.getUserInfo(), cookieModel.getCookie());
                 }
             }
 
@@ -167,7 +173,8 @@ public final class ExportImportUtils {
                 for (int i = 0; i < favsLen; ++i) {
                     final JSONObject favsObject = favs.getJSONObject(i);
                     Utils.dataBox.addFavorite(new DataBox.FavoriteModel(favsObject.getString("q"),
-                            favsObject.getLong("d"), favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
+                                                                        favsObject.getLong("d"),
+                                                                        favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
                 }
             }
 

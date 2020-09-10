@@ -109,7 +109,6 @@ public class MainActivity extends BaseLanguageActivity {
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
-        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
@@ -315,6 +314,8 @@ public class MainActivity extends BaseLanguageActivity {
 
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             binding.bottomNavView.getMenu().clear();
@@ -329,7 +330,7 @@ public class MainActivity extends BaseLanguageActivity {
             mainNavList.add(resourceId);
         }
         navIds.recycle();
-        if (setDefaultFromSettings) {
+        if (setDefaultFromSettings || !isLoggedIn) {
             final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
                 final int defaultNavId = Utils.isEmpty(defaultTabIdString) || !isLoggedIn

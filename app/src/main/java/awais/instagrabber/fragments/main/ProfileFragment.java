@@ -60,6 +60,7 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
+import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
@@ -107,6 +108,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private MenuItem favMenuItem;
     private boolean isPullToRefresh;
     private HighlightsAdapter highlightsAdapter;
+    private HighlightsViewModel highlightsViewModel;
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -197,7 +199,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         action.setUsername("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     };
-    private HighlightsViewModel highlightsViewModel;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -283,8 +284,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             setUsernameDelayed();
         }
         if (Utils.isEmpty(username) && !isLoggedIn) {
+            binding.infoContainer.setVisibility(View.GONE);
             binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
+            final NestedCoordinatorLayout.LayoutParams layoutParams = (NestedCoordinatorLayout.LayoutParams) binding.privatePage.getLayoutParams();
+            layoutParams.topMargin = 0;
+            binding.privatePage.setLayoutParams(layoutParams);
             binding.privatePage.setVisibility(View.VISIBLE);
             return;
         }
@@ -302,10 +307,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 this.username = username;
                 setUsernameDelayed();
                 fetchProfileDetails();
-                // adds cookies to database for quick access
-                final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
-                if (Utils.dataBox.getCookieCount() == 0 || cookieModel == null || Utils.isEmpty(cookieModel.getUsername()))
-                    Utils.dataBox.addUserCookie(new DataBox.CookieModel(uid, username, cookie));
             };
             boolean found = false;
             final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
@@ -334,7 +335,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     && profileModel != null
                     && userIdFromCookie != null
                     && userIdFromCookie.equals(profileModel.getId());
-            favMenuItem.setVisible(isSelf);
+            if (favMenuItem != null) {
+                favMenuItem.setVisible(isSelf);
+            }
             setProfileDetails();
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -651,18 +654,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     });
         });
         binding.btnSaved.setOnClickListener(v -> {
-            // startActivity(new Intent(requireContext(), SavedViewerFragment.class)
-            //                       .putExtra(Constants.EXTRAS_INDEX, "$" + profileModel.getId())
-            //                       .putExtra(Constants.EXTRAS_USER, "@" + profileModel.getUsername()));
             final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
                                                                                                               profileModel.getId(),
                                                                                                               PostItemType.SAVED);
             NavHostFragment.findNavController(this).navigate(action);
         });
         binding.btnLiked.setOnClickListener(v -> {
-            // startActivity(new Intent(requireContext(), SavedViewerFragment.class)
-            //                       .putExtra(Constants.EXTRAS_INDEX, "^" + profileModel.getId())
-            //                       .putExtra(Constants.EXTRAS_USER, username));
             final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
                                                                                                               profileModel.getId(),
                                                                                                               PostItemType.LIKED);

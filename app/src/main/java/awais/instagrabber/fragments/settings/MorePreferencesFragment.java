@@ -1,57 +1,94 @@
 package awais.instagrabber.fragments.settings;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.PreferenceViewHolder;
+
+import java.util.Collections;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
+import awais.instagrabber.adapters.AccountSwitcherListAdapter;
+import awais.instagrabber.adapters.AccountSwitcherListAdapter.OnAccountClickListener;
+import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
+import awais.instagrabber.repositories.responses.UserInfo;
+import awais.instagrabber.services.ProfileService;
+import awais.instagrabber.services.ServiceCallback;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.Utils;
 
+import static awais.instagrabber.adapters.AccountSwitcherListAdapter.OnAccountLongClickListener;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class MorePreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = "MorePreferencesFragment";
-
-    private final String cookie = settingsHelper.getString(Constants.COOKIE);
+    private AlertDialog accountSwitchDialog;
+    private DataBox.CookieModel tappedModel;
+    private ArrayAdapter<DataBox.CookieModel> adapter;
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
-        screen.addPreference(new MoreHeaderPreference(requireContext()));
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        final boolean isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
+        // screen.addPreference(new MoreHeaderPreference(requireContext()));
 
         final PreferenceCategory accountCategory = new PreferenceCategory(requireContext());
         accountCategory.setTitle("Account");
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
-        final boolean isLoggedIn = !Utils.isEmpty(cookie) && Utils.getUserIdFromCookie(cookie) != null;
-        screen.addPreference(getPreference(
-                isLoggedIn ? R.string.relogin : R.string.login,
-                isLoggedIn ? R.string.relogin_summary : -1,
-                -1,
-                preference -> {
-                    startActivityForResult(new Intent(requireContext(), Login.class), Constants.LOGIN_RESULT_CODE);
-                    return true;
-                }));
+        // To re-login, user can just add the same account back from account switcher dialog
+        // accountCategory.addPreference(getPreference(
+        //         isLoggedIn ? R.string.relogin : R.string.login,
+        //         isLoggedIn ? R.string.relogin_summary : -1,
+        //         -1,
+        //         preference -> {
+        //             startActivityForResult(new Intent(requireContext(), Login.class), Constants.LOGIN_RESULT_CODE);
+        //             return true;
+        //         }));
         if (isLoggedIn) {
-            screen.addPreference(getPreference(R.string.logout, -1, preference -> {
-                Utils.setupCookies("LOGOUT");
-                shouldRecreate();
-                Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
-                settingsHelper.putString(Constants.COOKIE, "");
+            accountCategory.addPreference(getAccountSwitcherPreference(cookie));
+            accountCategory.addPreference(getPreference(R.string.logout, "Remove all accounts", -1, preference -> {
+                if (getContext() == null) return false;
+                new AlertDialog.Builder(getContext())
+                        .setTitle(R.string.logout)
+                        .setMessage("This will remove all added accounts from the app!\n"
+                                            + "To remove just one account, long tap the account from the account switcher dialog.\n"
+                                            + "Do you want to continue?")
+                        .setPositiveButton(R.string.yes, (dialog, which) -> {
+                            Utils.setupCookies("LOGOUT");
+                            shouldRecreate();
+                            Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
+                            settingsHelper.putString(Constants.COOKIE, "");
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+                return true;
+            }));
+        } else {
+            // Need to show something to trigger login activity
+            accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
                 return true;
             }));
         }
@@ -86,10 +123,129 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             if (data == null) return;
             final String cookie = data.getStringExtra("cookie");
             Utils.setupCookies(cookie);
-            shouldRecreate();
-            Toast.makeText(requireContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
             settingsHelper.putString(Constants.COOKIE, cookie);
+            // No use as the timing of show is unreliable
+            // Toast.makeText(requireContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
+
+            // adds cookies to database for quick access
+            final String uid = Utils.getUserIdFromCookie(cookie);
+            final ProfileService profileService = ProfileService.getInstance();
+            profileService.getUserInfo(uid, new ServiceCallback<UserInfo>() {
+                @Override
+                public void onSuccess(final UserInfo result) {
+                    // Log.d(TAG, "adding userInfo: " + result);
+                    if (result != null) {
+                        Utils.dataBox.addOrUpdateUser(uid, result.getUsername(), cookie, result.getFullName(), result.getProfilePicUrl());
+                    }
+                    final FragmentActivity activity = getActivity();
+                    if (activity == null) return;
+                    activity.recreate();
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error fetching user info", t);
+                }
+            });
         }
+    }
+
+    @NonNull
+    private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie) {
+        final List<DataBox.CookieModel> allUsers = Utils.dataBox.getAllCookies();
+        if (getContext() != null && allUsers != null) {
+            sortUserList(cookie, allUsers);
+            final OnAccountClickListener clickListener = (model, isCurrent) -> {
+                if (isCurrent) {
+                    if (accountSwitchDialog == null) return;
+                    accountSwitchDialog.dismiss();
+                    return;
+                }
+                tappedModel = model;
+                shouldRecreate();
+                if (accountSwitchDialog == null) return;
+                accountSwitchDialog.dismiss();
+            };
+            final OnAccountLongClickListener longClickListener = (model, isCurrent) -> {
+                if (isCurrent) {
+                    new AlertDialog.Builder(getContext())
+                            .setMessage(R.string.quick_access_cannot_delete_curr)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
+                    return true;
+                }
+                new AlertDialog.Builder(getContext())
+                        .setMessage(getString(R.string.quick_access_confirm_delete, model.getUsername()))
+                        .setPositiveButton(R.string.yes, (dialog, which) -> {
+                            Utils.dataBox.delUserCookie(model);
+                            adapter.clear();
+                            final List<DataBox.CookieModel> users = Utils.dataBox.getAllCookies();
+                            if (users == null) return;
+                            adapter.addAll(users);
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+                accountSwitchDialog.dismiss();
+                return true;
+            };
+            adapter = new AccountSwitcherListAdapter(
+                    getContext(),
+                    R.layout.pref_account_switcher,
+                    allUsers,
+                    clickListener,
+                    longClickListener
+            );
+            accountSwitchDialog = new AlertDialog.Builder(getContext())
+                    .setTitle("Accounts")
+                    .setNeutralButton("Add account", (dialog1, which) -> startActivityForResult(
+                            new Intent(getContext(), Login.class),
+                            Constants.LOGIN_RESULT_CODE))
+                    .setAdapter(adapter, null)
+                    .create();
+            accountSwitchDialog.setOnDismissListener(dialog -> {
+                if (tappedModel == null) return;
+                Utils.setupCookies(tappedModel.getCookie());
+                settingsHelper.putString(Constants.COOKIE, tappedModel.getCookie());
+            });
+        }
+        final AlertDialog finalDialog = accountSwitchDialog;
+        return new AccountSwitcherPreference(requireContext(), cookie, v -> {
+            if (finalDialog == null) return;
+            finalDialog.show();
+        });
+    }
+
+    /**
+     * Sort the user list by following logic:
+     * <ol>
+     * <li>Keep currently active account at top.
+     * <li>Check if any user does not have a full name.
+     * <li>If all have full names, sort by full names.
+     * <li>Otherwise, sort by the usernames
+     * </ol>
+     *
+     * @param cookie   active cookie
+     * @param allUsers list of users
+     */
+    private void sortUserList(final String cookie, final List<DataBox.CookieModel> allUsers) {
+        boolean sortByName = true;
+        for (final DataBox.CookieModel user : allUsers) {
+            if (Utils.isEmpty(user.getFullName())) {
+                sortByName = false;
+                break;
+            }
+        }
+        final boolean finalSortByName = sortByName;
+        Collections.sort(allUsers, (o1, o2) -> {
+            // keep current account at top
+            if (o1.getCookie().equals(cookie)) return -1;
+            if (finalSortByName) {
+                // sort by full name
+                return o1.getFullName().compareTo(o2.getFullName());
+            }
+            // otherwise sort by username
+            return o1.getUsername().compareTo(o2.getUsername());
+        });
     }
 
     @NonNull
@@ -137,6 +293,35 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             super(context);
             setLayoutResource(R.layout.pref_more_header);
             setSelectable(false);
+        }
+    }
+
+    public static class AccountSwitcherPreference extends Preference {
+
+        private final String cookie;
+        private final View.OnClickListener onClickListener;
+
+        public AccountSwitcherPreference(final Context context,
+                                         final String cookie,
+                                         final View.OnClickListener onClickListener) {
+            super(context);
+            this.cookie = cookie;
+            this.onClickListener = onClickListener;
+            setLayoutResource(R.layout.pref_account_switcher);
+        }
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onBindViewHolder(final PreferenceViewHolder holder) {
+            final View root = holder.itemView;
+            if (onClickListener != null) root.setOnClickListener(onClickListener);
+            final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
+            final String uid = Utils.getUserIdFromCookie(cookie);
+            final DataBox.CookieModel user = Utils.dataBox.getCookie(uid);
+            if (user == null) return;
+            binding.fullName.setText(user.getFullName());
+            binding.username.setText("@" + user.getUsername());
+            binding.profilePic.setImageURI(user.getProfilePic());
         }
     }
 }

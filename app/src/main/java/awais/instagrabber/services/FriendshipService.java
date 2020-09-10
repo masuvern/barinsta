@@ -17,7 +17,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class FriendshipService extends BaseService {
-    private static final String TAG = "ProfileService";
+    private static final String TAG = "FriendshipService";
 
     private final FriendshipRepository repository;
 
