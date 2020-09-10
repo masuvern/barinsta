@@ -68,8 +68,8 @@ public final class FeedAdapter extends ListAdapter<FeedModel, FeedItemViewHolder
                 final ItemFeedSliderBinding binding = ItemFeedSliderBinding.inflate(layoutInflater, parent, false);
                 return new FeedSliderViewHolder(binding, mentionClickListener, clickListener, longClickListener);
             }
-            default:
-            case MEDIA_TYPE_IMAGE: {
+            case MEDIA_TYPE_IMAGE:
+            default: {
                 final ItemFeedPhotoBinding binding = ItemFeedPhotoBinding.inflate(layoutInflater, parent, false);
                 return new FeedPhotoViewHolder(binding, mentionClickListener, clickListener, longClickListener);
             }

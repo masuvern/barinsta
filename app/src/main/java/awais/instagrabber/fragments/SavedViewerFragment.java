@@ -106,7 +106,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         @Override
         public void onResult(final PostModel[] result) {
             final List<PostModel> current = postsViewModel.getList().getValue();
-            if (result != null) {
+            if (result != null && result.length > 0) {
                 final List<PostModel> resultList = Arrays.asList(result);
                 if (current == null) {
                     postsViewModel.getList().postValue(resultList);
