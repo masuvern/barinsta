@@ -30,11 +30,7 @@ Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.insta
 
 * Use [GitHub issues](https://github.com/austinhuang0131/instagrabber/issues) when possible.
 * Email: [InstaGrabber@AustinHuang.me](mailto:instagrabber@austinhuang.me) (Synced to GitHub issues)
-* Matrix: [#InstaGrabber:matrix.org](https://matrix.to/#/#instagrabber:matrix.org)
-* Telegram: [@Grabber_App](https://t.me/grabber_app)
-* Discord: [https://discord.gg/YtEDzN2](https://discord.gg/YtEDzN2)
-* Gitter: [InstaGrabber/General](https://gitter.im/instagrabber/general)
-  * Above 4 are bridged to each other.
+* Chat (Bridged to each other): [![Matrix](https://img.shields.io/badge/Matrix-@InstaGrabber:matrix.org-000000?logo=matrix)](https://matrix.to/#/#instagrabber:matrix.org) [![Telegram](https://img.shields.io/badge/Telegram-@Grabber__App-2CA5E0?logo=telegram)](https://t.me/grabber_app) [![Discord](https://img.shields.io/badge/Discord-YtEDzN2-7289da?logo=discord&logoColor=white)](https://discord.gg/YtEDzN2) [![Gitter](https://img.shields.io/badge/Gitter-InstaGrabber/General-ed1965?logo=gitter)](https://gitter.im/instagrabber/general)
 
 ### Contributors
 
