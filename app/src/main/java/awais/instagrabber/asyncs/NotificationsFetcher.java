@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
@@ -22,16 +24,18 @@ import awaisomereport.LogCollector;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public final class NotificationsFetcher extends AsyncTask<Void, Void, NotificationModel[]> {
-    private final FetchListener<NotificationModel[]> fetchListener;
+public final class NotificationsFetcher extends AsyncTask<Void, Void, List<NotificationModel>> {
+    private static final String TAG = "NotificationsFetcher";
 
-    public NotificationsFetcher(final FetchListener<NotificationModel[]> fetchListener) {
+    private final FetchListener<List<NotificationModel>> fetchListener;
+
+    public NotificationsFetcher(final FetchListener<List<NotificationModel>> fetchListener) {
         this.fetchListener = fetchListener;
     }
 
     @Override
-    protected NotificationModel[] doInBackground(final Void... voids) {
-        NotificationModel[] result = null;
+    protected List<NotificationModel> doInBackground(final Void... voids) {
+        List<NotificationModel> result = new ArrayList<>();
         final String url = "https://www.instagram.com/accounts/activity/?__a=1";
         CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
 
@@ -43,37 +47,34 @@ public final class NotificationsFetcher extends AsyncTask<Void, Void, Notificati
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                JSONObject page = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject("user"),
-                        ewaf = page.getJSONObject("activity_feed").optJSONObject("edge_web_activity_feed"),
-                        efr = page.optJSONObject("edge_follow_requests"),
-                        data;
+                final JSONObject page = new JSONObject(NetworkUtils.readFromConnection(conn))
+                        .getJSONObject("graphql")
+                        .getJSONObject("user");
+                final JSONObject ewaf = page.getJSONObject("activity_feed")
+                                            .optJSONObject("edge_web_activity_feed");
+                final JSONObject efr = page.optJSONObject("edge_follow_requests");
+                JSONObject data;
                 JSONArray media;
-                // int totalLength = 0;
-                int mediaLen = 0;
-                int reqLen = 0;
-                NotificationModel[] models = null, req = null;
-
                 if (ewaf != null
                         && (media = ewaf.optJSONArray("edges")) != null
                         && media.length() > 0
                         && media.optJSONObject(0).optJSONObject("node") != null) {
-                    mediaLen = media.length();
-                    models = new NotificationModel[mediaLen];
-                    for (int i = 0; i < mediaLen; ++i) {
+                    for (int i = 0; i < media.length(); ++i) {
                         data = media.optJSONObject(i).optJSONObject("node");
                         if (data == null) continue;
                         final String type = data.getString("__typename");
                         final NotificationType notificationType = NotificationType.valueOfType(type);
                         if (notificationType == null) continue;
-                        models[i] = new NotificationModel(
+                        final JSONObject user = data.getJSONObject("user");
+                        result.add(new NotificationModel(
                                 data.getString(Constants.EXTRAS_ID),
                                 data.optString("text"), // comments or mentions
                                 data.getLong("timestamp"),
-                                data.getJSONObject("user").getString("username"),
-                                data.getJSONObject("user").getString("profile_pic_url"),
+                                user.getString("id"),
+                                user.getString("username"),
+                                user.getString("profile_pic_url"),
                                 !data.isNull("media") ? data.getJSONObject("media").getString("shortcode") : null,
-                                !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null,
-                                notificationType);
+                                !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null, notificationType));
                     }
                 }
 
@@ -81,29 +82,27 @@ public final class NotificationsFetcher extends AsyncTask<Void, Void, Notificati
                         && (media = efr.optJSONArray("edges")) != null
                         && media.length() > 0
                         && media.optJSONObject(0).optJSONObject("node") != null) {
-                    reqLen = media.length();
-                    req = new NotificationModel[reqLen];
-                    for (int i = 0; i < reqLen; ++i) {
+                    for (int i = 0; i < media.length(); ++i) {
                         data = media.optJSONObject(i).optJSONObject("node");
                         if (data == null) continue;
-                        req[i] = new NotificationModel(data.getString(Constants.EXTRAS_ID),
-                                                       data.optString("full_name"), 0L, data.getString("username"),
-                                                       data.getString("profile_pic_url"), null, null, NotificationType.REQUEST);
+                        result.add(new NotificationModel(
+                                data.getString(Constants.EXTRAS_ID),
+                                data.optString("full_name"),
+                                0L,
+                                data.getString(Constants.EXTRAS_ID),
+                                data.getString("username"),
+                                data.getString("profile_pic_url"),
+                                null,
+                                null, NotificationType.REQUEST));
                     }
                 }
-
-                result = new NotificationModel[mediaLen + reqLen];
-                if (req != null) System.arraycopy(req, 0, result, 0, reqLen);
-                if (models != null) System.arraycopy(models, 0, result, reqLen, mediaLen);
             }
-
             conn.disconnect();
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_NOTIFICATION_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
-
         return result;
     }
 
@@ -113,7 +112,7 @@ public final class NotificationsFetcher extends AsyncTask<Void, Void, Notificati
     }
 
     @Override
-    protected void onPostExecute(final NotificationModel[] result) {
+    protected void onPostExecute(final List<NotificationModel> result) {
         if (fetchListener != null) fetchListener.onResult(result);
     }
 }

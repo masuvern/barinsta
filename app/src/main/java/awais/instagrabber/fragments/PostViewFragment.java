@@ -291,6 +291,7 @@ public class PostViewFragment extends Fragment {
                 return;
             }
         }
+        if (currentPostIndex >= idOrCodeList.size() || currentPostIndex < 0) return;
         final String idOrShortCode = idOrCodeList.get(currentPostIndex);
         if (isId) {
             new iPostFetcher(idOrShortCode, pfl).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

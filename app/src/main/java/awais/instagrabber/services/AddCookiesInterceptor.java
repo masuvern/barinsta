@@ -17,8 +17,11 @@ public class AddCookiesInterceptor implements Interceptor {
         final Request request = chain.request();
         final Request.Builder builder = request.newBuilder();
         final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-        builder.addHeader("Cookie", cookie)
-               .addHeader("User-Agent", Constants.I_USER_AGENT);
+        builder.addHeader("Cookie", cookie);
+        final String userAgentHeader = "User-Agent";
+        if (request.header(userAgentHeader) == null) {
+            builder.addHeader(userAgentHeader, Constants.I_USER_AGENT);
+        }
         final Request updatedRequest = builder.build();
         return chain.proceed(updatedRequest);
     }

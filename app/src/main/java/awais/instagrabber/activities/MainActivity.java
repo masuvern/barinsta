@@ -78,7 +78,8 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.savedViewerFragment,
             R.id.commentsViewerFragment,
             R.id.followViewerFragment,
-            R.id.directMessagesSettingsFragment);
+            R.id.directMessagesSettingsFragment,
+            R.id.notificationsViewer);
     private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
     private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";

@@ -19,8 +19,8 @@ public abstract class BaseService {
         if (builder == null) {
             final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                     .addInterceptor(new AddCookiesInterceptor())
-                    .followRedirects(true)
-                    .followSslRedirects(true);
+                    .followRedirects(false)
+                    .followSslRedirects(false);
             if (BuildConfig.DEBUG) {
                 // clientBuilder.addInterceptor(new LoggingInterceptor());
             }

@@ -100,7 +100,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         generalCategory.setTitle("General");
         generalCategory.setIconSpaceReserved(false);
         screen.addPreference(generalCategory);
-        generalCategory.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> false));
+        generalCategory.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
+            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToNotificationsViewer();
+            NavHostFragment.findNavController(this).navigate(navDirections);
+            return true;
+        }));
         generalCategory.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {
             final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
             NavHostFragment.findNavController(this).navigate(navDirections);

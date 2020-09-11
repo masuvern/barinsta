@@ -121,13 +121,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.NotificationsViewer"
-            android:parentActivityName=".activities.MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activities.MainActivity" />
-        </activity>
-        <activity
             android:name=".activities.Login"
             android:label="@string/login"
             android:parentActivityName=".activities.MainActivity">

@@ -74,4 +74,5 @@ public final class Constants {
     public static final String CHANNEL_ID = "InstaGrabber";
     public static final String CHANNEL_NAME = "Instagrabber";
     public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
+    public static final int ACTIVITY_NOTIFICATION_ID = 1800000000;
 }

@@ -99,6 +99,20 @@ public class FriendshipService extends BaseService {
         });
     }
 
+    public void approve(final String userId,
+                       final String targetUserId,
+                       final String crsfToken,
+                       final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
+        change("approve", userId, targetUserId, crsfToken, callback);
+    }
+
+    public void ignore(final String userId,
+                        final String targetUserId,
+                        final String crsfToken,
+                        final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
+        change("ignore", userId, targetUserId, crsfToken, callback);
+    }
+
     private void change(final String action,
                         final String userId,
                         final String targetUserId,
