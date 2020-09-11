@@ -1,4 +1,4 @@
-package awais.instagrabber.services;
+package awais.instagrabber.webservices;
 
 import androidx.annotation.NonNull;
 

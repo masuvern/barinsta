@@ -1,4 +1,4 @@
-package awais.instagrabber.services;
+package awais.instagrabber.webservices;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;

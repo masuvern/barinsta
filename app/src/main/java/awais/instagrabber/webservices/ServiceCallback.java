@@ -1,4 +1,4 @@
-package awais.instagrabber.services;
+package awais.instagrabber.webservices;
 
 public interface ServiceCallback<T> {
     void onSuccess(T result);
