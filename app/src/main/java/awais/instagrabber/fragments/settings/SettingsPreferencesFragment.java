@@ -79,8 +79,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
-        }
-        else {
+        } else {
             final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(requireContext());
             screen.addPreference(anonUsersPreferenceCategory);
             anonUsersPreferenceCategory.setIconSpaceReserved(false);
@@ -242,6 +241,10 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setKey(Constants.CHECK_ACTIVITY);
         preference.setTitle(R.string.activity_setting);
         preference.setIconSpaceReserved(false);
+        preference.setOnPreferenceChangeListener((preference1, newValue) -> {
+            shouldRecreate();
+            return true;
+        });
         return preference;
     }
 

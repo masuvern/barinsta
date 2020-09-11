@@ -2,13 +2,20 @@ package awais.instagrabber.activities;
 
 
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Menu;
@@ -21,10 +28,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.LiveData;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
+import androidx.navigation.NavDirections;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -43,10 +52,12 @@ import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.customviews.helpers.CustomHideBottomViewOnScrollBehavior;
 import awais.instagrabber.databinding.ActivityMainBinding;
+import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
+import awais.instagrabber.services.ActivityCheckerService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
@@ -93,7 +104,21 @@ public class MainActivity extends BaseLanguageActivity {
     private boolean showSearch = true;
     private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
-    private boolean isLoggedIn;
+    private boolean isActivityCheckerServiceBound = false;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(final ComponentName name, final IBinder service) {
+            // final ActivityCheckerService.LocalBinder binder = (ActivityCheckerService.LocalBinder) service;
+            // final ActivityCheckerService activityCheckerService = binder.getService();
+            isActivityCheckerServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(final ComponentName name) {
+            isActivityCheckerServiceBound = false;
+        }
+    };
 
     static {
         NAV_TO_MENU_ID_MAP.put(R.navigation.direct_messages_nav_graph, R.id.direct_messages_nav_graph);
@@ -112,6 +137,7 @@ public class MainActivity extends BaseLanguageActivity {
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+        createNotificationChannels();
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
@@ -120,9 +146,11 @@ public class MainActivity extends BaseLanguageActivity {
         final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
         if (checkUpdates) FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
-
         final Intent intent = getIntent();
         handleIntent(intent);
+        if (!TextUtils.isEmpty(cookie) && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
+            bindActivityCheckerService();
+        }
     }
 
     @Override
@@ -174,6 +202,24 @@ public class MainActivity extends BaseLanguageActivity {
     protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
         handleIntent(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindActivityCheckerService();
+    }
+
+    private void createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+            notificationManager.createNotificationChannel(new NotificationChannel(Constants.DOWNLOAD_CHANNEL_ID,
+                                                                                  Constants.DOWNLOAD_CHANNEL_NAME,
+                                                                                  NotificationManager.IMPORTANCE_DEFAULT));
+            notificationManager.createNotificationChannel(new NotificationChannel(Constants.ACTIVITY_CHANNEL_ID,
+                                                                                  Constants.ACTIVITY_CHANNEL_NAME,
+                                                                                  NotificationManager.IMPORTANCE_DEFAULT));
+        }
     }
 
     private void setupSuggestions() {
@@ -318,7 +364,7 @@ public class MainActivity extends BaseLanguageActivity {
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             binding.bottomNavView.getMenu().clear();
@@ -429,6 +475,10 @@ public class MainActivity extends BaseLanguageActivity {
         final String type = intent.getType();
         // Log.d(TAG, action + " " + type);
         if (Intent.ACTION_MAIN.equals(action)) return;
+        if (Constants.ACTION_SHOW_ACTIVITY.equals(action)) {
+            showActivityView();
+            return;
+        }
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (type.equals("text/plain")) {
                 handleUrl(intent.getStringExtra(Intent.EXTRA_TEXT));
@@ -510,5 +560,26 @@ public class MainActivity extends BaseLanguageActivity {
         final Bundle bundle = new Bundle();
         bundle.putString("hashtag", "#" + hashtag);
         navController.navigate(R.id.action_global_hashTagFragment, bundle);
+    }
+
+    private void showActivityView() {
+        binding.bottomNavView.setSelectedItemId(R.id.more_nav_graph);
+        binding.bottomNavView.post(() -> {
+            final NavController navController = currentNavControllerLiveData.getValue();
+            if (currentNavControllerLiveData == null || navController == null) return;
+            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToNotificationsViewer();
+            navController.navigate(navDirections);
+        });
+    }
+
+    private void bindActivityCheckerService() {
+        bindService(new Intent(this, ActivityCheckerService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        isActivityCheckerServiceBound = true;
+    }
+
+    private void unbindActivityCheckerService() {
+        if (!isActivityCheckerServiceBound) return;
+        unbindService(serviceConnection);
+        isActivityCheckerServiceBound = false;
     }
 }

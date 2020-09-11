@@ -6,8 +6,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -21,11 +19,9 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
@@ -56,9 +52,7 @@ public final class Utils {
     public static SettingsHelper settingsHelper;
     public static DataBox dataBox;
     public static boolean sessionVolumeFull = false;
-    public static NotificationManagerCompat notificationManager;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-    public static boolean isChannelCreated = false;
     public static ClipboardManager clipboardManager;
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
@@ -122,8 +116,8 @@ public final class Utils {
             clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
         int toastMessage = R.string.clipboard_error;
-        if (clipboardManager != null) {
-            clipboardManager.setPrimaryClip(ClipData.newPlainText(Constants.CHANNEL_NAME, string));
+        if (clipboardManager != null && ctxNotNull) {
+            clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
             toastMessage = R.string.clipboard_copied;
         }
         if (ctxNotNull) Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();

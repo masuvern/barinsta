@@ -138,5 +138,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+        <service android:name=".services.ActivityCheckerService" />
     </application>
 </manifest>

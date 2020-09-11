@@ -4,7 +4,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.core.app.NotificationManagerCompat;
 import androidx.multidex.MultiDexApplication;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -26,7 +25,6 @@ import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.dataBox;
 import static awais.instagrabber.utils.Utils.datetimeParser;
 import static awais.instagrabber.utils.Utils.logCollector;
-import static awais.instagrabber.utils.Utils.notificationManager;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class InstaGrabberApplication extends MultiDexApplication {
@@ -66,9 +64,6 @@ public final class InstaGrabberApplication extends MultiDexApplication {
             settingsHelper = new SettingsHelper(this);
 
         LocaleUtils.setLocale(getBaseContext());
-
-        if (notificationManager == null)
-            notificationManager = NotificationManagerCompat.from(appContext);
 
         if (clipboardManager == null)
             clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);

@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -31,16 +33,14 @@ import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
-import awais.instagrabber.webservices.FriendshipService;
-import awais.instagrabber.webservices.NewsService;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
-
-import static awais.instagrabber.utils.Utils.notificationManager;
+import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.NewsService;
+import awais.instagrabber.webservices.ServiceCallback;
 
 public final class NotificationsViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "NotificationsViewer";
@@ -145,10 +145,12 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        notificationManager.cancel(Constants.ACTIVITY_NOTIFICATION_ID);
+        final Context context = getContext();
+        if (context == null) return;
+        NotificationManagerCompat.from(context.getApplicationContext()).cancel(Constants.ACTIVITY_NOTIFICATION_ID);
         final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
         if (TextUtils.isEmpty(cookie)) {
-            Toast.makeText(getContext(), R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
         friendshipService = FriendshipService.getInstance();
         newsService = NewsService.getInstance();

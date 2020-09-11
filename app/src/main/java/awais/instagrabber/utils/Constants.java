@@ -71,8 +71,11 @@ public final class Constants {
     public static final String FDROID_SHA1_FINGERPRINT = "C1661EB8FD09F618307E687786D5E5056F65084D";
     public static final String SKIPPED_VERSION = "skipped_version";
     public static final String DEFAULT_TAB = "default_tab";
-    public static final String CHANNEL_ID = "InstaGrabber";
-    public static final String CHANNEL_NAME = "Instagrabber";
+    public static final String ACTIVITY_CHANNEL_ID = "activity";
+    public static final String DOWNLOAD_CHANNEL_ID = "download";
+    public static final String ACTIVITY_CHANNEL_NAME = "Activity";
+    public static final String DOWNLOAD_CHANNEL_NAME = "Downloads";
     public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
     public static final int ACTIVITY_NOTIFICATION_ID = 1800000000;
+    public static final String ACTION_SHOW_ACTIVITY = "show_activity";
 }
