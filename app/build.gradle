@@ -45,24 +45,20 @@ dependencies {
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
     implementation "androidx.recyclerview:recyclerview:1.2.0-alpha05"
-    implementation 'com.google.android.material:material:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
-    implementation "androidx.constraintlayout:constraintlayout:2.0.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.1"
     implementation "androidx.preference:preference:$preference_version"
 
 
     implementation 'org.jsoup:jsoup:1.13.1'
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    implementation 'com.github.chrisbanes:PhotoView:v2.0.0'
     implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 }

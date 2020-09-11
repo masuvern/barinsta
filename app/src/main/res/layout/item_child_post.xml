@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/slider_item_size"
     android:layout_height="@dimen/slider_item_size"
     android:layout_marginStart="2dp"
@@ -12,10 +11,9 @@
     android:layout_marginBottom="4dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:selectableItemBackground"
-    tools:viewBindingIgnore="true">
+    android:foreground="?android:selectableItemBackground">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

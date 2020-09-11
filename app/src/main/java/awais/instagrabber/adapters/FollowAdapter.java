@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +10,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.FollowsViewHolder;
+import awais.instagrabber.databinding.ItemFollowBinding;
 import awais.instagrabber.interfaces.OnGroupClickListener;
 import awais.instagrabber.models.FollowModel;
 import awais.instagrabber.utils.TextUtils;
@@ -66,12 +64,10 @@ public final class FollowAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     };
     private final View.OnClickListener onClickListener;
-    private final LayoutInflater layoutInflater;
     private final ExpandableList expandableList;
     private final boolean hasManyGroups;
 
-    public FollowAdapter(final Context context, final View.OnClickListener onClickListener, @NonNull final ArrayList<ExpandableGroup> groups) {
-        this.layoutInflater = LayoutInflater.from(context);
+    public FollowAdapter(final View.OnClickListener onClickListener, @NonNull final ArrayList<ExpandableGroup> groups) {
         this.expandableList = new ExpandableList(groups);
         this.onClickListener = onClickListener;
         this.hasManyGroups = groups.size() > 1;
@@ -86,10 +82,15 @@ public final class FollowAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final boolean isGroup = hasManyGroups && viewType == ExpandableListPosition.GROUP;
-
-        final View view = layoutInflater.inflate(isGroup ? R.layout.header_follow : R.layout.item_follow, parent, false);
-
-        return isGroup ? new GroupViewHolder(view, this) : new FollowsViewHolder(view);
+        final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        final View view;
+        if (isGroup) {
+            view = layoutInflater.inflate(R.layout.header_follow, parent, false);
+            return new GroupViewHolder(view, this);
+        } else {
+            final ItemFollowBinding binding = ItemFollowBinding.inflate(layoutInflater, parent, false);
+            return new FollowsViewHolder(binding);
+        }
     }
 
     @Override
@@ -101,21 +102,10 @@ public final class FollowAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final GroupViewHolder gvh = (GroupViewHolder) holder;
             gvh.setTitle(group.getTitle());
             gvh.toggle(isGroupExpanded(group));
-
-        } else {
-            final FollowModel model = group.getItems(true).get(hasManyGroups ? listPos.childPos : position);
-
-            final FollowsViewHolder followHolder = (FollowsViewHolder) holder;
-            if (model != null) {
-                followHolder.itemView.setTag(model);
-                followHolder.itemView.setOnClickListener(onClickListener);
-
-                followHolder.tvUsername.setText(model.getUsername());
-                followHolder.tvFullName.setText(model.getFullName());
-
-                Glide.with(layoutInflater.getContext()).load(model.getProfilePicUrl()).into(followHolder.profileImage);
-            }
+            return;
         }
+        final FollowModel model = group.getItems(true).get(hasManyGroups ? listPos.childPos : position);
+        ((FollowsViewHolder) holder).bind(model, onClickListener);
     }
 
     @Override

@@ -8,12 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
-
 import java.util.List;
 
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -29,19 +25,15 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
     private final ProfileModel myProfileHolder = ProfileModel.getDefaultProfileModel(
             CookieUtils.getUserIdFromCookie(Utils.settingsHelper.getString(Constants.COOKIE)));
     private final LayoutDmBaseBinding binding;
-    private final String strDmYou;
     private final int itemMargin;
-
-    private final RequestManager glideRequestManager;
 
     public DirectMessageItemViewHolder(@NonNull final LayoutDmBaseBinding binding, @NonNull final View.OnClickListener onClickListener) {
         super(binding.getRoot());
         this.binding = binding;
         binding.ivProfilePic.setOnClickListener(onClickListener);
         binding.messageCard.setOnClickListener(onClickListener);
-        strDmYou = binding.getRoot().getContext().getString(R.string.direct_messages_you);
+        // final String strDmYou = binding.getRoot().getContext().getString(R.string.direct_messages_you);
         itemMargin = Utils.displayMetrics.widthPixels / 5;
-        glideRequestManager = Glide.with(itemView);
     }
 
     public void bind(final DirectItemModel directItemModel, final List<ProfileModel> users, final List<ProfileModel> leftUsers) {
@@ -50,7 +42,7 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
 
         final RecyclerView.LayoutParams itemViewLayoutParams = (RecyclerView.LayoutParams) itemView.getLayoutParams();
         itemViewLayoutParams.setMargins(type == MESSAGE_OUTGOING ? itemMargin : 0, 0,
-                type == MESSAGE_INCOMING ? itemMargin : 0, 0);
+                                        type == MESSAGE_INCOMING ? itemMargin : 0, 0);
 
         final ViewGroup messageCardParent = (ViewGroup) binding.messageCard.getParent();
         binding.contentContainer.setGravity(type == MESSAGE_INCOMING ? Gravity.START : Gravity.END);
@@ -69,7 +61,7 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
         binding.messageCard.setTag(directItemModel);
 
         if (type == MESSAGE_INCOMING && user != null) {
-            glideRequestManager.load(user.getSdProfilePic()).into(binding.ivProfilePic);
+            binding.ivProfilePic.setImageURI(user.getSdProfilePic());
         }
 
         bindItem(directItemModel);
@@ -77,10 +69,6 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
 
     public void setItemView(final View view) {
         this.binding.messageCard.addView(view);
-    }
-
-    public RequestManager getGlideRequestManager() {
-        return glideRequestManager;
     }
 
     public abstract void bindItem(final DirectItemModel directItemModel);

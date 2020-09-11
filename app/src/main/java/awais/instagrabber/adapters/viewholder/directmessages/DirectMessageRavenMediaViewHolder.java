@@ -73,8 +73,8 @@ public class DirectMessageRavenMediaViewHolder extends DirectMessageItemViewHold
                 final MediaItemType mediaType = mediaModel.getMediaType();
                 textRes = -1;
                 binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
-                        mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
-                getGlideRequestManager().load(mediaModel.getThumbUrl()).into(binding.ivMediaPreview);
+                                                       mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
+                binding.ivMediaPreview.setImageURI(mediaModel.getThumbUrl());
             }
         }
         if (textRes != -1) {

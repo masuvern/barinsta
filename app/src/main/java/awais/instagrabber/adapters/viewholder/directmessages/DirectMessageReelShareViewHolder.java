@@ -41,8 +41,8 @@ public class DirectMessageReelShareViewHolder extends DirectMessageItemViewHolde
             binding.mediaExpiredIcon.setVisibility(View.VISIBLE);
         } else {
             binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ||
-                    mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
-            getGlideRequestManager().load(reelShareMedia.getThumbUrl()).into(binding.ivMediaPreview);
+                                                   mediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
+            binding.ivMediaPreview.setImageURI(reelShareMedia.getThumbUrl());
         }
     }
 }

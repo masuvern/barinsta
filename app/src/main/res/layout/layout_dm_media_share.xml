@@ -18,12 +18,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/ivMediaPreview"
             android:layout_width="wrap_content"
-            android:maxHeight="@dimen/dm_media_img_max_height"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true" />
+            android:adjustViewBounds="true"
+            android:maxHeight="@dimen/dm_media_img_max_height" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/typeIcon"

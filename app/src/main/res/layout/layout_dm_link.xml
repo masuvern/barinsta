@@ -13,11 +13,11 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="?android:textColorPrimary" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/ivLinkPreview"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dm_link_image_size"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvLinkTitle"
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start|fill_horizontal"
-        android:maxLines="2"
         android:ellipsize="end"
+        android:maxLines="2"
         android:padding="4dp" />
 </LinearLayout>

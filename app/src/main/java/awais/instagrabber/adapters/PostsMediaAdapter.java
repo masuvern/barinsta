@@ -7,16 +7,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.PostMediaViewHolder;
+import awais.instagrabber.databinding.ItemChildPostBinding;
 import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.ViewerPostModel;
 
 public final class PostsMediaAdapter extends RecyclerView.Adapter<PostMediaViewHolder> {
     private final View.OnClickListener clickListener;
-    private LayoutInflater layoutInflater;
     private ViewerPostModel[] postModels;
 
     public PostsMediaAdapter(final ViewerPostModel[] postModels, final View.OnClickListener clickListener) {
@@ -27,25 +25,16 @@ public final class PostsMediaAdapter extends RecyclerView.Adapter<PostMediaViewH
     @NonNull
     @Override
     public PostMediaViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-        if (layoutInflater == null) layoutInflater = LayoutInflater.from(parent.getContext());
-        return new PostMediaViewHolder(layoutInflater.inflate(R.layout.item_child_post, parent, false));
+        final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        layoutInflater.inflate(R.layout.item_child_post, parent, false);
+        final ItemChildPostBinding binding = ItemChildPostBinding.inflate(layoutInflater, parent, false);
+        return new PostMediaViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final PostMediaViewHolder holder, final int position) {
         final ViewerPostModel postModel = postModels[position];
-        if (postModel != null) {
-            postModel.setPosition(position);
-
-            holder.itemView.setTag(postModel);
-            holder.itemView.setOnClickListener(clickListener);
-
-            holder.selectedView.setVisibility(postModel.isCurrentSlide() ? View.VISIBLE : View.GONE);
-
-            holder.isDownloaded.setVisibility(postModel.isDownloaded() ? View.VISIBLE : View.GONE);
-
-            Glide.with(layoutInflater.getContext()).load(postModel.getSliderDisplayUrl()).into(holder.icon);
-        }
+        holder.bind(postModel, position, clickListener);
     }
 
     public void setData(final ViewerPostModel[] postModels) {

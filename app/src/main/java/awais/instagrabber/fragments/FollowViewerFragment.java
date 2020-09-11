@@ -345,15 +345,9 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             final ExpandableGroup group = new ExpandableGroup(type, followModels);
             groups.add(group);
         }
-
-        try {
-            adapter = new FollowAdapter(requireContext(), clickListener, groups);
-            adapter.toggleGroup(0);
-            binding.rvFollow.setAdapter(adapter);
-        }
-        catch (IllegalStateException e) {
-            // do nothing
-        }
+        adapter = new FollowAdapter(clickListener, groups);
+        adapter.toggleGroup(0);
+        binding.rvFollow.setAdapter(adapter);
     }
 
     public void stopCurrentExecutor() {

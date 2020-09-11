@@ -24,9 +24,9 @@ public class DirectMessageMediaViewHolder extends DirectMessageItemViewHolder {
     @Override
     public void bindItem(final DirectItemModel directItemModel) {
         final DirectItemModel.DirectItemMediaModel mediaModel = directItemModel.getMediaModel();
-        getGlideRequestManager().load(mediaModel.getThumbUrl()).into(binding.ivMediaPreview);
+        binding.ivMediaPreview.setImageURI(mediaModel.getThumbUrl());
         final MediaItemType modelMediaType = mediaModel.getMediaType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO
-                || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
+                                               || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
     }
 }

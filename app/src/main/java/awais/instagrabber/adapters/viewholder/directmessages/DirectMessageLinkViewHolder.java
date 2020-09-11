@@ -29,7 +29,7 @@ public class DirectMessageLinkViewHolder extends DirectMessageItemViewHolder {
         if (TextUtils.isEmpty(linkImageUrl)) {
             binding.ivLinkPreview.setVisibility(View.GONE);
         } else {
-            getGlideRequestManager().load(linkImageUrl).into(binding.ivLinkPreview);
+            binding.ivLinkPreview.setImageURI(linkImageUrl);
         }
         if (TextUtils.isEmpty(linkContext.getLinkTitle())) {
             binding.tvLinkTitle.setVisibility(View.GONE);

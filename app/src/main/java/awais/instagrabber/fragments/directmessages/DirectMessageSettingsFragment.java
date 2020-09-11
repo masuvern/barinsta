@@ -72,12 +72,12 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             final boolean amAdmin = adminList.contains(Long.parseLong(userIdFromCookie));
             final DirectMessageMembersAdapter memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(),
                                                                                               adminList,
-                                                                                              requireContext(),
                                                                                               amAdmin ? clickListener : basicClickListener);
             userList.setAdapter(memberAdapter);
             if (threadModel.getLeftUsers() != null && threadModel.getLeftUsers().length > 0) {
                 leftTitle.setVisibility(View.VISIBLE);
-                final DirectMessageMembersAdapter leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(), null, requireContext(),
+                final DirectMessageMembersAdapter leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(),
+                                                                                                null,
                                                                                                 basicClickListener);
                 leftUserList.setAdapter(leftAdapter);
             }

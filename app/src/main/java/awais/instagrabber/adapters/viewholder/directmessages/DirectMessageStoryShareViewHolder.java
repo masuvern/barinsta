@@ -37,12 +37,11 @@ public class DirectMessageStoryShareViewHolder extends DirectMessageItemViewHold
             if (!TextUtils.isEmpty(text)) {
                 binding.tvMessage.setText(text);
                 binding.tvMessage.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 final DirectItemModel.DirectItemMediaModel reelShareMedia = reelShare.getMedia();
                 final MediaItemType mediaType = reelShareMedia.getMediaType();
                 binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? View.VISIBLE : View.GONE);
-                getGlideRequestManager().load(reelShareMedia.getThumbUrl()).into(binding.ivMediaPreview);
+                binding.ivMediaPreview.setImageURI(reelShareMedia.getThumbUrl());
             }
         }
     }
