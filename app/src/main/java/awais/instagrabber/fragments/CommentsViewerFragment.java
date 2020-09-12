@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -41,12 +42,12 @@ import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.CommentModel;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.webservices.MediaService;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.ServiceCallback;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
@@ -178,8 +179,10 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
     }
 
     final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
+        final Context context = getContext();
+        if (context == null) return;
         if (commentModel == null) {
-            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             return;
         }
         final ProfileModel profileModel = commentModel.getProfileModel();
@@ -198,10 +201,10 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                   .commit();
                 break;
             case 2: // copy username
-                Utils.copyText(requireContext(), profileModel.getUsername());
+                Utils.copyText(context, profileModel.getUsername());
                 break;
             case 3: // copy comment
-                Utils.copyText(requireContext(), commentModel.getText().toString());
+                Utils.copyText(context, commentModel.getText().toString());
                 break;
             case 4: // reply to comment
                 final View focus = binding.rvComments.findViewWithTag(commentModel);
@@ -213,7 +216,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                 binding.commentText.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        imm = (InputMethodManager) requireContext().getSystemService(INPUT_METHOD_SERVICE);
+                        imm = (InputMethodManager) context.getSystemService(INPUT_METHOD_SERVICE);
                         if (imm == null) return;
                         imm.showSoftInput(binding.commentText, 0);
                     }
@@ -226,7 +229,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                         public void onSuccess(final Boolean result) {
                             commentModel = null;
                             if (!result) {
-                                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             onRefresh();
@@ -235,7 +238,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                         @Override
                         public void onFailure(final Throwable t) {
                             Log.e(TAG, "Error liking comment", t);
-                            Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
                     return;
@@ -245,7 +248,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                     public void onSuccess(final Boolean result) {
                         commentModel = null;
                         if (!result) {
-                            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                             return;
                         }
                         onRefresh();
@@ -254,7 +257,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                     @Override
                     public void onFailure(final Throwable t) {
                         Log.e(TAG, "Error unliking comment", t);
-                        Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
                 break;
@@ -268,7 +271,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                             public void onSuccess(final Boolean result) {
                                 commentModel = null;
                                 if (!result) {
-                                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 onRefresh();
@@ -277,7 +280,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                             @Override
                             public void onFailure(final Throwable t) {
                                 Log.e(TAG, "Error deleting comment", t);
-                                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
@@ -327,7 +330,9 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                         resources.getString(R.string.comment_viewer_copy_comment)
                 };
             }
-            new AlertDialog.Builder(requireContext())
+            final Context context = getContext();
+            if (context == null) return;
+            new AlertDialog.Builder(context)
                     .setTitle(title)
                     .setItems(commentDialogList, profileDialogListener)
                     .setNegativeButton(R.string.cancel, null)
@@ -346,8 +351,10 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
 
     private final View.OnClickListener newCommentListener = v -> {
         final Editable text = binding.commentText.getText();
+        final Context context = getContext();
+        if (context == null) return;
         if (text == null || TextUtils.isEmpty(text.toString())) {
-            Toast.makeText(requireContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
             return;
         }
         final String userId = CookieUtils.getUserIdFromCookie(cookie);
@@ -362,7 +369,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
                 commentModel = null;
                 binding.commentText.setText("");
                 if (!result) {
-                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 onRefresh();
@@ -371,7 +378,7 @@ public final class CommentsViewerFragment extends Fragment implements SwipeRefre
             @Override
             public void onFailure(final Throwable t) {
                 Log.e(TAG, "Error during comment", t);
-                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     };

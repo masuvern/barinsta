@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.directmessages;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -100,7 +101,9 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
                 ProfileModel model = (ProfileModel) tag;
-                final ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, new String[]{
+                final Context context = getContext();
+                if (context == null) return;
+                final ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{
                         getString(R.string.open_profile),
                         getString(R.string.dms_action_kick),
                 });
@@ -113,33 +116,36 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                         onRefresh();
                     }
                 };
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setAdapter(adapter, clickListener)
                         .show();
             }
         };
     }
 
+    @NonNull
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         final FragmentDirectMessagesSettingsBinding binding = FragmentDirectMessagesSettingsBinding.inflate(inflater, container, false);
         final LinearLayout root = binding.getRoot();
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext()) {
+        final Context context = getContext();
+        if (context == null) return root;
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(context) {
             @Override
             public boolean canScrollVertically() {
                 return false;
             }
         };
-        final LinearLayoutManager layoutManagerDos = new LinearLayoutManager(requireContext()) {
+        final LinearLayoutManager layoutManagerDos = new LinearLayoutManager(context) {
             @Override
             public boolean canScrollVertically() {
                 return false;
             }
         };
         if (getArguments() == null) {
-            return null;
+            return root;
         }
         threadId = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getThreadId();
         threadTitle = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getTitle();
@@ -175,7 +181,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
         });
 
         final AppCompatButton btnLeave = binding.btnLeave;
-        btnLeave.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
+        btnLeave.setOnClickListener(v -> new AlertDialog.Builder(context)
                 .setTitle(R.string.dms_action_leave_question)
                 .setPositiveButton(R.string.yes,
                                    (x, y) -> new ChangeSettings(titleText.getText().toString()).execute("leave"))
@@ -250,8 +256,10 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
 
         @Override
         protected void onPostExecute(Void result) {
+            final Context context = getContext();
+            if (context == null) return;
             if (ok) {
-                Toast.makeText(requireContext(), R.string.dms_action_success, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.dms_action_success, Toast.LENGTH_SHORT).show();
                 if (action.equals("update_title")) {
                     threadTitle = titleText.getText().toString();
                     titleSend.setVisibility(View.GONE);
@@ -263,7 +271,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                 } else {
                     DirectMessageThreadFragment.hasSentSomething = true;
                 }
-            } else Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            } else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
         }
     }
 }

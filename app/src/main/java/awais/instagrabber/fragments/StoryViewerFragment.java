@@ -1,6 +1,7 @@
 package awais.instagrabber.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
@@ -180,17 +181,19 @@ public class StoryViewerFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        final Context context = getContext();
+        if (context == null) return false;
         switch (item.getItemId()) {
             case R.id.action_download:
-                if (ContextCompat.checkSelfPermission(requireContext(), DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
+                if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
                     downloadStory();
                 else
                     ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
                 return true;
             case R.id.action_dms:
-                final EditText input = new EditText(requireContext());
+                final EditText input = new EditText(context);
                 input.setHint(R.string.reply_hint);
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setTitle(R.string.reply_story)
                         .setView(input)
                         .setPositiveButton(R.string.ok, (d, w) -> new CommentAction(cookie, currentStory, threadId -> {
@@ -202,7 +205,7 @@ public class StoryViewerFragment extends Fragment {
                                 );
                                 final DirectThreadBroadcaster broadcast = new DirectThreadBroadcaster(threadId);
                                 broadcast.setOnTaskCompleteListener(result -> Toast.makeText(
-                                        requireContext(),
+                                        context,
                                         result != null ? R.string.answered_story : R.string.downloader_unknown_error,
                                         Toast.LENGTH_SHORT
                                 ).show());
@@ -262,7 +265,9 @@ public class StoryViewerFragment extends Fragment {
     private void setupStories() {
         storiesViewModel = new ViewModelProvider(this).get(StoriesViewModel.class);
         setupListeners();
-        binding.storiesList.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        final Context context = getContext();
+        if (context == null) return;
+        binding.storiesList.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
         storiesAdapter = new StoriesAdapter((model, position) -> {
             currentStory = model;
             slidePos = position;
@@ -294,6 +299,8 @@ public class StoryViewerFragment extends Fragment {
         }
         hasFeedStories = models != null && !models.isEmpty();
         final List<?> finalModels = models;
+        final Context context = getContext();
+        if (context == null) return;
         swipeEvent = isRightSwipe -> {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             final int storiesLen = storyModels == null ? 0 : storyModels.size();
@@ -307,7 +314,7 @@ public class StoryViewerFragment extends Fragment {
                     new SeenAction(cookie, currentStory).execute();
                 }
                 if ((isRightSwipe && index == 0) || (isLeftSwipe && index == finalModels.size() - 1)) {
-                    Toast.makeText(requireContext(), R.string.no_more_stories, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 final Object feedStoryModel = isRightSwipe
@@ -315,7 +322,7 @@ public class StoryViewerFragment extends Fragment {
                                               : finalModels.size() == index + 1 ? null : finalModels.get(index + 1);
                 if (feedStoryModel != null) {
                     if (fetching) {
-                        Toast.makeText(requireContext(), R.string.be_patient, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     fetching = true;
@@ -334,7 +341,7 @@ public class StoryViewerFragment extends Fragment {
             currentStory = storyModels.get(slidePos);
             refreshStory();
         };
-        gestureDetector = new GestureDetectorCompat(requireContext(), new SwipeGestureListener(swipeEvent));
+        gestureDetector = new GestureDetectorCompat(context, new SwipeGestureListener(swipeEvent));
         binding.playerView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
         final GestureDetector.SimpleOnGestureListener simpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -382,22 +389,22 @@ public class StoryViewerFragment extends Fragment {
             if (tag instanceof PollModel) {
                 poll = (PollModel) tag;
                 if (poll.getMyChoice() > -1) {
-                    new AlertDialog.Builder(requireContext()).setTitle(R.string.voted_story_poll)
-                                                             .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1,
-                                                                                            new String[]{
-                                                                                                    (poll.getMyChoice() == 0 ? "√ " : "") + poll
-                                                                                                            .getLeftChoice() + " (" + poll
-                                                                                                            .getLeftCount() + ")",
-                                                                                                    (poll.getMyChoice() == 1 ? "√ " : "") + poll
-                                                                                                            .getRightChoice() + " (" + poll
-                                                                                                            .getRightCount() + ")"
-                                                                                            }), null)
-                                                             .setPositiveButton(R.string.ok, null)
-                                                             .show();
+                    new AlertDialog.Builder(context).setTitle(R.string.voted_story_poll)
+                                                    .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1,
+                                                                                   new String[]{
+                                                                                           (poll.getMyChoice() == 0 ? "√ " : "") + poll
+                                                                                                   .getLeftChoice() + " (" + poll
+                                                                                                   .getLeftCount() + ")",
+                                                                                           (poll.getMyChoice() == 1 ? "√ " : "") + poll
+                                                                                                   .getRightChoice() + " (" + poll
+                                                                                                   .getRightCount() + ")"
+                                                                                   }), null)
+                                                    .setPositiveButton(R.string.ok, null)
+                                                    .show();
                 } else {
-                    new AlertDialog.Builder(requireContext())
+                    new AlertDialog.Builder(context)
                             .setTitle(poll.getQuestion())
-                            .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, new String[]{
+                            .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{
                                     poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
@@ -405,10 +412,10 @@ public class StoryViewerFragment extends Fragment {
                                     new VoteAction(currentStory, poll, cookie, choice -> {
                                         if (choice > -1) {
                                             poll.setMyChoice(choice);
-                                            Toast.makeText(requireContext(), R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
                                             return;
                                         }
-                                        Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                     }).execute(w);
                             })
                             .setPositiveButton(R.string.cancel, null)
@@ -416,24 +423,24 @@ public class StoryViewerFragment extends Fragment {
                 }
             } else if (tag instanceof QuestionModel) {
                 question = (QuestionModel) tag;
-                final EditText input = new EditText(requireContext());
+                final EditText input = new EditText(context);
                 input.setHint(R.string.answer_hint);
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setTitle(question.getQuestion())
                         .setView(input)
                         .setPositiveButton(R.string.ok, (d, w) -> new RespondAction(currentStory, question, cookie, result -> {
                             if (result) {
-                                Toast.makeText(requireContext(), R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
                             } else
-                                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                         }).execute(input.getText().toString()))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (tag instanceof String[]) {
                 mentions = (String[]) tag;
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setTitle(R.string.story_mentions)
-                        .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, mentions), (d, w) -> {
+                        .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mentions), (d, w) -> {
                             // searchUsername(mentions[w]);
                         })
                         .setPositiveButton(R.string.cancel, null)
@@ -443,17 +450,17 @@ public class StoryViewerFragment extends Fragment {
                 for (int q = 0; q < choices.length; ++q) {
                     choices[q] = (quiz.getMyChoice() == q ? "√ " : "") + quiz.getChoices()[q] + " (" + quiz.getCounts()[q] + ")";
                 }
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
-                        .setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, choices), (d, w) -> {
+                        .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
                             if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie))
                                 new QuizAction(currentStory, quiz, cookie, choice -> {
                                     if (choice > -1) {
                                         quiz.setMyChoice(choice);
-                                        Toast.makeText(requireContext(), R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
                                         return;
                                     }
-                                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                 }).execute(w);
                         })
                         .setPositiveButton(R.string.cancel, null)
@@ -614,6 +621,8 @@ public class StoryViewerFragment extends Fragment {
 
     private void downloadStory() {
         int error = 0;
+        final Context context = getContext();
+        if (context == null) return;
         if (currentStory != null) {
             File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
@@ -632,19 +641,19 @@ public class StoryViewerFragment extends Fragment {
                 final File saveFile = new File(dir, currentStory.getStoryMediaId() + "_" + currentStory.getTimestamp()
                         + DownloadUtils.getExtensionFromModel(storyUrl, currentStory));
 
-                new DownloadAsync(requireContext(), storyUrl, saveFile, result -> {
+                new DownloadAsync(context, storyUrl, saveFile, result -> {
                     final int toastRes = result != null && result.exists() ? R.string.downloader_complete
                                                                            : R.string.downloader_error_download_file;
-                    Toast.makeText(requireContext(), toastRes, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, toastRes, Toast.LENGTH_SHORT).show();
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             } else error = 1;
         } else error = 2;
 
         if (error == 1)
-            Toast.makeText(requireContext(), R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
         else if (error == 2)
-            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
     }
 
     private void setupImage() {
@@ -688,11 +697,13 @@ public class StoryViewerFragment extends Fragment {
         binding.imageViewer.setVisibility(View.GONE);
         binding.imageViewer.setController(null);
 
-        player = new SimpleExoPlayer.Builder(requireContext()).build();
+        final Context context = getContext();
+        if (context == null) return;
+        player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
         player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
 
-        final ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(requireContext(), "instagram"))
+        final ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(context, "instagram"))
                 .createMediaSource(Uri.parse(url));
         mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
             @Override

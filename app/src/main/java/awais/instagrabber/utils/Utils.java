@@ -110,17 +110,16 @@ public final class Utils {
         }
     }
 
-    public static void copyText(final Context context, final CharSequence string) {
-        final boolean ctxNotNull = context != null;
-        if (ctxNotNull && clipboardManager == null)
+    public static void copyText(@NonNull final Context context, final CharSequence string) {
+        if (clipboardManager == null)
             clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
         int toastMessage = R.string.clipboard_error;
-        if (clipboardManager != null && ctxNotNull) {
+        if (clipboardManager != null) {
             clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
             toastMessage = R.string.clipboard_copied;
         }
-        if (ctxNotNull) Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
     }
 
     public static void showImportExportDialog(final Context context) {

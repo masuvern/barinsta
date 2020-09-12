@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.directmessages;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -98,7 +99,9 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         inboxList = binding.inboxList;
         inboxList.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(requireContext());
+        final Context context = getContext();
+        if (context == null) return root;
+        layoutManager = new LinearLayoutManager(context);
         inboxList.setLayoutManager(layoutManager);
         final DirectMessageInboxAdapter inboxAdapter = new DirectMessageInboxAdapter(inboxThreadModel -> {
             final NavDirections action = DirectMessageInboxFragmentDirections

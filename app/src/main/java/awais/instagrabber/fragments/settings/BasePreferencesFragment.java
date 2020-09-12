@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.settings;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -19,7 +20,9 @@ public abstract class BasePreferencesFragment extends PreferenceFragmentCompat i
         final PreferenceManager preferenceManager = getPreferenceManager();
         preferenceManager.setSharedPreferencesName("settings");
         preferenceManager.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-        final PreferenceScreen screen = preferenceManager.createPreferenceScreen(requireContext());
+        final Context context = getContext();
+        if (context == null) return;
+        final PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
         setupPreferenceScreen(screen);
         setPreferenceScreen(screen);
     }

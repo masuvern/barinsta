@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.main;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
@@ -74,9 +75,6 @@ import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
 import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
-import awais.instagrabber.webservices.AloService;
-import awais.instagrabber.webservices.FriendshipService;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DataBox;
@@ -85,6 +83,9 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.PostsViewModel;
+import awais.instagrabber.webservices.AloService;
+import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.ServiceCallback;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -148,7 +149,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         if (postsAdapter == null || username == null) {
                             return false;
                         }
-                        DownloadUtils.batchDownload(requireContext(),
+                        final Context context = getContext();
+                        if (context == null) return false;
+                        DownloadUtils.batchDownload(context,
                                                     username,
                                                     DownloadMethod.DOWNLOAD_MAIN,
                                                     postsAdapter.getSelectedModels());
@@ -351,19 +354,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void setProfileDetails() {
+        final Context context = getContext();
+        if (context == null) return;
         if (profileModel == null) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(requireContext(), R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
             return;
         }
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final String profileId = profileModel.getId();
-        if (settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue() || isLoggedIn) {
+        if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.STORIESIG.getValue()) || isLoggedIn) {
             new iStoryStatusFetcher(profileId,
                                     profileModel.getUsername(),
                                     false,
                                     false,
-                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
+                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.STORIESIG.getValue()),
                                     false,
                                     result -> {
                                         storyModels = result;
@@ -372,19 +377,18 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         }
                                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             new HighlightsFetcher(profileId,
-                                  !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
+                                  !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.STORIESIG.getValue()),
                                   result -> {
                                       if (result != null) {
                                           binding.highlightsList.setVisibility(View.VISIBLE);
                                           highlightsViewModel.getList().postValue(result);
                                       } else binding.highlightsList.setVisibility(View.GONE);
                                   }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
-        else if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.ALOINSTAGRAM.getValue())) {
+        } else if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.ALOINSTAGRAM.getValue())) {
             Log.d("austin_debug", "alo triggered");
             aloService.getUserStory(profileId, profileModel.getUsername(), false, new ServiceCallback<List<StoryModel>>() {
                 @Override
-                public void onSuccess(final List<StoryModel> result){
+                public void onSuccess(final List<StoryModel> result) {
                     if (result != null && result.size() > 0) {
                         storyModels = result.toArray(storyModels);
                         binding.mainProfileImage.setStoriesBorder();
@@ -406,7 +410,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.btnLiked.setVisibility(View.VISIBLE);
                 binding.btnSaved.setText(R.string.saved);
                 ViewCompat.setBackgroundTintList(binding.btnSaved,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_orange_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_orange_background)));
             } else {
                 binding.btnTagged.setVisibility(View.GONE);
                 binding.btnSaved.setVisibility(View.GONE);
@@ -415,54 +419,54 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 if (profileModel.getFollowing()) {
                     binding.btnFollow.setText(R.string.unfollow);
                     ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_purple_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_purple_background)));
                 } else if (profileModel.getRequested()) {
                     binding.btnFollow.setText(R.string.cancel);
                     ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_purple_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_purple_background)));
                 } else {
                     binding.btnFollow.setText(R.string.follow);
                     ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_pink_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_pink_background)));
                 }
                 binding.btnRestrict.setVisibility(View.VISIBLE);
                 if (profileModel.getRestricted()) {
                     binding.btnRestrict.setText(R.string.unrestrict);
                     ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_green_background)));
                 } else {
                     binding.btnRestrict.setText(R.string.restrict);
                     ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_orange_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_orange_background)));
                 }
                 binding.btnBlock.setVisibility(View.VISIBLE);
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 if (profileModel.getBlocked()) {
                     binding.btnBlock.setText(R.string.unblock);
                     ViewCompat.setBackgroundTintList(binding.btnBlock,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_green_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_green_background)));
                 } else {
                     binding.btnBlock.setText(R.string.block);
                     ViewCompat.setBackgroundTintList(binding.btnBlock,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_red_background)));
+                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_red_background)));
                 }
             }
         } else {
             if (Utils.dataBox.getFavorite(username) != null) {
                 binding.btnFollow.setText(R.string.unfavorite_short);
                 ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_purple_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_purple_background)));
             } else {
                 binding.btnFollow.setText(R.string.favorite_short);
                 ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_pink_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_pink_background)));
             }
             binding.btnFollow.setVisibility(View.VISIBLE);
             if (!profileModel.isReallyPrivate()) {
                 binding.btnRestrict.setVisibility(View.VISIBLE);
                 binding.btnRestrict.setText(R.string.tagged);
                 ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.btn_blue_background)));
+                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_blue_background)));
             }
         }
 
@@ -717,7 +721,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 }
                 showProfilePicDialog();
             };
-            new AlertDialog.Builder(requireContext())
+            final Context context = getContext();
+            if (context == null) return;
+            new AlertDialog.Builder(context)
                     .setItems(options, profileDialogListener)
                     .setNeutralButton(R.string.cancel, null)
                     .show();
@@ -742,7 +748,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupPosts() {
         postsViewModel = new ViewModelProvider(this).get(PostsViewModel.class);
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
+        final Context context = getContext();
+        if (context == null) return;
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(context, Utils.convertDpToPx(110));
         binding.mainPosts.setLayoutManager(layoutManager);
         binding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         postsAdapter = new PostsAdapter((postModel, position) -> {
@@ -804,7 +812,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, null, null);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false);
+        final Context context = getContext();
+        if (context == null) return;
+        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false);
         binding.highlightsList.setLayoutManager(layoutManager);
         binding.highlightsList.setAdapter(highlightsAdapter);
         highlightsViewModel.getList().observe(getViewLifecycleOwner(), highlightModels -> highlightsAdapter.submitList(highlightModels));

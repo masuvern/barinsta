@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.main;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -54,14 +55,14 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.FeedViewModel;
+import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.StoriesService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -229,9 +230,11 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
                 final ViewerPostModel[] sliderItems = feedModel.getSliderItems();
 
+                final Context context = getContext();
+                if (context == null) return;
                 if (feedModel
                         .getItemType() != MediaItemType.MEDIA_TYPE_SLIDER || sliderItems == null || sliderItems.length == 1)
-                    DownloadUtils.batchDownload(requireContext(),
+                    DownloadUtils.batchDownload(context,
                                                 username,
                                                 DownloadMethod.DOWNLOAD_FEED,
                                                 Collections.singletonList(feedModel));
@@ -257,14 +260,14 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                             postModels.add(sliderItems[0]);
                         }
                         if (postModels.size() > 0) {
-                            DownloadUtils.batchDownload(requireContext(),
+                            DownloadUtils.batchDownload(context,
                                                         username,
                                                         DownloadMethod.DOWNLOAD_FEED,
                                                         postModels);
                         }
                     };
 
-                    new AlertDialog.Builder(requireContext())
+                    new AlertDialog.Builder(context)
                             .setTitle(R.string.post_viewer_download_dialog_title).setPositiveButton(
                             R.string.post_viewer_download_current,
                             clickListener1)
@@ -337,7 +340,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private void setupFeed() {
         feedViewModel = new ViewModelProvider(fragmentActivity).get(FeedViewModel.class);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        final Context context = getContext();
+        if (context == null) return;
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         binding.feedRecyclerView.setLayoutManager(layoutManager);
         binding.feedRecyclerView.setHasFixedSize(true);
         final FeedAdapter feedAdapter = new FeedAdapter(postViewClickListener, mentionClickListener);
@@ -368,7 +373,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, null, null);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        binding.feedStoriesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
+        final Context context = getContext();
+        if (context == null) return;
+        binding.feedStoriesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         binding.feedStoriesRecyclerView.setAdapter(feedStoriesAdapter);
         feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);
         fetchStories();

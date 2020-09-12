@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +20,7 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,14 +31,14 @@ import awais.instagrabber.adapters.AccountSwitcherListAdapter;
 import awais.instagrabber.adapters.AccountSwitcherListAdapter.OnAccountClickListener;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
 import awais.instagrabber.repositories.responses.UserInfo;
-import awais.instagrabber.webservices.ProfileService;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.webservices.ProfileService;
+import awais.instagrabber.webservices.ServiceCallback;
 
 import static awais.instagrabber.adapters.AccountSwitcherListAdapter.OnAccountLongClickListener;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -53,21 +53,15 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
-        // screen.addPreference(new MoreHeaderPreference(requireContext()));
+        // screen.addPreference(new MoreHeaderPreference(getContext()));
 
-        final PreferenceCategory accountCategory = new PreferenceCategory(requireContext());
+        final Context context = getContext();
+        if (context == null) return;
+        final PreferenceCategory accountCategory = new PreferenceCategory(context);
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
-        // To re-login, user can just add the same account back from account switcher dialog
-        // accountCategory.addPreference(getPreference(
-        //         isLoggedIn ? R.string.relogin : R.string.login,
-        //         isLoggedIn ? R.string.relogin_summary : -1,
-        //         -1,
-        //         preference -> {
-        //             startActivityForResult(new Intent(requireContext(), Login.class), Constants.LOGIN_RESULT_CODE);
-        //             return true;
-        //         }));
+        final ArrayList<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
         if (isLoggedIn) {
             accountCategory.setSummary(R.string.account_hint);
             accountCategory.addPreference(getAccountSwitcherPreference(cookie));
@@ -75,12 +69,12 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 if (getContext() == null) return false;
                 CookieUtils.setupCookies("LOGOUT");
                 shouldRecreate();
-                Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
                 settingsHelper.putString(Constants.COOKIE, "");
                 return true;
             }));
         } else {
-            if (Utils.dataBox.getAllCookies().size() > 0) {
+            if (allCookies != null && allCookies.size() > 0) {
                 accountCategory.addPreference(getAccountSwitcherPreference(null));
             }
             // Need to show something to trigger login activity
@@ -90,7 +84,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             }));
         }
 
-        if (Utils.dataBox.getAllCookies().size() > 0) {
+        if (allCookies != null && allCookies.size() > 0) {
             accountCategory.addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_delete, preference -> {
                 if (getContext() == null) return false;
                 new AlertDialog.Builder(getContext())
@@ -99,7 +93,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                         .setPositiveButton(R.string.yes, (dialog, which) -> {
                             CookieUtils.setupCookies("REMOVE");
                             shouldRecreate();
-                            Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
                             settingsHelper.putString(Constants.COOKIE, "");
                         })
                         .setNegativeButton(R.string.cancel, null)
@@ -108,7 +102,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             }));
         }
 
-        final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
+        final PreferenceCategory generalCategory = new PreferenceCategory(context);
         generalCategory.setTitle(R.string.pref_category_general);
         generalCategory.setIconSpaceReserved(false);
         screen.addPreference(generalCategory);
@@ -131,15 +125,15 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         });
         generalCategory.addPreference(aboutPreference);
 
-        final Preference divider = new Preference(requireContext());
+        final Preference divider = new Preference(context);
         divider.setLayoutResource(R.layout.item_pref_divider);
         screen.addPreference(divider);
 
         final Preference versionPreference = getPreference(R.string.version,
-                BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", -1, preference -> {
-            FlavorTown.updateCheck((AppCompatActivity) requireActivity(), true);
-            return true;
-        });
+                                                           BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", -1, preference -> {
+                    FlavorTown.updateCheck((AppCompatActivity) requireActivity(), true);
+                    return true;
+                });
         screen.addPreference(versionPreference);
 
         final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
@@ -155,7 +149,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             CookieUtils.setupCookies(cookie);
             settingsHelper.putString(Constants.COOKIE, cookie);
             // No use as the timing of show is unreliable
-            // Toast.makeText(requireContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
 
             // adds cookies to database for quick access
             final String uid = CookieUtils.getUserIdFromCookie(cookie);
@@ -180,7 +174,6 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         }
     }
 
-    @NonNull
     private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie) {
         final List<DataBox.CookieModel> allUsers = Utils.dataBox.getAllCookies();
         if (getContext() != null && allUsers != null) {
@@ -239,7 +232,9 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             });
         }
         final AlertDialog finalDialog = accountSwitchDialog;
-        return new AccountSwitcherPreference(requireContext(), cookie, v -> {
+        final Context context = getContext();
+        if (context == null) return null;
+        return new AccountSwitcherPreference(context, cookie, v -> {
             if (finalDialog == null) return;
             finalDialog.show();
         });
@@ -278,14 +273,12 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         });
     }
 
-    @NonNull
     private Preference getPreference(final int title,
                                      final int icon,
                                      final Preference.OnPreferenceClickListener clickListener) {
         return getPreference(title, -1, icon, clickListener);
     }
 
-    @NonNull
     private Preference getPreference(final int title,
                                      final int summary,
                                      final int icon,
@@ -301,12 +294,13 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         return getPreference(title, string, icon, clickListener);
     }
 
-    @NonNull
     private Preference getPreference(final int title,
                                      final String summary,
                                      final int icon,
                                      final Preference.OnPreferenceClickListener clickListener) {
-        final Preference preference = new Preference(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final Preference preference = new Preference(context);
         if (icon <= 0) preference.setIconSpaceReserved(false);
         if (icon > 0) preference.setIcon(icon);
         preference.setTitle(title);

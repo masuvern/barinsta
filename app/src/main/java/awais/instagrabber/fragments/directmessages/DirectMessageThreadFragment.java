@@ -1,6 +1,7 @@
 package awais.instagrabber.fragments.directmessages;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -101,7 +102,9 @@ public class DirectMessageThreadFragment extends Fragment {
         if (v == binding.commentSend) {
             final String text = binding.commentText.getText().toString();
             if (TextUtils.isEmpty(text)) {
-                Toast.makeText(requireContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
                 return;
             }
             sendText(text, null, false);
@@ -123,8 +126,11 @@ public class DirectMessageThreadFragment extends Fragment {
 
         @Override
         public void onResult(final InboxThreadModel result) {
-            if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || TextUtils.isEmpty(cursor)))
-                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || TextUtils.isEmpty(cursor))) {
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            }
 
             if (result != null) {
                 cursor = result.getOldestCursor();
@@ -209,7 +215,9 @@ public class DirectMessageThreadFragment extends Fragment {
         messageList.setHasFixedSize(true);
         binding.commentSend.setOnClickListener(clickListener);
         binding.image.setOnClickListener(clickListener);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        final Context context = getContext();
+        if (context == null) return;
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setReverseLayout(true);
         messageList.setLayoutManager(layoutManager);
         messageList.addOnScrollListener(new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
@@ -238,14 +246,14 @@ public class DirectMessageThreadFragment extends Fragment {
                         break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);
-                        linkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        linkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         linkIntent.setData(Uri.parse(directItemModel.getLinkModel().getLinkContext().getLinkUrl()));
                         startActivity(linkIntent);
                         break;
                     case TEXT:
                     case REEL_SHARE:
-                        Utils.copyText(requireContext(), directItemModel.getText());
-                        Toast.makeText(requireContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
+                        Utils.copyText(context, directItemModel.getText());
+                        Toast.makeText(context, R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
                         break;
                     case RAVEN_MEDIA:
                     case MEDIA:
@@ -256,10 +264,10 @@ public class DirectMessageThreadFragment extends Fragment {
                                            ? selectedItem.getVideoUrl()
                                            : selectedItem.getThumbUrl();
                         if (url == null) {
-                            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                         } else {
-                            DownloadUtils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
-                            Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                            DownloadUtils.dmDownload(context, user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
+                            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         }
                         break;
                     case STORY_SHARE:
@@ -275,7 +283,7 @@ public class DirectMessageThreadFragment extends Fragment {
                             // );
                             // sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
                             // StoryModel[] sms = {sm};
-                            // startActivity(new Intent(requireContext(), StoryViewer.class)
+                            // startActivity(new Intent(getContext(), StoryViewer.class)
                             //         .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
                             //         .putExtra(Constants.EXTRAS_STORIES, sms)
                             // );
@@ -292,10 +300,9 @@ public class DirectMessageThreadFragment extends Fragment {
                 }
             } else if (which == 1) {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
-            }
-            else if (which == 2) {
+            } else if (which == 2) {
                 if (directItemModel == null)
-                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 else if (String.valueOf(directItemModel.getUserId()).equals(myId))
                     new ThreadAction().execute("delete", directItemModel.getItemId());
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
@@ -346,9 +353,9 @@ public class DirectMessageThreadFragment extends Fragment {
                         getString(String.valueOf(directItemModel.getUserId()).equals(myId) ? R.string.dms_inbox_unsend : R.string.dms_inbox_author)
                 };
 
-                dialogAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, dialogList);
+                dialogAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, dialogList);
 
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setAdapter(dialogAdapter, onDialogListener)
                         .show();
             }
@@ -435,7 +442,9 @@ public class DirectMessageThreadFragment extends Fragment {
         }
         broadcast(text != null ? textOptions : reactionOptions, result -> {
             if (result == null || result.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (text != null) {
@@ -455,14 +464,16 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void sendImage(final Uri imageUri) {
-        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri)) {
+        final Context context = getContext();
+        if (context == null) return;
+        try (InputStream inputStream = context.getContentResolver().openInputStream(imageUri)) {
             final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            Toast.makeText(requireContext(), R.string.uploading, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.uploading, Toast.LENGTH_SHORT).show();
             // Upload Image
             final ImageUploader imageUploader = new ImageUploader();
             imageUploader.setOnTaskCompleteListener(response -> {
                 if (response == null || response.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     if (response != null && response.getResponse() != null) {
                         Log.e(TAG, response.getResponse().toString());
                     }
@@ -484,7 +495,7 @@ public class DirectMessageThreadFragment extends Fragment {
             final ImageUploadOptions options = ImageUploadOptions.builder(bitmap).build();
             imageUploader.execute(options);
         } catch (IOException e) {
-            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Error opening file", e);
         }
     }
@@ -509,7 +520,6 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void searchUsername(final String text) {
-        // startActivity(new Intent(requireContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
         final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     }

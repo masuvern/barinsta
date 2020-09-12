@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -35,13 +36,13 @@ import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.ViewerPostModelWrapper;
 import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.webservices.MediaService;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.ViewerPostViewModel;
+import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.ServiceCallback;
 
 import static androidx.core.content.ContextCompat.checkSelfPermission;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -116,10 +117,6 @@ public class PostViewFragment extends Fragment {
             case R.id.viewerCaption:
                 break;
             case R.id.btnComments:
-                // startActivity(new Intent(requireContext(), CommentsViewerFragment.class)
-                //                       .putExtra(Constants.EXTRAS_SHORTCODE, postModel.getShortCode())
-                //                       .putExtra(Constants.EXTRAS_POST, postModel.getPostId())
-                //                       .putExtra(Constants.EXTRAS_USER, Utils.getUserIdFromCookie(COOKIE)));
                 String postId = postModel.getPostId();
                 if (postId.contains("_")) postId = postId.substring(0, postId.indexOf("_"));
                 final NavDirections commentsAction = PostViewFragmentDirections.actionGlobalCommentsViewerFragment(
@@ -130,7 +127,9 @@ public class PostViewFragment extends Fragment {
                 NavHostFragment.findNavController(this).navigate(commentsAction);
                 break;
             case R.id.btnDownload:
-                if (checkSelfPermission(requireContext(),
+                final Context context = getContext();
+                if (context == null) return;
+                if (checkSelfPermission(context,
                                         DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
                     showDownloadDialog(Arrays.asList(wrapper.getViewerPostModels()),
                                        childPosition,
@@ -205,7 +204,11 @@ public class PostViewFragment extends Fragment {
                 break;
         }
     };
-    private PostViewAdapter.OnPostCaptionLongClickListener captionLongClickListener = text -> Utils.copyText(requireContext(), text);
+    private PostViewAdapter.OnPostCaptionLongClickListener captionLongClickListener = text -> {
+        final Context context = getContext();
+        if (context == null) return;
+        Utils.copyText(context, text);
+    };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -304,6 +307,8 @@ public class PostViewFragment extends Fragment {
                                     final int childPosition,
                                     final String username) {
         final List<ViewerPostModel> postModelsToDownload = new ArrayList<>();
+        final Context context = getContext();
+        if (context == null) return;
         if (!session && postModels.size() > 1) {
             final DialogInterface.OnClickListener clickListener = (dialog, which) -> {
                 if (which == DialogInterface.BUTTON_NEGATIVE) {
@@ -315,20 +320,20 @@ public class PostViewFragment extends Fragment {
                     postModelsToDownload.add(postModels.get(childPosition));
                 }
                 if (postModelsToDownload.size() > 0) {
-                    DownloadUtils.batchDownload(requireContext(),
+                    DownloadUtils.batchDownload(context,
                                                 username,
                                                 DownloadMethod.DOWNLOAD_POST_VIEWER,
                                                 postModelsToDownload);
                 }
             };
-            new AlertDialog.Builder(requireContext())
+            new AlertDialog.Builder(context)
                     .setTitle(R.string.post_viewer_download_dialog_title)
                     .setMessage(R.string.post_viewer_download_message)
                     .setNeutralButton(R.string.post_viewer_download_session, clickListener)
                     .setPositiveButton(R.string.post_viewer_download_current, clickListener)
                     .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
         } else {
-            DownloadUtils.batchDownload(requireContext(),
+            DownloadUtils.batchDownload(context,
                                         username,
                                         DownloadMethod.DOWNLOAD_POST_VIEWER,
                                         Collections.singletonList(postModels.get(childPosition)));

@@ -1,6 +1,7 @@
 package awais.instagrabber.dialogs;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
@@ -88,7 +89,9 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void init() {
         binding.download.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(requireContext(), DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+            final Context context = getContext();
+            if (context == null) return;
+            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
                 downloadProfilePicture();
                 return;
             }
@@ -140,21 +143,23 @@ public class ProfilePicDialogFragment extends DialogFragment {
     private void downloadProfilePicture() {
         if (url == null) return;
         final File dir = new File(Environment.getExternalStorageDirectory(), "Download");
+        final Context context = getContext();
+        if (context == null) return;
         if (dir.exists() || dir.mkdirs()) {
             final File saveFile = new File(dir, name + '_' + System.currentTimeMillis() + ".jpg");
-            new DownloadAsync(requireContext(),
+            new DownloadAsync(context,
                               url,
                               saveFile,
                               result -> {
                                   final int toastRes = result != null && result.exists() ?
                                                        R.string.downloader_downloaded_in_folder : R.string.downloader_error_download_file;
-                                  Toast.makeText(requireContext(), toastRes, Toast.LENGTH_SHORT).show();
+                                  Toast.makeText(context, toastRes, Toast.LENGTH_SHORT).show();
                               })
                     .setItems(null, name)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             return;
         }
-        Toast.makeText(requireContext(), R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
     }
 
     // private void showImageInfo() {

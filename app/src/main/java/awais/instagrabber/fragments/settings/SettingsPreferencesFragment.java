@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.fragment.app.FragmentActivity;
@@ -41,7 +40,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
-        final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
+        final Context context = getContext();
+        if (context == null) return;
+        final PreferenceCategory generalCategory = new PreferenceCategory(context);
         screen.addPreference(generalCategory);
         generalCategory.setTitle(R.string.pref_category_general);
         generalCategory.setIconSpaceReserved(false);
@@ -50,21 +51,21 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         generalCategory.addPreference(getAutoPlayVideosPreference());
         generalCategory.addPreference(getAlwaysMuteVideosPreference());
 
-        final PreferenceCategory themeCategory = new PreferenceCategory(requireContext());
+        final PreferenceCategory themeCategory = new PreferenceCategory(context);
         screen.addPreference(themeCategory);
         themeCategory.setTitle(R.string.pref_category_theme);
         themeCategory.setIconSpaceReserved(false);
         themeCategory.addPreference(getThemePreference());
         themeCategory.addPreference(getAmoledThemePreference());
 
-        final PreferenceCategory downloadsCategory = new PreferenceCategory(requireContext());
+        final PreferenceCategory downloadsCategory = new PreferenceCategory(context);
         screen.addPreference(downloadsCategory);
         downloadsCategory.setTitle(R.string.pref_category_downloads);
         downloadsCategory.setIconSpaceReserved(false);
         downloadsCategory.addPreference(getDownloadUserFolderPreference());
         downloadsCategory.addPreference(getSaveToCustomFolderPreference());
 
-        final PreferenceCategory localeCategory = new PreferenceCategory(requireContext());
+        final PreferenceCategory localeCategory = new PreferenceCategory(context);
         screen.addPreference(localeCategory);
         localeCategory.setTitle(R.string.pref_category_locale);
         localeCategory.setIconSpaceReserved(false);
@@ -72,7 +73,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         localeCategory.addPreference(getPostTimePreference());
 
         if (isLoggedIn) {
-            final PreferenceCategory loggedInUsersPreferenceCategory = new PreferenceCategory(requireContext());
+            final PreferenceCategory loggedInUsersPreferenceCategory = new PreferenceCategory(context);
             screen.addPreference(loggedInUsersPreferenceCategory);
             loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
             loggedInUsersPreferenceCategory.setTitle(R.string.login_settings);
@@ -80,7 +81,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
         } else {
-            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(requireContext());
+            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
             screen.addPreference(anonUsersPreferenceCategory);
             anonUsersPreferenceCategory.setIconSpaceReserved(false);
             anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
@@ -90,9 +91,10 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
 
     }
 
-    @NonNull
     private Preference getLanguagePreference() {
-        final ListPreference preference = new ListPreference(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final ListPreference preference = new ListPreference(context);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final int length = getResources().getStringArray(R.array.languages).length;
         final String[] values = new String[length];
@@ -113,7 +115,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getDefaultTabPreference() {
-        final ListPreference preference = new ListPreference(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final ListPreference preference = new ListPreference(context);
         preference.setEnabled(isLoggedIn);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final FragmentActivity activity = getActivity();
@@ -139,16 +143,19 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getUpdateCheckPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.CHECK_UPDATES);
         preference.setTitle(R.string.update_check);
         preference.setIconSpaceReserved(false);
         return preference;
     }
 
-    @NonNull
     private Preference getThemePreference() {
-        final ListPreference preference = new ListPreference(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final ListPreference preference = new ListPreference(context);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final int length = getResources().getStringArray(R.array.theme_presets).length;
         final String[] values = new String[length];
@@ -169,12 +176,14 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private SwitchPreferenceCompat getAmoledThemePreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.AMOLED_THEME);
         preference.setTitle(R.string.use_amoled_dark_theme);
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceChangeListener((preference1, newValue) -> {
-            final boolean isNight = Utils.isNight(requireContext(), settingsHelper.getThemeCode(true));
+            final boolean isNight = Utils.isNight(context, settingsHelper.getThemeCode(true));
             if (isNight) shouldRecreate();
             return true;
         });
@@ -182,7 +191,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getDownloadUserFolderPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.DOWNLOAD_USER_FOLDER);
         preference.setTitle("Download to username folder");
         preference.setSummary(R.string.download_user_folder);
@@ -191,19 +202,21 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getSaveToCustomFolderPreference() {
-        return new SaveToCustomFolderPreference(requireContext(), (resultCallback) -> {
-            new DirectoryChooser()
-                    .setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
-                    .setInteractionListener(path -> {
-                        settingsHelper.putString(FOLDER_PATH, path);
-                        resultCallback.onResult(path);
-                    })
-                    .show(getParentFragmentManager(), null);
-        });
+        final Context context = getContext();
+        if (context == null) return null;
+        return new SaveToCustomFolderPreference(context, (resultCallback) -> new DirectoryChooser()
+                .setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
+                .setInteractionListener(path -> {
+                    settingsHelper.putString(FOLDER_PATH, path);
+                    resultCallback.onResult(path);
+                })
+                .show(getParentFragmentManager(), null));
     }
 
     private Preference getAutoPlayVideosPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.AUTOPLAY_VIDEOS);
         preference.setTitle(R.string.post_viewer_autoplay_video);
         preference.setIconSpaceReserved(false);
@@ -211,7 +224,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getAlwaysMuteVideosPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.MUTED_VIDEOS);
         preference.setTitle(R.string.post_viewer_muted_autoplay);
         preference.setIconSpaceReserved(false);
@@ -219,7 +234,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getMarkStoriesSeenPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.MARK_AS_SEEN);
         preference.setTitle(R.string.mark_as_seen_setting);
         preference.setSummary(R.string.mark_as_seen_setting_summary);
@@ -228,7 +245,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getMarkDMSeenPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.DM_MARK_AS_SEEN);
         preference.setTitle(R.string.dm_mark_as_seen_setting);
         preference.setSummary(R.string.dm_mark_as_seen_setting_summary);
@@ -237,7 +256,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getEnableActivityNotificationsPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.CHECK_ACTIVITY);
         preference.setTitle(R.string.activity_setting);
         preference.setIconSpaceReserved(false);
@@ -249,16 +270,19 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getUseInstaDpPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.INSTADP);
         preference.setTitle(R.string.instadp_settings);
         preference.setIconSpaceReserved(false);
         return preference;
     }
 
-    @NonNull
     private Preference getStoryViewerPreference() {
-        final ListPreference preference = new ListPreference(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final ListPreference preference = new ListPreference(context);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         final int length = getResources().getStringArray(R.array.anonymous_story_viewer).length;
         final String[] values = new String[length];
@@ -275,7 +299,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getPostTimePreference() {
-        final Preference preference = new Preference(requireContext());
+        final Context context = getContext();
+        if (context == null) return null;
+        final Preference preference = new Preference(context);
         preference.setTitle(R.string.time_settings);
         preference.setSummary(Utils.datetimeParser.format(new Date()));
         preference.setIconSpaceReserved(false);

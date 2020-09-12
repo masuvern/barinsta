@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -44,10 +45,6 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentLocationBinding;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DownloadUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostModel;
@@ -55,7 +52,11 @@ import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.PostsViewModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -106,7 +107,9 @@ public class LocationFragment extends Fragment {
                 if (postsAdapter == null || locationId == null) {
                     return false;
                 }
-                DownloadUtils.batchDownload(requireContext(),
+                final Context context = getContext();
+                if (context == null) return false;
+                DownloadUtils.batchDownload(context,
                                             locationId,
                                             DownloadMethod.DOWNLOAD_MAIN,
                                             postsAdapter.getSelectedModels());
@@ -186,7 +189,9 @@ public class LocationFragment extends Fragment {
 
     private void setupPosts() {
         postsViewModel = new ViewModelProvider(this).get(PostsViewModel.class);
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
+        final Context context = getContext();
+        if (context == null) return;
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(context, Utils.convertDpToPx(110));
         binding.mainPosts.setLayoutManager(layoutManager);
         binding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         postsAdapter = new PostsAdapter((postModel, position) -> {
@@ -247,7 +252,9 @@ public class LocationFragment extends Fragment {
             locationModel = result;
             binding.swipeRefreshLayout.setRefreshing(false);
             if (locationModel == null) {
-                Toast.makeText(requireContext(), R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                 return;
             }
             setTitle();

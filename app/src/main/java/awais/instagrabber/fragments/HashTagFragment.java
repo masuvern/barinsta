@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -103,7 +104,9 @@ public class HashTagFragment extends Fragment {
                         if (postsAdapter == null || hashtag == null) {
                             return false;
                         }
-                        DownloadUtils.batchDownload(requireContext(),
+                        final Context context = getContext();
+                        if (context == null) return false;
+                        DownloadUtils.batchDownload(context,
                                                     hashtag,
                                                     DownloadMethod.DOWNLOAD_MAIN,
                                                     postsAdapter.getSelectedModels());
@@ -180,7 +183,9 @@ public class HashTagFragment extends Fragment {
 
     private void setupPosts() {
         postsViewModel = new ViewModelProvider(this).get(PostsViewModel.class);
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
+        final Context context = getContext();
+        if (context == null) return;
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(context, Utils.convertDpToPx(110));
         binding.mainPosts.setLayoutManager(layoutManager);
         binding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         postsAdapter = new PostsAdapter((postModel, position) -> {
@@ -238,11 +243,12 @@ public class HashTagFragment extends Fragment {
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
         currentlyExecuting = new HashtagFetcher(hashtag.substring(1), result -> {
-            if (getContext() == null) return;
+            final Context context = getContext();
+            if (context == null) return;
             hashtagModel = result;
             binding.swipeRefreshLayout.setRefreshing(false);
             if (hashtagModel == null) {
-                Toast.makeText(requireContext(), R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                 return;
             }
             fetchPosts();
@@ -256,6 +262,8 @@ public class HashTagFragment extends Fragment {
         if (TextUtils.isEmpty(hashtag)) return;
         currentlyExecuting = new PostsFetcher(hashtag.substring(1), PostItemType.HASHTAG, endCursor, postsFetchListener)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        final Context context = getContext();
+        if (context == null) return;
         if (isLoggedIn) {
             new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, stories -> {
                 storyModels = stories;
@@ -266,17 +274,17 @@ public class HashTagFragment extends Fragment {
 
             binding.btnFollowTag.setText(hashtagModel.getFollowing() ? R.string.unfollow : R.string.follow);
             ViewCompat.setBackgroundTintList(binding.btnFollowTag, ColorStateList.valueOf(
-                    ContextCompat.getColor(requireContext(), hashtagModel.getFollowing()
-                                                             ? R.color.btn_purple_background
-                                                             : R.color.btn_pink_background)));
+                    ContextCompat.getColor(context, hashtagModel.getFollowing()
+                                                    ? R.color.btn_purple_background
+                                                    : R.color.btn_pink_background)));
         } else {
             binding.btnFollowTag.setText(Utils.dataBox.getFavorite(hashtag) != null
                                          ? R.string.unfavorite_short
                                          : R.string.favorite_short);
             ViewCompat.setBackgroundTintList(binding.btnFollowTag, ColorStateList.valueOf(
-                    ContextCompat.getColor(requireContext(), Utils.dataBox.getFavorite(hashtag) != null
-                                                             ? R.color.btn_purple_background
-                                                             : R.color.btn_pink_background)));
+                    ContextCompat.getColor(context, Utils.dataBox.getFavorite(hashtag) != null
+                                                    ? R.color.btn_purple_background
+                                                    : R.color.btn_pink_background)));
         }
         binding.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
         final String postCount = String.valueOf(hashtagModel.getPostCount());

@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,14 +42,14 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentSavedBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
-import awais.instagrabber.utils.DownloadUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.PostsViewModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -94,7 +95,9 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                         if (postsAdapter == null || username == null) {
                             return false;
                         }
-                        DownloadUtils.batchDownload(requireContext(),
+                        final Context context = getContext();
+                        if (context == null) return false;
+                        DownloadUtils.batchDownload(context,
                                                     username,
                                                     DownloadMethod.DOWNLOAD_SAVED,
                                                     postsAdapter.getSelectedModels());
@@ -133,9 +136,10 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                     }
                     model.setPageCursor(false, null);
                 }
-            }
-            else if (current == null) {
-                Toast.makeText(requireContext(), R.string.empty_list, Toast.LENGTH_SHORT).show();
+            } else if (current == null) {
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.empty_list, Toast.LENGTH_SHORT).show();
                 NavHostFragment.findNavController(SavedViewerFragment.this).popBackStack();
             }
             binding.swipeRefreshLayout.setRefreshing(false);
@@ -192,7 +196,9 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         // autoloadPosts = Utils.settingsHelper.getBoolean(AUTOLOAD_POSTS);
         binding.mainPosts.setNestedScrollingEnabled(false);
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
+        final Context context = getContext();
+        if (context == null) return;
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(context, Utils.convertDpToPx(110));
         binding.mainPosts.setLayoutManager(layoutManager);
         binding.mainPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         postsAdapter = new PostsAdapter((postModel, position) -> {
@@ -286,8 +292,11 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 8020 && grantResults[0] == PackageManager.PERMISSION_GRANTED && selectedItems.size() > 0)
-            DownloadUtils.batchDownload(requireContext(), null, DownloadMethod.DOWNLOAD_SAVED, selectedItems);
+        if (requestCode == 8020 && grantResults[0] == PackageManager.PERMISSION_GRANTED && selectedItems.size() > 0) {
+            final Context context = getContext();
+            if (context == null) return;
+            DownloadUtils.batchDownload(context, null, DownloadMethod.DOWNLOAD_SAVED, selectedItems);
+        }
     }
 
     public static void stopCurrentExecutor() {

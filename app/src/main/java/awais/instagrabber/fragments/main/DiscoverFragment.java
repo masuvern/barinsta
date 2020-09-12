@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.main;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ActionMode;
@@ -36,13 +37,13 @@ import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDiscoverBinding;
-import awais.instagrabber.utils.DownloadUtils;
-import awais.instagrabber.viewmodels.DiscoverItemViewModel;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.DiscoverItemModel;
 import awais.instagrabber.models.DiscoverTopicModel;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.DiscoverItemViewModel;
 
 public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -70,8 +71,10 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (result != null) {
                 topicIds = result.getIds();
                 rankToken = result.getToken();
+                final Context context = getContext();
+                if (context == null) return;
                 final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
-                        requireContext(),
+                        context,
                         android.R.layout.simple_spinner_dropdown_item,
                         result.getNames()
                 );
@@ -87,7 +90,9 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
         public void onResult(final DiscoverItemModel[] result) {
             if (result == null || result.length <= 0) {
                 binding.discoverSwipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(requireContext(), R.string.discover_empty, Toast.LENGTH_SHORT).show();
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.discover_empty, Toast.LENGTH_SHORT).show();
                 return;
             }
             List<DiscoverItemModel> current = discoverItemViewModel.getList().getValue();
@@ -130,7 +135,9 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
                 public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
                     if (item.getItemId() == R.id.action_download) {
                         if (discoverAdapter == null) return false;
-                        DownloadUtils.batchDownload(requireContext(),
+                        final Context context = getContext();
+                        if (context == null) return false;
+                        DownloadUtils.batchDownload(context,
                                                     null,
                                                     DownloadMethod.DOWNLOAD_DISCOVER,
                                                     discoverAdapter.getSelectedModels());
@@ -178,7 +185,9 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private void setupExplore() {
         discoverItemViewModel = new ViewModelProvider(fragmentActivity).get(DiscoverItemViewModel.class);
-        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(requireContext(), Utils.convertDpToPx(110));
+        final Context context = getContext();
+        if (context == null) return;
+        final GridAutofitLayoutManager layoutManager = new GridAutofitLayoutManager(context, Utils.convertDpToPx(110));
         binding.discoverPosts.setLayoutManager(layoutManager);
         binding.discoverPosts.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
         binding.discoverType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
