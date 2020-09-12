@@ -41,11 +41,12 @@ dependencies {
     def nav_version = "2.3.0"
     def preference_version = "1.1.1"
 
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
+
     implementation "androidx.appcompat:appcompat:$appcompat_version"
-    // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
     implementation "androidx.recyclerview:recyclerview:1.2.0-alpha05"
-    implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
@@ -55,7 +56,6 @@ dependencies {
 
 
     implementation 'org.jsoup:jsoup:1.13.1'
-    implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
