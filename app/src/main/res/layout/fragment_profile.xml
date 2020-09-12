@@ -17,60 +17,105 @@
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll">
 
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/infoContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
-                android:orientation="vertical"
-                android:paddingBottom="5dp">
+                android:layout_height="wrap_content">
 
-                <LinearLayout
-                    android:id="@+id/profileInfoText"
-                    android:layout_width="match_parent"
+                <awais.instagrabber.customviews.CircularImageView
+                    android:id="@+id/mainProfileImage"
+                    android:layout_width="@dimen/profile_picture_size"
+                    android:layout_height="@dimen/profile_picture_size"
+                    android:padding="8dp"
+                    app:actualImageScaleType="centerCrop"
+                    app:layout_constraintEnd_toStartOf="@id/mainPostCount"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:background="@mipmap/ic_launcher" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/mainPostCount"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat"
+                    app:layout_constraintBottom_toBottomOf="@id/mainProfileImage"
+                    app:layout_constraintEnd_toStartOf="@id/mainFollowers"
+                    app:layout_constraintStart_toEndOf="@id/mainProfileImage"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="35\nPosts" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/mainFollowers"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat"
+                    app:layout_constraintBottom_toBottomOf="@id/mainProfileImage"
+                    app:layout_constraintEnd_toStartOf="@id/mainFollowing"
+                    app:layout_constraintStart_toEndOf="@id/mainPostCount"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="68\nFollowers" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/mainFollowing"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat"
+                    app:layout_constraintBottom_toBottomOf="@id/mainProfileImage"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/mainFollowers"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="64\nFollowing" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/mainFullName"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/profileInfo"
-                    android:orientation="horizontal"
-                    android:paddingStart="10dp"
-                    android:paddingLeft="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingRight="10dp">
+                    android:ellipsize="marquee"
+                    android:paddingStart="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingEnd="4dp"
+                    android:paddingRight="4dp"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mainProfileImage"
+                    tools:text="Austin Huang" />
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/isVerified"
-                        android:layout_width="18dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="start"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitCenter"
-                        android:visibility="gone"
-                        app:srcCompat="@drawable/verified" />
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/mainFullName"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ellipsize="marquee"
-                        android:singleLine="true"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                        android:textSize="16sp"
-                        tools:text="Austin Huang" />
-                </LinearLayout>
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/isVerified"
+                    android:layout_width="18dp"
+                    android:layout_height="0dp"
+                    android:layout_gravity="start"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/mainFullName"
+                    app:layout_constraintStart_toEndOf="@id/mainFullName"
+                    app:layout_constraintTop_toBottomOf="@id/mainProfileImage"
+                    app:srcCompat="@drawable/verified"
+                    tools:visibility="visible" />
 
                 <awais.instagrabber.customviews.RamboTextView
                     android:id="@+id/mainBiography"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/profileInfoText"
                     android:background="?android:selectableItemBackground"
-                    android:paddingStart="10dp"
-                    android:paddingLeft="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingRight="10dp"
+                    android:paddingStart="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingRight="8dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
-                    tools:text="THE GLORIOUS (step)OWNER OF THIS APP" />
+                    app:layout_constraintBottom_toTopOf="@id/mainUrl"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mainFullName"
+                    tools:text="THE GLORIOUS (step)OWNER OF THIS APP. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id justo lorem. In malesuada feugiat ornare. Suspendisse et mauris imperdiet, luctus augue eget, tempus eros. Cras vitae molestie ipsum. " />
 
                 <awais.instagrabber.customviews.RamboTextView
                     android:id="@+id/mainUrl"
@@ -78,189 +123,134 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/mainBiography"
                     android:ellipsize="marquee"
-                    android:paddingStart="10dp"
-                    android:paddingLeft="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingRight="10dp"
+                    android:paddingStart="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingRight="8dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="16sp"
                     android:visibility="gone"
-                    tools:text="https://austinhuang.me/" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mainBiography"
+                    tools:text="https://austinhuang.me/"
+                    tools:textColor="@android:color/holo_blue_dark"
+                    tools:visibility="visible" />
 
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:id="@+id/profileActions"
-                    android:layout_width="match_parent"
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnFollow"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/mainUrl">
+                    android:text="@string/follow"
+                    android:textColor="@color/btn_pink_text_color"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/btn_pink_background"
+                    app:layout_constraintBottom_toTopOf="@id/button_barrier"
+                    app:layout_constraintEnd_toStartOf="@id/btnRestrict"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mainUrl"
+                    tools:visibility="visible" />
 
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btnFollow"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:text="@string/follow"
-                        android:textColor="@color/btn_pink_text_color"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@color/btn_pink_background" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btnRestrict"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:text="@string/restrict"
-                        android:textColor="@color/btn_orange_text_color"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@color/btn_orange_background" />
-
-                    <!-- only for invisible private accounts -->
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btnBlock"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:text="@string/block"
-                        android:textColor="@color/btn_red_text_color"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@color/btn_red_background" />
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:id="@+id/myActions"
-                    android:layout_width="match_parent"
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnRestrict"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/profileActions">
+                    android:text="@string/restrict"
+                    android:textColor="@color/btn_orange_text_color"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/btn_orange_background"
+                    app:layout_constraintBottom_toTopOf="@id/button_barrier"
+                    app:layout_constraintEnd_toStartOf="@id/btnBlock"
+                    app:layout_constraintStart_toEndOf="@id/btnFollow"
+                    app:layout_constraintTop_toBottomOf="@id/mainUrl"
+                    tools:visibility="visible" />
 
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btnTagged"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:text="@string/tagged"
-                        android:textColor="@color/btn_blue_text_color"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@color/btn_blue_background" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnBlock"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/block"
+                    android:textColor="@color/btn_red_text_color"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/btn_red_background"
+                    app:layout_constraintBottom_toTopOf="@id/button_barrier"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btnRestrict"
+                    app:layout_constraintTop_toBottomOf="@id/mainUrl"
+                    tools:visibility="visible" />
 
-                    <!-- also used as block -->
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btnSaved"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:text="@string/saved"
-                        android:textColor="@color/btn_orange_text_color"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@color/btn_orange_background" />
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/button_barrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="btnFollow, btnRestrict, btnBlock" />
 
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/btnLiked"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="1"
-                        android:text="@string/liked"
-                        android:textColor="@color/btn_lightpink_text_color"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:backgroundTint="@color/btn_lightpink_background" />
-                </androidx.appcompat.widget.LinearLayoutCompat>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnTagged"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tagged"
+                    android:textColor="@color/btn_blue_text_color"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/btn_blue_background"
+                    app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
+                    app:layout_constraintEnd_toStartOf="@id/btnSaved"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/button_barrier"
+                    tools:visibility="visible" />
 
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSaved"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/saved"
+                    android:textColor="@color/btn_orange_text_color"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/btn_orange_background"
+                    app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
+                    app:layout_constraintEnd_toStartOf="@id/btnLiked"
+                    app:layout_constraintStart_toEndOf="@id/btnTagged"
+                    app:layout_constraintTop_toTopOf="@id/button_barrier"
+                    tools:visibility="visible" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnLiked"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/liked"
+                    android:textColor="@color/btn_lightpink_text_color"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/btn_lightpink_background"
+                    app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btnSaved"
+                    app:layout_constraintTop_toTopOf="@id/button_barrier"
+                    tools:visibility="visible" />
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/highlights_barrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="btnTagged, btnSaved, btnLiked" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/highlightsList"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/myActions"
                     android:clipToPadding="false"
                     android:paddingStart="5dp"
                     android:paddingLeft="5dp"
                     android:paddingEnd="5dp"
                     android:paddingRight="5dp"
                     android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/highlights_barrier"
                     tools:itemCount="2"
                     tools:visibility="visible" />
-
-                <LinearLayout
-                    android:id="@+id/profileInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/profile_info_container_bottom_space">
-
-                    <awais.instagrabber.customviews.CircularImageView
-                        android:id="@+id/mainProfileImage"
-                        android:layout_width="@dimen/profile_picture_size"
-                        android:layout_height="@dimen/profile_picture_size" />
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/mainPostCount"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginLeft="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginRight="12dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:textAppearance="@style/TextAppearance.AppCompat"
-                        android:textSize="15sp"
-                        tools:text="35\nPosts" />
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/mainFollowers"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:gravity="center"
-                        android:textAppearance="@style/TextAppearance.AppCompat"
-                        android:textSize="15sp"
-                        tools:text="68\nFollowers" />
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/mainFollowing"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginLeft="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginRight="12dp"
-                        android:layout_weight="1"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:gravity="center"
-                        android:textAppearance="@style/TextAppearance.AppCompat"
-                        android:textSize="15sp"
-                        tools:text="64\nFollowing" />
-                </LinearLayout>
-            </RelativeLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -286,7 +276,8 @@
         android:layout_marginTop="@dimen/private_page_margins"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="gone">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/privatePage1"
