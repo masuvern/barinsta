@@ -1,18 +1,16 @@
 package awais.instagrabber.adapters;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.List;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
@@ -21,42 +19,45 @@ import awais.instagrabber.utils.DataBox;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class AccountSwitcherListAdapter extends ArrayAdapter<DataBox.CookieModel> {
-    private static final String TAG = "AccountSwitcherListAdap";
+public class AccountSwitcherAdapter extends ListAdapter<DataBox.CookieModel, AccountSwitcherAdapter.ViewHolder> {
+    private static final String TAG = "AccountSwitcherAdapter";
+    private static final DiffUtil.ItemCallback<DataBox.CookieModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<DataBox.CookieModel>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull final DataBox.CookieModel oldItem, @NonNull final DataBox.CookieModel newItem) {
+            return oldItem.getUid().equals(newItem.getUid());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull final DataBox.CookieModel oldItem, @NonNull final DataBox.CookieModel newItem) {
+            return oldItem.getUid().equals(newItem.getUid());
+        }
+    };
 
     private final OnAccountClickListener clickListener;
     private final OnAccountLongClickListener longClickListener;
 
-    public AccountSwitcherListAdapter(@NonNull final Context context,
-                                      final int resource,
-                                      @NonNull final List<DataBox.CookieModel> allUsers,
-                                      final OnAccountClickListener clickListener,
-                                      final OnAccountLongClickListener longClickListener) {
-        super(context, resource, allUsers);
+    public AccountSwitcherAdapter(final OnAccountClickListener clickListener,
+                                  final OnAccountLongClickListener longClickListener) {
+        super(DIFF_CALLBACK);
         this.clickListener = clickListener;
         this.longClickListener = longClickListener;
     }
 
     @NonNull
     @Override
-    public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
+    public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+        final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.inflate(layoutInflater, parent, false);
+        return new ViewHolder(binding);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final DataBox.CookieModel model = getItem(position);
+        if (model == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        if (convertView == null) {
-            final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-            final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.inflate(layoutInflater, parent, false);
-            final ViewHolder viewHolder = new ViewHolder(binding);
-            viewHolder.itemView.setTag(viewHolder);
-            if (model == null) return viewHolder.itemView;
-            final boolean equals = model.getCookie().equals(cookie);
-            viewHolder.bind(model, equals, clickListener, longClickListener);
-            return viewHolder.itemView;
-        }
-        final ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-        if (model == null) return viewHolder.itemView;
-        final boolean equals = model.getCookie().equals(cookie);
-        viewHolder.bind(model, equals, clickListener, longClickListener);
-        return viewHolder.itemView;
+        final boolean isCurrent = model.getCookie().equals(cookie);
+        holder.bind(model, isCurrent, clickListener, longClickListener);
     }
 
     public interface OnAccountClickListener {
@@ -67,12 +68,11 @@ public class AccountSwitcherListAdapter extends ArrayAdapter<DataBox.CookieModel
         boolean onAccountLongClick(final DataBox.CookieModel model, final boolean isCurrent);
     }
 
-    private static class ViewHolder {
-        private final View itemView;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         private final PrefAccountSwitcherBinding binding;
 
         public ViewHolder(final PrefAccountSwitcherBinding binding) {
-            this.itemView = binding.getRoot();
+            super(binding.getRoot());
             this.binding = binding;
             binding.arrowDown.setImageResource(R.drawable.ic_check_24);
         }
