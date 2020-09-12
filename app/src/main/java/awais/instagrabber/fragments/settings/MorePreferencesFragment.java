@@ -88,27 +88,28 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
                 return true;
             }));
-            if (Utils.dataBox.getAllCookies().size() > 0) {
-                accountCategory.addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_delete, preference -> {
-                    if (getContext() == null) return false;
-                    new AlertDialog.Builder(getContext())
-                            .setTitle(R.string.logout)
-                            .setMessage(R.string.remove_all_acc_warning)
-                            .setPositiveButton(R.string.yes, (dialog, which) -> {
-                                CookieUtils.setupCookies("REMOVE");
-                                shouldRecreate();
-                                Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
-                                settingsHelper.putString(Constants.COOKIE, "");
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .show();
-                    return true;
-                }));
-            }
+        }
+
+        if (Utils.dataBox.getAllCookies().size() > 0) {
+            accountCategory.addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_delete, preference -> {
+                if (getContext() == null) return false;
+                new AlertDialog.Builder(getContext())
+                        .setTitle(R.string.logout)
+                        .setMessage(R.string.remove_all_acc_warning)
+                        .setPositiveButton(R.string.yes, (dialog, which) -> {
+                            CookieUtils.setupCookies("REMOVE");
+                            shouldRecreate();
+                            Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
+                            settingsHelper.putString(Constants.COOKIE, "");
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+                return true;
+            }));
         }
 
         final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
-        generalCategory.setTitle("General");
+        generalCategory.setTitle(R.string.pref_category_general);
         generalCategory.setIconSpaceReserved(false);
         screen.addPreference(generalCategory);
         if (isLoggedIn) {
