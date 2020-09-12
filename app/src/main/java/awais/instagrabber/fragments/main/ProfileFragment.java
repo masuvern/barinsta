@@ -71,8 +71,10 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
 import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
+import awais.instagrabber.webservices.AloService;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.utils.Constants;
@@ -102,6 +104,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private PostsAdapter postsAdapter;
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
+    private AloService aloService;
     private FriendshipService friendshipService;
     private boolean shouldRefresh = true;
     private StoryModel[] storyModels;
@@ -208,6 +211,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
+        aloService = AloService.getInstance();
         setHasOptionsMenu(true);
     }
 
@@ -354,12 +358,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final String profileId = profileModel.getId();
-        if (settingsHelper.getBoolean(Constants.STORIESIG) || isLoggedIn) {
+        if (settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue() || isLoggedIn) {
             new iStoryStatusFetcher(profileId,
                                     profileModel.getUsername(),
                                     false,
                                     false,
-                                    !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
+                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
                                     false,
                                     result -> {
                                         storyModels = result;
@@ -368,13 +372,30 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         }
                                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             new HighlightsFetcher(profileId,
-                                  !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
+                                  !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
                                   result -> {
                                       if (result != null) {
                                           binding.highlightsList.setVisibility(View.VISIBLE);
                                           highlightsViewModel.getList().postValue(result);
                                       } else binding.highlightsList.setVisibility(View.GONE);
                                   }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.ALOINSTAGRAM.getValue())) {
+            Log.d("austin_debug", "alo triggered");
+            aloService.getUserStory(profileId, profileModel.getUsername(), false, new ServiceCallback<List<StoryModel>>() {
+                @Override
+                public void onSuccess(final List<StoryModel> result){
+                    if (result != null && result.size() > 0) {
+                        storyModels = result.toArray(storyModels);
+                        binding.mainProfileImage.setStoriesBorder();
+                    }
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error on aloService", t);
+                }
+            });
         }
 
         if (isLoggedIn) {

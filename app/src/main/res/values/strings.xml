@@ -53,6 +53,7 @@
     <string name="privacy_warning">Privacy</string>
     <string name="instadp_settings">Use Instadp for high definition profile pictures</string>
     <string name="storiesig_settings">Use storiesig for stories and highlights from public users</string>
+    <string name="stories_viewer_settings">Story viewer service</string>
     <string name="import_export">Import/Export</string>
     <string name="select_language">Language</string>
     <string name="what_to_do_dialog">What to do?</string>
@@ -97,6 +98,9 @@
     <string name="read_more">read more…</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+    <string name="logout_summary">Browse Instagram anonymously</string>
+    <string name="remove_all_acc">Remove all accounts</string>
+    <string name="remove_all_acc_warning">This will remove all added accounts from the app!\nTo remove just one account, long tap the account from the account switcher dialog.\nDo you want to continue?</string>
     <string name="send_logs">Send Debug Logs</string>
     <string name="time_settings">Date format</string>
     <string name="project_link">Visit Project Page</string>

@@ -55,9 +55,7 @@ public class AboutFragment extends BasePreferencesFragment {
         // alphabetical order!!!
         thirdPartyCategory.addPreference(getExoPlayerPreference());
         thirdPartyCategory.addPreference(getFrescoPreference());
-        thirdPartyCategory.addPreference(getGlidePreference());
         thirdPartyCategory.addPreference(getJsoupPreference());
-        thirdPartyCategory.addPreference(getPhotoViewPreference());
         thirdPartyCategory.addPreference(getRetrofitPreference());
 
         final PreferenceCategory licenseCategory = new PreferenceCategory(requireContext());
@@ -146,34 +144,6 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setOnPreferenceClickListener(p -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("https://frescolib.org/"));
-            startActivity(intent);
-            return true;
-        });
-        return preference;
-    }
-
-    private Preference getGlidePreference() {
-        final Preference preference = new Preference(requireContext());
-        preference.setTitle("Glide");
-        preference.setSummary("Copyright 2014 Google, Inc. All rights reserved. Custom license.");
-        preference.setIconSpaceReserved(false);
-        preference.setOnPreferenceClickListener(p -> {
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://bumptech.github.io/glide/"));
-            startActivity(intent);
-            return true;
-        });
-        return preference;
-    }
-
-    private Preference getPhotoViewPreference() {
-        final Preference preference = new Preference(requireContext());
-        preference.setTitle("PhotoView");
-        preference.setSummary("Copyright 2018 Chris Banes. Apache Version 2.0.");
-        preference.setIconSpaceReserved(false);
-        preference.setOnPreferenceClickListener(p -> {
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://github.com/chrisbanes/PhotoView"));
             startActivity(intent);
             return true;
         });

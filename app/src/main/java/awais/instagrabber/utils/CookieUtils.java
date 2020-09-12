@@ -23,9 +23,13 @@ public final class CookieUtils {
         if (cookieStore == null || TextUtils.isEmpty(cookieRaw)) {
             return;
         }
-        if (cookieRaw.equals("LOGOUT")) {
+        if (cookieRaw.equals("REMOVE")) {
             cookieStore.removeAll();
             Utils.dataBox.deleteAllUserCookies();
+            return;
+        }
+        else if (cookieRaw.equals("LOGOUT")) {
+            cookieStore.removeAll();
             return;
         }
         try {

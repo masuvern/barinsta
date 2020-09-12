@@ -75,9 +75,11 @@ import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.webservices.AloService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.utils.Constants;
@@ -109,6 +111,7 @@ public class StoryViewerFragment extends Fragment {
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
     private StoriesService storiesService;
+    private AloService aloService;
     private StoryModel currentStory;
     private int slidePos;
     private int lastSlidePos;
@@ -510,33 +513,34 @@ public class StoryViewerFragment extends Fragment {
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (currentStoryMediaId == null) return;
+        final ServiceCallback storyCallback = new ServiceCallback<List<StoryModel>>() {
+            @Override
+            public void onSuccess(final List<StoryModel> storyModels) {
+                fetching = false;
+                if (storyModels == null || storyModels.isEmpty()) {
+                    storiesViewModel.getList().setValue(Collections.emptyList());
+                    currentStory = null;
+                    binding.storiesList.setVisibility(View.GONE);
+                    return;
+                }
+                binding.storiesList.setVisibility(View.VISIBLE);
+                storiesViewModel.getList().setValue(storyModels);
+                currentStory = storyModels.get(0);
+                refreshStory();
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                Log.e(TAG, "Error", t);
+            }
+        };
         storiesService.getUserStory(currentStoryMediaId,
                                     username,
-                                    !isLoggedIn && settingsHelper.getBoolean(Constants.STORIESIG),
+                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
                                     false,
                                     false,
                                     isHighlight,
-                                    new ServiceCallback<List<StoryModel>>() {
-                                        @Override
-                                        public void onSuccess(final List<StoryModel> storyModels) {
-                                            fetching = false;
-                                            if (storyModels == null || storyModels.isEmpty()) {
-                                                storiesViewModel.getList().setValue(Collections.emptyList());
-                                                currentStory = null;
-                                                binding.storiesList.setVisibility(View.GONE);
-                                                return;
-                                            }
-                                            binding.storiesList.setVisibility(View.VISIBLE);
-                                            storiesViewModel.getList().setValue(storyModels);
-                                            currentStory = storyModels.get(0);
-                                            refreshStory();
-                                        }
-
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            Log.e(TAG, "Error", t);
-                                        }
-                                    });
+                                    storyCallback);
     }
 
     private void refreshStory() {

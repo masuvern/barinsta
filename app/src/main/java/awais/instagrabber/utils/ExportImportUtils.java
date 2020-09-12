@@ -241,7 +241,6 @@ public final class ExportImportUtils {
 
                 json.put(Constants.DOWNLOAD_USER_FOLDER, settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER));
                 json.put(Constants.MUTED_VIDEOS, settingsHelper.getBoolean(Constants.MUTED_VIDEOS));
-                json.put(Constants.BOTTOM_TOOLBAR, settingsHelper.getBoolean(Constants.BOTTOM_TOOLBAR));
                 json.put(Constants.AUTOPLAY_VIDEOS, settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
                 json.put(Constants.AUTOLOAD_POSTS, settingsHelper.getBoolean(Constants.AUTOLOAD_POSTS));
                 json.put(Constants.FOLDER_SAVE_TO, settingsHelper.getBoolean(Constants.FOLDER_SAVE_TO));

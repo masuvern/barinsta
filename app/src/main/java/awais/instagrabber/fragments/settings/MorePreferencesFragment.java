@@ -57,7 +57,6 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
         final PreferenceCategory accountCategory = new PreferenceCategory(requireContext());
         accountCategory.setTitle(R.string.account);
-        accountCategory.setSummary(R.string.account_hint);
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
         // To re-login, user can just add the same account back from account switcher dialog
@@ -70,41 +69,55 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         //             return true;
         //         }));
         if (isLoggedIn) {
+            accountCategory.setSummary(R.string.account_hint);
             accountCategory.addPreference(getAccountSwitcherPreference(cookie));
-            accountCategory.addPreference(getPreference(R.string.logout, "Remove all accounts", -1, preference -> {
+            accountCategory.addPreference(getPreference(R.string.logout, R.string.logout_summary, R.drawable.ic_logout, preference -> {
                 if (getContext() == null) return false;
-                new AlertDialog.Builder(getContext())
-                        .setTitle(R.string.logout)
-                        .setMessage("This will remove all added accounts from the app!\n"
-                                            + "To remove just one account, long tap the account from the account switcher dialog.\n"
-                                            + "Do you want to continue?")
-                        .setPositiveButton(R.string.yes, (dialog, which) -> {
-                            CookieUtils.setupCookies("LOGOUT");
-                            shouldRecreate();
-                            Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
-                            settingsHelper.putString(Constants.COOKIE, "");
-                        })
-                        .setNegativeButton(R.string.cancel, null)
-                        .show();
+                CookieUtils.setupCookies("LOGOUT");
+                shouldRecreate();
+                Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
+                settingsHelper.putString(Constants.COOKIE, "");
                 return true;
             }));
         } else {
+            if (Utils.dataBox.getAllCookies().size() > 0) {
+                accountCategory.addPreference(getAccountSwitcherPreference(null));
+            }
             // Need to show something to trigger login activity
             accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
                 startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
                 return true;
             }));
+            if (Utils.dataBox.getAllCookies().size() > 0) {
+                accountCategory.addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_delete, preference -> {
+                    if (getContext() == null) return false;
+                    new AlertDialog.Builder(getContext())
+                            .setTitle(R.string.logout)
+                            .setMessage(R.string.remove_all_acc_warning)
+                            .setPositiveButton(R.string.yes, (dialog, which) -> {
+                                CookieUtils.setupCookies("REMOVE");
+                                shouldRecreate();
+                                Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show();
+                                settingsHelper.putString(Constants.COOKIE, "");
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                    return true;
+                }));
+            }
         }
 
         final PreferenceCategory generalCategory = new PreferenceCategory(requireContext());
         generalCategory.setTitle("General");
         generalCategory.setIconSpaceReserved(false);
         screen.addPreference(generalCategory);
-        generalCategory.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToNotificationsViewer();
-            NavHostFragment.findNavController(this).navigate(navDirections);
-            return true;
-        }));
+        if (isLoggedIn) {
+            generalCategory.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToNotificationsViewer();
+                NavHostFragment.findNavController(this).navigate(navDirections);
+                return true;
+            }));
+        }
         generalCategory.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {
             final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
             NavHostFragment.findNavController(this).navigate(navDirections);
@@ -129,7 +142,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(versionPreference);
 
         final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
-        reminderPreference.setEnabled(false);
+        reminderPreference.setSelectable(false);
         screen.addPreference(reminderPreference);
     }
 
@@ -333,6 +346,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             if (onClickListener != null) root.setOnClickListener(onClickListener);
             final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
             final String uid = CookieUtils.getUserIdFromCookie(cookie);
+            if (uid == null) return;
             final DataBox.CookieModel user = Utils.dataBox.getCookie(uid);
             if (user == null) return;
             binding.fullName.setText(user.getFullName());

@@ -12,7 +12,7 @@ public final class Constants {
     public static final String PREV_INSTALL_VERSION = "prevVersion";
     // boolean prefs
     public static final String DOWNLOAD_USER_FOLDER = "download_user_folder";
-    public static final String BOTTOM_TOOLBAR = "bottom_toolbar";
+    // deprecated: public static final String BOTTOM_TOOLBAR = "bottom_toolbar";
     public static final String FOLDER_SAVE_TO = "saved_to";
     public static final String AUTOPLAY_VIDEOS = "autoplay_videos";
     public static final String MUTED_VIDEOS = "muted_videos";
@@ -22,7 +22,8 @@ public final class Constants {
     public static final String MARK_AS_SEEN = "mark_as_seen";
     public static final String DM_MARK_AS_SEEN = "dm_mark_as_seen";
     public static final String INSTADP = "instadp";
-    public static final String STORIESIG = "storiesig";
+    // deprecated: public static final String STORIESIG = "storiesig";
+    public static final String STORY_VIEWER = "story_viewer";
     public static final String AMOLED_THEME = "amoled_theme";
     public static final String CHECK_ACTIVITY = "check_activity";
     public static final String CHECK_UPDATES = "check_updates";

@@ -13,7 +13,6 @@ import static awais.instagrabber.utils.Constants.APP_LANGUAGE;
 import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
 import static awais.instagrabber.utils.Constants.AUTOPLAY_VIDEOS;
-import static awais.instagrabber.utils.Constants.BOTTOM_TOOLBAR;
 import static awais.instagrabber.utils.Constants.CHECK_ACTIVITY;
 import static awais.instagrabber.utils.Constants.CHECK_UPDATES;
 import static awais.instagrabber.utils.Constants.COOKIE;
@@ -33,7 +32,7 @@ import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
 import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
-import static awais.instagrabber.utils.Constants.STORIESIG;
+import static awais.instagrabber.utils.Constants.STORY_VIEWER;
 
 public final class SettingsHelper {
     private final SharedPreferences sharedPreferences;
@@ -56,9 +55,8 @@ public final class SettingsHelper {
     }
 
     public boolean getBoolean(@BooleanSettings final String key) {
-        final boolean booleanDefault = getBooleanDefault(key);
-        if (sharedPreferences != null) return sharedPreferences.getBoolean(key, booleanDefault);
-        return booleanDefault;
+        if (sharedPreferences != null) return sharedPreferences.getBoolean(key, false);
+        return false;
     }
 
     @NonNull
@@ -74,14 +72,6 @@ public final class SettingsHelper {
         if (APP_THEME.equals(key)) return getThemeCode(true);
         if (PREV_INSTALL_VERSION.equals(key)) return -1;
         return 0;
-    }
-
-    private boolean getBooleanDefault(@BooleanSettings final String key) {
-        return BOTTOM_TOOLBAR.equals(key) ||
-                AUTOPLAY_VIDEOS.equals(key) ||
-                SHOW_QUICK_ACCESS_DIALOG.equals(key) ||
-                MUTED_VIDEOS.equals(key) ||
-                CHECK_UPDATES.equals(key);
     }
 
     public int getThemeCode(final boolean fromHelper) {
@@ -122,12 +112,12 @@ public final class SettingsHelper {
 
     @StringDef(
             {APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT,
-                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB})
+                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, STORY_VIEWER})
     public @interface StringSettings {}
 
-    @StringDef({DOWNLOAD_USER_FOLDER, BOTTOM_TOOLBAR, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-                       AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN,
-                       INSTADP, STORIESIG, AMOLED_THEME, CHECK_ACTIVITY, CHECK_UPDATES})
+    @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
+                    AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, INSTADP,
+                    AMOLED_THEME, CHECK_ACTIVITY, CHECK_UPDATES})
     public @interface BooleanSettings {}
 
     @StringDef({PREV_INSTALL_VERSION})

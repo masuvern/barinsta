@@ -39,35 +39,30 @@ public class FriendshipService extends BaseService {
 
     public void follow(final String userId,
                        final String targetUserId,
-                       final String crsfToken,
+                       final String csrfToken,
                        final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("create", userId, targetUserId, crsfToken, callback);
+        change("create", userId, targetUserId, csrfToken, callback);
     }
 
     public void unfollow(final String userId,
                          final String targetUserId,
-                         final String crsfToken,
+                         final String csrfToken,
                          final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("destroy", userId, targetUserId, crsfToken, callback);
+        change("destroy", userId, targetUserId, csrfToken, callback);
     }
 
     public void block(final String userId,
                       final String targetUserId,
-                      final String crsfToken,
+                      final String csrfToken,
                       final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("block", userId, targetUserId, crsfToken, callback);
+        change("block", userId, targetUserId, csrfToken, callback);
     }
 
     public void unblock(final String userId,
                         final String targetUserId,
-                        final String crsfToken,
+                        final String csrfToken,
                         final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("unblock", userId, targetUserId, crsfToken, callback);
-    }
-
-    public void restrict(final String targetUserId,
-                         final String csrfToken,
-                         final ServiceCallback<FriendshipRepoRestrictRootResponse> callback) {
+        change("unblock", userId, targetUserId, csrfToken, callback);
     }
 
     public void toggleRestrict(final String targetUserId,
@@ -101,16 +96,16 @@ public class FriendshipService extends BaseService {
 
     public void approve(final String userId,
                        final String targetUserId,
-                       final String crsfToken,
+                       final String csrfToken,
                        final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("approve", userId, targetUserId, crsfToken, callback);
+        change("approve", userId, targetUserId, csrfToken, callback);
     }
 
     public void ignore(final String userId,
                         final String targetUserId,
-                        final String crsfToken,
+                        final String csrfToken,
                         final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("ignore", userId, targetUserId, crsfToken, callback);
+        change("ignore", userId, targetUserId, csrfToken, callback);
     }
 
     private void change(final String action,

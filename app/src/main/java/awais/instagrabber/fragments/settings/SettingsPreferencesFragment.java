@@ -85,7 +85,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             anonUsersPreferenceCategory.setIconSpaceReserved(false);
             anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
             anonUsersPreferenceCategory.addPreference(getUseInstaDpPreference());
-            anonUsersPreferenceCategory.addPreference(getUseStoriesIgPreference());
+            anonUsersPreferenceCategory.addPreference(getStoryViewerPreference());
         }
 
     }
@@ -256,11 +256,21 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         return preference;
     }
 
-    private Preference getUseStoriesIgPreference() {
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(requireContext());
-        preference.setKey(Constants.STORIESIG);
-        preference.setTitle(R.string.storiesig_settings);
+    @NonNull
+    private Preference getStoryViewerPreference() {
+        final ListPreference preference = new ListPreference(requireContext());
+        preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
+        final int length = getResources().getStringArray(R.array.anonymous_story_viewer).length;
+        final String[] values = new String[length];
+        for (int i = 0; i < length; i++) {
+            values[i] = String.valueOf(i);
+        }
+        preference.setKey(Constants.STORY_VIEWER);
+        preference.setTitle(R.string.stories_viewer_settings);
+        preference.setDialogTitle(R.string.stories_viewer_settings);
+        preference.setEntries(R.array.anonymous_story_viewer);
         preference.setIconSpaceReserved(false);
+        preference.setEntryValues(values);
         return preference;
     }
 
