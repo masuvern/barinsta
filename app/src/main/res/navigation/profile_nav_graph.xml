@@ -124,7 +124,7 @@
         android:id="@+id/storyViewerFragment"
         android:name="awais.instagrabber.fragments.StoryViewerFragment"
         android:label="StoryViewerFragment"
-        tools:layout="@layout/activity_story_viewer">
+        tools:layout="@layout/fragment_story_viewer">
         <argument
             android:name="feedStoryIndex"
             app:argType="integer"

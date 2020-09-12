@@ -69,7 +69,7 @@ import awais.instagrabber.asyncs.SeenAction;
 import awais.instagrabber.asyncs.VoteAction;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
-import awais.instagrabber.databinding.ActivityStoryViewerBinding;
+import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
@@ -79,9 +79,6 @@ import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
-import awais.instagrabber.webservices.AloService;
-import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -90,6 +87,9 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
+import awais.instagrabber.webservices.AloService;
+import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
@@ -105,7 +105,8 @@ public class StoryViewerFragment extends Fragment {
 
     private AppCompatActivity fragmentActivity;
     private View root;
-    private ActivityStoryViewerBinding binding;
+    private @NonNull
+    FragmentStoryViewerBinding binding;
     private String currentStoryUsername;
     private StoriesAdapter storiesAdapter;
     private SwipeEvent swipeEvent;
@@ -151,7 +152,7 @@ public class StoryViewerFragment extends Fragment {
             shouldRefresh = false;
             return root;
         }
-        binding = ActivityStoryViewerBinding.inflate(inflater, container, false);
+        binding = FragmentStoryViewerBinding.inflate(inflater, container, false);
         root = binding.getRoot();
         return root;
     }
@@ -504,11 +505,11 @@ public class StoryViewerFragment extends Fragment {
                 // actionBar.setOnClickListener(v -> {
                 //     searchUsername(username);
                 // });
-//                if (isHighlight) {
-//                    actionBar.setSubtitle(getString(R.string.title_highlight, highlight));
-//                } else {
-//                    actionBar.setSubtitle(R.string.title_user_story);
-//                }
+                //                if (isHighlight) {
+                //                    actionBar.setSubtitle(getString(R.string.title_highlight, highlight));
+                //                } else {
+                //                    actionBar.setSubtitle(R.string.title_user_story);
+                //                }
             }
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
