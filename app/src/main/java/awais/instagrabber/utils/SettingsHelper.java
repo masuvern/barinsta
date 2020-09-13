@@ -113,7 +113,7 @@ public final class SettingsHelper {
 
     @StringDef(
             {APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT,
-                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, STORY_VIEWER})
+                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, STORY_VIEWER, PREF_DARK_THEME, PREF_LIGHT_THEME})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
@@ -121,6 +121,6 @@ public final class SettingsHelper {
                        CHECK_ACTIVITY, CHECK_UPDATES})
     public @interface BooleanSettings {}
 
-    @StringDef({PREV_INSTALL_VERSION, PREF_DARK_THEME, PREF_LIGHT_THEME})
+    @StringDef({PREV_INSTALL_VERSION})
     public @interface IntegerSettings {}
 }

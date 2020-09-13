@@ -33,9 +33,6 @@
     <color name="dm_profile_button_color">#efefef</color>
     <color name="semi_transparent_black">#80000000</color>
 
-    <!-- Amoled Colors -->
-    <color name="background_amoled">#000000</color>
-
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
@@ -67,4 +64,14 @@
     <color name="blue_A700">#2962FF</color>
 
     <color name="green_400">#66BB6A</color>
+
+    <!-- Barinsta Theme colors -->
+    <color name="barinstaColorPrimary">#a86735</color>
+    <color name="barinstaColorPrimaryLight">#dd9561</color>
+    <color name="barinstaColorPrimaryDark">#753c0a</color>
+    <color name="barinstaColorSecondary">#d4ab7c</color>
+    <color name="barinstaColorSecondaryLight">#ffddac</color>
+    <color name="barinstaColorSecondaryDark">#a17c4f</color>
+    <color name="barinstaColorPrimaryText">#616161</color>
+    <color name="barinstaColorSecondaryText">@color/black</color>
 </resources>

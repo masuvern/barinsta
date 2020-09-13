@@ -4,7 +4,6 @@
     <style name="AppTheme.Base" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!--<item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>-->
         <!--<item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>-->
-        <!--<item name="bottomNavigationStyle">@style/AppTheme.BottomNavigationView</item>-->
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeCloseDrawable">@drawable/ic_close_24</item>
         <item name="android:textColorLink">@color/blue_700</item>
@@ -50,9 +49,19 @@
         <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.Black</item>
     </style>
 
-    <style name="Theme.Amoled" parent="AppTheme.Base">
-        <!--<item name="android:colorBackground">@color/background_amoled</item>-->
-        <!--<item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog.Dark</item>-->
+    <style name="AppTheme.Light.Barinsta" parent="AppTheme.Base">
+        <item name="colorPrimary">@color/barinstaColorPrimary</item>
+        <item name="colorPrimaryDark">@color/barinstaColorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/barinstaColorPrimaryLight</item>
+        <item name="colorSecondary">@color/barinstaColorSecondary</item>
+        <item name="colorSurface">@color/grey_200</item>
+        <item name="colorControlHighlight">@color/barinstaColorSecondaryDark</item>
+        <item name="colorAccent">@color/barinstaColorSecondaryDark</item>
+        <item name="android:windowBackground">?colorSurface</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.Barinsta</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
+        <item name="android:textColorPrimary">@color/barinstaColorPrimaryText</item>
     </style>
 
     <style name="AppTheme.BottomSheetDialog.Dark" parent="Theme.MaterialComponents.BottomSheetDialog" />

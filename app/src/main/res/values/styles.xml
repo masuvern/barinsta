@@ -44,13 +44,16 @@
         <item name="background">?attr/colorPrimary</item>
     </style>
 
-
     <style name="Widget.BottomNavigationView.Light.White" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
         <item name="colorPrimary">@color/black</item>
     </style>
 
     <style name="Widget.BottomNavigationView.Dark.Black" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
         <item name="colorPrimary">@color/white</item>
+    </style>
+
+    <style name="Widget.BottomNavigationView.Light.Barinsta" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+        <item name="colorPrimary">@color/barinstaColorPrimary</item>
     </style>
 
     <style name="Widget.MaterialComponents.Button.Light.White" parent="Widget.MaterialComponents.Button">

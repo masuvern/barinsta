@@ -281,4 +281,5 @@
     <string name="dark_black_theme">Black</string>
     <string name="light_theme_settings">Light theme</string>
     <string name="dark_theme_settings">Dark theme</string>
+    <string name="light_barinsta_theme">Barinsta</string>
 </resources>
