@@ -11,9 +11,9 @@ assignees: 'austinhuang0131'
 
 ## Answer honestly. All boxes must be checked for this report to be considered.
 
-- [ ] My app is on the latest version. I understand that any other version is not supported.
-- [ ] I certify that all actions I have performed on the app constitute human behaviour. I am using InstaGrabber responsibly and in a way identical to using the official app. Specifically, I did not perform botting or automated key clicks.
-- [ ] I have considered other possible reasons for my ban, and I cannot find any substantial claim other than the usage of InstaGrabber.
+- [ ] My app is on the latest version available on GitHub or F-Droid. I understand that any other version is not supported.
+- [ ] I certify that all actions I have performed on the app constitute human behaviour. I am using the app responsibly and in a way identical to using the official app. Specifically, I did not perform botting or automated key clicks.
+- [ ] I have considered other possible reasons for my ban, and I cannot find any substantial claim other than the usage of this app.
 
 ## Answer honestly. Check accordingly to your situation.
 
