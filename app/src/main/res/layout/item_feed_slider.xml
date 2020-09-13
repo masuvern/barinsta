@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -16,25 +17,26 @@
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/media_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            tools:background="@color/semi_transparent_black" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="end|top"
             android:layout_margin="8dp"
-            app:srcCompat="@drawable/slider" />
+            app:srcCompat="@drawable/ic_slider_24" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/mediaCounter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
+            android:background="@drawable/rounder_corner_semi_black_bg"
             android:gravity="center"
             android:padding="5dp"
-            android:textColor="@android:color/white"
-            android:background="@drawable/rounder_corner_semi_black_bg"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@android:color/white" />
     </FrameLayout>
 
     <include

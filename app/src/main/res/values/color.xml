@@ -65,4 +65,6 @@
     <color name="blue_A200">#448AFF</color>
     <color name="blue_A400">#2979FF</color>
     <color name="blue_A700">#2962FF</color>
+
+    <color name="green_400">#66BB6A</color>
 </resources>

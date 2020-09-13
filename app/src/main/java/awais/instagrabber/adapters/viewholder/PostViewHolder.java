@@ -35,7 +35,7 @@ public final class PostViewHolder extends RecyclerView.ViewHolder {
         binding.isDownloaded.setVisibility(postModel.isDownloaded() ? View.VISIBLE : View.GONE);
 
         binding.typeIcon.setVisibility(itemType == MediaItemType.MEDIA_TYPE_VIDEO || isSlider ? View.VISIBLE : View.GONE);
-        binding.typeIcon.setImageResource(isSlider ? R.drawable.slider : R.drawable.video);
+        binding.typeIcon.setImageResource(isSlider ? R.drawable.ic_slider_24 : R.drawable.ic_video_24);
 
         binding.selectedView.setVisibility(postModel.isSelected() ? View.VISIBLE : View.GONE);
         binding.postImage.setImageURI(postModel.getThumbnailUrl());

@@ -31,6 +31,6 @@
             android:layout_height="24dp"
             android:layout_gravity="end|top"
             android:layout_margin="8dp"
-            app:srcCompat="@drawable/video" />
+            app:srcCompat="@drawable/ic_video_24" />
     </FrameLayout>
 </LinearLayout>
