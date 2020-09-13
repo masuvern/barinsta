@@ -48,5 +48,5 @@
         android:layout_gravity="end"
         android:scaleType="fitCenter"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_star" />
+        app:srcCompat="@drawable/ic_star_24" />
 </FrameLayout>

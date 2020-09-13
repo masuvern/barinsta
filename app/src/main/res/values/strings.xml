@@ -277,4 +277,8 @@
     <string name="about_category_3pt_summary">The following third-party open-source libraries are used:</string>
     <string name="reminder">Reminder</string>
     <string name="reminder_summary">Please use this app responsibly. Downloaded images should only be used for purposes allowed by applicable laws.</string>
+    <string name="light_white_theme">White</string>
+    <string name="dark_black_theme">Black</string>
+    <string name="light_theme_settings">Light theme</string>
+    <string name="dark_theme_settings">Dark theme</string>
 </resources>

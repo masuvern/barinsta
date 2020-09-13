@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import static awais.instagrabber.utils.Constants.AMOLED_THEME;
 import static awais.instagrabber.utils.Constants.APP_LANGUAGE;
 import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.AUTOLOAD_POSTS;
@@ -29,6 +28,8 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Constants.INSTADP;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
+import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
+import static awais.instagrabber.utils.Constants.PREF_LIGHT_THEME;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
 import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
@@ -116,10 +117,10 @@ public final class SettingsHelper {
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
-                    AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, INSTADP,
-                    AMOLED_THEME, CHECK_ACTIVITY, CHECK_UPDATES})
+                       AUTOLOAD_POSTS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, INSTADP,
+                       CHECK_ACTIVITY, CHECK_UPDATES})
     public @interface BooleanSettings {}
 
-    @StringDef({PREV_INSTALL_VERSION})
+    @StringDef({PREV_INSTALL_VERSION, PREF_DARK_THEME, PREF_LIGHT_THEME})
     public @interface IntegerSettings {}
 }

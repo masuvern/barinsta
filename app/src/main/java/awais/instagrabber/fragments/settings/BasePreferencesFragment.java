@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
+import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
@@ -43,5 +46,12 @@ public abstract class BasePreferencesFragment extends PreferenceFragmentCompat i
         }
         shouldRecreate = false;
         activity.recreate();
+    }
+
+    @NonNull
+    protected Preference getDivider(final Context context) {
+        final Preference divider = new Preference(context);
+        divider.setLayoutResource(R.layout.item_pref_divider);
+        return divider;
     }
 }

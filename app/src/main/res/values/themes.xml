@@ -1,19 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>
-        <item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>
-        <item name="bottomNavigationStyle">@style/AppTheme.BottomNavigationView</item>
+    <style name="AppTheme.Base" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!--<item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>-->
+        <!--<item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>-->
+        <!--<item name="bottomNavigationStyle">@style/AppTheme.BottomNavigationView</item>-->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
         <item name="actionModeCloseDrawable">@drawable/ic_close_24</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppTheme.Dark.ActionBar</item>
+        <item name="android:textColorLink">@color/blue_700</item>
+        <item name="android:textColorHighlight">@color/blue_300</item>
+        <!--<item name="actionModeStyle">@style/Widget.App.ActionMode</item>-->
+        <!--<item name="actionBarTheme">@style/ThemeOverlay.AppTheme.Dark.ActionBar</item>-->
     </style>
 
-    <style name="Theme.Amoled" parent="AppTheme">
-        <item name="android:colorBackground">@color/background_amoled</item>
-        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog.Dark</item>
+    <style name="AppTheme" parent="AppTheme.Base" />
+
+    <style name="AppTheme.Light.White" parent="AppTheme.Base">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorAccent">@color/black</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.White</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.Light.White</item>
+    </style>
+
+    <style name="AppTheme.Dark.Black" parent="AppTheme.Base">
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/black</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorAccent">@color/blue_A700</item>
+        <item name="colorControlHighlight">@color/grey_600</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:textColorHint">@color/grey_500</item>
+        <item name="android:windowBackground">@color/black</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Dark.Black</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.Dark.Black</item>
+        <item name="android:dialogTheme">@style/Widget.Dialog.Dark.Black</item>
+        <item name="alertDialogTheme">@style/Widget.AlertDialog.Dark.Black</item>
+        <item name="switchStyle">@style/Widget.AppCompat.CompoundButton.Switch.Dark.Black</item>
+        <item name="android:dropDownListViewStyle">@style/Widget.AppCompat.ListView.DropDown.Dark.Black</item>
+        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.Black</item>
+    </style>
+
+    <style name="Theme.Amoled" parent="AppTheme.Base">
+        <!--<item name="android:colorBackground">@color/background_amoled</item>-->
+        <!--<item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog.Dark</item>-->
     </style>
 
     <style name="AppTheme.BottomSheetDialog.Dark" parent="Theme.MaterialComponents.BottomSheetDialog" />

@@ -51,7 +51,11 @@
     <fragment
         android:id="@+id/settingsPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.SettingsPreferencesFragment"
-        android:label="@string/action_settings" />
+        android:label="@string/action_settings">
+        <action
+            android:id="@+id/action_settingsPreferencesFragment_to_themePreferencesFragment"
+            app:destination="@id/themePreferencesFragment" />
+    </fragment>
     <fragment
         android:id="@+id/aboutFragment"
         android:name="awais.instagrabber.fragments.settings.AboutFragment"
@@ -61,4 +65,8 @@
         android:name="awais.instagrabber.fragments.NotificationsViewerFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications_viewer" />
+    <fragment
+        android:id="@+id/themePreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.ThemePreferencesFragment"
+        android:label="@string/theme_settings" />
 </navigation>

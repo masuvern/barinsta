@@ -119,9 +119,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         });
         generalCategory.addPreference(aboutPreference);
 
-        final Preference divider = new Preference(context);
-        divider.setLayoutResource(R.layout.item_pref_divider);
-        screen.addPreference(divider);
+        screen.addPreference(getDivider(context));
 
         final Preference versionPreference = getPreference(R.string.version,
                                                            BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", -1, preference -> {
@@ -129,6 +127,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                     return true;
                 });
         screen.addPreference(versionPreference);
+        screen.addPreference(getDivider(context));
 
         final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
         reminderPreference.setSelectable(false);

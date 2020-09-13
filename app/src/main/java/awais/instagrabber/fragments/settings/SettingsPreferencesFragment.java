@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -46,17 +48,18 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(generalCategory);
         generalCategory.setTitle(R.string.pref_category_general);
         generalCategory.setIconSpaceReserved(false);
+        generalCategory.addPreference(getThemePreference(context));
         generalCategory.addPreference(getDefaultTabPreference());
         generalCategory.addPreference(getUpdateCheckPreference());
         generalCategory.addPreference(getAutoPlayVideosPreference());
         generalCategory.addPreference(getAlwaysMuteVideosPreference());
 
-        final PreferenceCategory themeCategory = new PreferenceCategory(context);
-        screen.addPreference(themeCategory);
-        themeCategory.setTitle(R.string.pref_category_theme);
-        themeCategory.setIconSpaceReserved(false);
-        themeCategory.addPreference(getThemePreference());
-        themeCategory.addPreference(getAmoledThemePreference());
+        // screen.addPreference(getDivider(context));
+        // final PreferenceCategory themeCategory = new PreferenceCategory(context);
+        // screen.addPreference(themeCategory);
+        // themeCategory.setTitle(R.string.pref_category_theme);
+        // themeCategory.setIconSpaceReserved(false);
+        // themeCategory.addPreference(getAmoledThemePreference());
 
         final PreferenceCategory downloadsCategory = new PreferenceCategory(context);
         screen.addPreference(downloadsCategory);
@@ -120,10 +123,6 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         final ListPreference preference = new ListPreference(context);
         preference.setEnabled(isLoggedIn);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
-        final FragmentActivity activity = getActivity();
-        if (activity == null) {
-            return preference;
-        }
         final TypedArray mainNavIds = getResources().obtainTypedArray(R.array.main_nav_ids);
         final int length = mainNavIds.length();
         final String[] values = new String[length];
@@ -152,39 +151,14 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         return preference;
     }
 
-    private Preference getThemePreference() {
-        final Context context = getContext();
-        if (context == null) return null;
-        final ListPreference preference = new ListPreference(context);
-        preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
-        final int length = getResources().getStringArray(R.array.theme_presets).length;
-        final String[] values = new String[length];
-        for (int i = 0; i < length; i++) {
-            values[i] = String.valueOf(i);
-        }
-        preference.setKey(Constants.APP_THEME);
-        preference.setTitle(R.string.theme_settings);
-        preference.setDialogTitle(R.string.theme_settings);
-        preference.setEntries(R.array.theme_presets);
+    private Preference getThemePreference(@NonNull final Context context) {
+        final Preference preference = new Preference(context);
+        preference.setTitle(R.string.pref_category_theme);
+        // preference.setIcon(R.drawable.ic_format_paint_24);
         preference.setIconSpaceReserved(false);
-        preference.setEntryValues(values);
-        preference.setOnPreferenceChangeListener((preference1, newValue) -> {
-            shouldRecreate();
-            return true;
-        });
-        return preference;
-    }
-
-    private SwitchPreferenceCompat getAmoledThemePreference() {
-        final Context context = getContext();
-        if (context == null) return null;
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.AMOLED_THEME);
-        preference.setTitle(R.string.use_amoled_dark_theme);
-        preference.setIconSpaceReserved(false);
-        preference.setOnPreferenceChangeListener((preference1, newValue) -> {
-            final boolean isNight = Utils.isNight(context, settingsHelper.getThemeCode(true));
-            if (isNight) shouldRecreate();
+        preference.setOnPreferenceClickListener(preference1 -> {
+            final NavDirections navDirections = SettingsPreferencesFragmentDirections.actionSettingsPreferencesFragmentToThemePreferencesFragment();
+            NavHostFragment.findNavController(this).navigate(navDirections);
             return true;
         });
         return preference;

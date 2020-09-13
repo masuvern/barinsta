@@ -24,7 +24,7 @@ public final class Constants {
     public static final String INSTADP = "instadp";
     // deprecated: public static final String STORIESIG = "storiesig";
     public static final String STORY_VIEWER = "story_viewer";
-    public static final String AMOLED_THEME = "amoled_theme";
+    // deprecated: public static final String AMOLED_THEME = "amoled_theme";
     public static final String CHECK_ACTIVITY = "check_activity";
     public static final String CHECK_UPDATES = "check_updates";
     // never Export
@@ -79,4 +79,6 @@ public final class Constants {
     public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
     public static final int ACTIVITY_NOTIFICATION_ID = 1800000000;
     public static final String ACTION_SHOW_ACTIVITY = "show_activity";
+    public static final String PREF_DARK_THEME = "dark_theme";
+    public static final String PREF_LIGHT_THEME = "light_theme";
 }

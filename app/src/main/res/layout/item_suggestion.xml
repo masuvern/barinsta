@@ -4,6 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
     android:padding="8dp">
 
     <com.facebook.drawee.view.SimpleDraweeView
@@ -16,15 +19,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:roundAsCircle="true"
-        tools:src="@mipmap/ic_launcher" />
+        tools:background="@mipmap/ic_launcher" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvUsername"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:gravity="center_vertical"
-        android:paddingStart="4dp"
-        android:paddingLeft="4dp"
+        android:paddingStart="8dp"
+        android:paddingLeft="8dp"
         android:paddingEnd="4dp"
         android:paddingRight="4dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -39,16 +42,17 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center_vertical"
-        android:paddingStart="4dp"
-        android:paddingLeft="4dp"
-        android:paddingEnd="4dp"
-        android:paddingRight="4dp"
-        tools:visibility="gone"
+        android:paddingStart="8dp"
+        android:paddingLeft="8dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/ivProfilePic"
         app:layout_constraintTop_toBottomOf="@id/tvUsername"
-        tools:text="full name" />
+        tools:text="full name"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/isVerified"

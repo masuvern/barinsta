@@ -64,39 +64,6 @@ public final class Utils {
         return Math.round((dp * displayMetrics.densityDpi) / 160.0f);
     }
 
-    public static void changeTheme(final Context context) {
-        int themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM; // this is fallback / default
-
-        if (settingsHelper != null) themeCode = settingsHelper.getThemeCode(false);
-
-        if (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && Build.VERSION.SDK_INT < 29)
-            themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
-
-        boolean isAmoledEnabled = false;
-        if (settingsHelper != null) {
-            isAmoledEnabled = settingsHelper.getBoolean(Constants.AMOLED_THEME);
-        }
-        AppCompatDelegate.setDefaultNightMode(themeCode);
-        // use amoled theme only if enabled in settings
-        if (isAmoledEnabled && isNight(context, themeCode)) {
-            // set amoled theme
-            Log.d(TAG, "settings amoled theme");
-            context.setTheme(R.style.Theme_Amoled);
-        }
-    }
-
-    public static boolean isNight(final Context context, final int themeCode) {
-        // check if setting is set to 'Dark'
-        boolean isNight = themeCode == AppCompatDelegate.MODE_NIGHT_YES;
-        // if not dark check if themeCode is MODE_NIGHT_FOLLOW_SYSTEM or MODE_NIGHT_AUTO_BATTERY
-        if (!isNight && (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM || themeCode == AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)) {
-            // check if resulting theme would be NIGHT
-            final int uiMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            isNight = uiMode == Configuration.UI_MODE_NIGHT_YES;
-        }
-        return isNight;
-    }
-
     public static void setTooltipText(final View view, @StringRes final int tooltipTextRes) {
         if (view != null && tooltipTextRes != 0 && tooltipTextRes != -1) {
             final Context context = view.getContext();

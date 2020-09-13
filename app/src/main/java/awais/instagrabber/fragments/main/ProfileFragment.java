@@ -725,7 +725,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (context == null) return;
             new AlertDialog.Builder(context)
                     .setItems(options, profileDialogListener)
-                    .setNeutralButton(R.string.cancel, null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show();
         });
     }

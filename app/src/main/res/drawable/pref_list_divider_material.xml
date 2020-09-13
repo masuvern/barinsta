@@ -11,7 +11,7 @@
   limitations under the License
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#1f000000" />
+    <solid android:color="@color/grey_600_a20" />
     <size
         android:width="1dp"
         android:height="1dp" />
