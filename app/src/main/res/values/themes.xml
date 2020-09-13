@@ -9,7 +9,7 @@
         <item name="actionModeCloseDrawable">@drawable/ic_close_24</item>
         <item name="android:textColorLink">@color/blue_700</item>
         <item name="android:textColorHighlight">@color/blue_300</item>
-        <!--<item name="actionModeStyle">@style/Widget.App.ActionMode</item>-->
+        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
         <!--<item name="actionBarTheme">@style/ThemeOverlay.AppTheme.Dark.ActionBar</item>-->
     </style>
 
