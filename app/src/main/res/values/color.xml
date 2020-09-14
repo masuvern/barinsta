@@ -34,7 +34,9 @@
     <color name="semi_transparent_black">#80000000</color>
 
     <color name="white">#FFFFFF</color>
+
     <color name="black">#000000</color>
+    <color name="black_800">#121212</color>
 
     <color name="grey_50">#FAFAFA</color>
     <color name="grey_100">#F5F5F5</color>
@@ -63,7 +65,25 @@
     <color name="blue_A400">#2979FF</color>
     <color name="blue_A700">#2962FF</color>
 
+    <color name="brown_50">#EFEBE9</color>
+    <color name="brown_100">#D7CCC8</color>
+    <color name="brown_200">#BCAAA4</color>
+    <color name="brown_300">#A1887F</color>
+    <color name="brown_400">#8D6E63</color>
+    <color name="brown_500">#795548</color>
+    <color name="brown_600">#6D4C41</color>
+    <color name="brown_700">#5D4037</color>
+    <color name="brown_800">#4E342E</color>
+    <color name="brown_900">#3E2723</color>
+
+    <color name="green_200">#03dac6</color>
     <color name="green_400">#66BB6A</color>
+    <color name="green_500">#018786</color>
+
+    <color name="purple_200">#bb86fc</color>
+    <color name="purple_600">#4b01d0</color>
+
+    <color name="red_200">#cf6679</color>
 
     <!-- Barinsta Theme colors -->
     <color name="barinstaColorPrimary">#a86735</color>
@@ -72,6 +92,6 @@
     <color name="barinstaColorSecondary">#d4ab7c</color>
     <color name="barinstaColorSecondaryLight">#ffddac</color>
     <color name="barinstaColorSecondaryDark">#a17c4f</color>
-    <color name="barinstaColorPrimaryText">#616161</color>
-    <color name="barinstaColorSecondaryText">@color/black</color>
+    <color name="barinstaPrimaryTextColor">#616161</color>
+    <color name="barinstaSecondaryTextColor">@color/white</color>
 </resources>

@@ -127,8 +127,10 @@
     </string-array>
     <string-array name="dark_themes">
         <item>@string/dark_black_theme</item>
+        <item>@string/dark_material_dark_theme</item>
     </string-array>
     <string-array name="dark_theme_values">
         <item>@style/AppTheme.Dark.Black</item>
+        <item>@style/AppTheme.Dark.MaterialDark</item>
     </string-array>
 </resources>

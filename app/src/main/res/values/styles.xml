@@ -23,12 +23,12 @@
         <item name="android:windowActionBar">false</item>
     </style>
 
-    <style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog" />
+    <!--<style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog" />-->
 
-    <style name="AppTheme.WindowAnimationTransition">
-        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
-    </style>
+    <!--<style name="AppTheme.WindowAnimationTransition">-->
+    <!--    <item name="android:windowEnterAnimation">@android:anim/fade_in</item>-->
+    <!--    <item name="android:windowExitAnimation">@android:anim/fade_out</item>-->
+    <!--</style>-->
 
     <style name="AppTheme.BottomNavigationView" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
         <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
@@ -38,21 +38,21 @@
 
     <style name="Widget.AppTheme.Toolbar.PrimarySurface" parent="Widget.MaterialComponents.Toolbar.PrimarySurface" />
 
-    <style name="ThemeOverlay.AppTheme.Dark.ActionBar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <!--<style name="ThemeOverlay.AppTheme.Dark.ActionBar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />-->
 
     <style name="Widget.App.ActionMode" parent="Widget.AppCompat.ActionMode">
         <item name="background">?attr/colorPrimary</item>
     </style>
 
-    <style name="Widget.BottomNavigationView.Light.White" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+    <style name="Widget.BottomNavigationView.Light.White" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
         <item name="colorPrimary">@color/black</item>
     </style>
 
-    <style name="Widget.BottomNavigationView.Dark.Black" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+    <style name="Widget.BottomNavigationView.Dark.Black" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
         <item name="colorPrimary">@color/white</item>
     </style>
 
-    <style name="Widget.BottomNavigationView.Light.Barinsta" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+    <style name="Widget.BottomNavigationView.Light.Barinsta" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
         <item name="colorPrimary">@color/barinstaColorPrimary</item>
     </style>
 
@@ -85,11 +85,27 @@
         <item name="colorOnSurface">@color/grey_800</item>
     </style>
 
-    <style name="Widget.AppCompat.ListView.DropDown.Dark.Black" parent="@style/Widget.AppCompat.ListView.DropDown">
+    <style name="Widget.AppCompat.ListView.DropDown.Dark.Black" parent="Widget.AppCompat.ListView.DropDown">
         <item name="android:background">@color/grey_800</item>
     </style>
 
     <style name="PreferenceFragmentCompatStyle.Dark.Black" parent="PreferenceFragment.Material">
         <item name="android:divider">@drawable/pref_list_divider_material</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.Toolbar.Light.Barinsta" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MaterialComponents.ActionBar.Light.Barinsta</item>
+    </style>
+
+    <style name="ThemeOverlay.MaterialComponents.ActionBar.Light.Barinsta" parent="ThemeOverlay.MaterialComponents.ActionBar.Primary">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="android:textColorHint">@color/brown_600</item>
+    </style>
+
+    <style name="PreferenceFragmentCompatStyle.Dark.MaterialDark" parent="PreferenceFragment.Material">
+        <item name="android:background">?colorSurface</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
     </style>
 </resources>

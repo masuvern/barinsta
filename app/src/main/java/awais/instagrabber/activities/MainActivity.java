@@ -264,7 +264,6 @@ public class MainActivity extends BaseLanguageActivity {
         final View searchText = searchView.findViewById(R.id.search_src_text);
         if (searchText instanceof AutoCompleteTextView) {
             searchAutoComplete = (AutoCompleteTextView) searchText;
-            searchAutoComplete.setTextColor(getResources().getColor(android.R.color.white));
         }
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             private boolean searchUser;
