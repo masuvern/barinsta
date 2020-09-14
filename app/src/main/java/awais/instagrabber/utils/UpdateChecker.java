@@ -35,7 +35,7 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
 
             final int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                final JSONObject data = new JSONObject(Utils.readFromConnection(conn));
+                final JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn));
                 if (BuildConfig.VERSION_CODE < data.getInt("suggestedVersionCode")) {
                     version = data.getJSONArray("packages").getJSONObject(0).getString("versionName");
                     return true;

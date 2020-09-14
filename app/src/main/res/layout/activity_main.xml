@@ -1,104 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.Main">
+    android:animateLayoutChanges="true"
+    tools:context=".activities.MainActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/layout_include_toolbar" />
-
-        <awais.instagrabber.customviews.RemixDrawerLayout
-            android:id="@+id/drawerLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <!-- Profile View -->
-            <include
-                android:id="@+id/profile_view"
-                layout="@layout/layout_profile_view" />
-
-            <!-- Feed View -->
-            <include
-                android:id="@+id/feed_view"
-                layout="@layout/layout_feed_view" />
-
-            <!-- Discover View -->
-            <androidx.coordinatorlayout.widget.CoordinatorLayout
-                android:id="@+id/discoverLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="end"
-                android:animateLayoutChanges="true"
-                android:tag="@android:string/yes">
-
-                <com.google.android.material.appbar.AppBarLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    app:elevation="0dp">
-                    <com.google.android.material.appbar.CollapsingToolbarLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:layout_scrollFlags="scroll|snap|enterAlways">
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/discoverType"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:entries="@array/discover_placeholder"/>
-                    </com.google.android.material.appbar.CollapsingToolbarLayout>
-                </com.google.android.material.appbar.AppBarLayout>
-
-                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                    android:id="@+id/discoverSwipeRefreshLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:tag="@android:string/yes"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/discoverPosts"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clipToPadding="false"
-                        tools:listitem="@layout/item_feed" />
-                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-            </androidx.coordinatorlayout.widget.CoordinatorLayout>
-        </awais.instagrabber.customviews.RemixDrawerLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/iconSlider"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:srcCompat="@drawable/ic_feed"
-            app:tint="?android:textColorSecondary" />
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|snap|enterAlways"
+            app:titleEnabled="false">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:srcCompat="@drawable/ic_profile"
-            app:tint="?android:textColorPrimary" />
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="none"
+                app:popupTheme="@style/Widget.AppTheme.Toolbar.PrimarySurface"
+                app:title="@string/app_name"
+                tools:menu="@menu/main_menu" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:srcCompat="@drawable/ic_discover"
-            app:tint="?android:textColorSecondary" />
-    </LinearLayout>
-</FrameLayout>
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/main_nav_host"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/main_bottom_navigation_menu" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

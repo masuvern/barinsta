@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/hashtag_nav_graph"
+    app:startDestination="@id/hashTagFragment">
+
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/post_view_nav_graph">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
+
+    <fragment
+        android:id="@+id/hashTagFragment"
+        android:name="awais.instagrabber.fragments.HashTagFragment"
+        android:label=""
+        tools:layout="@layout/fragment_hashtag">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_hashTagFragment"
+        app:destination="@id/hashTagFragment">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+</navigation>

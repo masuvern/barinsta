@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -43,8 +44,8 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String cc = UUID.randomUUID().toString();
         final Map<String, String> form = new HashMap<>();
-        form.put("_csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
-        form.put("_uid", Utils.getUserIdFromCookie(cookie));
+        form.put("_csrftoken", CookieUtils.getCsrfTokenFromCookie(cookie));
+        form.put("_uid", CookieUtils.getUserIdFromCookie(cookie));
         form.put("__uuid", settingsHelper.getString(Constants.DEVICE_UUID));
         form.put("client_context", cc);
         form.put("mutation_token", cc);

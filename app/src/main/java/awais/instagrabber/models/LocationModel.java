@@ -4,11 +4,26 @@ import java.io.Serializable;
 
 public final class LocationModel implements Serializable {
     private final long postCount;
-    private final String id, name, bio, url, sdProfilePic, lat, lng;
+    private final String id;
+    private final String slug;
+    private final String name;
+    private final String bio;
+    private final String url;
+    private final String sdProfilePic;
+    private final String lat;
+    private final String lng;
 
-    public LocationModel(final String id, final String name, final String bio, final String url,
-                         final String sdProfilePic, final long postCount, final String lat, final String lng) {
-        this.id = id; // <- id + "/" + slug
+    public LocationModel(final String id,
+                         final String slug,
+                         final String name,
+                         final String bio,
+                         final String url,
+                         final String sdProfilePic,
+                         final long postCount,
+                         final String lat,
+                         final String lng) {
+        this.id = id;
+        this.slug = slug;
         this.name = name;
         this.bio = bio;
         this.url = url;
@@ -20,6 +35,10 @@ public final class LocationModel implements Serializable {
 
     public String getId() {
         return id;
+    }
+
+    public String getSlug() {
+        return slug;
     }
 
     public String getName() {
@@ -34,7 +53,7 @@ public final class LocationModel implements Serializable {
         return url;
     }
 
-    public String getGeo() { return "geo:"+lat+","+lng+"?z=17&q="+lat+","+lng+"("+name+")"; }
+    public String getGeo() { return "geo:" + lat + "," + lng + "?z=17&q=" + lat + "," + lng + "(" + name + ")"; }
 
     public String getSdProfilePic() {
         return sdProfilePic;

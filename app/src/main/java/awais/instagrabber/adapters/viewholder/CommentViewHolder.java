@@ -2,11 +2,12 @@ package awais.instagrabber.adapters.viewholder;
 
 import android.text.Spannable;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.CommentsAdapter;
@@ -17,11 +18,16 @@ import awais.instagrabber.models.CommentModel;
 public final class CommentViewHolder extends RecyclerView.ViewHolder {
     private final MentionClickListener mentionClickListener;
     private final RecyclerView rvChildComments;
-    private final ImageView ivProfilePic;
-    private final TextView tvUsername, tvDate, tvComment, tvLikes;
+    private final SimpleDraweeView ivProfilePic;
+    private final TextView tvUsername;
+    private final TextView tvDate;
+    private final TextView tvComment;
+    private final TextView tvLikes;
     private final View container;
 
-    public CommentViewHolder(@NonNull final View itemView, final View.OnClickListener onClickListener, final MentionClickListener mentionClickListener) {
+    public CommentViewHolder(@NonNull final View itemView,
+                             final View.OnClickListener onClickListener,
+                             final MentionClickListener mentionClickListener) {
         super(itemView);
 
         container = itemView.findViewById(R.id.container);
@@ -41,7 +47,7 @@ public final class CommentViewHolder extends RecyclerView.ViewHolder {
         rvChildComments = itemView.findViewById(R.id.rvChildComments);
     }
 
-    public final ImageView getProfilePicView() {
+    public final SimpleDraweeView getProfilePicView() {
         return ivProfilePic;
     }
 
@@ -69,9 +75,9 @@ public final class CommentViewHolder extends RecyclerView.ViewHolder {
         if (liked) container.setBackgroundColor(0x40FF69B4);
     }
 
-    public final void setCommment(final CharSequence commment) {
+    public final void setComment(final CharSequence comment) {
         if (tvComment != null) {
-            tvComment.setText(commment, commment instanceof Spannable ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL);
+            tvComment.setText(comment, comment instanceof Spannable ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL);
             ((RamboTextView) tvComment).setMentionClickListener(mentionClickListener);
         }
     }

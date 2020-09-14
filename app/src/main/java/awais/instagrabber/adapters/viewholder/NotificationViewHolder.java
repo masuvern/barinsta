@@ -1,75 +1,68 @@
 package awais.instagrabber.adapters.viewholder;
 
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.R;
-import awais.instagrabber.customviews.RamboTextView;
-import awais.instagrabber.interfaces.MentionClickListener;
+import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListener;
+import awais.instagrabber.databinding.ItemNotificationBinding;
 import awais.instagrabber.models.NotificationModel;
+import awais.instagrabber.models.enums.NotificationType;
 
 public final class NotificationViewHolder extends RecyclerView.ViewHolder {
-    private final MentionClickListener mentionClickListener;
-    private final ImageView ivProfilePic, ivPreviewPic;
-    private final TextView tvUsername, tvDate, tvComment, tvSubComment;
-    private final View container, rightContainer;
+    private final ItemNotificationBinding binding;
 
-    public NotificationViewHolder(@NonNull final View itemView, final View.OnClickListener onClickListener, final MentionClickListener mentionClickListener) {
-        super(itemView);
-
-        container = itemView.findViewById(R.id.container);
-        rightContainer = itemView.findViewById(R.id.rightContainer);
-        if (onClickListener != null) container.setOnClickListener(onClickListener);
-
-        this.mentionClickListener = mentionClickListener;
-
-        ivProfilePic = itemView.findViewById(R.id.ivProfilePic);
-        ivPreviewPic = itemView.findViewById(R.id.ivPreviewPic);
-        tvUsername = itemView.findViewById(R.id.tvUsername);
-        tvDate = itemView.findViewById(R.id.tvDate);
-        tvComment = itemView.findViewById(R.id.tvComment);
-        tvSubComment = itemView.findViewById(R.id.tvSubComment);
-
-        tvUsername.setSelected(true);
-        tvDate.setSelected(true);
+    public NotificationViewHolder(final ItemNotificationBinding binding) {
+        super(binding.getRoot());
+        this.binding = binding;
     }
 
-    public final ImageView getProfilePicView() {
-        return ivProfilePic;
-    }
-
-    public final ImageView getPreviewPicView() {
-        return ivPreviewPic;
-    }
-
-    public final void setNotificationModel(final NotificationModel notificationModel) {
-        if (container != null) container.setTag(notificationModel);
-        if (rightContainer != null) rightContainer.setTag(notificationModel);
-    }
-
-    public final void setUsername(final String username) {
-        if (tvUsername != null) tvUsername.setText(username);
-    }
-
-    public final void setDate(final String date) {
-        if (tvDate != null) tvDate.setText(date);
-    }
-
-    public final void setCommment(final int commment) {
-        if (tvComment != null) {
-            tvComment.setText(commment);
+    public void bind(final NotificationModel model,
+                     final OnNotificationClickListener notificationClickListener) {
+        if (model == null) return;
+        itemView.setOnClickListener(v -> {
+            if (notificationClickListener == null) return;
+            notificationClickListener.onNotificationClick(model);
+        });
+        int text = -1;
+        CharSequence subtext = null;
+        switch (model.getType()) {
+            case LIKE:
+                text = R.string.liked_notif;
+                break;
+            case COMMENT:
+                text = R.string.comment_notif;
+                subtext = model.getText();
+                break;
+            case MENTION:
+                text = R.string.mention_notif;
+                subtext = model.getText();
+                break;
+            case FOLLOW:
+                text = R.string.follow_notif;
+                break;
+            case REQUEST:
+                text = R.string.request_notif;
+                subtext = model.getText();
+                break;
         }
-    }
-
-    public final void setSubCommment(final CharSequence commment) {
-        if (tvSubComment != null) {
-            tvSubComment.setText(commment, commment instanceof Spannable ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL);
-            ((RamboTextView) tvSubComment).setMentionClickListener(mentionClickListener);
+        binding.tvUsername.setText(model.getUsername());
+        binding.tvComment.setText(text);
+        binding.tvSubComment.setText(subtext, subtext instanceof Spannable ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL);
+        // binding.tvSubComment.setMentionClickListener(mentionClickListener);
+        if (model.getType() != NotificationType.REQUEST) {
+            binding.tvDate.setText(model.getDateTime());
+        }
+        binding.ivProfilePic.setImageURI(model.getProfilePic());
+        if (TextUtils.isEmpty(model.getPreviewPic())) {
+            binding.ivPreviewPic.setVisibility(View.GONE);
+        } else {
+            binding.ivPreviewPic.setVisibility(View.VISIBLE);
+            binding.ivPreviewPic.setImageURI(model.getPreviewPic());
         }
     }
 }

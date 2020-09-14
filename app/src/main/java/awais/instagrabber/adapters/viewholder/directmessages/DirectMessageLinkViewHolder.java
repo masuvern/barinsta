@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmLinkBinding;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectMessageLinkViewHolder extends DirectMessageItemViewHolder {
 
@@ -26,21 +26,21 @@ public class DirectMessageLinkViewHolder extends DirectMessageItemViewHolder {
         final DirectItemModel.DirectItemLinkModel link = directItemModel.getLinkModel();
         final DirectItemModel.DirectItemLinkContext linkContext = link.getLinkContext();
         final String linkImageUrl = linkContext.getLinkImageUrl();
-        if (Utils.isEmpty(linkImageUrl)) {
+        if (TextUtils.isEmpty(linkImageUrl)) {
             binding.ivLinkPreview.setVisibility(View.GONE);
         } else {
-            getGlideRequestManager().load(linkImageUrl).into(binding.ivLinkPreview);
+            binding.ivLinkPreview.setImageURI(linkImageUrl);
         }
-        if (Utils.isEmpty(linkContext.getLinkTitle())) {
+        if (TextUtils.isEmpty(linkContext.getLinkTitle())) {
             binding.tvLinkTitle.setVisibility(View.GONE);
         } else {
             binding.tvLinkTitle.setText(linkContext.getLinkTitle());
         }
-        if (Utils.isEmpty(linkContext.getLinkSummary())) {
+        if (TextUtils.isEmpty(linkContext.getLinkSummary())) {
             binding.tvLinkSummary.setVisibility(View.GONE);
         } else {
             binding.tvLinkSummary.setText(linkContext.getLinkSummary());
         }
-        binding.tvMessage.setText(Utils.getSpannableUrl(link.getText()));
+        binding.tvMessage.setText(TextUtils.getSpannableUrl(link.getText()));
     }
 }

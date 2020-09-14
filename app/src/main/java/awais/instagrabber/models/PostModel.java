@@ -51,4 +51,6 @@ public class PostModel extends BasePostModel {
         this.endCursor = endCursor;
         this.hasNextPage = hasNextPage;
     }
+
+
 }

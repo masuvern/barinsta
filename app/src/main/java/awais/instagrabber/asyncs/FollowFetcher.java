@@ -13,7 +13,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FollowModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -55,8 +55,8 @@ public final class FollowFetcher extends AsyncTask<Void, Void, FollowModel[]> {
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject data = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("data")
-                        .getJSONObject(Constants.EXTRAS_USER).getJSONObject(isFollowers ? "edge_followed_by" : "edge_follow");
+                final JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("data")
+                                                                                             .getJSONObject(Constants.EXTRAS_USER).getJSONObject(isFollowers ? "edge_followed_by" : "edge_follow");
 
                 final String endCursor;
                 final boolean hasNextPage;

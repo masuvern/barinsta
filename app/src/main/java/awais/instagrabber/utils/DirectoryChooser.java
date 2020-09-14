@@ -46,7 +46,7 @@ public final class DirectoryChooser extends DialogFragment {
     }
 
     public DirectoryChooser setInitialDirectory(final String initialDirectory) {
-        if (!Utils.isEmpty(initialDirectory))
+        if (!TextUtils.isEmpty(initialDirectory))
             this.initialDirectory = initialDirectory;
         return this;
     }
@@ -123,7 +123,7 @@ public final class DirectoryChooser extends DialogFragment {
         directoriesList.setAdapter(listDirectoriesAdapter);
 
         final File initDir = new File(initialDirectory);
-        final File initialDir = !Utils.isEmpty(initialDirectory) && isValidFile(initDir) ? initDir : Environment.getExternalStorageDirectory();
+        final File initialDir = !TextUtils.isEmpty(initialDirectory) && isValidFile(initDir) ? initDir : Environment.getExternalStorageDirectory();
 
         changeDirectory(initialDir);
 
@@ -134,11 +134,11 @@ public final class DirectoryChooser extends DialogFragment {
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Utils.isEmpty(initialDirectory)) {
+        if (TextUtils.isEmpty(initialDirectory)) {
             initialDirectory = new File(sdcardPath, "Download").getAbsolutePath();
             if (savedInstanceState != null) {
                 final String savedDir = savedInstanceState.getString(KEY_CURRENT_DIRECTORY);
-                if (!Utils.isEmpty(savedDir)) initialDirectory = savedDir;
+                if (!TextUtils.isEmpty(savedDir)) initialDirectory = savedDir;
             }
         }
 

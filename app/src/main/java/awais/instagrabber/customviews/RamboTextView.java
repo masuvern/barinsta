@@ -3,6 +3,7 @@ package awais.instagrabber.customviews;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
@@ -14,6 +15,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,14 +25,23 @@ import androidx.appcompat.widget.AppCompatTextView;
 import awais.instagrabber.R;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class RamboTextView extends AppCompatTextView {
+    private static final String TAG = "RamboTextView";
     private static final int highlightBackgroundSpanKey = R.id.tvComment;
     private static final RectF touchedLineBounds = new RectF();
     private ClickableSpan clickableSpanUnderTouchOnActionDown;
     private MentionClickListener mentionClickListener;
-    private boolean isUrlHighlighted, isExpandable, isExpanded;
+    private boolean isUrlHighlighted;
+    private boolean isExpandable;
+    private boolean isExpanded;
+    private OnLongClickListener longClickListener;
+
+    private final Handler handler = new Handler();
+    private final Runnable longPressRunnable = () -> {
+        if (longClickListener != null) longClickListener.onLongClick(this);
+    };
 
     public RamboTextView(final Context context) {
         super(context);
@@ -56,6 +67,12 @@ public final class RamboTextView extends AppCompatTextView {
         this.isExpanded = isExpanded;
     }
 
+    @Override
+    public void setOnLongClickListener(@Nullable final OnLongClickListener l) {
+        if (l == null) return;
+        this.longClickListener = l;
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(final MotionEvent event) {
@@ -71,33 +88,37 @@ public final class RamboTextView extends AppCompatTextView {
             final boolean isURLSpan = clickableSpanUnderTouch instanceof URLSpan;
 
             // feed view caption hacks
-            if (isExpandable && !touchStartedOverAClickableSpan)
-                return !isExpanded | super.onTouchEvent(event); // short operator, because we want two shits to work
+            // if (isExpandable && !touchStartedOverAClickableSpan)
+            //     return !isExpanded | super.onTouchEvent(event); // short operator, because we want two shits to work
 
             final Object tag = getTag();
             final FeedModel feedModel = tag instanceof FeedModel ? (FeedModel) tag : null;
 
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
+                    final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+                    handler.postDelayed(longPressRunnable, longPressTimeout);
                     if (feedModel != null) feedModel.setMentionClicked(false);
-                    if (clickableSpanUnderTouch != null) highlightUrl(clickableSpanUnderTouch, spanText);
-                    return isURLSpan ? super.onTouchEvent(event) : touchStartedOverAClickableSpan;
-
+                    if (clickableSpanUnderTouch != null) {
+                        highlightUrl(clickableSpanUnderTouch, spanText);
+                    }
+                    return super.onTouchEvent(event);
                 case MotionEvent.ACTION_UP:
+                    handler.removeCallbacks(longPressRunnable);
                     if (touchStartedOverAClickableSpan && clickableSpanUnderTouch == clickableSpanUnderTouchOnActionDown) {
                         dispatchUrlClick(spanText, clickableSpanUnderTouch);
                         if (feedModel != null) feedModel.setMentionClicked(true);
                     }
                     cleanupOnTouchUp(spanText);
-                    return isURLSpan ? super.onTouchEvent(event) : touchStartedOverAClickableSpan;
-
+                    return super.onTouchEvent(event);
                 case MotionEvent.ACTION_MOVE:
+                    // handler.removeCallbacks(longPressRunnable);
                     if (feedModel != null) feedModel.setMentionClicked(false);
                     if (clickableSpanUnderTouch != null) highlightUrl(clickableSpanUnderTouch, spanText);
                     else removeUrlHighlightColor(spanText);
-                    return isURLSpan ? super.onTouchEvent(event) : touchStartedOverAClickableSpan;
-
+                    return super.onTouchEvent(event);
                 case MotionEvent.ACTION_CANCEL:
+                    handler.removeCallbacks(longPressRunnable);
                     if (feedModel != null) feedModel.setMentionClicked(false);
                     cleanupOnTouchUp(spanText);
                     return super.onTouchEvent(event);
@@ -117,11 +138,11 @@ public final class RamboTextView extends AppCompatTextView {
             CharSequence subSequence = s.subSequence(start, s.getSpanEnd(clickableSpan));
 
             // for feed ellipsize
-            final int indexOfEllipsize = Utils.indexOfChar(subSequence, '…', 0);
+            final int indexOfEllipsize = TextUtils.indexOfChar(subSequence, '…', 0);
             if (indexOfEllipsize != -1)
                 subSequence = subSequence.subSequence(0, indexOfEllipsize - 1);
 
-            mentionClickListener.onClick(this, subSequence.toString(), ishHashtag);
+            mentionClickListener.onClick(this, subSequence.toString(), ishHashtag, false);
         }
     }
 
@@ -155,7 +176,9 @@ public final class RamboTextView extends AppCompatTextView {
     }
 
     @Nullable
-    private static ClickableSpan findClickableSpanUnderTouch(@NonNull final TextView textView, final Spannable text, @NonNull final MotionEvent event) {
+    private static ClickableSpan findClickableSpanUnderTouch(@NonNull final TextView textView,
+                                                             final Spanned text,
+                                                             @NonNull final MotionEvent event) {
         final int touchX = (int) (event.getX() - textView.getTotalPaddingLeft() + textView.getScrollX());
         final int touchY = (int) (event.getY() - textView.getTotalPaddingTop() + textView.getScrollY());
 
@@ -175,5 +198,9 @@ public final class RamboTextView extends AppCompatTextView {
         }
 
         return null;
+    }
+
+    public boolean isCaptionExpanded() {
+        return isExpanded;
     }
 }

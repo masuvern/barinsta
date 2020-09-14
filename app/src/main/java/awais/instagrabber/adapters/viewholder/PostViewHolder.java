@@ -1,23 +1,43 @@
 package awais.instagrabber.adapters.viewholder;
 
 import android.view.View;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.MultiSelectListAdapter.OnItemClickListener;
+import awais.instagrabber.adapters.MultiSelectListAdapter.OnItemLongClickListener;
+import awais.instagrabber.databinding.ItemPostBinding;
+import awais.instagrabber.models.PostModel;
+import awais.instagrabber.models.enums.MediaItemType;
 
 public final class PostViewHolder extends RecyclerView.ViewHolder {
-    public final ImageView postImage, typeIcon;
-    public final View selectedView, progressView, isDownloaded;
+    private final ItemPostBinding binding;
 
-    public PostViewHolder(@NonNull final View itemView) {
-        super(itemView);
-        typeIcon = itemView.findViewById(R.id.typeIcon);
-        postImage = itemView.findViewById(R.id.postImage);
-        isDownloaded = itemView.findViewById(R.id.isDownloaded);
-        selectedView = itemView.findViewById(R.id.selectedView);
-        progressView = itemView.findViewById(R.id.progressView);
+    public PostViewHolder(@NonNull final ItemPostBinding binding) {
+        super(binding.getRoot());
+        this.binding = binding;
+    }
+
+    public void bind(final PostModel postModel,
+                     final int position,
+                     final OnItemClickListener<PostModel> clickListener,
+                     final OnItemLongClickListener<PostModel> longClickListener) {
+        if (postModel == null) return;
+        postModel.setPosition(position);
+        itemView.setOnClickListener(v -> clickListener.onItemClick(postModel, position));
+        itemView.setOnLongClickListener(v -> longClickListener.onItemLongClick(postModel, position));
+
+        final MediaItemType itemType = postModel.getItemType();
+        final boolean isSlider = itemType == MediaItemType.MEDIA_TYPE_SLIDER;
+
+        binding.isDownloaded.setVisibility(postModel.isDownloaded() ? View.VISIBLE : View.GONE);
+
+        binding.typeIcon.setVisibility(itemType == MediaItemType.MEDIA_TYPE_VIDEO || isSlider ? View.VISIBLE : View.GONE);
+        binding.typeIcon.setImageResource(isSlider ? R.drawable.ic_slider_24 : R.drawable.ic_video_24);
+
+        binding.selectedView.setVisibility(postModel.isSelected() ? View.VISIBLE : View.GONE);
+        binding.postImage.setImageURI(postModel.getThumbnailUrl());
     }
 }

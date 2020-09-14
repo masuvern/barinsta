@@ -19,7 +19,8 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.CommentModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.TextUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -57,7 +58,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                 final int childCommentsLen = childCommentModels.length;
 
                 final CommentModel lastChild = childCommentModels[childCommentsLen - 1];
-                if (lastChild != null && lastChild.hasNextPage() && !Utils.isEmpty(lastChild.getEndCursor())) {
+                if (lastChild != null && lastChild.hasNextPage() && !TextUtils.isEmpty(lastChild.getEndCursor())) {
                     final CommentModel[] remoteChildComments = getChildComments(commentModel.getId());
                     commentModel.setChildCommentModels(remoteChildComments);
                     lastChild.setPageCursor(false, null);
@@ -94,12 +95,12 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
 
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) break;
                 else {
-                    final JSONObject data = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("data")
-                            .getJSONObject("comment").getJSONObject("edge_threaded_comments");
+                    final JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("data")
+                                                                                                 .getJSONObject("comment").getJSONObject("edge_threaded_comments");
 
                     final JSONObject pageInfo = data.getJSONObject("page_info");
                     endCursor = pageInfo.getString("end_cursor");
-                    if (Utils.isEmpty(endCursor)) endCursor = null;
+                    if (TextUtils.isEmpty(endCursor)) endCursor = null;
 
                     final JSONArray childComments = data.optJSONArray("edges");
                     if (childComments != null) {
@@ -158,12 +159,12 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
 
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) break;
                 else {
-                    final JSONObject parentComments = new JSONObject(Utils.readFromConnection(conn)).getJSONObject("data")
-                            .getJSONObject("shortcode_media").getJSONObject("edge_media_to_parent_comment");
+                    final JSONObject parentComments = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("data")
+                                                                                                           .getJSONObject("shortcode_media").getJSONObject("edge_media_to_parent_comment");
 
                     final JSONObject pageInfo = parentComments.getJSONObject("page_info");
                     endCursor = pageInfo.optString("end_cursor");
-                    if (Utils.isEmpty(endCursor)) endCursor = null;
+                    if (TextUtils.isEmpty(endCursor)) endCursor = null;
 
                     // final boolean containsToken = endCursor.contains("bifilter_token");
                     // if (!Utils.isEmpty(endCursor) && (containsToken || endCursor.contains("cached_comments_cursor"))) {
@@ -216,7 +217,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, CommentModel[]>
                             final boolean hasNextPage;
                             if ((tempJsonObject = tempJsonObject.optJSONObject("page_info")) != null) {
                                 childEndCursor = tempJsonObject.optString("end_cursor");
-                                hasNextPage = tempJsonObject.optBoolean("has_next_page", !Utils.isEmpty(childEndCursor));
+                                hasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
                             } else {
                                 childEndCursor = null;
                                 hasNextPage = false;

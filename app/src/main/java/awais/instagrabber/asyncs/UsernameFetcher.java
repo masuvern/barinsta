@@ -13,7 +13,7 @@ import java.net.URL;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 
 public final class UsernameFetcher extends AsyncTask<Void, Void, String> {
     private final FetchListener<String> fetchListener;
@@ -36,7 +36,7 @@ public final class UsernameFetcher extends AsyncTask<Void, Void, String> {
 
             final JSONObject user;
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK &&
-                    (user = new JSONObject(Utils.readFromConnection(conn)).optJSONObject(Constants.EXTRAS_USER)) != null)
+                    (user = new JSONObject(NetworkUtils.readFromConnection(conn)).optJSONObject(Constants.EXTRAS_USER)) != null)
                 result = user.getString(Constants.EXTRAS_USERNAME);
 
             conn.disconnect();

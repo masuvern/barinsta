@@ -6,13 +6,13 @@ public final class Constants {
     public static final String DATE_TIME_FORMAT = "date_time_format";
     public static final String DATE_TIME_SELECTION = "date_time_selection";
     public static final String CUSTOM_DATE_TIME_FORMAT = "date_time_custom_format";
+    public static final String APP_THEME = "app_theme_v19";
+    public static final String APP_LANGUAGE = "app_language_v19";
     // int prefs
-    public static final String APP_THEME = "app_theme";
-    public static final String APP_LANGUAGE = "app_language";
     public static final String PREV_INSTALL_VERSION = "prevVersion";
     // boolean prefs
     public static final String DOWNLOAD_USER_FOLDER = "download_user_folder";
-    public static final String BOTTOM_TOOLBAR = "bottom_toolbar";
+    // deprecated: public static final String BOTTOM_TOOLBAR = "bottom_toolbar";
     public static final String FOLDER_SAVE_TO = "saved_to";
     public static final String AUTOPLAY_VIDEOS = "autoplay_videos";
     public static final String MUTED_VIDEOS = "muted_videos";
@@ -22,8 +22,9 @@ public final class Constants {
     public static final String MARK_AS_SEEN = "mark_as_seen";
     public static final String DM_MARK_AS_SEEN = "dm_mark_as_seen";
     public static final String INSTADP = "instadp";
-    public static final String STORIESIG = "storiesig";
-    public static final String AMOLED_THEME = "amoled_theme";
+    // deprecated: public static final String STORIESIG = "storiesig";
+    public static final String STORY_VIEWER = "story_viewer";
+    // deprecated: public static final String AMOLED_THEME = "amoled_theme";
     public static final String CHECK_ACTIVITY = "check_activity";
     public static final String CHECK_UPDATES = "check_updates";
     // never Export
@@ -66,4 +67,18 @@ public final class Constants {
             "\"gyroscope\", \"value\": \"gyroscope_enabled\" } ]";
     public static final String SIGNATURE_VERSION = "4";
     public static final String SIGNATURE_KEY = "9193488027538fd3450b83b7d05286d4ca9599a0f7eeed90d8c85925698a05dc";
+    public static final String BREADCRUMB_KEY = "iN4$aGr0m";
+    public static final int LOGIN_RESULT_CODE = 5000;
+    public static final String FDROID_SHA1_FINGERPRINT = "C1661EB8FD09F618307E687786D5E5056F65084D";
+    public static final String SKIPPED_VERSION = "skipped_version";
+    public static final String DEFAULT_TAB = "default_tab";
+    public static final String ACTIVITY_CHANNEL_ID = "activity";
+    public static final String DOWNLOAD_CHANNEL_ID = "download";
+    public static final String ACTIVITY_CHANNEL_NAME = "Activity";
+    public static final String DOWNLOAD_CHANNEL_NAME = "Downloads";
+    public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
+    public static final int ACTIVITY_NOTIFICATION_ID = 1800000000;
+    public static final String ACTION_SHOW_ACTIVITY = "show_activity";
+    public static final String PREF_DARK_THEME = "dark_theme";
+    public static final String PREF_LIGHT_THEME = "light_theme";
 }

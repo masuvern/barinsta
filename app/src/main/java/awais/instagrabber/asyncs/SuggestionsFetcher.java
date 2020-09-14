@@ -17,8 +17,8 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.UrlEncoder;
-import awais.instagrabber.utils.Utils;
 
 public final class SuggestionsFetcher extends AsyncTask<String, String, SuggestionModel[]> {
     private final FetchListener<SuggestionModel[]> fetchListener;
@@ -43,7 +43,7 @@ public final class SuggestionsFetcher extends AsyncTask<String, String, Suggesti
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 final String defaultHashTagPic = "https://www.instagram.com/static/images/hashtag/search-hashtag-default-avatar.png/1d8417c9a4f5.png";
-                final JSONObject jsonObject = new JSONObject(Utils.readFromConnection(conn));
+                final JSONObject jsonObject = new JSONObject(NetworkUtils.readFromConnection(conn));
                 conn.disconnect();
 
                 final JSONArray usersArray = jsonObject.getJSONArray("users");
@@ -75,9 +75,9 @@ public final class SuggestionsFetcher extends AsyncTask<String, String, Suggesti
 
                     // name
                     suggestionModels.add(new SuggestionModel(false,
-                            place.getJSONObject("location").getString("pk")+"/"+place.getString("slug"),
+                            place.getJSONObject("location").getString("pk"),  // +"/"+place.getString("slug"),
                             place.getString("title"),
-                            place.optString("profile_pic_url", null),
+                            place.optString("profile_pic_url"),
                             SuggestionType.TYPE_LOCATION,
                             placesArrayJSONObject.optInt("position", suggestionModels.size() - 1)));
                 }

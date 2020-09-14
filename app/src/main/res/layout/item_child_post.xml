@@ -12,10 +12,9 @@
     android:layout_marginBottom="4dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:selectableItemBackground"
-    tools:viewBindingIgnore="true">
+    android:foreground="?android:selectableItemBackground">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -25,7 +24,9 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:visibility="gone"
-        app:srcCompat="@drawable/downloaded" />
+        app:srcCompat="@drawable/ic_cloud_download_24"
+        app:tint="@color/green_400"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/selectedView"

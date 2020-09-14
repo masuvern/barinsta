@@ -11,7 +11,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.BaseLanguageActivity;
@@ -23,6 +22,7 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 
 public final class MultiDirectDialog extends BaseLanguageActivity {
@@ -47,7 +47,7 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
             return;
         }
 
-        username = postModels[0].getUsername();
+        username = postModels[0].getProfileModel().getUsername();
         toolbar.setTitle(username);
         toolbar.setSubtitle(postModels[0].getShortCode());
 
@@ -62,31 +62,31 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
                     postModel.getSliderDisplayUrl(), postModel.getShortCode(), postModel.getPostCaption(), postModel.getTimestamp(),
                     postModel.getLike(), postModel.getBookmark(), postModel.getLikes()));
 
-        postsAdapter = new PostsAdapter(models, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                final PostModel postModel = (PostModel) tag;
-                if (postsAdapter.isSelecting) toggleSelection(postModel);
-                else {
-                    Utils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(postModel));
-                    finish();
-                }
-            }
-        }, v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof PostModel) {
-                postsAdapter.isSelecting = true;
-                toggleSelection((PostModel) tag);
-            }
-            return true;
-        });
+        // postsAdapter = new PostsAdapter(models, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         final PostModel postModel = (PostModel) tag;
+        //         if (postsAdapter.isSelecting) toggleSelection(postModel);
+        //         else {
+        //             Utils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, Collections.singletonList(postModel));
+        //             finish();
+        //         }
+        //     }
+        // }, v -> {
+        //     final Object tag = v.getTag();
+        //     if (tag instanceof PostModel) {
+        //         postsAdapter.isSelecting = true;
+        //         toggleSelection((PostModel) tag);
+        //     }
+        //     return true;
+        // });
 
         recyclerView.setAdapter(postsAdapter);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        Utils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, selectedItems);
+        DownloadUtils.batchDownload(this, username, DownloadMethod.DOWNLOAD_DIRECT, selectedItems);
         finish();
         return true;
     }
@@ -109,10 +109,10 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
     }
 
     private void notifyAdapter(final PostModel postModel) {
-        if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
-        if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
-        else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
-
-        if (btnDownload != null) btnDownload.setVisible(postsAdapter.isSelecting);
+        // if (selectedItems.size() < 1) postsAdapter.isSelecting = false;
+        // if (postModel.getPosition() < 0) postsAdapter.notifyDataSetChanged();
+        // else postsAdapter.notifyItemChanged(postModel.getPosition(), postModel);
+        //
+        // if (btnDownload != null) btnDownload.setVisible(postsAdapter.isSelecting);
     }
 }

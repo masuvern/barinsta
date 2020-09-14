@@ -14,7 +14,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 import awaisomereport.LogCollector.LogFile;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -39,7 +39,7 @@ public final class FeedStoriesFetcher extends AsyncTask<Void, Void, FeedStoryMod
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONArray feedStoriesReel = new JSONObject(Utils.readFromConnection(conn))
+                final JSONArray feedStoriesReel = new JSONObject(NetworkUtils.readFromConnection(conn))
                         .getJSONObject("data")
                         .getJSONObject(Constants.EXTRAS_USER)
                         .getJSONObject("feed_reels_tray")

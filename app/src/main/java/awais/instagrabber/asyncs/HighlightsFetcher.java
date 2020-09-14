@@ -8,27 +8,29 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 
-public final class HighlightsFetcher extends AsyncTask<Void, Void, HighlightModel[]> {
+public final class HighlightsFetcher extends AsyncTask<Void, Void, List<HighlightModel>> {
     private final String id;
     private final boolean storiesig;
-    private final FetchListener<HighlightModel[]> fetchListener;
+    private final FetchListener<List<HighlightModel>> fetchListener;
 
-    public HighlightsFetcher(final String id, final boolean storiesig, final FetchListener<HighlightModel[]> fetchListener) {
+    public HighlightsFetcher(final String id, final boolean storiesig, final FetchListener<List<HighlightModel>> fetchListener) {
         this.id = id;
         this.storiesig = storiesig;
         this.fetchListener = fetchListener;
     }
 
     @Override
-    protected HighlightModel[] doInBackground(final Void... voids) {
-        HighlightModel[] result = null;
+    protected List<HighlightModel> doInBackground(final Void... voids) {
+        List<HighlightModel> result = null;
         String url = "https://" + (storiesig ? "storiesig" : "i.instagram") + ".com/api/v1/highlights/" + id + "/highlights_tray/";
 
         try {
@@ -39,20 +41,21 @@ public final class HighlightsFetcher extends AsyncTask<Void, Void, HighlightMode
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONArray highlightsReel = new JSONObject(Utils.readFromConnection(conn)).getJSONArray("tray");
+                final JSONArray highlightsReel = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONArray("tray");
 
                 final int length = highlightsReel.length();
-                final HighlightModel[] highlightModels = new HighlightModel[length];
-                final String[] highlightIds = new String[length];
+                final List<HighlightModel> highlightModels = new ArrayList<>();
+                // final String[] highlightIds = new String[length];
                 for (int i = 0; i < length; ++i) {
                     final JSONObject highlightNode = highlightsReel.getJSONObject(i);
-                    highlightModels[i] = new HighlightModel(
+                    highlightModels.add(new HighlightModel(
                             highlightNode.getString("title"),
                             highlightNode.getString(Constants.EXTRAS_ID),
-                            highlightNode.getJSONObject("cover_media").getJSONObject("cropped_image_version").getString("url")
-                    );
+                            highlightNode.getJSONObject("cover_media")
+                                         .getJSONObject("cropped_image_version")
+                                         .getString("url")
+                    ));
                 }
-
                 conn.disconnect();
                 result = highlightModels;
             }
@@ -66,7 +69,7 @@ public final class HighlightsFetcher extends AsyncTask<Void, Void, HighlightMode
     }
 
     @Override
-    protected void onPostExecute(final HighlightModel[] result) {
+    protected void onPostExecute(final List<HighlightModel> result) {
         if (fetchListener != null) fetchListener.onResult(result);
     }
 }

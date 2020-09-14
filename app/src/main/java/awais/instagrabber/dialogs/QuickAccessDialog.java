@@ -21,10 +21,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.ArrayList;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.Main;
 import awais.instagrabber.adapters.SimpleAdapter;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DataBox;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -59,7 +61,7 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         btnFavorite = contentView.findViewById(R.id.btnFavorite);
         btnImportExport = contentView.findViewById(R.id.importExport);
 
-        isQuery = !Utils.isEmpty(userQuery);
+        isQuery = !TextUtils.isEmpty(userQuery);
         btnFavorite.setVisibility(isQuery ? View.VISIBLE : View.GONE);
         Utils.setTooltipText(btnImportExport, R.string.import_export);
 
@@ -76,12 +78,12 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
         rvFavorites.setAdapter(favoritesAdapter);
 
         final String cookieStr = settingsHelper.getString(Constants.COOKIE);
-        if (!Utils.isEmpty(cookieStr)
+        if (!TextUtils.isEmpty(cookieStr)
                 || Utils.dataBox.getCookieCount() > 0 // fallback for export / import
         ) {
             rvQuickAccess.addItemDecoration(itemDecoration);
             final ArrayList<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
-            if (!Utils.isEmpty(cookieStr) && allCookies != null) {
+            if (!TextUtils.isEmpty(cookieStr) && allCookies != null) {
                 for (final DataBox.CookieModel cookie : allCookies) {
                     if (cookieStr.equals(cookie.getCookie())) {
                         cookie.setSelected(true);
@@ -107,21 +109,21 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
                 favoritesAdapter.setItems(Utils.dataBox.getAllFavorites());
             }
         } else if (v == btnImportExport) {
-            if (ContextCompat.checkSelfPermission(activity, Utils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
-                requestPermissions(Utils.PERMS, 6007);
+            if (ContextCompat.checkSelfPermission(activity, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_DENIED)
+                requestPermissions(DownloadUtils.PERMS, 6007);
             else Utils.showImportExportDialog(v.getContext());
 
         } else if (tag instanceof DataBox.FavoriteModel) {
-            if (Main.scanHack != null) {
-                Main.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
-                dismiss();
-            }
+            // if (MainActivityBackup.scanHack != null) {
+            //     MainActivityBackup.scanHack.onResult(((DataBox.FavoriteModel) tag).getQuery());
+            //     dismiss();
+            // }
 
         } else if (tag instanceof DataBox.CookieModel) {
             final DataBox.CookieModel cookieModel = (DataBox.CookieModel) tag;
             if (!cookieModel.isSelected()) {
                 settingsHelper.putString(Constants.COOKIE, cookieModel.getCookie());
-                Utils.setupCookies(cookieModel.getCookie());
+                CookieUtils.setupCookies(cookieModel.getCookie());
                 cookieChanged = true;
             }
             dismiss();
@@ -139,8 +141,8 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
                 Utils.dataBox.delFavorite(favoriteModel);
                 favoritesAdapter.setItems(Utils.dataBox.getAllFavorites());
             })
-            .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
-            favoriteModel.getQuery())).show();
+                                             .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
+                                                                                                        favoriteModel.getQuery())).show();
 
         } else if (tag instanceof DataBox.CookieModel) {
             final DataBox.CookieModel cookieModel = (DataBox.CookieModel) tag;
@@ -148,12 +150,14 @@ public final class QuickAccessDialog extends BottomSheetDialogFragment implement
             if (cookieModel.isSelected())
                 Toast.makeText(v.getContext(), R.string.quick_access_cannot_delete_curr, Toast.LENGTH_SHORT).show();
             else
-                new AlertDialog.Builder(activity).setPositiveButton(R.string.yes, (d, which) -> {
-                    Utils.dataBox.delUserCookie(cookieModel);
-                    rvQuickAccess.findViewWithTag(cookieModel).setVisibility(View.GONE);
-                })
-                        .setNegativeButton(R.string.no, null).setMessage(getString(R.string.quick_access_confirm_delete,
-                        cookieModel.getUsername())).show();
+                new AlertDialog.Builder(activity)
+                        .setMessage(getString(R.string.quick_access_confirm_delete, cookieModel.getUsername()))
+                        .setPositiveButton(R.string.yes, (d, which) -> {
+                            Utils.dataBox.delUserCookie(cookieModel);
+                            rvQuickAccess.findViewWithTag(cookieModel).setVisibility(View.GONE);
+                        })
+                        .setNegativeButton(R.string.no, null)
+                        .show();
         }
 
         return true;

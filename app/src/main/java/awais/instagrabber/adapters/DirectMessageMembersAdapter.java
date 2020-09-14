@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,52 +7,37 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.List;
 
-import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.FollowsViewHolder;
+import awais.instagrabber.databinding.ItemFollowBinding;
 import awais.instagrabber.models.ProfileModel;
 
-public final class DirectMessageMembersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public final class DirectMessageMembersAdapter extends RecyclerView.Adapter<FollowsViewHolder> {
     private final ProfileModel[] profileModels;
     private final List<Long> admins;
     private final View.OnClickListener onClickListener;
-    private final LayoutInflater layoutInflater;
 
-    public DirectMessageMembersAdapter(final ProfileModel[] profileModels, final List<Long> admins,
-                                       final Context context, final View.OnClickListener onClickListener) {
+    public DirectMessageMembersAdapter(final ProfileModel[] profileModels,
+                                       final List<Long> admins,
+                                       final View.OnClickListener onClickListener) {
         this.profileModels = profileModels;
         this.admins = admins;
-        this.layoutInflater = LayoutInflater.from(context);
         this.onClickListener = onClickListener;
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-        final View view = layoutInflater.inflate(R.layout.item_follow, parent, false);
-        return new FollowsViewHolder(view);
+    public FollowsViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+        final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        final ItemFollowBinding binding = ItemFollowBinding.inflate(layoutInflater, parent, false);
+        return new FollowsViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final FollowsViewHolder holder, final int position) {
         final ProfileModel model = profileModels[position];
-
-        final FollowsViewHolder followHolder = (FollowsViewHolder) holder;
-        if (model != null) {
-            followHolder.itemView.setTag(model);
-            followHolder.itemView.setOnClickListener(onClickListener);
-
-            followHolder.tvUsername.setText(model.getUsername());
-            followHolder.tvFullName.setText(model.getName());
-
-            if (admins != null && admins.contains(Long.parseLong(model.getId())))
-                followHolder.isAdmin.setVisibility(View.VISIBLE);
-
-            Glide.with(layoutInflater.getContext()).load(model.getSdProfilePic()).into(followHolder.profileImage);
-        }
+        holder.bind(model, admins, onClickListener);
     }
 
     @Override

@@ -4,8 +4,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.bumptech.glide.Glide;
-
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmProfileBinding;
 import awais.instagrabber.models.ProfileModel;
@@ -27,9 +25,8 @@ public class DirectMessageProfileViewHolder extends DirectMessageItemViewHolder 
     @Override
     public void bindItem(final DirectItemModel directItemModel) {
         final ProfileModel profileModel = directItemModel.getProfileModel();
-        Glide.with(binding.profileInfo)
-                .load(profileModel.getSdProfilePic())
-                .into(binding.profileInfo);
+        if (profileModel == null) return;
+        binding.profileInfo.setImageURI(profileModel.getSdProfilePic());
         binding.btnOpenProfile.setTag(profileModel);
         binding.tvFullName.setText(profileModel.getName());
         binding.profileInfoText.setText(profileModel.getUsername());

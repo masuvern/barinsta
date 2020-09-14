@@ -55,7 +55,7 @@
     <item
         android:id="@+id/action_search"
         android:actionLayout="@layout/layout_searchview"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/ic_search_24"
         android:title="@string/action_search"
         android:titleCondensed="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"

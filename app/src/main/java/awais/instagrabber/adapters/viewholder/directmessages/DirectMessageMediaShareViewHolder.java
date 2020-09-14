@@ -34,11 +34,13 @@ public class DirectMessageMediaShareViewHolder extends DirectMessageItemViewHold
         final DirectItemMediaModel mediaModel = directItemModel.getMediaModel();
         final ProfileModel modelUser = mediaModel.getUser();
         if (modelUser != null) {
-            binding.tvMessage.setText(HtmlCompat.fromHtml("<small>" + context.getString(R.string.dms_inbox_media_shared_from, modelUser.getUsername()) + "</small>", FROM_HTML_MODE_COMPACT));
+            binding.tvMessage.setText(HtmlCompat.fromHtml(
+                    "<small>" + context.getString(R.string.dms_inbox_media_shared_from, modelUser.getUsername()) + "</small>",
+                    FROM_HTML_MODE_COMPACT));
         }
-        getGlideRequestManager().load(mediaModel.getThumbUrl()).into(binding.ivMediaPreview);
+        binding.ivMediaPreview.setImageURI(mediaModel.getThumbUrl());
         final MediaItemType modelMediaType = mediaModel.getMediaType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO
-                || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
+                                               || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
     }
 }

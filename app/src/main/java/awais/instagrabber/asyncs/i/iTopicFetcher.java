@@ -14,7 +14,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.DiscoverTopicModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -39,7 +39,7 @@ public final class iTopicFetcher extends AsyncTask<Void, Void, DiscoverTopicMode
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject body = new JSONObject(Utils.readFromConnection(conn));
+                final JSONObject body = new JSONObject(NetworkUtils.readFromConnection(conn));
 
                 final JSONArray edges = body.getJSONArray("clusters");
                 String[] names = new String[edges.length()], ids = new String[edges.length()];
