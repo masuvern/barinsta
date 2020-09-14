@@ -5,9 +5,9 @@
 
 ## Contributing
 
-Thank you for your interest in InstaGrabber!
+Thank you for your interest in Barinsta!
 
-Our vision of InstaGrabber is an open source true alternative of the official Instagram app. It is Austin's pursuit of a libre life that lead him to this app during its abandonment, and it was one unresolved bug that made him have the enthusiasm in implementing numerous features for this app, despite having 0 knowledge of Java beforehand.
+Our vision is an open source true alternative of the official Instagram app. It is Austin's pursuit of a libre life that lead him to this app during its abandonment, and it was one unresolved bug that made him have the enthusiasm in implementing numerous features for this app, despite having 0 knowledge of Java beforehand.
 
 As we grow in popularity, it becomes apparent that we are short on hands. Every contribution counts!
 
@@ -23,26 +23,7 @@ Check errors are for reference only. Try to minimize them, but usually they don'
 
 **NEVER touch the l10n-master branch.** It's automatically managed by Crowdin.
 
-### Structure
-
-It is preferred that you read the scripts yourself, as my understanding (and presentation) may be basic.
-
-* `awais.instagrabber`
-  * `activities`: Scripts directly binding to each view. Assigns `adapters`.
-  * `adapters`: Scripts used to present a list of `models` from `asyncs` into `activities`.
-    * Those inside `viewholder` are for frontend, while others are for backend.
-  * `asyncs`: Scripts used to communicate with Instagram. Returns `models` which is sent to `adapters`.
-    * `asyncs.i`: Scripts that fetch data from `i.instagram.com`, except DM.
-    * `asyncs.direct_messages`: As the name suggests, communication scripts used for DM.
-  * `customviews`: Custom frontend components for this app.
-  * `dialogs`: Scripts directly binding to dialogs (i.e. those that are nested in the main view).
-  * `fragments.directmessages`: Scripts directly binding to each fragment ("small views") within `DirectMessageActivity` in `activities`.
-  * `interfaces`: Custom backend components for this app.
-  * `models`: Data structure for Instagram API responses from `asyncs`.
-  * `utils`: Various tools.
-  * `MainHelper.java` is basically an extension of `activities.main`.
-* `awaisomereport`: Crash reporter. Shouldn not require too much maintenance.
-* `thoughtbot.expandableadapter`: These are for the follower comparison view, which allows grouping users.
+The legacy branch is no longer maintained.
 
 ### I can't code Java, but I want to!
 
@@ -68,6 +49,6 @@ You can...
 
 * translate it [![badge](https://badges.crowdin.net/instagrabber/localized.svg)](https://crowdin.com/project/instagrabber)
 * promote it (reddit [r/AndroidApps](https://www.reddit.com/r/androidapps/comments/i30tpp/instagrabber_an_open_source_instagram_client/), YouTube [HowToMen](https://www.youtube.com/watch?v=1Um2ZJG_mB4), [Ekşi Sözlük](https://eksisozluk.com/instagrabber--6643143))
-* star it [![stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://github.com/austinhuang0131/instagrabber/stargazers)
+* star it [![stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://github.com/austinhuang0131/barinsta/stargazers)
 
 Happy contributing!

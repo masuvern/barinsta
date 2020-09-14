@@ -42,6 +42,33 @@
       ]
     },
     {
+      "login": "snajdovski",
+      "name": "Stefan Najdovski",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/42580385?v=4",
+      "profile": "https://stefannajdovski.com/",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "aypie",
+      "name": "Alex Potterson",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/57075012?v=4",
+      "profile": "http://aypie.design/",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "KevinNThomas",
+      "name": "Kevin Thomas",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/15370181",
+      "profile": "http://kevinthomas.dev",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
       "login": "Shadowspear123",
       "name": "Shadowspear123",
       "avatar_url": "https://avatars1.githubusercontent.com/u/50462281",
@@ -52,15 +79,6 @@
         "ideas",
         "question",
         "userTesting"
-      ]
-    },
-    {
-      "login": "KevinNThomas",
-      "name": "Kevin Thomas",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/15370181",
-      "profile": "http://kevinthomas.dev",
-      "contributions": [
-        "financial"
       ]
     },
     {
@@ -80,6 +98,15 @@
       "profile": "https://github.com/Galang23",
       "contributions": [
         "question",
+        "translation"
+      ]
+    },
+    {
+      "login": "farzadx",
+      "name": "farzadx",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/70059397?v=4",
+      "profile": "https://github.com/farzadx",
+      "contributions": [
         "translation"
       ]
     },
