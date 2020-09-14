@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog</item>
-        <item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>
-    </style>
-
     <style name="CompletelyTransparent" parent="Theme.AppCompat.NoActionBar">
         <item name="android:background">@null</item>
         <item name="android:backgroundDimEnabled">false</item>
@@ -28,10 +23,89 @@
         <item name="android:windowActionBar">false</item>
     </style>
 
-    <style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog" />
+    <!--<style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog" />-->
 
-    <style name="AppTheme.WindowAnimationTransition">
-        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    <!--<style name="AppTheme.WindowAnimationTransition">-->
+    <!--    <item name="android:windowEnterAnimation">@android:anim/fade_in</item>-->
+    <!--    <item name="android:windowExitAnimation">@android:anim/fade_out</item>-->
+    <!--</style>-->
+
+    <style name="AppTheme.BottomNavigationView" parent="@style/Widget.MaterialComponents.BottomNavigationView.PrimarySurface">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomNavigationView" parent="" />
+
+    <style name="Widget.AppTheme.Toolbar.PrimarySurface" parent="Widget.MaterialComponents.Toolbar.PrimarySurface" />
+
+    <!--<style name="ThemeOverlay.AppTheme.Dark.ActionBar" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />-->
+
+    <style name="Widget.App.ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="background">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.BottomNavigationView.Light.White" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="colorPrimary">@color/black</item>
+    </style>
+
+    <style name="Widget.BottomNavigationView.Dark.Black" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="colorPrimary">@color/white</item>
+    </style>
+
+    <style name="Widget.BottomNavigationView.Light.Barinsta" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="colorPrimary">@color/barinstaColorPrimary</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.Button.Light.White" parent="Widget.MaterialComponents.Button">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Button.Dark.Black</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.Button.Dark.Black" parent="Widget.MaterialComponents.Button">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Button.Dark.Black</item>
+    </style>
+
+    <style name="ThemeOverlay.Button.Dark.Black" parent="">
+        <item name="colorPrimary">@color/white</item>
+    </style>
+
+    <style name="Widget.Dialog.Dark.Black" parent="@style/Theme.AppCompat.Dialog">
+        <item name="android:background">@color/grey_800</item>
+    </style>
+
+    <style name="Widget.AlertDialog.Dark.Black" parent="@style/Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">@color/grey_800</item>
+    </style>
+
+    <style name="Widget.AppCompat.CompoundButton.Switch.Dark.Black" parent="@style/Widget.AppCompat.CompoundButton.Switch">
+        <item name="trackTint">@color/grey_800</item>
+        <item name="colorControlActivated">@color/blue_900</item>
+    </style>
+
+    <style name="ThemeOverlay.Switch.Dark.Black" parent="">
+        <item name="colorOnSurface">@color/grey_800</item>
+    </style>
+
+    <style name="Widget.AppCompat.ListView.DropDown.Dark.Black" parent="Widget.AppCompat.ListView.DropDown">
+        <item name="android:background">@color/grey_800</item>
+    </style>
+
+    <style name="PreferenceFragmentCompatStyle.Dark.Black" parent="PreferenceFragment.Material">
+        <item name="android:divider">@drawable/pref_list_divider_material</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.Toolbar.Light.Barinsta" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MaterialComponents.ActionBar.Light.Barinsta</item>
+    </style>
+
+    <style name="ThemeOverlay.MaterialComponents.ActionBar.Light.Barinsta" parent="ThemeOverlay.MaterialComponents.ActionBar.Primary">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="android:textColorHint">@color/brown_600</item>
+    </style>
+
+    <style name="PreferenceFragmentCompatStyle.Dark.MaterialDark" parent="PreferenceFragment.Material">
+        <item name="android:background">?colorSurface</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
     </style>
 </resources>

@@ -19,12 +19,16 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
+    private static final String TAG = "FeedFetcher";
+
     private static final int maxItemsToLoad = 25; // max is 50, but that's too many posts, setting more than 30 is gay
     private final String endCursor;
     private final FetchListener<FeedModel[]> fetchListener;
@@ -61,8 +65,10 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
             final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
 
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject timelineFeed = new JSONObject(Utils.readFromConnection(urlConnection)).getJSONObject("data")
-                        .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_web_feed_timeline");
+                final String json = NetworkUtils.readFromConnection(urlConnection);
+                // Log.d(TAG, json);
+                final JSONObject timelineFeed = new JSONObject(json).getJSONObject("data")
+                                                                    .getJSONObject(Constants.EXTRAS_USER).getJSONObject("edge_web_feed_timeline");
 
                 final String endCursor;
                 final boolean hasNextPage;
@@ -83,30 +89,41 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                 for (int i = 0; i < feedLen; ++i) {
                     final JSONObject feedItem = feedItems.getJSONObject(i).getJSONObject("node");
                     final String mediaType = feedItem.optString("__typename");
-                    if (mediaType.isEmpty() || "GraphSuggestedUserFeedUnit".equals(mediaType)) continue;
+                    if (mediaType.isEmpty() || "GraphSuggestedUserFeedUnit".equals(mediaType))
+                        continue;
 
                     final boolean isVideo = feedItem.optBoolean("is_video");
                     final long videoViews = feedItem.optLong("video_view_count", 0);
 
                     final String displayUrl = feedItem.optString("display_url");
-                    if (Utils.isEmpty(displayUrl)) continue;
+                    if (TextUtils.isEmpty(displayUrl)) continue;
                     final String resourceUrl;
 
                     if (isVideo) resourceUrl = feedItem.getString("video_url");
-                    else resourceUrl = feedItem.has("display_resources") ? Utils.getHighQualityImage(feedItem) : displayUrl;
+                    else
+                        resourceUrl = feedItem.has("display_resources") ? ResponseBodyUtils.getHighQualityImage(feedItem) : displayUrl;
 
                     ProfileModel profileModel = null;
                     if (feedItem.has("owner")) {
                         final JSONObject owner = feedItem.getJSONObject("owner");
-                        profileModel = new ProfileModel(owner.optBoolean("is_private"),
+                        profileModel = new ProfileModel(
+                                owner.optBoolean("is_private"),
                                 false, // if you can see it then you def follow
                                 owner.optBoolean("is_verified"),
                                 owner.getString(Constants.EXTRAS_ID),
                                 owner.getString(Constants.EXTRAS_USERNAME),
                                 owner.optString("full_name"),
-                                null, null,
+                                null,
+                                null,
                                 owner.getString("profile_pic_url"),
-                                null, 0, 0, 0, false, false, false, false);
+                                null,
+                                0,
+                                0,
+                                0,
+                                false,
+                                false,
+                                false,
+                                false);
                     }
 
                     JSONObject tempJsonObject = feedItem.optJSONObject("edge_media_preview_comment");
@@ -122,7 +139,21 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                             captionText = tempJsonObject.getString("text");
                     }
 
-                    final FeedModel feedModel = new FeedModel(profileModel,
+                    final JSONObject location = feedItem.optJSONObject("location");
+                    // Log.d(TAG, "location: " + (location == null ? null : location.toString()));
+                    String locationId = null;
+                    String locationName = null;
+                    if (location != null) {
+                        locationName = location.optString("name");
+                        if (location.has("id")) {
+                            locationId = location.getString("id");
+                        } else if (location.has("pk")) {
+                            locationId = location.getString("pk");
+                        }
+                        // Log.d(TAG, "locationId: " + locationId);
+                    }
+                    final FeedModel feedModel = new FeedModel(
+                            profileModel,
                             isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                             videoViews,
                             feedItem.getString(Constants.EXTRAS_ID),
@@ -135,7 +166,8 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                             feedItem.getBoolean("viewer_has_liked"),
                             feedItem.getBoolean("viewer_has_saved"),
                             feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
-                            feedItem.optJSONObject("location"));
+                            locationName,
+                            locationId);
 
                     final boolean isSlider = "GraphSidecar".equals(mediaType) && feedItem.has("edge_sidecar_to_children");
 
@@ -154,14 +186,17 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
                                     sliderItems[j] = new ViewerPostModel(
                                             isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                             node.getString(Constants.EXTRAS_ID),
-                                            isChildVideo ? node.getString("video_url") : Utils.getHighQualityImage(node),
-                                            null, null, null,
-                                            node.optLong("video_view_count", -1), -1, false, false,
+                                            isChildVideo ? node.getString("video_url") : ResponseBodyUtils.getHighQualityImage(node),
+                                            null,
+                                            null,
+                                            null,
+                                            node.optLong("video_view_count", -1),
+                                            -1,
+                                            false,
+                                            false,
                                             feedItem.getJSONObject("edge_media_preview_like").getLong("count"),
-                                            feedItem.isNull("location") ? null : feedItem.getJSONObject("location").optString("name"),
-                                            feedItem.isNull("location") ? null :
-                                                    (feedItem.getJSONObject("location").optString("id") + "/" +
-                                                            feedItem.getJSONObject("location").optString("slug")));
+                                            locationName,
+                                            locationId);
 
                                     sliderItems[j].setSliderDisplayUrl(node.getString("display_url"));
                                 }
@@ -187,7 +222,9 @@ public final class FeedFetcher extends AsyncTask<Void, Void, FeedModel[]> {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_FEED_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) {
+                Log.e(TAG, "", e);
+            }
         }
 
         return result;

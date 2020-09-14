@@ -1,59 +1,51 @@
 package awais.instagrabber.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 
-import com.bumptech.glide.Glide;
-
-import awais.instagrabber.R;
-import awais.instagrabber.adapters.viewholder.HighlightViewHolder;
+import awais.instagrabber.adapters.viewholder.FeedStoryViewHolder;
+import awais.instagrabber.databinding.ItemHighlightBinding;
 import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.ProfileModel;
 
-public final class FeedStoriesAdapter extends RecyclerView.Adapter<HighlightViewHolder> {
-    private final View.OnClickListener clickListener;
-    private LayoutInflater layoutInflater;
-    private FeedStoryModel[] feedStoryModels;
+public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedStoryViewHolder> {
+    private final OnFeedStoryClickListener listener;
 
-    public FeedStoriesAdapter(final FeedStoryModel[] feedStoryModels, final View.OnClickListener clickListener) {
-        this.feedStoryModels = feedStoryModels;
-        this.clickListener = clickListener;
+    private static final DiffUtil.ItemCallback<FeedStoryModel> diffCallback = new DiffUtil.ItemCallback<FeedStoryModel>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull final FeedStoryModel oldItem, @NonNull final FeedStoryModel newItem) {
+            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull final FeedStoryModel oldItem, @NonNull final FeedStoryModel newItem) {
+            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId());
+        }
+    };
+
+    public FeedStoriesAdapter(final OnFeedStoryClickListener listener) {
+        super(diffCallback);
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public HighlightViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-        if (layoutInflater == null) layoutInflater = LayoutInflater.from(parent.getContext());
-        return new HighlightViewHolder(layoutInflater.inflate(R.layout.item_highlight, parent, false));
+    public FeedStoryViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+        final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        final ItemHighlightBinding binding = ItemHighlightBinding.inflate(layoutInflater, parent, false);
+        return new FeedStoryViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final HighlightViewHolder holder, final int position) {
-        final FeedStoryModel feedStoryModel = feedStoryModels[position];
-        if (feedStoryModel != null) {
-            holder.itemView.setTag(feedStoryModel);
-            holder.itemView.setOnClickListener(clickListener);
-
-            final ProfileModel profileModel = feedStoryModel.getProfileModel();
-
-            holder.title.setText(profileModel.getUsername());
-            Glide.with(layoutInflater.getContext()).load(profileModel.getSdProfilePic()).into(holder.icon);
-            holder.icon.setAlpha(feedStoryModel.getFullyRead() ? 0.5F : 1.0F);
-            holder.title.setAlpha(feedStoryModel.getFullyRead() ? 0.5F : 1.0F);
-        }
+    public void onBindViewHolder(@NonNull final FeedStoryViewHolder holder, final int position) {
+        final FeedStoryModel model = getItem(position);
+        holder.bind(model, position, listener);
     }
 
-    public void setData(final FeedStoryModel[] feedStoryModels) {
-        this.feedStoryModels = feedStoryModels;
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public int getItemCount() {
-        return feedStoryModels == null ? 0 : feedStoryModels.length;
+    public interface OnFeedStoryClickListener {
+        void onFeedStoryClick(FeedStoryModel model, int position);
     }
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/post_view_nav_graph"
+    app:startDestination="@id/postViewFragment">
+
+    <include app:graph="@navigation/hashtag_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_hashTagFragment"
+        app:destination="@id/hashtag_nav_graph">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+    <!--<include app:graph="@navigation/profile_nav_graph" />-->
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="true" />
+    </action>
+
+    <include app:graph="@navigation/location_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/location_nav_graph">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <action
+        android:id="@+id/action_global_commentsViewerFragment"
+        app:destination="@id/comments_nav_graph">
+        <argument
+            android:name="shortCode"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewFragment"
+        tools:layout="@layout/item_full_post_view">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/postViewFragment">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
+
+</navigation>

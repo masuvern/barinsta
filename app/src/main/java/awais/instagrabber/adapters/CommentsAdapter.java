@@ -10,9 +10,6 @@ import android.widget.Filterable;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-
 import java.util.ArrayList;
 
 import awais.instagrabber.R;
@@ -21,10 +18,18 @@ import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.CommentModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolder> implements Filterable {
+
+    private CommentModel[] filteredCommentModels;
+    private LayoutInflater layoutInflater;
+
     private final boolean isParent;
+    private final View.OnClickListener onClickListener;
+    private final MentionClickListener mentionClickListener;
+    private final CommentModel[] commentModels;
+    private final String[] quantityStrings = new String[2];
     private final Filter filter = new Filter() {
         @NonNull
         @Override
@@ -33,7 +38,7 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
             results.values = commentModels;
 
             final int commentsLen = commentModels == null ? 0 : commentModels.length;
-            if (commentModels != null && commentsLen > 0 && !Utils.isEmpty(filter)) {
+            if (commentModels != null && commentsLen > 0 && !TextUtils.isEmpty(filter)) {
                 final String query = filter.toString().toLowerCase();
                 final ArrayList<CommentModel> filterList = new ArrayList<>(commentsLen);
 
@@ -66,15 +71,12 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
             }
         }
     };
-    private final View.OnClickListener onClickListener;
-    private final MentionClickListener mentionClickListener;
-    private final CommentModel[] commentModels;
-    private final String[] quantityStrings = new String[2];
-    private LayoutInflater layoutInflater;
-    private CommentModel[] filteredCommentModels;
 
-    public CommentsAdapter(final CommentModel[] commentModels, final boolean isParent, final View.OnClickListener onClickListener,
+    public CommentsAdapter(final CommentModel[] commentModels,
+                           final boolean isParent,
+                           final View.OnClickListener onClickListener,
                            final MentionClickListener mentionClickListener) {
+        super();
         this.commentModels = this.filteredCommentModels = commentModels;
         this.isParent = isParent;
         this.onClickListener = onClickListener;
@@ -93,10 +95,13 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
         if (quantityStrings[0] == null) quantityStrings[0] = context.getString(R.string.single_like);
         if (quantityStrings[1] == null) quantityStrings[1] = context.getString(R.string.multiple_likes);
         if (layoutInflater == null) layoutInflater = LayoutInflater.from(context);
-        return new CommentViewHolder(layoutInflater.inflate(
-                isParent ? R.layout.item_comment       // parent
-                        : R.layout.item_comment_small, // child
-                parent, false), onClickListener, mentionClickListener);
+        final View view = layoutInflater.inflate(isParent ? R.layout.item_comment
+                                                          : R.layout.item_comment_small,
+                                                 parent,
+                                                 false);
+        return new CommentViewHolder(view,
+                                     onClickListener,
+                                     mentionClickListener);
     }
 
     @Override
@@ -105,7 +110,7 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
         if (commentModel != null) {
             holder.setCommentModel(commentModel);
 
-            holder.setCommment(commentModel.getText());
+            holder.setComment(commentModel.getText());
             holder.setDate(commentModel.getDateTime());
             holder.setLiked(commentModel.getLiked());
 
@@ -115,12 +120,8 @@ public final class CommentsAdapter extends RecyclerView.Adapter<CommentViewHolde
             final ProfileModel profileModel = commentModel.getProfileModel();
             if (profileModel != null) {
                 holder.setUsername(profileModel.getUsername());
-
-                Glide.with(layoutInflater.getContext())
-                        .applyDefaultRequestOptions(new RequestOptions().skipMemoryCache(true))
-                        .load(profileModel.getSdProfilePic()).into(holder.getProfilePicView());
+                holder.getProfilePicView().setImageURI(profileModel.getSdProfilePic());
             }
-
             if (holder.isParent()) {
                 final CommentModel[] childCommentModels = commentModel.getChildCommentModels();
                 if (childCommentModels != null && childCommentModels.length > 0)

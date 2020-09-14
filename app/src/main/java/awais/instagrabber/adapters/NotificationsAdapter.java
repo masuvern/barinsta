@@ -1,91 +1,55 @@
 package awais.instagrabber.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
-
-import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.NotificationViewHolder;
+import awais.instagrabber.databinding.ItemNotificationBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.NotificationModel;
-import awais.instagrabber.models.enums.NotificationType;
 
-public final class NotificationsAdapter extends RecyclerView.Adapter<NotificationViewHolder> {
-    private final View.OnClickListener onClickListener;
+public final class NotificationsAdapter extends ListAdapter<NotificationModel, NotificationViewHolder> {
+    private final OnNotificationClickListener notificationClickListener;
     private final MentionClickListener mentionClickListener;
-    private final NotificationModel[] notificationModels;
-    private LayoutInflater layoutInflater;
 
-    public NotificationsAdapter(final NotificationModel[] notificationModels, final View.OnClickListener onClickListener,
+    private static final DiffUtil.ItemCallback<NotificationModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<NotificationModel>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull final NotificationModel oldItem, @NonNull final NotificationModel newItem) {
+            return oldItem.getId().equals(newItem.getId());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull final NotificationModel oldItem, @NonNull final NotificationModel newItem) {
+            return oldItem.getId().equals(newItem.getId());
+        }
+    };
+
+    public NotificationsAdapter(final OnNotificationClickListener notificationClickListener,
                                 final MentionClickListener mentionClickListener) {
-        this.notificationModels = notificationModels;
-        this.onClickListener = onClickListener;
+        super(DIFF_CALLBACK);
+        this.notificationClickListener = notificationClickListener;
         this.mentionClickListener = mentionClickListener;
     }
 
     @NonNull
     @Override
     public NotificationViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
-        final Context context = parent.getContext();
-        if (layoutInflater == null) layoutInflater = LayoutInflater.from(context);
-        return new NotificationViewHolder(layoutInflater.inflate(R.layout.item_notification,
-                parent, false), onClickListener, mentionClickListener);
+        final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        final ItemNotificationBinding binding = ItemNotificationBinding.inflate(layoutInflater, parent, false);
+        return new NotificationViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final NotificationViewHolder holder, final int position) {
-        final NotificationModel notificationModel = notificationModels[position];
-        if (notificationModel != null) {
-            holder.setNotificationModel(notificationModel);
-
-            int text = -1;
-            CharSequence subtext = null;
-            switch (notificationModel.getType()) {
-                case LIKE:
-                    text = R.string.liked_notif;
-                    break;
-                case COMMENT:
-                    text = R.string.comment_notif;
-                    subtext = notificationModel.getText();
-                    break;
-                case MENTION:
-                    text = R.string.mention_notif;
-                    subtext = notificationModel.getText();
-                    break;
-                case FOLLOW:
-                    text = R.string.follow_notif;
-                    break;
-                case REQUEST:
-                    text = R.string.request_notif;
-                    subtext = notificationModel.getText();
-                    break;
-            }
-
-            holder.setCommment(text);
-            holder.setSubCommment(subtext);
-            if (notificationModel.getType() != NotificationType.REQUEST)
-                holder.setDate(notificationModel.getDateTime());
-
-            holder.setUsername(notificationModel.getUsername());
-
-            final RequestManager rm = Glide.with(layoutInflater.getContext())
-                    .applyDefaultRequestOptions(new RequestOptions().skipMemoryCache(true));
-
-            rm.load(notificationModel.getProfilePic()).into(holder.getProfilePicView());
-            rm.load(notificationModel.getPreviewPic()).into(holder.getPreviewPicView());
-        }
+        final NotificationModel notificationModel = getItem(position);
+        holder.bind(notificationModel, notificationClickListener);
     }
 
-    @Override
-    public int getItemCount() {
-        return notificationModels == null ? 0 : notificationModels.length;
+    public interface OnNotificationClickListener {
+        void onNotificationClick(final NotificationModel model);
     }
 }

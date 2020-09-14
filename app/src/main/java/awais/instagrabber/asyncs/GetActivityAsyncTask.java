@@ -9,24 +9,24 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.TextUtils;
 
-public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsyncTask.NotificationCounts> {
+public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsyncTask.NotificationCounts> {
     private static final String TAG = "GetActivityAsyncTask";
-    private String uid;
-    private String cookie;
+
     private OnTaskCompleteListener onTaskCompleteListener;
 
-    public GetActivityAsyncTask(final String uid, final String cookie, final OnTaskCompleteListener onTaskCompleteListener) {
-        this.uid = uid;
-        this.cookie = cookie;
+    public GetActivityAsyncTask(final OnTaskCompleteListener onTaskCompleteListener) {
         this.onTaskCompleteListener = onTaskCompleteListener;
     }
 
-    protected NotificationCounts doInBackground(Void... voids) {
-        if (Utils.isEmpty(cookie)) {
-            return null;
-        }
+    protected NotificationCounts doInBackground(final String... cookiesArray) {
+        if (cookiesArray == null) return null;
+        final String cookie = cookiesArray[0];
+        if (TextUtils.isEmpty(cookie)) return null;
+        final String uid = CookieUtils.getUserIdFromCookie(cookie);
         final String url = "https://www.instagram.com/graphql/query/?query_hash=0f318e8cfff9cc9ef09f88479ff571fb"
                 + "&variables={\"id\":\"" + uid + "\"}";
         HttpURLConnection urlConnection = null;
@@ -39,8 +39,12 @@ public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsync
             if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 return null;
             }
-            final JSONObject data = new JSONObject(Utils.readFromConnection(urlConnection)).getJSONObject("data")
-                    .getJSONObject("user").getJSONObject("edge_activity_count").getJSONArray("edges").getJSONObject(0)
+            final JSONObject data = new JSONObject(NetworkUtils.readFromConnection(urlConnection))
+                    .getJSONObject("data")
+                    .getJSONObject("user")
+                    .getJSONObject("edge_activity_count")
+                    .getJSONArray("edges")
+                    .getJSONObject(0)
                     .getJSONObject("node");
             return new NotificationCounts(
                     data.getInt("relationships"),
@@ -61,9 +65,7 @@ public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsync
 
     @Override
     protected void onPostExecute(final NotificationCounts result) {
-        if (onTaskCompleteListener == null) {
-            return;
-        }
+        if (onTaskCompleteListener == null) return;
         onTaskCompleteListener.onTaskComplete(result);
     }
 
@@ -104,6 +106,17 @@ public class GetActivityAsyncTask extends AsyncTask<Void, Void, GetActivityAsync
 
         public int getLikesCount() {
             return likesCount;
+        }
+
+        @Override
+        public String toString() {
+            return "NotificationCounts{" +
+                    "relationshipsCount=" + relationshipsCount +
+                    ", userTagsCount=" + userTagsCount +
+                    ", commentsCount=" + commentsCount +
+                    ", commentLikesCount=" + commentLikesCount +
+                    ", likesCount=" + likesCount +
+                    '}';
         }
     }
 

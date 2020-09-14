@@ -1,7 +1,5 @@
 package awais.instagrabber.asyncs;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,25 +26,24 @@ import androidx.core.content.FileProvider;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.ProfilePicViewer;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
-import static awais.instagrabber.utils.Utils.CHANNEL_ID;
-import static awais.instagrabber.utils.Utils.CHANNEL_NAME;
-import static awais.instagrabber.utils.Utils.NOTIF_GROUP_NAME;
-import static awais.instagrabber.utils.Utils.isChannelCreated;
+import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
 import static awais.instagrabber.utils.Utils.logCollector;
-import static awais.instagrabber.utils.Utils.notificationManager;
 import static awaisomereport.LogCollector.LogFile;
 
 public final class DownloadAsync extends AsyncTask<Void, Float, File> {
+    private static final String TAG = "DownloadAsync";
+
     private static int lastNotifId = 1;
     private final int currentNotifId;
     private final AtomicReference<Context> context;
@@ -56,8 +53,12 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
     private final Resources resources;
     private final NotificationCompat.Builder downloadNotif;
     private String shortCode, username;
+    private final NotificationManagerCompat notificationManager;
 
-    public DownloadAsync(final Context context, final String url, final File outFile, final FetchListener<File> fetchListener) {
+    public DownloadAsync(@NonNull final Context context,
+                         final String url,
+                         final File outFile,
+                         final FetchListener<File> fetchListener) {
         this.context = new AtomicReference<>(context);
         this.resources = context.getResources();
         this.url = url;
@@ -67,22 +68,18 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
         this.currentNotifId = ++lastNotifId;
         if (++lastNotifId + 1 == Integer.MAX_VALUE) lastNotifId = 1;
 
-        if (notificationManager == null)
-            notificationManager = NotificationManagerCompat.from(context.getApplicationContext());
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isChannelCreated) {
-            notificationManager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                    CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH));
-            isChannelCreated = true;
-        }
-
-        @StringRes final int titleRes = context instanceof ProfilePicViewer ? R.string.downloader_downloading_pfp : R.string.downloader_downloading_post;
-
-        downloadNotif = new NotificationCompat.Builder(context, CHANNEL_ID).setCategory(NotificationCompat.CATEGORY_STATUS)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentText(shortCode == null ? username : shortCode).setOngoing(true)
-                .setProgress(100, 0, false).setAutoCancel(false).setOnlyAlertOnce(true)
+        @StringRes final int titleRes = R.string.downloader_downloading_post;
+        downloadNotif = new NotificationCompat.Builder(context, Constants.DOWNLOAD_CHANNEL_ID)
+                .setCategory(NotificationCompat.CATEGORY_STATUS)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentText(shortCode == null ? username : shortCode)
+                .setOngoing(true)
+                .setProgress(100, 0, false)
+                .setAutoCancel(false)
+                .setOnlyAlertOnce(true)
                 .setContentTitle(resources.getString(titleRes));
 
+        notificationManager = NotificationManagerCompat.from(context.getApplicationContext());
         notificationManager.notify(currentNotifId, downloadNotif.build());
     }
 
@@ -99,7 +96,7 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
         try {
             final URLConnection urlConnection = new URL(url).openConnection();
             final long fileSize = Build.VERSION.SDK_INT >= 24 ? urlConnection.getContentLengthLong() :
-                    urlConnection.getContentLength();
+                                  urlConnection.getContentLength();
             float totalRead = 0;
 
             try (final BufferedInputStream bis = new BufferedInputStream(urlConnection.getInputStream());
@@ -152,13 +149,13 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogFile.ASYNC_DOWNLOADER, "doInBackground",
-                        new Pair<>("context", context.get()),
-                        new Pair<>("resources", resources),
-                        new Pair<>("lastNotifId", lastNotifId),
-                        new Pair<>("downloadNotif", downloadNotif),
-                        new Pair<>("currentNotifId", currentNotifId),
-                        new Pair<>("notificationManager", notificationManager));
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                                             new Pair<>("context", context.get()),
+                                             new Pair<>("resources", resources),
+                                             new Pair<>("lastNotifId", lastNotifId),
+                                             new Pair<>("downloadNotif", downloadNotif),
+                                             new Pair<>("currentNotifId", currentNotifId),
+                                             new Pair<>("notificationManager", notificationManager));
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
         return null;
     }
@@ -182,23 +179,23 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
             final Context context = this.context.get();
 
             context.sendBroadcast(Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ?
-                    new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())) :
-                    new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(result.getAbsoluteFile()))
+                                  new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())) :
+                                  new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(result.getAbsoluteFile()))
             );
             MediaScannerConnection.scanFile(context, new String[]{result.getAbsolutePath()}, null, null);
 
             if (notificationManager != null) {
-                final Uri uri = FileProvider.getUriForFile(context, "me.austinhuang.instagrabber.provider", result);
+                final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", result);
 
                 final ContentResolver contentResolver = context.getContentResolver();
                 Bitmap bitmap = null;
                 if (Utils.isImage(uri, contentResolver)) {
-                    try {
-                        bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(uri));
+                    try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
+                        bitmap = BitmapFactory.decodeStream(inputStream);
                     } catch (final Exception e) {
                         if (logCollector != null)
                             logCollector.appendException(e, LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
-                        if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                        if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                     }
                 }
 
@@ -228,15 +225,16 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
                 final String downloadComplete = resources.getString(R.string.downloader_complete);
 
                 downloadNotif.setContentText(null).setContentTitle(downloadComplete).setProgress(0, 0, false)
-                        .setWhen(System.currentTimeMillis()).setOngoing(false).setOnlyAlertOnce(false).setAutoCancel(true)
-                        .setGroup(NOTIF_GROUP_NAME).setGroupSummary(true).setContentIntent(
+                             .setWhen(System.currentTimeMillis()).setOngoing(false).setOnlyAlertOnce(false).setAutoCancel(true)
+                             .setGroup(NOTIF_GROUP_NAME).setGroupSummary(true).setContentIntent(
                         PendingIntent.getActivity(context, 2020, new Intent(Intent.ACTION_VIEW, uri)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_FROM_BACKGROUND | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                                .addFlags(
+                                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_FROM_BACKGROUND | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                                 .putExtra(Intent.EXTRA_STREAM, uri), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT));
 
                 if (bitmap != null)
                     downloadNotif.setStyle(new NotificationCompat.BigPictureStyle().setBigContentTitle(downloadComplete).bigPicture(bitmap))
-                            .setLargeIcon(bitmap).setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL);
+                                 .setLargeIcon(bitmap).setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL);
 
                 notificationManager.cancel(currentNotifId);
                 notificationManager.notify(currentNotifId + 1, downloadNotif.build());

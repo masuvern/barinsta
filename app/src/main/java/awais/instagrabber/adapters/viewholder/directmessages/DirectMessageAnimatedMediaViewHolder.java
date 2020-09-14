@@ -4,6 +4,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
@@ -22,8 +24,10 @@ public class DirectMessageAnimatedMediaViewHolder extends DirectMessageItemViewH
 
     @Override
     public void bindItem(final DirectItemModel directItemModel) {
-        getGlideRequestManager().asGif().load(directItemModel.getAnimatedMediaModel().getGifUrl())
-                .into(binding.ivAnimatedMessage);
+        binding.ivAnimatedMessage.setController(Fresco.newDraweeControllerBuilder()
+                                                      .setUri(directItemModel.getAnimatedMediaModel().getGifUrl())
+                                                      .setAutoPlayAnimations(true)
+                                                      .build());
         binding.ivAnimatedMessage.setVisibility(View.VISIBLE);
     }
 }

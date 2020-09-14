@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/more_nav_graph"
+    app:startDestination="@id/morePreferencesFragment">
+
+    <include app:graph="@navigation/post_view_nav_graph" />
+    <include app:graph="@navigation/profile_nav_graph" />
+    <include app:graph="@navigation/hashtag_nav_graph" />
+    <include app:graph="@navigation/location_nav_graph" />
+    <include app:graph="@navigation/comments_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/post_view_nav_graph">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="true" />
+    </action>
+
+    <fragment
+        android:id="@+id/morePreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.MorePreferencesFragment"
+        android:label="@string/more">
+        <action
+            android:id="@+id/action_morePreferencesFragment_to_settingsPreferencesFragment"
+            app:destination="@id/settingsPreferencesFragment" />
+        <action
+            android:id="@+id/action_morePreferencesFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_morePreferencesFragment_to_notificationsViewer"
+            app:destination="@id/notificationsViewer" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.SettingsPreferencesFragment"
+        android:label="@string/action_settings">
+        <action
+            android:id="@+id/action_settingsPreferencesFragment_to_themePreferencesFragment"
+            app:destination="@id/themePreferencesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="awais.instagrabber.fragments.settings.AboutFragment"
+        android:label="@string/action_about" />
+    <fragment
+        android:id="@+id/notificationsViewer"
+        android:name="awais.instagrabber.fragments.NotificationsViewerFragment"
+        android:label="@string/title_notifications"
+        tools:layout="@layout/fragment_notifications_viewer" />
+    <fragment
+        android:id="@+id/themePreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.ThemePreferencesFragment"
+        android:label="@string/theme_settings" />
+</navigation>

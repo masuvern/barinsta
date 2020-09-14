@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/location_nav_graph"
+    app:startDestination="@id/locationFragment">
+
+    <!--<include app:graph="@navigation/post_view_nav_graph" />-->
+
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/post_view_nav_graph">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
+
+    <fragment
+        android:id="@+id/locationFragment"
+        android:name="awais.instagrabber.fragments.LocationFragment"
+        android:label=""
+        tools:layout="@layout/fragment_location">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
+    <action
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/locationFragment">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+</navigation>

@@ -1,24 +1,34 @@
 package awais.instagrabber.models;
 
-import org.json.JSONObject;
-
 import awais.instagrabber.models.enums.MediaItemType;
 
 public final class ViewerPostModel extends BasePostModel {
-    protected final String username, locationName, location;
+    protected final ProfileModel profileModel;
+    protected final String locationName;
+    protected final String location;
     protected final long videoViews;
     protected String sliderDisplayUrl;
     protected long commentsCount, likes;
     private boolean isCurrentSlide = false;
 
-    public ViewerPostModel(final MediaItemType itemType, final String postId, final String displayUrl, final String shortCode,
-                           final String postCaption, final String username, final long videoViews, final long timestamp,
-                           boolean liked, boolean bookmarked, long likes, final String locationName, final String location) {
+    public ViewerPostModel(final MediaItemType itemType,
+                           final String postId,
+                           final String displayUrl,
+                           final String shortCode,
+                           final String postCaption,
+                           final ProfileModel profileModel,
+                           final long videoViews,
+                           final long timestamp,
+                           boolean liked,
+                           boolean bookmarked,
+                           long likes,
+                           final String locationName,
+                           final String location) {
         this.itemType = itemType;
         this.postId = postId;
         this.displayUrl = displayUrl;
         this.postCaption = postCaption;
-        this.username = username;
+        this.profileModel = profileModel;
         this.shortCode = shortCode;
         this.videoViews = videoViews;
         this.timestamp = timestamp;
@@ -29,6 +39,10 @@ public final class ViewerPostModel extends BasePostModel {
         this.location = location;
     }
 
+    public static ViewerPostModel getDefaultModel(final int postId, final String shortCode) {
+        return new ViewerPostModel(null, String.valueOf(postId), null, "", null, null, -1, -1, false, false, -1, null, null);
+    }
+
     public long getCommentsCount() {
         return commentsCount;
     }
@@ -37,8 +51,8 @@ public final class ViewerPostModel extends BasePostModel {
         return sliderDisplayUrl;
     }
 
-    public String getUsername() {
-        return username;
+    public ProfileModel getProfileModel() {
+        return profileModel;
     }
 
     public String getLocationName() {
@@ -62,6 +76,10 @@ public final class ViewerPostModel extends BasePostModel {
         liked = like;
         likes = (like) ? (likes + 1) : (likes - 1);
         return liked;
+    }
+
+    public void setBookmarked(final boolean bookmarked) {
+        this.bookmarked = bookmarked;
     }
 
     public void setSliderDisplayUrl(final String sliderDisplayUrl) {

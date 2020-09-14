@@ -1,10 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.Amoled" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:colorBackground">@color/background_amoled</item>
-        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheetDialog.Dark</item>
-        <item name="android:windowAnimationStyle">@style/AppTheme.WindowAnimationTransition</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="" />
+
+    <!-- Light Themes -->
+    <style name="AppTheme.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Common start -->
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryDark</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">?attr/colorPrimaryDark</item>
+        <item name="android:navigationBarDividerColor" tools:ignore="NewApi">?attr/colorPrimaryDark</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_close_24</item>
+        <item name="android:textColorLink">@color/blue_700</item>
+        <item name="android:textColorHighlight">@color/blue_300</item>
+        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
+        <!-- Common end -->
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar</item>
+        <!--<item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Primary</item>-->
     </style>
 
-    <style name="AppTheme.BottomSheetDialog.Dark" parent="Theme.MaterialComponents.BottomSheetDialog"/>
+    <style name="AppTheme.Light.White" parent="AppTheme.Light">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorAccent">@color/black</item>
+        <item name="editTextColor">@color/black</item>
+        <item name="android:editTextColor">@color/black</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.White</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.Light.White</item>
+    </style>
+
+    <style name="AppTheme.Light.Barinsta" parent="AppTheme.Light">
+        <item name="colorPrimary">@color/barinstaColorPrimary</item>
+        <item name="colorPrimaryDark">@color/barinstaColorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/barinstaColorPrimaryLight</item>
+        <item name="colorSecondary">@color/barinstaColorSecondary</item>
+        <item name="colorSecondaryVariant">@color/barinstaColorSecondaryDark</item>
+        <item name="colorSurface">@color/grey_200</item>
+        <item name="colorControlHighlight">@color/barinstaColorSecondaryDark</item>
+        <item name="colorAccent">@color/barinstaColorSecondaryDark</item>
+        <!--<item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar</item>-->
+        <item name="android:windowBackground">?colorSurface</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.Barinsta</item>
+        <item name="android:textColorPrimary">@color/barinstaPrimaryTextColor</item>
+        <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
+    </style>
+
+
+    <!-- Dark Themes -->
+    <style name="AppTheme.Dark" parent="Theme.MaterialComponents.NoActionBar">
+        <!-- Common start -->
+        <item name="android:statusBarColor" tools:ignore="NewApi">?attr/colorPrimaryDark</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">?attr/colorPrimaryDark</item>
+        <item name="android:navigationBarDividerColor" tools:ignore="NewApi">?attr/colorPrimaryDark</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_close_24</item>
+        <item name="android:textColorLink">@color/blue_700</item>
+        <item name="android:textColorHighlight">@color/blue_300</item>
+        <item name="actionModeStyle">@style/Widget.App.ActionMode</item>
+        <!-- Common end -->
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+        <!--<item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Primary</item>-->
+    </style>
+
+    <style name="AppTheme.Dark.Black" parent="AppTheme.Dark">
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/black</item>
+        <item name="colorSurface">@color/black</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorAccent">@color/blue_A700</item>
+        <item name="colorControlHighlight">@color/grey_600</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:textColorHint">@color/grey_500</item>
+        <item name="android:windowBackground">@color/black</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Dark.Black</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.Dark.Black</item>
+        <item name="android:dialogTheme">@style/Widget.Dialog.Dark.Black</item>
+        <item name="alertDialogTheme">@style/Widget.AlertDialog.Dark.Black</item>
+        <item name="switchStyle">@style/Widget.AppCompat.CompoundButton.Switch.Dark.Black</item>
+        <item name="android:dropDownListViewStyle">@style/Widget.AppCompat.ListView.DropDown.Dark.Black</item>
+        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.Black</item>
+        <item name="appBarLayoutStyle">@style/Widget.MaterialComponents.AppBarLayout.Primary</item>
+    </style>
+
+    <style name="AppTheme.Dark.MaterialDark" parent="AppTheme.Dark">
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryVariant">@color/purple_600</item>
+        <item name="colorSecondary">@color/green_200</item>
+        <item name="colorSecondaryVariant">@color/green_500</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="colorSurface">@color/black_800</item>
+        <item name="colorError">@color/red_200</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorOnBackground">@color/white</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorOnError">@color/black</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
+        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.MaterialDark</item>
+    </style>
 </resources>

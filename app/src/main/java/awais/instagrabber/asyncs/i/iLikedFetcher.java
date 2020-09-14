@@ -16,6 +16,10 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
@@ -50,7 +54,7 @@ public final class iLikedFetcher extends AsyncTask<Void, Void, PostModel[]> {
             conn.connect();
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final JSONObject body = new JSONObject(Utils.readFromConnection(conn));
+                final JSONObject body = new JSONObject(NetworkUtils.readFromConnection(conn));
 
                 final String endCursor;
                 final boolean hasNextPage;
@@ -77,12 +81,12 @@ public final class iLikedFetcher extends AsyncTask<Void, Void, PostModel[]> {
                     else itemType = MediaItemType.MEDIA_TYPE_IMAGE;
 
                     models[i] = new PostModel(itemType, mediaNode.getString(Constants.EXTRAS_ID),
-                            isSlider
-                                    ? Utils.getHighQualityImage(mediaNode.getJSONArray("carousel_media").getJSONObject(0))
-                                    : Utils.getHighQualityImage(mediaNode),
-                            isSlider
-                                    ? Utils.getLowQualityImage(mediaNode.getJSONArray("carousel_media").getJSONObject(0))
-                                    : Utils.getLowQualityImage(mediaNode),
+                                              isSlider
+                                    ? ResponseBodyUtils.getHighQualityImage(mediaNode.getJSONArray("carousel_media").getJSONObject(0))
+                                    : ResponseBodyUtils.getHighQualityImage(mediaNode),
+                                              isSlider
+                                    ? ResponseBodyUtils.getLowQualityImage(mediaNode.getJSONArray("carousel_media").getJSONObject(0))
+                                    : ResponseBodyUtils.getLowQualityImage(mediaNode),
                             mediaNode.getString("code"),
                             mediaNode.isNull("caption") ? null : mediaNode.getJSONObject("caption").optString("text"),
                             mediaNode.getLong("taken_at"), true,
@@ -95,9 +99,9 @@ public final class iLikedFetcher extends AsyncTask<Void, Void, PostModel[]> {
                     if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
                         final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
                                 (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/"+username) : ""));
-                        if (!Utils.isEmpty(customPath)) customDir = new File(customPath);
+                        if (!TextUtils.isEmpty(customPath)) customDir = new File(customPath);
                     }
-                    Utils.checkExistence(downloadDir, customDir, isSlider, models[i]);
+                    DownloadUtils.checkExistence(downloadDir, customDir, isSlider, models[i]);
                 }
 
                 if (models[models.length - 1] != null)

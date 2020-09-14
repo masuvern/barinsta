@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmVoiceMediaBinding;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.NumberUtils;
 
 public class DirectMessageVoiceMediaViewHolder extends DirectMessageItemViewHolder {
 
@@ -61,13 +61,13 @@ public class DirectMessageVoiceMediaViewHolder extends DirectMessageItemViewHold
             if (waveformData != null) binding.waveformSeekBar.setSample(waveformData);
 
             final long durationMs = voiceMediaModel.getDurationMs();
-            binding.tvVoiceDuration.setText(Utils.millisToString(durationMs));
+            binding.tvVoiceDuration.setText(NumberUtils.millisToString(durationMs));
             binding.waveformSeekBar.setProgress(voiceMediaModel.getProgress());
             binding.waveformSeekBar.setProgressChangeListener((waveformSeekBar, progress, fromUser) -> {
                 // todo progress audio player
                 voiceMediaModel.setProgress(progress);
                 if (fromUser)
-                    binding.tvVoiceDuration.setText(Utils.millisToString(durationMs * progress / 100));
+                    binding.tvVoiceDuration.setText(NumberUtils.millisToString(durationMs * progress / 100));
             });
             binding.btnPlayVoice.setTag(voiceMediaModel);
         } else {

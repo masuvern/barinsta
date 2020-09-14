@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.directmessages;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,18 +29,19 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.adapters.DirectMessageInboxAdapter;
 import awais.instagrabber.asyncs.direct_messages.InboxFetcher;
+import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.direct_messages.InboxModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectMessageInboxFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "DirectMessagesInboxFrag";
 
     private FragmentActivity fragmentActivity;
-    private SwipeRefreshLayout root;
+    private NestedCoordinatorLayout root;
     private RecyclerView inboxList;
     private RecyclerLazyLoader lazyLoader;
     private LinearLayoutManager layoutManager;
@@ -47,11 +49,12 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private AsyncTask<Void, Void, InboxModel> currentlyRunning;
     private InboxThreadModelListViewModel listViewModel;
     public static boolean refreshPlease = false;
+    private boolean shouldRefresh = true;
 
     private final FetchListener<InboxModel> fetchListener = new FetchListener<InboxModel>() {
         @Override
         public void doBefore() {
-            root.setRefreshing(true);
+            binding.swipeRefreshLayout.setRefreshing(true);
         }
 
         @Override
@@ -71,10 +74,11 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
                     listViewModel.getList().postValue(list);
                 }
             }
-            root.setRefreshing(false);
+            binding.swipeRefreshLayout.setRefreshing(false);
             stopCurrentExecutor();
         }
     };
+    private FragmentDirectMessagesInboxBinding binding;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -87,24 +91,33 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         if (root != null) {
+            shouldRefresh = false;
             return root;
         }
-        final FragmentDirectMessagesInboxBinding binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
+        binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
         root = binding.getRoot();
-        root.setOnRefreshListener(this);
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
         inboxList = binding.inboxList;
         inboxList.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(requireContext());
+        final Context context = getContext();
+        if (context == null) return root;
+        layoutManager = new LinearLayoutManager(context);
         inboxList.setLayoutManager(layoutManager);
         final DirectMessageInboxAdapter inboxAdapter = new DirectMessageInboxAdapter(inboxThreadModel -> {
-            final NavDirections action = DirectMessageInboxFragmentDirections.actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
+            final NavDirections action = DirectMessageInboxFragmentDirections
+                    .actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
             NavHostFragment.findNavController(this).navigate(action);
         });
         inboxList.setAdapter(inboxAdapter);
-        listViewModel = new ViewModelProvider(fragmentActivity).get(InboxThreadModelListViewModel.class);
+        listViewModel = new ViewModelProvider(this).get(InboxThreadModelListViewModel.class);
         listViewModel.getList().observe(fragmentActivity, inboxAdapter::submitList);
-        initData();
         return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
+        initData();
     }
 
     @Override
@@ -125,9 +138,17 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (listViewModel != null) {
+            listViewModel.getList().postValue(Collections.emptyList());
+        }
+    }
+
     private void initData() {
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!Utils.isEmpty(endCursor))
+            if (!TextUtils.isEmpty(endCursor))
                 currentlyRunning = new InboxFetcher(endCursor, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             endCursor = null;
         });

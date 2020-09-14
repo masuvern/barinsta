@@ -15,6 +15,8 @@ import java.net.URL;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
@@ -45,26 +47,26 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
             conn.setRequestMethod("GET");
             conn.setRequestProperty("User-Agent", Constants.USER_AGENT);
 
-            final String result = conn.getResponseCode() == HttpURLConnection.HTTP_OK ? Utils.readFromConnection(conn) : null;
+            final String result = conn.getResponseCode() == HttpURLConnection.HTTP_OK ? NetworkUtils.readFromConnection(conn) : null;
             conn.disconnect();
 
-            if (!Utils.isEmpty(result)) {
+            if (!TextUtils.isEmpty(result)) {
                 JSONObject data = new JSONObject(result).getJSONObject("user");
                 if (data.has("hd_profile_pic_url_info"))
                     out = data.getJSONObject("hd_profile_pic_url_info").optString("url");
             }
 
-            if (Utils.isEmpty(out) && Utils.settingsHelper.getBoolean(Constants.INSTADP)) {
+            if (TextUtils.isEmpty(out) && Utils.settingsHelper.getBoolean(Constants.INSTADP)) {
                 final HttpURLConnection backup =
                         (HttpURLConnection) new URL("https://instadp.com/fullsize/" + userName).openConnection();
                 backup.setUseCaches(false);
                 backup.setRequestMethod("GET");
                 backup.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
 
-                final String instadp = backup.getResponseCode() == HttpURLConnection.HTTP_OK ? Utils.readFromConnection(backup) : null;
+                final String instadp = backup.getResponseCode() == HttpURLConnection.HTTP_OK ? NetworkUtils.readFromConnection(backup) : null;
                 backup.disconnect();
 
-                if (!Utils.isEmpty(instadp)) {
+                if (!TextUtils.isEmpty(instadp)) {
                     final Document doc = Jsoup.parse(instadp);
                     boolean fallback = false;
 
@@ -86,7 +88,7 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
                     }
                 }
             }
-            if (Utils.isEmpty(out)) out = picUrl;
+            if (TextUtils.isEmpty(out)) out = picUrl;
         } catch (final Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_PROFILE_PICTURE_FETCHER, "doInBackground");

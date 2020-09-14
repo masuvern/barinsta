@@ -11,6 +11,7 @@ import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Constants.COOKIE;
@@ -39,7 +40,7 @@ public final class DirectItemModel implements Serializable, Comparable<DirectIte
                            final DirectItemActionLogModel actionLogModel, final DirectItemVoiceMediaModel voiceMediaModel,
                            final DirectItemRavenMediaModel ravenMediaModel, final DirectItemVideoCallEventModel videoCallEventModel,
                            final DirectItemAnimatedMediaModel animatedMediaModel) {
-        final String myId = Utils.getUserIdFromCookie(Utils.settingsHelper.getString(COOKIE));
+        final String myId = CookieUtils.getUserIdFromCookie(Utils.settingsHelper.getString(COOKIE));
         this.userId = userId;
         this.timestamp = timestamp;
         this.itemType = itemType;

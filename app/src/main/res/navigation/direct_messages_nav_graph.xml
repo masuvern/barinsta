@@ -1,13 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/direct_messages_nav_graph"
     app:startDestination="@id/directMessagesInboxFragment">
+
+    <include app:graph="@navigation/profile_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/location_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/location_nav_graph">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/hashtag_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_hashTagFragment"
+        app:destination="@id/hashtag_nav_graph">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/post_view_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_postViewFragment"
+        app:destination="@id/post_view_nav_graph">
+        <argument
+            android:name="index"
+            app:argType="integer" />
+        <argument
+            android:name="idOrCodeArray"
+            app:argType="string[]" />
+        <argument
+            android:name="isId"
+            app:argType="boolean" />
+    </action>
 
     <fragment
         android:id="@+id/directMessagesInboxFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageInboxFragment"
-        android:label="DirectMessagesInboxFragment" >
+        android:label="@string/action_dms"
+        tools:layout="@layout/fragment_direct_messages_inbox">
         <action
             android:id="@+id/action_dMInboxFragment_to_dMThreadFragment"
             app:destination="@id/directMessagesThreadFragment" />
@@ -15,7 +66,8 @@
     <fragment
         android:id="@+id/directMessagesThreadFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageThreadFragment"
-        android:label="DirectMessagesThreadFragment">
+        android:label="DirectMessagesThreadFragment"
+        tools:layout="@layout/fragment_direct_messages_thread">
         <argument
             android:name="threadId"
             app:argType="string" />
@@ -29,7 +81,8 @@
     <fragment
         android:id="@+id/directMessagesSettingsFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"
-        android:label="DirectMessagesSettingsFragment">
+        android:label="DirectMessagesSettingsFragment"
+        tools:layout="@layout/fragment_direct_messages_settings">
         <argument
             android:name="threadId"
             app:argType="string" />

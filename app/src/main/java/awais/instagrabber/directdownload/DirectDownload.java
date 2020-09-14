@@ -3,21 +3,19 @@ package awais.instagrabber.directdownload;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -33,17 +31,21 @@ import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
-
-import static awais.instagrabber.utils.Utils.CHANNEL_ID;
-import static awais.instagrabber.utils.Utils.CHANNEL_NAME;
-import static awais.instagrabber.utils.Utils.isChannelCreated;
-import static awais.instagrabber.utils.Utils.notificationManager;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.IntentUtils;
+import awais.instagrabber.utils.TextUtils;
 
 public final class DirectDownload extends Activity {
     private boolean isFound = false;
     private Intent intent;
     private Context context;
+    private NotificationManagerCompat notificationManager;
+
+    @Override
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        notificationManager = NotificationManagerCompat.from(getApplicationContext());
+    }
 
     @Override
     public void onWindowAttributesChanged(final WindowManager.LayoutParams params) {
@@ -83,70 +85,61 @@ public final class DirectDownload extends Activity {
                     handler.removeCallbacks(this);
                 }
             });
-            ActivityCompat.requestPermissions(this, Utils.PERMS, 8020);
+            ActivityCompat.requestPermissions(this, DownloadUtils.PERMS, 8020);
         }
         finish();
     }
 
     private synchronized void doDownload() {
         final String action = intent.getAction();
-        if (!Utils.isEmpty(action) && !Intent.ACTION_MAIN.equals(action)) {
-            boolean error = true;
+        if (TextUtils.isEmpty(action) || Intent.ACTION_MAIN.equals(action)) return;
+        boolean error = true;
 
-            String data = null;
-            final Bundle extras = intent.getExtras();
-            if (extras != null) {
-                final Object extraData = extras.get(Intent.EXTRA_TEXT);
-                if (extraData != null) {
-                    error = false;
-                    data = extraData.toString();
-                }
+        String data = null;
+        final Bundle extras = intent.getExtras();
+        if (extras != null) {
+            final Object extraData = extras.get(Intent.EXTRA_TEXT);
+            if (extraData != null) {
+                error = false;
+                data = extraData.toString();
             }
+        }
 
-            if (error) {
-                final Uri intentData = intent.getData();
-                if (intentData != null) data = intentData.toString();
-            }
+        if (error) {
+            final Uri intentData = intent.getData();
+            if (intentData != null) data = intentData.toString();
+        }
 
-            if (data != null && !Utils.isEmpty(data)) {
-                final IntentModel model = Utils.stripString(data);
-                if (model != null && model.getType() == IntentModelType.POST) {
-                    final String text = model.getText();
+        if (data != null && !TextUtils.isEmpty(data)) {
+            final IntentModel model = IntentUtils.parseUrl(data);
+            if (model != null && model.getType() == IntentModelType.POST) {
+                final String text = model.getText();
 
-                    new PostFetcher(text, new FetchListener<ViewerPostModel[]>() {
-                        @Override
-                        public void doBefore() {
-                            if (notificationManager == null)
-                                notificationManager = NotificationManagerCompat.from(context.getApplicationContext());
+                new PostFetcher(text, new FetchListener<ViewerPostModel[]>() {
+                    @Override
+                    public void doBefore() {
+                        final Notification fetchingPostNotif = new NotificationCompat.Builder(context, Constants.DOWNLOAD_CHANNEL_ID)
+                                .setCategory(NotificationCompat.CATEGORY_STATUS).setSmallIcon(R.mipmap.ic_launcher)
+                                .setAutoCancel(false).setPriority(NotificationCompat.PRIORITY_MIN)
+                                .setContentText(context.getString(R.string.direct_download_loading)).build();
+                        notificationManager.notify(1900000000, fetchingPostNotif);
+                    }
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isChannelCreated) {
-                                notificationManager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
-                                        CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH));
-                                isChannelCreated = true;
-                            }
-                            final Notification fetchingPostNotif = new NotificationCompat.Builder(context, CHANNEL_ID)
-                                    .setCategory(NotificationCompat.CATEGORY_STATUS).setSmallIcon(R.mipmap.ic_launcher)
-                                    .setAutoCancel(false).setPriority(NotificationCompat.PRIORITY_MIN)
-                                    .setContentText(context.getString(R.string.direct_download_loading)).build();
-                            notificationManager.notify(1900000000, fetchingPostNotif);
-                        }
-
-                        @Override
-                        public void onResult(final ViewerPostModel[] result) {
-                            if (notificationManager != null) notificationManager.cancel(1900000000);
-                            if (result != null) {
-                                if (result.length == 1) {
-                                    Utils.batchDownload(context, result[0].getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
-                                            Arrays.asList(result));
-                                } else if (result.length > 1) {
-                                    context.startActivity(new Intent(context, MultiDirectDialog.class)
-                                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                                            .putExtra(Constants.EXTRAS_POST, result));
-                                }
+                    @Override
+                    public void onResult(final ViewerPostModel[] result) {
+                        if (notificationManager != null) notificationManager.cancel(1900000000);
+                        if (result != null) {
+                            if (result.length == 1) {
+                                DownloadUtils.batchDownload(context, result[0].getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
+                                                            Arrays.asList(result));
+                            } else if (result.length > 1) {
+                                context.startActivity(new Intent(context, MultiDirectDialog.class)
+                                                              .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                                                              .putExtra(Constants.EXTRAS_POST, result));
                             }
                         }
-                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                }
+                    }
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     }

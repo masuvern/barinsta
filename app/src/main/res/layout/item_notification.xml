@@ -1,19 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    tools:viewBindingIgnore="true">
+    android:background="?android:selectableItemBackground"
+    android:baselineAligned="false"
+    android:padding="8dp">
 
-    <include
-        android:id="@+id/container"
-        layout="@layout/layout_include_notif_item" />
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/ivProfilePic"
+        android:layout_width="@dimen/notification_image_size"
+        android:layout_height="@dimen/notification_image_size"
+        android:visibility="visible"
+        app:actualImageScaleType="centerCrop"
+        app:layout_constraintEnd_toStartOf="@id/barrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:roundAsCircle="true"
+        tools:placeholderImage="@mipmap/ic_launcher" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="4dp"
-        android:background="#80888888" />
-</LinearLayout>
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+    <!--    android:id="@+id/multi_pic1"-->
+    <!--    android:layout_width="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    android:layout_height="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    app:actualImageScaleType="centerCrop"-->
+    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--    app:layout_constraintStart_toStartOf="parent"-->
+    <!--    app:layout_constraintTop_toTopOf="parent"-->
+    <!--    app:placeholderImage="@mipmap/ic_launcher" />-->
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+    <!--    android:id="@+id/multi_pic2"-->
+    <!--    android:layout_width="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    android:layout_height="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    app:layout_constraintBottom_toTopOf="@+id/multi_pic3"-->
+    <!--    app:layout_constraintEnd_toStartOf="@id/barrier"-->
+    <!--    app:layout_constraintStart_toEndOf="@id/multi_pic1"-->
+    <!--    app:layout_constraintTop_toTopOf="parent"-->
+    <!--    app:placeholderImage="@mipmap/ic_launcher" />-->
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+    <!--    android:id="@+id/multi_pic3"-->
+    <!--    android:layout_width="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    android:layout_height="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--    app:layout_constraintEnd_toStartOf="@id/barrier"-->
+    <!--    app:layout_constraintStart_toEndOf="@id/multi_pic1"-->
+    <!--    app:layout_constraintTop_toBottomOf="@+id/multi_pic2"-->
+    <!--    app:placeholderImage="@mipmap/ic_launcher" />-->
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="ivProfilePic" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvUsername"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:paddingStart="16dp"
+        android:paddingLeft="16dp"
+        android:paddingEnd="16dp"
+        android:paddingRight="16dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        app:layout_constraintEnd_toStartOf="@id/ivPreviewPic"
+        app:layout_constraintStart_toStartOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="username" />
+
+    <awais.instagrabber.customviews.RamboTextView
+        android:id="@+id/tvComment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:linksClickable="true"
+        android:paddingStart="16dp"
+        android:paddingLeft="16dp"
+        android:paddingEnd="16dp"
+        android:paddingRight="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toTopOf="@id/tvSubComment"
+        app:layout_constraintEnd_toStartOf="@id/ivPreviewPic"
+        app:layout_constraintStart_toStartOf="@id/tvUsername"
+        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+        tools:text="comment comment comment comment comment comment comment comment comment comment comment comment comment " />
+
+    <awais.instagrabber.customviews.RamboTextView
+        android:id="@+id/tvSubComment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:autoLink="web|email"
+        android:ellipsize="end"
+        android:linksClickable="true"
+        android:paddingStart="16dp"
+        android:paddingLeft="16dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        app:layout_constraintEnd_toStartOf="@id/tvDate"
+        app:layout_constraintStart_toStartOf="@id/tvUsername"
+        app:layout_constraintTop_toBottomOf="@id/tvComment"
+        tools:text="sub-comment" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:gravity="end"
+        android:paddingStart="8dp"
+        android:paddingLeft="8dp"
+        android:paddingEnd="16dp"
+        android:paddingRight="16dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ivPreviewPic"
+        app:layout_constraintStart_toEndOf="@id/tvSubComment"
+        app:layout_constraintTop_toBottomOf="@id/tvComment"
+        tools:text="date" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/preview_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="ivPreviewPic" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/ivPreviewPic"
+        android:layout_width="@dimen/notification_image_size"
+        android:layout_height="@dimen/notification_image_size"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/preview_barrier"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:placeholderImage="@mipmap/ic_launcher"
+        tools:visibility="visible" />
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+    <!--    android:id="@+id/preview_pic1"-->
+    <!--    android:layout_width="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    android:layout_height="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--    app:layout_constraintEnd_toStartOf="@id/preview_pic2"-->
+    <!--    app:layout_constraintStart_toEndOf="@id/preview_barrier"-->
+    <!--    app:layout_constraintTop_toTopOf="parent"-->
+    <!--    app:placeholderImage="@mipmap/ic_launcher" />-->
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+    <!--    android:id="@+id/preview_pic2"-->
+    <!--    android:layout_width="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    android:layout_height="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    app:layout_constraintEnd_toEndOf="parent"-->
+    <!--    app:layout_constraintStart_toEndOf="@id/preview_pic1"-->
+    <!--    app:layout_constraintTop_toTopOf="parent"-->
+    <!--    app:placeholderImage="@mipmap/ic_launcher" />-->
+
+    <!--<com.facebook.drawee.view.SimpleDraweeView-->
+    <!--    android:id="@+id/preview_pic3"-->
+    <!--    android:layout_width="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    android:layout_height="@dimen/simple_item_picture_size_exact_half"-->
+    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--    app:layout_constraintEnd_toEndOf="parent"-->
+    <!--    app:layout_constraintStart_toEndOf="@id/preview_pic1"-->
+    <!--    app:layout_constraintTop_toBottomOf="@id/preview_pic2"-->
+    <!--    app:placeholderImage="@mipmap/ic_launcher" />-->
+
+    <!--<androidx.constraintlayout.widget.Group-->
+    <!--    android:id="@+id/multi_pic_group"-->
+    <!--    android:layout_width="wrap_content"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:visibility="visible"-->
+    <!--    app:constraint_referenced_ids="multi_pic1, multi_pic2, multi_pic3" />-->
+
+    <!--<androidx.constraintlayout.widget.Group-->
+    <!--    android:id="@+id/preview_pic_group"-->
+    <!--    android:layout_width="wrap_content"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:visibility="gone"-->
+    <!--    app:constraint_referenced_ids="preview_pic1, preview_pic2, preview_pic3" />-->
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package awais.instagrabber.fragments.directmessages;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,6 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -19,14 +23,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -48,9 +52,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.PostViewer;
-import awais.instagrabber.activities.ProfileViewer;
-import awais.instagrabber.activities.StoryViewer;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
@@ -60,9 +61,7 @@ import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ImageUploadOptions;
-import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
@@ -70,21 +69,26 @@ import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public class DirectMessageThreadFragment extends Fragment {
     private static final String TAG = "DirectMessagesThreadFmt";
     private static final int PICK_IMAGE = 100;
 
-    private FragmentActivity fragmentActivity;
-    private String threadId, threadTitle, cursor, lastMessage;
+    private AppCompatActivity fragmentActivity;
+    private String threadId;
+    private String threadTitle;
+    private String cursor;
+    private String lastMessage;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-    private final String myId = Utils.getUserIdFromCookie(cookie);
+    private final String myId = CookieUtils.getUserIdFromCookie(cookie);
     private FragmentDirectMessagesThreadBinding binding;
     private DirectItemModelListViewModel listViewModel;
     private DirectItemModel directItemModel;
     private RecyclerView messageList;
-    private AppCompatImageView dmInfo, dmSeen;
     private boolean hasDeletedSomething;
     private boolean hasOlder = true;
     public static boolean hasSentSomething;
@@ -97,8 +101,10 @@ public class DirectMessageThreadFragment extends Fragment {
     private final View.OnClickListener clickListener = v -> {
         if (v == binding.commentSend) {
             final String text = binding.commentText.getText().toString();
-            if (Utils.isEmpty(text)) {
-                Toast.makeText(requireContext(), R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
+            if (TextUtils.isEmpty(text)) {
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
                 return;
             }
             sendText(text, null, false);
@@ -120,8 +126,11 @@ public class DirectMessageThreadFragment extends Fragment {
 
         @Override
         public void onResult(final InboxThreadModel result) {
-            if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || Utils.isEmpty(cursor)))
-                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || TextUtils.isEmpty(cursor))) {
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            }
 
             if (result != null) {
                 cursor = result.getOldestCursor();
@@ -159,115 +168,125 @@ public class DirectMessageThreadFragment extends Fragment {
             binding.swipeRefreshLayout.setRefreshing(false);
         }
     };
+    private LinearLayout root;
+    private boolean shouldRefresh = true;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fragmentActivity = requireActivity();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (hasSentSomething) {
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
+        fragmentActivity = (AppCompatActivity) requireActivity();
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
-        binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
-        CoordinatorLayout containerTwo = (CoordinatorLayout) container.getParent();
-        dmInfo = containerTwo.findViewById(R.id.dmInfo);
-        dmSeen = containerTwo.findViewById(R.id.dmSeen);
-        final LinearLayout root = binding.getRoot();
-        listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
-        if (getArguments() == null) {
+        if (root != null) {
+            shouldRefresh = false;
             return root;
         }
+        binding = FragmentDirectMessagesThreadBinding.inflate(inflater, container, false);
+        root = binding.getRoot();
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        if (!shouldRefresh) return;
+        init();
+        shouldRefresh = false;
+    }
+
+    private void init() {
+        listViewModel = new ViewModelProvider(fragmentActivity).get(DirectItemModelListViewModel.class);
+        if (getArguments() == null) return;
         if (!DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId().equals(threadId)) {
             listViewModel.empty();
             threadId = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getThreadId();
         }
         threadTitle = DirectMessageThreadFragmentArgs.fromBundle(getArguments()).getTitle();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(threadTitle);
+        }
         binding.swipeRefreshLayout.setEnabled(false);
         messageList = binding.messageList;
         messageList.setHasFixedSize(true);
         binding.commentSend.setOnClickListener(clickListener);
         binding.image.setOnClickListener(clickListener);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        final Context context = getContext();
+        if (context == null) return;
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setReverseLayout(true);
-        // layoutManager.setStackFromEnd(true);
         messageList.setLayoutManager(layoutManager);
         messageList.addOnScrollListener(new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (Utils.isEmpty(cursor) || !hasOlder) {
+            if (TextUtils.isEmpty(cursor) || !hasOlder) {
                 return;
             }
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener).execute(); // serial because we don't want messages to be randomly ordered
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, cursor, fetchListener)
+                    .execute(); // serial because we don't want messages to be randomly ordered
         }));
-        dmInfo.setOnClickListener(v -> {
-            final NavDirections action =
-                    DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
-            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
-        });
-
-        dmSeen.setOnClickListener(v -> {
-            new ThreadAction().execute("seen", lastMessage);
-            dmSeen.setVisibility(View.GONE);
-        });
-
         final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
             if (which == 0) {
                 final DirectItemType itemType = directItemModel.getItemType();
                 switch (itemType) {
                     case MEDIA_SHARE:
                     case CLIP:
-                        startActivity(new Intent(requireContext(), PostViewer.class)
-                                .putExtra(Constants.EXTRAS_POST, new PostModel(directItemModel.getMediaModel().getCode(), false)));
+                        final long postId = directItemModel.getMediaModel().getPk();
+                        final boolean isId = true;
+                        final NavController navController = NavHostFragment.findNavController(this);
+                        final NavDirections action = DirectMessageThreadFragmentDirections
+                                .actionGlobalPostViewFragment(
+                                        0,
+                                        new String[]{String.valueOf(postId)},
+                                        isId
+                                );
+                        navController.navigate(action);
                         break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);
+                        linkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         linkIntent.setData(Uri.parse(directItemModel.getLinkModel().getLinkContext().getLinkUrl()));
                         startActivity(linkIntent);
                         break;
                     case TEXT:
                     case REEL_SHARE:
-                        Utils.copyText(requireContext(), directItemModel.getText());
-                        Toast.makeText(requireContext(), R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
+                        Utils.copyText(context, directItemModel.getText());
+                        Toast.makeText(context, R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
                         break;
                     case RAVEN_MEDIA:
                     case MEDIA:
                         final ProfileModel user = getUser(directItemModel.getUserId());
                         final DirectItemModel.DirectItemMediaModel selectedItem =
                                 itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia();
-                        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl();
+                        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
+                                           ? selectedItem.getVideoUrl()
+                                           : selectedItem.getThumbUrl();
                         if (url == null) {
-                            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            Utils.dmDownload(requireContext(), user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
-                            Toast.makeText(requireContext(), R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        } else {
+                            DownloadUtils.dmDownload(context, user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
+                            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
                         }
                         break;
                     case STORY_SHARE:
                         if (directItemModel.getReelShare() != null) {
-                            StoryModel sm = new StoryModel(
-                                    directItemModel.getReelShare().getReelId(),
-                                    directItemModel.getReelShare().getMedia().getVideoUrl(),
-                                    directItemModel.getReelShare().getMedia().getMediaType(),
-                                    directItemModel.getTimestamp(),
-                                    directItemModel.getReelShare().getReelOwnerName(),
-                                    String.valueOf(directItemModel.getReelShare().getReelOwnerId()),
-                                    false
-                            );
-                            sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
-                            StoryModel[] sms = {sm};
-                            startActivity(new Intent(requireContext(), StoryViewer.class)
-                                    .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
-                                    .putExtra(Constants.EXTRAS_STORIES, sms)
-                            );
+                            // StoryModel sm = new StoryModel(
+                            //         directItemModel.getReelShare().getReelId(),
+                            //         directItemModel.getReelShare().getMedia().getVideoUrl(),
+                            //         directItemModel.getReelShare().getMedia().getMediaType(),
+                            //         directItemModel.getTimestamp(),
+                            //         directItemModel.getReelShare().getReelOwnerName(),
+                            //         String.valueOf(directItemModel.getReelShare().getReelOwnerId()),
+                            //         false
+                            // );
+                            // sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
+                            // StoryModel[] sms = {sm};
+                            // startActivity(new Intent(getContext(), StoryViewer.class)
+                            //         .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
+                            //         .putExtra(Constants.EXTRAS_STORIES, sms)
+                            // );
                         } else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         }
@@ -277,15 +296,15 @@ public class DirectMessageThreadFragment extends Fragment {
                             searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
                         break;
                     default:
-                        Log.d("austin_debug", "unsupported type " + itemType);
+                        Log.d(TAG, "unsupported type " + itemType);
                 }
-            }
-            else if (which == 1) {
+            } else if (which == 1) {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
-            }
-            else if (which == 2) {
-                if (directItemModel == null) Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                else if (String.valueOf(directItemModel.getUserId()).equals(myId)) new ThreadAction().execute("delete", directItemModel.getItemId());
+            } else if (which == 2) {
+                if (directItemModel == null)
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                else if (String.valueOf(directItemModel.getUserId()).equals(myId))
+                    new ThreadAction().execute("delete", directItemModel.getItemId());
                 else searchUsername(getUser(directItemModel.getUserId()).getUsername());
             }
         };
@@ -334,21 +353,59 @@ public class DirectMessageThreadFragment extends Fragment {
                         getString(String.valueOf(directItemModel.getUserId()).equals(myId) ? R.string.dms_inbox_unsend : R.string.dms_inbox_author)
                 };
 
-                dialogAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, dialogList);
+                dialogAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, dialogList);
 
-                new AlertDialog.Builder(requireContext())
+                new AlertDialog.Builder(context)
                         .setAdapter(dialogAdapter, onDialogListener)
                         .show();
             }
         };
-        final MentionClickListener mentionClickListener = (view, text, isHashtag) -> searchUsername(text);
+        final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> searchUsername(text);
         final DirectMessageItemsAdapter adapter = new DirectMessageItemsAdapter(users, leftUsers, onClickListener, mentionClickListener);
         messageList.setAdapter(adapter);
         listViewModel.getList().observe(fragmentActivity, adapter::submitList);
         if (listViewModel.isEmpty()) {
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
-        return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (hasSentSomething) {
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(threadTitle);
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull final Menu menu) {
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
+        inflater.inflate(R.menu.dm_thread_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        final int itemId = item.getItemId();
+        switch (itemId) {
+            case R.id.info:
+                final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
+                NavHostFragment.findNavController(this).navigate(action);
+                return true;
+            case R.id.mark_as_seen:
+                new ThreadAction().execute("seen", lastMessage);
+                item.setVisible(false);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -385,7 +442,9 @@ public class DirectMessageThreadFragment extends Fragment {
         }
         broadcast(text != null ? textOptions : reactionOptions, result -> {
             if (result == null || result.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                final Context context = getContext();
+                if (context == null) return;
+                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                 return;
             }
             if (text != null) {
@@ -399,19 +458,22 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             DirectMessageInboxFragment.refreshPlease = true;
             hasSentSomething = true;
-            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         });
     }
 
     private void sendImage(final Uri imageUri) {
-        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri)) {
+        final Context context = getContext();
+        if (context == null) return;
+        try (InputStream inputStream = context.getContentResolver().openInputStream(imageUri)) {
             final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            Toast.makeText(requireContext(), R.string.uploading, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.uploading, Toast.LENGTH_SHORT).show();
             // Upload Image
             final ImageUploader imageUploader = new ImageUploader();
             imageUploader.setOnTaskCompleteListener(response -> {
                 if (response == null || response.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     if (response != null && response.getResponse() != null) {
                         Log.e(TAG, response.getResponse().toString());
                     }
@@ -423,7 +485,9 @@ public class DirectMessageThreadFragment extends Fragment {
                     // Broadcast
                     final DirectThreadBroadcaster.ImageBroadcastOptions options = new DirectThreadBroadcaster.ImageBroadcastOptions(true, uploadId);
                     hasSentSomething = true;
-                    broadcast(options, broadcastResponse -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
+                    broadcast(options,
+                              broadcastResponse -> new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                                      .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR));
                 } catch (JSONException e) {
                     Log.e(TAG, "Error parsing json response", e);
                 }
@@ -431,12 +495,13 @@ public class DirectMessageThreadFragment extends Fragment {
             final ImageUploadOptions options = ImageUploadOptions.builder(bitmap).build();
             imageUploader.execute(options);
         } catch (IOException e) {
-            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Error opening file", e);
         }
     }
 
-    private void broadcast(final DirectThreadBroadcaster.BroadcastOptions broadcastOptions, final DirectThreadBroadcaster.OnBroadcastCompleteListener listener) {
+    private void broadcast(final DirectThreadBroadcaster.BroadcastOptions broadcastOptions,
+                           final DirectThreadBroadcaster.OnBroadcastCompleteListener listener) {
         final DirectThreadBroadcaster broadcaster = new DirectThreadBroadcaster(threadId);
         broadcaster.setOnTaskCompleteListener(listener);
         broadcaster.execute(broadcastOptions);
@@ -455,7 +520,8 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void searchUsername(final String text) {
-        startActivity(new Intent(requireContext(), ProfileViewer.class).putExtra(Constants.EXTRAS_USERNAME, text));
+        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + text);
+        NavHostFragment.findNavController(this).navigate(action);
     }
 
     public static class DirectItemModelListViewModel extends ViewModel {
@@ -466,8 +532,7 @@ public class DirectMessageThreadFragment extends Fragment {
             if (list == null) {
                 list = new MutableLiveData<>();
                 isEmpty = true;
-            }
-            else isEmpty = false;
+            } else isEmpty = false;
             return list;
         }
 
@@ -487,10 +552,10 @@ public class DirectMessageThreadFragment extends Fragment {
         protected Void doInBackground(String... rawAction) {
             action = rawAction[0];
             argument = rawAction[1];
-            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/"+threadId+"/items/"+argument+"/"+action+"/";
+            final String url = "https://i.instagram.com/api/v1/direct_v2/threads/" + threadId + "/items/" + argument + "/" + action + "/";
             try {
                 String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
-                        +"&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+                        + "&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
                 final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
@@ -504,8 +569,8 @@ public class DirectMessageThreadFragment extends Fragment {
                 wr.close();
                 urlConnection.connect();
                 if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    if (action == "delete") hasDeletedSomething = true;
-                    else if (action == "seen") DirectMessageInboxFragment.refreshPlease = true;
+                    if (action.equals("delete")) hasDeletedSomething = true;
+                    else if (action.equals("seen")) DirectMessageInboxFragment.refreshPlease = true;
                 }
                 urlConnection.disconnect();
             } catch (Throwable ex) {
@@ -518,7 +583,8 @@ public class DirectMessageThreadFragment extends Fragment {
         protected void onPostExecute(Void result) {
             if (hasDeletedSomething) {
                 directItemModel = null;
-                new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                new DirectMessageInboxThreadFetcher(threadId, UserInboxDirection.OLDER, null, fetchListener)
+                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     }

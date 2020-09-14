@@ -45,8 +45,8 @@ public final class ExportImportUtils {
     public static void Export(@Nullable final String password, @ExportImportFlags final int flags, @NonNull final File filePath,
                               final FetchListener<Boolean> fetchListener) {
         final String exportString = ExportImportUtils.getExportString(flags);
-        if (!Utils.isEmpty(exportString)) {
-            final boolean isPass = !Utils.isEmpty(password);
+        if (!TextUtils.isEmpty(exportString)) {
+            final boolean isPass = !TextUtils.isEmpty(password);
             byte[] exportBytes = null;
 
             if (isPass) {
@@ -97,28 +97,30 @@ public final class ExportImportUtils {
                 final AppCompatEditText editText = new AppCompatEditText(context);
                 editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32)});
                 editText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                new AlertDialog.Builder(context).setView(editText).setTitle(R.string.password).setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    final CharSequence text = editText.getText();
-                    if (!Utils.isEmpty(text)) {
-                        try {
-                            final byte[] passwordBytes = text.toString().getBytes();
-                            final byte[] bytes = new byte[32];
-                            System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
-                            saveToSettings(new String(PasswordUtils.dec(builder.toString(), bytes)), flags, fetchListener);
-                        } catch (final Exception e) {
-                            if (fetchListener != null) fetchListener.onResult(false);
-                            if (logCollector != null)
-                                logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import::pass");
-                            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-                        }
+                new AlertDialog.Builder(context).setView(editText).setTitle(R.string.password)
+                                                .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                                                    final CharSequence text = editText.getText();
+                                                    if (!TextUtils.isEmpty(text)) {
+                                                        try {
+                                                            final byte[] passwordBytes = text.toString().getBytes();
+                                                            final byte[] bytes = new byte[32];
+                                                            System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
+                                                            saveToSettings(new String(PasswordUtils.dec(builder.toString(), bytes)), flags,
+                                                                           fetchListener);
+                                                        } catch (final Exception e) {
+                                                            if (fetchListener != null) fetchListener.onResult(false);
+                                                            if (logCollector != null)
+                                                                logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import::pass");
+                                                            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                                                        }
 
-                    } else
-                        Toast.makeText(context, R.string.dialog_export_err_password_empty, Toast.LENGTH_SHORT).show();
-                }).show();
+                                                    } else
+                                                        Toast.makeText(context, R.string.dialog_export_err_password_empty, Toast.LENGTH_SHORT).show();
+                                                }).show();
 
             } else if (configType == 'Z') {
                 saveToSettings(new String(Base64.decode(builder.toString(), Base64.DEFAULT | Base64.NO_PADDING | Base64.NO_WRAP)),
-                        flags, fetchListener);
+                               flags, fetchListener);
 
             } else {
                 Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
@@ -156,8 +158,12 @@ public final class ExportImportUtils {
                 final int cookiesLen = cookies.length();
                 for (int i = 0; i < cookiesLen; ++i) {
                     final JSONObject cookieObject = cookies.getJSONObject(i);
-                    Utils.dataBox.addUserCookie(new DataBox.CookieModel(cookieObject.getString("i"),
-                            cookieObject.getString("u"), cookieObject.getString("c")));
+                    // final DataBox.CookieModel cookieModel = new DataBox.CookieModel(cookieObject.getString("i"),
+                    //                                                                 cookieObject.getString("u"),
+                    //                                                                 cookieObject.getString("c"),
+                    //                                                                 fullName,
+                    //                                                                 profilePic);
+                    // Utils.dataBox.addOrUpdateUser(cookieModel.getUid(), cookieModel.getUserInfo(), cookieModel.getCookie());
                 }
             }
 
@@ -167,7 +173,8 @@ public final class ExportImportUtils {
                 for (int i = 0; i < favsLen; ++i) {
                     final JSONObject favsObject = favs.getJSONObject(i);
                     Utils.dataBox.addFavorite(new DataBox.FavoriteModel(favsObject.getString("q"),
-                            favsObject.getLong("d"), favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
+                                                                        favsObject.getLong("d"),
+                                                                        favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
                 }
             }
 
@@ -217,24 +224,23 @@ public final class ExportImportUtils {
         if (settingsHelper != null) {
             try {
                 final JSONObject json = new JSONObject();
-                json.put(Constants.APP_THEME, settingsHelper.getInteger(Constants.APP_THEME));
-                json.put(Constants.APP_LANGUAGE, settingsHelper.getInteger(Constants.APP_LANGUAGE));
+                json.put(Constants.APP_THEME, settingsHelper.getString(Constants.APP_THEME));
+                json.put(Constants.APP_LANGUAGE, settingsHelper.getString(Constants.APP_LANGUAGE));
 
                 String str = settingsHelper.getString(Constants.FOLDER_PATH);
-                if (!Utils.isEmpty(str)) json.put(Constants.FOLDER_PATH, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.FOLDER_PATH, str);
 
                 str = settingsHelper.getString(Constants.DATE_TIME_FORMAT);
-                if (!Utils.isEmpty(str)) json.put(Constants.DATE_TIME_FORMAT, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.DATE_TIME_FORMAT, str);
 
                 str = settingsHelper.getString(Constants.DATE_TIME_SELECTION);
-                if (!Utils.isEmpty(str)) json.put(Constants.DATE_TIME_SELECTION, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.DATE_TIME_SELECTION, str);
 
                 str = settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT);
-                if (!Utils.isEmpty(str)) json.put(Constants.CUSTOM_DATE_TIME_FORMAT, str);
+                if (!TextUtils.isEmpty(str)) json.put(Constants.CUSTOM_DATE_TIME_FORMAT, str);
 
                 json.put(Constants.DOWNLOAD_USER_FOLDER, settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER));
                 json.put(Constants.MUTED_VIDEOS, settingsHelper.getBoolean(Constants.MUTED_VIDEOS));
-                json.put(Constants.BOTTOM_TOOLBAR, settingsHelper.getBoolean(Constants.BOTTOM_TOOLBAR));
                 json.put(Constants.AUTOPLAY_VIDEOS, settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
                 json.put(Constants.AUTOLOAD_POSTS, settingsHelper.getBoolean(Constants.AUTOLOAD_POSTS));
                 json.put(Constants.FOLDER_SAVE_TO, settingsHelper.getBoolean(Constants.FOLDER_SAVE_TO));

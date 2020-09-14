@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Date;
 
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public final class CommentModel {
@@ -18,7 +19,7 @@ public final class CommentModel {
     public CommentModel(final String id, final String text, final long timestamp, final long likes, final boolean liked,
                         final ProfileModel profileModel) {
         this.id = id;
-        this.text = Utils.hasMentions(text) ? Utils.getMentionText(text) : text;
+        this.text = TextUtils.hasMentions(text) ? TextUtils.getMentionText(text) : text;
         this.likes = likes;
         this.liked = liked;
         this.timestamp = timestamp;
