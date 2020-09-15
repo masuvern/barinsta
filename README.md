@@ -1,4 +1,4 @@
-<img src="./app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" alt="InstaGrabber" align="right" width="25%"/>
+<img src="./app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" alt="InstaGrabber" align="right"/>
 
 ## Barinsta
 
