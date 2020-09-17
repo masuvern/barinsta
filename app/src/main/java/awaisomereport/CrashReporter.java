@@ -159,7 +159,7 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
             if ((errorFileList != null && errorFileList.length > 0) || sendZipsOnly) {
                 final StringBuilder errorStringBuilder;
 
-                if (sendZipsOnly) errorStringBuilder = new StringBuilder("So... what happened?\n\n");
+                if (sendZipsOnly) errorStringBuilder = new StringBuilder("(Not a crash)\n\n");
                 else {
                     errorStringBuilder = new StringBuilder("\r\n\r\n");
                     final int maxSendMail = 5;
@@ -187,7 +187,7 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                         .putExtra(Intent.EXTRA_EMAIL, new String[]{email})
                         .putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(application, BuildConfig.APPLICATION_ID + ".provider", crashLogsZip))
-                        .putExtra(Intent.EXTRA_SUBJECT, "InstaGrabber Crash Report")
+                        .putExtra(Intent.EXTRA_SUBJECT, "Barinsta Crash Report")
                         .putExtra(Intent.EXTRA_TEXT, errorStringBuilder.toString()), "Select an email app to send crash logs"));
             }
         } catch (final Exception e) {
