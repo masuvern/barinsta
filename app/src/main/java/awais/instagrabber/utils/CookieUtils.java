@@ -10,6 +10,8 @@ import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awaisomereport.LogCollector;
@@ -74,79 +76,40 @@ public final class CookieUtils {
 
     @Nullable
     public static String getCookie(@Nullable final String webViewUrl) {
-        int lastLongestCookieLength = 0;
-        String mainCookie = null;
+        final List<String> domains = Arrays.asList(
+                "https://instagram.com",
+                "https://instagram.com/",
+                "http://instagram.com",
+                "http://instagram.com",
+                "https://www.instagram.com",
+                "https://www.instagram.com/",
+                "http://www.instagram.com",
+                "http://www.instagram.com/"
+        );
 
-        String cookie;
         if (!TextUtils.isEmpty(webViewUrl)) {
-            cookie = COOKIE_MANAGER.getCookie(webViewUrl);
+            domains.add(0, webViewUrl);
+        }
+
+        return getLongestCookie(domains);
+    }
+
+    @Nullable
+    private static String getLongestCookie(final List<String> domains) {
+        int longestLength = 0;
+        String longestCookie = null;
+
+        for (final String domain : domains) {
+            final String cookie = COOKIE_MANAGER.getCookie(domain);
             if (cookie != null) {
-                final int cookieLen = cookie.length();
-                if (cookieLen > lastLongestCookieLength) {
-                    mainCookie = cookie;
-                    lastLongestCookieLength = cookieLen;
+                final int cookieLength = cookie.length();
+                if (cookieLength > longestLength) {
+                    longestCookie = cookie;
+                    longestLength = cookieLength;
                 }
             }
         }
-        cookie = COOKIE_MANAGER.getCookie("https://instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("https://instagram.com/");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("http://instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("http://instagram.com/");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("https://www.instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("https://www.instagram.com/");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("http://www.instagram.com");
-        if (cookie != null) {
-            final int cookieLen = cookie.length();
-            if (cookieLen > lastLongestCookieLength) {
-                mainCookie = cookie;
-                lastLongestCookieLength = cookieLen;
-            }
-        }
-        cookie = COOKIE_MANAGER.getCookie("http://www.instagram.com/");
-        if (cookie != null && cookie.length() > lastLongestCookieLength) mainCookie = cookie;
 
-        return mainCookie;
+        return longestCookie;
     }
 }
