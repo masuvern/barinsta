@@ -108,4 +108,24 @@
         <item name="android:background">?colorSurface</item>
         <item name="android:windowBackground">?attr/colorSurface</item>
     </style>
+
+    <style name="ThemeOverlay.MaterialComponents.MaterialAlertDialog.Light" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <!--<item name="colorPrimary">?attr/colorPrimaryDark</item>-->
+        <!--<item name="colorSecondary">?attr/colorSecondaryVariant</item>-->
+        <!--<item name="colorSurface">@color/shrine_pink_light</item>-->
+        <!--<item name="colorOnSurface">@color/shrine_pink_900</item>-->
+        <!--<item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text</item>-->
+        <!--<item name="colorPrimary">?attr/colorPrimaryDark</item>-->
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button.TextButton.Dialog.Light</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.MaterialComponents.Button.TextButton.Dialog.Light</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MaterialComponents.Button.TextButton.Dialog.Light</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.Button.TextButton.Dialog.Light" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MaterialComponents.Button.TextButton.Light</item>
+    </style>
+
+    <style name="ThemeOverlay.MaterialComponents.Button.TextButton.Light" parent="">
+        <item name="colorPrimary">?attr/colorPrimaryDark</item>
+    </style>
 </resources>

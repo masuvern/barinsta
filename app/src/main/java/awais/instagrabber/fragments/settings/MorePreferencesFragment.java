@@ -107,6 +107,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 return true;
             }));
         }
+        generalCategory.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
+            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
+            NavHostFragment.findNavController(this).navigate(navDirections);
+            return true;
+        }));
         generalCategory.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {
             final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
             NavHostFragment.findNavController(this).navigate(navDirections);

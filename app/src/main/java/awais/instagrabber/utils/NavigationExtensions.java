@@ -57,7 +57,8 @@ public class NavigationExtensions {
                 return false;
             }
             String newlySelectedItemTag = graphIdToTagMap.get(item.getItemId());
-            if (!selectedItemTag[0].equals(newlySelectedItemTag)) {
+            String tag = selectedItemTag[0];
+            if (tag != null && !tag.equals(newlySelectedItemTag)) {
                 fragmentManager.popBackStack(firstFragmentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 Fragment fragment = fragmentManager.findFragmentByTag(newlySelectedItemTag);
                 if (fragment == null) {

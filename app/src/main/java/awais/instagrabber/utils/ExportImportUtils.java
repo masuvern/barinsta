@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -35,6 +36,8 @@ import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class ExportImportUtils {
+    private static final String TAG = "ExportImportUtils";
+
     public static final int FLAG_COOKIES = 1;
     public static final int FLAG_FAVORITES = 1 << 1;
     public static final int FLAG_SETTINGS = 1 << 2;
@@ -60,7 +63,7 @@ public final class ExportImportUtils {
                     if (fetchListener != null) fetchListener.onResult(false);
                     if (logCollector != null)
                         logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::isPass");
-                    if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                 }
             } else {
                 exportBytes = Base64.encode(exportString.getBytes(), Base64.DEFAULT | Base64.NO_WRAP | Base64.NO_PADDING);
@@ -75,7 +78,7 @@ public final class ExportImportUtils {
                     if (fetchListener != null) fetchListener.onResult(false);
                     if (logCollector != null)
                         logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::notPass");
-                    if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                 }
             } else if (fetchListener != null) fetchListener.onResult(false);
         }
@@ -111,7 +114,7 @@ public final class ExportImportUtils {
                                                             if (fetchListener != null) fetchListener.onResult(false);
                                                             if (logCollector != null)
                                                                 logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import::pass");
-                                                            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                                                            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                                                         }
 
                                                     } else
@@ -129,7 +132,7 @@ public final class ExportImportUtils {
         } catch (final Exception e) {
             if (fetchListener != null) fetchListener.onResult(false);
             if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
     }
 
@@ -172,9 +175,9 @@ public final class ExportImportUtils {
                 final int favsLen = favs.length();
                 for (int i = 0; i < favsLen; ++i) {
                     final JSONObject favsObject = favs.getJSONObject(i);
-                    Utils.dataBox.addFavorite(new DataBox.FavoriteModel(favsObject.getString("q"),
-                                                                        favsObject.getLong("d"),
-                                                                        favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
+                    // Utils.dataBox.addFavorite(new DataBox.FavoriteModel(favsObject.getString("q"),
+                    //                                                     favsObject.getLong("d"),
+                    //                                                     favsObject.has("s") ? favsObject.getString("s") : favsObject.getString("q")));
                 }
             }
 
@@ -183,7 +186,7 @@ public final class ExportImportUtils {
         } catch (final Exception e) {
             if (fetchListener != null) fetchListener.onResult(false);
             if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_IMPORT, "saveToSettings");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
     }
 
@@ -212,7 +215,7 @@ public final class ExportImportUtils {
             result = jsonObject.toString();
         } catch (final Exception e) {
             if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getExportString");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
         return result;
     }
@@ -249,7 +252,7 @@ public final class ExportImportUtils {
             } catch (final Exception e) {
                 result = null;
                 if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getSettings");
-                if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             }
         }
 
@@ -261,15 +264,15 @@ public final class ExportImportUtils {
         String result = null;
         if (Utils.dataBox != null) {
             try {
-                final ArrayList<DataBox.FavoriteModel> allFavorites = Utils.dataBox.getAllFavorites();
+                final List<DataBox.FavoriteModel> allFavorites = Utils.dataBox.getAllFavorites();
                 final int allFavoritesSize;
-                if (allFavorites != null && (allFavoritesSize = allFavorites.size()) > 0) {
+                if ((allFavoritesSize = allFavorites.size()) > 0) {
                     final JSONArray jsonArray = new JSONArray();
                     for (int i = 0; i < allFavoritesSize; i++) {
                         final DataBox.FavoriteModel favorite = allFavorites.get(i);
                         final JSONObject jsonObject = new JSONObject();
                         jsonObject.put("q", favorite.getQuery());
-                        jsonObject.put("d", favorite.getDate());
+                        jsonObject.put("d", favorite.getDateAdded().getTime());
                         jsonObject.put("s", favorite.getDisplayName());
                         jsonArray.put(jsonObject);
                     }
@@ -278,7 +281,7 @@ public final class ExportImportUtils {
             } catch (final Exception e) {
                 result = null;
                 if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getFavorites");
-                if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             }
         }
         return result;
@@ -305,7 +308,7 @@ public final class ExportImportUtils {
                 }
             } catch (final Exception e) {
                 result = null;
-                if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             }
         }
         return result;

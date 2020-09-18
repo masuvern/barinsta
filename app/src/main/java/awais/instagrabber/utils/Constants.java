@@ -81,4 +81,5 @@ public final class Constants {
     public static final String ACTION_SHOW_ACTIVITY = "show_activity";
     public static final String PREF_DARK_THEME = "dark_theme";
     public static final String PREF_LIGHT_THEME = "light_theme";
+    public static final String DEFAULT_HASH_TAG_PIC = "https://www.instagram.com/static/images/hashtag/search-hashtag-default-avatar.png/1d8417c9a4f5.png";
 }

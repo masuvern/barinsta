@@ -58,6 +58,7 @@
     <string name="select_language">Language</string>
     <string name="what_to_do_dialog">What to do?</string>
     <string name="main_posts_count">%s\nPosts</string>
+    <string name="main_posts_count_inline">%s Posts</string>
     <string name="main_posts_followers">%s\nFollowers</string>
     <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_video_post">Video post</string>
@@ -146,7 +147,7 @@
     <string name="time_settings_swap_time">Swap Time and Date positions</string>
     <string name="quick_access_info_dialog">Favorites panel is for adding your favorite hashtags and/or usernames.\n\nAnd the Quick Access panel is for quickly switching between accounts.\n\nNote 1: Make sure to Login into each account [Settings &gt; Login] to add account to the list!\n\nNote 2: Log out of the current account and then log into the other account.</string>
     <string name="quick_access_cannot_delete_curr">Cannot delete currently in use account</string>
-    <string name="quick_access_confirm_delete">Are you sure you want to delete %s?</string>
+    <string name="quick_access_confirm_delete">Are you sure you want to delete \'%s\'?</string>
     <string name="profile_viewer_imageinfo">Width: %d\nHeight: %d</string>
     <string name="profile_viewer_colordepth_prefix">\nColor depth:</string>
     <string name="profile_endpoint">Select profile picture endpoint\n(Does not affect hashtags)</string>
@@ -283,4 +284,11 @@
     <string name="dark_theme_settings">Dark theme</string>
     <string name="light_barinsta_theme">Barinsta</string>
     <string name="dark_material_dark_theme">Material Dark</string>
+    <string name="added_to_favs">Added to Favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="accounts">Accounts</string>
+    <string name="hashtags">Hashtags</string>
+    <string name="locations">Locations</string>
+    <string name="unknown">Unknown</string>
+    <string name="removed_from_favs">Removed from Favourites</string>
 </resources>

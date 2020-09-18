@@ -2,7 +2,6 @@ package awais.instagrabber.fragments.main;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,8 +29,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -42,9 +39,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import awais.instagrabber.ProfileNavGraphDirections;
@@ -71,6 +71,7 @@ import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
+import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
@@ -111,11 +112,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private StoryModel[] storyModels;
     private boolean hasNextPage;
     private String endCursor;
-    private AsyncTask<Void, Void, PostModel[]> currentlyExecuting;
-    private MenuItem favMenuItem;
+    private AsyncTask<Void, Void, List<PostModel>> currentlyExecuting;
     private boolean isPullToRefresh;
     private HighlightsAdapter highlightsAdapter;
     private HighlightsViewModel highlightsViewModel;
+    private MenuItem blockMenuItem;
+    private MenuItem restrictMenuItem;
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -161,11 +163,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     return false;
                 }
             });
-    private final FetchListener<PostModel[]> postsFetchListener = new FetchListener<PostModel[]>() {
+    private final FetchListener<List<PostModel>> postsFetchListener = new FetchListener<List<PostModel>>() {
         @Override
-        public void onResult(final PostModel[] result) {
+        public void onResult(final List<PostModel> result) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            if (result == null || result.length <= 0) {
+            if (result == null || result.isEmpty()) {
                 binding.privatePage1.setImageResource(R.drawable.ic_cancel);
                 binding.privatePage2.setText(R.string.empty_acc);
                 binding.privatePage.setVisibility(View.VISIBLE);
@@ -175,15 +177,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             final List<PostModel> postModels = postsViewModel.getList().getValue();
             List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>()
                                                                                    : new ArrayList<>(postModels);
-            final List<PostModel> resultList = Arrays.asList(result);
             if (isPullToRefresh) {
-                finalList = resultList;
+                finalList = result;
                 isPullToRefresh = false;
             } else {
-                finalList.addAll(resultList);
+                finalList.addAll(result);
             }
             postsViewModel.getList().postValue(finalList);
-            final PostModel lastPostModel = result[result.length - 1];
+            final PostModel lastPostModel = result.get(result.size() - 1);
             if (lastPostModel == null) return;
             endCursor = lastPostModel.getEndCursor();
             hasNextPage = lastPostModel.hasNextPage();
@@ -262,7 +263,81 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.profile_menu, menu);
-        favMenuItem = menu.findItem(R.id.favourites);
+        // favMenuItem = menu.findItem(R.id.favourites);
+        blockMenuItem = menu.findItem(R.id.block);
+        if (blockMenuItem != null) {
+            blockMenuItem.setVisible(false);
+        }
+        restrictMenuItem = menu.findItem(R.id.restrict);
+        if (restrictMenuItem != null) {
+            restrictMenuItem.setVisible(false);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        if (item.getItemId() == R.id.restrict) {
+            if (!isLoggedIn) return false;
+            final String action = profileModel.getRestricted() ? "Unrestrict" : "Restrict";
+            friendshipService.toggleRestrict(
+                    profileModel.getId(),
+                    !profileModel.getRestricted(),
+                    CookieUtils.getCsrfTokenFromCookie(cookie),
+                    new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
+                            Log.d(TAG, action + " success: " + result);
+                            fetchProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error while performing " + action, t);
+                        }
+                    });
+            return true;
+        }
+        if (item.getItemId() == R.id.block) {
+            final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+            if (!isLoggedIn) return false;
+            if (profileModel.getBlocked()) {
+                friendshipService.unblock(
+                        userIdFromCookie,
+                        profileModel.getId(),
+                        CookieUtils.getCsrfTokenFromCookie(cookie),
+                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                            @Override
+                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                Log.d(TAG, "Unblock success: " + result);
+                                fetchProfileDetails();
+                            }
+
+                            @Override
+                            public void onFailure(final Throwable t) {
+                                Log.e(TAG, "Error unblocking", t);
+                            }
+                        });
+                return true;
+            }
+            friendshipService.block(
+                    userIdFromCookie,
+                    profileModel.getId(),
+                    CookieUtils.getCsrfTokenFromCookie(cookie),
+                    new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                            Log.d(TAG, "Block success: " + result);
+                            fetchProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error blocking", t);
+                        }
+                    });
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -340,14 +415,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         new ProfileFetcher(username.substring(1), profileModel -> {
             if (getContext() == null) return;
             this.profileModel = profileModel;
-            final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-            final boolean isSelf = isLoggedIn
-                    && profileModel != null
-                    && userIdFromCookie != null
-                    && userIdFromCookie.equals(profileModel.getId());
-            if (favMenuItem != null) {
-                favMenuItem.setVisible(isSelf);
-            }
+            // final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+            // final boolean isSelf = isLoggedIn
+            //         && profileModel != null
+            //         && userIdFromCookie != null
+            //         && userIdFromCookie.equals(profileModel.getId());
+            // if (favMenuItem != null) {
+            //     favMenuItem.setVisible(isSelf);
+            // }
             setProfileDetails();
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -385,7 +460,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                       } else binding.highlightsList.setVisibility(View.GONE);
                                   }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.ALOINSTAGRAM.getValue())) {
-            Log.d("austin_debug", "alo triggered");
+            // Log.d(TAG, "alo triggered");
             aloService.getUserStory(profileId, profileModel.getUsername(), false, new ServiceCallback<List<StoryModel>>() {
                 @Override
                 public void onSuccess(final List<StoryModel> result) {
@@ -402,15 +477,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             });
         }
 
+        final String myId = CookieUtils.getUserIdFromCookie(cookie);
         if (isLoggedIn) {
-            final String myId = CookieUtils.getUserIdFromCookie(cookie);
             if (profileId.equals(myId)) {
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 binding.btnSaved.setVisibility(View.VISIBLE);
                 binding.btnLiked.setVisibility(View.VISIBLE);
                 binding.btnSaved.setText(R.string.saved);
-                ViewCompat.setBackgroundTintList(binding.btnSaved,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_orange_background)));
             } else {
                 binding.btnTagged.setVisibility(View.GONE);
                 binding.btnSaved.setVisibility(View.GONE);
@@ -418,58 +491,50 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.btnFollow.setVisibility(View.VISIBLE);
                 if (profileModel.getFollowing()) {
                     binding.btnFollow.setText(R.string.unfollow);
-                    ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_purple_background)));
+                    binding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_disabled_24);
                 } else if (profileModel.getRequested()) {
                     binding.btnFollow.setText(R.string.cancel);
-                    ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_purple_background)));
+                    binding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_disabled_24);
                 } else {
                     binding.btnFollow.setText(R.string.follow);
-                    ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_pink_background)));
+                    binding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_24);
                 }
-                binding.btnRestrict.setVisibility(View.VISIBLE);
-                if (profileModel.getRestricted()) {
-                    binding.btnRestrict.setText(R.string.unrestrict);
-                    ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_green_background)));
-                } else {
-                    binding.btnRestrict.setText(R.string.restrict);
-                    ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_orange_background)));
+                if (restrictMenuItem != null) {
+                    restrictMenuItem.setVisible(true);
+                    if (profileModel.getRestricted()) {
+                        restrictMenuItem.setTitle(R.string.unrestrict);
+                    } else {
+                        restrictMenuItem.setTitle(R.string.restrict);
+                    }
                 }
-                binding.btnBlock.setVisibility(View.VISIBLE);
                 binding.btnTagged.setVisibility(View.VISIBLE);
-                if (profileModel.getBlocked()) {
-                    binding.btnBlock.setText(R.string.unblock);
-                    ViewCompat.setBackgroundTintList(binding.btnBlock,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_green_background)));
-                } else {
-                    binding.btnBlock.setText(R.string.block);
-                    ViewCompat.setBackgroundTintList(binding.btnBlock,
-                                                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_red_background)));
+                if (blockMenuItem != null) {
+                    blockMenuItem.setVisible(true);
+                    if (profileModel.getBlocked()) {
+                        blockMenuItem.setTitle(R.string.unblock);
+                    } else {
+                        blockMenuItem.setTitle(R.string.block);
+                    }
                 }
             }
         } else {
-            if (Utils.dataBox.getFavorite(username) != null) {
-                binding.btnFollow.setText(R.string.unfavorite_short);
-                ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_purple_background)));
-            } else {
-                binding.btnFollow.setText(R.string.favorite_short);
-                ViewCompat.setBackgroundTintList(binding.btnFollow,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_pink_background)));
-            }
-            binding.btnFollow.setVisibility(View.VISIBLE);
-            if (!profileModel.isReallyPrivate()) {
-                binding.btnRestrict.setVisibility(View.VISIBLE);
-                binding.btnRestrict.setText(R.string.tagged);
-                ViewCompat.setBackgroundTintList(binding.btnRestrict,
-                                                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.btn_blue_background)));
+            if (!profileModel.isReallyPrivate() && restrictMenuItem != null) {
+                restrictMenuItem.setVisible(true);
+                if (profileModel.getRestricted()) {
+                    restrictMenuItem.setTitle(R.string.unrestrict);
+                } else {
+                    restrictMenuItem.setTitle(R.string.restrict);
+                }
             }
         }
-
+        if (!profileId.equals(myId)) {
+            binding.favCb.setVisibility(View.VISIBLE);
+            final boolean isFav = Utils.dataBox.getFavorite(username.substring(1), FavoriteType.USER) != null;
+            binding.favCb.setChecked(isFav);
+            binding.favCb.setButtonDrawable(isFav ? R.drawable.ic_star_check_24 : R.drawable.ic_outline_star_plus_24);
+        } else {
+            binding.favCb.setVisibility(View.GONE);
+        }
         binding.mainProfileImage.setImageURI(profileModel.getSdProfilePic());
 
         final long followersCount = profileModel.getFollowersCount();
@@ -570,23 +635,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         // final boolean isSelf = isLoggedIn && profileModel != null && userIdFromCookie != null && userIdFromCookie
         //         .equals(profileModel.getId());
-        final String favorite = Utils.dataBox.getFavorite(username);
         binding.btnFollow.setOnClickListener(v -> {
-            if (!isLoggedIn) {
-                if (favorite != null && v == binding.btnFollow) {
-                    Utils.dataBox.delFavorite(new DataBox.FavoriteModel(
-                            username,
-                            Long.parseLong(favorite.split("/")[1]),
-                            username.replaceAll("^@", "")));
-                } else if (v == binding.btnFollow) {
-                    Utils.dataBox.addFavorite(new DataBox.FavoriteModel(
-                            username,
-                            System.currentTimeMillis(),
-                            username.replaceAll("^@", "")));
-                }
-                fetchProfileDetails();
-                return;
-            }
             if (profileModel.getFollowing() || profileModel.getRequested()) {
                 friendshipService.unfollow(
                         userIdFromCookie,
@@ -622,64 +671,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
                         });
             }
-        });
-        binding.btnRestrict.setOnClickListener(v -> {
-            if (!isLoggedIn) return;
-            final String action = profileModel.getRestricted() ? "Unrestrict" : "Restrict";
-            friendshipService.toggleRestrict(
-                    profileModel.getId(),
-                    !profileModel.getRestricted(),
-                    CookieUtils.getCsrfTokenFromCookie(cookie),
-                    new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
-                            Log.d(TAG, action + " success: " + result);
-                            fetchProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error while performing " + action, t);
-                        }
-                    });
-        });
-        binding.btnBlock.setOnClickListener(v -> {
-            if (!isLoggedIn) return;
-            if (profileModel.getBlocked()) {
-                friendshipService.unblock(
-                        userIdFromCookie,
-                        profileModel.getId(),
-                        CookieUtils.getCsrfTokenFromCookie(cookie),
-                        new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                            @Override
-                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                Log.d(TAG, "Unblock success: " + result);
-                                fetchProfileDetails();
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable t) {
-                                Log.e(TAG, "Error unblocking", t);
-                            }
-                        });
-                return;
-            }
-            friendshipService.block(
-                    userIdFromCookie,
-                    profileModel.getId(),
-                    CookieUtils.getCsrfTokenFromCookie(cookie),
-                    new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                            Log.d(TAG, "Block success: " + result);
-                            fetchProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error blocking", t);
-                        }
-                    });
         });
         binding.btnSaved.setOnClickListener(v -> {
             final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
@@ -727,6 +718,41 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     .setItems(options, profileDialogListener)
                     .setNegativeButton(R.string.cancel, null)
                     .show();
+        });
+        binding.favCb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // do not do anything if state matches the db, as listener is set before profile details are set
+            final String finalUsername = username.startsWith("@") ? username.substring(1) : username;
+            final DataBox.FavoriteModel favorite = Utils.dataBox.getFavorite(finalUsername, FavoriteType.USER);
+            if ((isChecked && favorite != null) || (!isChecked && favorite == null)) {
+                return;
+            }
+            buttonView.setVisibility(View.GONE);
+            binding.favProgress.setVisibility(View.VISIBLE);
+            final String message;
+            if (isChecked) {
+                final DataBox.FavoriteModel model = new DataBox.FavoriteModel(
+                        -1,
+                        finalUsername,
+                        FavoriteType.USER,
+                        profileModel.getName(),
+                        profileModel.getSdProfilePic(),
+                        new Date()
+                );
+                Utils.dataBox.addFavorite(model);
+                binding.favCb.setButtonDrawable(R.drawable.ic_star_check_24);
+                message = getString(R.string.added_to_favs);
+            } else {
+                Utils.dataBox.deleteFavorite(finalUsername, FavoriteType.USER);
+                message = getString(R.string.removed_from_favs);
+                binding.favCb.setButtonDrawable(R.drawable.ic_outline_star_plus_24);
+            }
+            final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
+            snackbar.setAction(R.string.ok, v -> snackbar.dismiss())
+                    .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
+                    .setAnchorView(fragmentActivity.getBottomNavView())
+                    .show();
+            binding.favProgress.setVisibility(View.GONE);
+            binding.favCb.setVisibility(View.VISIBLE);
         });
     }
 

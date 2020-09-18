@@ -19,6 +19,7 @@
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
         <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar</item>
         <!--<item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Primary</item>-->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog.Light</item>
     </style>
 
     <style name="AppTheme.Light.White" parent="AppTheme.Light">
