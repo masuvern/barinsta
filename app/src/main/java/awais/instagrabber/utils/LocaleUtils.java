@@ -69,6 +69,8 @@ public final class LocaleUtils {
         if (appLanguageIndex == 8) return "pl";
         if (appLanguageIndex == 9) return "tr";
         if (appLanguageIndex == 10) return "pt";
+        if (appLanguageIndex == 11) return "fa";
+        if (appLanguageIndex == 12) return "mk";
 
         return null;
     }

@@ -150,4 +150,14 @@
     <color name="barinstaColorSecondaryDark">#a17c4f</color>
     <color name="barinstaPrimaryTextColor">#616161</color>
     <color name="barinstaSecondaryTextColor">@color/white</color>
+
+    <!-- Bibliogram Theme colors -->
+    <color name="bibliogramColorPrimary">#d63f44</color>
+    <color name="bibliogramColorPrimaryLight">#fff4e8</color>
+    <color name="bibliogramColorPrimaryDark">#8e2929</color>
+    <color name="bibliogramColorSecondary">#d63f44</color>
+    <color name="bibliogramColorSecondaryLight">#fff4e8</color>
+    <color name="bibliogramColorSecondaryDark">#8e2929</color>
+    <color name="bibliogramPrimaryTextColor">#000000</color>
+    <color name="bibliogramSecondaryTextColor">@color/white</color>
 </resources>

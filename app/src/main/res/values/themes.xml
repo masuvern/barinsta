@@ -56,6 +56,21 @@
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
     </style>
 
+    <style name="AppTheme.Light.Bibliogram" parent="AppTheme.Light">
+        <item name="colorPrimary">@color/bibliogramColorPrimary</item>
+        <item name="colorPrimaryDark">@color/bibliogramColorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/bibliogramColorPrimaryLight</item>
+        <item name="colorSecondary">@color/bibliogramColorSecondary</item>
+        <item name="colorSecondaryVariant">@color/bibliogramColorSecondaryDark</item>
+        <item name="colorSurface">@color/grey_200</item>
+        <item name="colorControlHighlight">@color/bibliogramColorSecondaryDark</item>
+        <item name="colorAccent">@color/bibliogramColorSecondaryDark</item>
+        <item name="android:windowBackground">?colorSurface</item>
+        <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.Barinsta</item>
+        <item name="android:textColorPrimary">@color/bibliogramPrimaryTextColor</item>
+        <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
+    </style>
+
 
     <!-- Dark Themes -->
     <style name="AppTheme.Dark" parent="Theme.MaterialComponents.NoActionBar">

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>Język urządzenia</item>
-        <item>Angielski</item>
-        <item>Francuski [Podziękowania dla @kernoeb (Telegram)]</item>
-        <item>Hiszpański [Podziękowania dla @sguinetti (GitLab)]</item>
-        <item>Chiński uproszczony</item>
-        <item>Indonezyjski [Podziękowania dla @Galang23 (GitLab)]</item>
-        <item>Włoski [Podziękowania dla @RAR_Ramar (Telegram)]</item>
-        <item>Niemiecki [Podziękowania dla @peterge1998 (GitHub)]</item>
-        <item>Polski [Podziękowania dla @Lego8486 (GitHub)]</item>
-        <item>Turecki [Podziękowania dla @faydin90 (Telegram)]</item>
-        <item>Portugalski [Podziękowania dla @wagnim (GitHub)]</item>
+        <item>Системски одбрано</item>
+        <item>Англиски</item>
+        <item>Француски [Благодарност до @kernoeb (Telegram)]</item>
+        <item>Шпански [Благодарност до @sguinetti (GitLab)]</item>
+        <item>Кинески</item>
+        <item>Индонезиски [Благодарност до @Galang23 (GitLab)]</item>
+        <item>Италијански [Благодарност до @RAR_Ramar (Telegram)]</item>
+        <item>Германски [Благодарност до @peterge1998 (GitHub)]</item>
+        <item>Полски [Благодарност до @Lego8486 (GitHub)]</item>
+        <item>Турски [Благодарност до @faydin90 (Telegram)]</item>
+        <item>Португалски(Бразил) [Благодарност до @wagnim (GitHub)]</item>
     </string-array>
     <string-array name="languages_values">
         <item>0</item>
@@ -27,10 +27,10 @@
         <item>10</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>Auto / Ustawienia systemu</item>
-        <item>Auto / Ustawienia oszczędzania baterii</item>
-        <item>Ciemny</item>
-        <item>Jasny</item>
+        <item>Auto / Follow System</item>
+        <item>Auto / Follow Battery</item>
+        <item>Dark</item>
+        <item>Light</item>
     </string-array>
     <string-array name="theme_presets_values">
         <item>0</item>
@@ -45,10 +45,10 @@
         <item>Instadp</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>Brak</item>
+        <item>None</item>
         <item>\@</item>
-        <item>o</item>
-        <item>dnia</item>
+        <item>at</item>
+        <item>on</item>
         <item>\|</item>
         <item>-</item>
     </string-array>

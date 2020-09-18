@@ -282,7 +282,8 @@
     <string name="dark_black_theme">Black</string>
     <string name="light_theme_settings">Light theme</string>
     <string name="dark_theme_settings">Dark theme</string>
-    <string name="light_barinsta_theme">Barinsta</string>
+    <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
+    <string name="light_bibliogram_theme" translatable="false">Bibliogram</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">Added to Favorites</string>
     <string name="add_to_favorites">Add to favorites</string>
