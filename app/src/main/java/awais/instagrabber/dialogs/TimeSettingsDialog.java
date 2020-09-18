@@ -86,11 +86,12 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
             final String timeStr = String.valueOf(timeSettingsBinding.spTimeFormat.getSelectedItem());
             final String dateStr = String.valueOf(timeSettingsBinding.spDateFormat.getSelectedItem());
 
-            final boolean isSwapTime = !timeSettingsBinding.cbSwapTimeDate.isChecked();
+            final boolean isSwapTime = timeSettingsBinding.cbSwapTimeDate.isChecked();
+            final boolean isBlankSeparator = timeSettingsBinding.spSeparator.getSelectedItemPosition() <= 0;
 
-            selectedFormat = (isSwapTime ? timeStr : dateStr)
-                    + (TextUtils.isEmpty(sepStr) || timeSettingsBinding.spSeparator.getSelectedItemPosition() == 0 ? " " : " '" + sepStr + "' ")
-                    + (isSwapTime ? dateStr : timeStr);
+            selectedFormat = (isSwapTime ? dateStr : timeStr)
+                    + (isBlankSeparator ? " " : " '" + sepStr + "' ")
+                    + (isSwapTime ? timeStr : dateStr);
 
             timeSettingsBinding.btnConfirm.setEnabled(true);
             currentFormat = new SimpleDateFormat(selectedFormat, LocaleUtils.getCurrentLocale());
