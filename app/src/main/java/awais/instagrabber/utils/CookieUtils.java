@@ -12,6 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import awais.instagrabber.BuildConfig;
 import awaisomereport.LogCollector;
@@ -56,22 +58,23 @@ public final class CookieUtils {
     }
 
     @Nullable
-    public static String getUserIdFromCookie(final String cookie) {
-        if (!TextUtils.isEmpty(cookie)) {
-            final int uidIndex = cookie.indexOf("ds_user_id=");
-            if (uidIndex > 0) {
-                String uid = cookie.split("ds_user_id=")[1].split(";")[0];
-                return !TextUtils.isEmpty(uid) ? uid : null;
-            }
-        }
-        return null;
+    public static String getUserIdFromCookie(final String cookies) {
+        return getCookieValue(cookies, "ds_user_id");
     }
 
-    public static String getCsrfTokenFromCookie(final String cookie) {
-        if (cookie == null) {
-            return null;
+    @Nullable
+    public static String getCsrfTokenFromCookie(final String cookies) {
+        return getCookieValue(cookies, "csrftoken");
+    }
+
+    @Nullable
+    private static String getCookieValue(final String cookies, final String name) {
+        final Pattern pattern = Pattern.compile(name + "=(.+?);");
+        final Matcher matcher = pattern.matcher(cookies);
+        if (matcher.find()) {
+            return matcher.group(1);
         }
-        return cookie.split("csrftoken=")[1].split(";")[0];
+        return null;
     }
 
     @Nullable
