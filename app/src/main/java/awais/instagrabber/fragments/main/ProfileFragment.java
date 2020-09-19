@@ -648,7 +648,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             @Override
                             public void onSuccess(final FriendshipRepoChangeRootResponse result) {
                                 Log.d(TAG, "Unfollow success: " + result);
-                                fetchProfileDetails();
+                                onRefresh();
                             }
 
                             @Override
@@ -665,7 +665,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             @Override
                             public void onSuccess(final FriendshipRepoChangeRootResponse result) {
                                 Log.d(TAG, "Follow success: " + result);
-                                fetchProfileDetails();
+                                onRefresh();
                             }
 
                             @Override
