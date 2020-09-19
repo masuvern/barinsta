@@ -34,7 +34,7 @@ public class NavigationExtensions {
         int firstFragmentGraphId = 0;
         for (int i = 0; i < navGraphIds.size(); i++) {
             final int navGraphId = navGraphIds.get(i);
-            final String fragmentTag = getFragmentTag(i);
+            final String fragmentTag = getFragmentTag(navGraphId);
             final NavHostFragment navHostFragment = obtainNavHostFragment(fragmentManager, fragmentTag, navGraphId, containerId);
             final NavController navController = navHostFragment.getNavController();
             final int graphId = navController.getGraph().getId();
@@ -177,7 +177,7 @@ public class NavigationExtensions {
                                        final Intent intent) {
         for (int i = 0; i < navGraphIds.size(); i++) {
             final int navGraphId = navGraphIds.get(i);
-            final String fragmentTag = getFragmentTag(i);
+            final String fragmentTag = getFragmentTag(navGraphId);
             final NavHostFragment navHostFragment = obtainNavHostFragment(fragmentManager, fragmentTag, navGraphId, containerId);
             if (navHostFragment.getNavController().handleDeepLink(intent)) {
                 final int selectedItemId = bottomNavigationView.getSelectedItemId();
