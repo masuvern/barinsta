@@ -369,32 +369,26 @@ public class MainActivity extends BaseLanguageActivity {
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
+            final int selectedItemId = binding.bottomNavView.getSelectedItemId();
             binding.bottomNavView.getMenu().clear();
             binding.bottomNavView.inflateMenu(R.menu.logged_out_bottom_navigation_menu);
+            if (selectedItemId == R.id.profile_nav_graph
+                    || selectedItemId == R.id.more_nav_graph) {
+                binding.bottomNavView.setSelectedItemId(selectedItemId);
+            } else {
+                setBottomNavSelectedItem(R.navigation.profile_nav_graph);
+            }
         }
-        final TypedArray navIds = getResources().obtainTypedArray(main_nav_ids);
-        final List<Integer> mainNavList = new ArrayList<>(navIds.length());
-        final int length = navIds.length();
-        for (int i = 0; i < length; i++) {
-            final int resourceId = navIds.getResourceId(i, -1);
-            if (resourceId < 0) continue;
-            mainNavList.add(resourceId);
-        }
-        navIds.recycle();
-        if (setDefaultFromSettings || !isLoggedIn) {
+        final List<Integer> mainNavList = getMainNavList(main_nav_ids);
+        if (setDefaultFromSettings) {
             final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
-                final int defaultNavId = TextUtils.isEmpty(defaultTabIdString) || !isLoggedIn
+                final int defaultNavId = TextUtils.isEmpty(defaultTabIdString)
                                          ? R.navigation.profile_nav_graph
                                          : Integer.parseInt(defaultTabIdString);
                 final int index = mainNavList.indexOf(defaultNavId);
-                if (index >= 0) {
-                    firstFragmentGraphIndex = index;
-                    final Integer menuId = NAV_TO_MENU_ID_MAP.get(defaultNavId);
-                    if (menuId != null) {
-                        binding.bottomNavView.setSelectedItemId(menuId);
-                    }
-                }
+                if (index >= 0) firstFragmentGraphIndex = index;
+                setBottomNavSelectedItem(defaultNavId);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "Error parsing id", e);
             }
@@ -408,6 +402,27 @@ public class MainActivity extends BaseLanguageActivity {
                 firstFragmentGraphIndex);
         navControllerLiveData.observe(this, this::setupNavigation);
         currentNavControllerLiveData = navControllerLiveData;
+    }
+
+    private void setBottomNavSelectedItem(final int navId) {
+        final Integer menuId = NAV_TO_MENU_ID_MAP.get(navId);
+        if (menuId != null) {
+            binding.bottomNavView.setSelectedItemId(menuId);
+        }
+    }
+
+    @NonNull
+    private List<Integer> getMainNavList(final int main_nav_ids) {
+        final TypedArray navIds = getResources().obtainTypedArray(main_nav_ids);
+        final List<Integer> mainNavList = new ArrayList<>(navIds.length());
+        final int length = navIds.length();
+        for (int i = 0; i < length; i++) {
+            final int resourceId = navIds.getResourceId(i, -1);
+            if (resourceId < 0) continue;
+            mainNavList.add(resourceId);
+        }
+        navIds.recycle();
+        return mainNavList;
     }
 
     private void setupNavigation(final NavController navController) {
