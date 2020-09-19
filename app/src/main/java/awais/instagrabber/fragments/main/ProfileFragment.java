@@ -370,6 +370,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         if (TextUtils.isEmpty(username) && !isLoggedIn) {
             binding.infoContainer.setVisibility(View.GONE);
+            binding.swipeRefreshLayout.setEnabled(false);
             binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
             final NestedCoordinatorLayout.LayoutParams layoutParams = (NestedCoordinatorLayout.LayoutParams) binding.privatePage.getLayoutParams();
@@ -378,6 +379,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.privatePage.setVisibility(View.VISIBLE);
             return;
         }
+        binding.swipeRefreshLayout.setEnabled(true);
         setupPosts();
         setupHighlights();
         setupCommonListeners();
@@ -412,6 +414,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void fetchProfileDetails() {
+        if (TextUtils.isEmpty(username)) return;
         new ProfileFetcher(username.substring(1), profileModel -> {
             if (getContext() == null) return;
             this.profileModel = profileModel;
