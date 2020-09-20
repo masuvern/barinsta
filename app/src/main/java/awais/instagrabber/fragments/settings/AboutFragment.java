@@ -167,7 +167,7 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(p -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://exoplayer.dev/"));
+            intent.setData(Uri.parse("https://materialdesignicons.com/"));
             startActivity(intent);
             return true;
         });
