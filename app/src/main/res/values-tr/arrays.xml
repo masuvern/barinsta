@@ -3,15 +3,17 @@
     <string-array name="languages">
         <item>Sistem Varsayılanı</item>
         <item>İngilizce</item>
-        <item>Fransızca [@kernoeb (Telegram) sayesinde]</item>
-        <item>İspanyolca [@sguinetti (GitLab) sayesinde]</item>
+        <item>Fransızca [@kernoeb tarafından]</item>
+        <item>İspanyolca [@sguinetti tarafından]</item>
         <item>Basitleştirilmiş Çince</item>
-        <item>Endonezyaca [@Galang23 (GitLab) sayesinde]</item>
-        <item>İtalyaca [@RAR_Ramar (Telegram) sayesinde]</item>
-        <item>Almanca [@peterge1998 (GitHub) sayesinde]</item>
-        <item>Lehçe [@Lego8486 (GitHub) sayesinde]</item>
-        <item>Türkçe [@faydin90 (Telegram) sayesinde]</item>
-        <item>Portekizce [@wagnim (GitHub) sayesinde]</item>
+        <item>Endonezyaca [@Galang23 tarafından]</item>
+        <item>İtalyaca [@RAR_Ramar tarafından]</item>
+        <item>Almanca [@peterge1998 tarafından]</item>
+        <item>Lehçe [@Lego8486 tarafından]</item>
+        <item>Türkçe [@faydin90 tarafından]</item>
+        <item>Brezilya Portekizce [@wagnim tarafından]</item>
+        <item>Farsça [@farzadx tarafından]</item>
+        <item>Makedonyaca [@snajdovski tarafından]</item>
     </string-array>
     <string-array name="languages_values">
         <item>0</item>
@@ -109,10 +111,12 @@
     <string-array name="light_themes">
         <item>@string/light_white_theme</item>
         <item>@string/light_barinsta_theme</item>
+        <item>@string/light_bibliogram_theme</item>
     </string-array>
     <string-array name="light_theme_values">
         <item>@style/AppTheme.Light.White</item>
         <item>@style/AppTheme.Light.Barinsta</item>
+        <item>@style/AppTheme.Light.Bibliogram</item>
     </string-array>
     <string-array name="dark_themes">
         <item>@string/dark_black_theme</item>

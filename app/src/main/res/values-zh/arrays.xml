@@ -3,15 +3,17 @@
     <string-array name="languages">
         <item>系统默认</item>
         <item>英文</item>
-        <item>法文 [感谢 @kernoeb (Telegram)]</item>
-        <item>西班牙文 [感谢 @sguinetti (GitLab)]</item>
+        <item>法文 [感谢 @kernoeb]</item>
+        <item>西班牙文 [感谢 @sguinetti]</item>
         <item>简体中文</item>
-        <item>印尼文 [感谢 @Galang23 (GitLab)]</item>
-        <item>意大利文 [感谢 @RAR_Ramar (Telegram)]</item>
-        <item>德文 [感谢 @peterge1998 (GitHub)]</item>
-        <item>波兰文 [感谢 @Lego8486 (GitHub)]</item>
-        <item>土耳其语 [感谢 @faydin90 (Telegram)]</item>
-        <item>巴西葡文 [感谢 @wagnim (GitHub)]</item>
+        <item>印尼文 [感谢 @Galang23]</item>
+        <item>意大利语 [感谢@RAR_Ramar]</item>
+        <item>德语 [感谢@peterge1998年]</item>
+        <item>波兰语 [谢谢@Lego8486]</item>
+        <item>土耳其语 [感谢@faydin90]</item>
+        <item>巴西葡萄牙语 [感谢@wagnim]</item>
+        <item>波斯语 [感谢@frazadx]</item>
+        <item>马其顿语 [感谢@snajdovski]</item>
     </string-array>
     <string-array name="languages_values">
         <item>0</item>
@@ -109,10 +111,12 @@
     <string-array name="light_themes">
         <item>@string/light_white_theme</item>
         <item>@string/light_barinsta_theme</item>
+        <item>@string/light_bibliogram_theme</item>
     </string-array>
     <string-array name="light_theme_values">
         <item>@style/AppTheme.Light.White</item>
         <item>@style/AppTheme.Light.Barinsta</item>
+        <item>@style/AppTheme.Light.Bibliogram</item>
     </string-array>
     <string-array name="dark_themes">
         <item>@string/dark_black_theme</item>
