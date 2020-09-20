@@ -232,8 +232,8 @@ public final class ResponseBodyUtils {
         final String threadV2Id = data.getString("thread_v2_id");
         final String threadTitle = data.getString("thread_title");
 
-        final String threadNewestCursor = data.getString("newest_cursor");
-        final String threadOldestCursor = data.getString("oldest_cursor");
+        final String threadNewestCursor = data.optString("newest_cursor");
+        final String threadOldestCursor = data.optString("oldest_cursor");
         final String threadNextCursor = data.has("next_cursor") ? data.getString("next_cursor") : null;
         final String threadPrevCursor = data.has("prev_cursor") ? data.getString("prev_cursor") : null;
 
