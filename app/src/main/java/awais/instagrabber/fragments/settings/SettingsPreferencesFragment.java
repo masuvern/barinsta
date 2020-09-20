@@ -180,9 +180,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         if (context == null) return null;
         return new SaveToCustomFolderPreference(context, (resultCallback) -> new DirectoryChooser()
                 .setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
-                .setInteractionListener(path -> {
-                    settingsHelper.putString(FOLDER_PATH, path);
-                    resultCallback.onResult(path);
+                .setInteractionListener(file -> {
+                    settingsHelper.putString(FOLDER_PATH, file.getAbsolutePath());
+                    resultCallback.onResult(file.getAbsolutePath());
                 })
                 .show(getParentFragmentManager(), null));
     }

@@ -741,7 +741,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         profileModel.getSdProfilePic(),
                         new Date()
                 );
-                Utils.dataBox.addFavorite(model);
+                Utils.dataBox.addOrUpdateFavorite(model);
                 binding.favCb.setButtonDrawable(R.drawable.ic_star_check_24);
                 message = getString(R.string.added_to_favs);
             } else {

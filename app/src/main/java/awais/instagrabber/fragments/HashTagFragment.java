@@ -369,7 +369,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
                 message = getString(R.string.removed_from_favs);
             } else {
-                Utils.dataBox.addFavorite(new DataBox.FavoriteModel(
+                Utils.dataBox.addOrUpdateFavorite(new DataBox.FavoriteModel(
                         -1,
                         hashtag.substring(1),
                         FavoriteType.HASHTAG,

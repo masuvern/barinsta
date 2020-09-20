@@ -68,6 +68,9 @@
         <action
             android:id="@+id/action_morePreferencesFragment_to_favoritesFragment"
             app:destination="@id/favoritesFragment" />
+        <action
+            android:id="@+id/action_morePreferencesFragment_to_backupPreferencesFragment"
+            app:destination="@id/backupPreferencesFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsPreferencesFragment"
@@ -94,4 +97,8 @@
         android:id="@+id/favoritesFragment"
         android:name="awais.instagrabber.fragments.FavoritesFragment"
         android:label="@string/title_favorites" />
+    <fragment
+        android:id="@+id/backupPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.BackupPreferencesFragment"
+        android:label="@string/backup_and_restore" />
 </navigation>

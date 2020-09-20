@@ -157,7 +157,7 @@ public class FavoritesFragment extends Fragment {
                                                 result.getSdProfilePic(),
                                                 model.getDateAdded()
                                         );
-                                        Utils.dataBox.addFavorite(updated);
+                                        Utils.dataBox.addOrUpdateFavorite(updated);
                                         updatedList.add(i, updated);
                                     } finally {
                                         try {
@@ -186,7 +186,7 @@ public class FavoritesFragment extends Fragment {
                                                 result.getSdProfilePic(),
                                                 model.getDateAdded()
                                         );
-                                        Utils.dataBox.addFavorite(updated);
+                                        Utils.dataBox.addOrUpdateFavorite(updated);
                                         updatedList.add(i, updated);
                                     } finally {
                                         try {

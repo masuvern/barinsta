@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -95,7 +96,7 @@ public final class DataBox extends SQLiteOpenHelper {
                                    + FAV_COL_DATE_ADDED + " INTEGER)");
                 // add the old favorites back
                 for (final FavoriteModel oldFavorite : oldFavorites) {
-                    addFavorite(db, oldFavorite);
+                    addOrUpdateFavorite(db, oldFavorite);
                 }
         }
         Log.i(TAG, String.format("DB update from v%d to v%d completed!", oldVersion, newVersion));
@@ -117,18 +118,10 @@ public final class DataBox extends SQLiteOpenHelper {
                 do {
                     try {
                         final String queryText = cursor.getString(cursor.getColumnIndex("query_text"));
-                        FavoriteType type = null;
-                        String query = null;
-                        if (queryText.startsWith("@")) {
-                            type = FavoriteType.USER;
-                            query = queryText.substring(1);
-                        } else if (queryText.contains("/")) {
-                            type = FavoriteType.LOCATION;
-                            query = queryText.substring(0, queryText.indexOf("/"));
-                        } else if (queryText.startsWith("#")) {
-                            type = FavoriteType.HASHTAG;
-                            query = queryText.substring(1);
-                        }
+                        final Pair<FavoriteType, String> favoriteTypeQueryPair = Utils.migrateOldFavQuery(queryText);
+                        if (favoriteTypeQueryPair == null) continue;
+                        final FavoriteType type = favoriteTypeQueryPair.first;
+                        final String query = favoriteTypeQueryPair.second;
                         oldModels.add(new FavoriteModel(
                                 -1,
                                 query,
@@ -170,20 +163,20 @@ public final class DataBox extends SQLiteOpenHelper {
         return exists;
     }
 
-    public final void addFavorite(@NonNull final FavoriteModel model) {
+    public final void addOrUpdateFavorite(@NonNull final FavoriteModel model) {
         final String query = model.getQuery();
         if (!TextUtils.isEmpty(query)) {
             try (final SQLiteDatabase db = getWritableDatabase()) {
                 db.beginTransaction();
                 try {
-                    addFavorite(db, model);
+                    addOrUpdateFavorite(db, model);
                     db.setTransactionSuccessful();
                 } catch (final Exception e) {
                     if (logCollector != null) {
-                        logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "addFavorite");
+                        logCollector.appendException(e, LogCollector.LogFile.DATA_BOX_FAVORITES, "addOrUpdateFavorite");
                     }
                     if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "", e);
+                        Log.e(TAG, "Error adding/updating favorite", e);
                     }
                 } finally {
                     db.endTransaction();
@@ -192,16 +185,22 @@ public final class DataBox extends SQLiteOpenHelper {
         }
     }
 
-    private void addFavorite(@NonNull final SQLiteDatabase db, @NonNull final FavoriteModel model) {
+    private void addOrUpdateFavorite(@NonNull final SQLiteDatabase db, @NonNull final FavoriteModel model) {
         final ContentValues values = new ContentValues();
         values.put(FAV_COL_QUERY, model.getQuery());
         values.put(FAV_COL_TYPE, model.getType().toString());
         values.put(FAV_COL_DISPLAY_NAME, model.getDisplayName());
         values.put(FAV_COL_PIC_URL, model.getPicUrl());
         values.put(FAV_COL_DATE_ADDED, model.getDateAdded().getTime());
-        int rows = 0;
+        int rows;
         if (model.getId() >= 1) {
             rows = db.update(TABLE_FAVORITES, values, FAV_COL_ID + "=?", new String[]{String.valueOf(model.getId())});
+        } else {
+            rows = db.update(TABLE_FAVORITES,
+                             values,
+                             FAV_COL_QUERY + "=?" +
+                                     " AND " + FAV_COL_TYPE + "=?",
+                             new String[]{model.getQuery(), model.getType().toString()});
         }
         if (rows != 1) {
             db.insertOrThrow(TABLE_FAVORITES, null, values);
@@ -304,6 +303,16 @@ public final class DataBox extends SQLiteOpenHelper {
         return null;
     }
 
+    public final void addOrUpdateUser(@NonNull final DataBox.CookieModel cookieModel) {
+        addOrUpdateUser(
+                cookieModel.getUid(),
+                cookieModel.getUsername(),
+                cookieModel.getCookie(),
+                cookieModel.getFullName(),
+                cookieModel.getProfilePic()
+        );
+    }
+
     public final void addOrUpdateUser(final String uid,
                                       final String username,
                                       final String cookie,
@@ -368,15 +377,6 @@ public final class DataBox extends SQLiteOpenHelper {
         }
     }
 
-    public final int getCookieCount() {
-        int cookieCount = 0;
-        try (final SQLiteDatabase db = getReadableDatabase();
-             final Cursor cursor = db.rawQuery("SELECT * FROM cookies", null)) {
-            if (cursor != null) cookieCount = cursor.getCount();
-        }
-        return cookieCount;
-    }
-
     @Nullable
     public final CookieModel getCookie(final String uid) {
         CookieModel cookie = null;
@@ -404,10 +404,9 @@ public final class DataBox extends SQLiteOpenHelper {
         return cookie;
     }
 
-    @Nullable
-    public final ArrayList<CookieModel> getAllCookies() {
-        ArrayList<CookieModel> cookies = null;
-
+    @NonNull
+    public final List<CookieModel> getAllCookies() {
+        final List<CookieModel> cookies = new ArrayList<>();
         try (final SQLiteDatabase db = getReadableDatabase();
              final Cursor cursor = db.rawQuery(
                      "SELECT "
@@ -419,7 +418,6 @@ public final class DataBox extends SQLiteOpenHelper {
                              + " FROM " + TABLE_COOKIES, null)
         ) {
             if (cursor != null && cursor.moveToFirst()) {
-                cookies = new ArrayList<>();
                 do {
                     cookies.add(new CookieModel(
                             cursor.getString(cursor.getColumnIndex(KEY_UID)),
@@ -431,7 +429,6 @@ public final class DataBox extends SQLiteOpenHelper {
                 } while (cursor.moveToNext());
             }
         }
-
         return cookies;
     }
 
@@ -483,6 +480,12 @@ public final class DataBox extends SQLiteOpenHelper {
             this.selected = selected;
         }
 
+        public boolean isValid() {
+            return !TextUtils.isEmpty(uid)
+                    && !TextUtils.isEmpty(username)
+                    && !TextUtils.isEmpty(cookie);
+        }
+
         @Override
         public boolean equals(final Object o) {
             if (this == o) return true;
@@ -501,7 +504,14 @@ public final class DataBox extends SQLiteOpenHelper {
         @NonNull
         @Override
         public String toString() {
-            return username;
+            return "CookieModel{" +
+                    "uid='" + uid + '\'' +
+                    ", username='" + username + '\'' +
+                    ", cookie='" + cookie + '\'' +
+                    ", fullName='" + fullName + '\'' +
+                    ", profilePic='" + profilePic + '\'' +
+                    ", selected=" + selected +
+                    '}';
         }
     }
 

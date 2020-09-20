@@ -20,7 +20,7 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -55,7 +55,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
-        final ArrayList<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
+        final List<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
         if (isLoggedIn) {
             accountCategory.setSummary(R.string.account_hint);
             accountCategory.addPreference(getAccountSwitcherPreference(cookie));
@@ -117,6 +117,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(getDivider(context));
         screen.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {
             final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
+            NavHostFragment.findNavController(this).navigate(navDirections);
+            return true;
+        }));
+        screen.addPreference(getPreference(R.string.backup_and_restore, R.drawable.ic_settings_backup_restore_24, preference -> {
+            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToBackupPreferencesFragment();
             NavHostFragment.findNavController(this).navigate(navDirections);
             return true;
         }));

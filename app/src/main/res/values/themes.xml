@@ -38,6 +38,7 @@
         <item name="android:windowBackground">@color/white</item>
         <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.White</item>
         <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button.Light.White</item>
+        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Light.White</item>
     </style>
 
     <style name="AppTheme.Light.Barinsta" parent="AppTheme.Light">
