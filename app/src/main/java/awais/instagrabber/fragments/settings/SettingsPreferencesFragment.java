@@ -284,12 +284,15 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
                     settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
                     settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT),
                     settingsHelper.getString(Constants.DATE_TIME_SELECTION),
+                    settingsHelper.getBoolean(Constants.SWAP_DATE_TIME_FORMAT_ENABLED),
                     (isCustomFormat,
                      formatSelection,
                      spTimeFormatSelectedItemPosition,
                      spSeparatorSelectedItemPosition,
                      spDateFormatSelectedItemPosition,
-                     selectedFormat, currentFormat) -> {
+                     selectedFormat,
+                     currentFormat,
+                     swapDateTime) -> {
                         if (isCustomFormat) {
                             settingsHelper.putString(Constants.CUSTOM_DATE_TIME_FORMAT, formatSelection);
                         } else {
@@ -300,6 +303,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
                             settingsHelper.putString(Constants.DATE_TIME_SELECTION, formatSelectionUpdated);
                         }
                         settingsHelper.putBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
+                        settingsHelper.putBoolean(Constants.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
                         Utils.datetimeParser = (SimpleDateFormat) currentFormat.clone();
                         preference.setSummary(Utils.datetimeParser.format(new Date()));
                     }
