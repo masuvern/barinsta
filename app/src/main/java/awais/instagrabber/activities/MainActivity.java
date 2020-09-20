@@ -29,6 +29,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
@@ -68,7 +69,7 @@ import awais.instagrabber.utils.TextUtils;
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class MainActivity extends BaseLanguageActivity {
+public class MainActivity extends BaseLanguageActivity implements FragmentManager.OnBackStackChangedListener {
     private static final String TAG = "MainActivity";
 
     private static final List<Integer> SHOW_BOTTOM_VIEW_DESTINATIONS = Arrays.asList(
@@ -93,7 +94,8 @@ public class MainActivity extends BaseLanguageActivity {
             R.id.directMessagesSettingsFragment,
             R.id.notificationsViewer,
             R.id.themePreferencesFragment,
-            R.id.favoritesFragment);
+            R.id.favoritesFragment,
+            R.id.backupPreferencesFragment);
     private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
     private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
@@ -108,6 +110,7 @@ public class MainActivity extends BaseLanguageActivity {
     private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
     private boolean isActivityCheckerServiceBound = false;
+    private boolean isBackStackEmpty = false;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -154,6 +157,7 @@ public class MainActivity extends BaseLanguageActivity {
         if (!TextUtils.isEmpty(cookie) && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
             bindActivityCheckerService();
         }
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
     }
 
     @Override
@@ -211,6 +215,21 @@ public class MainActivity extends BaseLanguageActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindActivityCheckerService();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isTaskRoot() && isBackStackEmpty) {
+            finishAfterTransition();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        final int backStackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
+        isBackStackEmpty = backStackEntryCount == 0;
     }
 
     private void createNotificationChannels() {
