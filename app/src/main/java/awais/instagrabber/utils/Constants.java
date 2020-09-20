@@ -19,6 +19,7 @@ public final class Constants {
     public static final String AUTOLOAD_POSTS = "autoload_posts";
     public static final String SHOW_FEED = "show_feed";
     public static final String CUSTOM_DATE_TIME_FORMAT_ENABLED = "data_time_custom_enabled";
+    public static final String SWAP_DATE_TIME_FORMAT_ENABLED = "swap_date_time_enabled";
     public static final String MARK_AS_SEEN = "mark_as_seen";
     public static final String DM_MARK_AS_SEEN = "dm_mark_as_seen";
     public static final String INSTADP = "instadp";
