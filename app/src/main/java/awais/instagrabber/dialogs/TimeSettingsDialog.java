@@ -34,15 +34,18 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
     private boolean customDateTimeFormatEnabled;
     private String customDateTimeFormat;
     private String dateTimeSelection;
+    private final boolean swapDateTimeEnabled;
     private final OnConfirmListener onConfirmListener;
 
     public TimeSettingsDialog(final boolean customDateTimeFormatEnabled,
                               final String customDateTimeFormat,
                               final String dateTimeSelection,
+                              final boolean swapDateTimeEnabled,
                               final OnConfirmListener onConfirmListener) {
         this.customDateTimeFormatEnabled = customDateTimeFormatEnabled;
         this.customDateTimeFormat = customDateTimeFormat;
         this.dateTimeSelection = dateTimeSelection;
+        this.swapDateTimeEnabled = swapDateTimeEnabled;
         this.onConfirmListener = onConfirmListener;
         final Calendar instance = GregorianCalendar.getInstance();
         instance.set(2020, 5, 22, 8, 17, 13);
@@ -55,6 +58,7 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
 
         timeSettingsBinding.cbCustomFormat.setOnCheckedChangeListener(this);
         timeSettingsBinding.cbCustomFormat.setChecked(customDateTimeFormatEnabled);
+        timeSettingsBinding.cbSwapTimeDate.setChecked(swapDateTimeEnabled);
         timeSettingsBinding.etCustomFormat.setText(customDateTimeFormat);
 
         final String[] dateTimeFormat = dateTimeSelection.split(";"); // output = time;separator;date
@@ -86,11 +90,12 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
             final String timeStr = String.valueOf(timeSettingsBinding.spTimeFormat.getSelectedItem());
             final String dateStr = String.valueOf(timeSettingsBinding.spDateFormat.getSelectedItem());
 
-            final boolean isSwapTime = !timeSettingsBinding.cbSwapTimeDate.isChecked();
+            final boolean isSwapTime = timeSettingsBinding.cbSwapTimeDate.isChecked();
+            final boolean isBlankSeparator = timeSettingsBinding.spSeparator.getSelectedItemPosition() <= 0;
 
-            selectedFormat = (isSwapTime ? timeStr : dateStr)
-                    + (TextUtils.isEmpty(sepStr) || timeSettingsBinding.spSeparator.getSelectedItemPosition() == 0 ? " " : " '" + sepStr + "' ")
-                    + (isSwapTime ? dateStr : timeStr);
+            selectedFormat = (isSwapTime ? dateStr : timeStr)
+                    + (isBlankSeparator ? " " : " '" + sepStr + "' ")
+                    + (isSwapTime ? timeStr : dateStr);
 
             timeSettingsBinding.btnConfirm.setEnabled(true);
             currentFormat = new SimpleDateFormat(selectedFormat, LocaleUtils.getCurrentLocale());
@@ -145,13 +150,15 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
         if (v == timeSettingsBinding.btnConfirm) {
             final Editable etCustomFormatText = timeSettingsBinding.etCustomFormat.getText();
             if (onConfirmListener != null) {
-                onConfirmListener.onConfirm(timeSettingsBinding.cbCustomFormat.isChecked(),
+                onConfirmListener.onConfirm(
+                        timeSettingsBinding.cbCustomFormat.isChecked(),
                         etCustomFormatText == null ? null : etCustomFormatText.toString(),
                         timeSettingsBinding.spTimeFormat.getSelectedItemPosition(),
                         timeSettingsBinding.spSeparator.getSelectedItemPosition(),
                         timeSettingsBinding.spDateFormat.getSelectedItemPosition(),
                         selectedFormat,
-                        currentFormat);
+                        currentFormat,
+                        timeSettingsBinding.cbSwapTimeDate.isChecked());
             }
             dismiss();
         } else if (v == timeSettingsBinding.btnInfo) {
@@ -166,7 +173,10 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
                        String formatSelection,
                        int spTimeFormatSelectedItemPosition,
                        int spSeparatorSelectedItemPosition,
-                       int spDateFormatSelectedItemPosition, final String selectedFormat, final SimpleDateFormat currentFormat);
+                       int spDateFormatSelectedItemPosition,
+                       final String selectedFormat,
+                       final SimpleDateFormat currentFormat,
+                       final boolean swapDateTime);
     }
 
     @Override
