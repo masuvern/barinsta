@@ -32,6 +32,16 @@
       ]
     },
     {
+      "login": "andersonvom",
+      "name": "Anderson Mesquita",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/69922?v=4",
+      "profile": "https://github.com/andersonvom",
+      "contributions": [
+        "code",
+        "bug"
+      ]
+    },
+    {
       "login": "AwaisKing",
       "name": "AWAiS",
       "avatar_url": "https://avatars3.githubusercontent.com/u/5278488",
@@ -47,16 +57,8 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/42580385?v=4",
       "profile": "https://stefannajdovski.com/",
       "contributions": [
-        "design"
-      ]
-    },
-    {
-      "login": "aypie",
-      "name": "Alex Potterson",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/57075012?v=4",
-      "profile": "http://aypie.design/",
-      "contributions": [
-        "design"
+        "design",
+        "translation"
       ]
     },
     {
@@ -97,7 +99,6 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/13700948",
       "profile": "https://github.com/Galang23",
       "contributions": [
-        "question",
         "translation"
       ]
     },
