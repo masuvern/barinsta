@@ -17,7 +17,7 @@ import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class CommentAction extends AsyncTask<String, Void, String> {
+public class CommentAction extends AsyncTask<Void, Void, String> {
     private static final String TAG = "CommentAction";
 
     private final String cookie;
@@ -30,8 +30,7 @@ public class CommentAction extends AsyncTask<String, Void, String> {
         this.onTaskCompleteListener = onTaskCompleteListener;
     }
 
-    protected String doInBackground(String... rawAction) {
-        final String action = rawAction[0];
+    protected String doInBackground(Void... lmao) {
         final String url = "https://i.instagram.com/api/v1/direct_v2/create_group_thread/";
         HttpURLConnection urlConnection = null;
         try {
@@ -57,10 +56,8 @@ public class CommentAction extends AsyncTask<String, Void, String> {
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 return new JSONObject(NetworkUtils.readFromConnection(urlConnection)).getString("thread_id");
             }
-
         } catch (Throwable ex) {
             Log.e(TAG, "reply (CT): " + ex);
-            // Toast.makeText(getApplicationContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
