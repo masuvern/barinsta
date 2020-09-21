@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId 'me.austinhuang.instagrabbr'
 
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 29
 
         versionCode 51
