@@ -54,7 +54,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.0.1"
     implementation "androidx.preference:preference:$preference_version"
 
-    implementation 'com.github.hendrawd:StorageUtil:1.1.0'
+//    implementation 'com.github.hendrawd:StorageUtil:1.1.0'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'
