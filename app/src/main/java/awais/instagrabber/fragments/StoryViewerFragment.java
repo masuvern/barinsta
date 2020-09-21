@@ -544,7 +544,6 @@ public class StoryViewerFragment extends Fragment {
         };
         storiesService.getUserStory(currentStoryMediaId,
                                     username,
-                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
                                     false,
                                     false,
                                     isHighlight,

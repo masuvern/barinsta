@@ -293,7 +293,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                     true,
                     false,
                     false,
-                    false,
                     stories -> {
                         if (stories != null && stories.length > 0) {
                             binding.mainLocationImage.setStoriesBorder();

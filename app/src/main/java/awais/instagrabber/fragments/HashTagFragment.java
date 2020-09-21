@@ -286,7 +286,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final Context context = getContext();
         if (context == null) return;
         if (isLoggedIn) {
-            new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, false, stories -> {
+            new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, stories -> {
                 if (stories != null && stories.length > 0) {
                     binding.mainHashtagImage.setStoriesBorder();
                 }

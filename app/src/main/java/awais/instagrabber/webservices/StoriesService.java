@@ -98,14 +98,12 @@ public class StoriesService extends BaseService {
 
     public void getUserStory(final String id,
                              final String username,
-                             final boolean storiesig,
                              final boolean isLoc,
                              final boolean isHashtag,
                              final boolean highlight,
                              final ServiceCallback<List<StoryModel>> callback) {
-        final String url = buildUrl(id, storiesig, isLoc, isHashtag, highlight);
-        final String userAgent = storiesig ? Constants.A_USER_AGENT : Constants.I_USER_AGENT;
-        final Call<String> userStoryCall = repository.getUserStory(userAgent, url);
+        final String url = buildUrl(id, isLoc, isHashtag, highlight);
+        final Call<String> userStoryCall = repository.getUserStory(Constants.I_USER_AGENT, url);
         userStoryCall.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -119,7 +117,7 @@ public class StoriesService extends BaseService {
                     }
                     data = new JSONObject(body);
 
-                    if (!storiesig && !highlight)
+                    if (!highlight)
                         data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
                     else if (highlight) data = data.getJSONObject("reels").optJSONObject(id);
 
@@ -243,16 +241,10 @@ public class StoriesService extends BaseService {
         });
     }
 
-    private String buildUrl(final String id, final boolean storiesig, final boolean isLoc, final boolean isHashtag, final boolean highlight) {
+    private String buildUrl(final String id, final boolean isLoc, final boolean isHashtag, final boolean highlight) {
         final String userId = id.replace(":", "%3A");
         final StringBuilder builder = new StringBuilder();
-        builder.append("https://");
-        if (storiesig) {
-            builder.append("storiesig");
-        } else {
-            builder.append("i.instagram");
-        }
-        builder.append(".com/api/v1/");
+        builder.append("https://i.instagram.com/api/v1/");
         if (isLoc) {
             builder.append("locations/");
         }
@@ -266,11 +258,7 @@ public class StoriesService extends BaseService {
         }
         builder.append(userId);
         if (!highlight) {
-            if (storiesig) {
-                builder.append("/reel_media/");
-            } else {
-                builder.append("/story/");
-            }
+            builder.append("/story/");
         }
         return builder.toString();
     }

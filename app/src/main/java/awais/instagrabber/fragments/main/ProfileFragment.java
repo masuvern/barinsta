@@ -441,12 +441,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final String profileId = profileModel.getId();
-        if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.STORIESIG.getValue()) || isLoggedIn) {
+        if (isLoggedIn) {
             new iStoryStatusFetcher(profileId,
                                     profileModel.getUsername(),
                                     false,
                                     false,
-                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.STORIESIG.getValue()),
                                     false,
                                     result -> {
                                         storyModels = result;
@@ -455,7 +454,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         }
                                     }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             new HighlightsFetcher(profileId,
-                                  !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.STORIESIG.getValue()),
                                   result -> {
                                       if (result != null) {
                                           binding.highlightsList.setVisibility(View.VISIBLE);
