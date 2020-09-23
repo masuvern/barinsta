@@ -56,6 +56,7 @@ import awais.instagrabber.asyncs.HighlightsFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.UsernameFetcher;
+import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
@@ -484,11 +485,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 binding.btnSaved.setVisibility(View.VISIBLE);
                 binding.btnLiked.setVisibility(View.VISIBLE);
+                binding.btnDM.setVisibility(View.GONE);
                 binding.btnSaved.setText(R.string.saved);
             } else {
                 binding.btnTagged.setVisibility(View.GONE);
                 binding.btnSaved.setVisibility(View.GONE);
                 binding.btnLiked.setVisibility(View.GONE);
+                binding.btnDM.setVisibility(View.VISIBLE); // maybe there is a judgment mechanism?
                 binding.btnFollow.setVisibility(View.VISIBLE);
                 if (profileModel.getFollowing()) {
                     binding.btnFollow.setText(R.string.unfollow);
@@ -508,7 +511,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         restrictMenuItem.setTitle(R.string.restrict);
                     }
                 }
-                binding.btnTagged.setVisibility(View.VISIBLE);
+                binding.btnTagged.setVisibility(profileModel.isReallyPrivate() ? View.GONE : View.VISIBLE);
                 if (blockMenuItem != null) {
                     blockMenuItem.setVisible(true);
                     if (profileModel.getBlocked()) {
@@ -690,6 +693,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               profileModel.getId(),
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
+        });
+        binding.btnDM.setOnClickListener(v -> {
+            new CreateThreadAction(cookie, profileModel.getId(), threadId -> {
+                final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
+                NavHostFragment.findNavController(this).navigate(action);
+            }).execute();
         });
         binding.mainProfileImage.setOnClickListener(v -> {
             if (storyModels == null || storyModels.length <= 0) {

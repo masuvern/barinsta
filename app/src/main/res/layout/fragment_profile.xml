@@ -221,9 +221,28 @@
                     app:iconTint="@color/red_600"
                     app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btnDM"
                     app:layout_constraintStart_toEndOf="@id/btnSaved"
                     app:layout_constraintTop_toBottomOf="@id/mainUrl"
                     app:rippleColor="@color/red_300"
+                    tools:visibility="visible" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDM"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dm_person"
+                    android:textColor="@color/green"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_send_24"
+                    app:iconGravity="top"
+                    app:iconTint="@color/green"
+                    app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btnLiked"
+                    app:layout_constraintTop_toBottomOf="@id/mainUrl"
+                    app:rippleColor="@color/green"
                     tools:visibility="visible" />
 
                 <androidx.constraintlayout.widget.Barrier

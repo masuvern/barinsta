@@ -141,6 +141,8 @@
     <color name="yellow_A400">#FFEA00</color>
     <color name="yellow_A700">#FFD600</color>
 
+    <color name="green">#5CE362</color>
+
     <!-- Barinsta Theme colors -->
     <color name="barinstaColorPrimary">#a86735</color>
     <color name="barinstaColorPrimaryLight">#dd9561</color>

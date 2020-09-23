@@ -112,6 +112,7 @@
     <string name="liked">Liked</string>
     <string name="saved">Saved</string>
     <string name="tagged">Tagged</string>
+    <string name="dm_person">Message</string>
     <string name="like">Like (%s)</string>
     <string name="unlike">Unlike (%s)</string>
     <string name="bookmark">Bookmark</string>
