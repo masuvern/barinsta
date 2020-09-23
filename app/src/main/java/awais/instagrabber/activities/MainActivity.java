@@ -39,9 +39,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import hendrawd.storageutil.library.StorageUtil;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -160,9 +158,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);
 
-        Log.d("austin_debug", "dir: "+Arrays.toString(StorageUtil.getStorageDirectories(getApplicationContext())));
-        final File sdcard = new File(StorageUtil.getStorageDirectories(getApplicationContext())[0]);
-        Log.d("austin_debug", "files: "+Arrays.toString(sdcard.listFiles()));
+        // Log.d("austin_debug", "dir: "+Arrays.toString(StorageUtil.getStorageDirectories(getApplicationContext())));
+        // final File sdcard = new File(StorageUtil.getStorageDirectories(getApplicationContext())[0]);
+        // Log.d("austin_debug", "files: "+Arrays.toString(sdcard.listFiles()));
     }
 
     @Override
