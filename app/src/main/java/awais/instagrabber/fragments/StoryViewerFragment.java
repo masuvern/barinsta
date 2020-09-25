@@ -62,12 +62,12 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
-import awais.instagrabber.asyncs.CommentAction;
 import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.QuizAction;
 import awais.instagrabber.asyncs.RespondAction;
 import awais.instagrabber.asyncs.SeenAction;
 import awais.instagrabber.asyncs.VoteAction;
+import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
@@ -196,7 +196,7 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.reply_story)
                         .setView(input)
-                        .setPositiveButton(R.string.ok, (d, w) -> new CommentAction(cookie, currentStory, threadId -> {
+                        .setPositiveButton(R.string.ok, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
                             try {
                                 final DirectThreadBroadcaster.StoryReplyBroadcastOptions options = new DirectThreadBroadcaster.StoryReplyBroadcastOptions(
                                         input.getText().toString(),
@@ -544,7 +544,6 @@ public class StoryViewerFragment extends Fragment {
         };
         storiesService.getUserStory(currentStoryMediaId,
                                     username,
-                                    !isLoggedIn && settingsHelper.getString(Constants.STORY_VIEWER) == StoryViewerChoice.STORIESIG.getValue(),
                                     false,
                                     false,
                                     isHighlight,

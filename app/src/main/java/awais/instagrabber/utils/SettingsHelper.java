@@ -40,7 +40,7 @@ public final class SettingsHelper {
     private final SharedPreferences sharedPreferences;
 
     public SettingsHelper(@NonNull final Context context) {
-        this.sharedPreferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        this.sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
 
     @NonNull

@@ -4,9 +4,8 @@ import java.io.Serializable;
 
 public enum StoryViewerChoice implements Serializable {
     NONE(0),
-    STORIESIG(1),
-    ALOINSTAGRAM(2),
-    INSTADP(3);
+    ALOINSTAGRAM(1),
+    INSTADP(2);
 
     private int value;
 

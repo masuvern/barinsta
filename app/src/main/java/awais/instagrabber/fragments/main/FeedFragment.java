@@ -325,6 +325,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public void onResume() {
         super.onResume();
+        binding.feedSwipeRefreshLayout.setRefreshing(false);
         if (videoAwareRecyclerScroller != null && shouldAutoPlay) {
             videoAwareRecyclerScroller.startPlaying();
         }
