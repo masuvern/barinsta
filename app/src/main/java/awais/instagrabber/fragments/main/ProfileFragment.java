@@ -85,7 +85,6 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.PostsViewModel;
-import awais.instagrabber.webservices.AloService;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awaisomereport.LogCollector;
@@ -107,7 +106,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private PostsAdapter postsAdapter;
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
-    private AloService aloService;
     private FriendshipService friendshipService;
     private boolean shouldRefresh = true;
     private StoryModel[] storyModels;
@@ -216,7 +214,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
-        aloService = AloService.getInstance();
         setHasOptionsMenu(true);
     }
 
@@ -461,22 +458,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                           highlightsViewModel.getList().postValue(result);
                                       } else binding.highlightsList.setVisibility(View.GONE);
                                   }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } else if (settingsHelper.getString(Constants.STORY_VIEWER).equals(StoryViewerChoice.ALOINSTAGRAM.getValue())) {
-            // Log.d(TAG, "alo triggered");
-            aloService.getUserStory(profileId, profileModel.getUsername(), false, new ServiceCallback<List<StoryModel>>() {
-                @Override
-                public void onSuccess(final List<StoryModel> result) {
-                    if (result != null && result.size() > 0) {
-                        storyModels = result.toArray(storyModels);
-                        binding.mainProfileImage.setStoriesBorder();
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error on aloService", t);
-                }
-            });
         }
 
         final String myId = CookieUtils.getUserIdFromCookie(cookie);

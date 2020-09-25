@@ -88,7 +88,6 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
-import awais.instagrabber.webservices.AloService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
@@ -113,7 +112,6 @@ public class StoryViewerFragment extends Fragment {
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
     private StoriesService storiesService;
-    private AloService aloService;
     private StoryModel currentStory;
     private int slidePos;
     private int lastSlidePos;

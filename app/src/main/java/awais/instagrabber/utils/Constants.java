@@ -24,7 +24,7 @@ public final class Constants {
     public static final String DM_MARK_AS_SEEN = "dm_mark_as_seen";
     public static final String INSTADP = "instadp";
     // deprecated: public static final String STORIESIG = "storiesig";
-    public static final String STORY_VIEWER = "story_viewer";
+    // deprecated: public static final String STORY_VIEWER = "story_viewer";
     // deprecated: public static final String AMOLED_THEME = "amoled_theme";
     public static final String CHECK_ACTIVITY = "check_activity";
     public static final String CHECK_UPDATES = "check_updates";
