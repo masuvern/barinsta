@@ -543,16 +543,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
             }
 
-            if (profileModel.getPostCount() == 0) {
-                binding.swipeRefreshLayout.setRefreshing(false);
-                binding.privatePage1.setImageResource(R.drawable.ic_cancel);
-                binding.privatePage2.setText(R.string.empty_acc);
-                binding.privatePage.setVisibility(View.VISIBLE);
-            } else {
-                binding.swipeRefreshLayout.setRefreshing(true);
-                binding.mainPosts.setVisibility(View.VISIBLE);
-                fetchPosts();
-            }
+            binding.swipeRefreshLayout.setRefreshing(true);
+            binding.mainPosts.setVisibility(View.VISIBLE);
+            fetchPosts();
         } else {
             binding.mainFollowers.setClickable(false);
             binding.mainFollowing.setClickable(false);
