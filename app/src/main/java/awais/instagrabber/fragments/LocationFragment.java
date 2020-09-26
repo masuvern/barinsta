@@ -42,7 +42,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
-import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
