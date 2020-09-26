@@ -573,6 +573,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.mainBiography.setText(biography);
             binding.mainBiography.setMentionClickListener(null);
         }
+        binding.mainBiography.setOnLongClickListener(v -> {
+            if (context != null) Utils.copyText(context, profileModel.getBiography());
+            return true;
+        });
 
         final String url = profileModel.getUrl();
         if (TextUtils.isEmpty(url)) {
@@ -585,6 +589,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         binding.mainFullName.setSelected(true);
         binding.mainBiography.setEnabled(true);
+        binding.mainBiography.setClickable(true);
 
         if (!profileModel.isReallyPrivate()) {
             binding.mainFollowing.setClickable(true);

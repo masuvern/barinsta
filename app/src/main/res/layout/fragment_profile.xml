@@ -82,7 +82,6 @@
                     android:paddingTop="8dp"
                     android:paddingEnd="4dp"
                     android:paddingRight="4dp"
-                    android:paddingBottom="8dp"
                     android:singleLine="true"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textStyle="bold"
