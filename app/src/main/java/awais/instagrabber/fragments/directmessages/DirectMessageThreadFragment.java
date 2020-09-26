@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
@@ -520,7 +521,9 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void searchUsername(final String text) {
-        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + text);
+        final ProfileNavGraphDirections.ActionGlobalProfileFragment action = DirectMessageThreadFragmentDirections
+                .actionGlobalProfileFragment();
+        action.setUsername("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     }
 

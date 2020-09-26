@@ -43,7 +43,6 @@ public class DirectMessageMediaViewHolder extends DirectMessageItemViewHolder {
         layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
         layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
         binding.ivMediaPreview.requestLayout();
-        binding.ivMediaPreview.requestLayout();
         binding.ivMediaPreview.setImageURI(mediaModel.getThumbUrl());
         final MediaItemType modelMediaType = mediaModel.getMediaType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER
