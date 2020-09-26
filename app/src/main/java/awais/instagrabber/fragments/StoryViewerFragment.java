@@ -71,12 +71,12 @@ import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
+import awais.instagrabber.fragments.main.ProfileFragmentDirections;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
@@ -115,7 +115,7 @@ public class StoryViewerFragment extends Fragment {
     private StoryModel currentStory;
     private int slidePos;
     private int lastSlidePos;
-    private String url;
+    private String url, username;
     private PollModel poll;
     private QuestionModel question;
     private String[] mentions;
@@ -123,7 +123,7 @@ public class StoryViewerFragment extends Fragment {
     private MenuItem menuDownload;
     private MenuItem menuDm;
     private SimpleExoPlayer player;
-    private boolean isHashtag;
+    private boolean isHashtag, isLoc;
     private String highlight;
     private boolean fetching = false;
     private int currentFeedStoryIndex;
@@ -439,7 +439,7 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.story_mentions)
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mentions), (d, w) -> {
-                            // searchUsername(mentions[w]);
+                            openProfile(mentions[w]);
                         })
                         .setPositiveButton(R.string.cancel, null)
                         .show();
@@ -479,7 +479,6 @@ public class StoryViewerFragment extends Fragment {
         binding.imageViewer.setController(null);
         releasePlayer();
         String currentStoryMediaId = null;
-        String username = null;
         if (currentFeedStoryIndex >= 0) {
             if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
@@ -501,20 +500,13 @@ public class StoryViewerFragment extends Fragment {
             username = fragmentArgs.getUsername();
         }
         isHashtag = fragmentArgs.getIsHashtag();
+        isLoc = fragmentArgs.getIsLoc();
         final boolean hasUsername = !TextUtils.isEmpty(currentStoryUsername);
         if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setTitle(currentStoryUsername);
-                // actionBar.setOnClickListener(v -> {
-                //     searchUsername(username);
-                // });
-                //                if (isHighlight) {
-                //                    actionBar.setSubtitle(getString(R.string.title_highlight, highlight));
-                //                } else {
-                //                    actionBar.setSubtitle(R.string.title_user_story);
-                //                }
             }
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
@@ -542,8 +534,8 @@ public class StoryViewerFragment extends Fragment {
         };
         storiesService.getUserStory(currentStoryMediaId,
                                     username,
-                                    false,
-                                    false,
+                                    isLoc,
+                                    isHashtag,
                                     isHighlight,
                                     storyCallback);
     }
@@ -596,14 +588,11 @@ public class StoryViewerFragment extends Fragment {
         binding.quiz.setTag(quiz);
 
         releasePlayer();
-        if (isHashtag) {
+        if (isHashtag || isLoc) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(currentStory.getUsername() + " (" + currentStoryUsername + ")");
+                actionBar.setTitle(currentStory.getUsername());
             }
-            // binding.toolbar.toolbar.setOnClickListener(v -> {
-            //     searchUsername(currentStory.getUsername());
-            // });
         }
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
         else setupImage();
@@ -753,6 +742,19 @@ public class StoryViewerFragment extends Fragment {
                 player.setPlayWhenReady(player.getPlaybackState() == Player.STATE_ENDED || !player.isPlaying());
             }
         });
+    }
+
+    private void openProfile(final String username) {
+        final char t = username.charAt(0);
+        Log.d("austin_debug", username);
+        if (t == '@') {
+            final NavDirections action = HashTagFragmentDirections.actionGlobalProfileFragment(username);
+            NavHostFragment.findNavController(this).navigate(action);
+        }
+        else if (t == '#') {
+            final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(username.substring(1));
+            NavHostFragment.findNavController(this).navigate(action);
+        }
     }
 
     private void releasePlayer() {

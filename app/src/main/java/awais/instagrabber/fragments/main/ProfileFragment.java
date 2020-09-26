@@ -74,7 +74,6 @@ import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
-import awais.instagrabber.models.enums.StoryViewerChoice;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
 import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
 import awais.instagrabber.utils.Constants;
@@ -87,6 +86,7 @@ import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -107,8 +107,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
     private FriendshipService friendshipService;
-    private boolean shouldRefresh = true;
-    private StoryModel[] storyModels;
+    private StoriesService storiesService;
+    private boolean shouldRefresh = true, hasStories = false;
     private boolean hasNextPage;
     private String endCursor;
     private AsyncTask<Void, Void, List<PostModel>> currentlyExecuting;
@@ -172,6 +172,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.privatePage.setVisibility(View.VISIBLE);
                 return;
             }
+            else {
+                binding.privatePage.setVisibility(View.GONE);
+            }
             binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
             final List<PostModel> postModels = postsViewModel.getList().getValue();
             List<PostModel> finalList = postModels == null || postModels.isEmpty() ? new ArrayList<>()
@@ -214,6 +217,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
+        storiesService = StoriesService.getInstance();
         setHasOptionsMenu(true);
     }
 
@@ -439,29 +443,35 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final String profileId = profileModel.getId();
-        if (isLoggedIn) {
-            new iStoryStatusFetcher(profileId,
-                                    profileModel.getUsername(),
-                                    false,
-                                    false,
-                                    false,
-                                    result -> {
-                                        storyModels = result;
-                                        if (result != null && result.length > 0) {
-                                            binding.mainProfileImage.setStoriesBorder();
-                                        }
-                                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            new HighlightsFetcher(profileId,
-                                  result -> {
-                                      if (result != null) {
-                                          binding.highlightsList.setVisibility(View.VISIBLE);
-                                          highlightsViewModel.getList().postValue(result);
-                                      } else binding.highlightsList.setVisibility(View.GONE);
-                                  }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
 
         final String myId = CookieUtils.getUserIdFromCookie(cookie);
         if (isLoggedIn) {
+            storiesService.getUserStory(profileId,
+                    profileModel.getUsername(),
+                    false,
+                    false,
+                    false,
+                    new ServiceCallback<List<StoryModel>>() {
+                        @Override
+                        public void onSuccess(final List<StoryModel> storyModels) {
+                            if (storyModels != null && !storyModels.isEmpty()) {
+                                binding.mainProfileImage.setStoriesBorder();
+                                hasStories = true;
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error", t);
+                        }
+                    });
+            new HighlightsFetcher(profileId,
+                    result -> {
+                        if (result != null) {
+                            binding.highlightsList.setVisibility(View.VISIBLE);
+                            highlightsViewModel.getList().postValue(result);
+                        } else binding.highlightsList.setVisibility(View.GONE);
+                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             if (profileId.equals(myId)) {
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 binding.btnSaved.setVisibility(View.VISIBLE);
@@ -675,7 +685,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }).execute();
         });
         binding.mainProfileImage.setOnClickListener(v -> {
-            if (storyModels == null || storyModels.length <= 0) {
+            if (!hasStories) {
                 // show profile pic
                 showProfilePicDialog();
                 return;
@@ -690,7 +700,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 if (which == 1) {
                     // show stories
                     final NavDirections action = ProfileFragmentDirections
-                            .actionProfileFragmentToStoryViewerFragment(-1, null, false, profileModel.getId(), username);
+                            .actionProfileFragmentToStoryViewerFragment(-1, null, false, false, profileModel.getId(), username);
                     NavHostFragment.findNavController(this).navigate(action);
                     return;
                 }
@@ -819,7 +829,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         highlightsViewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
         highlightsAdapter = new HighlightsAdapter((model, position) -> {
             final NavDirections action = ProfileFragmentDirections
-                    .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, null, null);
+                    .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, false, null, null);
             NavHostFragment.findNavController(this).navigate(action);
         });
         final Context context = getContext();
@@ -831,6 +841,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void fetchPosts() {
+        Log.d("austin_debug", "fp");
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
         currentlyExecuting = new PostsFetcher(profileModel.getId(), PostItemType.MAIN, endCursor, postsFetchListener)

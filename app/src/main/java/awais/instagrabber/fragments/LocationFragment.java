@@ -52,6 +52,7 @@ import awais.instagrabber.databinding.FragmentLocationBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostModel;
+import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
@@ -62,6 +63,8 @@ import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.PostsViewModel;
+import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -73,12 +76,13 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private MainActivity fragmentActivity;
     private FragmentLocationBinding binding;
     private NestedCoordinatorLayout root;
-    private boolean shouldRefresh = true;
+    private boolean shouldRefresh = true, hasStories = false;
     private String locationId;
     private LocationModel locationModel;
     private PostsViewModel postsViewModel;
     private PostsAdapter postsAdapter;
     private ActionMode actionMode;
+    private StoriesService storiesService;
     private boolean hasNextPage;
     private String endCursor;
     private AsyncTask<?, ?, ?> currentlyExecuting;
@@ -155,6 +159,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
+        storiesService = StoriesService.getInstance();
     }
 
     @Nullable
@@ -184,6 +189,12 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         isPullToRefresh = true;
         endCursor = null;
         fetchLocationModel();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setTitle();
     }
 
     @Override
@@ -287,17 +298,25 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String locationId = locationModel.getId();
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) {
-            new iStoryStatusFetcher(
-                    locationId,
+            storiesService.getUserStory(locationId,
                     null,
                     true,
                     false,
                     false,
-                    stories -> {
-                        if (stories != null && stories.length > 0) {
-                            binding.mainLocationImage.setStoriesBorder();
+                    new ServiceCallback<List<StoryModel>>() {
+                        @Override
+                        public void onSuccess(final List<StoryModel> storyModels) {
+                            if (storyModels != null && !storyModels.isEmpty()) {
+                                binding.mainLocationImage.setStoriesBorder();
+                                hasStories = true;
+                            }
                         }
-                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error", t);
+                        }
+                    });
         }
         binding.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
         final String postCount = String.valueOf(locationModel.getPostCount());
@@ -380,6 +399,15 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                     .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
                     .setAnchorView(fragmentActivity.getBottomNavView())
                     .show();
+        });
+        binding.mainLocationImage.setOnClickListener(v -> {
+            if (hasStories) {
+                // show stories
+                final NavDirections action = LocationFragmentDirections
+                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName());
+                NavHostFragment.findNavController(this).navigate(action);
+                return;
+            }
         });
     }
 

@@ -1,6 +1,7 @@
 package awais.instagrabber.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -40,7 +42,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.HashtagFetcher;
 import awais.instagrabber.asyncs.PostsFetcher;
-import awais.instagrabber.asyncs.i.iStoryStatusFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
@@ -50,6 +51,7 @@ import awais.instagrabber.databinding.FragmentHashtagBinding;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostModel;
+import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
@@ -61,6 +63,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.PostsViewModel;
 import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.TagsService;
 import awaisomereport.LogCollector;
 
@@ -73,12 +76,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private MainActivity fragmentActivity;
     private FragmentHashtagBinding binding;
     private NestedCoordinatorLayout root;
-    private boolean shouldRefresh = true;
+    private boolean shouldRefresh = true, hasStories = false;
     private String hashtag;
     private HashtagModel hashtagModel;
     private PostsViewModel postsViewModel;
     private PostsAdapter postsAdapter;
     private ActionMode actionMode;
+    private StoriesService storiesService;
     private boolean hasNextPage;
     private String endCursor;
     private AsyncTask<?, ?, ?> currentlyExecuting;
@@ -155,6 +159,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         tagsService = TagsService.getInstance();
+        storiesService = StoriesService.getInstance();
     }
 
     @Nullable
@@ -182,6 +187,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         isPullToRefresh = true;
         endCursor = null;
         fetchHashtagModel();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setTitle();
     }
 
     @Override
@@ -286,11 +297,25 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final Context context = getContext();
         if (context == null) return;
         if (isLoggedIn) {
-            new iStoryStatusFetcher(hashtagModel.getName(), null, false, true, false, stories -> {
-                if (stories != null && stories.length > 0) {
-                    binding.mainHashtagImage.setStoriesBorder();
-                }
-            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            storiesService.getUserStory(hashtagModel.getName(),
+                    null,
+                    false,
+                    true,
+                    false,
+                    new ServiceCallback<List<StoryModel>>() {
+                        @Override
+                        public void onSuccess(final List<StoryModel> storyModels) {
+                            if (storyModels != null && !storyModels.isEmpty()) {
+                                binding.mainHashtagImage.setStoriesBorder();
+                                hasStories = true;
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error", t);
+                        }
+                    });
             binding.btnFollowTag.setVisibility(View.VISIBLE);
             binding.btnFollowTag.setText(hashtagModel.getFollowing() ? R.string.unfollow : R.string.follow);
             binding.btnFollowTag.setChipIconResource(hashtagModel.getFollowing()
@@ -394,6 +419,15 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         binding.mainTagPostCount.setText(span);
         binding.mainTagPostCount.setVisibility(View.VISIBLE);
+        binding.mainHashtagImage.setOnClickListener(v -> {
+            if (hasStories) {
+                // show stories
+                final NavDirections action = HashTagFragmentDirections
+                        .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName());
+                NavHostFragment.findNavController(this).navigate(action);
+                return;
+            }
+        });
     }
 
     public void stopCurrentExecutor() {

@@ -153,6 +153,7 @@ public class StoriesService extends BaseService {
                                 model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));
                             }
 
+                            // TODO: this may not be limited to spotify
                             if (!data.isNull("story_app_attribution"))
                                 model.setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
 
@@ -173,7 +174,7 @@ public class StoriesService extends BaseService {
                                 ));
                             }
                             if (data.has("story_questions")) {
-                                JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0).optJSONObject("question_sticker");
+                                final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0).optJSONObject("question_sticker");
                                 if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
                                     model.setQuestion(new QuestionModel(
                                             String.valueOf(tappableObject.getLong("question_id")),
@@ -229,6 +230,9 @@ public class StoriesService extends BaseService {
                         }
                         callback.onSuccess(models);
                     }
+                    else {
+                        callback.onSuccess(null);
+                    }
                 } catch (JSONException e) {
                     Log.e(TAG, "Error parsing string");
                 }
@@ -248,12 +252,13 @@ public class StoriesService extends BaseService {
         if (isLoc) {
             builder.append("locations/");
         }
-        if (isHashtag) {
+        else if (isHashtag) {
             builder.append("tags/");
         }
-        if (highlight) {
+        else if (highlight) {
             builder.append("feed/reels_media?user_ids=");
-        } else {
+        }
+        else {
             builder.append("feed/user/");
         }
         builder.append(userId);

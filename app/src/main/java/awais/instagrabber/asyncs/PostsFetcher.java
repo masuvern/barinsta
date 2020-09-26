@@ -79,7 +79,8 @@ public final class PostsFetcher extends AsyncTask<Void, Void, List<PostModel>> {
                         "{\"id\":\"" + id + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
                 break;
             default:
-                url = "https://www.instagram.com/graphql/query/?query_id=17880160963012870&id=" + id + "&first=50&after=" + endCursor;
+                url = "https://www.instagram.com/graphql/query/?query_hash=18a7b935ab438c4514b1f742d8fa07a7&variables=" +
+                        "{\"id\":\"" + id + "\",\"first\":150,\"after\":\"" + endCursor + "\"}";
         }
         List<PostModel> result = new ArrayList<>();
         try {
@@ -153,8 +154,7 @@ public final class PostsFetcher extends AsyncTask<Void, Void, List<PostModel>> {
                             mediaNode.getLong("taken_at_timestamp"),
                             mediaNode.optBoolean("viewer_has_liked"),
                             mediaNode.optBoolean("viewer_has_saved"),
-                            mediaNode.getJSONObject("edge_liked_by")
-                                     .getLong("count")
+                            mediaNode.isNull("edge_liked_by") ? 0 : mediaNode.getJSONObject("edge_liked_by").getLong("count")
                     );
                     result.add(model);
                     DownloadUtils.checkExistence(downloadDir, customDir, isSlider, model);
