@@ -1,18 +1,18 @@
 <img src="./app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" alt="InstaGrabber" align="right"/>
 
-## Barinsta
+# Barinsta
 
 [![Awesome Humane Tech](https://raw.githubusercontent.com/humanetech-community/awesome-humane-tech/main/humane-tech-badge.svg?sanitize=true)](https://github.com/humanetech-community/awesome-humane-tech)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/barinsta/stargazers/)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-18-orange.svg)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-We're previously known as InstaGrabber and still in process of rebranding. For documentation, visit [InstaGrabber.AustinHuang.me](https://instagrabber.austinhuang.me).
+We're previously known as InstaGrabber and still in process of rebranding. For documentation, visit [Barinsta.AustinHuang.me](https://barinsta.austinhuang.me).
 
-### Download
+## Download
 
 **By installing, you indicate your acceptance of [Disclosure and Privacy Policy](https://instagrabber.austinhuang.me/disclosure).**
 
@@ -28,13 +28,13 @@ Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.insta
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/5.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" alt="Hashtag" width="15%"/></a>
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/images/en-US/phoneScreenshots/6.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" alt="Location" width="15%"/></a>
 
-### Contact us
+## Contact us
 
 * Use [GitHub issues](https://github.com/austinhuang0131/instagrabber/issues) when possible.
 * Email: [InstaGrabber@AustinHuang.me](mailto:instagrabber@austinhuang.me) (Synced to GitHub issues)
 * Chat (Bridged to each other): [![Matrix](https://img.shields.io/badge/Matrix-@Barinsta:matrix.org-000000?logo=matrix)](https://matrix.to/#/#barinsta:matrix.org) [![Telegram](https://img.shields.io/badge/Telegram-@Grabber__App-2CA5E0?logo=telegram)](https://t.me/grabber_app) [![Discord](https://img.shields.io/badge/Discord-YtEDzN2-7289da?logo=discord&logoColor=white)](https://discord.gg/YtEDzN2) [![Gitter](https://img.shields.io/badge/Gitter-InstaGrabber/General-ed1965?logo=gitter)](https://gitter.im/instagrabber/general)
 
-### Contributors
+## Contributors
 
 Prominent contributors are listed here in the [all-contributors](https://allcontributors.org/) specifications, see [emoji key](https://allcontributors.org/docs/en/emoji-key). [Want to contribute to Barinsta?](https://github.com/austinhuang0131/barinsta/blob/master/.github/CONTRIBUTING.md)
 
@@ -59,11 +59,14 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
     <td align="center"><a href="https://github.com/faydin"><img src="https://avatars2.githubusercontent.com/u/22706676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fatih Aydın</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
   </tr>
   <tr>
+    <td align="center"><a href="https://github.com/fouze555"><img src="https://avatars3.githubusercontent.com/u/71935341?v=4?s=100" width="100px;" alt=""/><br /><sub><b>fouze555</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://becauseofprog.fr/"><img src="https://avatars3.githubusercontent.com/u/24623168?s=100" width="100px;" alt=""/><br /><sub><b>kernoeb</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/Lego8486"><img src="https://avatars1.githubusercontent.com/u/47414485?s=100" width="100px;" alt=""/><br /><sub><b>Ten_Lego</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/MoaufmKlo"><img src="https://avatars1.githubusercontent.com/u/45636897?s=100" width="100px;" alt=""/><br /><sub><b>MoaufmKlo</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/peterge1998"><img src="https://avatars2.githubusercontent.com/u/47355238?s=100" width="100px;" alt=""/><br /><sub><b>peterge1998</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/RAMAR-RAR"><img src="https://avatars3.githubusercontent.com/u/47423745?s=100" width="100px;" alt=""/><br /><sub><b>RAMAR-RAR</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
+  </tr>
+  <tr>
     <td align="center"><a href="https://github.com/wagnim"><img src="https://avatars0.githubusercontent.com/u/30241419?s=100" width="100px;" alt=""/><br /><sub><b>wagnim</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
   </tr>
 </table>
@@ -72,7 +75,7 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-### License
+## License
 
 This app is originally made by [@AwaisKing](https://github.com/AwaisKing) on [GitLab](https://gitlab.com/AwaisKing/instagrabber).
 

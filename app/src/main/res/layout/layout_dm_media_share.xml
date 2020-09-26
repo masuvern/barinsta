@@ -23,7 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:maxHeight="@dimen/dm_media_img_max_height" />
+            android:maxHeight="@dimen/dm_media_img_max_height"
+            app:actualImageScaleType="fitCenter" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/typeIcon"
