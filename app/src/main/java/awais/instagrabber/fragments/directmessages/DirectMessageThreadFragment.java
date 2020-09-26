@@ -521,9 +521,7 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void searchUsername(final String text) {
-        final ProfileNavGraphDirections.ActionGlobalProfileFragment action = DirectMessageThreadFragmentDirections
-                .actionGlobalProfileFragment();
-        action.setUsername("@" + text);
+        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + text);
         NavHostFragment.findNavController(this).navigate(action);
     }
 
