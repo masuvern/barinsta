@@ -841,7 +841,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void fetchPosts() {
-        Log.d("austin_debug", "fp");
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
         currentlyExecuting = new PostsFetcher(profileModel.getId(), PostItemType.MAIN, endCursor, postsFetchListener)

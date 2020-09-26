@@ -53,41 +53,12 @@ public class DirectMessageMediaShareViewHolder extends DirectMessageItemViewHold
                 maxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.ivMediaPreview.getLayoutParams();
-        layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
         layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
+        layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
         binding.ivMediaPreview.requestLayout();
         binding.ivMediaPreview.setImageURI(mediaModel.getThumbUrl());
         final MediaItemType modelMediaType = mediaModel.getMediaType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO
                                                || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER ? View.VISIBLE : View.GONE);
-    }
-
-    private class WidthHeight {
-        private final DirectItemMediaModel mediaModel;
-        private int height;
-        private int width;
-
-        public WidthHeight(final DirectItemMediaModel mediaModel) {this.mediaModel = mediaModel;}
-
-        public int getHeight() {
-            return height;
-        }
-
-        public int getWidth() {
-            return width;
-        }
-
-        public WidthHeight invoke() {
-            height = mediaModel.getHeight();
-            width = mediaModel.getWidth();
-            // make height 500dp regardless
-            width = NumberUtils.getResultingWidth(maxHeight, height, width);
-            height = maxHeight;
-            if (width > maxWidth) {
-                height = NumberUtils.getResultingHeight(maxWidth, height, width);
-                width = maxWidth;
-            }
-            return this;
-        }
     }
 }

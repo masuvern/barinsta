@@ -57,8 +57,8 @@ public final class NumberUtils {
 
     @NonNull
     public static Pair<Integer, Integer> calculateWidthHeight(final int height, final int width, final int maxHeight, final int maxWidth) {
-        int tempWidth = NumberUtils.getResultingWidth(maxHeight, height, width);
-        int tempHeight = maxHeight;
+        int tempWidth = width;
+        int tempHeight = height > maxHeight ? maxHeight : height;
         if (tempWidth > maxWidth) {
             tempHeight = NumberUtils.getResultingHeight(maxWidth, height, width);
             tempWidth = maxWidth;

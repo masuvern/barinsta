@@ -22,6 +22,7 @@
             android:id="@+id/ivMediaPreview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:maxHeight="@dimen/dm_media_img_max_height"
             app:actualImageScaleType="fitCenter" />
