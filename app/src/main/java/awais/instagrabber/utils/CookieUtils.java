@@ -10,6 +10,7 @@ import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,8 +32,7 @@ public final class CookieUtils {
             cookieStore.removeAll();
             Utils.dataBox.deleteAllUserCookies();
             return;
-        }
-        else if (cookieRaw.equals("LOGOUT")) {
+        } else if (cookieRaw.equals("LOGOUT")) {
             cookieStore.removeAll();
             return;
         }
@@ -79,7 +79,7 @@ public final class CookieUtils {
 
     @Nullable
     public static String getCookie(@Nullable final String webViewUrl) {
-        final List<String> domains = Arrays.asList(
+        final List<String> domains = new ArrayList<>(Arrays.asList(
                 "https://instagram.com",
                 "https://instagram.com/",
                 "http://instagram.com",
@@ -88,8 +88,7 @@ public final class CookieUtils {
                 "https://www.instagram.com/",
                 "http://www.instagram.com",
                 "http://www.instagram.com/"
-        );
-
+        ));
         if (!TextUtils.isEmpty(webViewUrl)) {
             domains.add(0, webViewUrl);
         }
