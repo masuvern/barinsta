@@ -69,6 +69,7 @@ public final class CookieUtils {
 
     @Nullable
     private static String getCookieValue(final String cookies, final String name) {
+        if (cookies == null) return null;
         final Pattern pattern = Pattern.compile(name + "=(.+?);");
         final Matcher matcher = pattern.matcher(cookies);
         if (matcher.find()) {
