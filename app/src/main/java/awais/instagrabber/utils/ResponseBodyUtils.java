@@ -257,8 +257,8 @@ public final class ResponseBodyUtils {
 
         final JSONArray users = data.getJSONArray("users");
         final int usersLen = users.length();
-        final JSONArray leftusers = data.getJSONArray("left_users");
-        final int leftusersLen = leftusers.length();
+        final JSONArray leftusers = data.optJSONArray("left_users");
+        final int leftusersLen = leftusers == null ? 0 : leftusers.length();
         final JSONArray admins = data.getJSONArray("admin_user_ids");
         final int adminsLen = admins.length();
 
