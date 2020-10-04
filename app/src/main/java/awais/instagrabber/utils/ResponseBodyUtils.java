@@ -265,11 +265,11 @@ public final class ResponseBodyUtils {
         final ProfileModel[] userModels = new ProfileModel[usersLen];
         for (int j = 0; j < usersLen; ++j) {
             final JSONObject userObject = users.getJSONObject(j);
-            userModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
+            userModels[j] = new ProfileModel(userObject.optBoolean("is_private"),
                                              false,
                                              userObject.optBoolean("is_verified"),
                                              String.valueOf(userObject.get("pk")),
-                                             userObject.getString("username"),
+                                             userObject.optString("username"), // optional cuz fb users
                                              userObject.getString("full_name"),
                                              null, null,
                                              userObject.getString("profile_pic_url"),
