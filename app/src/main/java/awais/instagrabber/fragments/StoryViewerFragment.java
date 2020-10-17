@@ -45,8 +45,11 @@ import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.LoadEventInfo;
+import com.google.android.exoplayer2.source.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -81,7 +84,6 @@ import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -622,8 +624,11 @@ public class StoryViewerFragment extends Fragment {
                 final String storyUrl = currentStory.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
                                         ? currentStory.getVideoUrl()
                                         : currentStory.getStoryUrl();
-                final File saveFile = new File(dir, currentStory.getStoryMediaId() + "_" + currentStory.getTimestamp()
-                        + DownloadUtils.getExtensionFromModel(storyUrl, currentStory));
+                final File saveFile = new File(
+                        dir,
+                        currentStory.getStoryMediaId()
+                                + "_" + currentStory.getTimestamp()
+                                + DownloadUtils.getFileExtensionFromUrl(storyUrl));
 
                 new DownloadAsync(context, storyUrl, saveFile, result -> {
                     final int toastRes = result != null && result.exists() ? R.string.downloader_complete
@@ -687,8 +692,10 @@ public class StoryViewerFragment extends Fragment {
         binding.playerView.setPlayer(player);
         player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
 
+        final Uri uri = Uri.parse(url);
+        final MediaItem mediaItem = MediaItem.fromUri(uri);
         final ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(context, "instagram"))
-                .createMediaSource(Uri.parse(url));
+                .createMediaSource(mediaItem);
         mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
             @Override
             public void onLoadCompleted(final int windowIndex,
@@ -732,7 +739,8 @@ public class StoryViewerFragment extends Fragment {
                 binding.progressView.setVisibility(View.GONE);
             }
         });
-        player.prepare(mediaSource);
+        player.setMediaSource(mediaSource);
+        player.prepare();
 
         binding.playerView.setOnClickListener(v -> {
             if (player != null) {
@@ -751,12 +759,10 @@ public class StoryViewerFragment extends Fragment {
         if (t == '@') {
             final NavDirections action = HashTagFragmentDirections.actionGlobalProfileFragment(username);
             NavHostFragment.findNavController(this).navigate(action);
-        }
-        else if (t == '#') {
+        } else if (t == '#') {
             final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(username.substring(1));
             NavHostFragment.findNavController(this).navigate(action);
-        }
-        else {
+        } else {
             final NavDirections action = ProfileFragmentDirections.actionGlobalLocationFragment(username.split(" \\(")[1].replace(")", ""));
             NavHostFragment.findNavController(this).navigate(action);
         }

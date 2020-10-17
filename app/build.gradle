@@ -20,6 +20,9 @@ android {
     }
 
     compileOptions {
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
     }
@@ -37,24 +40,29 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
+
     def appcompat_version = "1.2.0"
     def nav_version = "2.3.0"
-    def preference_version = "1.1.1"
 
-    implementation 'com.google.android.material:material:1.3.0-alpha02'
-    implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
+    implementation 'com.google.android.material:material:1.3.0-alpha03'
+    implementation 'com.google.android.exoplayer:exoplayer:2.12.0'
 
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
-    implementation "androidx.recyclerview:recyclerview:1.2.0-alpha05"
+    implementation "androidx.recyclerview:recyclerview:1.2.0-alpha06"
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
-    implementation "androidx.constraintlayout:constraintlayout:2.0.1"
-    implementation "androidx.preference:preference:$preference_version"
+    implementation "androidx.constraintlayout:constraintlayout:2.0.2"
+    implementation "androidx.preference:preference:1.1.1"
+    implementation "androidx.work:work-runtime:2.4.0"
+
+    implementation 'com.google.guava:guava:27.0.1-android'
 
 //    implementation 'com.github.hendrawd:StorageUtil:1.1.0'
+    implementation 'com.github.armcha:AutoLinkTextViewV2:2.1.1'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'
@@ -63,5 +71,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.4'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
 }

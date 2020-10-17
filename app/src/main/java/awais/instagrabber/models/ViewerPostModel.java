@@ -7,13 +7,124 @@ public final class ViewerPostModel extends BasePostModel {
     protected final String locationName;
     protected final String location;
     protected final long videoViews;
-    protected String sliderDisplayUrl;
-    protected long commentsCount, likes;
+    private final String thumbnailUrl;
+    protected long commentsCount;
+    protected long likes;
+    private int imageWidth;
+    private int imageHeight;
     private boolean isCurrentSlide = false;
+
+    public static class Builder {
+        private MediaItemType itemType;
+        private String postId;
+        private String displayUrl;
+        private String shortCode;
+        private String postCaption;
+        private ProfileModel profileModel;
+        private long videoViews;
+        private long timestamp;
+        private boolean liked;
+        private boolean bookmarked;
+        private long likes;
+        private String locationName;
+        private String location;
+        private String thumbnailUrl;
+        private int imageWidth;
+        private int imageHeight;
+
+        public Builder setItemType(final MediaItemType itemType) {
+            this.itemType = itemType;
+            return this;
+        }
+
+        public Builder setPostId(final String postId) {
+            this.postId = postId;
+            return this;
+        }
+
+        public Builder setDisplayUrl(final String displayUrl) {
+            this.displayUrl = displayUrl;
+            return this;
+        }
+
+        public Builder setShortCode(final String shortCode) {
+            this.shortCode = shortCode;
+            return this;
+        }
+
+        // public Builder setPostCaption(final String postCaption) {
+        //     this.postCaption = postCaption;
+        //     return this;
+        // }
+
+        // public Builder setProfileModel(final ProfileModel profileModel) {
+        //     this.profileModel = profileModel;
+        //     return this;
+        // }
+
+        public Builder setVideoViews(final long videoViews) {
+            this.videoViews = videoViews;
+            return this;
+        }
+
+        // public Builder setTimestamp(final long timestamp) {
+        //     this.timestamp = timestamp;
+        //     return this;
+        // }
+        //
+        // public Builder setLiked(final boolean liked) {
+        //     this.liked = liked;
+        //     return this;
+        // }
+        //
+        // public Builder setBookmarked(final boolean bookmarked) {
+        //     this.bookmarked = bookmarked;
+        //     return this;
+        // }
+        //
+        // public Builder setLikes(final long likes) {
+        //     this.likes = likes;
+        //     return this;
+        // }
+
+        // public Builder setLocationName(final String locationName) {
+        //     this.locationName = locationName;
+        //     return this;
+        // }
+        //
+        // public Builder setLocation(final String location) {
+        //     this.location = location;
+        //     return this;
+        // }
+
+
+        public Builder setImageHeight(final int imageHeight) {
+            this.imageHeight = imageHeight;
+            return this;
+        }
+
+        public Builder setImageWidth(final int imageWidth) {
+            this.imageWidth = imageWidth;
+            return this;
+        }
+
+        public Builder setThumbnailUrl(final String thumbnailUrl) {
+            this.thumbnailUrl = thumbnailUrl;
+            return this;
+        }
+
+        public ViewerPostModel build() {
+            return new ViewerPostModel(itemType, postId, displayUrl, thumbnailUrl, imageHeight, imageWidth, shortCode, postCaption, profileModel,
+                                       videoViews, timestamp, liked, bookmarked, likes, locationName, location);
+        }
+    }
 
     public ViewerPostModel(final MediaItemType itemType,
                            final String postId,
                            final String displayUrl,
+                           final String thumbnailUrl,
+                           final int imageHeight,
+                           final int imageWidth,
                            final String shortCode,
                            final String postCaption,
                            final ProfileModel profileModel,
@@ -27,6 +138,9 @@ public final class ViewerPostModel extends BasePostModel {
         this.itemType = itemType;
         this.postId = postId;
         this.displayUrl = displayUrl;
+        this.thumbnailUrl = thumbnailUrl;
+        this.imageHeight = imageHeight;
+        this.imageWidth = imageWidth;
         this.postCaption = postCaption;
         this.profileModel = profileModel;
         this.shortCode = shortCode;
@@ -34,21 +148,13 @@ public final class ViewerPostModel extends BasePostModel {
         this.timestamp = timestamp;
         this.liked = liked;
         this.likes = likes;
-        this.bookmarked = bookmarked;
+        this.saved = bookmarked;
         this.locationName = locationName;
         this.location = location;
     }
 
-    public static ViewerPostModel getDefaultModel(final int postId, final String shortCode) {
-        return new ViewerPostModel(null, String.valueOf(postId), null, "", null, null, -1, -1, false, false, -1, null, null);
-    }
-
     public long getCommentsCount() {
         return commentsCount;
-    }
-
-    public String getSliderDisplayUrl() {
-        return sliderDisplayUrl;
     }
 
     public ProfileModel getProfileModel() {
@@ -72,29 +178,42 @@ public final class ViewerPostModel extends BasePostModel {
     }
 
     // setManualLike means user liked from InstaGrabber
-    public boolean setManualLike(final boolean like) {
+    public void setManualLike(final boolean like) {
         liked = like;
         likes = (like) ? (likes + 1) : (likes - 1);
-        return liked;
-    }
-
-    public void setBookmarked(final boolean bookmarked) {
-        this.bookmarked = bookmarked;
-    }
-
-    public void setSliderDisplayUrl(final String sliderDisplayUrl) {
-        this.sliderDisplayUrl = sliderDisplayUrl;
-    }
-
-    public void setCommentsCount(final long commentsCount) {
-        this.commentsCount = commentsCount;
-    }
-
-    public void setCurrentSlide(final boolean currentSlide) {
-        this.isCurrentSlide = currentSlide;
     }
 
     public boolean isCurrentSlide() {
         return isCurrentSlide;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    @Override
+    public String toString() {
+        return "ViewerPostModel{" +
+                "type=" + itemType +
+                ", displayUrl=" + displayUrl +
+                ", thumbnailUrl=" + thumbnailUrl +
+                ", locationName='" + locationName + '\'' +
+                ", location='" + location + '\'' +
+                ", videoViews=" + videoViews +
+                ", thumbnailUrl='" + thumbnailUrl + '\'' +
+                ", commentsCount=" + commentsCount +
+                ", likes=" + likes +
+                ", imageWidth=" + imageWidth +
+                ", imageHeight=" + imageHeight +
+                ", isCurrentSlide=" + isCurrentSlide +
+                '}';
     }
 }

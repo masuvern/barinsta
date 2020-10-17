@@ -15,6 +15,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -171,8 +172,9 @@ public class PostViewerChildAdapter extends ListAdapter<ViewerPostModel, PostVie
             if (vol == 0f && Utils.sessionVolumeFull) vol = 1f;
             player.setVolume(vol);
             player.setPlayWhenReady(Utils.settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
-            final ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(itemView.getContext(), "instagram"))
-                    .createMediaSource(Uri.parse(item.getDisplayUrl()));
+            final ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(
+                    new DefaultDataSourceFactory(itemView.getContext(), "instagram")
+            ).createMediaSource(MediaItem.fromUri(item.getDisplayUrl()));
             // mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
             //     @Override
             //     public void onLoadCompleted(final int windowIndex, @Nullable final MediaSource.MediaPeriodId mediaPeriodId, final LoadEventInfo loadEventInfo, final MediaLoadData mediaLoadData) {
@@ -194,7 +196,8 @@ public class PostViewerChildAdapter extends ListAdapter<ViewerPostModel, PostVie
             //         viewerBinding.progressView.setVisibility(View.GONE);
             //     }
             // });
-            player.prepare(mediaSource);
+            player.setMediaSource(mediaSource);
+            player.prepare();
             player.setVolume(vol);
             // viewerBinding.bottomPanel.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
             // viewerBinding.bottomPanel.btnMute.setOnClickListener(onClickListener);

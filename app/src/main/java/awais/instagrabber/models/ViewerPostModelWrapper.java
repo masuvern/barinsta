@@ -1,10 +1,12 @@
 package awais.instagrabber.models;
 
+import java.util.List;
+
 public class ViewerPostModelWrapper {
     private int position;
-    private ViewerPostModel[] viewerPostModels;
+    private List<PostChild> viewerPostModels;
 
-    public ViewerPostModelWrapper(final int position, final ViewerPostModel[] viewerPostModels) {
+    public ViewerPostModelWrapper(final int position, final List<PostChild> viewerPostModels) {
         this.position = position;
         this.viewerPostModels = viewerPostModels;
     }
@@ -13,11 +15,11 @@ public class ViewerPostModelWrapper {
         return position;
     }
 
-    public ViewerPostModel[] getViewerPostModels() {
+    public List<PostChild> getViewerPostModels() {
         return viewerPostModels;
     }
 
-    public void setViewerPostModels(final ViewerPostModel[] viewerPostModels) {
+    public void setViewerPostModels(final List<PostChild> viewerPostModels) {
         this.viewerPostModels = viewerPostModels;
     }
 }

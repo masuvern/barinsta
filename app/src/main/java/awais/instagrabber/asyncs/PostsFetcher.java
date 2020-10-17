@@ -153,8 +153,8 @@ public final class PostsFetcher extends AsyncTask<Void, Void, List<PostModel>> {
                                                   : null,
                             mediaNode.getLong("taken_at_timestamp"),
                             mediaNode.optBoolean("viewer_has_liked"),
-                            mediaNode.optBoolean("viewer_has_saved"),
-                            mediaNode.isNull("edge_liked_by") ? 0 : mediaNode.getJSONObject("edge_liked_by").getLong("count")
+                            mediaNode.optBoolean("viewer_has_saved")
+                            // , mediaNode.isNull("edge_liked_by") ? 0 : mediaNode.getJSONObject("edge_liked_by").getLong("count")
                     );
                     result.add(model);
                     DownloadUtils.checkExistence(downloadDir, customDir, isSlider, model);

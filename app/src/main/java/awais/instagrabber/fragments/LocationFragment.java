@@ -327,8 +327,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         binding.mainLocPostCount.setVisibility(View.VISIBLE);
         binding.locationFullName.setText(locationModel.getName());
         CharSequence biography = locationModel.getBio();
-        binding.locationBiography.setCaptionIsExpandable(true);
-        binding.locationBiography.setCaptionIsExpanded(true);
+        // binding.locationBiography.setCaptionIsExpandable(true);
+        // binding.locationBiography.setCaptionIsExpanded(true);
 
         if (TextUtils.isEmpty(biography)) {
             binding.locationBiography.setVisibility(View.GONE);

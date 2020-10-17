@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
     android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -31,11 +30,17 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
+        <awais.instagrabber.customviews.PostsRecyclerView
             android:id="@+id/feed_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             tools:listitem="@layout/item_feed_photo" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/frag_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 </awais.instagrabber.customviews.helpers.NestedCoordinatorLayout>

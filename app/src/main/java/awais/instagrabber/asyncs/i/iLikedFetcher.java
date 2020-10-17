@@ -96,8 +96,9 @@ public final class iLikedFetcher extends AsyncTask<Void, Void, List<PostModel>> 
                             mediaNode.isNull("caption") ? null : mediaNode.getJSONObject("caption").optString("text"),
                             mediaNode.getLong("taken_at"),
                             true,
-                            mediaNode.optBoolean("has_viewer_saved"),
-                            mediaNode.getLong("like_count"));
+                            mediaNode.optBoolean("has_viewer_saved")
+                            // , mediaNode.getLong("like_count")
+                    );
                     result.add(model);
                     String username = mediaNode.getJSONObject("user").getString("username");
                     final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +

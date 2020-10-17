@@ -65,4 +65,8 @@ public final class NumberUtils {
         }
         return new Pair<>(tempWidth, tempHeight);
     }
+
+    public static float roundFloat2Decimals(final float value) {
+        return ((int) ((value + (value >= 0 ? 1 : -1) * 0.005f) * 100)) / 100f;
+    }
 }

@@ -24,6 +24,6 @@ public final class PostMediaViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(clickListener);
         binding.selectedView.setVisibility(model.isCurrentSlide() ? View.VISIBLE : View.GONE);
         binding.isDownloaded.setVisibility(model.isDownloaded() ? View.VISIBLE : View.GONE);
-        binding.icon.setImageURI(model.getSliderDisplayUrl());
+        binding.icon.setImageURI(model.getDisplayUrl());
     }
 }

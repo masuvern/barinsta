@@ -10,8 +10,8 @@
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/ivProfilePic"
-        android:layout_width="@dimen/feed_profile_size"
-        android:layout_height="@dimen/feed_profile_size"
+        android:layout_width="@dimen/profile_pic_size_regular"
+        android:layout_height="@dimen/profile_pic_size_regular"
         android:background="?selectableItemBackgroundBorderless"
         app:roundAsCircle="true" />
 

@@ -20,14 +20,15 @@ public abstract class BasePostModel implements Serializable, Selectable {
     protected boolean isDownloaded;
     protected long timestamp;
     protected int position;
-    boolean liked, bookmarked;
+    boolean liked;
+    boolean saved;
 
     public boolean getLike() {
         return liked;
     }
 
-    public boolean getBookmark() {
-        return bookmarked;
+    public boolean isSaved() {
+        return saved;
     }
 
     public MediaItemType getItemType() {

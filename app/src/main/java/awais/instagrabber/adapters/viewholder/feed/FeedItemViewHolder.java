@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.databinding.ItemFeedBottomBinding;
@@ -34,17 +35,19 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         this.topBinding = topBinding;
         this.bottomBinding = bottomBinding;
         this.mentionClickListener = mentionClickListener;
+        // itemView.setOnClickListener(clickListener);
         // topBinding.title.setMovementMethod(new LinkMovementMethod());
-        bottomBinding.btnComments.setOnClickListener(clickListener);
-        topBinding.viewStoryPost.setOnClickListener(clickListener);
-        topBinding.ivProfilePic.setOnClickListener(clickListener);
-        bottomBinding.btnDownload.setOnClickListener(clickListener);
-        bottomBinding.viewerCaption.setOnClickListener(clickListener);
-        bottomBinding.viewerCaption.setOnLongClickListener(longClickListener);
-        bottomBinding.viewerCaption.setMentionClickListener(mentionClickListener);
+        // bottomBinding.btnComments.setOnClickListener(clickListener);
+        // topBinding.viewStoryPost.setOnClickListener(clickListener);
+        // topBinding.ivProfilePic.setOnClickListener(clickListener);
+        // bottomBinding.btnDownload.setOnClickListener(clickListener);
+        // bottomBinding.viewerCaption.setOnClickListener(clickListener);
+        // bottomBinding.viewerCaption.setOnLongClickListener(longClickListener);
+        // bottomBinding.viewerCaption.setMentionClickListener(mentionClickListener);
     }
 
-    public void bind(final FeedModel feedModel) {
+    public void bind(final FeedModel feedModel,
+                     final FeedAdapterV2.OnPostClickListener postClickListener) {
         if (feedModel == null) {
             return;
         }
@@ -83,7 +86,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             }
         }
         expandCollapseTextView(bottomBinding.viewerCaption, feedModel.getPostCaption());
-        bindItem(feedModel);
+        bindItem(feedModel, postClickListener);
     }
 
     private void setLocation(final String locationName, final String locationId) {
@@ -106,7 +109,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
      * expands or collapses {@link RamboTextView} [stg idek why i wrote this documentation]
      *
      * @param textView the {@link RamboTextView} view, to expand and collapse
-     * @param caption caption
+     * @param caption  caption
      * @return isExpanded
      */
     public static boolean expandCollapseTextView(@NonNull final RamboTextView textView, final CharSequence caption) {
@@ -116,7 +119,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
 
         if (textView.isCaptionExpanded()) {
             textView.setText(caption, bufferType);
-            textView.setCaptionIsExpanded(false);
+            // textView.setCaptionIsExpanded(false);
             return true;
         }
         int i = TextUtils.indexOfChar(caption, '\r', 0);
@@ -129,10 +132,15 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
 
         if (TextUtils.hasMentions(caption))
             textView.setText(TextUtils.getMentionText(caption), TextView.BufferType.SPANNABLE);
-        textView.setCaptionIsExpandable(true);
-        textView.setCaptionIsExpanded(true);
+        // textView.setCaptionIsExpandable(true);
+        // textView.setCaptionIsExpanded(true);
         return true;
     }
 
-    public abstract void bindItem(final FeedModel feedModel);
+    public abstract void bindItem(final FeedModel feedModel,
+                                  final FeedAdapterV2.OnPostClickListener postClickListener);
+
+    public void clearAnimation() {
+        itemView.clearAnimation();
+    }
 }

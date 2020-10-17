@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.database.MatrixCursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -94,7 +95,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             R.id.notificationsViewer,
             R.id.themePreferencesFragment,
             R.id.favoritesFragment,
-            R.id.backupPreferencesFragment);
+            R.id.backupPreferencesFragment
+            // , R.id.postViewV2Fragment
+    );
     private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
     private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
@@ -157,10 +160,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             bindActivityCheckerService();
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);
-
-        // Log.d("austin_debug", "dir: "+Arrays.toString(StorageUtil.getStorageDirectories(getApplicationContext())));
-        // final File sdcard = new File(StorageUtil.getStorageDirectories(getApplicationContext())[0]);
-        // Log.d("austin_debug", "files: "+Arrays.toString(sdcard.listFiles()));
     }
 
     @Override
@@ -222,7 +221,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     @Override
     public void onBackPressed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isTaskRoot() && isBackStackEmpty) {
+        if (isTaskRoot() && isBackStackEmpty) {
             finishAfterTransition();
         } else {
             super.onBackPressed();
@@ -625,5 +624,20 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     @NonNull
     public BottomNavigationView getBottomNavView() {
         return binding.bottomNavView;
+    }
+
+    public void fitSystemWindows(final boolean fit) {
+        binding.appBarLayout.setBackground(null);
+        binding.appBarLayout.setFitsSystemWindows(fit);
+        binding.collapsingToolbarLayout.setBackground(null);
+        binding.collapsingToolbarLayout.setFitsSystemWindows(fit);
+        final Drawable toolbarBackground = binding.toolbar.getBackground();
+        binding.toolbar.setFitsSystemWindows(fit);
+        binding.toolbar.setBackground(null);
+        binding.toolbar.setClickable(false);
+    }
+
+    public int getNavHostContainerId() {
+        return binding.mainNavHost.getId();
     }
 }

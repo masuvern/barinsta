@@ -5,7 +5,12 @@
 
     <dimen name="profile_picture_size">90dp</dimen>
     <dimen name="image_size_40">40dp</dimen>
-    <dimen name="feed_profile_size">48dp</dimen>
+
+    <dimen name="profile_pic_size_tiny">24dp</dimen>
+    <dimen name="profile_pic_size_small">40dp</dimen>
+    <dimen name="profile_pic_size_regular">48dp</dimen>
+    <dimen name="profile_pic_size_large">90dp</dimen>
+
     <dimen name="slider_item_size">80dp</dimen>
     <dimen name="highlight_size">70dp</dimen>
     <dimen name="dm_link_image_size">120dp</dimen>
@@ -19,7 +24,6 @@
 
     <dimen name="notification_image_size">56dp</dimen>
     <dimen name="message_item_size">@dimen/simple_item_picture_size</dimen>
-    <dimen name="message_item_profile_size">@dimen/feed_profile_size</dimen>
     <dimen name="dm_media_img_max_height">500dp</dimen>
     <dimen name="dm_message_card_radius">8dp</dimen>
 

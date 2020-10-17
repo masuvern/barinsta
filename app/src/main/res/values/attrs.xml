@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ProfilePicView">
+        <attr name="size" format="enum">
+            <enum name="tiny" value="0" />
+            <enum name="small" value="1" />
+            <enum name="regular" value="2" />
+            <enum name="large" value="3" />
+        </attr>
+    </declare-styleable>
+</resources>

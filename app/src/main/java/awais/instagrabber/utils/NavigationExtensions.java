@@ -131,6 +131,7 @@ public class NavigationExtensions {
         }
         final NavHostFragment navHostFragment = NavHostFragment.create(navGraphId);
         fragmentManager.beginTransaction()
+                       .setReorderingAllowed(true)
                        .add(containerId, navHostFragment, fragmentTag)
                        .commitNow();
         return navHostFragment;

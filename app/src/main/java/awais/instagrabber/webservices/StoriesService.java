@@ -1,5 +1,6 @@
 package awais.instagrabber.webservices;
 
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -8,6 +9,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +36,7 @@ import retrofit2.Retrofit;
 
 public class StoriesService extends BaseService {
     private static final String TAG = "StoriesService";
+    private static final boolean loadFromMock = false;
 
     private final StoriesRepository repository;
 
@@ -50,6 +57,30 @@ public class StoriesService extends BaseService {
     }
 
     public void getFeedStories(final ServiceCallback<List<FeedStoryModel>> callback) {
+        if (loadFromMock) {
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> {
+                final ClassLoader classLoader = getClass().getClassLoader();
+                if (classLoader == null) {
+                    Log.e(TAG, "getFeedStories: classLoader is null!");
+                    return;
+                }
+                try (InputStream resourceAsStream = classLoader.getResourceAsStream("stories_response.json");
+                     Reader in = new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8)) {
+                    final int bufferSize = 1024;
+                    final char[] buffer = new char[bufferSize];
+                    final StringBuilder out = new StringBuilder();
+                    int charsRead;
+                    while ((charsRead = in.read(buffer, 0, buffer.length)) > 0) {
+                        out.append(buffer, 0, charsRead);
+                    }
+                    parseStoriesBody(out.toString(), callback);
+                } catch (IOException e) {
+                    Log.e(TAG, "getFeedStories: ", e);
+                }
+            }, 1000);
+            return;
+        }
         final Map<String, String> queryMap = new HashMap<>();
         queryMap.put("query_hash", "b7b84d884400bc5aa7cfe12ae843a091");
         queryMap.put("variables", "{\"only_stories\":true,\"stories_prefetch\":false,\"stories_video_dash_manifest\":false}");
@@ -62,31 +93,7 @@ public class StoriesService extends BaseService {
                     Log.e(TAG, "getFeedStories: body is empty");
                     return;
                 }
-                try {
-                    final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
-                    final JSONArray feedStoriesReel = new JSONObject(body)
-                            .getJSONObject("data")
-                            .getJSONObject(Constants.EXTRAS_USER)
-                            .getJSONObject("feed_reels_tray")
-                            .getJSONObject("edge_reels_tray_to_reel")
-                            .getJSONArray("edges");
-                    for (int i = 0; i < feedStoriesReel.length(); ++i) {
-                        final JSONObject node = feedStoriesReel.getJSONObject(i).getJSONObject("node");
-                        final JSONObject user = node.getJSONObject(node.has("user") ? "user" : "owner");
-                        final ProfileModel profileModel = new ProfileModel(false, false, false,
-                                user.getString("id"),
-                                user.getString("username"),
-                                null, null, null,
-                                user.getString("profile_pic_url"),
-                                null, 0, 0, 0, false, false, false, false);
-                        final String id = node.getString("id");
-                        final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == node.getLong("latest_reel_media");
-                        feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead));
-                    }
-                    callback.onSuccess(feedStoryModels);
-                } catch (JSONException e) {
-                    Log.e(TAG, "Error parsing json", e);
-                }
+                parseStoriesBody(body, callback);
             }
 
             @Override
@@ -94,6 +101,34 @@ public class StoriesService extends BaseService {
                 callback.onFailure(t);
             }
         });
+    }
+
+    private void parseStoriesBody(final String body, final ServiceCallback<List<FeedStoryModel>> callback) {
+        try {
+            final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
+            final JSONArray feedStoriesReel = new JSONObject(body)
+                    .getJSONObject("data")
+                    .getJSONObject(Constants.EXTRAS_USER)
+                    .getJSONObject("feed_reels_tray")
+                    .getJSONObject("edge_reels_tray_to_reel")
+                    .getJSONArray("edges");
+            for (int i = 0; i < feedStoriesReel.length(); ++i) {
+                final JSONObject node = feedStoriesReel.getJSONObject(i).getJSONObject("node");
+                final JSONObject user = node.getJSONObject(node.has("user") ? "user" : "owner");
+                final ProfileModel profileModel = new ProfileModel(false, false, false,
+                                                                   user.getString("id"),
+                                                                   user.getString("username"),
+                                                                   null, null, null,
+                                                                   user.getString("profile_pic_url"),
+                                                                   null, 0, 0, 0, false, false, false, false);
+                final String id = node.getString("id");
+                final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == node.getLong("latest_reel_media");
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead));
+            }
+            callback.onSuccess(feedStoryModels);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error parsing json", e);
+        }
     }
 
     public void getUserStory(final String id,
@@ -138,12 +173,15 @@ public class StoriesService extends BaseService {
                             data = media.getJSONObject(i);
                             final boolean isVideo = data.has("video_duration");
                             final StoryModel model = new StoryModel(data.getString("id"),
-                                    data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0).getString("url"),
-                                    isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
-                                    data.optLong("taken_at", 0),
-                                    (isLoc || isHashtag) ? data.getJSONObject("user").getString("username") : localUsername,
-                                    data.getJSONObject("user").getString("pk"),
-                                    data.getBoolean("can_reply"));
+                                                                    data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
+                                                                        .getString("url"),
+                                                                    isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                                                                    data.optLong("taken_at", 0),
+                                                                    (isLoc || isHashtag)
+                                                                    ? data.getJSONObject("user").getString("username")
+                                                                    : localUsername,
+                                                                    data.getJSONObject("user").getString("pk"),
+                                                                    data.getBoolean("can_reply"));
 
                             final JSONArray videoResources = data.optJSONArray("video_versions");
                             if (isVideo && videoResources != null)
@@ -174,7 +212,8 @@ public class StoriesService extends BaseService {
                                 ));
                             }
                             if (data.has("story_questions")) {
-                                final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0).optJSONObject("question_sticker");
+                                final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0)
+                                                                      .optJSONObject("question_sticker");
                                 if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
                                     model.setQuestion(new QuestionModel(
                                             String.valueOf(tappableObject.getLong("question_id")),
@@ -229,8 +268,7 @@ public class StoriesService extends BaseService {
                             models.add(model);
                         }
                         callback.onSuccess(models);
-                    }
-                    else {
+                    } else {
                         callback.onSuccess(null);
                     }
                 } catch (JSONException e) {
@@ -251,14 +289,11 @@ public class StoriesService extends BaseService {
         builder.append("https://i.instagram.com/api/v1/");
         if (isLoc) {
             builder.append("locations/");
-        }
-        else if (isHashtag) {
+        } else if (isHashtag) {
             builder.append("tags/");
-        }
-        else if (highlight) {
+        } else if (highlight) {
             builder.append("feed/reels_media/?user_ids=");
-        }
-        else {
+        } else {
             builder.append("feed/user/");
         }
         builder.append(userId);

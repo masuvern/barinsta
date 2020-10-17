@@ -12,7 +12,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
 
@@ -177,11 +176,7 @@ public final class DownloadAsync extends AsyncTask<Void, Float, File> {
     protected void onPostExecute(final File result) {
         if (result != null) {
             final Context context = this.context.get();
-
-            context.sendBroadcast(Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ?
-                                  new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(Environment.getExternalStorageDirectory())) :
-                                  new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(result.getAbsoluteFile()))
-            );
+            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(result.getAbsoluteFile())));
             MediaScannerConnection.scanFile(context, new String[]{result.getAbsolutePath()}, null, null);
 
             if (notificationManager != null) {

@@ -3,6 +3,7 @@ package awais.instagrabber.fragments.main;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.graphics.drawable.Animatable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,6 +40,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.controller.ControllerListener;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -170,8 +174,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 binding.privatePage2.setText(R.string.empty_acc);
                 binding.privatePage.setVisibility(View.VISIBLE);
                 return;
-            }
-            else {
+            } else {
                 binding.privatePage.setVisibility(View.GONE);
             }
             binding.mainPosts.post(() -> binding.mainPosts.setVisibility(View.VISIBLE));
@@ -352,6 +355,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onDestroy() {
         super.onDestroy();
+        postsAdapter = null;
         if (usernameSettingHandler != null) {
             usernameSettingHandler.removeCallbacks(usernameSettingRunnable);
         }
@@ -446,31 +450,31 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String myId = CookieUtils.getUserIdFromCookie(cookie);
         if (isLoggedIn) {
             storiesService.getUserStory(profileId,
-                    profileModel.getUsername(),
-                    false,
-                    false,
-                    false,
-                    new ServiceCallback<List<StoryModel>>() {
-                        @Override
-                        public void onSuccess(final List<StoryModel> storyModels) {
-                            if (storyModels != null && !storyModels.isEmpty()) {
-                                binding.mainProfileImage.setStoriesBorder();
-                                hasStories = true;
-                            }
-                        }
+                                        profileModel.getUsername(),
+                                        false,
+                                        false,
+                                        false,
+                                        new ServiceCallback<List<StoryModel>>() {
+                                            @Override
+                                            public void onSuccess(final List<StoryModel> storyModels) {
+                                                if (storyModels != null && !storyModels.isEmpty()) {
+                                                    binding.mainProfileImage.setStoriesBorder();
+                                                    hasStories = true;
+                                                }
+                                            }
 
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error", t);
-                        }
-                    });
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                Log.e(TAG, "Error", t);
+                                            }
+                                        });
             new HighlightsFetcher(profileId,
-                    result -> {
-                        if (result != null) {
-                            binding.highlightsList.setVisibility(View.VISIBLE);
-                            highlightsViewModel.getList().postValue(result);
-                        } else binding.highlightsList.setVisibility(View.GONE);
-                    }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                  result -> {
+                                      if (result != null) {
+                                          binding.highlightsList.setVisibility(View.VISIBLE);
+                                          highlightsViewModel.getList().postValue(result);
+                                      } else binding.highlightsList.setVisibility(View.GONE);
+                                  }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             if (profileId.equals(myId)) {
                 binding.btnTagged.setVisibility(View.VISIBLE);
                 binding.btnSaved.setVisibility(View.VISIBLE);
@@ -529,7 +533,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             binding.favCb.setVisibility(View.GONE);
         }
-        binding.mainProfileImage.setImageURI(profileModel.getSdProfilePic());
+        final ControllerListener<ImageInfo> listener = new BaseControllerListener<ImageInfo>() {
+            @Override
+            public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
+                startPostponedEnterTransition();
+            }
+        };
+        binding.mainProfileImage.setImageURI(profileModel.getHdProfilePic());
 
         final long followersCount = profileModel.getFollowersCount();
         final long followingCount = profileModel.getFollowingCount();
@@ -562,8 +572,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                : profileModel.getName());
 
         CharSequence biography = profileModel.getBiography();
-        binding.mainBiography.setCaptionIsExpandable(true);
-        binding.mainBiography.setCaptionIsExpanded(true);
+        // binding.mainBiography.setCaptionIsExpandable(true);
+        // binding.mainBiography.setCaptionIsExpanded(true);
         if (TextUtils.hasMentions(biography)) {
             biography = TextUtils.getMentionText(biography);
             binding.mainBiography.setText(biography, TextView.BufferType.SPANNABLE);

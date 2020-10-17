@@ -8,16 +8,17 @@
 
     <include
         android:id="@+id/item_feed_top"
-        layout="@layout/item_feed_top" />
+        layout="@layout/item_feed_top"
+        android:visibility="gone" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.viewpager.widget.ViewPager
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/media_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             tools:background="@color/black_a50" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -25,7 +26,7 @@
             android:layout_height="24dp"
             android:layout_gravity="end|top"
             android:layout_margin="8dp"
-            app:srcCompat="@drawable/ic_slider_24" />
+            app:srcCompat="@drawable/ic_checkbox_multiple_blank_stroke" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/mediaCounter"
@@ -41,5 +42,6 @@
 
     <include
         android:id="@+id/item_feed_bottom"
-        layout="@layout/item_feed_bottom" />
+        layout="@layout/item_feed_bottom"
+        android:visibility="gone" />
 </LinearLayout>

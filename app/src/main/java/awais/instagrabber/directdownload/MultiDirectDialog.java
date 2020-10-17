@@ -18,8 +18,8 @@ import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.customviews.helpers.GridAutofitLayoutManager;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.models.BasePostModel;
+import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostModel;
-import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
@@ -39,30 +39,29 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final ViewerPostModel[] postModels;
+        final FeedModel feedModel;
         final Intent intent = getIntent();
         if (intent == null || !intent.hasExtra(Constants.EXTRAS_POST)
-                || (postModels = (ViewerPostModel[]) intent.getSerializableExtra(Constants.EXTRAS_POST)) == null) {
+                || (feedModel = (FeedModel) intent.getSerializableExtra(Constants.EXTRAS_POST)) == null) {
             Utils.errorFinish(this);
             return;
         }
 
-        username = postModels[0].getProfileModel().getUsername();
+        username = feedModel.getProfileModel().getUsername();
         toolbar.setTitle(username);
-        toolbar.setSubtitle(postModels[0].getShortCode());
+        toolbar.setSubtitle(feedModel.getShortCode());
 
         final RecyclerView recyclerView = findViewById(R.id.mainPosts);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setLayoutManager(new GridAutofitLayoutManager(this, Utils.convertDpToPx(130)));
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(4)));
+        // final ArrayList<PostModel> models = new ArrayList<>(feedModel.length - 1);
+        // for (final ViewerPostModel postModel : feedModel)
+        //     models.add(new PostModel(postModel.getItemType(), postModel.getPostId(), postModel.getDisplayUrl(),
+        //                              postModel.getDisplayUrl(), postModel.getShortCode(), postModel.getPostCaption(), postModel.getTimestamp(),
+        //                              postModel.getLike(), postModel.isSaved(), postModel.getLikes()));
 
-        final ArrayList<PostModel> models = new ArrayList<>(postModels.length - 1);
-        for (final ViewerPostModel postModel : postModels)
-            models.add(new PostModel(postModel.getItemType(), postModel.getPostId(), postModel.getDisplayUrl(),
-                    postModel.getSliderDisplayUrl(), postModel.getShortCode(), postModel.getPostCaption(), postModel.getTimestamp(),
-                    postModel.getLike(), postModel.getBookmark(), postModel.getLikes()));
-
-        // postsAdapter = new PostsAdapter(models, v -> {
+        // postsAdapter = new PostsAdapter(v -> {
         //     final Object tag = v.getTag();
         //     if (tag instanceof PostModel) {
         //         final PostModel postModel = (PostModel) tag;
@@ -80,8 +79,8 @@ public final class MultiDirectDialog extends BaseLanguageActivity {
         //     }
         //     return true;
         // });
-
-        recyclerView.setAdapter(postsAdapter);
+        //
+        // recyclerView.setAdapter(postsAdapter);
     }
 
     @Override

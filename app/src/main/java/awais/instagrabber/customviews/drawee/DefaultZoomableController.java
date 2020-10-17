@@ -572,16 +572,16 @@ public class DefaultZoomableController
         RectF b = mTempRect;
         b.set(mImageBounds);
         transform.mapRect(b);
-        float offsetLeft =
-                shouldLimit(limitTypes, LIMIT_TRANSLATION_X)
-                        ? getOffset(
-                        b.left, b.right, mViewBounds.left, mViewBounds.right, mImageBounds.centerX())
-                        : 0;
-        float offsetTop =
-                shouldLimit(limitTypes, LIMIT_TRANSLATION_Y)
-                        ? getOffset(
-                        b.top, b.bottom, mViewBounds.top, mViewBounds.bottom, mImageBounds.centerY())
-                        : 0;
+        final boolean shouldLimitX = shouldLimit(limitTypes, LIMIT_TRANSLATION_X);
+        float offsetLeft = shouldLimitX
+                           ? getOffset(b.left, b.right, mViewBounds.left, mViewBounds.right, mImageBounds.centerX())
+                           : 0;
+        float offsetTop = shouldLimit(limitTypes, LIMIT_TRANSLATION_Y)
+                          ? getOffset(b.top, b.bottom, mViewBounds.top, mViewBounds.bottom, mImageBounds.centerY())
+                          : 0;
+        if (mListener != null) {
+            mListener.onTranslationLimited(offsetLeft, offsetTop);
+        }
         if (offsetLeft != 0 || offsetTop != 0) {
             transform.postTranslate(offsetLeft, offsetTop);
             return true;

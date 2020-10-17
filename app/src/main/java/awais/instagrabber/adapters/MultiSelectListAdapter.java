@@ -12,8 +12,8 @@ public abstract class MultiSelectListAdapter<T extends MultiSelectListAdapter.Se
         ListAdapter<T, VH> {
 
     private boolean isSelecting;
-    private final OnItemClickListener<T> internalOnItemClickListener;
-    private final OnItemLongClickListener<T> internalOnLongItemClickListener;
+    private OnItemClickListener<T> internalOnItemClickListener;
+    private OnItemLongClickListener<T> internalOnLongItemClickListener;
 
     private final List<T> selectedItems = new ArrayList<>();
 

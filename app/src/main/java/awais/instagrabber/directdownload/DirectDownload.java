@@ -21,15 +21,16 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import awais.instagrabber.R;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.IntentModelType;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.IntentUtils;
@@ -115,7 +116,7 @@ public final class DirectDownload extends Activity {
             if (model != null && model.getType() == IntentModelType.POST) {
                 final String text = model.getText();
 
-                new PostFetcher(text, new FetchListener<ViewerPostModel[]>() {
+                new PostFetcher(text, new FetchListener<FeedModel>() {
                     @Override
                     public void doBefore() {
                         final Notification fetchingPostNotif = new NotificationCompat.Builder(context, Constants.DOWNLOAD_CHANNEL_ID)
@@ -126,13 +127,15 @@ public final class DirectDownload extends Activity {
                     }
 
                     @Override
-                    public void onResult(final ViewerPostModel[] result) {
+                    public void onResult(final FeedModel result) {
                         if (notificationManager != null) notificationManager.cancel(1900000000);
                         if (result != null) {
-                            if (result.length == 1) {
-                                DownloadUtils.batchDownload(context, result[0].getProfileModel().getUsername(), DownloadMethod.DOWNLOAD_DIRECT,
-                                                            Arrays.asList(result));
-                            } else if (result.length > 1) {
+                            if (result.getItemType() != MediaItemType.MEDIA_TYPE_SLIDER) {
+                                DownloadUtils.batchDownload(context,
+                                                            result.getProfileModel().getUsername(),
+                                                            DownloadMethod.DOWNLOAD_DIRECT,
+                                                            Collections.singletonList(result));
+                            } else {
                                 context.startActivity(new Intent(context, MultiDirectDialog.class)
                                                               .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                                                               .putExtra(Constants.EXTRAS_POST, result));

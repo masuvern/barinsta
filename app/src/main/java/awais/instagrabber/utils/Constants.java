@@ -51,6 +51,10 @@ public final class Constants {
     public static final String EXTRAS_END_CURSOR = "endCursor";
     public static final String FEED = "feed";
     public static final String FEED_ORDER = "feedOrder";
+
+    // Notification ids
+    public static final int ACTIVITY_NOTIFICATION_ID = 10;
+
     // spoof
     public static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) " +
             "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 " +
@@ -78,10 +82,10 @@ public final class Constants {
     public static final String ACTIVITY_CHANNEL_NAME = "Activity";
     public static final String DOWNLOAD_CHANNEL_NAME = "Downloads";
     public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
-    public static final int ACTIVITY_NOTIFICATION_ID = 1800000000;
     public static final String ACTION_SHOW_ACTIVITY = "show_activity";
     public static final String PREF_DARK_THEME = "dark_theme";
     public static final String PREF_LIGHT_THEME = "light_theme";
     public static final String DEFAULT_HASH_TAG_PIC = "https://www.instagram.com/static/images/hashtag/search-hashtag-default-avatar.png/1d8417c9a4f5.png";
     public static final String SHARED_PREFERENCES_NAME = "settings";
+    public static final String PREF_POSTS_LAYOUT = "posts_layout";
 }

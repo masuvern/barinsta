@@ -47,6 +47,7 @@ public final class Utils {
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
+    private static int statusBarHeight;
 
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
@@ -145,5 +146,16 @@ public final class Utils {
             return new Pair<>(FavoriteType.HASHTAG, queryText.substring(1));
         }
         return null;
+    }
+
+    public static int getStatusBarHeight(final Context context) {
+        if (statusBarHeight > 0) {
+            return statusBarHeight;
+        }
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return statusBarHeight;
     }
 }

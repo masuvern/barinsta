@@ -83,7 +83,7 @@ public final class FeedAdapter extends ListAdapter<FeedModel, FeedItemViewHolder
             return;
         }
         feedModel.setPosition(position);
-        viewHolder.bind(feedModel);
+        viewHolder.bind(feedModel, (feedModel1, view, postImage) -> {});
     }
 
     @Override

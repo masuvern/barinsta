@@ -34,7 +34,6 @@ public final class RamboTextView extends AppCompatTextView {
     private ClickableSpan clickableSpanUnderTouchOnActionDown;
     private MentionClickListener mentionClickListener;
     private boolean isUrlHighlighted;
-    private boolean isExpandable;
     private boolean isExpanded;
     private OnLongClickListener longClickListener;
 
@@ -59,13 +58,13 @@ public final class RamboTextView extends AppCompatTextView {
         this.mentionClickListener = mentionClickListener;
     }
 
-    public void setCaptionIsExpandable(final boolean isExpandable) {
-        this.isExpandable = isExpandable;
-    }
+    // public void setCaptionIsExpandable(final boolean isExpandable) {
+    //     this.isExpandable = isExpandable;
+    // }
 
-    public void setCaptionIsExpanded(final boolean isExpanded) {
-        this.isExpanded = isExpanded;
-    }
+    // public void setCaptionIsExpanded(final boolean isExpanded) {
+    //     this.isExpanded = isExpanded;
+    // }
 
     @Override
     public void setOnLongClickListener(@Nullable final OnLongClickListener l) {
@@ -98,7 +97,7 @@ public final class RamboTextView extends AppCompatTextView {
                 case MotionEvent.ACTION_DOWN:
                     final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
                     handler.postDelayed(longPressRunnable, longPressTimeout);
-                    if (feedModel != null) feedModel.setMentionClicked(false);
+                    // if (feedModel != null) feedModel.setMentionClicked(false);
                     if (clickableSpanUnderTouch != null) {
                         highlightUrl(clickableSpanUnderTouch, spanText);
                     }
@@ -107,19 +106,19 @@ public final class RamboTextView extends AppCompatTextView {
                     handler.removeCallbacks(longPressRunnable);
                     if (touchStartedOverAClickableSpan && clickableSpanUnderTouch == clickableSpanUnderTouchOnActionDown) {
                         dispatchUrlClick(spanText, clickableSpanUnderTouch);
-                        if (feedModel != null) feedModel.setMentionClicked(true);
+                        // if (feedModel != null) feedModel.setMentionClicked(true);
                     }
                     cleanupOnTouchUp(spanText);
                     return super.onTouchEvent(event);
                 case MotionEvent.ACTION_MOVE:
                     // handler.removeCallbacks(longPressRunnable);
-                    if (feedModel != null) feedModel.setMentionClicked(false);
+                    // if (feedModel != null) feedModel.setMentionClicked(false);
                     if (clickableSpanUnderTouch != null) highlightUrl(clickableSpanUnderTouch, spanText);
                     else removeUrlHighlightColor(spanText);
                     return super.onTouchEvent(event);
                 case MotionEvent.ACTION_CANCEL:
                     handler.removeCallbacks(longPressRunnable);
-                    if (feedModel != null) feedModel.setMentionClicked(false);
+                    // if (feedModel != null) feedModel.setMentionClicked(false);
                     cleanupOnTouchUp(spanText);
                     return super.onTouchEvent(event);
             }

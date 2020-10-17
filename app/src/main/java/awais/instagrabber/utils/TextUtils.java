@@ -7,6 +7,8 @@ import android.text.style.URLSpan;
 
 import androidx.annotation.NonNull;
 
+import java.util.Locale;
+
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 
 public final class TextUtils {
@@ -108,5 +110,23 @@ public final class TextUtils {
             return "".equals(str) || "null".equals(str) || str.isEmpty();
         }
         return "null".contentEquals(charSequence) || "".contentEquals(charSequence) || charSequence.length() < 1;
+    }
+
+    public static String millisToTimeString(final long millis) {
+        return millisToTimeString(millis, false);
+    }
+
+    public static String millisToTimeString(final long millis, final boolean includeHoursAlways) {
+        final int sec = (int) (millis / 1000) % 60;
+        int min = (int) (millis / (1000 * 60));
+        if (min >= 60) {
+            min = (int) ((millis / (1000 * 60)) % 60);
+            final int hr = (int) ((millis / (1000 * 60 * 60)) % 24);
+            return String.format(Locale.ENGLISH, "%02d:%02d:%02d", hr, min, sec);
+        }
+        if (includeHoursAlways) {
+            return String.format(Locale.ENGLISH, "%02d:%02d:%02d", 0, min, sec);
+        }
+        return String.format(Locale.ENGLISH, "%02d:%02d", min, sec);
     }
 }

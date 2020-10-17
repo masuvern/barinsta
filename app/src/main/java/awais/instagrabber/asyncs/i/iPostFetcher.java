@@ -10,14 +10,16 @@ import org.json.JSONObject;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.ViewerPostModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -29,22 +31,22 @@ import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
 
-public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]> {
+public final class iPostFetcher extends AsyncTask<Void, Void, FeedModel> {
     private static final String TAG = "iPostFetcher";
 
     private final String id;
-    private final FetchListener<ViewerPostModel[]> fetchListener;
+    private final FetchListener<FeedModel> fetchListener;
 
-    public iPostFetcher(final String id, final FetchListener<ViewerPostModel[]> fetchListener) {
+    public iPostFetcher(final String id, final FetchListener<FeedModel> fetchListener) {
         this.id = id;
         this.fetchListener = fetchListener;
     }
 
     @Override
-    protected ViewerPostModel[] doInBackground(final Void... voids) {
-        ViewerPostModel[] result = null;
+    protected FeedModel doInBackground(final Void... voids) {
+        HttpURLConnection conn = null;
         try {
-            final HttpURLConnection conn = (HttpURLConnection) new URL("https://i.instagram.com/api/v1/media/" + id + "/info").openConnection();
+            conn = (HttpURLConnection) new URL("https://i.instagram.com/api/v1/media/" + id + "/info").openConnection();
             conn.setUseCaches(false);
             conn.setRequestProperty("User-Agent", Constants.USER_AGENT);
             conn.connect();
@@ -86,7 +88,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                     );
                 }
                 if (profileModel == null) {
-                    return new ViewerPostModel[]{};
+                    return new FeedModel.Builder().build();
                 }
 
                 // to check if file exists
@@ -130,69 +132,65 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
                     }
                 }
                 // final String locationString = location.optString("id") + "/" + location.optString("slug");
-                if (mediaItemType != MediaItemType.MEDIA_TYPE_SLIDER) {
-                    final ViewerPostModel postModel = new ViewerPostModel(
-                            mediaItemType,
-                            media.getString(Constants.EXTRAS_ID),
-                            isVideo ? ResponseBodyUtils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
-                                    : ResponseBodyUtils.getHighQualityImage(media),
-                            media.getString("code"),
-                            TextUtils.isEmpty(postCaption) ? null : postCaption,
-                            profileModel,
-                            isVideo && media.has("view_count") ? media.getLong("view_count") : -1,
-                            timestamp, media.optBoolean("has_liked"),
-                            media.optBoolean("has_viewer_saved"),
-                            media.getLong("like_count"),
-                            locationName,
-                            locationId);
+                final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
+                        .setItemType(mediaItemType)
+                        .setPostId(media.getString(Constants.EXTRAS_ID))
+                        .setDisplayUrl(isVideo ? ResponseBodyUtils.getHighQualityPost(media.optJSONArray("video_versions"), true, true, false)
+                                               : ResponseBodyUtils.getHighQualityImage(media))
+                        .setShortCode(media.getString("code"))
+                        .setPostCaption(TextUtils.isEmpty(postCaption) ? null : postCaption)
+                        .setProfileModel(profileModel)
+                        .setViewCount(isVideo && media.has("view_count")
+                                      ? media.getLong("view_count")
+                                      : -1)
+                        .setTimestamp(timestamp)
+                        .setLiked(media.optBoolean("has_liked"))
+                        .setBookmarked(media.optBoolean("has_viewer_saved"))
+                        .setLikesCount(media.getLong("like_count"))
+                        .setLocationName(locationName)
+                        .setLocationId(locationId)
+                        .setCommentsCount(commentsCount);
+                // DownloadUtils.checkExistence(downloadDir, customDir, false, postModel);
 
-                    postModel.setCommentsCount(commentsCount);
-
-                    DownloadUtils.checkExistence(downloadDir, customDir, false, postModel);
-
-                    result = new ViewerPostModel[]{postModel};
-
-                } else {
+                if (isSlider) {
                     final JSONArray children = media.getJSONArray("carousel_media");
-                    final ViewerPostModel[] postModels = new ViewerPostModel[children.length()];
-
-                    for (int i = 0; i < postModels.length; ++i) {
-                        final JSONObject node = children.getJSONObject(i);
-                        final boolean isChildVideo = node.has("video_duration");
-
-                        postModels[i] = new ViewerPostModel(
-                                isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                                             : MediaItemType.MEDIA_TYPE_IMAGE,
-                                media.getString(Constants.EXTRAS_ID),
-                                isChildVideo ? ResponseBodyUtils.getHighQualityPost(node.optJSONArray("video_versions"), true, true, false)
-                                             : ResponseBodyUtils.getHighQualityImage(node),
-                                media.getString("code"),
-                                postCaption,
-                                profileModel,
-                                -1,
-                                timestamp, media.optBoolean("has_liked"),
-                                media.optBoolean("has_viewer_saved"),
-                                media.getLong("like_count"),
-                                locationName,
-                                locationId);
-                        postModels[i].setSliderDisplayUrl(ResponseBodyUtils.getHighQualityImage(node));
-                        DownloadUtils.checkExistence(downloadDir, customDir, true, postModels[i]);
+                    final List<PostChild> postModels = new ArrayList<>();
+                    for (int i = 0; i < children.length(); ++i) {
+                        final JSONObject childNode = children.getJSONObject(i);
+                        final boolean isChildVideo = childNode.has("video_duration");
+                        postModels.add(new PostChild.Builder()
+                                               .setItemType(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
+                                                                         : MediaItemType.MEDIA_TYPE_IMAGE)
+                                               .setPostId(childNode.has(Constants.EXTRAS_ID)
+                                                          ? childNode.getString(Constants.EXTRAS_ID)
+                                                          : media.getString(Constants.EXTRAS_ID))
+                                               // .setShortCode(childNode.optString(Constants.EXTRAS_SHORTCODE))
+                                               .setDisplayUrl(
+                                                       isChildVideo ? ResponseBodyUtils.getHighQualityPost(
+                                                               childNode.optJSONArray("video_versions"), true, true, false)
+                                                                    : ResponseBodyUtils.getHighQualityImage(childNode))
+                                               .setVideoViews(isChildVideo && childNode.has("video_view_count")
+                                                              ? childNode.getLong("video_view_count")
+                                                              : -1)
+                                               .build());
+                        // DownloadUtils.checkExistence(downloadDir, customDir, true, postModels[i]);
                     }
-
-                    postModels[0].setCommentsCount(commentsCount);
-                    result = postModels;
+                    feedModelBuilder.setSliderItems(postModels);
                 }
+                return feedModelBuilder.build();
             }
-
-            conn.disconnect();
         } catch (Exception e) {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground (i)");
             if (BuildConfig.DEBUG) {
                 Log.e(TAG, "", e);
             }
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
-        return result;
+        return null;
     }
 
     @Override
@@ -201,7 +199,7 @@ public final class iPostFetcher extends AsyncTask<Void, Void, ViewerPostModel[]>
     }
 
     @Override
-    protected void onPostExecute(final ViewerPostModel[] postModels) {
-        if (fetchListener != null) fetchListener.onResult(postModels);
+    protected void onPostExecute(final FeedModel feedModel) {
+        if (fetchListener != null) fetchListener.onResult(feedModel);
     }
 }
