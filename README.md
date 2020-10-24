@@ -1,3 +1,5 @@
+**THERE ARE CURRENTLY NO OFFICIAL GOOGLE PLAY RELEASES. PLEASE REPORT ANY OCCURRENCES TO US.**
+
 <img src="./app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" alt="InstaGrabber" align="right"/>
 
 # Barinsta
