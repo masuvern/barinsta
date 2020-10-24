@@ -132,7 +132,7 @@
                 android:layout_height="match_parent"
                 android:background="@null">
 
-                <io.github.armcha.autolink.AutoLinkTextView
+                <awais.instagrabber.customviews.RamboTextViewV2
                     android:id="@+id/caption"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -253,8 +253,28 @@
         app:iconSize="16dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/player_controls_toggle"
+        app:layout_constraintEnd_toStartOf="@id/comment"
         app:layout_constraintStart_toEndOf="@id/caption_toggle"
+        app:layout_constraintTop_toTopOf="@id/caption_toggle"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/comment"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/comment"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"
+        android:visibility="visible"
+        app:icon="@drawable/ic_outline_comments_24"
+        app:iconGravity="top"
+        app:iconSize="16dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/player_controls_toggle"
+        app:layout_constraintStart_toEndOf="@id/like"
         app:layout_constraintTop_toTopOf="@id/caption_toggle"
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
@@ -274,7 +294,7 @@
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/save"
-        app:layout_constraintStart_toEndOf="@id/like"
+        app:layout_constraintStart_toEndOf="@id/comment"
         app:layout_constraintTop_toTopOf="@id/caption_toggle"
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />

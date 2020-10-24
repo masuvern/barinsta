@@ -30,7 +30,7 @@
         android:paddingRight="8dp"
         android:weightSum="2">
 
-        <awais.instagrabber.customviews.RamboTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             tools:text="username" />
 
-        <awais.instagrabber.customviews.RamboTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,12 +50,12 @@
             tools:text="location" />
     </RelativeLayout>
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/viewStoryPost"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:background="?selectableItemBackgroundBorderless"
-        app:srcCompat="@drawable/ic_open_in_new_24"
-        app:tint="?android:textColorPrimary" />
+    <!--<androidx.appcompat.widget.AppCompatImageView-->
+    <!--    android:id="@+id/viewStoryPost"-->
+    <!--    android:layout_width="wrap_content"-->
+    <!--    android:layout_height="match_parent"-->
+    <!--    android:layout_gravity="center"-->
+    <!--    android:background="?selectableItemBackgroundBorderless"-->
+    <!--    app:srcCompat="@drawable/ic_open_in_new_24"-->
+    <!--    app:tint="?android:textColorPrimary" />-->
 </LinearLayout>

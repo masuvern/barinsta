@@ -9,8 +9,6 @@
     <string name="action_fdroid" translatable="false">F-Droid</string>
     <string name="action_search">Search username…</string>
     <string name="action_compare">Compare</string>
-    <string name="single_like">like</string>
-    <string name="multiple_likes">likes</string>
     <string name="clipboard_error">Error copying text</string>
     <string name="clipboard_copied">Copied to clipboard!</string>
     <string name="report">Report</string>
@@ -325,6 +323,7 @@
     <string name="downloading">Downloading…</string>
     <string name="downloader_downloading_child">Download item %d of %d</string>
     <string name="delete">Delete</string>
+    <string name="comment">Comment</string>
     <plurals name="likes_count">
         <item quantity="one">%d like</item>
         <item quantity="other">%d likes</item>

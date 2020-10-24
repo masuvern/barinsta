@@ -19,12 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import awais.instagrabber.adapters.FeedAdapterV2;
-import awais.instagrabber.adapters.FeedAdapterV2.OnPostClickListener;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtBottom;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.utils.Constants;
@@ -34,12 +32,10 @@ import awais.instagrabber.viewmodels.FeedViewModel;
 public class PostsRecyclerView extends RecyclerView {
     private static final String TAG = "PostsRecyclerView";
 
-    private StaggeredGridLayoutManager gridLayoutManager;
+    private StaggeredGridLayoutManager layoutManager;
     private PostsLayoutPreferences layoutPreferences;
     private PostFetcher.PostFetchService postFetchService;
     private Transition transition;
-    private OnClickListener postViewClickListener;
-    private MentionClickListener mentionClickListener;
     private PostFetcher postFetcher;
     private ViewModelStoreOwner viewModelStoreOwner;
     private FeedAdapterV2 feedAdapter;
@@ -48,7 +44,7 @@ public class PostsRecyclerView extends RecyclerView {
     private boolean initCalled = false;
     private GridSpacingItemDecoration gridSpacingItemDecoration;
     private RecyclerLazyLoaderAtBottom lazyLoader;
-    private OnPostClickListener onPostClickListener;
+    private FeedAdapterV2.FeedItemCallback feedItemCallback;
 
     private final FetchListener<List<FeedModel>> fetchListener = new FetchListener<List<FeedModel>>() {
         @Override
@@ -109,13 +105,8 @@ public class PostsRecyclerView extends RecyclerView {
         return this;
     }
 
-    public PostsRecyclerView setOnPostClickListener(@NonNull final OnPostClickListener onPostClickListener) {
-        this.onPostClickListener = onPostClickListener;
-        return this;
-    }
-
-    public PostsRecyclerView setMentionClickListener(final MentionClickListener mentionClickListener) {
-        this.mentionClickListener = mentionClickListener;
+    public PostsRecyclerView setFeedItemCallback(@NonNull final FeedAdapterV2.FeedItemCallback feedItemCallback) {
+        this.feedItemCallback = feedItemCallback;
         return this;
     }
 
@@ -160,30 +151,19 @@ public class PostsRecyclerView extends RecyclerView {
 
     private void initTransition() {
         transition = new ChangeBounds();
-        // transition.addListener(new TransitionListenerAdapter(){
-        //     @Override
-        //     public void onTransitionEnd(@NonNull final Transition transition) {
-        //         super.onTransitionEnd(transition);
-        //     }
-        // });
         transition.setDuration(300);
     }
 
     private void initLayoutManager() {
-        gridLayoutManager = new StaggeredGridLayoutManager(layoutPreferences.getColCount(), StaggeredGridLayoutManager.VERTICAL);
-        setLayoutManager(gridLayoutManager);
+        layoutManager = new StaggeredGridLayoutManager(layoutPreferences.getColCount(), StaggeredGridLayoutManager.VERTICAL);
+        if (layoutPreferences.getHasGap()) {
+            addItemDecoration(gridSpacingItemDecoration);
+        }
+        setLayoutManager(layoutManager);
     }
 
     private void initAdapter() {
-        feedAdapter = new FeedAdapterV2(
-                layoutPreferences,
-                postViewClickListener,
-                mentionClickListener,
-                (feedModel, view, postImage) -> {
-                    if (onPostClickListener != null) {
-                        onPostClickListener.onPostClick(feedModel, view, postImage);
-                    }
-                });
+        feedAdapter = new FeedAdapterV2(layoutPreferences, feedItemCallback);
         feedAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         setAdapter(feedAdapter);
     }
@@ -194,7 +174,8 @@ public class PostsRecyclerView extends RecyclerView {
         postFetcher = new PostFetcher(postFetchService, fetchListener);
         addItemDecoration(gridSpacingItemDecoration);
         setHasFixedSize(true);
-        lazyLoader = new RecyclerLazyLoaderAtBottom(gridLayoutManager, (page) -> {
+        setNestedScrollingEnabled(true);
+        lazyLoader = new RecyclerLazyLoaderAtBottom(layoutManager, (page) -> {
             if (postFetcher.hasMore()) {
                 postFetcher.fetchNextPage();
                 dispatchFetchStatus();
@@ -211,8 +192,23 @@ public class PostsRecyclerView extends RecyclerView {
             feedAdapter.notifyDataSetChanged();
             if (!layoutPreferences.getHasGap()) {
                 removeItemDecoration(gridSpacingItemDecoration);
+            } else {
+                addItemDecoration(gridSpacingItemDecoration);
             }
-            gridLayoutManager.setSpanCount(layoutPreferences.getColCount());
+            if (layoutPreferences.getType() == PostsLayoutPreferences.PostsLayoutType.LINEAR) {
+                if (layoutManager.getSpanCount() != 1) {
+                    layoutManager.setSpanCount(1);
+                    setAdapter(null);
+                    setAdapter(feedAdapter);
+                }
+            } else {
+                boolean shouldRedraw = layoutManager.getSpanCount() == 1;
+                layoutManager.setSpanCount(layoutPreferences.getColCount());
+                if (shouldRedraw) {
+                    setAdapter(null);
+                    setAdapter(feedAdapter);
+                }
+            }
         });
     }
 

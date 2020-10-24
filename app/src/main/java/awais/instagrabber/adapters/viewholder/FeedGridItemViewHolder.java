@@ -1,11 +1,8 @@
 package awais.instagrabber.adapters.viewholder;
 
-import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
@@ -13,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
-import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
@@ -42,10 +37,9 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(@NonNull final FeedModel feedModel,
                      @NonNull final PostsLayoutPreferences layoutPreferences,
-                     final FeedAdapterV2.OnPostClickListener postClickListener,
-                     final boolean animate) {
-        if (postClickListener != null) {
-            itemView.setOnClickListener(v -> postClickListener.onPostClick(feedModel, binding.profilePic, binding.postImage));
+                     final FeedAdapterV2.FeedItemCallback feedItemCallback) {
+        if (feedItemCallback != null) {
+            itemView.setOnClickListener(v -> feedItemCallback.onPostClick(feedModel, binding.profilePic, binding.postImage));
         }
         itemView.setClipToOutline(layoutPreferences.getHasRoundedCorners());
         if (layoutPreferences.getType() == STAGGERED_GRID) {
@@ -123,25 +117,6 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
         final PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
                                                               .setImageRequest(requestBuilder)
                                                               .setOldController(binding.postImage.getController());
-        if (animate) {
-            final BaseControllerListener<ImageInfo> imageListener = new BaseControllerListener<ImageInfo>() {
-                @Override
-                public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
-                    setAnimation(binding.getRoot());
-                }
-            };
-            builder.setControllerListener(imageListener);
-        }
         binding.postImage.setController(builder.build());
-    }
-
-    private void setAnimation(View viewToAnimate) {
-        final Animation animation = AnimationUtils.loadAnimation(viewToAnimate.getContext(), android.R.anim.fade_in);
-        animation.setDuration(300);
-        viewToAnimate.startAnimation(animation);
-    }
-
-    public void clearAnimation() {
-        binding.getRoot().clearAnimation();
     }
 }

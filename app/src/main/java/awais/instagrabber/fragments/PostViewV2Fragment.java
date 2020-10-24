@@ -76,12 +76,9 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
-import io.github.armcha.autolink.MODE_EMAIL;
-import io.github.armcha.autolink.MODE_HASHTAG;
-import io.github.armcha.autolink.MODE_MENTION;
-import kotlin.Unit;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
+import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -90,6 +87,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private static final String COOKIE = settingsHelper.getString(Constants.COOKIE);
     private static final int DETAILS_HIDE_DELAY_MILLIS = 2000;
     private static final String ARG_FEED_MODEL = "feedModel";
+    private static final String ARG_SLIDER_POSITION = "position";
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
 
     private FeedModel feedModel;
@@ -105,6 +103,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private SliderItemsAdapter sliderItemsAdapter;
     private boolean wasControlsVisible;
     private boolean wasPaused;
+    private int captionState = BottomSheetBehavior.STATE_HIDDEN;
+    private int sliderPosition;
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
 
@@ -151,6 +151,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         private final FeedModel feedModel;
         private View profilePicElement;
         private View mainPostElement;
+        private int position;
 
         public Builder setSharedProfilePicElement(final View profilePicElement) {
             this.profilePicElement = profilePicElement;
@@ -162,8 +163,13 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             return this;
         }
 
+        public Builder setPosition(final int position) {
+            this.position = position;
+            return this;
+        }
+
         public PostViewV2Fragment build() {
-            return PostViewV2Fragment.newInstance(feedModel, profilePicElement, mainPostElement);
+            return PostViewV2Fragment.newInstance(feedModel, profilePicElement, mainPostElement, position);
         }
 
         public Builder(final FeedModel feedModel) {
@@ -171,10 +177,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         }
     }
 
-    private static PostViewV2Fragment newInstance(final FeedModel feedModel, final View profilePicElement, final View mainPostElement) {
+    private static PostViewV2Fragment newInstance(final FeedModel feedModel,
+                                                  final View profilePicElement,
+                                                  final View mainPostElement,
+                                                  final int position) {
         final PostViewV2Fragment f = new PostViewV2Fragment(profilePicElement, mainPostElement);
         final Bundle args = new Bundle();
         args.putSerializable(ARG_FEED_MODEL, feedModel);
+        if (position >= 0) {
+            args.putInt(ARG_SLIDER_POSITION, position);
+        }
         f.setArguments(args);
         return f;
     }
@@ -353,6 +365,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             return;
         }
         feedModel = (FeedModel) feedModelSerializable;
+        if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_SLIDER) {
+            sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
+        }
     }
 
     @Nullable
@@ -402,6 +417,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     public void onPause() {
         super.onPause();
         wasPaused = true;
+        captionState = bottomSheetBehavior.getState();
     }
 
     @Override
@@ -424,7 +440,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     @Override
     public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState");
+        if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_SLIDER) {
+            outState.putInt(ARG_SLIDER_POSITION, sliderPosition);
+        }
     }
 
     @Override
@@ -505,32 +523,34 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void init() {
-        binding.getRoot().getBackground().mutate().setAlpha(0);
-        // if (getArguments() == null) return;
-        // final PostViewV2FragmentArgs fragmentArgs = PostViewV2FragmentArgs.fromBundle(getArguments());
-        // feedModel = fragmentArgs.getFeedModel();
+        if (!wasPaused && (sharedProfilePicElement != null || sharedMainPostElement != null)) {
+            binding.getRoot().getBackground().mutate().setAlpha(0);
+        }
         setupProfilePic();
         setupTitles();
         setupCaption();
         setupCounts();
         setupPostTypeLayout();
         setupCommonActions();
-        // binding.getRoot().setOnTouchListener(onTouchListener);
-        // final String[] idOrCodeArray = fragmentArgs.getIdOrCodeArray();
-        // if (idOrCodeArray.length == 0) return;
-        // currentPostIndex = fragmentArgs.getIndex();
-        // if (currentPostIndex < 0) return;
-        // if (currentPostIndex >= idOrCodeArray.length) return;
-        // idOrCodeList = Arrays.asList(idOrCodeArray);
-        // viewerPostViewModel.getList().setValue(createPlaceholderModels(idOrCodeArray.length));
-        // isId = fragmentArgs.getIsId();
-        // fetchPost();
     }
 
     private void setupCommonActions() {
         setupLike();
         setupSave();
         setupDownload();
+        setupComment();
+    }
+
+    private void setupComment() {
+        binding.comment.setOnClickListener(v -> {
+            final NavController navController = getNavController();
+            if (navController == null) return;
+            final Bundle bundle = new Bundle();
+            bundle.putString("shortCode", feedModel.getShortCode());
+            bundle.putString("postId", feedModel.getPostId());
+            bundle.putString("postUserId", feedModel.getProfileModel().getId());
+            navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
+        });
     }
 
     private void setupDownload() {
@@ -758,30 +778,26 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     private void setupCaption() {
         final CharSequence postCaption = feedModel.getPostCaption();
-        binding.caption.addAutoLinkMode(MODE_HASHTAG.INSTANCE, MODE_MENTION.INSTANCE, MODE_EMAIL.INSTANCE);
-        binding.caption.onAutoLinkClick(autoLinkItem -> {
-            // Log.d(TAG, "setupCaption: autoLinkItem: " + autoLinkItem.getMode().getModeName() + " : " + autoLinkItem.getOriginalText());
-            final String originalText = autoLinkItem.getOriginalText();
-            if (autoLinkItem.getMode().equals(MODE_HASHTAG.INSTANCE)) {
-                final NavController navController = NavHostFragment.findNavController(this);
-                final Bundle bundle = new Bundle();
-                bundle.putString("hashtag", originalText);
-                navController.navigate(R.id.action_global_hashTagFragment, bundle);
-                return Unit.INSTANCE;
-            }
-            if (autoLinkItem.getMode().equals(MODE_MENTION.INSTANCE)) {
-                navigateToProfile(originalText);
-                return Unit.INSTANCE;
-            }
-            return Unit.INSTANCE;
+        binding.caption.addOnHashtagListener(autoLinkItem -> {
+            final NavController navController = NavHostFragment.findNavController(this);
+            final Bundle bundle = new Bundle();
+            final String originalText = autoLinkItem.getOriginalText().trim();
+            bundle.putString(ARG_HASHTAG, originalText);
+            navController.navigate(R.id.action_global_hashTagFragment, bundle);
         });
+        binding.caption.addOnMentionClickListener(autoLinkItem -> {
+            final String originalText = autoLinkItem.getOriginalText().trim();
+            navigateToProfile(originalText);
+        });
+        binding.caption.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(), autoLinkItem.getOriginalText().trim()));
+        binding.caption.addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
         binding.caption.setOnLongClickListener(v -> {
-            Utils.copyText(getContext(), postCaption);
+            Utils.copyText(context, postCaption);
             return true;
         });
         binding.caption.setText(postCaption);
         bottomSheetBehavior = BottomSheetBehavior.from(binding.captionParent);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        bottomSheetBehavior.setState(captionState);
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull final View bottomSheet, final int newState) {}
@@ -900,7 +916,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         if (sharedMainPostElement != null) {
             addSharedElement(sharedMainPostElement, binding.sliderParent);
         }
-        sliderItemsAdapter = new SliderItemsAdapter(onVerticalDragListener, binding.playerControls, new SliderCallbackAdapter() {
+        sliderItemsAdapter = new SliderItemsAdapter(onVerticalDragListener, binding.playerControls, true, new SliderCallbackAdapter() {
             @Override
             public void onThumbnailLoaded(final int position) {
                 if (position != 0) return;
@@ -926,6 +942,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             }
         });
         binding.sliderParent.setAdapter(sliderItemsAdapter);
+        if (sliderPosition >= 0 && sliderPosition < feedModel.getSliderItems().size()) {
+            binding.sliderParent.setCurrentItem(sliderPosition);
+        }
         binding.sliderParent.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             int prevPosition = -1;
 
@@ -947,6 +966,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             public void onPageSelected(final int position) {
                 final int size = feedModel.getSliderItems().size();
                 if (position < 0 || position >= size) return;
+                sliderPosition = position;
                 final String text = (position + 1) + "/" + size;
                 binding.mediaCounter.setText(text);
                 final PostChild postChild = feedModel.getSliderItems().get(position);
@@ -1046,6 +1066,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 vol,
                 aspectRatio,
                 feedModel.getThumbnailUrl(),
+                true,
                 binding.playerControls,
                 videoPlayerCallback);
     }

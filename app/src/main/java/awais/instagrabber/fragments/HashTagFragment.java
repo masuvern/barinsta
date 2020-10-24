@@ -1,7 +1,6 @@
 package awais.instagrabber.fragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,7 +21,6 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -72,6 +70,8 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "HashTagFragment";
+
+    public static final String ARG_HASHTAG = "hashtag";
 
     private MainActivity fragmentActivity;
     private FragmentHashtagBinding binding;
@@ -298,24 +298,24 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (context == null) return;
         if (isLoggedIn) {
             storiesService.getUserStory(hashtagModel.getName(),
-                    null,
-                    false,
-                    true,
-                    false,
-                    new ServiceCallback<List<StoryModel>>() {
-                        @Override
-                        public void onSuccess(final List<StoryModel> storyModels) {
-                            if (storyModels != null && !storyModels.isEmpty()) {
-                                binding.mainHashtagImage.setStoriesBorder();
-                                hasStories = true;
-                            }
-                        }
+                                        null,
+                                        false,
+                                        true,
+                                        false,
+                                        new ServiceCallback<List<StoryModel>>() {
+                                            @Override
+                                            public void onSuccess(final List<StoryModel> storyModels) {
+                                                if (storyModels != null && !storyModels.isEmpty()) {
+                                                    binding.mainHashtagImage.setStoriesBorder();
+                                                    hasStories = true;
+                                                }
+                                            }
 
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error", t);
-                        }
-                    });
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                Log.e(TAG, "Error", t);
+                                            }
+                                        });
             binding.btnFollowTag.setVisibility(View.VISIBLE);
             binding.btnFollowTag.setText(hashtagModel.getFollowing() ? R.string.unfollow : R.string.follow);
             binding.btnFollowTag.setChipIconResource(hashtagModel.getFollowing()

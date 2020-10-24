@@ -7,8 +7,7 @@
 
     <include
         android:id="@+id/item_feed_top"
-        layout="@layout/item_feed_top"
-        android:visibility="gone" />
+        layout="@layout/item_feed_top" />
 
     <include
         android:id="@+id/video_post"
@@ -16,6 +15,5 @@
 
     <include
         android:id="@+id/item_feed_bottom"
-        layout="@layout/item_feed_bottom"
-        android:visibility="gone" />
+        layout="@layout/item_feed_bottom" />
 </LinearLayout>

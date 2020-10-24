@@ -20,6 +20,7 @@ import awais.instagrabber.models.enums.MediaItemType;
 public final class SliderItemsAdapter extends ListAdapter<PostChild, SliderItemViewHolder> {
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener;
+    private final boolean loadVideoOnItemClick;
     private final SliderCallback sliderCallback;
     private final awais.instagrabber.databinding.LayoutExoCustomControlsBinding controlsBinding;
 
@@ -35,15 +36,13 @@ public final class SliderItemsAdapter extends ListAdapter<PostChild, SliderItemV
         }
     };
 
-    public SliderItemsAdapter() {
-        this(null, null, null);
-    }
-
     public SliderItemsAdapter(final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener,
                               final LayoutExoCustomControlsBinding controlsBinding,
+                              final boolean loadVideoOnItemClick,
                               final SliderCallback sliderCallback) {
         super(DIFF_CALLBACK);
         this.onVerticalDragListener = onVerticalDragListener;
+        this.loadVideoOnItemClick = loadVideoOnItemClick;
         this.sliderCallback = sliderCallback;
         this.controlsBinding = controlsBinding;
     }
@@ -56,7 +55,7 @@ public final class SliderItemsAdapter extends ListAdapter<PostChild, SliderItemV
         switch (mediaItemType) {
             case MEDIA_TYPE_VIDEO: {
                 final LayoutVideoPlayerWithThumbnailBinding binding = LayoutVideoPlayerWithThumbnailBinding.inflate(inflater, parent, false);
-                return new SliderVideoViewHolder(binding, onVerticalDragListener, controlsBinding);
+                return new SliderVideoViewHolder(binding, onVerticalDragListener, controlsBinding, loadVideoOnItemClick);
             }
             case MEDIA_TYPE_IMAGE:
             default:

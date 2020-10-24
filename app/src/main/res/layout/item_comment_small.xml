@@ -5,6 +5,9 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingStart="40dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp"
     android:paddingBottom="2dp">
 
     <com.facebook.drawee.view.SimpleDraweeView
@@ -15,7 +18,8 @@
         app:layout_constraintEnd_toStartOf="@id/tvUsername"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:roundAsCircle="true" />
+        app:roundAsCircle="true"
+        tools:background="@mipmap/ic_launcher" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvUsername"
@@ -36,7 +40,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <awais.instagrabber.customviews.RamboTextViewV2
         android:id="@+id/tvComment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -55,17 +59,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/ivProfilePic"
         app:layout_constraintTop_toBottomOf="@id/tvUsername"
-        tools:text="comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment " />
+        tools:text="comment comment comment comment comment comment comment comment
+        comment comment comment comment comment comment comment comment comment comment comment comment comment comment
+        comment comment comment comment comment comment " />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvLikes"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:singleLine="true"
         android:paddingStart="4dp"
         android:paddingTop="2dp"
         android:paddingEnd="4dp"
         android:paddingBottom="2dp"
+        android:scrollbars="none"
+        android:singleLine="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/tvDate"

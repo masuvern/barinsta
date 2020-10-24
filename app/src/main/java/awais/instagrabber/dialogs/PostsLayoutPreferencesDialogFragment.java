@@ -82,26 +82,31 @@ public class PostsLayoutPreferencesDialogFragment extends DialogFragment {
     }
 
     private void initLayoutToggle() {
-        binding.layoutToggle.check(getSelectedLayoutId());
-        // binding.staggeredOrGridOptions.setVisibility(getSelectedLayoutId() != R.id.layout_linear ? View.VISIBLE : View.GONE);
+        final int selectedLayoutId = getSelectedLayoutId();
+        binding.layoutToggle.check(selectedLayoutId);
+        if (selectedLayoutId == R.id.layout_linear) {
+            binding.staggeredOrGridOptions.setVisibility(View.GONE);
+        }
         binding.layoutToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                switch (checkedId) {
-                    case R.id.layout_linear:
-                        preferencesBuilder.setType(PostsLayoutPreferences.PostsLayoutType.LINEAR);
-                        binding.staggeredOrGridOptions.setVisibility(View.GONE);
-                        break;
-                    case R.id.layout_staggered:
-                        preferencesBuilder.setType(PostsLayoutPreferences.PostsLayoutType.STAGGERED_GRID);
-                        binding.staggeredOrGridOptions.setVisibility(View.VISIBLE);
-                        initStaggeredOrGridOptions();
-                        break;
-                    case R.id.layout_grid:
-                    default:
-                        preferencesBuilder.setType(PostsLayoutPreferences.PostsLayoutType.GRID);
-                        binding.staggeredOrGridOptions.setVisibility(View.VISIBLE);
-                        initStaggeredOrGridOptions();
-                        break;
+                if (checkedId == R.id.layout_linear) {
+                    preferencesBuilder.setType(PostsLayoutPreferences.PostsLayoutType.LINEAR);
+                    preferencesBuilder.setColCount(1);
+                    binding.staggeredOrGridOptions.setVisibility(View.GONE);
+                } else if (checkedId == R.id.layout_staggered) {
+                    preferencesBuilder.setType(PostsLayoutPreferences.PostsLayoutType.STAGGERED_GRID);
+                    if (preferencesBuilder.getColCount() == 1) {
+                        preferencesBuilder.setColCount(2);
+                    }
+                    binding.staggeredOrGridOptions.setVisibility(View.VISIBLE);
+                    initStaggeredOrGridOptions();
+                } else {
+                    preferencesBuilder.setType(PostsLayoutPreferences.PostsLayoutType.GRID);
+                    if (preferencesBuilder.getColCount() == 1) {
+                        preferencesBuilder.setColCount(2);
+                    }
+                    binding.staggeredOrGridOptions.setVisibility(View.VISIBLE);
+                    initStaggeredOrGridOptions();
                 }
             }
         });
@@ -111,14 +116,10 @@ public class PostsLayoutPreferencesDialogFragment extends DialogFragment {
         binding.colCountToggle.check(getSelectedColCountId());
         binding.colCountToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
-            switch (checkedId) {
-                case R.id.col_count_two:
-                    preferencesBuilder.setColCount(2);
-                    break;
-                case R.id.col_count_three:
-                default:
-                    preferencesBuilder.setColCount(3);
-                    break;
+            if (checkedId == R.id.col_count_two) {
+                preferencesBuilder.setColCount(2);
+            } else {
+                preferencesBuilder.setColCount(3);
             }
         });
     }
@@ -135,17 +136,12 @@ public class PostsLayoutPreferencesDialogFragment extends DialogFragment {
         binding.avatarSizeToggle.setVisibility(preferencesBuilder.isAvatarVisible() ? View.VISIBLE : View.GONE);
         binding.avatarSizeToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
-            switch (checkedId) {
-                case R.id.avatar_size_tiny:
-                    preferencesBuilder.setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.TINY);
-                    break;
-                case R.id.avatar_size_small:
-                    preferencesBuilder.setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.SMALL);
-                    break;
-                case R.id.avatar_size_regular:
-                default:
-                    preferencesBuilder.setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.REGULAR);
-                    break;
+            if (checkedId == R.id.avatar_size_tiny) {
+                preferencesBuilder.setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.TINY);
+            } else if (checkedId == R.id.avatar_size_small) {
+                preferencesBuilder.setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.SMALL);
+            } else {
+                preferencesBuilder.setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.REGULAR);
             }
         });
     }

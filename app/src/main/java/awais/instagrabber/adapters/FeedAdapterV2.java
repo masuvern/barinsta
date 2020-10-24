@@ -15,32 +15,26 @@ import awais.instagrabber.adapters.viewholder.feed.FeedItemViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedPhotoViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedSliderViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedVideoViewHolder;
-import awais.instagrabber.customviews.RamboTextView;
 import awais.instagrabber.databinding.ItemFeedGridBinding;
 import awais.instagrabber.databinding.ItemFeedPhotoBinding;
 import awais.instagrabber.databinding.ItemFeedSliderBinding;
 import awais.instagrabber.databinding.ItemFeedVideoBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.utils.Utils;
 
 public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.ViewHolder> {
     private static final String TAG = "FeedAdapterV2";
 
     private PostsLayoutPreferences layoutPreferences;
-    private OnPostClickListener postClickListener;
-    private int lastAnimatedPosition;
+    private final FeedItemCallback feedItemCallback;
 
-    private final View.OnClickListener clickListener;
-    private final MentionClickListener mentionClickListener;
-    private final View.OnLongClickListener longClickListener = v -> {
-        final Object tag;
-        if (v instanceof RamboTextView && (tag = v.getTag()) instanceof FeedModel)
-            Utils.copyText(v.getContext(), ((FeedModel) tag).getPostCaption());
-        return true;
-    };
+    // private final View.OnLongClickListener longClickListener = v -> {
+    //     final Object tag;
+    //     if (v instanceof RamboTextView && (tag = v.getTag()) instanceof FeedModel)
+    //         Utils.copyText(v.getContext(), ((FeedModel) tag).getPostCaption());
+    //     return true;
+    // };
 
 
     private static final DiffUtil.ItemCallback<FeedModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<FeedModel>() {
@@ -56,14 +50,10 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
     };
 
     public FeedAdapterV2(@NonNull final PostsLayoutPreferences layoutPreferences,
-                         final View.OnClickListener clickListener,
-                         final MentionClickListener mentionClickListener,
-                         final OnPostClickListener postClickListener) {
+                         final FeedItemCallback feedItemCallback) {
         super(DIFF_CALLBACK);
         this.layoutPreferences = layoutPreferences;
-        this.clickListener = clickListener;
-        this.mentionClickListener = mentionClickListener;
-        this.postClickListener = postClickListener;
+        this.feedItemCallback = feedItemCallback;
     }
 
     @NonNull
@@ -89,16 +79,16 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
         switch (MediaItemType.valueOf(viewType)) {
             case MEDIA_TYPE_VIDEO: {
                 final ItemFeedVideoBinding binding = ItemFeedVideoBinding.inflate(layoutInflater, parent, false);
-                return new FeedVideoViewHolder(binding, mentionClickListener, clickListener, longClickListener);
+                return new FeedVideoViewHolder(binding, feedItemCallback);
             }
             case MEDIA_TYPE_SLIDER: {
                 final ItemFeedSliderBinding binding = ItemFeedSliderBinding.inflate(layoutInflater, parent, false);
-                return new FeedSliderViewHolder(binding, mentionClickListener, clickListener, longClickListener);
+                return new FeedSliderViewHolder(binding, feedItemCallback);
             }
             case MEDIA_TYPE_IMAGE:
             default: {
                 final ItemFeedPhotoBinding binding = ItemFeedPhotoBinding.inflate(layoutInflater, parent, false);
-                return new FeedPhotoViewHolder(binding, mentionClickListener, clickListener, longClickListener);
+                return new FeedPhotoViewHolder(binding, feedItemCallback);
             }
         }
     }
@@ -110,33 +100,18 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
         feedModel.setPosition(position);
         switch (layoutPreferences.getType()) {
             case LINEAR:
-                ((FeedItemViewHolder) viewHolder).bind(feedModel, postClickListener);
+                ((FeedItemViewHolder) viewHolder).bind(feedModel);
                 break;
             case GRID:
             case STAGGERED_GRID:
             default:
-                final boolean animate = position > lastAnimatedPosition;
-                ((FeedGridItemViewHolder) viewHolder).bind(feedModel, layoutPreferences, postClickListener, false);
+                ((FeedGridItemViewHolder) viewHolder).bind(feedModel, layoutPreferences, feedItemCallback);
         }
-        lastAnimatedPosition = position;
     }
 
     @Override
     public int getItemViewType(final int position) {
         return getItem(position).getItemType().getId();
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull final RecyclerView.ViewHolder viewHolder) {
-        switch (layoutPreferences.getType()) {
-            case LINEAR:
-                ((FeedItemViewHolder) viewHolder).clearAnimation();
-                break;
-            case GRID:
-            case STAGGERED_GRID:
-            default:
-                ((FeedGridItemViewHolder) viewHolder).clearAnimation();
-        }
     }
 
     public void setLayoutPreferences(@NonNull final PostsLayoutPreferences layoutPreferences) {
@@ -161,9 +136,31 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
     //     feedSliderViewHolder.stopPlayingVideo();
     // }
 
-    public interface OnPostClickListener {
+    public interface FeedItemCallback {
         void onPostClick(final FeedModel feedModel,
                          final View profilePicView,
                          final View mainPostImage);
+
+        void onProfilePicClick(final FeedModel feedModel,
+                               final View profilePicView);
+
+        void onNameClick(final FeedModel feedModel,
+                         final View profilePicView);
+
+        void onLocationClick(final FeedModel feedModel);
+
+        void onMentionClick(final String mention);
+
+        void onHashtagClick(final String hashtag);
+
+        void onCommentsClick(final FeedModel feedModel);
+
+        void onDownloadClick(final FeedModel feedModel);
+
+        void onEmailClick(final String emailId);
+
+        void onURLClick(final String url);
+
+        void onSliderClick(FeedModel feedModel, int position);
     }
 }

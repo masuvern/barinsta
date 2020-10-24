@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.util.DisplayMetrics;
@@ -157,5 +158,24 @@ public final class Utils {
             statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
         }
         return statusBarHeight;
+    }
+
+    public static void openURL(final Context context, final String url) {
+        if (context == null || TextUtils.isEmpty(url)) {
+            return;
+        }
+        final Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        context.startActivity(i);
+    }
+
+    public static void openEmailAddress(final Context context, final String emailAddress) {
+        if (context == null || TextUtils.isEmpty(emailAddress)) {
+            return;
+        }
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + emailAddress));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+        context.startActivity(emailIntent);
     }
 }

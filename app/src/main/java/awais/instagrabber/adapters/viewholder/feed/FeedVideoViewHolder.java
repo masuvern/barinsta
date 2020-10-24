@@ -12,12 +12,10 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 
-import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.ItemFeedVideoBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NumberUtils;
@@ -29,6 +27,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     private static final String TAG = "FeedVideoViewHolder";
 
     private final ItemFeedVideoBinding binding;
+    private final FeedAdapterV2.FeedItemCallback feedItemCallback;
     private final Handler handler;
     private final DefaultDataSourceFactory dataSourceFactory;
 
@@ -43,12 +42,11 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     // };
 
     public FeedVideoViewHolder(@NonNull final ItemFeedVideoBinding binding,
-                               final MentionClickListener mentionClickListener,
-                               final View.OnClickListener clickListener,
-                               final View.OnLongClickListener longClickListener) {
-        super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, mentionClickListener, clickListener, longClickListener);
+                               final FeedAdapterV2.FeedItemCallback feedItemCallback) {
+        super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
-        binding.itemFeedBottom.videoViewsContainer.setVisibility(View.VISIBLE);
+        this.feedItemCallback = feedItemCallback;
+        binding.itemFeedBottom.tvVideoViews.setVisibility(View.VISIBLE);
         handler = new Handler(Looper.getMainLooper());
         final Context context = binding.getRoot().getContext();
         dataSourceFactory = new DefaultDataSourceFactory(context, "instagram");
@@ -59,8 +57,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     }
 
     @Override
-    public void bindItem(final FeedModel feedModel,
-                         final FeedAdapterV2.OnPostClickListener postClickListener) {
+    public void bindItem(final FeedModel feedModel) {
         // Log.d(TAG, "Binding post: " + feedModel.getPostId());
         this.feedModel = feedModel;
         binding.itemFeedBottom.tvVideoViews.setText(String.valueOf(feedModel.getViewCount()));
@@ -70,12 +67,12 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
 
             @Override
             public void onThumbnailClick() {
-                postClickListener.onPostClick(feedModel, binding.itemFeedTop.ivProfilePic, binding.videoPost.thumbnail);
+                feedItemCallback.onPostClick(feedModel, binding.itemFeedTop.ivProfilePic, binding.videoPost.thumbnail);
             }
 
             @Override
             public void onPlayerViewLoaded() {
-                binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
+                // binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
                 final ViewGroup.LayoutParams layoutParams = binding.videoPost.playerView.getLayoutParams();
                 final int requiredWidth = Utils.displayMetrics.widthPixels;
                 final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
@@ -97,19 +94,27 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
                                                                                       vol,
                                                                                       aspectRatio,
                                                                                       feedModel.getThumbnailUrl(),
+                                                                                      false,
                                                                                       null,
                                                                                       videoPlayerCallback);
-        binding.itemFeedBottom.btnMute.setOnClickListener(v -> {
-            final float newVol = videoPlayerViewHelper.toggleMute();
-            setMuteIcon(newVol);
-            Utils.sessionVolumeFull = newVol == 1f;
+        binding.videoPost.thumbnail.post(() -> {
+            if (feedModel.getImageHeight() > 0.8 * Utils.displayMetrics.heightPixels) {
+                final ViewGroup.LayoutParams layoutParams = binding.videoPost.thumbnail.getLayoutParams();
+                layoutParams.height = (int) (0.8 * Utils.displayMetrics.heightPixels);
+                binding.videoPost.thumbnail.requestLayout();
+            }
         });
-        binding.videoPost.playerView.setOnClickListener(v -> videoPlayerViewHelper.togglePlayback());
+        // binding.itemFeedBottom.btnMute.setOnClickListener(v -> {
+        //     final float newVol = videoPlayerViewHelper.toggleMute();
+        //     setMuteIcon(newVol);
+        //     Utils.sessionVolumeFull = newVol == 1f;
+        // });
+        // binding.videoPost.playerView.setOnClickListener(v -> videoPlayerViewHelper.togglePlayback());
     }
 
 
     private void setMuteIcon(final float vol) {
-        binding.itemFeedBottom.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
+        // binding.itemFeedBottom.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
     }
 
     public FeedModel getCurrentFeedModel() {
@@ -131,14 +136,4 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     //     handler.removeCallbacks(loadRunnable);
     //     handler.postDelayed(loadRunnable, 800);
     // }
-
-    private void showOrHideDetails(final boolean show) {
-        if (show) {
-            binding.itemFeedTop.getRoot().setVisibility(View.VISIBLE);
-            binding.itemFeedBottom.getRoot().setVisibility(View.VISIBLE);
-        } else {
-            binding.itemFeedTop.getRoot().setVisibility(View.GONE);
-            binding.itemFeedBottom.getRoot().setVisibility(View.GONE);
-        }
-    }
 }

@@ -30,6 +30,8 @@
 
     <color name="dm_profile_button_color">#efefef</color>
 
+    <color name="comment_selected">#888888</color>
+
     <color name="white">#FFFFFF</color>
 
     <color name="black">#000000</color>

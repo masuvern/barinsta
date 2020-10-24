@@ -77,6 +77,7 @@ public abstract class SharedElementTransitionDialogFragment extends DialogFragme
                             final View startView = startViews.get(key);
                             final View destView = destViews.get(key);
                             final ViewBounds viewBounds = viewBoundsMap.get(key);
+                            if (startView == null || destView == null || viewBounds == null) return;
                             onEndSharedElementAnimation(startView, destView, viewBounds);
                         }
                     }
@@ -87,6 +88,7 @@ public abstract class SharedElementTransitionDialogFragment extends DialogFragme
                 final View startView = startViews.get(key);
                 final View destView = destViews.get(key);
                 final ViewBounds viewBounds = viewBoundsMap.get(key);
+                if (startView == null || destView == null || viewBounds == null) return;
                 onBeforeSharedElementAnimation(startView, destView, viewBounds);
                 setDestBounds(key);
             }

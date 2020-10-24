@@ -45,6 +45,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
     private final float initialVolume;
     private final float thumbnailAspectRatio;
     private final String thumbnailUrl;
+    private final boolean loadPlayerOnClick;
     private final awais.instagrabber.databinding.LayoutExoCustomControlsBinding controlsBinding;
     private final VideoPlayerCallback videoPlayerCallback;
     private final String videoUrl;
@@ -58,6 +59,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
                                  final float initialVolume,
                                  final float thumbnailAspectRatio,
                                  final String thumbnailUrl,
+                                 final boolean loadPlayerOnClick,
                                  final LayoutExoCustomControlsBinding controlsBinding,
                                  final VideoPlayerCallback videoPlayerCallback) {
         this.context = context;
@@ -65,6 +67,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         this.initialVolume = initialVolume;
         this.thumbnailAspectRatio = thumbnailAspectRatio;
         this.thumbnailUrl = thumbnailUrl;
+        this.loadPlayerOnClick = loadPlayerOnClick;
         this.controlsBinding = controlsBinding;
         this.videoPlayerCallback = videoPlayerCallback;
         this.videoUrl = videoUrl;
@@ -77,7 +80,9 @@ public class VideoPlayerViewHelper implements Player.EventListener {
             if (videoPlayerCallback != null) {
                 videoPlayerCallback.onThumbnailClick();
             }
-            loadPlayer();
+            if (loadPlayerOnClick) {
+                loadPlayer();
+            }
         });
         setThumbnail();
         setupControls();
@@ -262,38 +267,31 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         speedPopup.setOnMenuItemClickListener(item -> {
             float nextSpeed;
             int textResId;
-            switch (item.getItemId()) {
-                case R.id.pt_two_five_x:
-                    nextSpeed = 0.25f;
-                    textResId = R.string.pt_two_five_x;
-                    break;
-                case R.id.pt_five_x:
-                    nextSpeed = 0.5f;
-                    textResId = R.string.pt_five_x;
-                    break;
-                case R.id.pt_seven_five_x:
-                    nextSpeed = 0.75f;
-                    textResId = R.string.pt_seven_five_x;
-                    break;
-                case R.id.one_x:
-                    nextSpeed = 1f;
-                    textResId = R.string.one_x;
-                    break;
-                case R.id.one_pt_two_five_x:
-                    nextSpeed = 1.25f;
-                    textResId = R.string.one_pt_two_five_x;
-                    break;
-                case R.id.one_pt_five_x:
-                    nextSpeed = 1.5f;
-                    textResId = R.string.one_pt_five_x;
-                    break;
-                case R.id.two_x:
-                    nextSpeed = 2f;
-                    textResId = R.string.two_x;
-                    break;
-                default:
-                    nextSpeed = 1;
-                    textResId = R.string.one_x;
+            int itemId = item.getItemId();
+            if (itemId == R.id.pt_two_five_x) {
+                nextSpeed = 0.25f;
+                textResId = R.string.pt_two_five_x;
+            } else if (itemId == R.id.pt_five_x) {
+                nextSpeed = 0.5f;
+                textResId = R.string.pt_five_x;
+            } else if (itemId == R.id.pt_seven_five_x) {
+                nextSpeed = 0.75f;
+                textResId = R.string.pt_seven_five_x;
+            } else if (itemId == R.id.one_x) {
+                nextSpeed = 1f;
+                textResId = R.string.one_x;
+            } else if (itemId == R.id.one_pt_two_five_x) {
+                nextSpeed = 1.25f;
+                textResId = R.string.one_pt_two_five_x;
+            } else if (itemId == R.id.one_pt_five_x) {
+                nextSpeed = 1.5f;
+                textResId = R.string.one_pt_five_x;
+            } else if (itemId == R.id.two_x) {
+                nextSpeed = 2f;
+                textResId = R.string.two_x;
+            } else {
+                nextSpeed = 1;
+                textResId = R.string.one_x;
             }
             player.setPlaybackParameters(new PlaybackParameters(nextSpeed));
             controlsBinding.speed.setText(textResId);

@@ -22,34 +22,39 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     private static final String TAG = "SliderVideoViewHolder";
 
     private final LayoutVideoPlayerWithThumbnailBinding binding;
-    private final awais.instagrabber.databinding.LayoutExoCustomControlsBinding controlsBinding;
+    private final LayoutExoCustomControlsBinding controlsBinding;
+    private final boolean loadVideoOnItemClick;
     private VideoPlayerViewHelper videoPlayerViewHelper;
 
     @SuppressLint("ClickableViewAccessibility")
     public SliderVideoViewHolder(@NonNull final LayoutVideoPlayerWithThumbnailBinding binding,
                                  final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener,
-                                 final LayoutExoCustomControlsBinding controlsBinding) {
+                                 final LayoutExoCustomControlsBinding controlsBinding,
+                                 final boolean loadVideoOnItemClick) {
         super(binding.getRoot());
         this.binding = binding;
         this.controlsBinding = controlsBinding;
-        final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
-        final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
-        thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-        playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-        binding.thumbnailParent.setOnTouchListener((v, event) -> {
-            final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
-            if (onDragTouch) {
-                return true;
-            }
-            return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
-        });
-        binding.playerView.setOnTouchListener((v, event) -> {
-            final boolean onDragTouch = playerVerticalDragHelper.onDragTouch(event);
-            if (onDragTouch) {
-                return true;
-            }
-            return playerVerticalDragHelper.onGestureTouchEvent(event);
-        });
+        this.loadVideoOnItemClick = loadVideoOnItemClick;
+        if (onVerticalDragListener != null) {
+            final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
+            final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
+            thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
+            playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
+            binding.thumbnailParent.setOnTouchListener((v, event) -> {
+                final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
+                if (onDragTouch) {
+                    return true;
+                }
+                return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
+            });
+            binding.playerView.setOnTouchListener((v, event) -> {
+                final boolean onDragTouch = playerVerticalDragHelper.onDragTouch(event);
+                if (onDragTouch) {
+                    return true;
+                }
+                return playerVerticalDragHelper.onGestureTouchEvent(event);
+            });
+        }
     }
 
     public void bind(@NonNull final PostChild model,
@@ -57,6 +62,14 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                      final SliderItemsAdapter.SliderCallback sliderCallback) {
         final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
+
+            @Override
+            public void onThumbnailClick() {
+                if (sliderCallback != null) {
+                    sliderCallback.onItemClicked(position);
+                }
+            }
+
             @Override
             public void onThumbnailLoaded() {
                 if (sliderCallback != null) {
@@ -97,6 +110,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                                                           vol,
                                                           aspectRatio,
                                                           model.getThumbnailUrl(),
+                                                          loadVideoOnItemClick,
                                                           controlsBinding,
                                                           videoPlayerCallback);
         // binding.itemFeedBottom.btnMute.setOnClickListener(v -> {

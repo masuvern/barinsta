@@ -21,11 +21,10 @@ import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 
 import java.util.List;
 
-import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedAdapterV2;
+import awais.instagrabber.adapters.SliderCallbackAdapter;
 import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.databinding.ItemFeedSliderBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -40,25 +39,20 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
     private static final boolean shouldAutoPlay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
 
     private final ItemFeedSliderBinding binding;
+    private final FeedAdapterV2.FeedItemCallback feedItemCallback;
     private final DefaultDataSourceFactory dataSourceFactory;
-
-    private final PlayerChangeListener playerChangeListener = (position, player) -> {
-        pagerPlayer = player;
-        playerPosition = position;
-    };
 
     private CacheDataSourceFactory cacheDataSourceFactory;
     private SimpleExoPlayer pagerPlayer;
     private int playerPosition = 0;
 
     public FeedSliderViewHolder(@NonNull final ItemFeedSliderBinding binding,
-                                final MentionClickListener mentionClickListener,
-                                final View.OnClickListener clickListener,
-                                final View.OnLongClickListener longClickListener) {
-        super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, mentionClickListener, clickListener, longClickListener);
+                                final FeedAdapterV2.FeedItemCallback feedItemCallback) {
+        super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
-        binding.itemFeedBottom.videoViewsContainer.setVisibility(View.GONE);
-        binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
+        this.feedItemCallback = feedItemCallback;
+        binding.itemFeedBottom.tvVideoViews.setVisibility(View.GONE);
+        // binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
         final ViewGroup.LayoutParams layoutParams = binding.mediaList.getLayoutParams();
         layoutParams.height = Utils.displayMetrics.widthPixels + 1;
         binding.mediaList.setLayoutParams(layoutParams);
@@ -71,31 +65,31 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
     }
 
     @Override
-    public void bindItem(final FeedModel feedModel,
-                         final FeedAdapterV2.OnPostClickListener postClickListener) {
+    public void bindItem(final FeedModel feedModel) {
         final List<PostChild> sliderItems = feedModel.getSliderItems();
         final int sliderItemLen = sliderItems != null ? sliderItems.size() : 0;
         if (sliderItemLen <= 0) return;
         final String text = "1/" + sliderItemLen;
         binding.mediaCounter.setText(text);
         binding.mediaList.setOffscreenPageLimit(1);
-        SliderItemsAdapter adapter = (SliderItemsAdapter) binding.mediaList.getAdapter();
-        if (adapter == null) {
-            adapter = new SliderItemsAdapter();
-        }
-        // adapter.setSpanCount(spanCount);
+        final SliderItemsAdapter adapter = new SliderItemsAdapter(null, null, false, new SliderCallbackAdapter() {
+            @Override
+            public void onItemClicked(final int position) {
+                feedItemCallback.onSliderClick(feedModel, position);
+            }
+        });
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(final int position) {
                 if (position >= sliderItemLen) return;
+                final String text = (position + 1) + "/" + sliderItemLen;
+                binding.mediaCounter.setText(text);
                 setDimensions(binding.mediaList, sliderItems.get(position));
             }
         });
         setDimensions(binding.mediaList, sliderItems.get(0));
 
-
-        //noinspection deprecation
         // binding.mediaList.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
         //     private int prevPos = 0;
         //
@@ -149,15 +143,15 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
             final SimpleExoPlayer player = (SimpleExoPlayer) tag;
             final float intVol = player.getVolume() == 0f ? 1f : 0f;
             player.setVolume(intVol);
-            binding.itemFeedBottom.btnMute.setImageResource(intVol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
-            Utils.sessionVolumeFull = intVol == 1f;
+            // binding.itemFeedBottom.btnMute.setImageResource(intVol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
+            // Utils.sessionVolumeFull = intVol == 1f;
         };
-        final PostChild firstItem = sliderItems.get(0);
-        if (firstItem.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
-            binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
-        }
-        binding.itemFeedBottom.btnMute.setImageResource(Utils.sessionVolumeFull ? R.drawable.ic_volume_off_24 : R.drawable.ic_volume_up_24);
-        binding.itemFeedBottom.btnMute.setOnClickListener(muteClickListener);
+        // final PostChild firstItem = sliderItems.get(0);
+        // if (firstItem.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
+        //     binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
+        // }
+        // binding.itemFeedBottom.btnMute.setImageResource(Utils.sessionVolumeFull ? R.drawable.ic_volume_off_24 : R.drawable.ic_volume_up_24);
+        // binding.itemFeedBottom.btnMute.setOnClickListener(muteClickListener);
     }
 
     private void setDimensions(final View view, final PostChild model) {

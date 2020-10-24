@@ -134,34 +134,34 @@ public class DownloadWorker extends Worker {
                 boolean deletedIPTC = false;
                 while ((count = bis.read(buffer, 0, 0x2000)) != -1) {
                     totalRead = totalRead + count;
-                    if (!deletedIPTC) {
-                        int iptcStart = -1;
-                        int fbmdStart = -1;
-                        int fbmdBytesLen = -1;
-                        for (int i = 0; i < buffer.length; ++i) {
-                            if (buffer[i] == (byte) 0xFF && buffer[i + 1] == (byte) 0xED)
-                                iptcStart = i;
-                            else if (buffer[i] == (byte) 'F' && buffer[i + 1] == (byte) 'B'
-                                    && buffer[i + 2] == (byte) 'M' && buffer[i + 3] == (byte) 'D') {
-                                fbmdStart = i;
-                                fbmdBytesLen = buffer[i - 10] << 24 | (buffer[i - 9] & 0xFF) << 16 |
-                                        (buffer[i - 8] & 0xFF) << 8 | (buffer[i - 7] & 0xFF) |
-                                        (buffer[i - 6] & 0xFF);
-                                break;
-                            }
-                        }
-                        if (iptcStart != -1 && fbmdStart != -1 && fbmdBytesLen != -1) {
-                            final int fbmdDataLen = (iptcStart + (fbmdStart - iptcStart) + (fbmdBytesLen - iptcStart)) - 4;
-                            fos.write(buffer, 0, iptcStart);
-                            fos.write(buffer, fbmdDataLen + iptcStart, count - fbmdDataLen - iptcStart);
-                            // setProgressAsync(new Data.Builder().putString(URL, url)
-                            //                                    .putFloat(PROGRESS, totalRead * 100f / fileSize)
-                            //                                    .build());
-                            updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize);
-                            deletedIPTC = true;
-                            continue;
-                        }
-                    }
+                    // if (!deletedIPTC) {
+                    //     int iptcStart = -1;
+                    //     int fbmdStart = -1;
+                    //     int fbmdBytesLen = -1;
+                    //     for (int i = 0; i < buffer.length; ++i) {
+                    //         if (buffer[i] == (byte) 0xFF && buffer[i + 1] == (byte) 0xED)
+                    //             iptcStart = i;
+                    //         else if (buffer[i] == (byte) 'F' && buffer[i + 1] == (byte) 'B'
+                    //                 && buffer[i + 2] == (byte) 'M' && buffer[i + 3] == (byte) 'D') {
+                    //             fbmdStart = i;
+                    //             fbmdBytesLen = buffer[i - 10] << 24 | (buffer[i - 9] & 0xFF) << 16 |
+                    //                     (buffer[i - 8] & 0xFF) << 8 | (buffer[i - 7] & 0xFF) |
+                    //                     (buffer[i - 6] & 0xFF);
+                    //             break;
+                    //         }
+                    //     }
+                    //     if (iptcStart != -1 && fbmdStart != -1 && fbmdBytesLen != -1) {
+                    //         final int fbmdDataLen = (iptcStart + (fbmdStart - iptcStart) + (fbmdBytesLen - iptcStart)) - 4;
+                    //         fos.write(buffer, 0, iptcStart);
+                    //         fos.write(buffer, fbmdDataLen + iptcStart, count - fbmdDataLen - iptcStart);
+                    //         // setProgressAsync(new Data.Builder().putString(URL, url)
+                    //         //                                    .putFloat(PROGRESS, totalRead * 100f / fileSize)
+                    //         //                                    .build());
+                    //         updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize);
+                    //         deletedIPTC = true;
+                    //         continue;
+                    //     }
+                    // }
                     fos.write(buffer, 0, count);
                     // setProgressAsync(new Data.Builder().putString(URL, url)
                     //                                    .putFloat(PROGRESS, totalRead * 100f / fileSize)

@@ -39,6 +39,12 @@ android {
     }
 }
 
+
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
 
@@ -62,7 +68,8 @@ dependencies {
     implementation 'com.google.guava:guava:27.0.1-android'
 
 //    implementation 'com.github.hendrawd:StorageUtil:1.1.0'
-    implementation 'com.github.armcha:AutoLinkTextViewV2:2.1.1'
+//    implementation 'com.github.armcha:AutoLinkTextViewV2:2.1.1'
+    implementation 'com.github.ammargitham:AutoLinkTextViewV2:master-SNAPSHOT'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'

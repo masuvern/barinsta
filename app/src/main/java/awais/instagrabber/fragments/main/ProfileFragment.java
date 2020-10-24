@@ -420,7 +420,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void fetchProfileDetails() {
         if (TextUtils.isEmpty(username)) return;
-        new ProfileFetcher(username.substring(1), profileModel -> {
+        new ProfileFetcher(username.trim().substring(1), profileModel -> {
             if (getContext() == null) return;
             this.profileModel = profileModel;
             // final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);

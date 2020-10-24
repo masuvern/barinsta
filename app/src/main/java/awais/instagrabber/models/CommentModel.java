@@ -3,23 +3,29 @@ package awais.instagrabber.models;
 import androidx.annotation.NonNull;
 
 import java.util.Date;
+import java.util.List;
 
-import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
-public final class CommentModel {
+public class CommentModel {
     private final ProfileModel profileModel;
     private final String id;
-    private final CharSequence text;
-    private final long likes, timestamp;
-    private CommentModel[] childCommentModels;
-    private boolean hasNextPage, liked;
+    private final String text;
+    private final long likes;
+    private final long timestamp;
+    private List<CommentModel> childCommentModels;
+    private final boolean liked;
+    private boolean hasNextPage;
     private String endCursor;
 
-    public CommentModel(final String id, final String text, final long timestamp, final long likes, final boolean liked,
+    public CommentModel(final String id,
+                        final String text,
+                        final long timestamp,
+                        final long likes,
+                        final boolean liked,
                         final ProfileModel profileModel) {
         this.id = id;
-        this.text = TextUtils.hasMentions(text) ? TextUtils.getMentionText(text) : text;
+        this.text = text;
         this.likes = likes;
         this.liked = liked;
         this.timestamp = timestamp;
@@ -30,7 +36,7 @@ public final class CommentModel {
         return id;
     }
 
-    public CharSequence getText() {
+    public String getText() {
         return text;
     }
 
@@ -51,11 +57,11 @@ public final class CommentModel {
         return profileModel;
     }
 
-    public CommentModel[] getChildCommentModels() {
+    public List<CommentModel> getChildCommentModels() {
         return childCommentModels;
     }
 
-    public void setChildCommentModels(final CommentModel[] childCommentModels) {
+    public void setChildCommentModels(final List<CommentModel> childCommentModels) {
         this.childCommentModels = childCommentModels;
     }
 
@@ -72,21 +78,21 @@ public final class CommentModel {
         return endCursor;
     }
 
-//    @NonNull
-//    @Override
-//    public String toString() {
-//        try {
-//            final JSONObject object = new JSONObject();
-//            object.put(Constants.EXTRAS_ID, id);
-//            object.put("text", text);
-//            object.put(Constants.EXTRAS_NAME, profileModel != null ? profileModel.getUsername() : "");
-//            if (childCommentModels != null) object.put("childComments", childCommentModels);
-//            return object.toString();
-//        } catch (Exception e) {
-//            return "{\"id\":\"" + id + "\", \"text\":\"" + text
-//                     //(text != null ? text.replaceAll("\"", "\\\\\"") : "")
-//                    + "\", \"name\":\"" + (profileModel != null ? profileModel.getUsername() : "") +
-//                    (childCommentModels != null ? "\", \"childComments\":" + childCommentModels.length : "\"") + '}';
-//        }
-//    }
+    //    @NonNull
+    //    @Override
+    //    public String toString() {
+    //        try {
+    //            final JSONObject object = new JSONObject();
+    //            object.put(Constants.EXTRAS_ID, id);
+    //            object.put("text", text);
+    //            object.put(Constants.EXTRAS_NAME, profileModel != null ? profileModel.getUsername() : "");
+    //            if (childCommentModels != null) object.put("childComments", childCommentModels);
+    //            return object.toString();
+    //        } catch (Exception e) {
+    //            return "{\"id\":\"" + id + "\", \"text\":\"" + text
+    //                     //(text != null ? text.replaceAll("\"", "\\\\\"") : "")
+    //                    + "\", \"name\":\"" + (profileModel != null ? profileModel.getUsername() : "") +
+    //                    (childCommentModels != null ? "\", \"childComments\":" + childCommentModels.length : "\"") + '}';
+    //        }
+    //    }
 }
