@@ -31,7 +31,7 @@
     <string name="title_changelog">Lista de cambios</string>
     <string name="bottom_toolbar">Mostrar barra de herramientas inferior</string>
     <string name="update_check">Check for updates at startup</string>
-    <string name="download_user_folder">Descargar mensajes a la carpeta de usuario en Downloads</string>
+    <string name="download_user_folder">Download posts to username folders</string>
     <string name="autoload_posts">Cargar automáticamente todos los mensajes de usuario</string>
     <string name="mark_as_seen_setting">Mark stories as seen after viewing</string>
     <string name="mark_as_seen_setting_summary">Story author will know you viewed it</string>
@@ -230,7 +230,7 @@
     <string name="discover_empty">Esta categoría está vacía...</string>
     <string name="update_available">¡Hay una actualización disponible! (%s)</string>
     <string name="update_notice">Recordatorio: si ha descargado de F-Droid, debe actualizar desde él. Lo mismo se aplica a GitHub.</string>
-    <string name="updated">¡Gracias por actualizar InstaGrabber!</string>
+    <string name="updated">Thank you for updating Barinsta!</string>
     <string name="crash_title">App atascada</string>
     <string name="crash_descr">Vaya.. la aplicación dejó de funcionar, pero no te preocupes por un enviar un reporte de error al desarrollador para solucionar este problema. (:</string>
     <string name="use_amoled_dark_theme">Usar modo AMOLED para el tema oscuro</string>

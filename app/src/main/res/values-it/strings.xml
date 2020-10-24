@@ -31,12 +31,12 @@
     <string name="title_changelog">Changelog</string>
     <string name="bottom_toolbar">Mostra barra degli strumenti in basso</string>
     <string name="update_check">Controlla gli aggiornamenti all\'avvio</string>
-    <string name="download_user_folder">Scarica i post nella cartella nome utente in Download</string>
+    <string name="download_user_folder">Scarica post nelle cartelle del nome utente</string>
     <string name="autoload_posts">Carica automaticamente tutti i post dall\'utente</string>
     <string name="mark_as_seen_setting">Segna le storie come viste dopo la visualizzazione</string>
     <string name="mark_as_seen_setting_summary">L\'autore della storia saprà che l\'hai vista</string>
     <string name="dm_mark_as_seen_setting">Segna il DM come visto dopo la visualizzazione</string>
-    <string name="dm_mark_as_seen_setting_summary">Altri membri sapranno di averlo visto</string>
+    <string name="dm_mark_as_seen_setting_summary">Altri membri sapranno che lo hai visto</string>
     <string name="activity_setting">Abilita notifiche attività</string>
     <string name="error_loading_profile">Errore durante il caricamento del profilo!\nProvare ad accedere e cercare nuovamente.</string>
     <string name="error_creating_folders">Errore durante la creazione delle cartelle di scaricamento.</string>
@@ -87,7 +87,7 @@
     <string name="story_mentions">Menzioni</string>
     <string name="priv_acc">Questo profilo è privato</string>
     <string name="priv_acc_confirm">Non sarai in grado di accedere ai post dopo non seguire! Sei sicuro?</string>
-    <string name="no_acc">È possibile accedere tramite More -&gt; Account nell\'angolo in basso a destra o è possibile visualizzare gli account pubblici senza effettuare il login!</string>
+    <string name="no_acc">È possibile accedere tramite Altro -&gt; Account nell\'angolo in basso a destra o è possibile visualizzare gli account pubblici senza effettuare il login!</string>
     <string name="no_acc_logged_in">È possibile scorrere a sinistra/destra per esplorare/feed, o cercare qualcosa qui sotto!</string>
     <string name="empty_acc">Questo profilo non ha post</string>
     <string name="empty_list">Nessun Post Simile!</string>
@@ -230,7 +230,7 @@
     <string name="discover_empty">Questa categoria è in qualche modo vuota...</string>
     <string name="update_available">Un aggiornamento è disponibile! (%s)</string>
     <string name="update_notice">Promemoria: Se hai scaricato da F-Droid, devi aggiornare da esso! Stesso vale per GitHub.</string>
-    <string name="updated">Grazie per aver aggiornato InstaGrabber!</string>
+    <string name="updated">Grazie per aver aggiornato Barinsta!</string>
     <string name="crash_title">L\'app si è arrestata in modo anomalo</string>
     <string name="crash_descr">Oops… L\'app si è arrestata in modo anomalo, ma non preoccuparti, puoi inviare una segnalazione di errore allo sviluppatore per aiutarlo a risolvere il problema. (:</string>
     <string name="use_amoled_dark_theme">Usa la modalità AMOLED per il tema scuro</string>

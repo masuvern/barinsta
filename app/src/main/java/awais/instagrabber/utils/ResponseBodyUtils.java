@@ -257,19 +257,19 @@ public final class ResponseBodyUtils {
 
         final JSONArray users = data.getJSONArray("users");
         final int usersLen = users.length();
-        final JSONArray leftusers = data.getJSONArray("left_users");
-        final int leftusersLen = leftusers.length();
+        final JSONArray leftusers = data.optJSONArray("left_users");
+        final int leftusersLen = leftusers == null ? 0 : leftusers.length();
         final JSONArray admins = data.getJSONArray("admin_user_ids");
         final int adminsLen = admins.length();
 
         final ProfileModel[] userModels = new ProfileModel[usersLen];
         for (int j = 0; j < usersLen; ++j) {
             final JSONObject userObject = users.getJSONObject(j);
-            userModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
+            userModels[j] = new ProfileModel(userObject.optBoolean("is_private"),
                                              false,
                                              userObject.optBoolean("is_verified"),
                                              String.valueOf(userObject.get("pk")),
-                                             userObject.getString("username"),
+                                             userObject.optString("username"), // optional cuz fb users
                                              userObject.getString("full_name"),
                                              null, null,
                                              userObject.getString("profile_pic_url"),
