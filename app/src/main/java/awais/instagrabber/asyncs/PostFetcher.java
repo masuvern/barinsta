@@ -147,7 +147,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
                                                                          : MediaItemType.MEDIA_TYPE_IMAGE)
                                                .setDisplayUrl(isChildVideo ? childNode.getString("video_url")
                                                                            : childNode.getString("display_url"))
-                                               // .setShortCode(childNode.getString(Constants.EXTRAS_SHORTCODE))
+                                               .setShortCode(media.getString(Constants.EXTRAS_SHORTCODE))
                                                .setVideoViews(isChildVideo && childNode.has("video_view_count")
                                                               ? childNode.getLong("video_view_count")
                                                               : -1)
