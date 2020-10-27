@@ -15,10 +15,10 @@ public final class PostsLayoutPreferences {
 
     public static class Builder {
         private PostsLayoutType type = PostsLayoutType.GRID;
-        private int colCount = 2;
-        private boolean isAvatarVisible = false;
+        private int colCount = 3;
+        private boolean isAvatarVisible = true;
         private boolean isNameVisible = false;
-        private ProfilePicSize profilePicSize = ProfilePicSize.REGULAR;
+        private ProfilePicSize profilePicSize = ProfilePicSize.SMALL;
         private boolean hasRoundedCorners = true;
         private boolean hasGap = true;
 
@@ -87,6 +87,9 @@ public final class PostsLayoutPreferences {
         }
 
         public Builder mergeFrom(final PostsLayoutPreferences preferences) {
+            if (preferences == null) {
+                return this;
+            }
             setColCount(preferences.getColCount());
             setAvatarVisible(preferences.isAvatarVisible());
             setNameVisible(preferences.isNameVisible());

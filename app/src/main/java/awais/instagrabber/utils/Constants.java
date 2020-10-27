@@ -88,4 +88,5 @@ public final class Constants {
     public static final String DEFAULT_HASH_TAG_PIC = "https://www.instagram.com/static/images/hashtag/search-hashtag-default-avatar.png/1d8417c9a4f5.png";
     public static final String SHARED_PREFERENCES_NAME = "settings";
     public static final String PREF_POSTS_LAYOUT = "posts_layout";
+    public static final String PREF_PROFILE_POSTS_LAYOUT = "profile_posts_layout";
 }

@@ -331,7 +331,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void showPostsLayoutPreferences() {
-        final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(preferences -> new Handler()
+        final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(Constants.PREF_POSTS_LAYOUT, preferences -> new Handler()
                 .postDelayed(() -> binding.feedRecyclerView.setLayoutPreferences(preferences), 200));
         fragment.show(getChildFragmentManager(), "posts_layout_preferences");
     }

@@ -272,18 +272,32 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mainPosts"
+        <awais.instagrabber.customviews.PostsRecyclerView
+            android:id="@+id/posts_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            tools:listitem="@layout/item_post" />
+            tools:listitem="@layout/item_feed_photo" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!--<androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
+    <!--    android:id="@+id/swipeRefreshLayout"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="match_parent"-->
+    <!--    app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">-->
+
+    <!--    <androidx.recyclerview.widget.RecyclerView-->
+    <!--        android:id="@+id/mainPosts"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:clipToPadding="false"-->
+    <!--        tools:listitem="@layout/item_post" />-->
+    <!--</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
 
     <LinearLayout
         android:id="@+id/privatePage"

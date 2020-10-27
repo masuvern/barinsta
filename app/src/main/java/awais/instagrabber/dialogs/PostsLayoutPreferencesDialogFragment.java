@@ -16,20 +16,21 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.DialogPostLayoutPreferencesBinding;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.utils.Constants;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class PostsLayoutPreferencesDialogFragment extends DialogFragment {
 
-    private final PostsLayoutPreferences.Builder preferencesBuilder;
-    @NonNull
     private final OnApplyListener onApplyListener;
+    private final PostsLayoutPreferences.Builder preferencesBuilder;
+    private final String layoutPreferenceKey;
     private DialogPostLayoutPreferencesBinding binding;
     private Context context;
 
-    public PostsLayoutPreferencesDialogFragment(@NonNull final OnApplyListener onApplyListener) {
-        final PostsLayoutPreferences preferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_POSTS_LAYOUT));
+    public PostsLayoutPreferencesDialogFragment(final String layoutPreferenceKey,
+                                                @NonNull final OnApplyListener onApplyListener) {
+        this.layoutPreferenceKey = layoutPreferenceKey;
+        final PostsLayoutPreferences preferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(layoutPreferenceKey));
         this.preferencesBuilder = PostsLayoutPreferences.builder().mergeFrom(preferences);
         this.onApplyListener = onApplyListener;
     }
@@ -50,7 +51,7 @@ public class PostsLayoutPreferencesDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.apply, (dialog, which) -> {
                     final PostsLayoutPreferences preferences = preferencesBuilder.build();
                     final String json = preferences.getJson();
-                    settingsHelper.putString(Constants.PREF_POSTS_LAYOUT, json);
+                    settingsHelper.putString(layoutPreferenceKey, json);
                     onApplyListener.onApply(preferences);
                 })
                 .create();

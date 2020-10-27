@@ -417,7 +417,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     public void onPause() {
         super.onPause();
         wasPaused = true;
-        captionState = bottomSheetBehavior.getState();
+        if (bottomSheetBehavior != null) {
+            captionState = bottomSheetBehavior.getState();
+        }
     }
 
     @Override
@@ -494,7 +496,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.postImage.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                                 ViewGroup.LayoutParams.MATCH_PARENT));
             binding.postImage.requestLayout();
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            if (bottomSheetBehavior != null) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
             return;
         }
         if (destView == binding.sliderParent) {
@@ -778,6 +782,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     private void setupCaption() {
         final CharSequence postCaption = feedModel.getPostCaption();
+        if (TextUtils.isEmpty(postCaption)) {
+            return;
+        }
         binding.caption.addOnHashtagListener(autoLinkItem -> {
             final NavController navController = NavHostFragment.findNavController(this);
             final Bundle bundle = new Bundle();

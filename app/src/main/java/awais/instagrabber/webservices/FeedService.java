@@ -25,7 +25,7 @@ import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.FeedRepository;
-import awais.instagrabber.repositories.responses.FeedFetchResponse;
+import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -58,7 +58,7 @@ public class FeedService extends BaseService {
 
     public void fetch(final int maxItemsToLoad,
                       final String cursor,
-                      final ServiceCallback<FeedFetchResponse> callback) {
+                      final ServiceCallback<PostsFetchResponse> callback) {
         if (loadFromMock) {
             final Handler handler = new Handler();
             handler.postDelayed(() -> {
@@ -96,9 +96,9 @@ public class FeedService extends BaseService {
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 try {
                     // Log.d(TAG, "onResponse: body: " + response.body());
-                    final FeedFetchResponse feedFetchResponse = parseResponse(response);
+                    final PostsFetchResponse postsFetchResponse = parseResponse(response);
                     if (callback != null) {
-                        callback.onSuccess(feedFetchResponse);
+                        callback.onSuccess(postsFetchResponse);
                     }
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
@@ -119,16 +119,16 @@ public class FeedService extends BaseService {
     }
 
     @NonNull
-    private FeedFetchResponse parseResponse(@NonNull final Response<String> response) throws JSONException {
+    private PostsFetchResponse parseResponse(@NonNull final Response<String> response) throws JSONException {
         if (TextUtils.isEmpty(response.body())) {
             Log.e(TAG, "parseResponse: feed response body is empty with status code: " + response.code());
-            return new FeedFetchResponse(Collections.emptyList(), false, null);
+            return new PostsFetchResponse(Collections.emptyList(), false, null);
         }
         return parseResponseBody(response.body());
     }
 
     @NonNull
-    private FeedFetchResponse parseResponseBody(@NonNull final String body)
+    private PostsFetchResponse parseResponseBody(@NonNull final String body)
             throws JSONException {
         final List<FeedModel> feedModels = new ArrayList<>();
         final JSONObject timelineFeed = new JSONObject(body)
@@ -161,7 +161,6 @@ public class FeedService extends BaseService {
             final String displayUrl = feedItem.optString("display_url");
             if (TextUtils.isEmpty(displayUrl)) continue;
             final String resourceUrl;
-
             if (isVideo) {
                 resourceUrl = feedItem.getString("video_url");
             } else {
@@ -265,7 +264,7 @@ public class FeedService extends BaseService {
             final FeedModel feedModel = feedModelBuilder.build();
             feedModels.add(feedModel);
         }
-        return new FeedFetchResponse(feedModels, hasNextPage, endCursor);
+        return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
     }
 
     @NonNull

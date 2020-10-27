@@ -5,23 +5,26 @@ import java.util.List;
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
-import awais.instagrabber.webservices.FeedService;
+import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
 
-public class FeedPostFetchService implements PostFetcher.PostFetchService {
-    private static final String TAG = "FeedPostFetchService";
-    private final FeedService feedService;
+public class ProfilePostFetchService implements PostFetcher.PostFetchService {
+    private static final String TAG = "ProfilePostFetchService";
+    private final ProfileService profileService;
+    private final ProfileModel profileModel;
     private String nextCursor;
     private boolean hasNextPage;
 
-    public FeedPostFetchService() {
-        feedService = FeedService.getInstance();
+    public ProfilePostFetchService(final ProfileModel profileModel) {
+        this.profileModel = profileModel;
+        profileService = ProfileService.getInstance();
     }
 
     @Override
     public void fetch(final String cursor, final FetchListener<List<FeedModel>> fetchListener) {
-        feedService.fetch(25, cursor, new ServiceCallback<PostsFetchResponse>() {
+        profileService.fetchPosts(profileModel, 30, cursor, new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;

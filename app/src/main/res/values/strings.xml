@@ -324,6 +324,7 @@
     <string name="downloader_downloading_child">Download item %d of %d</string>
     <string name="delete">Delete</string>
     <string name="comment">Comment</string>
+    <string name="layout">Layout</string>
     <plurals name="likes_count">
         <item quantity="one">%d like</item>
         <item quantity="other">%d likes</item>

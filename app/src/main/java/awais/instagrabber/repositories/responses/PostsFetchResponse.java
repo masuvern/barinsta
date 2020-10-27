@@ -4,12 +4,12 @@ import java.util.List;
 
 import awais.instagrabber.models.FeedModel;
 
-public class FeedFetchResponse {
+public class PostsFetchResponse {
     private List<FeedModel> feedModels;
     private boolean hasNextPage;
     private String nextCursor;
 
-    public FeedFetchResponse(final List<FeedModel> feedModels, final boolean hasNextPage, final String nextCursor) {
+    public PostsFetchResponse(final List<FeedModel> feedModels, final boolean hasNextPage, final String nextCursor) {
         this.feedModels = feedModels;
         this.hasNextPage = hasNextPage;
         this.nextCursor = nextCursor;

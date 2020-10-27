@@ -37,10 +37,4 @@
             android:clipToPadding="false"
             tools:listitem="@layout/item_feed_photo" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <!--<androidx.fragment.app.FragmentContainerView-->
-    <!--    android:id="@+id/frag_container"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent"-->
-    <!--    app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
 </awais.instagrabber.customviews.helpers.NestedCoordinatorLayout>

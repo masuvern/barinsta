@@ -25,7 +25,6 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtBottom;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedViewModel;
 
@@ -130,16 +129,8 @@ public class PostsRecyclerView extends RecyclerView {
             throw new IllegalArgumentException("PostFetchService cannot be null");
         }
         if (layoutPreferences == null) {
-            layoutPreferences = PostsLayoutPreferences.builder()
-                                                      .setType(PostsLayoutPreferences.PostsLayoutType.GRID)
-                                                      .setColCount(3)
-                                                      .setAvatarVisible(true)
-                                                      .setNameVisible(false)
-                                                      .setProfilePicSize(PostsLayoutPreferences.ProfilePicSize.TINY)
-                                                      .setHasGap(true)
-                                                      .setHasRoundedCorners(true)
-                                                      .build();
-            Utils.settingsHelper.putString(Constants.PREF_POSTS_LAYOUT, layoutPreferences.getJson());
+            layoutPreferences = PostsLayoutPreferences.builder().build();
+            // Utils.settingsHelper.putString(Constants.PREF_POSTS_LAYOUT, layoutPreferences.getJson());
         }
         gridSpacingItemDecoration = new GridSpacingItemDecoration(Utils.convertDpToPx(2));
         initTransition();
@@ -156,9 +147,6 @@ public class PostsRecyclerView extends RecyclerView {
 
     private void initLayoutManager() {
         layoutManager = new StaggeredGridLayoutManager(layoutPreferences.getColCount(), StaggeredGridLayoutManager.VERTICAL);
-        if (layoutPreferences.getHasGap()) {
-            addItemDecoration(gridSpacingItemDecoration);
-        }
         setLayoutManager(layoutManager);
     }
 
@@ -172,7 +160,9 @@ public class PostsRecyclerView extends RecyclerView {
         feedViewModel = new ViewModelProvider(viewModelStoreOwner).get(FeedViewModel.class);
         feedViewModel.getList().observe(lifeCycleOwner, feedAdapter::submitList);
         postFetcher = new PostFetcher(postFetchService, fetchListener);
-        addItemDecoration(gridSpacingItemDecoration);
+        if (layoutPreferences.getHasGap()) {
+            addItemDecoration(gridSpacingItemDecoration);
+        }
         setHasFixedSize(true);
         setNestedScrollingEnabled(true);
         lazyLoader = new RecyclerLazyLoaderAtBottom(layoutManager, (page) -> {
