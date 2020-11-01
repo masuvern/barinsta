@@ -234,16 +234,9 @@ public class DirectMessageThreadFragment extends Fragment {
                 switch (itemType) {
                     case MEDIA_SHARE:
                     case CLIP:
+                    case FELIX_SHARE:
                         final long postId = directItemModel.getMediaModel().getPk();
-                        final boolean isId = true;
-                        final NavController navController = NavHostFragment.findNavController(this);
-                        final NavDirections action = DirectMessageThreadFragmentDirections
-                                .actionGlobalPostViewFragment(
-                                        0,
-                                        new String[]{String.valueOf(postId)},
-                                        isId
-                                );
-                        navController.navigate(action);
+                        // open post
                         break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);
@@ -322,6 +315,7 @@ public class DirectMessageThreadFragment extends Fragment {
                 switch (itemType) {
                     case MEDIA_SHARE:
                     case CLIP:
+                    case FELIX_SHARE:
                         firstOption = R.string.view_post;
                         break;
                     case LINK:

@@ -58,10 +58,10 @@ public final class Constants {
     // spoof
     public static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) " +
             "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 " +
-            "Instagram 161.0.0.37.121 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 248310224)";
+            "Instagram 165.1.0.29.119 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 253447818)";
     public static final String I_USER_AGENT =
-            "Instagram 161.0.0.37.121 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 248310224)";
-    public static final String A_USER_AGENT = "https://InstaGrabber.AustinHuang.me / mailto:InstaGrabber@AustinHuang.me";
+            "Instagram 165.1.0.29.119 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 253447818)";
+    public static final String A_USER_AGENT = "https://Barinsta.AustinHuang.me / mailto:Barinsta@AustinHuang.me";
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
     public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
             " \"13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0," +

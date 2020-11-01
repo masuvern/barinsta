@@ -242,6 +242,7 @@ public final class ResponseBodyUtils {
         if ("voice_media".equals(itemType)) return DirectItemType.VOICE_MEDIA;
         if ("story_share".equals(itemType)) return DirectItemType.STORY_SHARE;
         if ("clip".equals(itemType)) return DirectItemType.CLIP;
+        if ("felix_share".equals(itemType)) return DirectItemType.FELIX_SHARE;
         return DirectItemType.TEXT;
     }
 
@@ -499,6 +500,10 @@ public final class ResponseBodyUtils {
 
                 case CLIP:
                     directMedia = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
+                    break;
+
+                case FELIX_SHARE:
+                    directMedia = getDirectMediaModel(itemObject.getJSONObject("felix_share").getJSONObject("video"));
                     break;
 
                 case MEDIA:
