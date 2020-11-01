@@ -91,4 +91,5 @@ public final class Constants {
     public static final String PREF_PROFILE_POSTS_LAYOUT = "profile_posts_layout";
     public static final String PREF_TOPIC_POSTS_LAYOUT = "topic_posts_layout";
     public static final String PREF_HASHTAG_POSTS_LAYOUT = "hashtag_posts_layout";
+    public static final String PREF_LOCATION_POSTS_LAYOUT = "location_posts_layout";
 }

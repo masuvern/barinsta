@@ -56,7 +56,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
                     android:text="@string/map"
                     app:chipBackgroundColor="@null"
                     app:chipIcon="@drawable/ic_outline_map_24"
@@ -72,7 +71,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
                     android:text="@string/add_to_favorites"
                     app:chipBackgroundColor="@null"
                     app:chipIcon="@drawable/ic_outline_star_plus_24"
@@ -143,16 +141,15 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mainPosts"
+        <awais.instagrabber.customviews.PostsRecyclerView
+            android:id="@+id/posts"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            tools:listitem="@layout/item_post" />
+            android:clipToPadding="false" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </awais.instagrabber.customviews.helpers.NestedCoordinatorLayout>

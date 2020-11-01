@@ -47,6 +47,15 @@
             app:nullable="true" />
     </action>
 
+    <action
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/location_nav_graph">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/hashTagFragment"
         android:name="awais.instagrabber.fragments.HashTagFragment"

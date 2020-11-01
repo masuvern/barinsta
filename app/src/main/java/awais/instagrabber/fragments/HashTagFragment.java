@@ -44,7 +44,6 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.databinding.FragmentHashtagBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.fragments.main.FeedFragmentDirections;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
@@ -183,13 +182,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = FeedFragmentDirections.actionGlobalHashTagFragment(hashtag);
+            final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(hashtag);
             NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
         }
 
         @Override
         public void onLocationClick(final FeedModel feedModel) {
-            final NavDirections action = FeedFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
+            final NavDirections action = HashTagFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
             NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
         }
 

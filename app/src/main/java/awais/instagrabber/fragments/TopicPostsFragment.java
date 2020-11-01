@@ -198,6 +198,12 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        fragmentActivity.setToolbar(binding.toolbar);
+    }
+
+    @Override
     public void onRefresh() {
         binding.posts.refresh();
     }
