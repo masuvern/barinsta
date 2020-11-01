@@ -5,25 +5,29 @@ import java.io.Serializable;
 import awais.instagrabber.models.enums.MediaItemType;
 
 public final class PostChild implements Serializable {
-    private String postId;
-    private MediaItemType itemType;
-    private String displayUrl;
+    private final String postId;
+    private final String displayUrl;
+    private final String shortCode;
+    private final MediaItemType itemType;
     private final String thumbnailUrl;
     private final long videoViews;
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
 
     public static class Builder {
-        private String postId;
+        private String postId, displayUrl, shortCode, thumbnailUrl;
         private MediaItemType itemType;
-        private String displayUrl;
         private long videoViews;
-        private String thumbnailUrl;
         private int width;
         private int height;
 
         public Builder setPostId(final String postId) {
             this.postId = postId;
+            return this;
+        }
+
+        public Builder setShortCode(final String shortCode) {
+            this.shortCode = shortCode;
             return this;
         }
 
@@ -58,11 +62,12 @@ public final class PostChild implements Serializable {
         }
 
         public PostChild build() {
-            return new PostChild(postId, itemType, displayUrl, thumbnailUrl, videoViews, height, width);
+            return new PostChild(postId, shortCode, itemType, displayUrl, thumbnailUrl, videoViews, height, width);
         }
     }
 
     public PostChild(final String postId,
+                     final String shortCode,
                      final MediaItemType itemType,
                      final String displayUrl,
                      final String thumbnailUrl,
@@ -70,6 +75,7 @@ public final class PostChild implements Serializable {
                      final int height,
                      final int width) {
         this.postId = postId;
+        this.shortCode = shortCode;
         this.itemType = itemType;
         this.displayUrl = displayUrl;
         this.thumbnailUrl = thumbnailUrl;
@@ -80,6 +86,10 @@ public final class PostChild implements Serializable {
 
     public String getPostId() {
         return postId;
+    }
+
+    public String getShortCode() {
+        return shortCode;
     }
 
     public MediaItemType getItemType() {
@@ -110,6 +120,7 @@ public final class PostChild implements Serializable {
     public String toString() {
         return "PostChild{" +
                 "postId='" + postId + '\'' +
+                ", shortCode=" + shortCode +
                 ", itemType=" + itemType +
                 ", displayUrl='" + displayUrl + '\'' +
                 ", thumbnailUrl='" + thumbnailUrl + '\'' +

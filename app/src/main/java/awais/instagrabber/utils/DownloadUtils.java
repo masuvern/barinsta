@@ -88,10 +88,8 @@ public final class DownloadUtils {
         switch (method) {
             case DOWNLOAD_SAVED:
             case DOWNLOAD_MAIN:
+            case DOWNLOAD_DISCOVER:
                 checkEachPost = true;
-                break;
-            case DOWNLOAD_FEED:
-                checkEachPost = false;
                 break;
         }
         final int itemsToDownloadSize = itemsToDownload.size();
@@ -100,7 +98,7 @@ public final class DownloadUtils {
             if (!checkEachPost) {
                 final boolean isSlider = itemsToDownloadSize > 1;
                 final File saveFile = getDownloadSaveFile(dir,
-                                                          selectedItem.getPostId(),
+                                                          selectedItem.getShortCode(),
                                                           isSlider ? "_slide_" + (i + 1) : "",
                                                           selectedItem.getDisplayUrl()
                 );
@@ -119,7 +117,7 @@ public final class DownloadUtils {
                             final PostChild model = result.getSliderItems().get(j);
                             final File saveFile = getDownloadSaveFile(
                                     finalDir,
-                                    model.getPostId(),
+                                    model.getShortCode(),
                                     "_slide_" + (j + 1),
                                     model.getDisplayUrl()
                             );

@@ -31,7 +31,7 @@
     <string name="title_changelog">Güncelleme Notları</string>
     <string name="bottom_toolbar">Araç çubuğunu aşağıda göster</string>
     <string name="update_check">Güncellemeleri başlangıçta kontrol et</string>
-    <string name="download_user_folder">İndirmeleri kullanıcı adından oluşan bir alt klasörün içine yap</string>
+    <string name="download_user_folder">Download posts to username folders</string>
     <string name="autoload_posts">Kullanıcıların tüm gönderilerini otomatik yükle</string>
     <string name="mark_as_seen_setting">Hikayeleri gördükten sonra görüldü olarak işaretle</string>
     <string name="mark_as_seen_setting_summary">Hikayeyi paylaşan gördüğünüzü bilecek</string>
@@ -230,7 +230,7 @@
     <string name="discover_empty">Bu kategori nasıl oluyorsa boş...</string>
     <string name="update_available">Yeni bir güncelleme mevcut! (%s)</string>
     <string name="update_notice">Hatırlatıcı: Eğer F-Droid kullanarak kurduysanız güncellemeyi oradan yapmalısınız. Aynısı GitHub için de geçerli.</string>
-    <string name="updated">InstaGrabber\'ı güncellediğin için teşekkürler!</string>
+    <string name="updated">Barinsta\'yı güncellediğin için teşekkürler!</string>
     <string name="crash_title">Uygulama çöktü</string>
     <string name="crash_descr">Amanın.. uygulama çöktü, ama telaşlanma. Geliştiriciye hata raporu yollayarak sorunun çözülmesine yardımcı olabilirsin. (:</string>
     <string name="use_amoled_dark_theme">\'AMOLED ekran için Koyu Tema\'yı kullan</string>

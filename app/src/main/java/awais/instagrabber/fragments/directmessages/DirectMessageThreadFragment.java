@@ -425,7 +425,7 @@ public class DirectMessageThreadFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        listViewModel.getList().postValue(Collections.emptyList());
+        if (listViewModel != null) listViewModel.getList().postValue(Collections.emptyList());
     }
 
     private void sendText(final String text, final String itemId, final boolean delete) {

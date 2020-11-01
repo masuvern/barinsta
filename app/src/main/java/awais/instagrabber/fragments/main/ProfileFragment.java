@@ -831,12 +831,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void showProfilePicDialog() {
-        final FragmentManager fragmentManager = getParentFragmentManager();
-        final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(), username, profileModel.getHdProfilePic());
-        final FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-          .add(fragment, "profilePicDialog")
-          .commit();
+        if (profileModel != null) {
+            final FragmentManager fragmentManager = getParentFragmentManager();
+            final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(), username, profileModel.getHdProfilePic());
+            final FragmentTransaction ft = fragmentManager.beginTransaction();
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(fragment, "profilePicDialog")
+                    .commit();
+        }
     }
 
     private void setUsernameDelayed() {
