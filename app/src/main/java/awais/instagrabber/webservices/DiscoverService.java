@@ -2,7 +2,7 @@ package awais.instagrabber.webservices;
 
 import androidx.annotation.NonNull;
 
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 
 import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.TopicCluster;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -51,7 +50,7 @@ public class DiscoverService extends BaseService {
 
     public void topicalExplore(@NonNull final TopicalExploreRequest request,
                                final ServiceCallback<TopicalExploreResponse> callback) {
-        final ImmutableBiMap.Builder<String, String> builder = ImmutableBiMap.<String, String>builder()
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
                 .put("module", "explore_popular");
         if (!TextUtils.isEmpty(request.getModule())) {
             builder.put("module", request.getModule());
@@ -204,124 +203,12 @@ public class DiscoverService extends BaseService {
                 continue;
             }
             final JSONObject mediaJson = itemJson.optJSONObject("media");
-            final FeedModel feedModel = parseClusterItemMedia(mediaJson);
+            final FeedModel feedModel = ResponseBodyUtils.parseItem(mediaJson);
             if (feedModel != null) {
                 feedModels.add(feedModel);
             }
         }
         return feedModels;
-    }
-
-    private FeedModel parseClusterItemMedia(final JSONObject mediaJson) throws JSONException {
-        if (mediaJson == null) {
-            return null;
-        }
-        ProfileModel profileModel = null;
-        if (mediaJson.has("user")) {
-            final JSONObject user = mediaJson.getJSONObject("user");
-            final JSONObject friendshipStatus = user.optJSONObject("friendship_status");
-            boolean following = false;
-            boolean restricted = false;
-            boolean requested = false;
-            if (friendshipStatus != null) {
-                following = friendshipStatus.optBoolean("following");
-                requested = friendshipStatus.optBoolean("outgoing_request");
-                restricted = friendshipStatus.optBoolean("is_restricted");
-            }
-            profileModel = new ProfileModel(
-                    user.optBoolean("is_private"),
-                    false, // if you can see it then you def follow
-                    user.optBoolean("is_verified"),
-                    user.getString("pk"),
-                    user.getString(Constants.EXTRAS_USERNAME),
-                    user.optString("full_name"),
-                    null,
-                    null,
-                    user.getString("profile_pic_url"),
-                    null,
-                    0,
-                    0,
-                    0,
-                    following,
-                    restricted,
-                    false,
-                    requested);
-        }
-        final JSONObject captionJson = mediaJson.optJSONObject("caption");
-        final JSONObject locationJson = mediaJson.optJSONObject("location");
-        final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(mediaJson.optInt("media_type"));
-        final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
-                .setItemType(mediaType)
-                .setProfileModel(profileModel)
-                .setPostId(mediaJson.getString(Constants.EXTRAS_ID))
-                .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(mediaJson) : null)
-                .setShortCode(mediaJson.getString("code"))
-                .setPostCaption(captionJson != null ? captionJson.optString("text") : null)
-                .setCommentsCount(mediaJson.optInt("comment_count"))
-                .setTimestamp(mediaJson.optLong("taken_at", -1))
-                .setLiked(mediaJson.optBoolean("has_liked"))
-                // .setBookmarked()
-                .setLikesCount(mediaJson.optInt("like_count"))
-                .setLocationName(locationJson != null ? locationJson.optString("name") : null)
-                .setLocationId(locationJson != null ? String.valueOf(locationJson.optInt("pk")) : null)
-                .setImageHeight(mediaJson.optInt("original_height"))
-                .setImageWidth(mediaJson.optInt("original_width"));
-        switch (mediaType) {
-            case MEDIA_TYPE_VIDEO:
-                final long videoViews = mediaJson.optLong("view_count", 0);
-                feedModelBuilder.setViewCount(videoViews)
-                                .setDisplayUrl(ResponseBodyUtils.getVideoUrl(mediaJson));
-                break;
-            case MEDIA_TYPE_IMAGE:
-                feedModelBuilder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(mediaJson));
-                break;
-            case MEDIA_TYPE_SLIDER:
-                final List<PostChild> childPosts = getChildPosts(mediaJson);
-                feedModelBuilder.setSliderItems(childPosts);
-                break;
-        }
-        return feedModelBuilder.build();
-    }
-
-    private List<PostChild> getChildPosts(final JSONObject mediaJson) throws JSONException {
-        if (mediaJson == null) {
-            return Collections.emptyList();
-        }
-        final JSONArray carouselMedia = mediaJson.optJSONArray("carousel_media");
-        if (carouselMedia == null) {
-            return Collections.emptyList();
-        }
-        final List<PostChild> children = new ArrayList<>();
-        for (int i = 0; i < carouselMedia.length(); i++) {
-            final JSONObject childJson = carouselMedia.optJSONObject(i);
-            final PostChild childPost = getChildPost(childJson);
-            if (childPost != null) {
-                children.add(childPost);
-            }
-        }
-        return children;
-    }
-
-    private PostChild getChildPost(final JSONObject childJson) throws JSONException {
-        if (childJson == null) {
-            return null;
-        }
-        final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(childJson.optInt("media_type"));
-        final PostChild.Builder builder = new PostChild.Builder();
-        switch (mediaType) {
-            case MEDIA_TYPE_VIDEO:
-                builder.setDisplayUrl(ResponseBodyUtils.getVideoUrl(childJson));
-                break;
-            case MEDIA_TYPE_IMAGE:
-                builder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(childJson));
-                break;
-        }
-        return builder.setItemType(mediaType)
-                      .setPostId(childJson.getString("id"))
-                      .setThumbnailUrl(ResponseBodyUtils.getLowQualityImage(childJson))
-                      .setHeight(childJson.optInt("original_height"))
-                      .setWidth(childJson.optInt("original_width"))
-                      .build();
     }
 
     public static class TopicalExploreRequest {

@@ -232,7 +232,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 .setFeedItemCallback(feedItemCallback)
                                 .init();
         binding.feedSwipeRefreshLayout.setRefreshing(true);
-        // feedAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         // if (shouldAutoPlay) {
         //     videoAwareRecyclerScroller = new VideoAwareRecyclerScroller();
         //     binding.feedRecyclerView.addOnScrollListener(videoAwareRecyclerScroller);

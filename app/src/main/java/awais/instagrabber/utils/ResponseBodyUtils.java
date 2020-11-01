@@ -7,11 +7,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import awais.instagrabber.BuildConfig;
+import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
@@ -579,5 +584,123 @@ public final class ResponseBodyUtils {
         if ("raven_cannot_deliver".equals(type)) return RavenExpiringMediaType.RAVEN_CANNOT_DELIVER;
         //if ("raven_unknown".equals(type)) [default?]
         return RavenExpiringMediaType.RAVEN_UNKNOWN;
+    }
+
+    public static FeedModel parseItem(final JSONObject itemJson) throws JSONException {
+        if (itemJson == null) {
+            return null;
+        }
+        ProfileModel profileModel = null;
+        if (itemJson.has("user")) {
+            final JSONObject user = itemJson.getJSONObject("user");
+            final JSONObject friendshipStatus = user.optJSONObject("friendship_status");
+            boolean following = false;
+            boolean restricted = false;
+            boolean requested = false;
+            if (friendshipStatus != null) {
+                following = friendshipStatus.optBoolean("following");
+                requested = friendshipStatus.optBoolean("outgoing_request");
+                restricted = friendshipStatus.optBoolean("is_restricted");
+            }
+            profileModel = new ProfileModel(
+                    user.optBoolean("is_private"),
+                    false, // if you can see it then you def follow
+                    user.optBoolean("is_verified"),
+                    user.getString("pk"),
+                    user.getString(Constants.EXTRAS_USERNAME),
+                    user.optString("full_name"),
+                    null,
+                    null,
+                    user.getString("profile_pic_url"),
+                    null,
+                    0,
+                    0,
+                    0,
+                    following,
+                    restricted,
+                    false,
+                    requested);
+        }
+        final JSONObject captionJson = itemJson.optJSONObject("caption");
+        final JSONObject locationJson = itemJson.optJSONObject("location");
+        final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(itemJson.optInt("media_type"));
+        if (mediaType == null) {
+            return null;
+        }
+        final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
+                .setItemType(mediaType)
+                .setProfileModel(profileModel)
+                .setPostId(itemJson.getString(Constants.EXTRAS_ID))
+                .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(itemJson) : null)
+                .setShortCode(itemJson.getString("code"))
+                .setPostCaption(captionJson != null ? captionJson.optString("text") : null)
+                .setCommentsCount(itemJson.optInt("comment_count"))
+                .setTimestamp(itemJson.optLong("taken_at", -1))
+                .setLiked(itemJson.optBoolean("has_liked"))
+                // .setBookmarked()
+                .setLikesCount(itemJson.optInt("like_count"))
+                .setLocationName(locationJson != null ? locationJson.optString("name") : null)
+                .setLocationId(locationJson != null ? String.valueOf(locationJson.optLong("pk")) : null)
+                .setImageHeight(itemJson.optInt("original_height"))
+                .setImageWidth(itemJson.optInt("original_width"));
+        switch (mediaType) {
+            case MEDIA_TYPE_VIDEO:
+                final long videoViews = itemJson.optLong("view_count", 0);
+                feedModelBuilder.setViewCount(videoViews)
+                                .setDisplayUrl(ResponseBodyUtils.getVideoUrl(itemJson));
+                break;
+            case MEDIA_TYPE_IMAGE:
+                feedModelBuilder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(itemJson));
+                break;
+            case MEDIA_TYPE_SLIDER:
+                final List<PostChild> childPosts = getChildPosts(itemJson);
+                feedModelBuilder.setSliderItems(childPosts);
+                break;
+        }
+        return feedModelBuilder.build();
+    }
+
+    private static List<PostChild> getChildPosts(final JSONObject mediaJson) throws JSONException {
+        if (mediaJson == null) {
+            return Collections.emptyList();
+        }
+        final JSONArray carouselMedia = mediaJson.optJSONArray("carousel_media");
+        if (carouselMedia == null) {
+            return Collections.emptyList();
+        }
+        final List<PostChild> children = new ArrayList<>();
+        for (int i = 0; i < carouselMedia.length(); i++) {
+            final JSONObject childJson = carouselMedia.optJSONObject(i);
+            final PostChild childPost = getChildPost(childJson);
+            if (childPost != null) {
+                children.add(childPost);
+            }
+        }
+        return children;
+    }
+
+    private static PostChild getChildPost(final JSONObject childJson) throws JSONException {
+        if (childJson == null) {
+            return null;
+        }
+        final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(childJson.optInt("media_type"));
+        if (mediaType == null) {
+            return null;
+        }
+        final PostChild.Builder builder = new PostChild.Builder();
+        switch (mediaType) {
+            case MEDIA_TYPE_VIDEO:
+                builder.setDisplayUrl(ResponseBodyUtils.getVideoUrl(childJson));
+                break;
+            case MEDIA_TYPE_IMAGE:
+                builder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(childJson));
+                break;
+        }
+        return builder.setItemType(mediaType)
+                      .setPostId(childJson.getString("id"))
+                      .setThumbnailUrl(ResponseBodyUtils.getLowQualityImage(childJson))
+                      .setHeight(childJson.optInt("original_height"))
+                      .setWidth(childJson.optInt("original_width"))
+                      .build();
     }
 }

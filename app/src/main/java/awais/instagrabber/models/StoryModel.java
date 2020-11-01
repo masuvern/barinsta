@@ -9,17 +9,24 @@ import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
 
 public final class StoryModel implements Serializable {
-    private final String storyMediaId, storyUrl, username, userId;
+    private final String storyMediaId;
+    private final String storyUrl;
+    private final String username;
+    private final String userId;
     private final MediaItemType itemType;
     private final long timestamp;
-    private String videoUrl, tappableShortCode, tappableId, spotify;
+    private String videoUrl;
+    private String tappableShortCode;
+    private String tappableId;
+    private String spotify;
     private PollModel poll;
     private QuestionModel question;
     private QuizModel quiz;
     private SwipeUpModel swipeUp;
     private String[] mentions;
     private int position;
-    private boolean isCurrentSlide = false, canReply = false;
+    private boolean isCurrentSlide = false;
+    private boolean canReply = false;
 
     public StoryModel(final String storyMediaId, final String storyUrl, final MediaItemType itemType,
                       final long timestamp, final String username, final String userId, final boolean canReply) {

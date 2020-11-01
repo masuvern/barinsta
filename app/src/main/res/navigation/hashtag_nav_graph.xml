@@ -19,13 +19,32 @@
             app:argType="boolean" />
     </action>
 
+    <include app:graph="@navigation/comments_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_commentsViewerFragment"
+        app:destination="@id/comments_nav_graph">
+        <argument
+            android:name="shortCode"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <action
         android:id="@+id/action_global_profileFragment"
         app:destination="@id/profile_nav_graph">
         <argument
             android:name="username"
             app:argType="string"
-            app:nullable="false" />
+            app:nullable="true" />
     </action>
 
     <fragment

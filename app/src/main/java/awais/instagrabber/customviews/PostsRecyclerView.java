@@ -44,6 +44,9 @@ public class PostsRecyclerView extends RecyclerView {
     private GridSpacingItemDecoration gridSpacingItemDecoration;
     private RecyclerLazyLoaderAtBottom lazyLoader;
     private FeedAdapterV2.FeedItemCallback feedItemCallback;
+    private boolean shouldScrollToTop;
+
+    private final List<FetchStatusChangeListener> fetchStatusChangeListeners = new ArrayList<>();
 
     private final FetchListener<List<FeedModel>> fetchListener = new FetchListener<List<FeedModel>>() {
         @Override
@@ -51,6 +54,7 @@ public class PostsRecyclerView extends RecyclerView {
             final int currentPage = lazyLoader.getCurrentPage();
             if (currentPage == 0) {
                 feedViewModel.getList().postValue(result);
+                shouldScrollToTop = true;
                 dispatchFetchStatus();
                 return;
             }
@@ -66,7 +70,6 @@ public class PostsRecyclerView extends RecyclerView {
             Log.e(TAG, "onFailure: ", t);
         }
     };
-    private final List<FetchStatusChangeListener> fetchStatusChangeListeners = new ArrayList<>();
 
     public PostsRecyclerView(@NonNull final Context context) {
         super(context);
@@ -158,7 +161,11 @@ public class PostsRecyclerView extends RecyclerView {
 
     private void initSelf() {
         feedViewModel = new ViewModelProvider(viewModelStoreOwner).get(FeedViewModel.class);
-        feedViewModel.getList().observe(lifeCycleOwner, feedAdapter::submitList);
+        feedViewModel.getList().observe(lifeCycleOwner, list -> feedAdapter.submitList(list, () -> {
+            if (!shouldScrollToTop) return;
+            smoothScrollToPosition(0);
+            shouldScrollToTop = false;
+        }));
         postFetcher = new PostFetcher(postFetchService, fetchListener);
         if (layoutPreferences.getHasGap()) {
             addItemDecoration(gridSpacingItemDecoration);
