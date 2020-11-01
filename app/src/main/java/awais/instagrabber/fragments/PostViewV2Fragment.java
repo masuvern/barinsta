@@ -920,7 +920,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         binding.playerControls.getRoot().setVisibility(View.GONE);
         binding.sliderParent.setVisibility(View.VISIBLE);
         binding.mediaCounter.setVisibility(View.VISIBLE);
-        if (sharedMainPostElement != null) {
+        if (!wasPaused && sharedMainPostElement != null) {
             addSharedElement(sharedMainPostElement, binding.sliderParent);
         }
         sliderItemsAdapter = new SliderItemsAdapter(onVerticalDragListener, binding.playerControls, true, new SliderCallbackAdapter() {
@@ -1014,7 +1014,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         binding.sliderParent.setVisibility(View.GONE);
         binding.mediaCounter.setVisibility(View.GONE);
         // binding.playerControls.getRoot().setVisibility(View.VISIBLE);
-        if (sharedMainPostElement != null) {
+        if (!wasPaused && sharedMainPostElement != null) {
             final GenericDraweeHierarchy hierarchy = binding.videoPost.thumbnail.getHierarchy();
             hierarchy.setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP);
             addSharedElement(sharedMainPostElement, binding.videoPost.thumbnailParent);

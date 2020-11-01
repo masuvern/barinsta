@@ -30,7 +30,7 @@ public final class RecyclerLazyLoaderAtBottom extends RecyclerView.OnScrollListe
         if (!recyclerView.canScrollVertically(RecyclerView.SCROLL_AXIS_HORIZONTAL) && newState == RecyclerView.SCROLL_STATE_IDLE) {
             if (!loading && lazyLoadListener != null) {
                 loading = true;
-                new Handler().postDelayed(() -> lazyLoadListener.onLoadMore(++currentPage), 1000);
+                new Handler().postDelayed(() -> lazyLoadListener.onLoadMore(++currentPage), 500);
             }
         }
     }

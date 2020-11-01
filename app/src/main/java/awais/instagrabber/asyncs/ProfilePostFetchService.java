@@ -23,8 +23,8 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     }
 
     @Override
-    public void fetch(final String cursor, final FetchListener<List<FeedModel>> fetchListener) {
-        profileService.fetchPosts(profileModel, 30, cursor, new ServiceCallback<PostsFetchResponse>() {
+    public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
+        profileService.fetchPosts(profileModel, 30, nextCursor, new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;
@@ -46,8 +46,8 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     }
 
     @Override
-    public String getNextCursor() {
-        return nextCursor;
+    public void reset() {
+        nextCursor = null;
     }
 
     @Override

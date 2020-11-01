@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
@@ -209,7 +208,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         final HashTagFragmentArgs fragmentArgs = HashTagFragmentArgs.fromBundle(getArguments());
         hashtag = fragmentArgs.getHashtag();
-        setTitle();
+        // setTitle();
         setupPosts();
         fetchHashtagModel();
     }
@@ -284,6 +283,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
                 return;
             }
+            setTitle();
             fetchPosts();
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -324,9 +324,35 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.btnFollowTag.setOnClickListener(v -> {
                 final String cookie = settingsHelper.getString(Constants.COOKIE);
                 final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-                binding.btnFollowTag.setClickable(false);
-                if (!hashtagModel.getFollowing()) {
-                    tagsService.follow(hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
+                if (csrfToken != null) {
+                    binding.btnFollowTag.setClickable(false);
+                    if (!hashtagModel.getFollowing()) {
+                        tagsService.follow(hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
+                            @Override
+                            public void onSuccess(final Boolean result) {
+                                binding.btnFollowTag.setClickable(true);
+                                if (!result) {
+                                    Log.e(TAG, "onSuccess: result is false");
+                                    return;
+                                }
+                                onRefresh();
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull final Throwable t) {
+                                binding.btnFollowTag.setClickable(true);
+                                Log.e(TAG, "onFailure: ", t);
+                                final String message = t.getMessage();
+                                Snackbar.make(root,
+                                              message != null ? message
+                                                              : getString(R.string.downloader_unknown_error),
+                                              BaseTransientBottomBar.LENGTH_LONG)
+                                        .show();
+                            }
+                        });
+                        return;
+                    }
+                    tagsService.unfollow(hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
                             binding.btnFollowTag.setClickable(true);
@@ -349,31 +375,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                     .show();
                         }
                     });
-                    return;
                 }
-                tagsService.unfollow(hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(final Boolean result) {
-                        binding.btnFollowTag.setClickable(true);
-                        if (!result) {
-                            Log.e(TAG, "onSuccess: result is false");
-                            return;
-                        }
-                        onRefresh();
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull final Throwable t) {
-                        binding.btnFollowTag.setClickable(true);
-                        Log.e(TAG, "onFailure: ", t);
-                        final String message = t.getMessage();
-                        Snackbar.make(root,
-                                      message != null ? message
-                                                      : getString(R.string.downloader_unknown_error),
-                                      BaseTransientBottomBar.LENGTH_LONG)
-                                .show();
-                    }
-                });
             });
         } else {
             binding.btnFollowTag.setVisibility(View.GONE);
@@ -425,7 +427,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 final NavDirections action = HashTagFragmentDirections
                         .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName());
                 NavHostFragment.findNavController(this).navigate(action);
-                return;
             }
         });
     }
@@ -445,9 +446,10 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void setTitle() {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
-            Log.d(TAG, "setting title: " + hashtag);
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> actionBar.setTitle(hashtag), 200);
+            // Log.d(TAG, "setting title: " + hashtag);
+            actionBar.setTitle(hashtag);
+            // final Handler handler = new Handler();
+            // handler.postDelayed(() -> , 1000);
         }
     }
 

@@ -99,7 +99,7 @@ public final class ResponseBodyUtils {
             if (Utils.logCollector != null)
                 Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getLowQualityImage",
                                                    new Pair<>("resourcesNull", resources == null));
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "Error in getLowQualityImage", e);
         }
         return src;
     }
@@ -152,12 +152,24 @@ public final class ResponseBodyUtils {
     }
 
     public static String getVideoUrl(@NonNull final JSONObject mediaObj) {
-        String thumbnail = null;
-        final JSONArray imageVersions = mediaObj.optJSONArray("video_versions");
-        if (imageVersions != null) {
-            thumbnail = getItemThumbnail(imageVersions).url;
+        String url = null;
+        final JSONArray videoVersions = mediaObj.optJSONArray("video_versions");
+        if (videoVersions == null) {
+            return null;
         }
-        return thumbnail;
+        int largestWidth = 0;
+        for (int i = 0; i < videoVersions.length(); i++) {
+            final JSONObject videoVersionJson = videoVersions.optJSONObject(i);
+            if (videoVersionJson == null) {
+                continue;
+            }
+            final int width = videoVersionJson.optInt("width");
+            if (largestWidth == 0 || width > largestWidth) {
+                largestWidth = width;
+                url = videoVersionJson.optString("url");
+            }
+        }
+        return url;
     }
 
     @Nullable

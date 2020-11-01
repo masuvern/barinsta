@@ -17,19 +17,15 @@ public class PostFetcher {
     }
 
     public void fetch() {
-        fetch(null);
-    }
-
-    public void fetchNextPage() {
-        fetch(postFetchService.getNextCursor());
-    }
-
-    public void fetch(final String cursor) {
         fetching = true;
-        postFetchService.fetch(cursor, result -> {
+        postFetchService.fetch(result -> {
             fetching = false;
             fetchListener.onResult(result);
         });
+    }
+
+    public void reset() {
+        postFetchService.reset();
     }
 
     public boolean isFetching() {
@@ -41,9 +37,9 @@ public class PostFetcher {
     }
 
     public interface PostFetchService {
-        void fetch(String cursor, FetchListener<List<FeedModel>> fetchListener);
+        void fetch(FetchListener<List<FeedModel>> fetchListener);
 
-        String getNextCursor();
+        void reset();
 
         boolean hasNextPage();
     }

@@ -5,9 +5,40 @@
     android:id="@+id/discover_nav_graph"
     app:startDestination="@id/discoverFragment">
 
-    <include app:graph="@navigation/post_view_nav_graph" />
+    <include app:graph="@navigation/hashtag_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_hashTagFragment"
+        app:destination="@id/hashtag_nav_graph">
+        <argument
+            android:name="hashtag"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <include app:graph="@navigation/profile_nav_graph" />
-    <include app:graph="@navigation/comments_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="true" />
+    </action>
+
+    <include app:graph="@navigation/location_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_locationFragment"
+        app:destination="@id/location_nav_graph">
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/post_view_nav_graph" />
 
     <action
         android:id="@+id/action_global_postViewFragment"
@@ -23,9 +54,48 @@
             app:argType="boolean" />
     </action>
 
+    <include app:graph="@navigation/comments_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_commentsViewerFragment"
+        app:destination="@id/comments_nav_graph">
+        <argument
+            android:name="shortCode"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/discoverFragment"
         android:name="awais.instagrabber.fragments.main.DiscoverFragment"
         android:label="@string/title_discover"
-        tools:layout="@layout/fragment_discover" />
+        tools:layout="@layout/fragment_discover">
+        <action
+            android:id="@+id/action_discoverFragment_to_topicPostsFragment"
+            app:destination="@id/topicPostsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/topicPostsFragment"
+        android:name="awais.instagrabber.fragments.TopicPostsFragment"
+        tools:layout="@layout/fragment_topic_posts">
+        <argument
+            android:name="topicCluster"
+            app:argType="awais.instagrabber.models.TopicCluster" />
+
+        <argument
+            android:name="titleColor"
+            app:argType="integer" />
+
+        <argument
+            android:name="backgroundColor"
+            app:argType="integer" />
+    </fragment>
 </navigation>

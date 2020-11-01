@@ -421,7 +421,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 R.id.main_nav_host,
                 getIntent(),
                 firstFragmentGraphIndex);
-        navControllerLiveData.observe(this, this::setupNavigation);
+        navControllerLiveData.observe(this, navController -> setupNavigation(binding.toolbar, navController));
         currentNavControllerLiveData = navControllerLiveData;
     }
 
@@ -446,8 +446,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return mainNavList;
     }
 
-    private void setupNavigation(final NavController navController) {
-        NavigationUI.setupWithNavController(binding.toolbar, navController);
+    private void setupNavigation(final Toolbar toolbar, final NavController navController) {
+        if (navController == null) {
+            return;
+        }
+        NavigationUI.setupWithNavController(toolbar, navController);
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             // below is a hack to check if we are at the end of the current stack, to setup the search view
             binding.appBarLayout.setExpanded(true, true);
@@ -639,5 +642,17 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public int getNavHostContainerId() {
         return binding.mainNavHost.getId();
+    }
+
+    public void setToolbar(final Toolbar toolbar) {
+        binding.appBarLayout.setVisibility(View.GONE);
+        setSupportActionBar(toolbar);
+        setupNavigation(toolbar, currentNavControllerLiveData.getValue());
+    }
+
+    public void resetToolbar() {
+        binding.appBarLayout.setVisibility(View.VISIBLE);
+        setSupportActionBar(binding.toolbar);
+        setupNavigation(binding.toolbar, currentNavControllerLiveData.getValue());
     }
 }

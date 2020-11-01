@@ -285,20 +285,6 @@
             tools:listitem="@layout/item_feed_photo" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!--<androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
-    <!--    android:id="@+id/swipeRefreshLayout"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent"-->
-    <!--    app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">-->
-
-    <!--    <androidx.recyclerview.widget.RecyclerView-->
-    <!--        android:id="@+id/mainPosts"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:clipToPadding="false"-->
-    <!--        tools:listitem="@layout/item_post" />-->
-    <!--</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
-
     <LinearLayout
         android:id="@+id/privatePage"
         android:layout_width="match_parent"

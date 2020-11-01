@@ -32,6 +32,7 @@ import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
 import static awais.instagrabber.utils.Constants.PREF_LIGHT_THEME;
 import static awais.instagrabber.utils.Constants.PREF_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_PROFILE_POSTS_LAYOUT;
+import static awais.instagrabber.utils.Constants.PREF_TOPIC_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
 import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
@@ -115,7 +116,8 @@ public final class SettingsHelper {
 
     @StringDef(
             {APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT,
-                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME, PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT})
+                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME, PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT,
+                    PREF_TOPIC_POSTS_LAYOUT})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,

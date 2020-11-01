@@ -58,17 +58,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private CoordinatorLayout root;
     private FragmentFeedBinding binding;
     private StoriesService storiesService;
-    // private boolean feedHasNextPage = false;
-    // private String feedEndCursor = null;
-    // private FeedViewModel feedViewModel;
-    // private VideoAwareRecyclerScroller videoAwareRecyclerScroller;
     private boolean shouldRefresh = true;
-    // private boolean isPullToRefresh;
     private FeedStoriesViewModel feedStoriesViewModel;
-    // private StaggeredGridLayoutManager gridLayoutManager;
     private boolean storiesFetching;
 
-    // private final boolean shouldAutoPlay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
         public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
@@ -226,15 +219,11 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onRefresh() {
-        // isPullToRefresh = true;
-        // feedEndCursor = null;
         binding.feedRecyclerView.refresh();
         fetchStories();
     }
 
     private void setupFeed() {
-        final Context context = getContext();
-        if (context == null) return;
         binding.feedRecyclerView.setViewModelStoreOwner(this)
                                 .setLifeCycleOwner(this)
                                 .setPostFetchService(new FeedPostFetchService())
@@ -331,8 +320,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void showPostsLayoutPreferences() {
-        final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(Constants.PREF_POSTS_LAYOUT, preferences -> new Handler()
-                .postDelayed(() -> binding.feedRecyclerView.setLayoutPreferences(preferences), 200));
+        final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(
+                Constants.PREF_POSTS_LAYOUT,
+                preferences -> new Handler().postDelayed(() -> binding.feedRecyclerView.setLayoutPreferences(preferences), 200));
         fragment.show(getChildFragmentManager(), "posts_layout_preferences");
     }
 }

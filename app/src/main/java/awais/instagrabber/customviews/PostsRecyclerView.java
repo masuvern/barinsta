@@ -167,7 +167,7 @@ public class PostsRecyclerView extends RecyclerView {
         setNestedScrollingEnabled(true);
         lazyLoader = new RecyclerLazyLoaderAtBottom(layoutManager, (page) -> {
             if (postFetcher.hasMore()) {
-                postFetcher.fetchNextPage();
+                postFetcher.fetch();
                 dispatchFetchStatus();
             }
         });
@@ -204,6 +204,7 @@ public class PostsRecyclerView extends RecyclerView {
 
     public void refresh() {
         lazyLoader.resetState();
+        postFetcher.reset();
         postFetcher.fetch();
         dispatchFetchStatus();
     }
