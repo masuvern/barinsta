@@ -118,7 +118,7 @@ public class DiscoverService extends BaseService {
             final JSONObject clusterJson = clustersJson.getJSONObject(i);
             final String id = clusterJson.optString("id");
             final String title = clusterJson.optString("title");
-            if (id == null || title == null) {
+            if (TextUtils.isEmpty(id) || TextUtils.isEmpty(title)) {
                 continue;
             }
             final String type = clusterJson.optString("type");

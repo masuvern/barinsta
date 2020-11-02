@@ -267,6 +267,7 @@ public class TagsService extends BaseService {
             return Objects.hash(moreAvailable, nextMaxId, numResults, status, items);
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "TagPostsFetchResponse{" +
