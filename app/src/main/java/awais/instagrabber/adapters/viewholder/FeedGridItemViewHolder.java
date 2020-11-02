@@ -74,7 +74,7 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
         }
         if (layoutPreferences.isNameVisible()) {
             binding.name.setVisibility(View.VISIBLE);
-            binding.name.setText(feedModel.getProfileModel().getName());
+            binding.name.setText(feedModel.getProfileModel().getUsername());
         } else {
             binding.name.setVisibility(View.GONE);
         }

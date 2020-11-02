@@ -98,7 +98,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private MediaService mediaService;
     private Context context;
     private BottomSheetBehavior<NestedScrollView> bottomSheetBehavior;
-    private boolean detailsVisible = true;
+    private boolean detailsVisible = true, video;
     private VideoPlayerViewHelper videoPlayerViewHelper;
     private SliderItemsAdapter sliderItemsAdapter;
     private boolean wasControlsVisible;
@@ -762,8 +762,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void setupTitles() {
-        binding.title.setText(feedModel.getProfileModel().getName());
+        binding.title.setText(feedModel.getProfileModel().getUsername());
+        binding.righttitle.setText(feedModel.getProfileModel().getName());
         binding.title.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
+        binding.righttitle.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
         final String locationName = feedModel.getLocationName();
         if (!TextUtils.isEmpty(locationName)) {
             binding.subtitle.setText(locationName);
@@ -1079,6 +1081,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void enablePlayerControls(final boolean enable) {
+        video = enable;
         if (enable) {
             binding.playerControlsToggle.setVisibility(View.VISIBLE);
             binding.playerControlsToggle.setOnClickListener(v -> {
@@ -1165,6 +1168,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 binding.bottomBg.setVisibility(View.GONE);
                 binding.likesCount.setVisibility(View.GONE);
                 binding.commentsCount.setVisibility(View.GONE);
+                binding.comment.setVisibility(View.GONE);
                 binding.captionToggle.setVisibility(View.GONE);
                 binding.playerControlsToggle.setVisibility(View.GONE);
                 binding.like.setVisibility(View.GONE);
@@ -1188,7 +1192,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.likesCount.setVisibility(View.VISIBLE);
             binding.commentsCount.setVisibility(View.VISIBLE);
             binding.captionToggle.setVisibility(View.VISIBLE);
-            binding.playerControlsToggle.setVisibility(View.VISIBLE);
+            binding.comment.setVisibility(View.VISIBLE);
+            if (video) {
+                binding.playerControlsToggle.setVisibility(View.VISIBLE);
+            }
             binding.download.setVisibility(View.VISIBLE);
             binding.like.setVisibility(View.VISIBLE);
             binding.save.setVisibility(View.VISIBLE);

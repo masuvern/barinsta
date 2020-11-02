@@ -55,7 +55,7 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(p -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://instagrabber.austinhuang.me"));
+            intent.setData(Uri.parse("https://barinsta.austinhuang.me"));
             startActivity(intent);
             return true;
         });
@@ -71,7 +71,7 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(p -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://github.com/austinhuang0131/instagrabber"));
+            intent.setData(Uri.parse("https://github.com/austinhuang0131/barinsta"));
             startActivity(intent);
             return true;
         });
