@@ -6,8 +6,6 @@
     <string name="action_download">Превземи</string>
     <string name="action_search">Пребарај username…</string>
     <string name="action_compare">Спореди</string>
-    <string name="single_like">лајкни</string>
-    <string name="multiple_likes">лајкови</string>
     <string name="clipboard_error">Грешка при копрање текст</string>
     <string name="clipboard_copied">Копрано во clipboard!</string>
     <string name="report">Пријави</string>

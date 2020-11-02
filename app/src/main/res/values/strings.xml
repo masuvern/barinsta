@@ -306,11 +306,11 @@
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="one_x" translatable="false">1x</string>
     <string name="two_x" translatable="false">2x</string>
-    <string name="pt_two_five_x">0.25x</string>
-    <string name="pt_five_x">0.5x</string>
-    <string name="pt_seven_five_x">0.75x</string>
-    <string name="one_pt_two_five_x">1.25x</string>
-    <string name="one_pt_five_x">1.5x</string>
+    <string name="pt_two_five_x" translatable="false">0.25x</string>
+    <string name="pt_five_x" translatable="false">0.5x</string>
+    <string name="pt_seven_five_x" translatable="false">0.75x</string>
+    <string name="one_pt_two_five_x" translatable="false">1.25x</string>
+    <string name="one_pt_five_x" translatable="false">1.5x</string>
     <string name="liking">Liking…</string>
     <string name="like_unsuccessful">Like unsuccessful</string>
     <string name="unlike_unsuccessful">Unlike unsuccessful</string>

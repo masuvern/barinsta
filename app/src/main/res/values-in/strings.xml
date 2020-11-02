@@ -6,8 +6,6 @@
     <string name="action_download">Unduh</string>
     <string name="action_search">Cari Pengguna…</string>
     <string name="action_compare">Bandingkan</string>
-    <string name="single_like">suka</string>
-    <string name="multiple_likes">suka</string>
     <string name="clipboard_error">Galat menyalin tulisan</string>
     <string name="clipboard_copied">Tersalin!</string>
     <string name="report">Laporkan</string>
