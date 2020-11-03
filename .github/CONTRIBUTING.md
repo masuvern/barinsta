@@ -1,7 +1,8 @@
 ## WARNING
 
 * All forks must respect [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html). Please report violations in Issues or [confidentially](https://austinhuang.me/#hey-you-look-cool).
-* Although publishing a fork is allowed by license, it is strongly discouraged to do so as it divides the effort and creates confusion. It is, therefore, recommended to send a pull request back to us, so that the larger community can enjoy your improvement. (This does not apply if you're adapting this app for a different platform other than Instagram.)
+  * Some people have asked me about publishing a "commercial" fork that serves ads. However, if you do properly comply with GPLv3, users would realize that the original non-commercial version exists and, in turn, abandon your fork. And if you don't comply, you get copystriked.
+* Although publishing a fork is allowed by license, it is strongly discouraged to do so as it divides the effort and creates confusion (as well as for the reason above). It is, therefore, recommended to send a pull request back to us, so that the larger community can enjoy your improvement. (This does not apply if you're adapting this app for a different platform other than Instagram.)
 
 ## Contributing
 
@@ -35,11 +36,11 @@ If you have questions, don't be afraid to ask for help from any current maintain
 
 ## I found a bug!
 
-**Please read [FAQ](https://instagrabber.austinhuang.me/faq) first.**
+**Please read [FAQ](https://barinsta.austinhuang.me/en/latest/faq/) first.**
 
 Bugs are inevitable during active development, as nobody can cover all the possible test cases. 
 
-You can either email your crash dump to `instagrabber@austinhuang.me` (The crash reporter will fill in this address for you) or create a GitHub issue. If you're on GitHub, please follow the template. If you're reporting by email, your email address will be published in the GitHub issue. You can contact me [privately](https://austinhuang.me/#hey-you-look-cool) or [through support channels](https://instagrabber.austinhuang.me/#what-can-i-do) to remove it.
+You can either email your crash dump to `barinsta@austinhuang.me` (The crash reporter will fill in this address for you) or create a GitHub issue. If you're on GitHub, please follow the template. If you're reporting by email, your email address will be published in the GitHub issue. You can contact me [privately](https://austinhuang.me/#hey-you-look-cool) or [through support channels](https://barinsta.austinhuang.me/en/latest/#contact-us) to remove it.
 
 Generally, reporting bugs directly in support channels is not recommended, as they can be difficult to find.
 

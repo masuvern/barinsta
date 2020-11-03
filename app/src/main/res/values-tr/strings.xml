@@ -6,8 +6,6 @@
     <string name="action_download">İndir</string>
     <string name="action_search">Kullanıcı adı ara…</string>
     <string name="action_compare">Karşılaştır</string>
-    <string name="single_like">beğeni</string>
-    <string name="multiple_likes">beğeni</string>
     <string name="clipboard_error">Metin kopyalanamadı</string>
     <string name="clipboard_copied">Panoya kopyalandı!</string>
     <string name="report">Bildir</string>

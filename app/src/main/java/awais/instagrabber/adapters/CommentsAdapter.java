@@ -142,10 +142,12 @@ public final class CommentsAdapter extends ListAdapter<CommentModel, RecyclerVie
             flatList.add(parent);
             positionTypeMap.put(lastCommentIndex, TYPE_PARENT);
             final List<CommentModel> children = parent.getChildCommentModels();
-            for (final CommentModel child : children) {
-                lastCommentIndex++;
-                flatList.add(child);
-                positionTypeMap.put(lastCommentIndex, TYPE_CHILD);
+            if (children != null) {
+                for (final CommentModel child : children) {
+                    lastCommentIndex++;
+                    flatList.add(child);
+                    positionTypeMap.put(lastCommentIndex, TYPE_CHILD);
+                }
             }
         }
         return flatList;
