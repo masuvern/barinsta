@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -24,7 +25,9 @@ import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
+
+import java.util.Set;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedAdapterV2;
@@ -34,7 +37,6 @@ import awais.instagrabber.databinding.FragmentSavedBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
 import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
@@ -47,6 +49,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class SavedViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
+    private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private FragmentSavedBinding binding;
     private String username;
@@ -56,15 +59,13 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     private boolean shouldRefresh = true;
     private PostItemType type;
     private String profileId;
+    private Set<FeedModel> selectedFeedModels;
+    private FeedModel downloadFeedModel;
 
-    private final ArrayList<PostModel> selectedItems = new ArrayList<>();
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
-            setEnabled(false);
-            remove();
-            // if (postsAdapter == null) return;
-            // postsAdapter.clearSelection();
+            binding.posts.endSelection();
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
@@ -72,23 +73,21 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
             new PrimaryActionModeCallback.CallbacksHelper() {
                 @Override
                 public void onDestroy(final ActionMode mode) {
-                    onBackPressedCallback.handleOnBackPressed();
+                    binding.posts.endSelection();
                 }
 
                 @Override
                 public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
                     if (item.getItemId() == R.id.action_download) {
-                        // if (postsAdapter == null || username == null) {
-                        //     return false;
-                        // }
-                        // final Context context = getContext();
-                        // if (context == null) return false;
-                        // DownloadUtils.batchDownload(context,
-                        //                             username,
-                        //                             DownloadMethod.DOWNLOAD_SAVED,
-                        //                             postsAdapter.getSelectedModels());
-                        // checkAndResetAction();
-                        return true;
+                        if (SavedViewerFragment.this.selectedFeedModels == null) return false;
+                        final Context context = getContext();
+                        if (context == null) return false;
+                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                            DownloadUtils.download(context, ImmutableList.copyOf(SavedViewerFragment.this.selectedFeedModels));
+                            binding.posts.endSelection();
+                            return true;
+                        }
+                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
                     }
                     return false;
                 }
@@ -176,6 +175,41 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                     .setSharedMainPostElement(mainPostImage)
                     .build();
             fragment.show(getChildFragmentManager(), "post_view");
+        }
+    };
+    private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
+
+        @Override
+        public void onSelectionStart() {
+            if (!onBackPressedCallback.isEnabled()) {
+                final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
+                onBackPressedCallback.setEnabled(true);
+                onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
+            }
+            if (actionMode == null) {
+                actionMode = fragmentActivity.startActionMode(multiSelectAction);
+            }
+        }
+
+        @Override
+        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+            final String title = getString(R.string.number_selected, selectedFeedModels.size());
+            if (actionMode != null) {
+                actionMode.setTitle(title);
+            }
+            SavedViewerFragment.this.selectedFeedModels = selectedFeedModels;
+        }
+
+        @Override
+        public void onSelectionEnd() {
+            if (onBackPressedCallback.isEnabled()) {
+                onBackPressedCallback.setEnabled(false);
+                onBackPressedCallback.remove();
+            }
+            if (actionMode != null) {
+                actionMode.finish();
+                actionMode = null;
+            }
         }
     };
 
@@ -286,6 +320,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                      .setLayoutPreferences(PostsLayoutPreferences.fromJson(settingsHelper.getString(getPostsLayoutPreferenceKey())))
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)
+                     .setSelectionModeCallback(selectionModeCallback)
                      .init();
         binding.swipeRefreshLayout.setRefreshing(true);
     }
@@ -306,10 +341,18 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 8020 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            // final Context context = getContext();
-            // if (context == null) return;
-            // DownloadUtils.batchDownload(context, null, DownloadMethod.DOWNLOAD_SAVED, selectedItems);
+        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
+            if (downloadFeedModel == null) return;
+            showDownloadDialog(downloadFeedModel);
+            downloadFeedModel = null;
+            return;
+        }
+        if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
+            final Context context = getContext();
+            if (context == null) return;
+            DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
+            binding.posts.endSelection();
         }
     }
 
@@ -391,20 +434,5 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                 getPostsLayoutPreferenceKey(),
                 preferences -> new Handler().postDelayed(() -> binding.posts.setLayoutPreferences(preferences), 200));
         fragment.show(getChildFragmentManager(), "posts_layout_preferences");
-    }
-
-    private boolean checkAndResetAction() {
-        if (!onBackPressedCallback.isEnabled() && actionMode == null) {
-            return false;
-        }
-        if (onBackPressedCallback.isEnabled()) {
-            onBackPressedCallback.setEnabled(false);
-            onBackPressedCallback.remove();
-        }
-        if (actionMode != null) {
-            actionMode.finish();
-            actionMode = null;
-        }
-        return true;
     }
 }

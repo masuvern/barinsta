@@ -1,9 +1,11 @@
 package awais.instagrabber.fragments.main;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,6 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -24,13 +28,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
+import java.util.Set;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.FeedStoriesAdapter;
 import awais.instagrabber.asyncs.FeedPostFetchService;
+import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentFeedBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
@@ -51,8 +59,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "FeedFragment";
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
-    // private static final double MAX_VIDEO_HEIGHT = 0.9 * Utils.displayMetrics.heightPixels;
-    // private static final int RESIZED_VIDEO_HEIGHT = (int) (0.8 * Utils.displayMetrics.heightPixels);
+    private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
     private CoordinatorLayout root;
@@ -61,6 +68,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private boolean shouldRefresh = true;
     private FeedStoriesViewModel feedStoriesViewModel;
     private boolean storiesFetching;
+    private ActionMode actionMode;
+    private Set<FeedModel> selectedFeedModels;
+    private FeedModel downloadFeedModel;
 
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
@@ -91,6 +101,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 showDownloadDialog(feedModel);
                 return;
             }
+            downloadFeedModel = feedModel;
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
@@ -147,6 +158,72 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             fragment.show(getChildFragmentManager(), "post_view");
         }
     };
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            binding.feedRecyclerView.endSelection();
+        }
+    };
+    private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
+            R.menu.multi_select_download_menu,
+            new PrimaryActionModeCallback.CallbacksHelper() {
+                @Override
+                public void onDestroy(final ActionMode mode) {
+                    binding.feedRecyclerView.endSelection();
+                }
+
+                @Override
+                public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
+                    if (item.getItemId() == R.id.action_download) {
+                        if (FeedFragment.this.selectedFeedModels == null) return false;
+                        final Context context = getContext();
+                        if (context == null) return false;
+                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                            DownloadUtils.download(context, ImmutableList.copyOf(FeedFragment.this.selectedFeedModels));
+                            binding.feedRecyclerView.endSelection();
+                            return true;
+                        }
+                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+    private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
+
+        @Override
+        public void onSelectionStart() {
+            if (!onBackPressedCallback.isEnabled()) {
+                final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
+                onBackPressedCallback.setEnabled(true);
+                onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
+            }
+            if (actionMode == null) {
+                actionMode = fragmentActivity.startActionMode(multiSelectAction);
+            }
+        }
+
+        @Override
+        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+            final String title = getString(R.string.number_selected, selectedFeedModels.size());
+            if (actionMode != null) {
+                actionMode.setTitle(title);
+            }
+            FeedFragment.this.selectedFeedModels = selectedFeedModels;
+        }
+
+        @Override
+        public void onSelectionEnd() {
+            if (onBackPressedCallback.isEnabled()) {
+                onBackPressedCallback.setEnabled(false);
+                onBackPressedCallback.remove();
+            }
+            if (actionMode != null) {
+                actionMode.finish();
+                actionMode = null;
+            }
+        }
+    };
 
     private void navigateToProfile(final String username) {
         final NavController navController = NavHostFragment.findNavController(this);
@@ -183,7 +260,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         setupFeedStories();
         setupFeed();
         shouldRefresh = false;
-        // showPostsLayoutPreferences();
     }
 
     @Override
@@ -223,6 +299,23 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         fetchStories();
     }
 
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
+            if (downloadFeedModel == null) return;
+            showDownloadDialog(downloadFeedModel);
+            return;
+        }
+        if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
+            final Context context = getContext();
+            if (context == null) return;
+            DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
+            binding.feedRecyclerView.endSelection();
+        }
+    }
+
     private void setupFeed() {
         binding.feedRecyclerView.setViewModelStoreOwner(this)
                                 .setLifeCycleOwner(this)
@@ -230,6 +323,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 .setLayoutPreferences(PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_POSTS_LAYOUT)))
                                 .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                                 .setFeedItemCallback(feedItemCallback)
+                                .setSelectionModeCallback(selectionModeCallback)
                                 .init();
         binding.feedSwipeRefreshLayout.setRefreshing(true);
         // if (shouldAutoPlay) {
@@ -276,7 +370,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
     }
 
-    private void showDownloadDialog(final FeedModel feedModel) {
+    private void showDownloadDialog(@NonNull final FeedModel feedModel) {
         final Context context = getContext();
         if (context == null) return;
         DownloadUtils.download(context, feedModel);

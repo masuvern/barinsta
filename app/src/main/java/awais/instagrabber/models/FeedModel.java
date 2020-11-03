@@ -9,13 +9,11 @@ public final class FeedModel extends PostModel {
     private final long commentsCount;
     private long likesCount;
     private final long viewCount;
-    private boolean captionExpanded = false;
-    private boolean mentionClicked = false;
-    private List<PostChild> sliderItems;
-    private int imageWidth;
-    private int imageHeight;
-    private String locationName;
-    private String locationId;
+    private final List<PostChild> sliderItems;
+    private final int imageWidth;
+    private final int imageHeight;
+    private final String locationName;
+    private final String locationId;
 
     public static class Builder {
 
@@ -184,38 +182,9 @@ public final class FeedModel extends PostModel {
         return likesCount;
     }
 
-    public boolean isCaptionExpanded() {
-        return captionExpanded;
-    }
-
-    public boolean isMentionClicked() {
-        return !mentionClicked;
-    }
-
-    // public void setMentionClicked(final boolean mentionClicked) {
-    //     this.mentionClicked = mentionClicked;
-    // }
-    //
-    // public void setSliderItems(final ViewerPostModel[] sliderItems) {
-    //     this.sliderItems = sliderItems;
-    //     setItemType(MediaItemType.MEDIA_TYPE_SLIDER);
-    // }
-
-    public void toggleCaption() {
-        captionExpanded = !captionExpanded;
-    }
-
     public int getImageWidth() {
         return imageWidth;
     }
-
-    // public void setImageWidth(final int imageWidth) {
-    //     this.imageWidth = imageWidth;
-    // }
-
-    // public void setImageHeight(final int imageHeight) {
-    //     this.imageHeight = imageHeight;
-    // }
 
     public int getImageHeight() {
         return imageHeight;
@@ -225,17 +194,9 @@ public final class FeedModel extends PostModel {
         return locationName;
     }
 
-    // public void setLocationName(final String locationName) {
-    //     this.locationName = locationName;
-    // }
-
     public String getLocationId() {
         return locationId;
     }
-
-    // public void setLocationId(final String locationId) {
-    //     this.locationId = locationId;
-    // }
 
     public void setLiked(final boolean liked) {
         this.liked = liked;
@@ -257,8 +218,6 @@ public final class FeedModel extends PostModel {
                 ", thumbnailUrl=" + thumbnailUrl +
                 ", commentsCount=" + commentsCount +
                 ", viewCount=" + viewCount +
-                ", captionExpanded=" + captionExpanded +
-                ", mentionClicked=" + mentionClicked +
                 // ", sliderItems=" + sliderItems +
                 ", imageWidth=" + imageWidth +
                 ", imageHeight=" + imageHeight +

@@ -2,6 +2,7 @@ package awais.instagrabber.fragments.main;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.Animatable;
 import android.os.AsyncTask;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -46,17 +48,18 @@ import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.common.collect.ImmutableList;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
-import awais.instagrabber.adapters.PostsAdapter;
 import awais.instagrabber.asyncs.HighlightsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
@@ -75,7 +78,6 @@ import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
@@ -98,6 +100,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "ProfileFragment";
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
+    private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
     private CoordinatorLayout root;
@@ -106,7 +109,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private String cookie;
     private String username;
     private ProfileModel profileModel;
-    private PostsAdapter postsAdapter;
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
     private FriendshipService friendshipService;
@@ -118,6 +120,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private MenuItem blockMenuItem;
     private MenuItem restrictMenuItem;
     private boolean highlightsFetching;
+    private boolean postsSetupDone = false;
+    private Set<FeedModel> selectedFeedModels;
+    private FeedModel downloadFeedModel;
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -131,10 +136,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
-            setEnabled(false);
-            remove();
-            if (postsAdapter == null) return;
-            postsAdapter.clearSelection();
+            binding.postsRecyclerView.endSelection();
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
@@ -142,22 +144,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             new CallbacksHelper() {
                 @Override
                 public void onDestroy(final ActionMode mode) {
-                    onBackPressedCallback.handleOnBackPressed();
+                    binding.postsRecyclerView.endSelection();
                 }
 
                 @Override
                 public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
                     if (item.getItemId() == R.id.action_download) {
-                        if (postsAdapter == null || username == null) {
-                            return false;
-                        }
+                        if (ProfileFragment.this.selectedFeedModels == null) return false;
                         final Context context = getContext();
                         if (context == null) return false;
-                        DownloadUtils.batchDownload(context,
-                                                    username,
-                                                    DownloadMethod.DOWNLOAD_MAIN,
-                                                    postsAdapter.getSelectedModels());
-                        checkAndResetAction();
+                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                            DownloadUtils.download(context, ImmutableList.copyOf(ProfileFragment.this.selectedFeedModels));
+                            binding.postsRecyclerView.endSelection();
+                            return true;
+                        }
+                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
                         return true;
                     }
                     return false;
@@ -210,6 +211,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 showDownloadDialog(feedModel);
                 return;
             }
+            downloadFeedModel = feedModel;
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
@@ -266,7 +268,41 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             fragment.show(getChildFragmentManager(), "post_view");
         }
     };
-    private boolean postsSetupDone = false;
+    private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
+
+        @Override
+        public void onSelectionStart() {
+            if (!onBackPressedCallback.isEnabled()) {
+                final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
+                onBackPressedCallback.setEnabled(true);
+                onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
+            }
+            if (actionMode == null) {
+                actionMode = fragmentActivity.startActionMode(multiSelectAction);
+            }
+        }
+
+        @Override
+        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+            final String title = getString(R.string.number_selected, selectedFeedModels.size());
+            if (actionMode != null) {
+                actionMode.setTitle(title);
+            }
+            ProfileFragment.this.selectedFeedModels = selectedFeedModels;
+        }
+
+        @Override
+        public void onSelectionEnd() {
+            if (onBackPressedCallback.isEnabled()) {
+                onBackPressedCallback.setEnabled(false);
+                onBackPressedCallback.remove();
+            }
+            if (actionMode != null) {
+                actionMode.finish();
+                actionMode = null;
+            }
+        }
+    };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -409,15 +445,29 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onDestroy() {
         super.onDestroy();
-        postsAdapter = null;
         if (usernameSettingHandler != null) {
             usernameSettingHandler.removeCallbacks(usernameSettingRunnable);
         }
-        // if (postsViewModel != null) {
-        //     postsViewModel.getList().postValue(Collections.emptyList());
-        // }
         if (highlightsViewModel != null) {
             highlightsViewModel.getList().postValue(Collections.emptyList());
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
+            if (downloadFeedModel == null) return;
+            showDownloadDialog(downloadFeedModel);
+            downloadFeedModel = null;
+            return;
+        }
+        if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
+            final Context context = getContext();
+            if (context == null) return;
+            DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
+            binding.postsRecyclerView.endSelection();
         }
     }
 
@@ -836,8 +886,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(), username, profileModel.getHdProfilePic());
             final FragmentTransaction ft = fragmentManager.beginTransaction();
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(fragment, "profilePicDialog")
-                    .commit();
+              .add(fragment, "profilePicDialog")
+              .commit();
         }
     }
 
@@ -855,6 +905,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                  .setLayoutPreferences(PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_PROFILE_POSTS_LAYOUT)))
                                  .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                                  .setFeedItemCallback(feedItemCallback)
+                                 .setSelectionModeCallback(selectionModeCallback)
                                  .init();
         binding.swipeRefreshLayout.setRefreshing(true);
         postsSetupDone = true;
@@ -926,21 +977,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         // currentlyExecuting = new PostsFetcher(profileModel.getId(), PostItemType.MAIN, endCursor, postsFetchListener)
         //         .setUsername(profileModel.getUsername())
         //         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private boolean checkAndResetAction() {
-        if (!onBackPressedCallback.isEnabled() && actionMode == null) {
-            return false;
-        }
-        if (onBackPressedCallback.isEnabled()) {
-            onBackPressedCallback.setEnabled(false);
-            onBackPressedCallback.remove();
-        }
-        if (actionMode != null) {
-            actionMode.finish();
-            actionMode = null;
-        }
-        return true;
     }
 
     private void navigateToProfile(final String username) {

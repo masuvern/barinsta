@@ -45,6 +45,7 @@ public class PostsRecyclerView extends RecyclerView {
     private RecyclerLazyLoaderAtBottom lazyLoader;
     private FeedAdapterV2.FeedItemCallback feedItemCallback;
     private boolean shouldScrollToTop;
+    private FeedAdapterV2.SelectionModeCallback selectionModeCallback;
 
     private final List<FetchStatusChangeListener> fetchStatusChangeListeners = new ArrayList<>();
 
@@ -112,6 +113,11 @@ public class PostsRecyclerView extends RecyclerView {
         return this;
     }
 
+    public PostsRecyclerView setSelectionModeCallback(@NonNull final FeedAdapterV2.SelectionModeCallback selectionModeCallback) {
+        this.selectionModeCallback = selectionModeCallback;
+        return this;
+    }
+
     public PostsRecyclerView setLayoutPreferences(final PostsLayoutPreferences layoutPreferences) {
         this.layoutPreferences = layoutPreferences;
         if (initCalled) {
@@ -154,7 +160,7 @@ public class PostsRecyclerView extends RecyclerView {
     }
 
     private void initAdapter() {
-        feedAdapter = new FeedAdapterV2(layoutPreferences, feedItemCallback);
+        feedAdapter = new FeedAdapterV2(layoutPreferences, feedItemCallback, selectionModeCallback);
         feedAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         setAdapter(feedAdapter);
     }
@@ -239,6 +245,10 @@ public class PostsRecyclerView extends RecyclerView {
 
     public PostsLayoutPreferences getLayoutPreferences() {
         return layoutPreferences;
+    }
+
+    public void endSelection() {
+        feedAdapter.endSelection();
     }
 
     public interface FetchStatusChangeListener {

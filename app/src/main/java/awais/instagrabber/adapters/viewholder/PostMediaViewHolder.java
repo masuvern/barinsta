@@ -19,7 +19,7 @@ public final class PostMediaViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(final ViewerPostModel model, final int position, final View.OnClickListener clickListener) {
         if (model == null) return;
-        model.setPosition(position);
+        // model.setPosition(position);
         itemView.setTag(model);
         itemView.setOnClickListener(clickListener);
         binding.selectedView.setVisibility(model.isCurrentSlide() ? View.VISIBLE : View.GONE);

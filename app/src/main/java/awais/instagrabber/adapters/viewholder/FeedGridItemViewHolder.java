@@ -31,16 +31,29 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
     public FeedGridItemViewHolder(@NonNull final ItemFeedGridBinding binding) {
         super(binding.getRoot());
         this.binding = binding;
-        // for rounded borders (clip view to background shape)
-        //
     }
 
-    public void bind(@NonNull final FeedModel feedModel,
+    public void bind(final int position,
+                     @NonNull final FeedModel feedModel,
                      @NonNull final PostsLayoutPreferences layoutPreferences,
-                     final FeedAdapterV2.FeedItemCallback feedItemCallback) {
-        if (feedItemCallback != null) {
-            itemView.setOnClickListener(v -> feedItemCallback.onPostClick(feedModel, binding.profilePic, binding.postImage));
+                     final FeedAdapterV2.FeedItemCallback feedItemCallback,
+                     final FeedAdapterV2.AdapterSelectionCallback adapterSelectionCallback,
+                     final boolean selectionModeActive,
+                     final boolean selected) {
+        itemView.setOnClickListener(v -> {
+            if (!selectionModeActive && feedItemCallback != null) {
+                feedItemCallback.onPostClick(feedModel, binding.profilePic, binding.postImage);
+                return;
+            }
+            if (selectionModeActive && adapterSelectionCallback != null) {
+                adapterSelectionCallback.onPostClick(position, feedModel);
+            }
+        });
+        if (adapterSelectionCallback != null) {
+            itemView.setOnLongClickListener(v -> adapterSelectionCallback.onPostLongClick(position, feedModel));
         }
+        binding.selectedView.setVisibility(selected ? View.VISIBLE : View.GONE);
+        // for rounded borders (clip view to background shape)
         itemView.setClipToOutline(layoutPreferences.getHasRoundedCorners());
         if (layoutPreferences.getType() == STAGGERED_GRID) {
             final float aspectRatio = (float) feedModel.getImageWidth() / feedModel.getImageHeight();

@@ -10,6 +10,9 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import awais.instagrabber.adapters.viewholder.FeedGridItemViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedItemViewHolder;
 import awais.instagrabber.adapters.viewholder.feed.FeedPhotoViewHolder;
@@ -26,15 +29,13 @@ import awais.instagrabber.models.enums.MediaItemType;
 public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.ViewHolder> {
     private static final String TAG = "FeedAdapterV2";
 
-    private PostsLayoutPreferences layoutPreferences;
     private final FeedItemCallback feedItemCallback;
+    private final SelectionModeCallback selectionModeCallback;
+    private final Set<Integer> selectedPositions = new HashSet<>();
+    private final Set<FeedModel> selectedFeedModels = new HashSet<>();
 
-    // private final View.OnLongClickListener longClickListener = v -> {
-    //     final Object tag;
-    //     if (v instanceof RamboTextView && (tag = v.getTag()) instanceof FeedModel)
-    //         Utils.copyText(v.getContext(), ((FeedModel) tag).getPostCaption());
-    //     return true;
-    // };
+    private PostsLayoutPreferences layoutPreferences;
+    private boolean selectionModeActive = false;
 
 
     private static final DiffUtil.ItemCallback<FeedModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<FeedModel>() {
@@ -48,12 +49,56 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
             return oldItem.getPostId().equals(newItem.getPostId());
         }
     };
+    private final AdapterSelectionCallback adapterSelectionCallback = new AdapterSelectionCallback() {
+        @Override
+        public boolean onPostLongClick(final int position, final FeedModel feedModel) {
+            if (!selectionModeActive) {
+                selectionModeActive = true;
+                notifyDataSetChanged();
+                if (selectionModeCallback != null) {
+                    selectionModeCallback.onSelectionStart();
+                }
+            }
+            selectedPositions.add(position);
+            selectedFeedModels.add(feedModel);
+            notifyItemChanged(position);
+            if (selectionModeCallback != null) {
+                selectionModeCallback.onSelectionChange(selectedFeedModels);
+            }
+            return true;
+        }
+
+        @Override
+        public void onPostClick(final int position, final FeedModel feedModel) {
+            if (!selectionModeActive) return;
+            if (selectedPositions.contains(position)) {
+                selectedPositions.remove(position);
+                selectedFeedModels.remove(feedModel);
+            } else {
+                selectedPositions.add(position);
+                selectedFeedModels.add(feedModel);
+            }
+            notifyItemChanged(position);
+            if (selectionModeCallback != null) {
+                selectionModeCallback.onSelectionChange(selectedFeedModels);
+            }
+            if (selectedPositions.isEmpty()) {
+                selectionModeActive = false;
+                notifyDataSetChanged();
+                if (selectionModeCallback != null) {
+                    selectionModeCallback.onSelectionEnd();
+                }
+            }
+        }
+    };
 
     public FeedAdapterV2(@NonNull final PostsLayoutPreferences layoutPreferences,
-                         final FeedItemCallback feedItemCallback) {
+                         final FeedItemCallback feedItemCallback,
+                         final SelectionModeCallback selectionModeCallback) {
         super(DIFF_CALLBACK);
         this.layoutPreferences = layoutPreferences;
         this.feedItemCallback = feedItemCallback;
+        this.selectionModeCallback = selectionModeCallback;
     }
 
     @NonNull
@@ -97,7 +142,6 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder viewHolder, final int position) {
         final FeedModel feedModel = getItem(position);
         if (feedModel == null) return;
-        feedModel.setPosition(position);
         switch (layoutPreferences.getType()) {
             case LINEAR:
                 ((FeedItemViewHolder) viewHolder).bind(feedModel);
@@ -105,7 +149,13 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
             case GRID:
             case STAGGERED_GRID:
             default:
-                ((FeedGridItemViewHolder) viewHolder).bind(feedModel, layoutPreferences, feedItemCallback);
+                ((FeedGridItemViewHolder) viewHolder).bind(position,
+                                                           feedModel,
+                                                           layoutPreferences,
+                                                           feedItemCallback,
+                                                           adapterSelectionCallback,
+                                                           selectionModeActive,
+                                                           selectedPositions.contains(position));
         }
     }
 
@@ -116,6 +166,17 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
 
     public void setLayoutPreferences(@NonNull final PostsLayoutPreferences layoutPreferences) {
         this.layoutPreferences = layoutPreferences;
+    }
+
+    public void endSelection() {
+        if (!selectionModeActive) return;
+        selectionModeActive = false;
+        selectedPositions.clear();
+        selectedFeedModels.clear();
+        notifyDataSetChanged();
+        if (selectionModeCallback != null) {
+            selectionModeCallback.onSelectionEnd();
+        }
     }
 
     // @Override
@@ -162,5 +223,19 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
         void onURLClick(final String url);
 
         void onSliderClick(FeedModel feedModel, int position);
+    }
+
+    public interface AdapterSelectionCallback {
+        boolean onPostLongClick(final int position, FeedModel feedModel);
+
+        void onPostClick(final int position, FeedModel feedModel);
+    }
+
+    public interface SelectionModeCallback {
+        void onSelectionStart();
+
+        void onSelectionChange(final Set<FeedModel> selectedFeedModels);
+
+        void onSelectionEnd();
     }
 }

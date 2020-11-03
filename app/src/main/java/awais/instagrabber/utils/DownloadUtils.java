@@ -319,37 +319,42 @@ public final class DownloadUtils {
     public static void download(@NonNull final Context context,
                                 @NonNull final FeedModel feedModel,
                                 final int position) {
-        final File downloadDir = getDownloadDir(context, "@" + feedModel.getProfileModel().getUsername());
-        if (downloadDir == null) return;
-        switch (feedModel.getItemType()) {
-            case MEDIA_TYPE_IMAGE:
-            case MEDIA_TYPE_VIDEO: {
-                final String url = feedModel.getDisplayUrl();
-                final File file = getDownloadSaveFile(downloadDir, feedModel.getPostId(), url);
-                download(context, url, file.getAbsolutePath());
-                break;
-            }
-            case MEDIA_TYPE_SLIDER:
-                final List<PostChild> sliderItems = feedModel.getSliderItems();
-                final Map<String, String> map = new HashMap<>();
-                for (int i = 0; i < sliderItems.size(); i++) {
-                    final PostChild child = sliderItems.get(i);
-                    final String url = child.getDisplayUrl();
-                    final File file = getDownloadChildSaveFile(downloadDir, feedModel.getPostId(), i + 1, url);
-                    map.put(url, file.getAbsolutePath());
-                }
-                download(context, map);
-                break;
-            default:
-        }
-
+        download(context, Collections.singletonList(feedModel), position);
     }
 
-    private static void download(final Context context,
-                                 final String url,
-                                 final String filePath) {
-        if (context == null || url == null || filePath == null) return;
-        download(context, Collections.singletonMap(url, filePath));
+    public static void download(@NonNull final Context context,
+                                @NonNull final List<FeedModel> feedModels) {
+        download(context, feedModels, -1);
+    }
+
+    private static void download(@NonNull final Context context,
+                                 @NonNull final List<FeedModel> feedModels,
+                                 final int childPositionIfSingle) {
+        final Map<String, String> map = new HashMap<>();
+        for (final FeedModel feedModel : feedModels) {
+            final File downloadDir = getDownloadDir(context, "@" + feedModel.getProfileModel().getUsername());
+            if (downloadDir == null) return;
+            switch (feedModel.getItemType()) {
+                case MEDIA_TYPE_IMAGE:
+                case MEDIA_TYPE_VIDEO: {
+                    final String url = feedModel.getDisplayUrl();
+                    final File file = getDownloadSaveFile(downloadDir, feedModel.getPostId(), url);
+                    map.put(url, file.getAbsolutePath());
+                    break;
+                }
+                case MEDIA_TYPE_SLIDER:
+                    final List<PostChild> sliderItems = feedModel.getSliderItems();
+                    for (int i = 0; i < sliderItems.size(); i++) {
+                        final PostChild child = sliderItems.get(i);
+                        final String url = child.getDisplayUrl();
+                        final File file = getDownloadChildSaveFile(downloadDir, feedModel.getPostId(), i + 1, url);
+                        map.put(url, file.getAbsolutePath());
+                    }
+                    break;
+                default:
+            }
+        }
+        download(context, map);
     }
 
     private static void download(final Context context, final Map<String, String> urlFilePathMap) {

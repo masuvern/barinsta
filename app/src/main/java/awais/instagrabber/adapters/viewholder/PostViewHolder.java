@@ -25,7 +25,7 @@ public final class PostViewHolder extends RecyclerView.ViewHolder {
                      final OnItemClickListener<PostModel> clickListener,
                      final OnItemLongClickListener<PostModel> longClickListener) {
         if (postModel == null) return;
-        postModel.setPosition(position);
+        // postModel.setPosition(position);
         itemView.setOnClickListener(v -> clickListener.onItemClick(postModel, position));
         itemView.setOnLongClickListener(v -> longClickListener.onItemLongClick(postModel, position));
 

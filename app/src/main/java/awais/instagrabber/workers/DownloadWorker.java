@@ -35,15 +35,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.activities.MainActivity;
+import awais.instagrabber.services.DeleteImageIntentService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -236,85 +236,85 @@ public class DownloadWorker extends Worker {
     private void showSummary(final Map<String, String> urlToFilePathMap) {
         final Context context = getApplicationContext();
         final Collection<String> filePaths = urlToFilePathMap.values();
-        final List<NotificationCompat.Builder> notifications = filePaths
-                .stream()
-                .map(filePath -> {
-                    final File file = new File(filePath);
-                    context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-                    MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, null, null);
-                    final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
-                    final ContentResolver contentResolver = context.getContentResolver();
-                    Bitmap bitmap = null;
-                    if (Utils.isImage(uri, contentResolver)) {
-                        try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
-                            bitmap = BitmapFactory.decodeStream(inputStream);
-                        } catch (final Exception e) {
-                            if (logCollector != null)
-                                logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
-                            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-                        }
+        final List<NotificationCompat.Builder> notifications = new LinkedList<>();
+        final List<Integer> notificationIds = new LinkedList<>();
+        int count = 1;
+        for (final String filePath : filePaths) {
+            final File file = new File(filePath);
+            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+            MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, null, null);
+            final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+            final ContentResolver contentResolver = context.getContentResolver();
+            Bitmap bitmap = null;
+            if (Utils.isImage(uri, contentResolver)) {
+                try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
+                    bitmap = BitmapFactory.decodeStream(inputStream);
+                } catch (final Exception e) {
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                }
+            }
+            if (bitmap == null) {
+                final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                try {
+                    try {
+                        retriever.setDataSource(context, uri);
+                    } catch (final Exception e) {
+                        retriever.setDataSource(file.getAbsolutePath());
                     }
-                    if (bitmap == null) {
-                        final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    bitmap = retriever.getFrameAtTime();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                         try {
-                            try {
-                                retriever.setDataSource(context, uri);
-                            } catch (final Exception e) {
-                                retriever.setDataSource(file.getAbsolutePath());
-                            }
-                            bitmap = retriever.getFrameAtTime();
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                                try {
-                                    retriever.close();
-                                } catch (final Exception e) {
-                                    if (logCollector != null)
-                                        logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_2");
-                                }
+                            retriever.close();
                         } catch (final Exception e) {
-                            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                             if (logCollector != null)
-                                logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_3");
+                                logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_2");
                         }
-                    }
-                    final String downloadComplete = context.getString(R.string.downloader_complete);
-                    final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                                              | Intent.FLAG_FROM_BACKGROUND
-                                              | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                              | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                            .putExtra(Intent.EXTRA_STREAM, uri);
-                    final PendingIntent pendingIntent = PendingIntent.getActivity(
-                            context,
-                            DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE,
-                            intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT
-                    );
-                    final Intent deleteIntent = new Intent(getApplicationContext(), MainActivity.class)
-                            .setAction(Constants.ACTION_SHOW_ACTIVITY)
-                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    final PendingIntent deleteItemIntent = PendingIntent
-                            .getActivity(getApplicationContext(), DELETE_IMAGE_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_download)
-                            .setContentText(null)
-                            .setContentTitle(downloadComplete)
-                            .setWhen(System.currentTimeMillis())
-                            .setOnlyAlertOnce(true)
-                            .setAutoCancel(true)
-                            .setGroup(NOTIF_GROUP_NAME + "_" + getId())
-                            .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
-                            .setContentIntent(pendingIntent)
-                            .addAction(R.drawable.ic_delete, context.getString(R.string.delete), deleteItemIntent);
-                    if (bitmap != null) {
-                        builder.setLargeIcon(bitmap)
-                               .setStyle(new NotificationCompat.BigPictureStyle()
-                                                 .bigPicture(bitmap)
-                                                 .bigLargeIcon(null))
-                               .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL);
-                    }
-                    return builder;
-                })
-                .collect(Collectors.toList());
+                } catch (final Exception e) {
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_3");
+                }
+            }
+            final String downloadComplete = context.getString(R.string.downloader_complete);
+            final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                      | Intent.FLAG_FROM_BACKGROUND
+                                      | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                      | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    .putExtra(Intent.EXTRA_STREAM, uri);
+            final PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context,
+                    DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT
+            );
+            final int notificationId = getNotificationId() + count;
+            notificationIds.add(notificationId);
+            count++;
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_download)
+                    .setContentText(null)
+                    .setContentTitle(downloadComplete)
+                    .setWhen(System.currentTimeMillis())
+                    .setOnlyAlertOnce(true)
+                    .setAutoCancel(true)
+                    .setGroup(NOTIF_GROUP_NAME + "_" + getId())
+                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                    .setContentIntent(pendingIntent)
+                    .addAction(R.drawable.ic_delete,
+                               context.getString(R.string.delete),
+                               DeleteImageIntentService.pendingIntent(context, filePath, notificationId));
+            if (bitmap != null) {
+                builder.setLargeIcon(bitmap)
+                       .setStyle(new NotificationCompat.BigPictureStyle()
+                                         .bigPicture(bitmap)
+                                         .bigLargeIcon(null))
+                       .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL);
+            }
+            notifications.add(builder);
+        }
         Notification summaryNotification = null;
         if (urlToFilePathMap.size() != 1) {
             final String text = "Downloaded " + urlToFilePathMap.size() + " items";
@@ -327,20 +327,18 @@ public class DownloadWorker extends Worker {
                     .setGroupSummary(true)
                     .build();
         }
-        int count = 1;
-        for (final NotificationCompat.Builder builder : notifications) {
+        for (int i = 0; i < notifications.size(); i++) {
+            final NotificationCompat.Builder builder = notifications.get(i);
             // only make sound and vibrate for the last notification
-            if (count != notifications.size()) {
+            if (i != notifications.size() - 1) {
                 builder.setSound(null)
                        .setVibrate(null);
             }
-            notificationManager.notify(getNotificationId() + count, builder.build());
-            count++;
+            notificationManager.notify(notificationIds.get(i), builder.build());
         }
         if (summaryNotification != null) {
             notificationManager.notify(getNotificationId() + count, summaryNotification);
         }
-
     }
 
     public static class DownloadRequest {
