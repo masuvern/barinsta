@@ -1,5 +1,7 @@
 package awais.instagrabber.adapters.viewholder.comments;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -77,6 +79,7 @@ public final class ChildCommentViewHolder extends RecyclerView.ViewHolder {
         if (profileModel == null) return;
         binding.tvUsername.setText(profileModel.getUsername());
         binding.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
+        binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
     }
 
     private void setLikes(final int likes) {

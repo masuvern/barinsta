@@ -172,7 +172,7 @@ public class ProfileService extends BaseService {
             } else {
                 resourceUrl = mediaNode.has("display_resources") ? ResponseBodyUtils.getHighQualityImage(mediaNode) : displayUrl;
             }
-            JSONObject tempJsonObject = mediaNode.optJSONObject("edge_media_preview_comment");
+            JSONObject tempJsonObject = mediaNode.optJSONObject("edge_media_to_comment");
             final long commentsCount = tempJsonObject != null ? tempJsonObject.optLong("count") : 0;
             tempJsonObject = mediaNode.optJSONObject("edge_media_preview_like");
             final long likesCount = tempJsonObject != null ? tempJsonObject.optLong("count") : 0;

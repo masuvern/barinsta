@@ -35,10 +35,22 @@
         android:textColor="?android:textColorPrimary"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/tvComment"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/ivProfilePic"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/isVerified"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitStart"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvUsername"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvUsername"
+        app:layout_constraintTop_toTopOf="@id/tvUsername"
+        app:srcCompat="@drawable/verified"
+        tools:visibility="visible" />
 
     <awais.instagrabber.customviews.RamboTextViewV2
         android:id="@+id/tvComment"

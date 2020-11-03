@@ -269,8 +269,8 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                             }
                             childCommentModels.get(childCommentsLen - 1).setPageCursor(hasNextPage, childEndCursor);
                             commentModel.setChildCommentModels(childCommentModels);
-                            commentModels.add(commentModel);
                         }
+                        commentModels.add(commentModel);
                     }
                 }
 

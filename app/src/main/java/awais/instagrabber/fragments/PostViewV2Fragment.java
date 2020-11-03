@@ -764,6 +764,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void setupTitles() {
         binding.title.setText(feedModel.getProfileModel().getUsername());
         binding.righttitle.setText(feedModel.getProfileModel().getName());
+        binding.isVerified.setVisibility(feedModel.getProfileModel().isVerified() ? View.VISIBLE : View.GONE);
         binding.title.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
         binding.righttitle.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
         final String locationName = feedModel.getLocationName();
