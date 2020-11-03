@@ -3,6 +3,7 @@ package awais.instagrabber.utils;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.work.Constraints;
@@ -275,7 +277,9 @@ public final class DownloadUtils {
         return "";
     }
 
-    public static void checkExistence(final File downloadDir, final File customDir, final boolean isSlider,
+    public static void checkExistence(final File downloadDir,
+                                      final File customDir,
+                                      final boolean isSlider,
                                       @NonNull final BasePostModel model) {
         boolean exists = false;
 
@@ -309,6 +313,38 @@ public final class DownloadUtils {
         }
 
         model.setDownloaded(exists);
+    }
+
+    public static void showDownloadDialog(@NonNull Context context,
+                                          @NonNull final FeedModel feedModel,
+                                          final int childPosition) {
+        if (childPosition >= 0) {
+            final DialogInterface.OnClickListener clickListener = (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        DownloadUtils.download(context, feedModel, childPosition);
+                        break;
+                    case 1:
+                        DownloadUtils.download(context, feedModel);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                    default:
+                        dialog.dismiss();
+                        break;
+                }
+            };
+            final String[] items = new String[]{
+                    context.getString(R.string.post_viewer_download_current),
+                    context.getString(R.string.post_viewer_download_album),
+            };
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.post_viewer_download_dialog_title)
+                    .setItems(items, clickListener)
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+            return;
+        }
+        DownloadUtils.download(context, feedModel);
     }
 
     public static void download(@NonNull final Context context,
@@ -345,6 +381,9 @@ public final class DownloadUtils {
                 case MEDIA_TYPE_SLIDER:
                     final List<PostChild> sliderItems = feedModel.getSliderItems();
                     for (int i = 0; i < sliderItems.size(); i++) {
+                        if (childPositionIfSingle >= 0 && feedModels.size() == 1 && i != childPositionIfSingle) {
+                            continue;
+                        }
                         final PostChild child = sliderItems.get(i);
                         final String url = child.getDisplayUrl();
                         final File file = getDownloadChildSaveFile(downloadDir, feedModel.getPostId(), i + 1, url);
@@ -355,6 +394,13 @@ public final class DownloadUtils {
             }
         }
         download(context, map);
+    }
+
+    public static void download(final Context context,
+                                final String url,
+                                final String filePath) {
+        if (context == null || url == null || filePath == null) return;
+        download(context, Collections.singletonMap(url, filePath));
     }
 
     private static void download(final Context context, final Map<String, String> urlFilePathMap) {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.graphics.drawable.Animatable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,9 +42,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.controller.ControllerListener;
-import com.facebook.imagepipeline.image.ImageInfo;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
@@ -123,6 +119,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean postsSetupDone = false;
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
+    private int downloadChildPosition = -1;
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -204,14 +201,15 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel) {
+        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                showDownloadDialog(feedModel);
+                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
                 return;
             }
             downloadFeedModel = feedModel;
+            downloadChildPosition = childPosition;
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
@@ -457,15 +455,16 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        final Context context = getContext();
+        if (context == null) return;
         if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
             if (downloadFeedModel == null) return;
-            showDownloadDialog(downloadFeedModel);
+            DownloadUtils.showDownloadDialog(context, downloadFeedModel, downloadChildPosition);
             downloadFeedModel = null;
+            downloadChildPosition = -1;
             return;
         }
         if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
-            final Context context = getContext();
-            if (context == null) return;
             DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
             binding.postsRecyclerView.endSelection();
         }
@@ -567,12 +566,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             binding.favCb.setVisibility(View.GONE);
         }
-        final ControllerListener<ImageInfo> listener = new BaseControllerListener<ImageInfo>() {
-            @Override
-            public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
-                startPostponedEnterTransition();
-            }
-        };
+        // final ControllerListener<ImageInfo> listener = new BaseControllerListener<ImageInfo>() {
+        //     @Override
+        //     public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
+        //         startPostponedEnterTransition();
+        //     }
+        // };
         binding.mainProfileImage.setImageURI(profileModel.getHdProfilePic());
 
         final long followersCount = profileModel.getFollowersCount();
@@ -751,8 +750,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void setupCommonListeners() {
 
         final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-        // final boolean isSelf = isLoggedIn && profileModel != null && userIdFromCookie != null && userIdFromCookie
-        //         .equals(profileModel.getId());
         binding.btnFollow.setOnClickListener(v -> {
             if (profileModel.getFollowing() || profileModel.getRequested()) {
                 friendshipService.unfollow(
@@ -808,12 +805,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        binding.btnDM.setOnClickListener(v -> {
-            new CreateThreadAction(cookie, profileModel.getId(), threadId -> {
-                final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
-                NavHostFragment.findNavController(this).navigate(action);
-            }).execute();
-        });
+        binding.btnDM.setOnClickListener(v -> new CreateThreadAction(cookie, profileModel.getId(), threadId -> {
+            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
+            NavHostFragment.findNavController(this).navigate(action);
+        }).execute());
         binding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic
@@ -984,48 +979,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final Bundle bundle = new Bundle();
         bundle.putString("username", username);
         navController.navigate(R.id.action_global_profileFragment, bundle);
-    }
-
-    private void showDownloadDialog(final FeedModel feedModel) {
-        final Context context = getContext();
-        if (context == null) return;
-        DownloadUtils.download(context, feedModel);
-        // switch (feedModel.getItemType()) {
-        //     case MEDIA_TYPE_IMAGE:
-        //     case MEDIA_TYPE_VIDEO:
-        //         break;
-        //     case MEDIA_TYPE_SLIDER:
-        //         break;
-        // }
-        // final List<ViewerPostModel> postModelsToDownload = new ArrayList<>();
-        // // if (!session) {
-        // final DialogInterface.OnClickListener clickListener = (dialog, which) -> {
-        //     if (which == DialogInterface.BUTTON_NEGATIVE) {
-        //         postModelsToDownload.addAll(postModels);
-        //     } else if (which == DialogInterface.BUTTON_POSITIVE) {
-        //         postModelsToDownload.add(postModels.get(childPosition));
-        //     } else {
-        //         session = true;
-        //         postModelsToDownload.add(postModels.get(childPosition));
-        //     }
-        //     if (postModelsToDownload.size() > 0) {
-        //         DownloadUtils.batchDownload(context,
-        //                                     username,
-        //                                     DownloadMethod.DOWNLOAD_POST_VIEWER,
-        //                                     postModelsToDownload);
-        //     }
-        // };
-        // new AlertDialog.Builder(context)
-        //         .setTitle(R.string.post_viewer_download_dialog_title)
-        //         .setMessage(R.string.post_viewer_download_message)
-        //         .setNeutralButton(R.string.post_viewer_download_session, clickListener)
-        //         .setPositiveButton(R.string.post_viewer_download_current, clickListener)
-        //         .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
-        // } else {
-        //     DownloadUtils.batchDownload(context,
-        //                                 username,
-        //                                 DownloadMethod.DOWNLOAD_POST_VIEWER,
-        //                                 Collections.singletonList(postModels.get(childPosition)));
     }
 
     private void showPostsLayoutPreferences() {

@@ -71,6 +71,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private ActionMode actionMode;
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
+    private int downloadChildPosition = -1;
 
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
@@ -94,14 +95,15 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel) {
+        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                showDownloadDialog(feedModel);
+                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
                 return;
             }
             downloadFeedModel = feedModel;
+            downloadChildPosition = childPosition;
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
@@ -303,14 +305,16 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        final Context context = getContext();
+        if (context == null) return;
         if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
             if (downloadFeedModel == null) return;
-            showDownloadDialog(downloadFeedModel);
+            DownloadUtils.showDownloadDialog(context, downloadFeedModel, downloadChildPosition);
+            downloadFeedModel = null;
+            downloadChildPosition = -1;
             return;
         }
         if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
-            final Context context = getContext();
-            if (context == null) return;
             DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
             binding.feedRecyclerView.endSelection();
         }
@@ -368,48 +372,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 updateSwipeRefreshState();
             }
         });
-    }
-
-    private void showDownloadDialog(@NonNull final FeedModel feedModel) {
-        final Context context = getContext();
-        if (context == null) return;
-        DownloadUtils.download(context, feedModel);
-        // switch (feedModel.getItemType()) {
-        //     case MEDIA_TYPE_IMAGE:
-        //     case MEDIA_TYPE_VIDEO:
-        //         break;
-        //     case MEDIA_TYPE_SLIDER:
-        //         break;
-        // }
-        // final List<ViewerPostModel> postModelsToDownload = new ArrayList<>();
-        // // if (!session) {
-        // final DialogInterface.OnClickListener clickListener = (dialog, which) -> {
-        //     if (which == DialogInterface.BUTTON_NEGATIVE) {
-        //         postModelsToDownload.addAll(postModels);
-        //     } else if (which == DialogInterface.BUTTON_POSITIVE) {
-        //         postModelsToDownload.add(postModels.get(childPosition));
-        //     } else {
-        //         session = true;
-        //         postModelsToDownload.add(postModels.get(childPosition));
-        //     }
-        //     if (postModelsToDownload.size() > 0) {
-        //         DownloadUtils.batchDownload(context,
-        //                                     username,
-        //                                     DownloadMethod.DOWNLOAD_POST_VIEWER,
-        //                                     postModelsToDownload);
-        //     }
-        // };
-        // new AlertDialog.Builder(context)
-        //         .setTitle(R.string.post_viewer_download_dialog_title)
-        //         .setMessage(R.string.post_viewer_download_message)
-        //         .setNeutralButton(R.string.post_viewer_download_session, clickListener)
-        //         .setPositiveButton(R.string.post_viewer_download_current, clickListener)
-        //         .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
-        // } else {
-        //     DownloadUtils.batchDownload(context,
-        //                                 username,
-        //                                 DownloadMethod.DOWNLOAD_POST_VIEWER,
-        //                                 Collections.singletonList(postModels.get(childPosition)));
     }
 
     private void showPostsLayoutPreferences() {

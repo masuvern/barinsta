@@ -13,6 +13,7 @@ import awais.instagrabber.databinding.ItemFeedBottomBinding;
 import awais.instagrabber.databinding.ItemFeedTopBinding;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.TextUtils;
 
 import static android.text.TextUtils.TruncateAt.END;
@@ -43,7 +44,9 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         bottomBinding.tvPostDate.setText(feedModel.getPostDate());
         setupComments(feedModel);
         setupCaption(feedModel);
-        bottomBinding.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(feedModel));
+        if (feedModel.getItemType() != MediaItemType.MEDIA_TYPE_SLIDER) {
+            bottomBinding.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(feedModel, -1));
+        }
         bindItem(feedModel);
     }
 

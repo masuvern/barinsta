@@ -216,7 +216,7 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
 
         void onCommentsClick(final FeedModel feedModel);
 
-        void onDownloadClick(final FeedModel feedModel);
+        void onDownloadClick(final FeedModel feedModel, final int childPosition);
 
         void onEmailClick(final String emailId);
 

@@ -104,7 +104,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private boolean wasControlsVisible;
     private boolean wasPaused;
     private int captionState = BottomSheetBehavior.STATE_HIDDEN;
-    private int sliderPosition;
+    private int sliderPosition = -1;
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
 
@@ -522,7 +522,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            showDownloadDialog();
+            DownloadUtils.showDownloadDialog(context, feedModel, sliderPosition);
         }
     }
 
@@ -560,7 +560,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void setupDownload() {
         binding.download.setOnClickListener(v -> {
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                showDownloadDialog();
+                DownloadUtils.showDownloadDialog(context, feedModel, sliderPosition);
                 return;
             }
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
@@ -1208,46 +1208,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             }
             detailsVisible = true;
         });
-    }
-
-    private void showDownloadDialog() {
-        DownloadUtils.download(context, feedModel);
-        // switch (feedModel.getItemType()) {
-        //     case MEDIA_TYPE_IMAGE:
-        //     case MEDIA_TYPE_VIDEO:
-        //         break;
-        //     case MEDIA_TYPE_SLIDER:
-        //         break;
-        // }
-        // final List<ViewerPostModel> postModelsToDownload = new ArrayList<>();
-        // // if (!session) {
-        // final DialogInterface.OnClickListener clickListener = (dialog, which) -> {
-        //     if (which == DialogInterface.BUTTON_NEGATIVE) {
-        //         postModelsToDownload.addAll(postModels);
-        //     } else if (which == DialogInterface.BUTTON_POSITIVE) {
-        //         postModelsToDownload.add(postModels.get(childPosition));
-        //     } else {
-        //         session = true;
-        //         postModelsToDownload.add(postModels.get(childPosition));
-        //     }
-        //     if (postModelsToDownload.size() > 0) {
-        //         DownloadUtils.batchDownload(context,
-        //                                     username,
-        //                                     DownloadMethod.DOWNLOAD_POST_VIEWER,
-        //                                     postModelsToDownload);
-        //     }
-        // };
-        // new AlertDialog.Builder(context)
-        //         .setTitle(R.string.post_viewer_download_dialog_title)
-        //         .setMessage(R.string.post_viewer_download_message)
-        //         .setNeutralButton(R.string.post_viewer_download_session, clickListener)
-        //         .setPositiveButton(R.string.post_viewer_download_current, clickListener)
-        //         .setNegativeButton(R.string.post_viewer_download_album, clickListener).show();
-        // } else {
-        //     DownloadUtils.batchDownload(context,
-        //                                 username,
-        //                                 DownloadMethod.DOWNLOAD_POST_VIEWER,
-        //                                 Collections.singletonList(postModels.get(childPosition)));
     }
 
     private void animateY(final View v,

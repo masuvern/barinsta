@@ -27,7 +27,6 @@ import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.databinding.ItemFeedSliderBinding;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.Utils;
@@ -86,66 +85,36 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
                 final String text = (position + 1) + "/" + sliderItemLen;
                 binding.mediaCounter.setText(text);
                 setDimensions(binding.mediaList, sliderItems.get(position));
+                binding.itemFeedBottom.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(feedModel, position));
             }
         });
         setDimensions(binding.mediaList, sliderItems.get(0));
-
-        // binding.mediaList.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-        //     private int prevPos = 0;
-        //
-        //     @Override
-        //     public void onPageSelected(final int position) {
-        //         ViewerPostModel sliderItem = sliderItems.get(prevPos);
-        //         if (sliderItem != null) {
-        //             sliderItem.setSelected(false);
-        //             if (sliderItem.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
-        //                 // stop playing prev video
-        //                 final ViewSwitcher prevChild = (ViewSwitcher) binding.mediaList.getChildAt(prevPos);
-        //                 if (prevChild == null || prevChild.getTag() == null || !(prevChild.getTag() instanceof SimpleExoPlayer)) {
-        //                     return;
-        //                 }
-        //                 ((SimpleExoPlayer) prevChild.getTag()).setPlayWhenReady(false);
-        //             }
-        //         }
-        //         sliderItem = sliderItems.get(position);
-        //         if (sliderItem == null) return;
-        //         sliderItem.setSelected(true);
-        //         final String text = (position + 1) + "/" + sliderItemLen;
-        //         binding.mediaCounter.setText(text);
-        //         prevPos = position;
-        //         if (sliderItem.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
-        //             binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
-        //             if (shouldAutoPlay) {
-        //                 autoPlay(position);
-        //             }
-        //         } else binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
-        //     }
-        // });
+        binding.itemFeedBottom.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(feedModel, 0));
         adapter.submitList(sliderItems);
-        final View.OnClickListener muteClickListener = v -> {
-            final int currentItem = binding.mediaList.getCurrentItem();
-            if (currentItem < 0 || currentItem >= binding.mediaList.getChildCount()) {
-                return;
-            }
-            final PostChild sliderItem = sliderItems.get(currentItem);
-            if (sliderItem.getItemType() != MediaItemType.MEDIA_TYPE_VIDEO) {
-                return;
-            }
-            final View currentView = binding.mediaList.getChildAt(currentItem);
-            if (!(currentView instanceof ViewSwitcher)) {
-                return;
-            }
-            final ViewSwitcher viewSwitcher = (ViewSwitcher) currentView;
-            final Object tag = viewSwitcher.getTag();
-            if (!(tag instanceof SimpleExoPlayer)) {
-                return;
-            }
-            final SimpleExoPlayer player = (SimpleExoPlayer) tag;
-            final float intVol = player.getVolume() == 0f ? 1f : 0f;
-            player.setVolume(intVol);
-            // binding.itemFeedBottom.btnMute.setImageResource(intVol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
-            // Utils.sessionVolumeFull = intVol == 1f;
-        };
+        // final View.OnClickListener muteClickListener = v -> {
+        //     final int currentItem = binding.mediaList.getCurrentItem();
+        //     if (currentItem < 0 || currentItem >= binding.mediaList.getChildCount()) {
+        //         return;
+        //     }
+        //     final PostChild sliderItem = sliderItems.get(currentItem);
+        //     if (sliderItem.getItemType() != MediaItemType.MEDIA_TYPE_VIDEO) {
+        //         return;
+        //     }
+        //     final View currentView = binding.mediaList.getChildAt(currentItem);
+        //     if (!(currentView instanceof ViewSwitcher)) {
+        //         return;
+        //     }
+        //     final ViewSwitcher viewSwitcher = (ViewSwitcher) currentView;
+        //     final Object tag = viewSwitcher.getTag();
+        //     if (!(tag instanceof SimpleExoPlayer)) {
+        //         return;
+        //     }
+        //     final SimpleExoPlayer player = (SimpleExoPlayer) tag;
+        //     final float intVol = player.getVolume() == 0f ? 1f : 0f;
+        //     player.setVolume(intVol);
+        //     // binding.itemFeedBottom.btnMute.setImageResource(intVol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
+        //     // Utils.sessionVolumeFull = intVol == 1f;
+        // };
         // final PostChild firstItem = sliderItems.get(0);
         // if (firstItem.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
         //     binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
