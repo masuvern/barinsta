@@ -3,8 +3,8 @@ package awais.instagrabber.customviews;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,6 @@ import io.github.armcha.autolink.MODE_HASHTAG;
 import io.github.armcha.autolink.MODE_MENTION;
 import io.github.armcha.autolink.MODE_URL;
 import io.github.armcha.autolink.Mode;
-import kotlin.Unit;
 
 public class RamboTextViewV2 extends AutoLinkTextView {
     private final List<OnMentionClickListener> onMentionClickListeners = new ArrayList<>();
@@ -24,7 +23,7 @@ public class RamboTextViewV2 extends AutoLinkTextView {
     private final List<OnURLClickListener> onURLClickListeners = new ArrayList<>();
     private final List<OnEmailClickListener> onEmailClickListeners = new ArrayList<>();
 
-    public RamboTextViewV2(@NotNull final Context context,
+    public RamboTextViewV2(@NonNull final Context context,
                            @Nullable final AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -38,27 +37,25 @@ public class RamboTextViewV2 extends AutoLinkTextView {
                 for (final OnMentionClickListener onMentionClickListener : onMentionClickListeners) {
                     onMentionClickListener.onMentionClick(autoLinkItem);
                 }
-                return Unit.INSTANCE;
+                return;
             }
             if (mode.equals(MODE_HASHTAG.INSTANCE)) {
                 for (final OnHashtagClickListener onHashtagClickListener : onHashtagClickListeners) {
                     onHashtagClickListener.onHashtagClick(autoLinkItem);
                 }
-                return Unit.INSTANCE;
+                return;
             }
             if (mode.equals(MODE_URL.INSTANCE)) {
                 for (final OnURLClickListener onURLClickListener : onURLClickListeners) {
                     onURLClickListener.onURLClick(autoLinkItem);
                 }
-                return Unit.INSTANCE;
+                return;
             }
             if (mode.equals(MODE_EMAIL.INSTANCE)) {
                 for (final OnEmailClickListener onEmailClickListener : onEmailClickListeners) {
                     onEmailClickListener.onEmailClick(autoLinkItem);
                 }
-                return Unit.INSTANCE;
             }
-            return Unit.INSTANCE;
         });
     }
 

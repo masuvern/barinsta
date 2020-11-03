@@ -40,7 +40,6 @@ android {
 }
 
 
-
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
@@ -82,8 +81,4 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-
-    // temporary
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.10'
-    implementation 'org.jetbrains:annotations:13.0'
 }
