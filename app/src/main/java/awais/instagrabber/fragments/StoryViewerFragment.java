@@ -319,15 +319,7 @@ public class StoryViewerFragment extends Fragment {
                 final Object feedStoryModel = isRightSwipe
                                               ? finalModels.get(index - 1)
                                               : finalModels.size() == index + 1 ? null : finalModels.get(index + 1);
-                if (feedStoryModel != null) {
-                    if (fetching) {
-                        Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    fetching = true;
-                    currentFeedStoryIndex = isRightSwipe ? (index - 1) : (index + 1);
-                    resetView();
-                }
+                paginateStories(feedStoryModel, context, isRightSwipe, currentFeedStoryIndex == finalModels.size() - 2);
                 return;
             }
             if (isRightSwipe) {
@@ -362,6 +354,14 @@ public class StoryViewerFragment extends Fragment {
                 return false;
             }
         };
+
+        if (hasFeedStories) {
+            binding.btnBackward.setVisibility(currentFeedStoryIndex == 0 ? View.INVISIBLE : View.VISIBLE);
+            binding.btnForward.setVisibility(currentFeedStoryIndex == finalModels.size() - 1 ? View.INVISIBLE : View.VISIBLE);
+            binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1), context, true, false));
+            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1), context, false, currentFeedStoryIndex == finalModels.size() - 2));
+        }
+
         binding.imageViewer.setTapListener(simpleOnGestureListener);
         binding.spotify.setOnClickListener(v -> {
             final Object tag = v.getTag();
@@ -779,5 +779,19 @@ public class StoryViewerFragment extends Fragment {
         try { player.stop(true); } catch (Exception ignored) { }
         try { player.release(); } catch (Exception ignored) { }
         player = null;
+    }
+
+    private void paginateStories(Object feedStory, Context context, boolean backward, boolean last) {
+        if (feedStory != null) {
+            if (fetching) {
+                Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            fetching = true;
+            binding.btnBackward.setVisibility(currentFeedStoryIndex == 1 && backward ? View.INVISIBLE : View.VISIBLE);
+            binding.btnForward.setVisibility(last ? View.INVISIBLE : View.VISIBLE);
+            currentFeedStoryIndex = backward ? (currentFeedStoryIndex - 1) : (currentFeedStoryIndex + 1);
+            resetView();
+        }
     }
 }
