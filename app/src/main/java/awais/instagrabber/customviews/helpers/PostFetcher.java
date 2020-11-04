@@ -17,11 +17,13 @@ public class PostFetcher {
     }
 
     public void fetch() {
-        fetching = true;
-        postFetchService.fetch(result -> {
-            fetching = false;
-            fetchListener.onResult(result);
-        });
+        if (!fetching) {
+            fetching = true;
+            postFetchService.fetch(result -> {
+                fetching = false;
+                fetchListener.onResult(result);
+            });
+        }
     }
 
     public void reset() {
