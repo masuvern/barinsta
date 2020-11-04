@@ -8,6 +8,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
@@ -105,6 +106,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private boolean wasPaused;
     private int captionState = BottomSheetBehavior.STATE_HIDDEN;
     private int sliderPosition = -1;
+    private DialogInterface.OnShowListener onShowListener;
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
 
@@ -146,6 +148,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             });
         }
     };
+
+    public void setOnShowListener(final DialogInterface.OnShowListener onShowListener) {
+        this.onShowListener = onShowListener;
+    }
 
     public static class Builder {
         private final FeedModel feedModel;
@@ -203,150 +209,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         this.sharedProfilePicElement = sharedProfilePicElement;
         this.sharedMainPostElement = sharedMainPostElement;
     }
-
-
-    // private FetchListener<FeedModel> pfl = result -> {
-    //     if (result == null) return;
-    //     final List<ViewerPostModelWrapper> viewerPostModels = viewerPostViewModel.getList().getValue();
-    //     final List<ViewerPostModelWrapper> temp = viewerPostModels == null ? new ArrayList<>(idOrCodeList.size())
-    //                                                                        : new ArrayList<>(viewerPostModels);
-    //     String idOrCode = isId ? result.getPostId() : result.getShortCode();
-    //     if (idOrCode == null) return;
-    //     if (isId) {
-    //         // the post id is appended with `_` in the result
-    //         idOrCode = idOrCode.substring(0, idOrCode.indexOf('_'));
-    //     }
-    //     final int index = idOrCodeList.indexOf(idOrCode);
-    //     if (index < 0) return;
-    //     final ViewerPostModelWrapper viewerPostModelWrapper = temp.get(index);
-    //     viewerPostModelWrapper.setViewerPostModels(result.getSliderItems() == null ? Collections.emptyList() : result.getSliderItems());
-    //     temp.set(index, viewerPostModelWrapper);
-    //     viewerPostViewModel.getList().setValue(temp);
-    //     adapter.notifyItemChanged(index);
-    //     if (!hasInitialResult) {
-    //         Log.d(TAG, "setting delayed position to: " + currentPostIndex);
-    //         binding.getRoot()
-    //                .postDelayed(() -> binding.getRoot().setCurrentItem(currentPostIndex), 200);
-    //     }
-    //     hasInitialResult = true;
-    // };
-    // private MentionClickListener mentionListener = (view, text, isHashtag, isLocation) -> {
-    //     if (isHashtag) {
-    //         final NavDirections action = PostViewFragmentDirections
-    //                 .actionGlobalHashTagFragment(text);
-    //         NavHostFragment.findNavController(this).navigate(action);
-    //         return;
-    //     }
-    //     if (isLocation) {
-    //         final NavDirections action = PostViewFragmentDirections
-    //                 .actionGlobalLocationFragment(text);
-    //         NavHostFragment.findNavController(this).navigate(action);
-    //         return;
-    //     }
-    //     final NavDirections action = PostViewFragmentDirections
-    //             .actionGlobalProfileFragment("@" + text);
-    //     NavHostFragment.findNavController(this).navigate(action);
-    // };
-    // private OnPostViewChildViewClickListener clickListener = (v, wrapper, postPosition, childPosition) -> {
-    //     final ViewerPostModel postModel = wrapper.getViewerPostModels().get(0);
-    //     final String username = postModel.getProfileModel().getUsername();
-    //     final int id = v.getId();
-    //     switch (id) {
-    //         case R.id.viewerCaption:
-    //             break;
-    //         case R.id.btnComments:
-    //             String postId = postModel.getPostId();
-    //             if (postId.contains("_")) postId = postId.substring(0, postId.indexOf("_"));
-    //             final NavDirections commentsAction = PostViewFragmentDirections.actionGlobalCommentsViewerFragment(
-    //                     postModel.getShortCode(),
-    //                     postId,
-    //                     postModel.getProfileModel().getId()
-    //             );
-    //             NavHostFragment.findNavController(this).navigate(commentsAction);
-    //             break;
-    //         case R.id.btnDownload:
-    //             final Context context = getContext();
-    //             if (context == null) return;
-    //             if (checkSelfPermission(context,
-    //                                     DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-    //                 showDownloadDialog(wrapper.getViewerPostModels(),
-    //                                    childPosition,
-    //                                    username);
-    //                 return;
-    //             }
-    //             requestPermissions(DownloadUtils.PERMS, 8020);
-    //             break;
-    //         case R.id.ivProfilePic:
-    //         case R.id.title:
-    //             mentionListener.onClick(null, username, false, false);
-    //             break;
-    //         case R.id.btnLike:
-    //             if (mediaService != null) {
-    //                 final String userId = CookieUtils.getUserIdFromCookie(COOKIE);
-    //                 final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
-    //                 v.setEnabled(false);
-    //                 final ServiceCallback<Boolean> likeCallback = new ServiceCallback<Boolean>() {
-    //                     @Override
-    //                     public void onSuccess(final Boolean result) {
-    //                         v.setEnabled(true);
-    //                         if (result) {
-    //                             postModel.setManualLike(!postModel.getLike());
-    //                             adapter.notifyItemChanged(postPosition);
-    //                             return;
-    //                         }
-    //                         Log.e(TAG, "like/unlike unsuccessful!");
-    //                     }
-    //
-    //                     @Override
-    //                     public void onFailure(final Throwable t) {
-    //                         v.setEnabled(true);
-    //                         Log.e(TAG, "Error during like/unlike", t);
-    //                     }
-    //                 };
-    //                 if (!postModel.getLike()) {
-    //                     mediaService.like(postModel.getPostId(), userId, csrfToken, likeCallback);
-    //                 } else {
-    //                     mediaService.unlike(postModel.getPostId(), userId, csrfToken, likeCallback);
-    //                 }
-    //             }
-    //             break;
-    //         case R.id.btnBookmark:
-    //             if (mediaService != null) {
-    //                 final String userId = CookieUtils.getUserIdFromCookie(COOKIE);
-    //                 final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
-    //                 v.setEnabled(false);
-    //                 final ServiceCallback<Boolean> saveCallback = new ServiceCallback<Boolean>() {
-    //                     @Override
-    //                     public void onSuccess(final Boolean result) {
-    //                         v.setEnabled(true);
-    //                         if (result) {
-    //                             // postModel.setBookmarked(!postModel.isSaved());
-    //                             adapter.notifyItemChanged(postPosition);
-    //                             return;
-    //                         }
-    //                         Log.e(TAG, "save/unsave unsuccessful!");
-    //                     }
-    //
-    //                     @Override
-    //                     public void onFailure(final Throwable t) {
-    //                         v.setEnabled(true);
-    //                         Log.e(TAG, "Error during save/unsave", t);
-    //                     }
-    //                 };
-    //                 if (!postModel.isSaved()) {
-    //                     mediaService.save(postModel.getPostId(), userId, csrfToken, saveCallback);
-    //                 } else {
-    //                     mediaService.unsave(postModel.getPostId(), userId, csrfToken, saveCallback);
-    //                 }
-    //             }
-    //             break;
-    //     }
-    // };
-    // private PostViewAdapter.OnPostCaptionLongClickListener captionLongClickListener = text -> {
-    //     final Context context = getContext();
-    //     if (context == null) return;
-    //     Utils.copyText(context, text);
-    // };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -410,6 +272,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                     PropertyValuesHolder.ofInt("alpha", 0, 255)
             );
             addAnimator(animator);
+        }
+        if (onShowListener != null) {
+            onShowListener.onShow(dialog);
         }
     }
 

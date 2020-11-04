@@ -5,20 +5,6 @@
     android:id="@+id/location_nav_graph"
     app:startDestination="@id/locationFragment">
 
-    <action
-        android:id="@+id/action_global_postViewFragment"
-        app:destination="@id/post_view_nav_graph">
-        <argument
-            android:name="index"
-            app:argType="integer" />
-        <argument
-            android:name="idOrCodeArray"
-            app:argType="string[]" />
-        <argument
-            android:name="isId"
-            app:argType="boolean" />
-    </action>
-
     <include app:graph="@navigation/comments_nav_graph" />
 
     <action

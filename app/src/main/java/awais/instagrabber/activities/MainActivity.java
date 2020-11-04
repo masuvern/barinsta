@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.database.MatrixCursor;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -25,6 +24,7 @@ import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -51,9 +51,11 @@ import java.util.Map;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.customviews.helpers.CustomHideBottomViewOnScrollBehavior;
 import awais.instagrabber.databinding.ActivityMainBinding;
+import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
@@ -574,13 +576,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private void showPostView(@NonNull final IntentModel intentModel) {
         final String shortCode = intentModel.getText();
         // Log.d(TAG, "shortCode: " + shortCode);
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (currentNavControllerLiveData == null || navController == null) return;
-        final Bundle bundle = new Bundle();
-        bundle.putStringArray("idOrCodeArray", new String[]{shortCode});
-        bundle.putInt("index", 0);
-        bundle.putBoolean("isId", false);
-        navController.navigate(R.id.action_global_postViewFragment, bundle);
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(R.layout.dialog_opening_post)
+                .create();
+        alertDialog.show();
+        new PostFetcher(shortCode, feedModel -> {
+            final PostViewV2Fragment fragment = PostViewV2Fragment
+                    .builder(feedModel)
+                    .build();
+            fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+            fragment.show(getSupportFragmentManager(), "post_view");
+        }).execute();
     }
 
     private void showLocationView(@NonNull final IntentModel intentModel) {
@@ -629,20 +636,20 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return binding.bottomNavView;
     }
 
-    public void fitSystemWindows(final boolean fit) {
-        binding.appBarLayout.setBackground(null);
-        binding.appBarLayout.setFitsSystemWindows(fit);
-        binding.collapsingToolbarLayout.setBackground(null);
-        binding.collapsingToolbarLayout.setFitsSystemWindows(fit);
-        final Drawable toolbarBackground = binding.toolbar.getBackground();
-        binding.toolbar.setFitsSystemWindows(fit);
-        binding.toolbar.setBackground(null);
-        binding.toolbar.setClickable(false);
-    }
-
-    public int getNavHostContainerId() {
-        return binding.mainNavHost.getId();
-    }
+    // public void fitSystemWindows(final boolean fit) {
+    //     binding.appBarLayout.setBackground(null);
+    //     binding.appBarLayout.setFitsSystemWindows(fit);
+    //     binding.collapsingToolbarLayout.setBackground(null);
+    //     binding.collapsingToolbarLayout.setFitsSystemWindows(fit);
+    //     final Drawable toolbarBackground = binding.toolbar.getBackground();
+    //     binding.toolbar.setFitsSystemWindows(fit);
+    //     binding.toolbar.setBackground(null);
+    //     binding.toolbar.setClickable(false);
+    // }
+    //
+    // public int getNavHostContainerId() {
+    //     return binding.mainNavHost.getId();
+    // }
 
     public void setToolbar(final Toolbar toolbar) {
         binding.appBarLayout.setVisibility(View.GONE);

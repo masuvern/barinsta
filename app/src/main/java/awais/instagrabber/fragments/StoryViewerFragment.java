@@ -66,6 +66,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.DownloadAsync;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.QuizAction;
 import awais.instagrabber.asyncs.RespondAction;
 import awais.instagrabber.asyncs.SeenAction;
@@ -373,14 +374,19 @@ public class StoryViewerFragment extends Fragment {
         binding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (!(tag instanceof CharSequence)) return;
-            final String postId = tag.toString();
-            final boolean isId = tag.toString().matches("^[\\d]+$");
-            final String[] idsOrShortCodes = new String[]{postId};
-            final NavDirections action = HashTagFragmentDirections.actionGlobalPostViewFragment(
-                    0,
-                    idsOrShortCodes,
-                    isId);
-            NavHostFragment.findNavController(this).navigate(action);
+            final String shortCode = tag.toString();
+            final AlertDialog alertDialog = new AlertDialog.Builder(context)
+                    .setCancelable(false)
+                    .setView(R.layout.dialog_opening_post)
+                    .create();
+            alertDialog.show();
+            new PostFetcher(shortCode, feedModel -> {
+                final PostViewV2Fragment fragment = PostViewV2Fragment
+                        .builder(feedModel)
+                        .build();
+                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+                fragment.show(getChildFragmentManager(), "post_view");
+            }).execute();
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();

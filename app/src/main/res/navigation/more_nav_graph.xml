@@ -5,25 +5,10 @@
     android:id="@+id/more_nav_graph"
     app:startDestination="@id/morePreferencesFragment">
 
-    <include app:graph="@navigation/post_view_nav_graph" />
     <include app:graph="@navigation/profile_nav_graph" />
     <include app:graph="@navigation/hashtag_nav_graph" />
     <include app:graph="@navigation/location_nav_graph" />
     <include app:graph="@navigation/comments_nav_graph" />
-
-    <action
-        android:id="@+id/action_global_postViewFragment"
-        app:destination="@id/post_view_nav_graph">
-        <argument
-            android:name="index"
-            app:argType="integer" />
-        <argument
-            android:name="idOrCodeArray"
-            app:argType="string[]" />
-        <argument
-            android:name="isId"
-            app:argType="boolean" />
-    </action>
 
     <action
         android:id="@+id/action_global_profileFragment"

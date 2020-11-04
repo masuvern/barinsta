@@ -28,6 +28,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
 import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListener;
 import awais.instagrabber.asyncs.NotificationsFetcher;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -75,7 +76,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         } else {
             commentDialogList = new String[]{getString(R.string.open_profile)};
         }
-        if (getContext() == null) return;
+        final Context context = getContext();
+        if (context == null) return;
         final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
             switch (which) {
                 case 0:
@@ -101,9 +103,18 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         });
                         return;
                     }
-                    final NavDirections action = MorePreferencesFragmentDirections
-                            .actionGlobalPostViewFragment(0, new String[]{model.getShortCode()}, false);
-                    NavHostFragment.findNavController(this).navigate(action);
+                    final AlertDialog alertDialog = new AlertDialog.Builder(context)
+                            .setCancelable(false)
+                            .setView(R.layout.dialog_opening_post)
+                            .create();
+                    alertDialog.show();
+                    new PostFetcher(model.getShortCode(), feedModel -> {
+                        final PostViewV2Fragment fragment = PostViewV2Fragment
+                                .builder(feedModel)
+                                .build();
+                        fragment.setOnShowListener(dialog1 -> alertDialog.dismiss());
+                        fragment.show(getChildFragmentManager(), "post_view");
+                    }).execute();
                     break;
                 case 2:
                     friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
@@ -125,7 +136,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                     break;
             }
         };
-        new AlertDialog.Builder(getContext())
+        new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setItems(commentDialogList, profileDialogListener)
                 .setNegativeButton(R.string.cancel, null)
