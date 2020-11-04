@@ -58,10 +58,12 @@ import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
+import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.ImageUploadOptions;
@@ -240,8 +242,13 @@ public class DirectMessageThreadFragment extends Fragment {
                     case MEDIA_SHARE:
                     case CLIP:
                     case FELIX_SHARE:
-                        final long postId = directItemModel.getMediaModel().getPk();
-                        // open post
+                        final String shortCode = directItemModel.getMediaModel().getCode();
+                        new PostFetcher(shortCode, feedModel -> {
+                            final PostViewV2Fragment fragment = PostViewV2Fragment
+                                    .builder(feedModel)
+                                    .build();
+                            fragment.show(getChildFragmentManager(), "post_view");
+                        }).execute();
                         break;
                     case LINK:
                         Intent linkIntent = new Intent(Intent.ACTION_VIEW);

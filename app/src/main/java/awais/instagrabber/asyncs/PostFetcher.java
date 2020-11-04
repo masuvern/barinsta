@@ -151,6 +151,9 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
                                                .setVideoViews(isChildVideo && childNode.has("video_view_count")
                                                               ? childNode.getLong("video_view_count")
                                                               : -1)
+                                               .setThumbnailUrl(childNode.getString("display_url"))
+                                               .setHeight(childNode.getJSONObject("dimensions").getInt("height"))
+                                               .setWidth(childNode.getJSONObject("dimensions").getInt("width"))
                                                .build());
                         // DownloadUtils.checkExistence(downloadDir, customDir, true, postModels.get(i));
                     }
