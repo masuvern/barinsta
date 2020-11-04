@@ -717,12 +717,15 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void setupCounts() {
-        final int commentsCount = (int) feedModel.getCommentsCount();
-        final String commentsString = getResources().getQuantityString(R.plurals.comments_count, commentsCount, commentsCount);
-        binding.commentsCount.setText(commentsString);
-        final int likesCount = (int) feedModel.getLikesCount();
-        final String likesString = getResources().getQuantityString(R.plurals.likes_count, likesCount, likesCount);
-        binding.likesCount.setText(likesString);
+        try {
+            final int commentsCount = (int) feedModel.getCommentsCount();
+            final String commentsString = getResources().getQuantityString(R.plurals.comments_count, commentsCount, commentsCount);
+            binding.commentsCount.setText(commentsString);
+            final int likesCount = (int) feedModel.getLikesCount();
+            final String likesString = getResources().getQuantityString(R.plurals.likes_count, likesCount, likesCount);
+            binding.likesCount.setText(likesString);
+        }
+        catch (IllegalStateException e) {}
     }
 
     private void setupPostTypeLayout() {

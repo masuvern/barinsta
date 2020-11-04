@@ -188,7 +188,7 @@ public class StoriesService extends BaseService {
                                 model.setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
 
                             if (data.has("story_feed_media")) {
-                                model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));
+                                model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_code"));
                             }
 
                             // TODO: this may not be limited to spotify
