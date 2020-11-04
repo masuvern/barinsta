@@ -40,10 +40,10 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -97,11 +97,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             R.id.notificationsViewer,
             R.id.themePreferencesFragment,
             R.id.favoritesFragment,
-            R.id.backupPreferencesFragment
-            // , R.id.postViewV2Fragment
+            R.id.backupPreferencesFragment,
+            R.id.directMessagesThreadFragment
     );
     private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
-    private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
+    private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = ImmutableList.of(R.id.commentsViewerFragment,
+                                                                                                        R.id.directMessagesThreadFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
 
     private ActivityMainBinding binding;

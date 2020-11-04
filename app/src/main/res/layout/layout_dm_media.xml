@@ -6,10 +6,10 @@
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/ivMediaPreview"
-        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:actualImageScaleType="fitCenter"/>
+        android:layout_gravity="center"
+        app:actualImageScaleType="fitXY" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/typeIcon"

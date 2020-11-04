@@ -26,7 +26,7 @@ public class DirectMessageMediaViewHolder extends DirectMessageItemViewHolder {
         super(baseBinding, onClickListener);
         this.binding = binding;
         maxHeight = itemView.getResources().getDimensionPixelSize(R.dimen.dm_media_img_max_height);
-        maxWidth = (int) (Utils.displayMetrics.widthPixels * 0.8);
+        maxWidth = (int) (Utils.displayMetrics.widthPixels - Utils.convertDpToPx(64) - getItemMargin());
         setItemView(binding.getRoot());
     }
 

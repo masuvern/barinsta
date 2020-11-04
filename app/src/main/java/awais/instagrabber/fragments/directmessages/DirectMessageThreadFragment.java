@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -26,6 +27,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -78,6 +81,7 @@ import awais.instagrabber.utils.Utils;
 public class DirectMessageThreadFragment extends Fragment {
     private static final String TAG = "DirectMessagesThreadFmt";
     private static final int PICK_IMAGE = 100;
+    private static final int STORAGE_PERM_REQUEST_CODE = 8020;
 
     private AppCompatActivity fragmentActivity;
     private String threadId;
@@ -169,8 +173,9 @@ public class DirectMessageThreadFragment extends Fragment {
             binding.swipeRefreshLayout.setRefreshing(false);
         }
     };
-    private LinearLayout root;
+    private ConstraintLayout root;
     private boolean shouldRefresh = true;
+    private DirectItemModel.DirectItemMediaModel downloadMediaItem;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -251,18 +256,7 @@ public class DirectMessageThreadFragment extends Fragment {
                         break;
                     case RAVEN_MEDIA:
                     case MEDIA:
-                        final ProfileModel user = getUser(directItemModel.getUserId());
-                        final DirectItemModel.DirectItemMediaModel selectedItem =
-                                itemType == DirectItemType.MEDIA ? directItemModel.getMediaModel() : directItemModel.getRavenMediaModel().getMedia();
-                        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
-                                           ? selectedItem.getVideoUrl()
-                                           : selectedItem.getThumbUrl();
-                        if (url == null) {
-                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        } else {
-                            DownloadUtils.dmDownload(context, user.getUsername(), DownloadMethod.DOWNLOAD_DIRECT, selectedItem);
-                            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
-                        }
+                        downloadItem(context);
                         break;
                     case STORY_SHARE:
                         if (directItemModel.getReelShare() != null) {
@@ -295,11 +289,13 @@ public class DirectMessageThreadFragment extends Fragment {
             } else if (which == 1) {
                 sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
             } else if (which == 2) {
-                if (directItemModel == null)
+                if (directItemModel == null) {
                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                else if (String.valueOf(directItemModel.getUserId()).equals(myId))
+                } else if (String.valueOf(directItemModel.getUserId()).equals(myId)) {
                     new ThreadAction().execute("delete", directItemModel.getItemId());
-                else searchUsername(getUser(directItemModel.getUserId()).getUsername());
+                } else {
+                    searchUsername(getUser(directItemModel.getUserId()).getUsername());
+                }
             }
         };
         final View.OnClickListener onClickListener = v -> {
@@ -365,6 +361,26 @@ public class DirectMessageThreadFragment extends Fragment {
         }
     }
 
+    private void downloadItem(final Context context) {
+        final ProfileModel user = getUser(directItemModel.getUserId());
+        final DirectItemModel.DirectItemMediaModel selectedItem = directItemModel.getItemType() == DirectItemType.MEDIA
+                                                                  ? directItemModel.getMediaModel()
+                                                                  : directItemModel.getRavenMediaModel().getMedia();
+        final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
+                           ? selectedItem.getVideoUrl()
+                           : selectedItem.getThumbUrl();
+        if (url == null) {
+            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+        } else {
+            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+                DownloadUtils.dmDownload(context, user.getUsername(), selectedItem.getId(), url);
+            } else {
+                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            }
+            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -420,6 +436,17 @@ public class DirectMessageThreadFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         if (listViewModel != null) listViewModel.getList().postValue(Collections.emptyList());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        final Context context = getContext();
+        if (context == null) return;
+        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
+            downloadItem(context);
+        }
     }
 
     private void sendText(final String text, final String itemId, final boolean delete) {

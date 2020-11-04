@@ -42,7 +42,6 @@ import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
-import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.workers.DownloadWorker;
@@ -169,40 +168,28 @@ public final class DownloadUtils {
 
     public static void dmDownload(@NonNull final Context context,
                                   @Nullable final String username,
-                                  final DownloadMethod method,
-                                  final DirectItemModel.DirectItemMediaModel itemsToDownload) {
-        if (Utils.settingsHelper == null) Utils.settingsHelper = new SettingsHelper(context);
-
-        if (itemsToDownload == null) return;
-
-        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-            dmDownloadImpl(context, username, method, itemsToDownload);
-        else if (context instanceof Activity)
+                                  final String modelId,
+                                  final String url) {
+        if (url == null) return;
+        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+            dmDownloadImpl(context, username, modelId, url);
+        } else if (context instanceof Activity) {
             ActivityCompat.requestPermissions((Activity) context, PERMS, 8020);
+        }
     }
 
     private static void dmDownloadImpl(@NonNull final Context context,
                                        @Nullable final String username,
-                                       final DownloadMethod method,
-                                       final DirectItemModel.DirectItemMediaModel selectedItem) {
-        File dir = new File(Environment.getExternalStorageDirectory(), "Download");
-
-        if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-            final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
-            if (!TextUtils.isEmpty(customPath)) dir = new File(customPath);
-        }
-
-        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(username))
-            dir = new File(dir, username);
-
+                                       final String modelId,
+                                       final String url) {
+        final File dir = getDownloadDir(context, username);
         if (dir.exists() || dir.mkdirs()) {
-            new DownloadAsync(context,
-                              selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? selectedItem.getVideoUrl() : selectedItem.getThumbUrl(),
-                              getDownloadSaveFileDm(dir, selectedItem),
-                              null)
-                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } else
-            Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
+            download(context,
+                     url,
+                     getDownloadSaveFile(dir, modelId, url).getAbsolutePath());
+            return;
+        }
+        Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
     }
 
     @NonNull
@@ -227,14 +214,6 @@ public final class DownloadUtils {
                                             final String displayUrl) {
         final String fileName = postId + sliderPostfix + "." + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
-    }
-
-    @NonNull
-    private static File getDownloadSaveFileDm(final File finalDir,
-                                              @NonNull final DirectItemModel.DirectItemMediaModel model) {
-        final boolean isVideo = model.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO;
-        final String displayUrl = isVideo ? model.getVideoUrl() : model.getThumbUrl();
-        return new File(finalDir, model.getId() + getFileExtensionFromUrl(displayUrl));
     }
 
     /**
