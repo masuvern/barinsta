@@ -11,10 +11,14 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 
 import java.io.File;
+import java.util.Random;
+
+import awais.instagrabber.utils.TextUtils;
 
 public class DeleteImageIntentService extends IntentService {
     private final static String TAG = "DeleteImageIntent";
     private static final int DELETE_IMAGE_SERVICE_REQUEST_CODE = 9010;
+    private static final Random random = new Random();
 
     public static final String EXTRA_IMAGE_PATH = "extra_image_path";
     public static final String EXTRA_NOTIFICATION_ID = "extra_notification_id";
@@ -34,6 +38,7 @@ public class DeleteImageIntentService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         if (intent != null && Intent.ACTION_DELETE.equals(intent.getAction()) && intent.hasExtra(EXTRA_IMAGE_PATH)) {
             final String path = intent.getStringExtra(EXTRA_IMAGE_PATH);
+            if (TextUtils.isEmpty(path)) return;
             final File file = new File(path);
             boolean deleted;
             if (file.exists()) {
@@ -59,6 +64,6 @@ public class DeleteImageIntentService extends IntentService {
         intent.setAction(Intent.ACTION_DELETE);
         intent.putExtra(EXTRA_IMAGE_PATH, imagePath);
         intent.putExtra(EXTRA_NOTIFICATION_ID, notificationId);
-        return PendingIntent.getService(context, DELETE_IMAGE_SERVICE_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, random.nextInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
