@@ -26,9 +26,12 @@ import androidx.work.WorkerParameters;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.icafe4j.image.meta.Metadata;
+import com.icafe4j.image.meta.MetadataType;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -45,6 +48,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.services.DeleteImageIntentService;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
@@ -121,7 +125,9 @@ public class DownloadWorker extends Worker {
                           final int total,
                           final String url,
                           final String filePath) {
-        final File outFile = new File(filePath);
+        final boolean isJpg = filePath.endsWith("jpg");
+        // using temp file approach to remove IPTC so that download progress can be reported
+        final File outFile = isJpg ? DownloadUtils.getTempFile() : new File(filePath);
         try {
             final URLConnection urlConnection = new URL(url).openConnection();
             final long fileSize = Build.VERSION.SDK_INT >= 24 ? urlConnection.getContentLengthLong() :
@@ -131,67 +137,38 @@ public class DownloadWorker extends Worker {
                  final FileOutputStream fos = new FileOutputStream(outFile)) {
                 final byte[] buffer = new byte[0x2000];
                 int count;
-                boolean deletedIPTC = false;
                 while ((count = bis.read(buffer, 0, 0x2000)) != -1) {
                     totalRead = totalRead + count;
-                    // if (!deletedIPTC) {
-                    //     int iptcStart = -1;
-                    //     int fbmdStart = -1;
-                    //     int fbmdBytesLen = -1;
-                    //     for (int i = 0; i < buffer.length; ++i) {
-                    //         if (buffer[i] == (byte) 0xFF && buffer[i + 1] == (byte) 0xED)
-                    //             iptcStart = i;
-                    //         else if (buffer[i] == (byte) 'F' && buffer[i + 1] == (byte) 'B'
-                    //                 && buffer[i + 2] == (byte) 'M' && buffer[i + 3] == (byte) 'D') {
-                    //             fbmdStart = i;
-                    //             fbmdBytesLen = buffer[i - 10] << 24 | (buffer[i - 9] & 0xFF) << 16 |
-                    //                     (buffer[i - 8] & 0xFF) << 8 | (buffer[i - 7] & 0xFF) |
-                    //                     (buffer[i - 6] & 0xFF);
-                    //             break;
-                    //         }
-                    //     }
-                    //     if (iptcStart != -1 && fbmdStart != -1 && fbmdBytesLen != -1) {
-                    //         final int fbmdDataLen = (iptcStart + (fbmdStart - iptcStart) + (fbmdBytesLen - iptcStart)) - 4;
-                    //         fos.write(buffer, 0, iptcStart);
-                    //         fos.write(buffer, fbmdDataLen + iptcStart, count - fbmdDataLen - iptcStart);
-                    //         // setProgressAsync(new Data.Builder().putString(URL, url)
-                    //         //                                    .putFloat(PROGRESS, totalRead * 100f / fileSize)
-                    //         //                                    .build());
-                    //         updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize);
-                    //         deletedIPTC = true;
-                    //         continue;
-                    //     }
-                    // }
                     fos.write(buffer, 0, count);
-                    // setProgressAsync(new Data.Builder().putString(URL, url)
-                    //                                    .putFloat(PROGRESS, totalRead * 100f / fileSize)
-                    //                                    .build());
+                    setProgressAsync(new Data.Builder().putString(URL, url)
+                                                       .putFloat(PROGRESS, totalRead * 100f / fileSize)
+                                                       .build());
                     updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize);
                 }
                 fos.flush();
+            } catch (final Exception e) {
+                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.getAbsolutePath(), e);
+            }
+            if (isJpg) {
+                final File finalFile = new File(filePath);
+                try (FileInputStream bis = new FileInputStream(outFile);
+                     FileOutputStream fos = new FileOutputStream(finalFile)) {
+                    Metadata.removeMetadata(bis, fos, MetadataType.IPTC);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while removing iptc: url: " + url
+                            + ", tempFile: " + outFile.getAbsolutePath()
+                            + ", finalFile: " + finalFile.getAbsolutePath(), e);
+                }
+                final boolean deleted = outFile.delete();
+                if (!deleted) {
+                    Log.w(TAG, "download: tempFile not deleted!");
+                }
             }
         } catch (final Exception e) {
             Log.e(TAG, "Error while downloading: " + url, e);
         }
         updateDownloadProgress(notificationId, position, total, 100);
     }
-
-    // private void showCompleteNotification(final String url) {
-    //     final Context context = getApplicationContext();
-    //     final Notification notification = new NotificationCompat.Builder(context, Constants.DOWNLOAD_CHANNEL_ID)
-    //             .setCategory(NotificationCompat.CATEGORY_STATUS)
-    //             .setSmallIcon(R.drawable.ic_download)
-    //             .setAutoCancel(false)
-    //             .setOnlyAlertOnce(true)
-    //             .setContentTitle(context.getString(R.string.downloader_complete))
-    //             .setGroup(DOWNLOAD_GROUP)
-    //             .build();
-    //     final int id = Math.abs(url.hashCode());
-    //     Log.d(TAG, "showCompleteNotification: cancelling: " + id);
-    //     notificationManager.cancel(id);
-    //     // WorkManager.getInstance(getApplicationContext()).
-    //     notificationManager.notify(id + 1, notification);
-    // }
 
     private void updateDownloadProgress(final int notificationId,
                                         final int position,

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
@@ -37,13 +36,9 @@ import java.util.regex.Pattern;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.asyncs.DownloadAsync;
-import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.models.BasePostModel;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
-import awais.instagrabber.models.enums.DownloadMethod;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.workers.DownloadWorker;
 import awaisomereport.LogCollector;
 
@@ -63,96 +58,22 @@ public final class DownloadUtils {
         return lastNotificationId;
     }
 
-    public static void batchDownload(@NonNull final Context context,
-                                     @Nullable String username,
-                                     final DownloadMethod method,
-                                     final List<? extends BasePostModel> itemsToDownload) {
-        if (Utils.settingsHelper == null) Utils.settingsHelper = new SettingsHelper(context);
-
-        if (itemsToDownload == null || itemsToDownload.size() < 1) return;
-
-        if (username != null && username.charAt(0) == '@') username = username.substring(1);
-
-        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-            batchDownloadImpl(context, username, method, itemsToDownload);
-        else if (context instanceof Activity)
-            ActivityCompat.requestPermissions((Activity) context, PERMS, 8020);
-    }
-
-    private static void batchDownloadImpl(@NonNull final Context context,
-                                          @Nullable final String username,
-                                          final DownloadMethod method,
-                                          final List<? extends BasePostModel> itemsToDownload) {
-        final File dir = getDownloadDir(context, username);
-        if (dir == null) return;
-        boolean checkEachPost = false;
-        switch (method) {
-            case DOWNLOAD_SAVED:
-            case DOWNLOAD_MAIN:
-            case DOWNLOAD_DISCOVER:
-                checkEachPost = true;
-                break;
-        }
-        final int itemsToDownloadSize = itemsToDownload.size();
-        for (int i = 0; i < itemsToDownloadSize; i++) {
-            final BasePostModel selectedItem = itemsToDownload.get(i);
-            if (!checkEachPost) {
-                final boolean isSlider = itemsToDownloadSize > 1;
-                final File saveFile = getDownloadSaveFile(dir,
-                                                          selectedItem.getShortCode(),
-                                                          isSlider ? "_slide_" + (i + 1) : "",
-                                                          selectedItem.getDisplayUrl()
-                );
-                new DownloadAsync(context,
-                                  selectedItem.getDisplayUrl(),
-                                  saveFile,
-                                  file -> selectedItem.setDownloaded(true))
-                        .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            } else {
-                final File finalDir = dir;
-                new PostFetcher(selectedItem.getShortCode(), result -> {
-                    if (result == null) return;
-                    final boolean isSlider = result.getItemType() == MediaItemType.MEDIA_TYPE_SLIDER;
-                    if (isSlider) {
-                        for (int j = 0; j < result.getSliderItems().size(); j++) {
-                            final PostChild model = result.getSliderItems().get(j);
-                            final File saveFile = getDownloadSaveFile(
-                                    finalDir,
-                                    model.getShortCode(),
-                                    "_slide_" + (j + 1),
-                                    model.getDisplayUrl()
-                            );
-                            new DownloadAsync(context,
-                                              model.getDisplayUrl(),
-                                              saveFile,
-                                              file -> {}/*model.setDownloaded(true)*/)
-                                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        }
-                    } else {
-                        final File saveFile = getDownloadSaveFile(
-                                finalDir,
-                                result.getPostId(),
-                                result.getDisplayUrl()
-                        );
-                        new DownloadAsync(context,
-                                          result.getDisplayUrl(),
-                                          saveFile,
-                                          file -> result.setDownloaded(true))
-                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    }
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        }
-    }
-
-    @Nullable
-    private static File getDownloadDir(@NonNull final Context context, @Nullable final String username) {
+    @NonNull
+    private static File getDownloadDir() {
         File dir = new File(Environment.getExternalStorageDirectory(), "Download");
 
         if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
             final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
-            if (!TextUtils.isEmpty(customPath)) dir = new File(customPath);
+            if (!TextUtils.isEmpty(customPath)) {
+                dir = new File(customPath);
+            }
         }
+        return dir;
+    }
+
+    @Nullable
+    private static File getDownloadDir(@NonNull final Context context, @Nullable final String username) {
+        File dir = getDownloadDir();
 
         if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(username)) {
             final String finaleUsername = username.startsWith("@") ? username : "@" + username;
@@ -214,6 +135,12 @@ public final class DownloadUtils {
                                             final String displayUrl) {
         final String fileName = postId + sliderPostfix + "." + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
+    }
+
+    @NonNull
+    public static File getTempFile() {
+        final File dir = getDownloadDir();
+        return new File(dir, UUID.randomUUID().toString());
     }
 
     /**
