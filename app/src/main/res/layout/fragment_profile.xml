@@ -250,7 +250,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:barrierDirection="bottom"
-                    app:constraint_referenced_ids="btnTagged, btnSaved, btnLiked" />
+                    app:constraint_referenced_ids="btnTagged, btnSaved, btnLiked, btnFollow, btnDM" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/highlightsList"
