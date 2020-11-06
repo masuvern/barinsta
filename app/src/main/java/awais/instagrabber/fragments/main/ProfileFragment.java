@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.SpannableStringBuilder;
-import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -20,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -90,6 +88,7 @@ import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
+import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -566,12 +565,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             binding.favCb.setVisibility(View.GONE);
         }
-        // final ControllerListener<ImageInfo> listener = new BaseControllerListener<ImageInfo>() {
-        //     @Override
-        //     public void onFinalImageSet(final String id, final ImageInfo imageInfo, final Animatable animatable) {
-        //         startPostponedEnterTransition();
-        //     }
-        // };
         binding.mainProfileImage.setImageURI(profileModel.getHdProfilePic());
 
         final long followersCount = profileModel.getFollowersCount();
@@ -604,33 +597,40 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         binding.mainFullName.setText(TextUtils.isEmpty(profileModel.getName()) ? profileModel.getUsername()
                                                                                : profileModel.getName());
 
-        CharSequence biography = profileModel.getBiography();
-        if (TextUtils.hasMentions(biography)) {
-            biography = TextUtils.getMentionText(biography);
-            binding.mainBiography.setText(biography, TextView.BufferType.SPANNABLE);
-            binding.mainBiography.setMentionClickListener(mentionClickListener);
-        } else {
+        final String biography = profileModel.getBiography();
+        if (!TextUtils.isEmpty(biography)) {
             binding.mainBiography.setText(biography);
-            binding.mainBiography.setMentionClickListener(null);
+            binding.mainBiography.addOnHashtagListener(autoLinkItem -> {
+                final NavController navController = NavHostFragment.findNavController(this);
+                final Bundle bundle = new Bundle();
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                bundle.putString(ARG_HASHTAG, originalText);
+                navController.navigate(R.id.action_global_hashTagFragment, bundle);
+            });
+            binding.mainBiography.addOnMentionClickListener(autoLinkItem -> {
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                navigateToProfile(originalText);
+            });
+            binding.mainBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
+                                                                                                 autoLinkItem.getOriginalText().trim()));
+            binding.mainBiography.addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+            binding.mainBiography.setOnLongClickListener(v -> {
+                if (context != null) Utils.copyText(context, biography);
+                return true;
+            });
         }
-        binding.mainBiography.setOnLongClickListener(v -> {
-            if (context != null) Utils.copyText(context, profileModel.getBiography());
-            return true;
-        });
-
         final String url = profileModel.getUrl();
         if (TextUtils.isEmpty(url)) {
             binding.mainUrl.setVisibility(View.GONE);
         } else {
             binding.mainUrl.setVisibility(View.VISIBLE);
-            binding.mainUrl.setText(TextUtils.getSpannableUrl(url));
-            binding.mainUrl.setMovementMethod(LinkMovementMethod.getInstance());
+            binding.mainUrl.setText(url);
+            binding.mainUrl.addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+            binding.mainUrl.setOnLongClickListener(v -> {
+                if (context != null) Utils.copyText(context, url);
+                return true;
+            });
         }
-
-        binding.mainFullName.setSelected(true);
-        binding.mainBiography.setEnabled(true);
-        binding.mainBiography.setClickable(true);
-
         if (!profileModel.isReallyPrivate()) {
             binding.mainFollowing.setClickable(true);
             binding.mainFollowers.setClickable(true);
@@ -904,47 +904,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                  .init();
         binding.swipeRefreshLayout.setRefreshing(true);
         postsSetupDone = true;
-        // postsAdapter = new PostsAdapter((postModel, position) -> {
-        //     if (postsAdapter.isSelecting()) {
-        //         if (actionMode == null) return;
-        //         final String title = getString(R.string.number_selected,
-        //                                        postsAdapter.getSelectedModels().size());
-        //         actionMode.setTitle(title);
-        //         return;
-        //     }
-        //     if (checkAndResetAction()) return;
-        //     final List<PostModel> postModels = postsViewModel.getList().getValue();
-        //     if (postModels == null || postModels.size() == 0) return;
-        //     if (postModels.get(0) == null) return;
-        //     final String postId = isLoggedIn ? postModels.get(0).getPostId() : postModels.get(0).getShortCode();
-        //     final boolean isId = isLoggedIn && postId != null;
-        //     final String[] idsOrShortCodes = new String[postModels.size()];
-        //     for (int i = 0; i < postModels.size(); i++) {
-        //         idsOrShortCodes[i] = isId ? postModels.get(i).getPostId()
-        //                                   : postModels.get(i).getShortCode();
-        //     }
-        //     final NavDirections action = ProfileFragmentDirections.actionGlobalPostViewFragment(
-        //             position,
-        //             idsOrShortCodes,
-        //             isId);
-        //     NavHostFragment.findNavController(this).navigate(action);
-        //
-        // }, (model, position) -> {
-        //     if (!postsAdapter.isSelecting()) {
-        //         checkAndResetAction();
-        //         return true;
-        //     }
-        //     if (onBackPressedCallback.isEnabled()) {
-        //         return true;
-        //     }
-        //     final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
-        //     onBackPressedCallback.setEnabled(true);
-        //     actionMode = fragmentActivity.startActionMode(multiSelectAction);
-        //     final String title = getString(R.string.number_selected, 1);
-        //     actionMode.setTitle(title);
-        //     onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
-        //     return true;
-        // });
     }
 
     private void updateSwipeRefreshState() {

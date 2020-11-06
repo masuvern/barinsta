@@ -16,7 +16,7 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|snap">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/infoContainer"
@@ -126,7 +126,7 @@
                     app:layout_constraintTop_toTopOf="@id/mainFullName"
                     tools:visibility="gone" />
 
-                <awais.instagrabber.customviews.RamboTextView
+                <awais.instagrabber.customviews.RamboTextViewV2
                     android:id="@+id/mainBiography"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -139,7 +139,7 @@
                     app:layout_constraintTop_toBottomOf="@id/mainFullName"
                     tools:text="THE GLORIOUS (step)OWNER OF THIS APP. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id justo lorem. In malesuada feugiat ornare. Suspendisse et mauris imperdiet, luctus augue eget, tempus eros. Cras vitae molestie ipsum. " />
 
-                <awais.instagrabber.customviews.RamboTextView
+                <awais.instagrabber.customviews.RamboTextViewV2
                     android:id="@+id/mainUrl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -153,7 +153,7 @@
                     app:layout_constraintTop_toBottomOf="@id/mainBiography"
                     tools:text="https://austinhuang.me/"
                     tools:textColor="@android:color/holo_blue_dark"
-                    tools:visibility="gone" />
+                    tools:visibility="visible" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnFollow"
