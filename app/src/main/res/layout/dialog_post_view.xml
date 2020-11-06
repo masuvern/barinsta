@@ -357,8 +357,26 @@
         app:iconSize="24dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/download"
+        app:layout_constraintEnd_toStartOf="@id/share"
         app:layout_constraintStart_toEndOf="@id/player_controls_toggle"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/share"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="?attr/actionModeShareDrawable"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/download"
+        app:layout_constraintStart_toEndOf="@id/save"
         app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
@@ -380,7 +398,7 @@
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/save"
+        app:layout_constraintStart_toEndOf="@id/share"
         app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />

@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
@@ -27,6 +28,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import androidx.annotation.NonNull;
@@ -497,7 +499,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             } else {
                 textRes = R.string.unliking;
             }
-            binding.like.setText(textRes);
             if (!feedModel.getLike()) {
                 mediaService.like(feedModel.getPostId(), userId, csrfToken, likeCallback);
             } else {
@@ -575,7 +576,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             } else {
                 textRes = R.string.removing;
             }
-            binding.save.setText(textRes);
             if (!feedModel.isSaved()) {
                 mediaService.save(feedModel.getPostId(), userId, csrfToken, saveCallback);
             } else {
@@ -734,6 +734,20 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 }
             });
         }
+        binding.share.setOnLongClickListener(v -> {
+            Utils.displayToastAboveView(context, v, getString(R.string.share));
+            return true;
+        });
+        binding.share.setOnClickListener(v -> {
+            final boolean isPrivate = feedModel.getProfileModel().isPrivate();
+            if (isPrivate)
+                Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/"+feedModel.getShortCode());
+            startActivity(Intent.createChooser(sharingIntent,
+                    isPrivate ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
+        });
     }
 
     private void setupCounts() {
@@ -1061,6 +1075,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 binding.playerControlsToggle.setVisibility(View.GONE);
                 binding.like.setVisibility(View.GONE);
                 binding.save.setVisibility(View.GONE);
+                binding.share.setVisibility(View.GONE);
                 binding.download.setVisibility(View.GONE);
                 binding.mediaCounter.setVisibility(View.GONE);
                 wasControlsVisible = binding.playerControls.getRoot().getVisibility() == View.VISIBLE;
@@ -1087,6 +1102,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.download.setVisibility(View.VISIBLE);
             binding.like.setVisibility(View.VISIBLE);
             binding.save.setVisibility(View.VISIBLE);
+            binding.share.setVisibility(View.VISIBLE);
             if (wasControlsVisible) {
                 showPlayerControls();
             }
