@@ -185,7 +185,7 @@ public final class DownloadUtils {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
                 final String url = feedModel.getDisplayUrl();
-                final File file = getDownloadSaveFile(downloadDir, feedModel.getPostId(), url);
+                final File file = getDownloadSaveFile(downloadDir, feedModel.getShortCode(), url);
                 checkList.add(file.exists());
                 break;
             }
@@ -194,7 +194,7 @@ public final class DownloadUtils {
                 for (int i = 0; i < sliderItems.size(); i++) {
                     final PostChild child = sliderItems.get(i);
                     final String url = child.getDisplayUrl();
-                    final File file = getDownloadChildSaveFile(downloadDir, feedModel.getPostId(), i + 1, url);
+                    final File file = getDownloadChildSaveFile(downloadDir, feedModel.getShortCode(), i + 1, url);
                     checkList.add(file.exists());
                 }
                 break;
@@ -275,7 +275,7 @@ public final class DownloadUtils {
                 case MEDIA_TYPE_IMAGE:
                 case MEDIA_TYPE_VIDEO: {
                     final String url = feedModel.getDisplayUrl();
-                    final File file = getDownloadSaveFile(downloadDir, feedModel.getPostId(), url);
+                    final File file = getDownloadSaveFile(downloadDir, feedModel.getShortCode(), url);
                     map.put(url, file.getAbsolutePath());
                     break;
                 }
@@ -287,7 +287,7 @@ public final class DownloadUtils {
                         }
                         final PostChild child = sliderItems.get(i);
                         final String url = child.getDisplayUrl();
-                        final File file = getDownloadChildSaveFile(downloadDir, feedModel.getPostId(), i + 1, url);
+                        final File file = getDownloadChildSaveFile(downloadDir, feedModel.getShortCode(), i + 1, url);
                         map.put(url, file.getAbsolutePath());
                     }
                     break;

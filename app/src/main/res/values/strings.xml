@@ -225,6 +225,7 @@
     <string name="comment_notif">Commented on your post:</string>
     <string name="follow_notif">Started following you</string>
     <string name="mention_notif">Mentioned you:</string>
+    <string name="tagged_notif">Tagged you in a post</string>
     <string name="request_notif">Requested following you</string>
     <string name="request_approve">Approve request</string>
     <string name="request_reject">Reject request</string>

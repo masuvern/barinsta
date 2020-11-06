@@ -9,10 +9,11 @@ public enum NotificationType implements Serializable {
     FOLLOW("GraphFollowAggregatedStory"),
     COMMENT("GraphCommentMediaStory"),
     MENTION("GraphMentionStory"),
+    TAGGED("GraphUserTaggedStory"),
     REQUEST("REQUEST");
 
     private final String itemType;
-    private static Map<String, NotificationType> map = new HashMap<>();
+    private static final Map<String, NotificationType> map = new HashMap<>();
 
     static {
         for (NotificationType type : NotificationType.values()) {
