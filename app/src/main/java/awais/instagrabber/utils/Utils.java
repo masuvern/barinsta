@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -177,5 +179,15 @@ public final class Utils {
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
         emailIntent.putExtra(Intent.EXTRA_TEXT, "");
         context.startActivity(emailIntent);
+    }
+
+    public static void displayToastAboveView(@NonNull final Context context,
+                                             @NonNull final View view,
+                                             @NonNull final String text) {
+        final Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP | Gravity.START,
+                         view.getLeft(),
+                         view.getTop() - view.getHeight() - 4);
+        toast.show();
     }
 }

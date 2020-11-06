@@ -420,6 +420,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             bundle.putString("postUserId", feedModel.getProfileModel().getId());
             navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
         });
+        binding.comment.setOnLongClickListener(v -> {
+            Utils.displayToastAboveView(context, v, getString(R.string.comment));
+            return true;
+        });
     }
 
     private void setupDownload() {
@@ -429,6 +433,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 return;
             }
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+        });
+        binding.download.setOnLongClickListener(v -> {
+            Utils.displayToastAboveView(context, v, getString(R.string.action_download));
+            return true;
         });
     }
 
@@ -496,6 +504,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 mediaService.unlike(feedModel.getPostId(), userId, csrfToken, likeCallback);
             }
         });
+        binding.like.setOnLongClickListener(v -> {
+            Utils.displayToastAboveView(context, v, getString(R.string.like_without_count));
+            return true;
+        });
     }
 
     private void setLikedResources(final boolean liked) {
@@ -513,7 +525,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         }
         binding.like.setIconResource(iconResource);
         binding.like.setIconTintResource(tintResource);
-        binding.like.setText(textResId);
+        // binding.like.setText(textResId);
     }
 
     private void setupSave() {
@@ -570,6 +582,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 mediaService.unsave(feedModel.getPostId(), userId, csrfToken, saveCallback);
             }
         });
+        binding.save.setOnLongClickListener(v -> {
+            Utils.displayToastAboveView(context, v, getString(R.string.save));
+            return true;
+        });
     }
 
     private void setSavedResources(final boolean saved) {
@@ -587,7 +603,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         }
         binding.save.setIconResource(iconResource);
         binding.save.setIconTintResource(tintResource);
-        binding.save.setText(textResId);
+        // binding.save.setText(textResId);
     }
 
     private void setupProfilePic() {
@@ -705,6 +721,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 default:
             }
         });
+        binding.captionToggle.setOnLongClickListener(v -> {
+            Utils.displayToastAboveView(context, v, getString(R.string.caption));
+            return true;
+        });
         if (sharedProfilePicElement == null || sharedMainPostElement == null) {
             binding.getRoot().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -724,8 +744,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             final int likesCount = (int) feedModel.getLikesCount();
             final String likesString = getResources().getQuantityString(R.plurals.likes_count, likesCount, likesCount);
             binding.likesCount.setText(likesString);
-        }
-        catch (IllegalStateException e) {}
+        } catch (IllegalStateException e) {}
     }
 
     private void setupPostTypeLayout() {
