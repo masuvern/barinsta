@@ -1,13 +1,11 @@
 package awais.instagrabber.asyncs;
 
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,9 +24,6 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
-import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
@@ -78,19 +73,6 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
                             owner.optBoolean("requested_by_viewer")
                     );
                 }
-                final String username = profileModel == null ? "" : profileModel.getUsername();
-                // to check if file exists
-                final File downloadDir = new File(Environment.getExternalStorageDirectory(), "Download" +
-                        (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER) ? ("/" + username) : ""));
-                File customDir = null;
-                if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-                    final String customPath = Utils.settingsHelper.getString(FOLDER_PATH +
-                                                                                     (Utils.settingsHelper.getBoolean(DOWNLOAD_USER_FOLDER)
-                                                                                      ? ("/" + username)
-                                                                                      : ""));
-                    if (!TextUtils.isEmpty(customPath)) customDir = new File(customPath);
-                }
-
                 final long timestamp = media.getLong("taken_at_timestamp");
 
                 final boolean isVideo = media.has("is_video") && media.optBoolean("is_video");
@@ -138,7 +120,6 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
                                        ? null
                                        : media.getJSONObject("location").optString("id"))
                         .setCommentsCount(commentsCount);
-                // DownloadUtils.checkExistence(downloadDir, customDir, false, feedModelBuilder);
                 if (isSlider) {
                     final JSONArray children = media.getJSONObject("edge_sidecar_to_children").getJSONArray("edges");
                     final List<PostChild> postModels = new ArrayList<>();
@@ -158,7 +139,6 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
                                                .setHeight(childNode.getJSONObject("dimensions").getInt("height"))
                                                .setWidth(childNode.getJSONObject("dimensions").getInt("width"))
                                                .build());
-                        // DownloadUtils.checkExistence(downloadDir, customDir, true, postModels.get(i));
                     }
                     feedModelBuilder.setSliderItems(postModels);
                 }

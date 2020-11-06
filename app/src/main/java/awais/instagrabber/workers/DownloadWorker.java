@@ -59,8 +59,8 @@ import static awais.instagrabber.utils.Utils.logCollector;
 
 public class DownloadWorker extends Worker {
     private static final String TAG = "DownloadWorker";
-    private static final String PROGRESS = "PROGRESS";
-    private static final String URL = "URL";
+    public static final String PROGRESS = "PROGRESS";
+    public static final String URL = "URL";
     private static final String DOWNLOAD_GROUP = "DOWNLOAD_GROUP";
 
     public static final String KEY_DOWNLOAD_REQUEST_JSON = "download_request_json";
@@ -167,6 +167,9 @@ public class DownloadWorker extends Worker {
         } catch (final Exception e) {
             Log.e(TAG, "Error while downloading: " + url, e);
         }
+        setProgressAsync(new Data.Builder().putString(URL, url)
+                                           .putFloat(PROGRESS, 100)
+                                           .build());
         updateDownloadProgress(notificationId, position, total, 100);
     }
 

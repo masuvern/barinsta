@@ -66,15 +66,15 @@
             tools:text="Full name Full name Full name Full name Full name Full name Full name " />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/isDownloaded"
+            android:id="@+id/downloaded"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_margin="8dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/ic_cloud_download_24"
-            app:tint="@color/green_400"
+            app:srcCompat="@drawable/ic_download_circle_24"
+            app:tint="@color/green_A400"
             tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -94,7 +94,7 @@
         android:layout_height="match_parent"
         android:background="@color/black_a50"
         android:visibility="gone"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="28dp"

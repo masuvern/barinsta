@@ -44,7 +44,7 @@ public class DeleteImageIntentService extends IntentService {
             if (file.exists()) {
                 deleted = file.delete();
                 if (!deleted) {
-                    Log.w(TAG, "onHandleIntent: file not delete!");
+                    Log.w(TAG, "onHandleIntent: file not deleted!");
                 }
             } else {
                 deleted = true;

@@ -14,8 +14,14 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.transition.ChangeBounds;
 import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.adapters.FeedAdapterV2;
@@ -24,9 +30,11 @@ import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtBottom;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedViewModel;
+import awais.instagrabber.workers.DownloadWorker;
 
 public class PostsRecyclerView extends RecyclerView {
     private static final String TAG = "PostsRecyclerView";
@@ -146,7 +154,7 @@ public class PostsRecyclerView extends RecyclerView {
         initAdapter();
         initLayoutManager();
         initSelf();
-
+        initDownloadWorkerListener();
     }
 
     private void initTransition() {
@@ -187,6 +195,51 @@ public class PostsRecyclerView extends RecyclerView {
         addOnScrollListener(lazyLoader);
         postFetcher.fetch();
         dispatchFetchStatus();
+    }
+
+    private void initDownloadWorkerListener() {
+        WorkManager.getInstance(getContext())
+                   .getWorkInfosByTagLiveData("download")
+                   .observe(lifeCycleOwner, workInfoList -> {
+                       for (final WorkInfo workInfo : workInfoList) {
+                           if (workInfo == null) continue;
+                           final Data progress = workInfo.getProgress();
+                           final float progressPercent = progress.getFloat(DownloadWorker.PROGRESS, 0);
+                           if (progressPercent != 100) continue;
+                           final String url = progress.getString(DownloadWorker.URL);
+                           final List<FeedModel> feedModels = feedViewModel.getList().getValue();
+                           for (int i = 0; i < feedModels.size(); i++) {
+                               final FeedModel feedModel = feedModels.get(i);
+                               final List<String> displayUrls = getDisplayUrl(feedModel);
+                               if (displayUrls.contains(url)) {
+                                   feedAdapter.notifyItemChanged(i);
+                                   break;
+                               }
+                           }
+                       }
+                   });
+    }
+
+    private List<String> getDisplayUrl(final FeedModel feedModel) {
+        List<String> urls = Collections.emptyList();
+        switch (feedModel.getItemType()) {
+            case MEDIA_TYPE_IMAGE:
+            case MEDIA_TYPE_VIDEO:
+                urls = Collections.singletonList(feedModel.getDisplayUrl());
+                break;
+            case MEDIA_TYPE_SLIDER:
+                final List<PostChild> sliderItems = feedModel.getSliderItems();
+                if (sliderItems != null) {
+                    final ImmutableList.Builder<String> builder = ImmutableList.builder();
+                    for (final PostChild child : sliderItems) {
+                        builder.add(child.getDisplayUrl());
+                    }
+                    urls = builder.build();
+                }
+                break;
+            default:
+        }
+        return urls;
     }
 
     private void updateLayout() {

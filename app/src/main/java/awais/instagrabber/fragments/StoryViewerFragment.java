@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
@@ -55,7 +53,6 @@ import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -65,7 +62,6 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
-import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.QuizAction;
 import awais.instagrabber.asyncs.RespondAction;
@@ -97,8 +93,6 @@ import awaisomereport.LogCollector;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -359,7 +353,8 @@ public class StoryViewerFragment extends Fragment {
             binding.btnBackward.setVisibility(currentFeedStoryIndex == 0 ? View.INVISIBLE : View.VISIBLE);
             binding.btnForward.setVisibility(currentFeedStoryIndex == finalModels.size() - 1 ? View.INVISIBLE : View.VISIBLE);
             binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1), context, true, false));
-            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1), context, false, currentFeedStoryIndex == finalModels.size() - 2));
+            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1), context, false,
+                                                                       currentFeedStoryIndex == finalModels.size() - 2));
         }
 
         binding.imageViewer.setTapListener(simpleOnGestureListener);
@@ -517,7 +512,7 @@ public class StoryViewerFragment extends Fragment {
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (currentStoryMediaId == null) return;
-        final ServiceCallback storyCallback = new ServiceCallback<List<StoryModel>>() {
+        final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
             @Override
             public void onSuccess(final List<StoryModel> storyModels) {
                 fetching = false;
@@ -612,43 +607,13 @@ public class StoryViewerFragment extends Fragment {
     }
 
     private void downloadStory() {
-        int error = 0;
         final Context context = getContext();
         if (context == null) return;
-        if (currentStory != null) {
-            File dir = new File(Environment.getExternalStorageDirectory(), "Download");
-
-            if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-                final String customPath = settingsHelper.getString(FOLDER_PATH);
-                if (!TextUtils.isEmpty(customPath)) dir = new File(customPath);
-            }
-
-            if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(currentStoryUsername))
-                dir = new File(dir, currentStoryUsername);
-
-            if (dir.exists() || dir.mkdirs()) {
-                final String storyUrl = currentStory.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
-                                        ? currentStory.getVideoUrl()
-                                        : currentStory.getStoryUrl();
-                final File saveFile = new File(
-                        dir,
-                        currentStory.getStoryMediaId()
-                                + "_" + currentStory.getTimestamp()
-                                + DownloadUtils.getFileExtensionFromUrl(storyUrl));
-
-                new DownloadAsync(context, storyUrl, saveFile, result -> {
-                    final int toastRes = result != null && result.exists() ? R.string.downloader_complete
-                                                                           : R.string.downloader_error_download_file;
-                    Toast.makeText(context, toastRes, Toast.LENGTH_SHORT).show();
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-            } else error = 1;
-        } else error = 2;
-
-        if (error == 1)
-            Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
-        else if (error == 2)
+        if (currentStory == null) {
             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        DownloadUtils.download(context, currentStory);
     }
 
     private void setupImage() {

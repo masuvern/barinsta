@@ -244,7 +244,6 @@ public class ProfileService extends BaseService {
             }
             final FeedModel feedModel = builder.build();
             feedModels.add(feedModel);
-            // DownloadUtils.checkExistence(downloadDir, customDir, isSlider, model);
         }
         return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
     }

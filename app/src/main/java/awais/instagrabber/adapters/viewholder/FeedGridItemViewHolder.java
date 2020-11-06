@@ -1,5 +1,6 @@
 package awais.instagrabber.adapters.viewholder;
 
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedAdapterV2;
+import awais.instagrabber.asyncs.DownloadedCheckerAsyncTask;
 import awais.instagrabber.databinding.ItemFeedGridBinding;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
@@ -131,5 +133,29 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
                                                               .setImageRequest(requestBuilder)
                                                               .setOldController(binding.postImage.getController());
         binding.postImage.setController(builder.build());
+        final DownloadedCheckerAsyncTask task = new DownloadedCheckerAsyncTask(result -> {
+            final List<Boolean> checkList = result.get(feedModel.getPostId());
+            if (checkList == null || checkList.isEmpty()) {
+                return;
+            }
+            switch (feedModel.getItemType()) {
+                case MEDIA_TYPE_IMAGE:
+                case MEDIA_TYPE_VIDEO:
+                    binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);
+                    binding.downloaded.setImageTintList(ColorStateList.valueOf(itemView.getResources().getColor(R.color.green_A400)));
+                    break;
+                case MEDIA_TYPE_SLIDER:
+                    binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);
+                    boolean allDownloaded = checkList.size() == feedModel.getSliderItems().size();
+                    if (allDownloaded) {
+                        allDownloaded = checkList.stream().allMatch(downloaded -> downloaded);
+                    }
+                    binding.downloaded.setImageTintList(ColorStateList.valueOf(itemView.getResources().getColor(
+                            allDownloaded ? R.color.green_A400 : R.color.yellow_400)));
+                    break;
+                default:
+            }
+        });
+        task.execute(feedModel);
     }
 }

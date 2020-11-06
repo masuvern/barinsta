@@ -26,7 +26,7 @@ public final class StoryModel implements Serializable {
     private String[] mentions;
     private int position;
     private boolean isCurrentSlide = false;
-    private boolean canReply = false;
+    private final boolean canReply;
 
     public StoryModel(final String storyMediaId, final String storyUrl, final MediaItemType itemType,
                       final long timestamp, final String username, final String userId, final boolean canReply) {
