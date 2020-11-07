@@ -26,24 +26,26 @@ public class AboutFragment extends BasePreferencesFragment {
         generalCategory.addPreference(getRepoPreference());
         generalCategory.addPreference(getFeedbackPreference());
 
-        final PreferenceCategory thirdPartyCategory = new PreferenceCategory(context);
-        screen.addPreference(thirdPartyCategory);
-        thirdPartyCategory.setTitle(R.string.about_category_3pt);
-        //thirdPartyCategory.setSummary(R.string.about_category_3pt_summary);
-        thirdPartyCategory.setIconSpaceReserved(false);
-        // alphabetical order!!!
-        thirdPartyCategory.addPreference(getExoPlayerPreference());
-        thirdPartyCategory.addPreference(getFrescoPreference());
-        thirdPartyCategory.addPreference(getJsoupPreference());
-        thirdPartyCategory.addPreference(getMDIPreference());
-        thirdPartyCategory.addPreference(getRetrofitPreference());
-
         final PreferenceCategory licenseCategory = new PreferenceCategory(context);
         screen.addPreference(licenseCategory);
         licenseCategory.setTitle(R.string.about_category_license);
         licenseCategory.setIconSpaceReserved(false);
         licenseCategory.addPreference(getLicensePreference());
         licenseCategory.addPreference(getLiabilityPreference());
+
+        final PreferenceCategory thirdPartyCategory = new PreferenceCategory(context);
+        screen.addPreference(thirdPartyCategory);
+        thirdPartyCategory.setTitle(R.string.about_category_3pt);
+        //thirdPartyCategory.setSummary(R.string.about_category_3pt_summary);
+        thirdPartyCategory.setIconSpaceReserved(false);
+        // alphabetical order!!!
+        thirdPartyCategory.addPreference(getAutolinkPreference());
+        thirdPartyCategory.addPreference(getExoPlayerPreference());
+        thirdPartyCategory.addPreference(getFrescoPreference());
+        thirdPartyCategory.addPreference(getIcafePreference());
+        thirdPartyCategory.addPreference(getJsoupPreference());
+        thirdPartyCategory.addPreference(getMDIPreference());
+        thirdPartyCategory.addPreference(getRetrofitPreference());
     }
 
     private Preference getDocsPreference() {
@@ -168,6 +170,38 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setOnPreferenceClickListener(p -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("https://materialdesignicons.com/"));
+            startActivity(intent);
+            return true;
+        });
+        return preference;
+    }
+
+    private Preference getAutolinkPreference() {
+        final Context context = getContext();
+        if (context == null) return null;
+        final Preference preference = new Preference(context);
+        preference.setTitle("AutoLinkTextViewV2");
+        preference.setSummary("Copyright (C) 2019 Arman Chatikyan. Apache Version 2.0.");
+        preference.setIconSpaceReserved(false);
+        preference.setOnPreferenceClickListener(p -> {
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://github.com/armcha/AutoLinkTextViewV2"));
+            startActivity(intent);
+            return true;
+        });
+        return preference;
+    }
+
+    private Preference getIcafePreference() {
+        final Context context = getContext();
+        if (context == null) return null;
+        final Preference preference = new Preference(context);
+        preference.setTitle("ICAFE");
+        preference.setSummary("Copyright (C) 2014-2019 Wen Yu. Eclipse Version 2.0.");
+        preference.setIconSpaceReserved(false);
+        preference.setOnPreferenceClickListener(p -> {
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://github.com/dragon66/icafe"));
             startActivity(intent);
             return true;
         });
