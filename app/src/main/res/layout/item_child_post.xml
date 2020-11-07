@@ -33,5 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:drawable/gallery_thumb"
-        android:visibility="gone" />
+        android:visibility="gone"
+        tools:visibility="visible" />
 </FrameLayout>

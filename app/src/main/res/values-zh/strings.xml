@@ -6,8 +6,6 @@
     <string name="action_download">下载</string>
     <string name="action_search">搜索用户名…</string>
     <string name="action_compare">比较</string>
-    <string name="single_like">次赞</string>
-    <string name="multiple_likes">次赞</string>
     <string name="clipboard_error">复制文字时出错</string>
     <string name="clipboard_copied">已复制到剪贴板！</string>
     <string name="report">报告</string>

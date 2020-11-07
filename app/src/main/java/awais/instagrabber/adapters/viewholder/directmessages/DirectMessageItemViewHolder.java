@@ -71,6 +71,10 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
         this.binding.messageCard.addView(view);
     }
 
+    public int getItemMargin() {
+        return itemMargin;
+    }
+
     public abstract void bindItem(final DirectItemModel directItemModel);
 
     @Nullable
@@ -87,5 +91,9 @@ public abstract class DirectMessageItemViewHolder extends RecyclerView.ViewHolde
             return result;
         }
         return null;
+    }
+
+    protected void removeElevation() {
+        binding.messageCard.setCardElevation(0);
     }
 }

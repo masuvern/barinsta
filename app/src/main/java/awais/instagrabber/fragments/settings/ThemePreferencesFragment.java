@@ -51,7 +51,7 @@ public class ThemePreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             final int resourceId = lightThemeValues.getResourceId(i, -1);
             if (resourceId < 0) continue;
-            values[i] = String.valueOf(resourceId);
+            values[i] = getResources().getResourceEntryName(resourceId);
         }
         lightThemeValues.recycle();
         preference.setKey(Constants.PREF_LIGHT_THEME);
@@ -76,7 +76,7 @@ public class ThemePreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             final int resourceId = darkThemeValues.getResourceId(i, -1);
             if (resourceId < 0) continue;
-            values[i] = String.valueOf(resourceId);
+            values[i] = getResources().getResourceEntryName(resourceId);
         }
         darkThemeValues.recycle();
         preference.setKey(Constants.PREF_DARK_THEME);

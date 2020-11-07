@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/videoHolder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,41 +9,9 @@
         android:id="@+id/item_feed_top"
         layout="@layout/item_feed_top" />
 
-    <ViewSwitcher
-        android:id="@+id/view_switcher"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!--<androidx.appcompat.widget.AppCompatImageView-->
-        <!--    android:id="@+id/thumbnail"-->
-        <!--    android:layout_width="match_parent"-->
-        <!--    android:layout_height="wrap_content"-->
-        <!--    android:adjustViewBounds="true"-->
-        <!--    android:scaleType="fitCenter"/>-->
-        <FrameLayout
-            android:id="@+id/thumbnail_parent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.facebook.drawee.view.SimpleDraweeView
-                android:id="@+id/thumbnail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:actualImageScaleType="fitCenter" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                app:srcCompat="@drawable/exo_controls_play" />
-        </FrameLayout>
-
-        <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/playerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:show_timeout="1000" />
-    </ViewSwitcher>
+    <include
+        android:id="@+id/video_post"
+        layout="@layout/layout_video_player_with_thumbnail" />
 
     <include
         android:id="@+id/item_feed_bottom"

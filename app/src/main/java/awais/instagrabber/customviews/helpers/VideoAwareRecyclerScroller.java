@@ -70,7 +70,7 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
             final FeedVideoViewHolder videoHolder = getFirstVideoHolder(recyclerView, firstVisibleItemPos, lastVisibleItemPos);
             if (videoHolder == null || videoHolder.getCurrentFeedModel() == null) {
                 if (currentlyPlayingViewHolder != null) {
-                    currentlyPlayingViewHolder.stopPlaying();
+                    // currentlyPlayingViewHolder.stopPlaying();
                     currentlyPlayingViewHolder = null;
                 }
                 return;
@@ -80,9 +80,9 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
                 return;
             }
             if (currentlyPlayingViewHolder != null) {
-                currentlyPlayingViewHolder.stopPlaying();
+                // currentlyPlayingViewHolder.stopPlaying();
             }
-            videoHolder.startPlaying();
+            // videoHolder.startPlaying();
             currentlyPlayingViewHolder = videoHolder;
         }
         // boolean processFirstItem = false, processLastItem = false;
@@ -196,7 +196,7 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
         for (int pos = firstVisibleItemPos; pos <= lastVisibleItemPos; pos++) {
             final View view = layoutManager.findViewByPosition(pos);
             if (view != null && view.getId() == R.id.videoHolder) {
-                final View viewSwitcher = view.findViewById(R.id.view_switcher);
+                final View viewSwitcher = view.findViewById(R.id.root);
                 if (viewSwitcher == null) {
                     continue;
                 }
@@ -220,113 +220,113 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
         if (currentlyPlayingViewHolder == null) {
             return;
         }
-        currentlyPlayingViewHolder.startPlaying();
+        // currentlyPlayingViewHolder.startPlaying();
     }
 
     public void stopPlaying() {
         if (currentlyPlayingViewHolder == null) {
             return;
         }
-        currentlyPlayingViewHolder.stopPlaying();
+        // currentlyPlayingViewHolder.stopPlaying();
     }
 
-//     private synchronized void attachVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
-//         synchronized (LOCK) {
-//             if (recyclerView != null) {
-//                 final RecyclerView.Adapter<?> adapter = recyclerView.getAdapter();
-//                 if (adapter instanceof FeedAdapter) {
-//                     final SimpleExoPlayer pagerPlayer = ((FeedAdapter) adapter).pagerPlayer;
-//                     if (pagerPlayer != null) pagerPlayer.setPlayWhenReady(false);
-//                 }
-//             }
-//             if (itemView == null) {
-//                 return;
-//             }
-//             final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
-//             final FeedModel feedModel = feedModels.get(itemPos);
-//             // loadVideo(itemPos, itemView, shouldAutoplay, feedModel);
-//         }
-//     }
-//
-//     private void loadVideo(final int itemPos, final View itemView, final boolean shouldAutoplay, final FeedModel feedModel) {
-//         final PlayerView playerView = itemView.findViewById(R.id.playerView);
-//         if (playerView == null) {
-//             return;
-//         }
-//         if (player != null) {
-//             player.stop(true);
-//             player.release();
-//             player = null;
-//         }
-//
-//         player = new SimpleExoPlayer.Builder(context)
-//                 .setUseLazyPreparation(!shouldAutoplay)
-//                 .build();
-//         player.setPlayWhenReady(shouldAutoplay);
-//
-//         final View btnComments = itemView.findViewById(R.id.btnComments);
-//         if (btnComments != null) {
-//             if (feedModel.getCommentsCount() <= 0) btnComments.setEnabled(false);
-//             else {
-//                 btnComments.setTag(feedModel);
-//                 btnComments.setEnabled(true);
-//                 btnComments.setOnClickListener(commentClickListener);
-//             }
-//         }
-//         playerView.setPlayer(player);
-//         btnMute = itemView.findViewById(R.id.btnMute);
-//         float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
-//         if (vol == 0f && Utils.sessionVolumeFull) vol = 1f;
-//         player.setVolume(vol);
-//
-//         if (btnMute != null) {
-//             btnMute.setVisibility(View.VISIBLE);
-//             btnMute.setImageResource(vol == 0f ? R.drawable.vol : R.drawable.mute);
-//             btnMute.setOnClickListener(muteClickListener);
-//         }
-//         final DataSource.Factory factory = cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory;
-//         final ProgressiveMediaSource.Factory sourceFactory = new ProgressiveMediaSource.Factory(factory);
-//         final ProgressiveMediaSource mediaSource = sourceFactory.createMediaSource(Uri.parse(feedModel.getDisplayUrl()));
-//
-//         player.setRepeatMode(Player.REPEAT_MODE_ALL);
-//         player.prepare(mediaSource);
-//         player.setVolume(vol);
-//
-//         playerView.setOnClickListener(v -> player.setPlayWhenReady(!player.getPlayWhenReady()));
-//
-//         if (videoChangeCallback != null) videoChangeCallback.playerChanged(itemPos, player);
-//     }
-//
-//     private void releaseVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
-// //                    Log.d("AWAISKING_APP", "release: " + itemPos);
-// //         if (player != null) {
-// //             player.stop(true);
-// //             player.release();
-// //         }
-// //         player = null;
-//     }
-//
-//     private void playVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
-// //                    if (player != null) {
-// //                        final int playbackState = player.getPlaybackState();
-// //                        if (!player.isPlaying()
-// //                               || playbackState == Player.STATE_READY || playbackState == Player.STATE_ENDED
-// //                        ) {
-// //                            player.setPlayWhenReady(true);
-// //                        }
-// //                    }
-// //                    if (player != null) {
-// //                        player.setPlayWhenReady(true);
-// //                        player.getPlaybackState();
-// //                    }
-//     }
-//
-//     private void stopVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
-//         if (player != null) {
-//             player.setPlayWhenReady(false);
-//             player.getPlaybackState();
-//         }
-//     }
+    //     private synchronized void attachVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
+    //         synchronized (LOCK) {
+    //             if (recyclerView != null) {
+    //                 final RecyclerView.Adapter<?> adapter = recyclerView.getAdapter();
+    //                 if (adapter instanceof FeedAdapter) {
+    //                     final SimpleExoPlayer pagerPlayer = ((FeedAdapter) adapter).pagerPlayer;
+    //                     if (pagerPlayer != null) pagerPlayer.setPlayWhenReady(false);
+    //                 }
+    //             }
+    //             if (itemView == null) {
+    //                 return;
+    //             }
+    //             final boolean shouldAutoplay = settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS);
+    //             final FeedModel feedModel = feedModels.get(itemPos);
+    //             // loadVideo(itemPos, itemView, shouldAutoplay, feedModel);
+    //         }
+    //     }
+    //
+    //     private void loadVideo(final int itemPos, final View itemView, final boolean shouldAutoplay, final FeedModel feedModel) {
+    //         final PlayerView playerView = itemView.findViewById(R.id.playerView);
+    //         if (playerView == null) {
+    //             return;
+    //         }
+    //         if (player != null) {
+    //             player.stop(true);
+    //             player.release();
+    //             player = null;
+    //         }
+    //
+    //         player = new SimpleExoPlayer.Builder(context)
+    //                 .setUseLazyPreparation(!shouldAutoplay)
+    //                 .build();
+    //         player.setPlayWhenReady(shouldAutoplay);
+    //
+    //         final View btnComments = itemView.findViewById(R.id.btnComments);
+    //         if (btnComments != null) {
+    //             if (feedModel.getCommentsCount() <= 0) btnComments.setEnabled(false);
+    //             else {
+    //                 btnComments.setTag(feedModel);
+    //                 btnComments.setEnabled(true);
+    //                 btnComments.setOnClickListener(commentClickListener);
+    //             }
+    //         }
+    //         playerView.setPlayer(player);
+    //         btnMute = itemView.findViewById(R.id.btnMute);
+    //         float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
+    //         if (vol == 0f && Utils.sessionVolumeFull) vol = 1f;
+    //         player.setVolume(vol);
+    //
+    //         if (btnMute != null) {
+    //             btnMute.setVisibility(View.VISIBLE);
+    //             btnMute.setImageResource(vol == 0f ? R.drawable.vol : R.drawable.mute);
+    //             btnMute.setOnClickListener(muteClickListener);
+    //         }
+    //         final DataSource.Factory factory = cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory;
+    //         final ProgressiveMediaSource.Factory sourceFactory = new ProgressiveMediaSource.Factory(factory);
+    //         final ProgressiveMediaSource mediaSource = sourceFactory.createMediaSource(Uri.parse(feedModel.getDisplayUrl()));
+    //
+    //         player.setRepeatMode(Player.REPEAT_MODE_ALL);
+    //         player.prepare(mediaSource);
+    //         player.setVolume(vol);
+    //
+    //         playerView.setOnClickListener(v -> player.setPlayWhenReady(!player.getPlayWhenReady()));
+    //
+    //         if (videoChangeCallback != null) videoChangeCallback.playerChanged(itemPos, player);
+    //     }
+    //
+    //     private void releaseVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
+    // //                    Log.d("AWAISKING_APP", "release: " + itemPos);
+    // //         if (player != null) {
+    // //             player.stop(true);
+    // //             player.release();
+    // //         }
+    // //         player = null;
+    //     }
+    //
+    //     private void playVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
+    // //                    if (player != null) {
+    // //                        final int playbackState = player.getPlaybackState();
+    // //                        if (!player.isPlaying()
+    // //                               || playbackState == Player.STATE_READY || playbackState == Player.STATE_ENDED
+    // //                        ) {
+    // //                            player.setPlayWhenReady(true);
+    // //                        }
+    // //                    }
+    // //                    if (player != null) {
+    // //                        player.setPlayWhenReady(true);
+    // //                        player.getPlaybackState();
+    // //                    }
+    //     }
+    //
+    //     private void stopVideo(final int itemPos, final RecyclerView recyclerView, final View itemView) {
+    //         if (player != null) {
+    //             player.setPlayWhenReady(false);
+    //             player.getPlaybackState();
+    //         }
+    //     }
 
     public interface VideoChangeCallback {
         void playerChanged(final int itemPos, final SimpleExoPlayer player);

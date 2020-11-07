@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black_a80">
+
+    <!--<FrameLayout-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="match_parent">-->
+
+    <awais.instagrabber.customviews.drawee.DraggableZoomableDraweeView
+        android:id="@+id/post_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:transitionName="post_image"
+        app:actualImageScaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@mipmap/ic_launcher"
+        tools:visibility="gone" />
+    <!--</FrameLayout>-->
+
+    <include
+        android:id="@+id/video_post"
+        layout="@layout/layout_video_player_with_thumbnail"
+        android:visibility="gone" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/slider_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <View
+        android:id="@+id/top_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/black_a80"
+        app:layout_constraintBottom_toBottomOf="@id/profile_pic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <awais.instagrabber.customviews.ProfilePicView
+        android:id="@+id/profile_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:transitionName="profile_pic"
+        app:layout_constraintBottom_toBottomOf="@id/top_bg"
+        app:layout_constraintEnd_toStartOf="@id/title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/top_bg"
+        app:size="regular" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/subtitle"
+        app:layout_constraintEnd_toStartOf="@id/isVerified"
+        app:layout_constraintStart_toEndOf="@id/profile_pic"
+        app:layout_constraintTop_toTopOf="@id/profile_pic"
+        tools:text="Username Username Username" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/isVerified"
+        android:layout_width="20dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/title"
+        app:layout_constraintStart_toEndOf="@id/title"
+        app:layout_constraintTop_toTopOf="@id/title"
+        app:srcCompat="@drawable/verified"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/righttitle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:textColor="@color/grey_600"
+        app:layout_constraintBottom_toBottomOf="@id/title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/isVerified"
+        app:layout_constraintTop_toTopOf="@id/title"
+        tools:text="Full name Full name Full name Full name Full name Full name Full name " />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/profile_pic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        tools:text="Location"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/media_counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/rounder_corner_semi_black_bg"
+        android:gravity="center"
+        android:padding="5dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bg"
+        tools:text="1/5"
+        tools:visibility="visible" />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@null"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_bg_barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/caption_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black_a80"
+            app:behavior_hideable="true"
+            app:behavior_peekHeight="100dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <ScrollView
+                android:id="@+id/bottom_scroll_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null">
+
+                <awais.instagrabber.customviews.RamboTextViewV2
+                    android:id="@+id/caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="@null"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:minHeight="100dp"
+                    android:padding="16dp"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="@color/white"
+                    tools:text="Text text text" />
+            </ScrollView>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <include
+        android:id="@+id/player_controls"
+        layout="@layout/layout_exo_custom_controls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
+
+    <View
+        android:id="@+id/bottom_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/black_a80"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bottom_bg_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="bottom_bg,likes_count,comments_count" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/likes_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttons_barrier"
+        app:layout_constraintEnd_toStartOf="@id/comments_count"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        tools:text="9999999999 likes"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/comments_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttons_barrier"
+        app:layout_constraintEnd_toStartOf="@id/views_count"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/likes_count"
+        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        tools:text="9999999 comments"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/views_count"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttons_barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/comments_count"
+        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        tools:text="9999999999 views"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/buttons_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="likes_count,comments_count,views_count" />
+
+    <!--android:text="@string/caption"-->
+    <!--app:iconGravity="top"-->
+    <!--android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/caption_toggle"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="@drawable/ic_notes_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/like"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <!--android:text="@string/like_without_count"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"
+        app:iconGravity="top"-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/like"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="@drawable/ic_not_liked"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/comment"
+        app:layout_constraintStart_toEndOf="@id/caption_toggle"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <!--android:text="@string/comment"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"
+        app:iconGravity="top"-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/comment"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="@drawable/ic_outline_comments_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/player_controls_toggle"
+        app:layout_constraintStart_toEndOf="@id/like"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <!--android:text="@string/controls"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"
+        app:iconGravity="top"-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/player_controls_toggle"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="gone"
+        app:icon="@drawable/ic_play_circle_outline_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/save"
+        app:layout_constraintStart_toEndOf="@id/comment"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <!--android:text="@string/save"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"
+        app:iconGravity="top"-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/save"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="@drawable/ic_outline_class_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/share"
+        app:layout_constraintStart_toEndOf="@id/player_controls_toggle"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/share"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="?attr/actionModeShareDrawable"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/download"
+        app:layout_constraintStart_toEndOf="@id/save"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+    <!--android:text="@string/action_download"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textColor="@color/white"
+        app:iconGravity="top"-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/download"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        app:icon="@drawable/ic_download"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/share"
+        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
+        app:rippleColor="@color/grey_300"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

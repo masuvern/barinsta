@@ -6,8 +6,6 @@
     <string name="action_download">Téléchargement</string>
     <string name="action_search">Rechercher par nom d\'utilisateur…</string>
     <string name="action_compare">Comparer</string>
-    <string name="single_like">j\'aime</string>
-    <string name="multiple_likes">j\'aimes</string>
     <string name="clipboard_error">Erreur lors de la copie des éléments</string>
     <string name="clipboard_copied">Copié dans le presse-papier !</string>
     <string name="report">Reporter</string>

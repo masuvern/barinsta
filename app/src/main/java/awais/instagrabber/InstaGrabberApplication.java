@@ -32,12 +32,16 @@ public final class InstaGrabberApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // final Set<RequestListener> requestListeners = new HashSet<>();
+        // requestListeners.add(new RequestLoggingListener());
         final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
                 .newBuilder(this)
                 // .setMainDiskCacheConfig(diskCacheConfig)
+                // .setRequestListeners(requestListeners)
                 .setDownsampleEnabled(true)
                 .build();
         Fresco.initialize(this, imagePipelineConfig);
+        // FLog.setMinimumLoggingLevel(FLog.VERBOSE);
 
         if (BuildConfig.DEBUG) {
             try {

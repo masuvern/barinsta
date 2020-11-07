@@ -7,37 +7,39 @@
     android:animateLayoutChanges="true"
     android:background="?attr/colorSurface">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        app:elevation="0dp">
+    <!--<com.google.android.material.appbar.AppBarLayout-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:background="?attr/colorSurface"-->
+    <!--    app:elevation="0dp">-->
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|snap|enterAlways">
+    <!--    <com.google.android.material.appbar.CollapsingToolbarLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_scrollFlags="scroll|snap|enterAlways">-->
 
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/discoverType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/discover_placeholder"
-                android:spinnerMode="dialog" />
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+    <!--        <androidx.appcompat.widget.AppCompatSpinner-->
+    <!--            android:id="@+id/discoverType"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:entries="@array/discover_placeholder"-->
+    <!--            android:spinnerMode="dialog" />-->
+    <!--    </com.google.android.material.appbar.CollapsingToolbarLayout>-->
+    <!--</com.google.android.material.appbar.AppBarLayout>-->
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/discoverSwipeRefreshLayout"
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/discoverPosts"
+            android:id="@+id/topics_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            tools:listitem="@layout/item_post" />
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:itemCount="10"
+            tools:listitem="@layout/item_discover_topic" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </awais.instagrabber.customviews.helpers.NestedCoordinatorLayout>

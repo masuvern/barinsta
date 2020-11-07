@@ -18,7 +18,6 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.asyncs.GetActivityAsyncTask;
 import awais.instagrabber.asyncs.GetActivityAsyncTask.NotificationCounts;
 import awais.instagrabber.asyncs.GetActivityAsyncTask.OnTaskCompleteListener;
 import awais.instagrabber.utils.Constants;
@@ -37,8 +36,8 @@ public class ActivityCheckerService extends Service {
     private final IBinder binder = new LocalBinder();
     private final Runnable runnable = () -> {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(onTaskCompleteListener);
-        activityAsyncTask.execute(cookie);
+        // final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(onTaskCompleteListener);
+        // activityAsyncTask.execute(cookie);
     };
 
     public class LocalBinder extends Binder {

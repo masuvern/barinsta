@@ -6,8 +6,6 @@
     <string name="action_download">Tải xuống</string>
     <string name="action_search">Tìm tên người dùng…</string>
     <string name="action_compare">So sánh</string>
-    <string name="single_like">thích</string>
-    <string name="multiple_likes">thích</string>
     <string name="clipboard_error">Lỗi khi sao chép</string>
     <string name="clipboard_copied">Đã sao chép vào clipboard!</string>
     <string name="report">Báo cáo</string>

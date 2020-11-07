@@ -5,6 +5,25 @@
     android:id="@+id/profile_nav_graph"
     app:startDestination="@id/profileFragment">
 
+    <include app:graph="@navigation/comments_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_commentsViewerFragment"
+        app:destination="@id/comments_nav_graph">
+        <argument
+            android:name="shortCode"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <include app:graph="@navigation/hashtag_nav_graph" />
 
     <action
@@ -14,22 +33,6 @@
             android:name="hashtag"
             app:argType="string"
             app:nullable="false" />
-    </action>
-
-    <include app:graph="@navigation/post_view_nav_graph" />
-
-    <action
-        android:id="@+id/action_global_postViewFragment"
-        app:destination="@id/post_view_nav_graph">
-        <argument
-            android:name="index"
-            app:argType="integer" />
-        <argument
-            android:name="idOrCodeArray"
-            app:argType="string[]" />
-        <argument
-            android:name="isId"
-            app:argType="boolean" />
     </action>
 
     <include app:graph="@navigation/comments_nav_graph" />

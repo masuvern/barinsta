@@ -28,7 +28,6 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import java.io.File;
 
 import awais.instagrabber.R;
-import awais.instagrabber.asyncs.DownloadAsync;
 import awais.instagrabber.asyncs.ProfilePictureFetcher;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
 import awais.instagrabber.interfaces.FetchListener;
@@ -147,54 +146,9 @@ public class ProfilePicDialogFragment extends DialogFragment {
         if (context == null) return;
         if (dir.exists() || dir.mkdirs()) {
             final File saveFile = new File(dir, name + '_' + System.currentTimeMillis() + ".jpg");
-            new DownloadAsync(context,
-                              url,
-                              saveFile,
-                              result -> {
-                                  final int toastRes = result != null && result.exists() ?
-                                                       R.string.downloader_downloaded_in_folder : R.string.downloader_error_download_file;
-                                  Toast.makeText(context, toastRes, Toast.LENGTH_SHORT).show();
-                              })
-                    .setItems(null, name)
-                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            DownloadUtils.download(context, url, saveFile.getAbsolutePath());
             return;
         }
         Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
     }
-
-    // private void showImageInfo() {
-    //     final Drawable drawable = profileBinding.imageViewer.getDrawable();
-    //     if (drawable != null) {
-    //         final StringBuilder info = new StringBuilder(
-    //                 getString(R.string.profile_viewer_imageinfo, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight()));
-    //         if (drawable instanceof BitmapDrawable) {
-    //             final Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-    //             if (bitmap != null) {
-    //                 final String colorDepthPrefix = getString(R.string.profile_viewer_colordepth_prefix);
-    //                 switch (bitmap.getConfig()) {
-    //                     case ALPHA_8:
-    //                         info.append(colorDepthPrefix).append(" 8-bits(A)");
-    //                         break;
-    //                     case RGB_565:
-    //                         info.append(colorDepthPrefix).append(" 16-bits-A");
-    //                         break;
-    //                     case ARGB_4444:
-    //                         info.append(colorDepthPrefix).append(" 16-bits+A");
-    //                         break;
-    //                     case ARGB_8888:
-    //                         info.append(colorDepthPrefix).append(" 32-bits+A");
-    //                         break;
-    //                     case RGBA_F16:
-    //                         info.append(colorDepthPrefix).append(" 64-bits+A");
-    //                         break;
-    //                     case HARDWARE:
-    //                         info.append(colorDepthPrefix).append(" auto");
-    //                         break;
-    //                 }
-    //             }
-    //         }
-    //         profileBinding.imageInfo.setText(info);
-    //         profileBinding.imageInfo.setVisibility(View.VISIBLE);
-    //     }
-    // }
 }

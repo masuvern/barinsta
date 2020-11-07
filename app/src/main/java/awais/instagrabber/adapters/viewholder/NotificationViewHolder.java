@@ -42,6 +42,9 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
                 text = R.string.mention_notif;
                 subtext = model.getText();
                 break;
+            case TAGGED:
+                text = R.string.tagged_notif;
+                break;
             case FOLLOW:
                 text = R.string.follow_notif;
                 break;

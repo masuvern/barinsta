@@ -42,6 +42,8 @@ public interface ZoomableController {
          * @param transform the current transform matrix
          */
         void onTransformEnd(Matrix transform);
+
+        void onTranslationLimited(float offsetLeft, float offsetTop);
     }
 
     /**

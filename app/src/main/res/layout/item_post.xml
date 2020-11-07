@@ -47,7 +47,7 @@
         android:layout_height="match_parent"
         android:background="#8A000000"
         android:visibility="gone"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="28dp"

@@ -1,118 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    tools:viewBindingIgnore="true">
+    android:background="?android:selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal"
+    android:padding="8dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/ivProfilePic"
+        android:layout_width="@dimen/simple_item_picture_size"
+        android:layout_height="@dimen/simple_item_picture_size"
+        android:padding="4dp"
+        app:actualImageScaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:roundAsCircle="true"
+        tools:background="@mipmap/ic_launcher" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvUsername"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?android:selectableItemBackground"
-        android:orientation="horizontal">
+        android:ellipsize="marquee"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="2dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="?android:textColorPrimary"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="username" />
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/ivProfilePic"
-            android:layout_width="@dimen/simple_item_picture_size"
-            android:layout_height="@dimen/simple_item_picture_size"
-            android:padding="4dp"
-            app:actualImageScaleType="centerCrop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:roundAsCircle="true" />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/isVerified"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitStart"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvUsername"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvUsername"
+        app:layout_constraintTop_toTopOf="@id/tvUsername"
+        app:srcCompat="@drawable/verified"
+        tools:visibility="visible" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvUsername"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:paddingStart="4dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="4dp"
-            android:paddingBottom="2dp"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="?android:textColorPrimary"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/tvComment"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="username" />
-
-        <awais.instagrabber.customviews.RamboTextView
-            android:id="@+id/tvComment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:autoLink="web|email"
-            android:ellipsize="end"
-            android:linksClickable="true"
-            android:paddingStart="4dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="4dp"
-            android:paddingBottom="2dp"
-            android:textAppearance="@style/TextAppearance.AppCompat"
-            app:layout_constraintBottom_toTopOf="@id/tvLikes"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-            app:layout_constraintTop_toBottomOf="@id/tvUsername"
-            tools:text="comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment " />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvLikes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:paddingStart="4dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="4dp"
-            android:paddingBottom="2dp"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tvDate"
-            app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-            app:layout_constraintTop_toBottomOf="@id/tvComment"
-            tools:text="likes" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:gravity="end"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textStyle="italic"
-            app:layout_constraintBaseline_toBaselineOf="@id/tvLikes"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tvLikes"
-            app:layout_constraintTop_toBottomOf="@id/tvComment"
-            tools:text="long date................................" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChildComments"
-        android:layout_width="match_parent"
+    <awais.instagrabber.customviews.RamboTextViewV2
+        android:id="@+id/tvComment"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginLeft="40dp"
-        app:layoutManager="LinearLayoutManager"
-        tools:itemCount="5"
-        tools:listitem="@layout/item_comment_small" />
+        android:autoLink="web|email"
+        android:ellipsize="end"
+        android:linksClickable="true"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="2dp"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        app:layout_constraintBottom_toTopOf="@id/tvLikes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+        tools:text="comment comment comment comment comment comment comment comment comment comment comment comment
+        comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
-        android:background="#32888888" />
-</LinearLayout>
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvLikes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="2dp"
+        android:scrollbars="none"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tvDate"
+        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+        app:layout_constraintTop_toBottomOf="@id/tvComment"
+        tools:text="likes" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:gravity="end"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textStyle="italic"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvLikes"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvLikes"
+        app:layout_constraintTop_toBottomOf="@id/tvComment"
+        tools:text="long date................................" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--<androidx.recyclerview.widget.RecyclerView-->
+    <!--    android:id="@+id/rvChildComments"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:layout_marginStart="40dp"-->
+    <!--    android:layout_marginLeft="40dp"-->
+    <!--    app:layoutManager="LinearLayoutManager"-->
+    <!--    tools:itemCount="5"-->
+    <!--    tools:listitem="@layout/item_comment_small" />-->
+
+    <!--<View-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="1dp"-->
+    <!--    android:layout_gravity="bottom"-->
+    <!--    android:layout_marginStart="4dp"-->
+    <!--    android:layout_marginEnd="4dp"-->
+    <!--    android:layout_marginBottom="4dp"-->
+    <!--    android:background="#32888888" />-->

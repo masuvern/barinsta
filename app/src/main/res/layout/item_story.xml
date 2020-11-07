@@ -5,7 +5,7 @@
     android:layout_height="@dimen/story_item_height"
     android:clickable="true"
     android:focusable="true"
-    android:layout_margin="8dp"
+    android:layout_margin="4dp"
     android:foreground="?android:selectableItemBackground">
 
     <com.facebook.drawee.view.SimpleDraweeView

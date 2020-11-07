@@ -24,10 +24,12 @@ import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.navigation.NavBackStackEntry;
@@ -39,10 +41,10 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -50,9 +52,12 @@ import java.util.Map;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.customviews.helpers.CustomHideBottomViewOnScrollBehavior;
 import awais.instagrabber.databinding.ActivityMainBinding;
+import awais.instagrabber.fragments.PostViewV2Fragment;
+import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
@@ -94,9 +99,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             R.id.notificationsViewer,
             R.id.themePreferencesFragment,
             R.id.favoritesFragment,
-            R.id.backupPreferencesFragment);
+            R.id.backupPreferencesFragment,
+            R.id.directMessagesThreadFragment
+    );
     private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
-    private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = Collections.singletonList(R.id.commentsViewerFragment);
+    private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = ImmutableList.of(R.id.commentsViewerFragment,
+                                                                                                        R.id.directMessagesThreadFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
 
     private ActivityMainBinding binding;
@@ -157,10 +165,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             bindActivityCheckerService();
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);
-
-        // Log.d("austin_debug", "dir: "+Arrays.toString(StorageUtil.getStorageDirectories(getApplicationContext())));
-        // final File sdcard = new File(StorageUtil.getStorageDirectories(getApplicationContext())[0]);
-        // Log.d("austin_debug", "files: "+Arrays.toString(sdcard.listFiles()));
     }
 
     @Override
@@ -222,7 +226,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     @Override
     public void onBackPressed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isTaskRoot() && isBackStackEmpty) {
+        if (isTaskRoot() && isBackStackEmpty) {
             finishAfterTransition();
         } else {
             super.onBackPressed();
@@ -403,11 +407,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
         final List<Integer> mainNavList = getMainNavList(main_nav_ids);
         if (setDefaultFromSettings) {
-            final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
+            final String defaultTabResNameString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
-                final int defaultNavId = TextUtils.isEmpty(defaultTabIdString)
-                                         ? R.navigation.profile_nav_graph
-                                         : Integer.parseInt(defaultTabIdString);
+                int navId = 0;
+                if (!TextUtils.isEmpty(defaultTabResNameString)) {
+                    navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
+                }
+                final int defaultNavId = navId <= 0 ? R.navigation.profile_nav_graph
+                                                    : navId;
                 final int index = mainNavList.indexOf(defaultNavId);
                 if (index >= 0) firstFragmentGraphIndex = index;
                 setBottomNavSelectedItem(defaultNavId);
@@ -422,8 +429,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 R.id.main_nav_host,
                 getIntent(),
                 firstFragmentGraphIndex);
-        navControllerLiveData.observe(this, this::setupNavigation);
+        navControllerLiveData.observe(this, navController -> setupNavigation(binding.toolbar, navController));
         currentNavControllerLiveData = navControllerLiveData;
+        binding.bottomNavView.setOnNavigationItemReselectedListener(item -> {
+            // Log.d(TAG, "setupBottomNavigationBar: item: " + item);
+            final Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.main_nav_host);
+            if (navHostFragment != null) {
+                final Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
+                if (fragment instanceof FeedFragment) {
+                    ((FeedFragment) fragment).scrollToTop();
+                }
+            }
+        });
     }
 
     private void setBottomNavSelectedItem(final int navId) {
@@ -447,8 +464,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return mainNavList;
     }
 
-    private void setupNavigation(final NavController navController) {
-        NavigationUI.setupWithNavController(binding.toolbar, navController);
+    private void setupNavigation(final Toolbar toolbar, final NavController navController) {
+        if (navController == null) {
+            return;
+        }
+        NavigationUI.setupWithNavController(toolbar, navController);
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             // below is a hack to check if we are at the end of the current stack, to setup the search view
             binding.appBarLayout.setExpanded(true, true);
@@ -572,13 +592,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private void showPostView(@NonNull final IntentModel intentModel) {
         final String shortCode = intentModel.getText();
         // Log.d(TAG, "shortCode: " + shortCode);
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (currentNavControllerLiveData == null || navController == null) return;
-        final Bundle bundle = new Bundle();
-        bundle.putStringArray("idOrCodeArray", new String[]{shortCode});
-        bundle.putInt("index", 0);
-        bundle.putBoolean("isId", false);
-        navController.navigate(R.id.action_global_postViewFragment, bundle);
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setView(R.layout.dialog_opening_post)
+                .create();
+        alertDialog.show();
+        new PostFetcher(shortCode, feedModel -> {
+            final PostViewV2Fragment fragment = PostViewV2Fragment
+                    .builder(feedModel)
+                    .build();
+            fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+            fragment.show(getSupportFragmentManager(), "post_view");
+        }).execute();
     }
 
     private void showLocationView(@NonNull final IntentModel intentModel) {
@@ -625,5 +650,32 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     @NonNull
     public BottomNavigationView getBottomNavView() {
         return binding.bottomNavView;
+    }
+
+    // public void fitSystemWindows(final boolean fit) {
+    //     binding.appBarLayout.setBackground(null);
+    //     binding.appBarLayout.setFitsSystemWindows(fit);
+    //     binding.collapsingToolbarLayout.setBackground(null);
+    //     binding.collapsingToolbarLayout.setFitsSystemWindows(fit);
+    //     final Drawable toolbarBackground = binding.toolbar.getBackground();
+    //     binding.toolbar.setFitsSystemWindows(fit);
+    //     binding.toolbar.setBackground(null);
+    //     binding.toolbar.setClickable(false);
+    // }
+    //
+    // public int getNavHostContainerId() {
+    //     return binding.mainNavHost.getId();
+    // }
+
+    public void setToolbar(final Toolbar toolbar) {
+        binding.appBarLayout.setVisibility(View.GONE);
+        setSupportActionBar(toolbar);
+        setupNavigation(toolbar, currentNavControllerLiveData.getValue());
+    }
+
+    public void resetToolbar() {
+        binding.appBarLayout.setVisibility(View.VISIBLE);
+        setSupportActionBar(binding.toolbar);
+        setupNavigation(binding.toolbar, currentNavControllerLiveData.getValue());
     }
 }

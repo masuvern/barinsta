@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
@@ -45,14 +43,16 @@ import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.LoadEventInfo;
+import com.google.android.exoplayer2.source.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -62,7 +62,7 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
-import awais.instagrabber.asyncs.DownloadAsync;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.QuizAction;
 import awais.instagrabber.asyncs.RespondAction;
 import awais.instagrabber.asyncs.SeenAction;
@@ -81,7 +81,6 @@ import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -94,8 +93,6 @@ import awaisomereport.LogCollector;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -316,15 +313,7 @@ public class StoryViewerFragment extends Fragment {
                 final Object feedStoryModel = isRightSwipe
                                               ? finalModels.get(index - 1)
                                               : finalModels.size() == index + 1 ? null : finalModels.get(index + 1);
-                if (feedStoryModel != null) {
-                    if (fetching) {
-                        Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    fetching = true;
-                    currentFeedStoryIndex = isRightSwipe ? (index - 1) : (index + 1);
-                    resetView();
-                }
+                paginateStories(feedStoryModel, context, isRightSwipe, currentFeedStoryIndex == finalModels.size() - 2);
                 return;
             }
             if (isRightSwipe) {
@@ -359,6 +348,15 @@ public class StoryViewerFragment extends Fragment {
                 return false;
             }
         };
+
+        if (hasFeedStories) {
+            binding.btnBackward.setVisibility(currentFeedStoryIndex == 0 ? View.INVISIBLE : View.VISIBLE);
+            binding.btnForward.setVisibility(currentFeedStoryIndex == finalModels.size() - 1 ? View.INVISIBLE : View.VISIBLE);
+            binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1), context, true, false));
+            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1), context, false,
+                                                                       currentFeedStoryIndex == finalModels.size() - 2));
+        }
+
         binding.imageViewer.setTapListener(simpleOnGestureListener);
         binding.spotify.setOnClickListener(v -> {
             final Object tag = v.getTag();
@@ -371,14 +369,19 @@ public class StoryViewerFragment extends Fragment {
         binding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (!(tag instanceof CharSequence)) return;
-            final String postId = tag.toString();
-            final boolean isId = tag.toString().matches("^[\\d]+$");
-            final String[] idsOrShortCodes = new String[]{postId};
-            final NavDirections action = HashTagFragmentDirections.actionGlobalPostViewFragment(
-                    0,
-                    idsOrShortCodes,
-                    isId);
-            NavHostFragment.findNavController(this).navigate(action);
+            final String shortCode = tag.toString();
+            final AlertDialog alertDialog = new AlertDialog.Builder(context)
+                    .setCancelable(false)
+                    .setView(R.layout.dialog_opening_post)
+                    .create();
+            alertDialog.show();
+            new PostFetcher(shortCode, feedModel -> {
+                final PostViewV2Fragment fragment = PostViewV2Fragment
+                        .builder(feedModel)
+                        .build();
+                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+                fragment.show(getChildFragmentManager(), "post_view");
+            }).execute();
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();
@@ -509,7 +512,7 @@ public class StoryViewerFragment extends Fragment {
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (currentStoryMediaId == null) return;
-        final ServiceCallback storyCallback = new ServiceCallback<List<StoryModel>>() {
+        final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
             @Override
             public void onSuccess(final List<StoryModel> storyModels) {
                 fetching = false;
@@ -604,40 +607,13 @@ public class StoryViewerFragment extends Fragment {
     }
 
     private void downloadStory() {
-        int error = 0;
         final Context context = getContext();
         if (context == null) return;
-        if (currentStory != null) {
-            File dir = new File(Environment.getExternalStorageDirectory(), "Download");
-
-            if (settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-                final String customPath = settingsHelper.getString(FOLDER_PATH);
-                if (!TextUtils.isEmpty(customPath)) dir = new File(customPath);
-            }
-
-            if (settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(currentStoryUsername))
-                dir = new File(dir, currentStoryUsername);
-
-            if (dir.exists() || dir.mkdirs()) {
-                final String storyUrl = currentStory.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
-                                        ? currentStory.getVideoUrl()
-                                        : currentStory.getStoryUrl();
-                final File saveFile = new File(dir, currentStory.getStoryMediaId() + "_" + currentStory.getTimestamp()
-                        + DownloadUtils.getExtensionFromModel(storyUrl, currentStory));
-
-                new DownloadAsync(context, storyUrl, saveFile, result -> {
-                    final int toastRes = result != null && result.exists() ? R.string.downloader_complete
-                                                                           : R.string.downloader_error_download_file;
-                    Toast.makeText(context, toastRes, Toast.LENGTH_SHORT).show();
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-            } else error = 1;
-        } else error = 2;
-
-        if (error == 1)
-            Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
-        else if (error == 2)
+        if (currentStory == null) {
             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        DownloadUtils.download(context, currentStory);
     }
 
     private void setupImage() {
@@ -687,8 +663,10 @@ public class StoryViewerFragment extends Fragment {
         binding.playerView.setPlayer(player);
         player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
 
+        final Uri uri = Uri.parse(url);
+        final MediaItem mediaItem = MediaItem.fromUri(uri);
         final ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(context, "instagram"))
-                .createMediaSource(Uri.parse(url));
+                .createMediaSource(mediaItem);
         mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
             @Override
             public void onLoadCompleted(final int windowIndex,
@@ -732,7 +710,8 @@ public class StoryViewerFragment extends Fragment {
                 binding.progressView.setVisibility(View.GONE);
             }
         });
-        player.prepare(mediaSource);
+        player.setMediaSource(mediaSource);
+        player.prepare();
 
         binding.playerView.setOnClickListener(v -> {
             if (player != null) {
@@ -751,12 +730,10 @@ public class StoryViewerFragment extends Fragment {
         if (t == '@') {
             final NavDirections action = HashTagFragmentDirections.actionGlobalProfileFragment(username);
             NavHostFragment.findNavController(this).navigate(action);
-        }
-        else if (t == '#') {
+        } else if (t == '#') {
             final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(username.substring(1));
             NavHostFragment.findNavController(this).navigate(action);
-        }
-        else {
+        } else {
             final NavDirections action = ProfileFragmentDirections.actionGlobalLocationFragment(username.split(" \\(")[1].replace(")", ""));
             NavHostFragment.findNavController(this).navigate(action);
         }
@@ -767,5 +744,19 @@ public class StoryViewerFragment extends Fragment {
         try { player.stop(true); } catch (Exception ignored) { }
         try { player.release(); } catch (Exception ignored) { }
         player = null;
+    }
+
+    private void paginateStories(Object feedStory, Context context, boolean backward, boolean last) {
+        if (feedStory != null) {
+            if (fetching) {
+                Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            fetching = true;
+            binding.btnBackward.setVisibility(currentFeedStoryIndex == 1 && backward ? View.INVISIBLE : View.VISIBLE);
+            binding.btnForward.setVisibility(last ? View.INVISIBLE : View.VISIBLE);
+            currentFeedStoryIndex = backward ? (currentFeedStoryIndex - 1) : (currentFeedStoryIndex + 1);
+            resetView();
+        }
     }
 }

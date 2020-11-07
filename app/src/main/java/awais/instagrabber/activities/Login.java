@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -59,7 +60,7 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loginBinding = ActivityLoginBinding.inflate(getLayoutInflater());
+        loginBinding = ActivityLoginBinding.inflate(LayoutInflater.from(getApplicationContext()));
         setContentView(loginBinding.getRoot());
 
         initWebView();
@@ -117,12 +118,9 @@ public final class Login extends BaseLanguageActivity implements View.OnClickLis
                 webSettings.setDisplayZoomControls(false);
                 webSettings.setLoadWithOverviewMode(true);
                 webSettings.setUseWideViewPort(true);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    webSettings.setAllowFileAccessFromFileURLs(true);
-                    webSettings.setAllowUniversalAccessFromFileURLs(true);
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                    webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                webSettings.setAllowFileAccessFromFileURLs(true);
+                webSettings.setAllowUniversalAccessFromFileURLs(true);
+                webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {

@@ -6,8 +6,6 @@
     <string name="action_download">डाउनलोड करें</string>
     <string name="action_search">ब्यबहारकारीयों के ब्यबहृत नाम ढुंढे...</string>
     <string name="action_compare">तुलना करें</string>
-    <string name="single_like">पसंद करें</string>
-    <string name="multiple_likes">पसन्दित</string>
     <string name="clipboard_error">लेखा उतारने में त्रुटि</string>
     <string name="clipboard_copied">क्लिपबोर्ड पर नक़ल किया</string>
     <string name="report">रिपोर्ट करें</string>

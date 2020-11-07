@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!--<item-->
-    <!--    android:id="@+id/favourites"-->
-    <!--    android:enabled="true"-->
-    <!--    android:icon="@drawable/ic_star_24"-->
-    <!--    android:title="@string/title_favorites"-->
-    <!--    android:visible="false"-->
-    <!--    app:showAsAction="ifRoom" />-->
+
+    <item
+        android:id="@+id/layout"
+        android:title="@string/layout"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/block"

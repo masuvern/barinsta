@@ -33,8 +33,6 @@ import com.facebook.drawee.generic.GenericDraweeHierarchyInflater;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.DraweeView;
 
-import awais.instagrabber.customviews.helpers.SwipeGestureListener;
-
 
 /**
  * DraweeView that has zoomable capabilities.
@@ -54,7 +52,7 @@ public class ZoomableDraweeView extends DraweeView<GenericDraweeHierarchy>
     private DraweeController mHugeImageController;
     private ZoomableController mZoomableController;
     private GestureDetector mTapGestureDetector;
-    private boolean mAllowTouchInterceptionWhileZoomed = true;
+    private boolean mAllowTouchInterceptionWhileZoomed = false;
 
     private boolean mIsDialtoneEnabled = false;
     private boolean mZoomingEnabled = true;
@@ -76,7 +74,9 @@ public class ZoomableDraweeView extends DraweeView<GenericDraweeHierarchy>
     private final ZoomableController.Listener mZoomableListener =
             new ZoomableController.Listener() {
                 @Override
-                public void onTransformBegin(Matrix transform) {}
+                public void onTransformBegin(Matrix transform) {
+                    ZoomableDraweeView.this.onTransformBegin(transform);
+                }
 
                 @Override
                 public void onTransformChanged(Matrix transform) {
@@ -84,7 +84,14 @@ public class ZoomableDraweeView extends DraweeView<GenericDraweeHierarchy>
                 }
 
                 @Override
-                public void onTransformEnd(Matrix transform) {}
+                public void onTransformEnd(Matrix transform) {
+                    ZoomableDraweeView.this.onTransformEnd(transform);
+                }
+
+                @Override
+                public void onTranslationLimited(final float offsetLeft, final float offsetTop) {
+                    ZoomableDraweeView.this.onTranslationLimited(offsetLeft, offsetTop);
+                }
             };
 
     private final GestureListenerWrapper mTapListenerWrapper = new GestureListenerWrapper();
@@ -302,11 +309,10 @@ public class ZoomableDraweeView extends DraweeView<GenericDraweeHierarchy>
         int a = event.getActionMasked();
         FLog.v(getLogTag(), "onTouchEvent: %d, view %x, received", a, this.hashCode());
         if (!mIsDialtoneEnabled && mTapGestureDetector.onTouchEvent(event)) {
-            FLog.v(
-                    getLogTag(),
-                    "onTouchEvent: %d, view %x, handled by tap gesture detector",
-                    a,
-                    this.hashCode());
+            FLog.v(getLogTag(),
+                   "onTouchEvent: %d, view %x, handled by tap gesture detector",
+                   a,
+                   this.hashCode());
             return true;
         }
 
@@ -389,23 +395,29 @@ public class ZoomableDraweeView extends DraweeView<GenericDraweeHierarchy>
         mZoomableController.setEnabled(false);
     }
 
+    protected void onTransformBegin(final Matrix transform) {}
+
     protected void onTransformChanged(Matrix transform) {
         FLog.v(getLogTag(), "onTransformChanged: view %x, transform: %s", this.hashCode(), transform);
         maybeSetHugeImageController();
         invalidate();
     }
 
+    protected void onTransformEnd(final Matrix transform) {}
+
+    protected void onTranslationLimited(final float offsetLeft, final float offsetTop) {}
+
     protected void updateZoomableControllerBounds() {
         getImageBounds(mImageBounds);
         getLimitBounds(mViewBounds);
+        // Log.d(TAG.getSimpleName(), "updateZoomableControllerBounds: mImageBounds: " + mImageBounds);
         mZoomableController.setImageBounds(mImageBounds);
         mZoomableController.setViewBounds(mViewBounds);
-        FLog.v(
-                getLogTag(),
-                "updateZoomableControllerBounds: view %x, view bounds: %s, image bounds: %s",
-                this.hashCode(),
-                mViewBounds,
-                mImageBounds);
+        FLog.v(getLogTag(),
+               "updateZoomableControllerBounds: view %x, view bounds: %s, image bounds: %s",
+               this.hashCode(),
+               mViewBounds,
+               mImageBounds);
     }
 
     protected Class<?> getLogTag() {

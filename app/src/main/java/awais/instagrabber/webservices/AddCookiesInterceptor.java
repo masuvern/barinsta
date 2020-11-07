@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.Utils;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -21,6 +22,10 @@ public class AddCookiesInterceptor implements Interceptor {
         final String userAgentHeader = "User-Agent";
         if (request.header(userAgentHeader) == null) {
             builder.addHeader(userAgentHeader, Constants.I_USER_AGENT);
+        }
+        final String languageHeader = "Accept-Language";
+        if (request.header(languageHeader) == null) {
+            builder.addHeader(languageHeader, LocaleUtils.getCurrentLocale().getLanguage() + ",en-US;q=0.8");
         }
         final Request updatedRequest = builder.build();
         return chain.proceed(updatedRequest);

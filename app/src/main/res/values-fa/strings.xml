@@ -6,8 +6,6 @@
     <string name="action_download">دانلود</string>
     <string name="action_search">جستجوی نام کاربری…</string>
     <string name="action_compare">مقایسه</string>
-    <string name="single_like">پسندیدن</string>
-    <string name="multiple_likes">پسند</string>
     <string name="clipboard_error">خطا هنگام کپی متن</string>
     <string name="clipboard_copied">به کلیپ بورد کپی شد!</string>
     <string name="report">گزارش</string>

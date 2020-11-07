@@ -5,11 +5,14 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -47,6 +50,7 @@ public final class Utils {
     public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
+    private static int statusBarHeight;
 
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
@@ -145,5 +149,45 @@ public final class Utils {
             return new Pair<>(FavoriteType.HASHTAG, queryText.substring(1));
         }
         return null;
+    }
+
+    public static int getStatusBarHeight(final Context context) {
+        if (statusBarHeight > 0) {
+            return statusBarHeight;
+        }
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return statusBarHeight;
+    }
+
+    public static void openURL(final Context context, final String url) {
+        if (context == null || TextUtils.isEmpty(url)) {
+            return;
+        }
+        final Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        context.startActivity(i);
+    }
+
+    public static void openEmailAddress(final Context context, final String emailAddress) {
+        if (context == null || TextUtils.isEmpty(emailAddress)) {
+            return;
+        }
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + emailAddress));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+        context.startActivity(emailIntent);
+    }
+
+    public static void displayToastAboveView(@NonNull final Context context,
+                                             @NonNull final View view,
+                                             @NonNull final String text) {
+        final Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP | Gravity.START,
+                         view.getLeft(),
+                         view.getTop() - view.getHeight() - 4);
+        toast.show();
     }
 }

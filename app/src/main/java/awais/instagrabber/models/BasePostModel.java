@@ -19,15 +19,15 @@ public abstract class BasePostModel implements Serializable, Selectable {
     protected boolean isSelected;
     protected boolean isDownloaded;
     protected long timestamp;
-    protected int position;
-    boolean liked, bookmarked;
+    boolean liked;
+    boolean saved;
 
     public boolean getLike() {
         return liked;
     }
 
-    public boolean getBookmark() {
-        return bookmarked;
+    public boolean isSaved() {
+        return saved;
     }
 
     public MediaItemType getItemType() {
@@ -54,10 +54,6 @@ public abstract class BasePostModel implements Serializable, Selectable {
         return timestamp;
     }
 
-    public int getPosition() {
-        return this.position;
-    }
-
     public boolean isSelected() {
         return isSelected;
     }
@@ -72,10 +68,6 @@ public abstract class BasePostModel implements Serializable, Selectable {
 
     public void setPostId(final String postId) {
         this.postId = postId;
-    }
-
-    public void setPosition(final int position) {
-        this.position = position;
     }
 
     public void setSelected(final boolean selected) {

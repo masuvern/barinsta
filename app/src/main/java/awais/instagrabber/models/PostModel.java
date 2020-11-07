@@ -13,9 +13,15 @@ public class PostModel extends BasePostModel {
         this.thumbnailUrl = null;
     }
 
-    public PostModel(final MediaItemType itemType, final String postId, final String displayUrl, final String thumbnailUrl,
-                     final String shortCode, final CharSequence postCaption, long timestamp, boolean liked, boolean bookmarked,
-                     long likes) {
+    public PostModel(final MediaItemType itemType,
+                     final String postId,
+                     final String displayUrl,
+                     final String thumbnailUrl,
+                     final String shortCode,
+                     final CharSequence postCaption,
+                     long timestamp,
+                     boolean liked,
+                     boolean bookmarked) {
         this.itemType = itemType;
         this.postId = postId;
         this.displayUrl = displayUrl;
@@ -24,7 +30,7 @@ public class PostModel extends BasePostModel {
         this.postCaption = postCaption;
         this.timestamp = timestamp;
         this.liked = liked;
-        this.bookmarked = bookmarked;
+        this.saved = bookmarked;
     }
 
     public String getThumbnailUrl() {

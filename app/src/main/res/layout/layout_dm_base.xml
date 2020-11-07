@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
     <awais.instagrabber.customviews.CircularImageView
         android:id="@+id/ivProfilePic"
-        android:layout_width="@dimen/message_item_profile_size"
-        android:layout_height="@dimen/message_item_profile_size"
+        android:layout_width="@dimen/profile_pic_size_regular"
+        android:layout_height="@dimen/profile_pic_size_regular"
         android:layout_gravity="top|start"
         android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp" />
+        android:layout_marginEnd="4dp"
+        tools:background="@mipmap/ic_launcher" />
 
     <LinearLayout
         android:id="@+id/content_container"
@@ -27,8 +29,8 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:singleLine="true"
-            android:text="@string/app_name"
-            android:textColor="?android:textColorPrimary" />
+            android:textColor="?android:textColorPrimary"
+            tools:text="@string/app_name" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/messageCard"
@@ -37,7 +39,8 @@
             android:foreground="?android:selectableItemBackground"
             app:cardCornerRadius="@dimen/dm_message_card_radius"
             app:cardElevation="2dp"
-            app:cardUseCompatPadding="true" />
+            app:cardUseCompatPadding="true"
+            tools:background="@mipmap/ic_launcher" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/liked_container"
@@ -45,7 +48,6 @@
             android:layout_height="50dp"
             android:layout_marginTop="-25dp"
             android:layout_marginEnd="-10dp"
-            android:layout_marginRight="-10dp"
             app:cardCornerRadius="25dp"
             app:cardElevation="4dp"
             app:cardUseCompatPadding="true">

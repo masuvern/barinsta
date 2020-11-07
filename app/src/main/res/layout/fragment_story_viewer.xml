@@ -116,12 +116,41 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
     </FrameLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBackward"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:icon="@drawable/exo_ic_skip_previous"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/storiesList"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/storiesList" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/storiesList"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/story_container"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnForward"
+        app:layout_constraintStart_toEndOf="@id/btnBackward" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnForward"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:icon="@drawable/exo_ic_skip_next"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/storiesList"
+        app:layout_constraintTop_toTopOf="@id/storiesList" />
 </androidx.constraintlayout.widget.ConstraintLayout>

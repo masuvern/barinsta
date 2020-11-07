@@ -37,29 +37,13 @@
                 tools:text="690000" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/videoViewsContainer"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvVideoViews"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="4dp"
-                app:srcCompat="@drawable/ic_outline_views_24"
-                app:tint="?android:textColorPrimary" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tvVideoViews"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:textAppearance="?attr/textAppearanceButton"
-                tools:text="690000" />
-        </LinearLayout>
+            android:gravity="center_vertical"
+            android:textAppearance="?attr/textAppearanceCaption"
+            tools:text="690000 views" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvPostDate"
@@ -70,17 +54,18 @@
             android:maxLines="1"
             android:padding="8dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            tools:text="690000" />
+            tools:text="2020-01-01 12:00:00" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/btnMute"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="?selectableItemBackgroundBorderless"
-            android:padding="4dp"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_volume_up_24"
-            app:tint="?android:textColorPrimary" />
+        <!--<androidx.appcompat.widget.AppCompatImageView-->
+        <!--    android:id="@+id/btnMute"-->
+        <!--    android:layout_width="wrap_content"-->
+        <!--    android:layout_height="match_parent"-->
+        <!--    android:background="?selectableItemBackgroundBorderless"-->
+        <!--    android:padding="4dp"-->
+        <!--    android:visibility="gone"-->
+        <!--    app:srcCompat="@drawable/ic_volume_up_24"-->
+        <!--    app:tint="?android:textColorPrimary"-->
+        <!--    tools:visibility="visible" />-->
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/btnDownload"
@@ -92,34 +77,21 @@
             app:tint="?android:textColorPrimary" />
     </LinearLayout>
 
-    <ScrollView
+    <awais.instagrabber.customviews.RamboTextViewV2
+        android:id="@+id/viewerCaption"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:isScrollContainer="true"
-        android:scrollbars="vertical"
-        android:scrollHorizontally="false">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true">
-
-            <awais.instagrabber.customviews.RamboTextView
-                android:id="@+id/viewerCaption"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="?android:selectableItemBackground"
-                android:clipToPadding="false"
-                android:paddingStart="8dp"
-                android:paddingLeft="8dp"
-                android:paddingEnd="8dp"
-                android:paddingRight="8dp"
-                android:paddingBottom="8dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                tools:text="BOTTOM TEXT" />
-        </FrameLayout>
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:background="?android:selectableItemBackground"
+        android:clickable="true"
+        android:clipToPadding="false"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:maxLines="5"
+        android:paddingStart="8dp"
+        android:paddingLeft="8dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        tools:text="Bottom text with hashtags etc." />
 </LinearLayout>

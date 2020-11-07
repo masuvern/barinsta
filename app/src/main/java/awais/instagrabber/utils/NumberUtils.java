@@ -57,12 +57,28 @@ public final class NumberUtils {
 
     @NonNull
     public static Pair<Integer, Integer> calculateWidthHeight(final int height, final int width, final int maxHeight, final int maxWidth) {
-        int tempWidth = width;
-        int tempHeight = height > maxHeight ? maxHeight : height;
-        if (tempWidth > maxWidth) {
-            tempHeight = NumberUtils.getResultingHeight(maxWidth, height, width);
-            tempWidth = maxWidth;
+        if (width > maxWidth) {
+            int tempHeight = getResultingHeight(maxWidth, height, width);
+            int tempWidth = maxWidth;
+            if (tempHeight > maxHeight) {
+                tempWidth = getResultingWidth(maxHeight, tempHeight, tempWidth);
+                tempHeight = maxHeight;
+            }
+            return new Pair<>(tempWidth, tempHeight);
         }
-        return new Pair<>(tempWidth, tempHeight);
+        if ((height < maxHeight && width < maxWidth) || (height > maxHeight)) {
+            int tempWidth = getResultingWidth(maxHeight, height, width);
+            int tempHeight = maxHeight;
+            if (tempWidth > maxWidth) {
+                tempHeight = getResultingHeight(maxWidth, tempHeight, tempWidth);
+                tempWidth = maxWidth;
+            }
+            return new Pair<>(tempWidth, tempHeight);
+        }
+        return new Pair<>(width, height);
+    }
+
+    public static float roundFloat2Decimals(final float value) {
+        return ((int) ((value + (value >= 0 ? 1 : -1) * 0.005f) * 100)) / 100f;
     }
 }

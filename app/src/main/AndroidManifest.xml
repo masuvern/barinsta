@@ -71,22 +71,7 @@
             android:taskAffinity="awais.instagrabber.errorreport"
             android:theme="@android:style/Theme.DeviceDefault.Dialog" />
         <activity
-            android:name=".directdownload.MultiDirectDialog"
-            android:allowEmbedded="false"
-            android:allowTaskReparenting="false"
-            android:autoRemoveFromRecents="true"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:documentLaunchMode="never"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleTask"
-            android:lockTaskMode="never"
-            android:noHistory="false"
-            android:taskAffinity="awais.instagrabber.multidialog"
-            android:theme="@style/FlyingGayDialog" />
-        <activity
-            android:name=".directdownload.DirectDownload"
+            android:name=".activities.DirectDownload"
             android:allowEmbedded="false"
             android:allowTaskReparenting="false"
             android:autoRemoveFromRecents="true"
@@ -100,7 +85,7 @@
             android:launchMode="singleTask"
             android:lockTaskMode="never"
             android:noHistory="false"
-            android:theme="@style/CompletelyTransparent">
+            android:theme="@style/Theme.AppCompat.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEARCH" />
@@ -138,6 +123,12 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-        <service android:name=".services.ActivityCheckerService" />
+
+        <service
+            android:name=".services.ActivityCheckerService"
+            android:exported="false" />
+        <service
+            android:name=".services.DeleteImageIntentService"
+            android:exported="false" />
     </application>
 </manifest>

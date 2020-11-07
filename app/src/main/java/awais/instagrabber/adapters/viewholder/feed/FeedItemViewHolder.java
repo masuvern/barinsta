@@ -1,92 +1,110 @@
 package awais.instagrabber.adapters.viewholder.feed;
 
-import android.text.SpannableString;
-import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.transition.TransitionManager;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import awais.instagrabber.customviews.CommentMentionClickSpan;
-import awais.instagrabber.customviews.RamboTextView;
+import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.databinding.ItemFeedBottomBinding;
 import awais.instagrabber.databinding.ItemFeedTopBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.TextUtils;
 
+import static android.text.TextUtils.TruncateAt.END;
+
 public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
-    public static final int MAX_CHARS = 255;
+    public static final int MAX_LINES_COLLAPSED = 5;
     private final ItemFeedTopBinding topBinding;
     private final ItemFeedBottomBinding bottomBinding;
-    private final MentionClickListener mentionClickListener;
+    private final FeedAdapterV2.FeedItemCallback feedItemCallback;
 
     public FeedItemViewHolder(@NonNull final View root,
                               final ItemFeedTopBinding topBinding,
                               final ItemFeedBottomBinding bottomBinding,
-                              final MentionClickListener mentionClickListener,
-                              final View.OnClickListener clickListener,
-                              final View.OnLongClickListener longClickListener) {
+                              final FeedAdapterV2.FeedItemCallback feedItemCallback) {
         super(root);
         this.topBinding = topBinding;
         this.bottomBinding = bottomBinding;
-        this.mentionClickListener = mentionClickListener;
-        // topBinding.title.setMovementMethod(new LinkMovementMethod());
-        bottomBinding.btnComments.setOnClickListener(clickListener);
-        topBinding.viewStoryPost.setOnClickListener(clickListener);
-        topBinding.ivProfilePic.setOnClickListener(clickListener);
-        bottomBinding.btnDownload.setOnClickListener(clickListener);
-        bottomBinding.viewerCaption.setOnClickListener(clickListener);
-        bottomBinding.viewerCaption.setOnLongClickListener(longClickListener);
-        bottomBinding.viewerCaption.setMentionClickListener(mentionClickListener);
+        topBinding.title.setMovementMethod(new LinkMovementMethod());
+        this.feedItemCallback = feedItemCallback;
     }
 
     public void bind(final FeedModel feedModel) {
         if (feedModel == null) {
             return;
         }
-        topBinding.viewStoryPost.setTag(feedModel);
-        topBinding.ivProfilePic.setTag(feedModel);
-        bottomBinding.btnDownload.setTag(feedModel);
-        bottomBinding.viewerCaption.setTag(feedModel);
-        bottomBinding.btnComments.setTag(feedModel);
-        final ProfileModel profileModel = feedModel.getProfileModel();
-        if (profileModel != null) {
-            topBinding.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
-            final int titleLen = profileModel.getUsername().length() + 1;
-            final SpannableString spannableString = new SpannableString("@" + profileModel.getUsername());
-            spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
-            topBinding.title.setText(spannableString);
-            topBinding.title.setMentionClickListener(
-                    (view, text, isHashtag, isLocation) -> mentionClickListener.onClick(null, profileModel.getUsername(), false, false));
-        }
+        setupProfilePic(feedModel);
+        setupLocation(feedModel);
         bottomBinding.tvPostDate.setText(feedModel.getPostDate());
-        final long commentsCount = feedModel.getCommentsCount();
-        bottomBinding.commentsCount.setText(String.valueOf(commentsCount));
-
-        final String locationName = feedModel.getLocationName();
-        final String locationId = feedModel.getLocationId();
-        setLocation(locationName, locationId);
-        CharSequence postCaption = feedModel.getPostCaption();
-        final boolean captionEmpty = TextUtils.isEmpty(postCaption);
-        bottomBinding.viewerCaption.setVisibility(captionEmpty ? View.GONE : View.VISIBLE);
-        if (!captionEmpty) {
-            if (TextUtils.hasMentions(postCaption)) {
-                postCaption = TextUtils.getMentionText(postCaption);
-                feedModel.setPostCaption(postCaption);
-                bottomBinding.viewerCaption.setText(postCaption, TextView.BufferType.SPANNABLE);
-            } else {
-                bottomBinding.viewerCaption.setText(postCaption);
-            }
+        setupComments(feedModel);
+        setupCaption(feedModel);
+        if (feedModel.getItemType() != MediaItemType.MEDIA_TYPE_SLIDER) {
+            bottomBinding.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(feedModel, -1));
         }
-        expandCollapseTextView(bottomBinding.viewerCaption, feedModel.getPostCaption());
         bindItem(feedModel);
     }
 
-    private void setLocation(final String locationName, final String locationId) {
+    private void setupComments(final FeedModel feedModel) {
+        final long commentsCount = feedModel.getCommentsCount();
+        bottomBinding.commentsCount.setText(String.valueOf(commentsCount));
+        bottomBinding.commentsCount.setOnClickListener(v -> feedItemCallback.onCommentsClick(feedModel));
+    }
+
+    private void setupProfilePic(final FeedModel feedModel) {
+        final ProfileModel profileModel = feedModel.getProfileModel();
+        if (profileModel != null) {
+            topBinding.ivProfilePic.setOnClickListener(v -> feedItemCallback.onProfilePicClick(feedModel, topBinding.ivProfilePic));
+            topBinding.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
+            setupTitle(feedModel);
+        }
+    }
+
+    private void setupTitle(final FeedModel feedModel) {
+        // final int titleLen = profileModel.getUsername().length() + 1;
+        // final SpannableString spannableString = new SpannableString();
+        // spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
+        final ProfileModel profileModel = feedModel.getProfileModel();
+        final String title = "@" + profileModel.getUsername();
+        topBinding.title.setText(title);
+        topBinding.title.setOnClickListener(v -> feedItemCallback.onNameClick(feedModel, topBinding.ivProfilePic));
+    }
+
+    private void setupCaption(final FeedModel feedModel) {
+        bottomBinding.viewerCaption.clearOnMentionClickListeners();
+        bottomBinding.viewerCaption.clearOnHashtagClickListeners();
+        bottomBinding.viewerCaption.clearOnURLClickListeners();
+        bottomBinding.viewerCaption.clearOnEmailClickListeners();
+        final CharSequence postCaption = feedModel.getPostCaption();
+        final boolean captionEmpty = TextUtils.isEmpty(postCaption);
+        bottomBinding.viewerCaption.setVisibility(captionEmpty ? View.GONE : View.VISIBLE);
+        if (captionEmpty) return;
+        bottomBinding.viewerCaption.setText(postCaption);
+        bottomBinding.viewerCaption.setMaxLines(MAX_LINES_COLLAPSED);
+        bottomBinding.viewerCaption.setEllipsize(END);
+        bottomBinding.viewerCaption.setOnClickListener(v -> bottomBinding.getRoot().post(() -> {
+            TransitionManager.beginDelayedTransition(bottomBinding.getRoot());
+            if (bottomBinding.viewerCaption.getMaxLines() == MAX_LINES_COLLAPSED) {
+                bottomBinding.viewerCaption.setMaxLines(Integer.MAX_VALUE);
+                bottomBinding.viewerCaption.setEllipsize(null);
+                return;
+            }
+            bottomBinding.viewerCaption.setMaxLines(MAX_LINES_COLLAPSED);
+            bottomBinding.viewerCaption.setEllipsize(END);
+        }));
+        bottomBinding.viewerCaption.addOnMentionClickListener(autoLinkItem -> feedItemCallback.onMentionClick(autoLinkItem.getOriginalText()));
+        bottomBinding.viewerCaption.addOnHashtagListener(autoLinkItem -> feedItemCallback.onHashtagClick(autoLinkItem.getOriginalText()));
+        bottomBinding.viewerCaption.addOnEmailClickListener(autoLinkItem -> feedItemCallback.onEmailClick(autoLinkItem.getOriginalText()));
+        bottomBinding.viewerCaption.addOnURLClickListener(autoLinkItem -> feedItemCallback.onURLClick(autoLinkItem.getOriginalText()));
+    }
+
+    private void setupLocation(final FeedModel feedModel) {
+        final String locationName = feedModel.getLocationName();
         if (TextUtils.isEmpty(locationName)) {
             topBinding.location.setVisibility(View.GONE);
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
@@ -98,40 +116,8 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
             ));
-            topBinding.location.setOnClickListener(v -> mentionClickListener.onClick(topBinding.location, locationId, false, true));
+            topBinding.location.setOnClickListener(v -> feedItemCallback.onLocationClick(feedModel));
         }
-    }
-
-    /**
-     * expands or collapses {@link RamboTextView} [stg idek why i wrote this documentation]
-     *
-     * @param textView the {@link RamboTextView} view, to expand and collapse
-     * @param caption caption
-     * @return isExpanded
-     */
-    public static boolean expandCollapseTextView(@NonNull final RamboTextView textView, final CharSequence caption) {
-        if (TextUtils.isEmpty(caption)) return false;
-
-        final TextView.BufferType bufferType = caption instanceof Spanned ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL;
-
-        if (textView.isCaptionExpanded()) {
-            textView.setText(caption, bufferType);
-            textView.setCaptionIsExpanded(false);
-            return true;
-        }
-        int i = TextUtils.indexOfChar(caption, '\r', 0);
-        if (i == -1) i = TextUtils.indexOfChar(caption, '\n', 0);
-        if (i == -1) i = MAX_CHARS;
-
-        final int captionLen = caption.length();
-        final int minTrim = Math.min(MAX_CHARS, i);
-        if (captionLen <= minTrim) return false;
-
-        if (TextUtils.hasMentions(caption))
-            textView.setText(TextUtils.getMentionText(caption), TextView.BufferType.SPANNABLE);
-        textView.setCaptionIsExpandable(true);
-        textView.setCaptionIsExpanded(true);
-        return true;
     }
 
     public abstract void bindItem(final FeedModel feedModel);

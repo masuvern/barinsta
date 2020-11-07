@@ -41,6 +41,13 @@ public class MultiZoomableControllerListener implements ZoomableController.Liste
         }
     }
 
+    @Override
+    public void onTranslationLimited(final float offsetLeft, final float offsetTop) {
+        for (ZoomableController.Listener listener : mListeners) {
+            listener.onTranslationLimited(offsetLeft, offsetTop);
+        }
+    }
+
     public synchronized void addListener(ZoomableController.Listener listener) {
         mListeners.add(listener);
     }
