@@ -128,7 +128,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             final int resourceId = mainNavIds.getResourceId(i, -1);
             if (resourceId < 0) continue;
-            values[i] = String.valueOf(resourceId);
+            values[i] = getResources().getResourceEntryName(resourceId);
         }
         mainNavIds.recycle();
         preference.setKey(Constants.DEFAULT_TAB);

@@ -405,11 +405,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
         final List<Integer> mainNavList = getMainNavList(main_nav_ids);
         if (setDefaultFromSettings) {
-            final String defaultTabIdString = settingsHelper.getString(Constants.DEFAULT_TAB);
+            final String defaultTabResNameString = settingsHelper.getString(Constants.DEFAULT_TAB);
             try {
-                final int defaultNavId = TextUtils.isEmpty(defaultTabIdString)
-                                         ? R.navigation.profile_nav_graph
-                                         : Integer.parseInt(defaultTabIdString);
+                int navId = 0;
+                if (!TextUtils.isEmpty(defaultTabResNameString)) {
+                    navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
+                }
+                final int defaultNavId = navId <= 0 ? R.navigation.profile_nav_graph
+                                                    : navId;
                 final int index = mainNavList.indexOf(defaultNavId);
                 if (index >= 0) firstFragmentGraphIndex = index;
                 setBottomNavSelectedItem(defaultNavId);

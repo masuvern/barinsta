@@ -3,7 +3,6 @@ package awais.instagrabber.utils;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -24,14 +23,9 @@ public final class ThemeUtils {
             themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
         }
         final boolean isNight = isNight(context, themeCode);
-        int themeResId = 0;
-        try {
-            themeResId = Integer.parseInt(isNight ? settingsHelper.getString(Constants.PREF_DARK_THEME)
-                                                  : settingsHelper.getString(Constants.PREF_LIGHT_THEME));
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "changeTheme: ", e);
-        }
-
+        final String themeResName = isNight ? settingsHelper.getString(Constants.PREF_DARK_THEME)
+                                            : settingsHelper.getString(Constants.PREF_LIGHT_THEME);
+        final int themeResId = context.getResources().getIdentifier(themeResName, "style", context.getPackageName());
         final int finalThemeResId;
         if (themeResId <= 0) {
             // Nothing set in settings
