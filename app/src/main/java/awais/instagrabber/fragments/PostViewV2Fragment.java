@@ -56,6 +56,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
@@ -666,7 +667,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     private void setupCaption() {
         final CharSequence postCaption = feedModel.getPostCaption();
+        binding.date.setText(Utils.datetimeParser.format(new Date(feedModel.getTimestamp() * 1000L)));
         if (TextUtils.isEmpty(postCaption)) {
+            binding.caption.setVisibility(View.GONE);
+            binding.captionToggle.setVisibility(View.GONE);
             return;
         }
         binding.caption.addOnHashtagListener(autoLinkItem -> {
@@ -1062,6 +1066,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 detailsVisible = false;
                 binding.profilePic.setVisibility(View.GONE);
                 binding.title.setVisibility(View.GONE);
+                binding.isVerified.setVisibility(View.GONE);
+                binding.righttitle.setVisibility(View.GONE);
                 binding.topBg.setVisibility(View.GONE);
                 if (!TextUtils.isEmpty(binding.subtitle.getText())) {
                     binding.subtitle.setVisibility(View.GONE);
@@ -1070,6 +1076,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 binding.bottomBg.setVisibility(View.GONE);
                 binding.likesCount.setVisibility(View.GONE);
                 binding.commentsCount.setVisibility(View.GONE);
+                binding.date.setVisibility(View.GONE);
                 binding.comment.setVisibility(View.GONE);
                 binding.captionToggle.setVisibility(View.GONE);
                 binding.playerControlsToggle.setVisibility(View.GONE);
@@ -1086,6 +1093,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             }
             binding.profilePic.setVisibility(View.VISIBLE);
             binding.title.setVisibility(View.VISIBLE);
+            binding.isVerified.setVisibility(feedModel.getProfileModel().isVerified() ? View.VISIBLE : View.GONE);
+            binding.righttitle.setVisibility(View.VISIBLE);
             binding.topBg.setVisibility(View.VISIBLE);
             if (!TextUtils.isEmpty(binding.subtitle.getText())) {
                 binding.subtitle.setVisibility(View.VISIBLE);
@@ -1094,6 +1103,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.bottomBg.setVisibility(View.VISIBLE);
             binding.likesCount.setVisibility(View.VISIBLE);
             binding.commentsCount.setVisibility(View.VISIBLE);
+            binding.date.setVisibility(View.VISIBLE);
             binding.captionToggle.setVisibility(View.VISIBLE);
             binding.comment.setVisibility(View.VISIBLE);
             if (video) {
