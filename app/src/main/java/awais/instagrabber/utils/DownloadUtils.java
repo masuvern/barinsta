@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -23,7 +24,10 @@ import androidx.work.WorkRequest;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -43,6 +47,8 @@ import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 
 public final class DownloadUtils {
+    private static final String TAG = "DownloadUtils";
+
     public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
@@ -311,11 +317,20 @@ public final class DownloadUtils {
         final DownloadWorker.DownloadRequest request = DownloadWorker.DownloadRequest.builder()
                                                                                      .setUrlToFilePathMap(urlFilePathMap)
                                                                                      .build();
+        final String requestJson = new Gson().toJson(request);
+        final File tempFile = getTempFile();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+            writer.write(requestJson);
+        } catch (IOException e) {
+            Log.e(TAG, "download: Error writing request to file", e);
+            //noinspection ResultOfMethodCallIgnored
+            tempFile.delete();
+            return;
+        }
         final WorkRequest downloadWorkRequest = new OneTimeWorkRequest.Builder(DownloadWorker.class)
                 .setInputData(
                         new Data.Builder()
-                                .putString(DownloadWorker.KEY_DOWNLOAD_REQUEST_JSON,
-                                           new Gson().toJson(request))
+                                .putString(DownloadWorker.KEY_DOWNLOAD_REQUEST_JSON, tempFile.getAbsolutePath())
                                 .build()
                 )
                 .setConstraints(constraints)

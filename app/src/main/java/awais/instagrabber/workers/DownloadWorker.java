@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -59,10 +60,10 @@ import static awais.instagrabber.utils.Utils.logCollector;
 
 public class DownloadWorker extends Worker {
     private static final String TAG = "DownloadWorker";
-    public static final String PROGRESS = "PROGRESS";
-    public static final String URL = "URL";
     private static final String DOWNLOAD_GROUP = "DOWNLOAD_GROUP";
 
+    public static final String PROGRESS = "PROGRESS";
+    public static final String URL = "URL";
     public static final String KEY_DOWNLOAD_REQUEST_JSON = "download_request_json";
     public static final int DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE = 2020;
     public static final int DELETE_IMAGE_REQUEST_CODE = 2030;
@@ -77,7 +78,21 @@ public class DownloadWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        final String downloadRequestString = getInputData().getString(KEY_DOWNLOAD_REQUEST_JSON);
+        final String downloadRequestFilePath = getInputData().getString(KEY_DOWNLOAD_REQUEST_JSON);
+        if (TextUtils.isEmpty(downloadRequestFilePath)) {
+            return Result.failure(new Data.Builder()
+                                          .putString("error", "downloadRequest is empty or null")
+                                          .build());
+        }
+        final String downloadRequestString;
+        final File requestFile = new File(downloadRequestFilePath);
+        try (Scanner scanner = new Scanner(requestFile)) {
+            downloadRequestString = scanner.useDelimiter("\\A").next();
+        } catch (Exception e) {
+            return Result.failure(new Data.Builder()
+                                          .putString("error", e.getLocalizedMessage())
+                                          .build());
+        }
         if (TextUtils.isEmpty(downloadRequestString)) {
             return Result.failure(new Data.Builder()
                                           .putString("error", "downloadRequest is empty or null")
@@ -100,6 +115,10 @@ public class DownloadWorker extends Worker {
         final Map<String, String> urlToFilePathMap = downloadRequest.getUrlToFilePathMap();
         download(urlToFilePathMap);
         new Handler(Looper.getMainLooper()).postDelayed(() -> showSummary(urlToFilePathMap), 500);
+        final boolean deleted = requestFile.delete();
+        if (!deleted) {
+            Log.w(TAG, "doWork: requestFile not deleted!");
+        }
         return Result.success();
     }
 
