@@ -380,4 +380,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 preferences -> new Handler().postDelayed(() -> binding.feedRecyclerView.setLayoutPreferences(preferences), 200));
         fragment.show(getChildFragmentManager(), "posts_layout_preferences");
     }
+
+    public void scrollToTop() {
+        binding.feedRecyclerView.smoothScrollToPosition(0);
+        binding.storiesContainer.setExpanded(true);
+    }
 }

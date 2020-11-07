@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.transition.ChangeBounds;
@@ -77,6 +78,13 @@ public class PostsRecyclerView extends RecyclerView {
         @Override
         public void onFailure(final Throwable t) {
             Log.e(TAG, "onFailure: ", t);
+        }
+    };
+
+    private final RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(getContext()) {
+        @Override
+        protected int getVerticalSnapPreference() {
+            return LinearSmoothScroller.SNAP_TO_START;
         }
     };
 
@@ -312,5 +320,11 @@ public class PostsRecyclerView extends RecyclerView {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         lifeCycleOwner = null;
+    }
+
+    @Override
+    public void smoothScrollToPosition(final int position) {
+        smoothScroller.setTargetPosition(position);
+        layoutManager.startSmoothScroll(smoothScroller);
     }
 }

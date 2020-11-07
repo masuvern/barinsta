@@ -19,9 +19,11 @@ import java.util.List;
 
 import awais.instagrabber.R;
 
+/**
+ * This is a Java rewrite of <a href="https://github.com/android/architecture-components-samples/blob/master/NavigationAdvancedSample/app/src/main/java/com/example/android/navigationadvancedsample/NavigationExtensions.kt">NavigationExtensions</a>
+ * from architecture-components-samples. Some modifications have been done, check git history.
+ */
 public class NavigationExtensions {
-    // private static final String TAG = "NavigationExtensions";
-
     @NonNull
     public static LiveData<NavController> setupWithNavController(@NonNull final BottomNavigationView bottomNavigationView,
                                                                  @NonNull List<Integer> navGraphIds,
