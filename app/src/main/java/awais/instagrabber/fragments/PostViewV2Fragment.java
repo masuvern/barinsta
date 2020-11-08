@@ -373,7 +373,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.sliderParent.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                                    ViewGroup.LayoutParams.MATCH_PARENT));
             binding.sliderParent.requestLayout();
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            if (bottomSheetBehavior != null) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
             return;
         }
         if (destView == binding.videoPost.thumbnailParent) {
@@ -382,7 +384,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             params.gravity = Gravity.CENTER;
             binding.videoPost.thumbnailParent.setLayoutParams(params);
             binding.videoPost.thumbnailParent.requestLayout();
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            if (bottomSheetBehavior != null) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
         }
     }
 
@@ -703,10 +707,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             }
         });
         binding.caption.setOnClickListener(v -> {
+            if (bottomSheetBehavior == null) return;
             if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) return;
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
         binding.captionToggle.setOnClickListener(v -> {
+            if (bottomSheetBehavior == null) return;
             switch (bottomSheetBehavior.getState()) {
                 case BottomSheetBehavior.STATE_HIDDEN:
                     binding.captionParent.fullScroll(ScrollView.FOCUS_UP); // reset scroll position
@@ -734,6 +740,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 @Override
                 public void onGlobalLayout() {
                     binding.getRoot().getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    if (bottomSheetBehavior == null) return;
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
             });
@@ -748,9 +755,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
-            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/"+feedModel.getShortCode());
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/" + feedModel.getShortCode());
             startActivity(Intent.createChooser(sharingIntent,
-                    isPrivate ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
+                                               isPrivate ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
         });
     }
 
@@ -762,7 +769,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             final int likesCount = (int) feedModel.getLikesCount();
             final String likesString = getResources().getQuantityString(R.plurals.likes_count, likesCount, likesCount);
             binding.likesCount.setText(likesString);
-        } catch (IllegalStateException e) {}
+        } catch (IllegalStateException ignored) {}
     }
 
     private void setupPostTypeLayout() {
