@@ -200,6 +200,10 @@ public class DownloadWorker extends Worker {
                                         final float percent) {
         final Notification notification = createProgressNotification(position, total, percent);
         try {
+            if (notification == null) {
+                notificationManager.cancel(notificationId);
+                return;
+            }
             setForegroundAsync(new ForegroundInfo(notificationId, notification)).get();
         } catch (ExecutionException | InterruptedException e) {
             Log.e(TAG, "updateDownloadProgress", e);
@@ -215,6 +219,9 @@ public class DownloadWorker extends Worker {
             totalPercent = 100;
         } else {
             totalPercent = (int) ((100f * (position - 1) / total) + (1f / total) * (percent));
+        }
+        if (totalPercent == 100) {
+            return null;
         }
         // Log.d(TAG, "createProgressNotification: position: " + position
         //         + ", total: " + total
