@@ -220,7 +220,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        try {
+            super.onDestroy();
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ", e);
+        }
         unbindActivityCheckerService();
     }
 
