@@ -35,7 +35,6 @@ import androidx.lifecycle.LiveData;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
-import androidx.navigation.NavDirections;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -58,7 +57,6 @@ import awais.instagrabber.customviews.helpers.CustomHideBottomViewOnScrollBehavi
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.main.FeedFragment;
-import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
@@ -634,14 +632,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     }
 
     private void showActivityView() {
-        binding.bottomNavView.setSelectedItemId(R.id.more_nav_graph);
-        binding.bottomNavView.post(() -> {
-            if (currentNavControllerLiveData == null) return;
-            final NavController navController = currentNavControllerLiveData.getValue();
-            if (navController == null) return;
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToNotificationsViewer();
-            navController.navigate(navDirections);
-        });
+        if (currentNavControllerLiveData == null) return;
+        final NavController navController = currentNavControllerLiveData.getValue();
+        if (navController == null) return;
+        navController.navigate(R.id.action_global_notificationsViewerFragment);
     }
 
     private void bindActivityCheckerService() {
