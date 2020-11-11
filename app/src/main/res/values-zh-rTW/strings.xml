@@ -193,7 +193,7 @@
     <string name="no_acc">您可以透過右下角的 「更多」 -> 「新增帳號」 來登入您的帳號，或者以匿名的身分查看公共帳戶！</string>
     <string name="no_acc_logged_in">您可以向左/向右滑動以瀏覽/動態，或透過下面搜尋！</string>
     <string name="no_more_stories">沒有限時動態了！</string>
-    <string name="number_selected">已選 %s</string>
+    <string name="number_selected">已選 %d</string>
     <string name="ok">OK</string>
     <string name="open_profile">開啟個人檔案</string>
     <string name="opening_post">開啟貼文中…</string>
