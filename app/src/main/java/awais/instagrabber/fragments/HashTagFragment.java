@@ -44,6 +44,7 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.asyncs.HashtagFetcher;
 import awais.instagrabber.asyncs.HashtagPostFetchService;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.databinding.FragmentHashtagBinding;
@@ -81,6 +82,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private NestedCoordinatorLayout root;
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
+    private boolean opening = false;
     private String hashtag;
     private HashtagModel hashtagModel;
     private ActionMode actionMode;
@@ -199,16 +201,37 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            if (opening) return;
+            else if (TextUtils.isEmpty(feedModel.getProfileModel().getUsername())) {
+                opening = true;
+                new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
+                    final PostViewV2Fragment.Builder builder = PostViewV2Fragment
+                            .builder(newFeedModel);
+                    if (position >= 0) {
+                        builder.setPosition(position);
+                    }
+                    final PostViewV2Fragment fragment = builder
+                            .setSharedProfilePicElement(profilePicView)
+                            .setSharedMainPostElement(mainPostImage)
+                            .build();
+                    fragment.show(getChildFragmentManager(), "post_view");
+                    opening = false;
+                }).execute();
             }
-            final PostViewV2Fragment fragment = builder
-                    .setSharedProfilePicElement(profilePicView)
-                    .setSharedMainPostElement(mainPostImage)
-                    .build();
-            fragment.show(getChildFragmentManager(), "post_view");
+            else {
+                opening = true;
+                final PostViewV2Fragment.Builder builder = PostViewV2Fragment
+                        .builder(feedModel);
+                if (position >= 0) {
+                    builder.setPosition(position);
+                }
+                final PostViewV2Fragment fragment = builder
+                        .setSharedProfilePicElement(profilePicView)
+                        .setSharedMainPostElement(mainPostImage)
+                        .build();
+                fragment.show(getChildFragmentManager(), "post_view");
+                opening = false;
+            }
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {

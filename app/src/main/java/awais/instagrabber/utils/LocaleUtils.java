@@ -62,7 +62,7 @@ public final class LocaleUtils {
         if (appLanguageIndex == 1) return "en";
         if (appLanguageIndex == 2) return "fr";
         if (appLanguageIndex == 3) return "es";
-        if (appLanguageIndex == 4) return "zh";
+        if (appLanguageIndex == 4) return "zh-rCN";
         if (appLanguageIndex == 5) return "in";
         if (appLanguageIndex == 6) return "it";
         if (appLanguageIndex == 7) return "de";
@@ -72,7 +72,9 @@ public final class LocaleUtils {
         if (appLanguageIndex == 11) return "fa";
         if (appLanguageIndex == 12) return "mk";
         if (appLanguageIndex == 13) return "vi";
-        if (appLanguageIndex == 14) return "hi";
+        if (appLanguageIndex == 14) return "zh-rTW";
+        if (appLanguageIndex == 15) return "hi";
+        if (appLanguageIndex == 16) return "cs";
 
         return null;
     }

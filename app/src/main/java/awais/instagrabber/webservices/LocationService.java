@@ -12,7 +12,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import awais.instagrabber.models.FeedModel;
@@ -27,7 +29,7 @@ import retrofit2.Retrofit;
 public class LocationService extends BaseService {
     private static final String TAG = "LocationService";
 
-    private final LocationRepository repository;
+    private final LocationRepository repository, webRepository;
 
     private static LocationService instance;
 
@@ -36,6 +38,10 @@ public class LocationService extends BaseService {
                 .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(LocationRepository.class);
+        final Retrofit webRetrofit = getRetrofitBuilder()
+                .baseUrl("https://www.instagram.com")
+                .build();
+        webRepository = webRetrofit.create(LocationRepository.class);
     }
 
     public static LocationService getInstance() {
@@ -48,7 +54,7 @@ public class LocationService extends BaseService {
     public void fetchPosts(@NonNull final String locationId,
                            final String maxId,
                            final ServiceCallback<LocationPostsFetchResponse> callback) {
-        final ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder();
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         if (!TextUtils.isEmpty(maxId)) {
             builder.put("max_id", maxId);
         }
@@ -110,6 +116,82 @@ public class LocationService extends BaseService {
                 continue;
             }
             final FeedModel feedModel = ResponseBodyUtils.parseItem(itemJson);
+            if (feedModel != null) {
+                feedModels.add(feedModel);
+            }
+        }
+        return feedModels;
+    }
+
+    public void fetchGraphQLPosts(@NonNull final String locationId,
+                                  final String maxId,
+                                  final ServiceCallback<LocationPostsFetchResponse> callback) {
+        final Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("query_hash", "36bd0f2bf5911908de389b8ceaa3be6d");
+        queryMap.put("variables", "{" +
+                "\"id\":\"" + locationId + "\"," +
+                "\"first\":25," +
+                "\"after\":\"" + (maxId == null ? "" : maxId) + "\"" +
+                "}");
+        final Call<String> request = webRepository.fetchGraphQLPosts(queryMap);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                try {
+                    if (callback == null) {
+                        return;
+                    }
+                    final String body = response.body();
+                    if (TextUtils.isEmpty(body)) {
+                        callback.onSuccess(null);
+                        return;
+                    }
+                    final LocationPostsFetchResponse tagPostsFetchResponse = parseGraphQLResponse(body);
+                    callback.onSuccess(tagPostsFetchResponse);
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    private LocationPostsFetchResponse parseGraphQLResponse(@NonNull final String body) throws JSONException {
+        final JSONObject rootroot = new JSONObject(body);
+        final JSONObject root = rootroot.getJSONObject("data").getJSONObject("location").getJSONObject("edge_location_to_media");
+        final boolean moreAvailable = root.getJSONObject("page_info").optBoolean("has_next_page");
+        final String nextMaxId = root.getJSONObject("page_info").optString("end_cursor");
+        final int numResults = root.optInt("count");
+        final String status = rootroot.optString("status");
+        final JSONArray itemsJson = root.optJSONArray("edges");
+        final List<FeedModel> items = parseGraphQLItems(itemsJson);
+        return new LocationPostsFetchResponse(
+                moreAvailable,
+                nextMaxId,
+                numResults,
+                status,
+                items
+        );
+    }
+
+    private List<FeedModel> parseGraphQLItems(final JSONArray items) throws JSONException {
+        if (items == null) {
+            return Collections.emptyList();
+        }
+        final List<FeedModel> feedModels = new ArrayList<>();
+        for (int i = 0; i < items.length(); i++) {
+            final JSONObject itemJson = items.optJSONObject(i);
+            if (itemJson == null) {
+                continue;
+            }
+            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
             if (feedModel != null) {
                 feedModels.add(feedModel);
             }

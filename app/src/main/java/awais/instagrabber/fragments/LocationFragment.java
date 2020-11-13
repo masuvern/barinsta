@@ -47,6 +47,7 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.LocationPostFetchService;
+import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.databinding.FragmentLocationBinding;
@@ -81,6 +82,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private NestedCoordinatorLayout root;
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
+    private boolean opening = false;
     private String locationId;
     private LocationModel locationModel;
     private ActionMode actionMode;
@@ -197,16 +199,37 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            if (opening) return;
+            else if (TextUtils.isEmpty(feedModel.getProfileModel().getUsername())) {
+                opening = true;
+                new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
+                    final PostViewV2Fragment.Builder builder = PostViewV2Fragment
+                            .builder(newFeedModel);
+                    if (position >= 0) {
+                        builder.setPosition(position);
+                    }
+                    final PostViewV2Fragment fragment = builder
+                            .setSharedProfilePicElement(profilePicView)
+                            .setSharedMainPostElement(mainPostImage)
+                            .build();
+                    fragment.show(getChildFragmentManager(), "post_view");
+                    opening = false;
+                }).execute();
             }
-            final PostViewV2Fragment fragment = builder
-                    .setSharedProfilePicElement(profilePicView)
-                    .setSharedMainPostElement(mainPostImage)
-                    .build();
-            fragment.show(getChildFragmentManager(), "post_view");
+            else {
+                opening = true;
+                final PostViewV2Fragment.Builder builder = PostViewV2Fragment
+                        .builder(feedModel);
+                if (position >= 0) {
+                    builder.setPosition(position);
+                }
+                final PostViewV2Fragment fragment = builder
+                        .setSharedProfilePicElement(profilePicView)
+                        .setSharedMainPostElement(mainPostImage)
+                        .build();
+                fragment.show(getChildFragmentManager(), "post_view");
+                opening = false;
+            }
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
@@ -335,7 +358,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void setupPosts() {
         binding.posts.setViewModelStoreOwner(this)
                      .setLifeCycleOwner(this)
-                     .setPostFetchService(new LocationPostFetchService(locationModel))
+                     .setPostFetchService(new LocationPostFetchService(locationModel, isLoggedIn))
                      .setLayoutPreferences(PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_LOCATION_POSTS_LAYOUT)))
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)

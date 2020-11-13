@@ -41,7 +41,7 @@
                     android:gravity="center"
                     android:padding="8dp"
                     android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintBottom_toTopOf="@id/btnFollowTag"
+                    app:layout_constraintBottom_toTopOf="@id/fav_chip"
                     app:layout_constraintStart_toEndOf="@id/mainHashtagImage"
                     app:layout_constraintTop_toTopOf="@id/mainHashtagImage"
                     tools:text="35 Posts" />

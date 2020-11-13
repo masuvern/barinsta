@@ -12,4 +12,7 @@ public interface LocationRepository {
     @GET("/api/v1/feed/location/{location}/")
     Call<String> fetchPosts(@Path("location") final String locationId,
                             @QueryMap Map<String, String> queryParams);
+
+    @GET("/graphql/query/")
+    Call<String> fetchGraphQLPosts(@QueryMap(encoded = true) Map<String, String> queryParams);
 }

@@ -671,8 +671,6 @@ public final class ResponseBodyUtils {
         }
         final JSONObject feedItem = itemJson.getJSONObject("node");
         final String mediaType = feedItem.optString("__typename");
-        if (mediaType.isEmpty() || "GraphSuggestedUserFeedUnit".equals(mediaType))
-            return null;
 
         final boolean isVideo = feedItem.optBoolean("is_video");
         final long videoViews = feedItem.optLong("video_view_count", 0);

@@ -15,15 +15,17 @@ public class LocationPostFetchService implements PostFetcher.PostFetchService {
     private final LocationModel locationModel;
     private String nextMaxId;
     private boolean moreAvailable;
+    private final boolean isLoggedIn;
 
-    public LocationPostFetchService(final LocationModel locationModel) {
+    public LocationPostFetchService(final LocationModel locationModel, final boolean isLoggedIn) {
         this.locationModel = locationModel;
+        this.isLoggedIn = isLoggedIn;
         locationService = LocationService.getInstance();
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        locationService.fetchPosts(locationModel.getId(), nextMaxId, new ServiceCallback<LocationPostsFetchResponse>() {
+        final ServiceCallback cb = new ServiceCallback<LocationPostsFetchResponse>() {
             @Override
             public void onSuccess(final LocationPostsFetchResponse result) {
                 if (result == null) return;
@@ -41,7 +43,9 @@ public class LocationPostFetchService implements PostFetcher.PostFetchService {
                     fetchListener.onFailure(t);
                 }
             }
-        });
+        };
+        if (isLoggedIn) locationService.fetchPosts(locationModel.getId(), nextMaxId, cb);
+        else locationService.fetchGraphQLPosts(locationModel.getId(), nextMaxId, cb);
     }
 
     @Override
