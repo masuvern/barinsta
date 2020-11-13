@@ -421,10 +421,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void setupComment() {
-        if (!isLoggedIn) {
-            binding.comment.setVisibility(View.GONE);
-            return;
-        }
         binding.comment.setOnClickListener(v -> {
             final NavController navController = getNavController();
             if (navController == null) return;
@@ -1129,8 +1125,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.captionToggle.setVisibility(View.VISIBLE);
             binding.download.setVisibility(View.VISIBLE);
             binding.share.setVisibility(View.VISIBLE);
+            binding.comment.setVisibility(View.VISIBLE);
             if (isLoggedIn) {
-                binding.comment.setVisibility(View.VISIBLE);
                 binding.like.setVisibility(View.VISIBLE);
                 binding.save.setVisibility(View.VISIBLE);
             }

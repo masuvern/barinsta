@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:hint="@string/comment_hint"
+        android:visibility="gone"
         app:counterEnabled="true"
         app:counterMaxLength="2200"
         app:endIconDrawable="@drawable/ic_send_24"
