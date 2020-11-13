@@ -84,10 +84,10 @@ public class FeedService extends BaseService {
             return;
         }
         final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("query_hash", "6b838488258d7a4820e48d209ef79eb1");
+        queryMap.put("query_hash", "c699b185975935ae2a457f24075de8c7");
         queryMap.put("variables", "{" +
                 "\"fetch_media_item_count\":" + maxItemsToLoad + "," +
-                "\"has_threaded_comments\":true," +
+                "\"fetch_like\":3,\"has_stories\":false,\"has_stories\":false,\"has_threaded_comments\":true," +
                 "\"fetch_media_item_cursor\":\"" + (cursor == null ? "" : cursor) + "\"" +
                 "}");
         final Call<String> request = repository.fetch(queryMap);
@@ -154,8 +154,10 @@ public class FeedService extends BaseService {
             if (itemJson == null) {
                 continue;
             }
-            final FeedModel feedModel = ResponseBodyUtils.parseItem(itemJson);
-            feedModels.add(feedModel);
+            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
+            if (feedModel != null) {
+                feedModels.add(feedModel);
+            }
         }
         return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
     }
