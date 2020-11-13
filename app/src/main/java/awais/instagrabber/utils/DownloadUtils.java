@@ -176,7 +176,7 @@ public final class DownloadUtils {
                     Pattern.matches("[a-zA-Z_0-9.\\-()%]+", filename)) {
                 int dotPos = filename.lastIndexOf('.');
                 if (0 <= dotPos) {
-                    return filename.substring(dotPos + 1);
+                    return filename.substring(dotPos);
                 }
             }
         }
