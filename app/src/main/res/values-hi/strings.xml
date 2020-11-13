@@ -76,10 +76,10 @@
     <string name="votef_story_poll">मतदान सफल!</string>
     <string name="voted_story_poll">आप पहले से ही मत दिये हो!</string>
     <string name="respond_story">जवाब</string>
-    <string name="answer_hint">उत्तर...</string>
+    <string name="answer_hint">उत्तर…</string>
     <string name="answered_story">सही उत्तर</string>
     <string name="reply_story">स्टोरि पे प्रतिक्रिया करें</string>
-    <string name="reply_hint">प्रतिक्रिया...</string>
+    <string name="reply_hint">जवाब…</string>
     <string name="story_quiz">प्रश्नोत्तरी</string>
     <string name="story_quizzed">आप पहले से ही उत्तर दिये हो!</string>
     <string name="story_mentions">उल्लेख</string>
@@ -107,7 +107,9 @@
     <string name="tagged">टैग किये</string>
     <string name="dm_person">संदेश</string>
     <string name="like">पसंद(%s)</string>
+    <string name="like_without_count">पसन्द</string>
     <string name="unlike">अपसंद (%s)</string>
+    <string name="unlike_without_count">नापसंद</string>
     <string name="bookmark">बुकमार्क</string>
     <string name="unbookmark">बुकमार्क न करें</string>
     <string name="follow">अनुसरण करे</string>
@@ -190,7 +192,7 @@
     <string name="direct_download_perms_ask">अनुमति दें और फिर से प्रयास करें!</string>
     <string name="downloader_started">डाउनलोड शुरू...</string>
     <string name="downloader_complete">डाउनलोड समाप्त हुआ</string>
-    <string name="downloader_downloading_post">पोस्ट डाउनलोड हो रहा है</string>
+    <string name="downloader_downloading_post">डाउनलोड जारी है…</string>
     <string name="downloader_downloading_media">मिडीया डाउनलोड हो रहा है</string>
     <string name="downloader_downloading_pfp">प्रोफाइल चित्र डाउनलोड करें</string>
     <string name="downloader_downloaded_in_folder">फाइल डाउनलोड फोल्डर पे डाउनलोड हो गया!</string>
@@ -216,12 +218,13 @@
     <string name="followers_not_follower">%s फोलो नहीं कर रहा है</string>
     <string name="login_error_loading_cookies">कुकीज लोड करने में त्रुटि</string>
     <string name="login_success_loading_cookies">कुकीज सफलतापूर्बक लोड हुआ!\nअगर आप अभी तक गोपन पेज या पोस्ट खुल नहीं पा रहे हैं, फिर से लग इन करें!</string>
-    <string name="comment_hint">नया कमेंट करें...</string>
+    <string name="comment_hint">एक नया टिप्पणी लिखें...</string>
     <string name="dm_hint">एक नया संदेश लिखो...</string>
     <string name="liked_notif">आपकी पोस्ट को पसंद किया</string>
     <string name="comment_notif">आपके पोस्ट पर कमेंट किया है:</string>
     <string name="follow_notif">आपको फॉलो करना शुरू किया</string>
     <string name="mention_notif">आपका उल्लेख किया:</string>
+    <string name="tagged_notif">आपको एक पोस्ट में टैग किया गया है</string>
     <string name="request_notif">आपको फॉलो करने का निवेदन किया</string>
     <string name="request_approve">निवेदन को ग्रहण करें</string>
     <string name="request_reject">अनुरोध प्रत्याख्यान करें</string>
@@ -234,9 +237,9 @@
     <string name="crash_title">एप में त्रुटि हुयी।</string>
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
     <string name="use_amoled_dark_theme">Use AMOLED mode for Dark theme</string>
-    <string name="action_notif">Activity</string>
-    <string name="select_picture">Select Picture</string>
-    <string name="uploading">Uploading...</string>
+    <string name="action_notif">कार्यकलाप</string>
+    <string name="select_picture">चित्र का चयन करें</string>
+    <string name="uploading">अपलोड हो रहा है...</string>
     <string name="activity_count_prefix">You have:</string>
     <string name="activity_count_relationship">%d follows</string>
     <string name="activity_count_comments">%d comments</string>
@@ -255,7 +258,7 @@
     <string name="dm_thread_info">Info</string>
     <string name="mark_as_seen">Mark as seen</string>
     <string name="skip_update_checkbox">Do not show again until next update</string>
-    <string name="version">Version</string>
+    <string name="version">संस्करण</string>
     <string name="pref_start_screen">Start screen</string>
     <string name="pref_category_general">General</string>
     <string name="pref_category_theme">Theme</string>
@@ -293,4 +296,32 @@
     <string name="file_chosen_label">File:</string>
     <string name="enter_password">Enter password</string>
     <string name="select_backup_file">Select a backup file (.zaai/.backup)</string>
+    <string name="apply">Apply</string>
+    <string name="save">Save</string>
+    <string name="caption">Caption</string>
+    <string name="player_timeline_desc">Video player timeline</string>
+    <string name="liking">Liking…</string>
+    <string name="like_unsuccessful">Like unsuccessful</string>
+    <string name="unlike_unsuccessful">Unlike unsuccessful</string>
+    <string name="unliking">Unliking…</string>
+    <string name="controls">Controls</string>
+    <string name="saving">Saving…</string>
+    <string name="removing">Removing…</string>
+    <string name="save_unsuccessful">Save unsuccessful</string>
+    <string name="save_remove_unsuccessful">Remove unsuccessful</string>
+    <string name="downloading">Downloading…</string>
+    <string name="downloader_downloading_child">Download item %d of %d</string>
+    <string name="delete">Delete</string>
+    <string name="comment">Comment</string>
+    <string name="layout">Layout</string>
+    <string name="opening_post">Opening post...</string>
+    <string name="share">Share</string>
+    <plurals name="likes_count">
+        <item quantity="one">%d like</item>
+        <item quantity="other">%d likes</item>
+    </plurals>
+    <plurals name="comments_count">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
 </resources>
