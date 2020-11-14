@@ -60,7 +60,6 @@ import awais.instagrabber.webservices.DiscoverService;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
@@ -75,7 +74,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
     private int downloadChildPosition = -1;
-    private PostsLayoutPreferences layoutPreferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_TOPIC_POSTS_LAYOUT));
+    private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_TOPIC_POSTS_LAYOUT);
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override

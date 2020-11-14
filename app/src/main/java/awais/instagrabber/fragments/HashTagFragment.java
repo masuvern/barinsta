@@ -95,7 +95,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
     private int downloadChildPosition = -1;
-    private PostsLayoutPreferences layoutPreferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_HASHTAG_POSTS_LAYOUT));
+    private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_HASHTAG_POSTS_LAYOUT);
     private LayoutHashtagDetailsBinding hashtagDetailsBinding;
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
