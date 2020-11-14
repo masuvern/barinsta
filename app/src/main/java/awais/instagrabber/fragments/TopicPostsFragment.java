@@ -22,6 +22,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
@@ -46,7 +47,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.asyncs.DiscoverPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
-import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.databinding.FragmentTopicPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.main.DiscoverFragmentDirections;
@@ -68,7 +68,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
 
     private MainActivity fragmentActivity;
     private FragmentTopicPostsBinding binding;
-    private NestedCoordinatorLayout root;
+    private CoordinatorLayout root;
     private boolean shouldRefresh = true;
     private TopicCluster topicCluster;
     private ActionMode actionMode;

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
@@ -29,7 +30,6 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.adapters.DirectMessageInboxAdapter;
 import awais.instagrabber.asyncs.direct_messages.InboxFetcher;
-import awais.instagrabber.customviews.helpers.NestedCoordinatorLayout;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding;
 import awais.instagrabber.interfaces.FetchListener;
@@ -41,7 +41,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     private static final String TAG = "DirectMessagesInboxFrag";
 
     private FragmentActivity fragmentActivity;
-    private NestedCoordinatorLayout root;
+    private CoordinatorLayout root;
     private RecyclerView inboxList;
     private RecyclerLazyLoader lazyLoader;
     private LinearLayoutManager layoutManager;
