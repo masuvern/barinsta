@@ -249,7 +249,7 @@
     <string name="profile">個人檔案</string>
     <string name="more">更多</string>
     <string name="title_dm">訊息</string>
-    <string name="number_selected">已選 %s</string>
+    <string name="number_selected">已選 %d</string>
     <string name="relogin">重新登入</string>
     <string name="relogin_summary">如果遇到任何問題，請刷新您的 Cookie</string>
     <string name="logout_success">已成功登出！</string>
