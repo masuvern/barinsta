@@ -91,6 +91,7 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
         discoverService.topicalExplore(new DiscoverService.TopicalExploreRequest(), new ServiceCallback<DiscoverService.TopicalExploreResponse>() {
             @Override
             public void onSuccess(final DiscoverService.TopicalExploreResponse result) {
+                if (result == null) return;
                 topicClusterViewModel.getList().postValue(result.getClusters());
                 binding.swipeRefreshLayout.setRefreshing(false);
             }

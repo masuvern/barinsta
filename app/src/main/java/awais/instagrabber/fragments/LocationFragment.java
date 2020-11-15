@@ -198,7 +198,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final FeedModel feedModel,
+        private void openPostDialog(@NonNull final FeedModel feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
@@ -207,6 +207,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 opening = true;
                 new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
                     opening = false;
+                    if (newFeedModel == null) return;
                     openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
                 }).execute();
                 return;

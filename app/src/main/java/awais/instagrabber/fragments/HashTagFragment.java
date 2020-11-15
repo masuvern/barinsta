@@ -200,7 +200,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final FeedModel feedModel,
+        private void openPostDialog(@NonNull final FeedModel feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
@@ -209,6 +209,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 opening = true;
                 new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
                     opening = false;
+                    if (newFeedModel == null) return;
                     openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
                 }).execute();
                 return;
