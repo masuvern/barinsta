@@ -138,7 +138,6 @@ public abstract class SharedElementTransitionDialogFragment extends DialogFragme
                 final int initY = location[1];
                 destView.setX(initX);
                 destView.setY(initY - Utils.getStatusBarHeight(getContext()));
-                destView.requestLayout();
                 boundsCalculatedCount++;
                 if (startCalled) {
                     startPostponedEnterTransition();

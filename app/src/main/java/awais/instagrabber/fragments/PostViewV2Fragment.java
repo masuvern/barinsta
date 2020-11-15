@@ -242,7 +242,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                              @Nullable final ViewGroup container,
                              @Nullable final Bundle savedInstanceState) {
         binding = DialogPostViewBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+        final ConstraintLayout root = binding.getRoot();
+        final ViewTreeObserver.OnPreDrawListener preDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                root.getViewTreeObserver().removeOnPreDrawListener(this);
+                return false;
+            }
+        };
+        root.getViewTreeObserver().addOnPreDrawListener(preDrawListener);
+        return root;
     }
 
     @Override
