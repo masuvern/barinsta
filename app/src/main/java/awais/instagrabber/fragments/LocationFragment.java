@@ -205,8 +205,10 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (opening) return;
             if (TextUtils.isEmpty(feedModel.getProfileModel().getUsername())) {
                 opening = true;
-                new PostFetcher(feedModel.getShortCode(), newFeedModel -> openPostDialog(newFeedModel, profilePicView, mainPostImage, position))
-                        .execute();
+                new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
+                    opening = false;
+                    openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
+                }).execute();
                 return;
             }
             opening = true;
