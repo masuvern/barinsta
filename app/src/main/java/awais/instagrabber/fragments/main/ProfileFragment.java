@@ -628,9 +628,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             });
         }
-        if (!profileModel.isReallyPrivate()) {
-            profileDetailsBinding.mainFollowing.setClickable(true);
-            profileDetailsBinding.mainFollowers.setClickable(true);
+        if (!profileModel.isReallyPrivate() && isLoggedIn) {
+            binding.mainFollowing.setClickable(true);
+            binding.mainFollowers.setClickable(true);
 
             if (isLoggedIn) {
                 final View.OnClickListener followClickListener = v -> {
