@@ -612,7 +612,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             });
         }
-        if (!profileModel.isReallyPrivate()) {
+        if (!profileModel.isReallyPrivate() && isLoggedIn) {
             binding.mainFollowing.setClickable(true);
             binding.mainFollowers.setClickable(true);
 
