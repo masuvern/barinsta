@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>Predefinito di Sistema</item>
-        <item>Inglese</item>
-        <item>Francese [Grazie a @kernoeb]</item>
-        <item>Spagnolo [Grazie a @sguinetti]</item>
-        <item>Cinese Semplificato</item>
-        <item>Indonesiano [Grazie a @Galang23]</item>
-        <item>Italiano [Grazie a @RAR_Ramar e Giorgio Arbato]</item>
-        <item>Tedesco [Grazie a @peterge1998]</item>
-        <item>Polacco [Grazie a @Lego8486]</item>
-        <item>Turco [Grazie a @faydin90]</item>
-        <item>Portoghese Brasiliano [Grazie a @wagnim]</item>
-        <item>Persiano [Grazie a @farzadx]</item>
-        <item>Macedone [Grazie a @snajdovski]</item>
-        <item>Vietnamita [Grazie a @fouze555]</item>
-        <item>Cinese Tradizionale [Grazie a @Still34]</item>
+        <item>ସିଷ୍ଟମ ନିର୍ଧାରିତ</item>
+        <item>ଇଂରାଜୀ</item>
+        <item>French [Thanks to @kernoeb]</item>
+        <item>Spanish [Thanks to @sguinetti]</item>
+        <item>Chinese Simplified</item>
+        <item>Indonesian [Thanks to @Galang23]</item>
+        <item>Italian [Thanks to @RAR_Ramar]</item>
+        <item>German [Thanks to @peterge1998]</item>
+        <item>Polish [Thanks to @Lego8486]</item>
+        <item>Turkish [Thanks to @faydin90]</item>
+        <item>Brazilian Portuguese [Thanks to @wagnim]</item>
+        <item>Persian [Thanks to @farzadx]</item>
+        <item>Macedonian [Thanks to @snajdovski]</item>
+        <item>Vietnamese [Thanks to @fouze555]</item>
+        <item>Chinese Traditional [Thanks to @Still34]</item>
         <item>Hindi</item>
     </string-array>
     <string-array name="languages_values">
@@ -35,10 +35,10 @@
         <item>13</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>Automatico / Basato sul Sistema</item>
-        <item>Automatico / Basato sulla Batteria</item>
-        <item>Scuro</item>
-        <item>Chiaro</item>
+        <item>Auto / Follow System</item>
+        <item>Auto / Follow Battery</item>
+        <item>Dark</item>
+        <item>Light</item>
     </string-array>
     <string-array name="theme_presets_values">
         <item>0</item>
@@ -47,15 +47,15 @@
         <item>3</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>Nessuno</item>
+        <item>None</item>
         <item>\@</item>
-        <item>a</item>
-        <item>il</item>
+        <item>at</item>
+        <item>on</item>
         <item>\|</item>
         <item>-</item>
     </string-array>
     <string-array name="discover_placeholder">
-        <item>Caricamento...</item>
+        <item>Loading...</item>
     </string-array>
     <string-array name="date_presets">
         <item>dd-MM-yyyy</item>
