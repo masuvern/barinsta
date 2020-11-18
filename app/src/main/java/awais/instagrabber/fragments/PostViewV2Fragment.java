@@ -71,6 +71,7 @@ import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
 import awais.instagrabber.databinding.DialogPostViewBinding;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
+import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -431,12 +432,14 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     private void setupComment() {
         binding.comment.setOnClickListener(v -> {
+            final ProfileModel profileModel = feedModel.getProfileModel();
+            if (profileModel == null) return;
             final NavController navController = getNavController();
             if (navController == null) return;
             final Bundle bundle = new Bundle();
             bundle.putString("shortCode", feedModel.getShortCode());
             bundle.putString("postId", feedModel.getPostId());
-            bundle.putString("postUserId", feedModel.getProfileModel().getId());
+            bundle.putString("postUserId", profileModel.getId());
             navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
         });
         binding.comment.setOnLongClickListener(v -> {
@@ -635,7 +638,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         if (!wasPaused && sharedProfilePicElement != null) {
             addSharedElement(sharedProfilePicElement, binding.profilePic);
         }
-        final String uri = feedModel.getProfileModel().getSdProfilePic();
+        final ProfileModel profileModel = feedModel.getProfileModel();
+        if (profileModel == null) {
+            binding.profilePic.setVisibility(View.GONE);
+            return;
+        }
+        final String uri = profileModel.getSdProfilePic();
         final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(uri)).build();
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
@@ -656,7 +664,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 })
                 .build();
         binding.profilePic.setController(controller);
-        binding.profilePic.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
+        binding.profilePic.setOnClickListener(v -> navigateToProfile("@" + profileModel.getUsername()));
     }
 
     private void setupToolbar() {
@@ -668,11 +676,18 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void setupTitles() {
-        binding.title.setText(feedModel.getProfileModel().getUsername());
-        binding.righttitle.setText(feedModel.getProfileModel().getName());
-        binding.isVerified.setVisibility(feedModel.getProfileModel().isVerified() ? View.VISIBLE : View.GONE);
-        binding.title.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
-        binding.righttitle.setOnClickListener(v -> navigateToProfile("@" + feedModel.getProfileModel().getUsername()));
+        final ProfileModel profileModel = feedModel.getProfileModel();
+        if (profileModel == null) {
+            binding.title.setVisibility(View.GONE);
+            binding.righttitle.setVisibility(View.GONE);
+            binding.subtitle.setVisibility(View.GONE);
+            return;
+        }
+        binding.title.setText(profileModel.getUsername());
+        binding.righttitle.setText(profileModel.getName());
+        binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
+        binding.title.setOnClickListener(v -> navigateToProfile("@" + profileModel.getUsername()));
+        binding.righttitle.setOnClickListener(v -> navigateToProfile("@" + profileModel.getUsername()));
         final String locationName = feedModel.getLocationName();
         if (!TextUtils.isEmpty(locationName)) {
             binding.subtitle.setText(locationName);
@@ -770,7 +785,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             return true;
         });
         binding.share.setOnClickListener(v -> {
-            final boolean isPrivate = feedModel.getProfileModel().isPrivate();
+            final ProfileModel profileModel = feedModel.getProfileModel();
+            if (profileModel == null) return;
+            final boolean isPrivate = profileModel.isPrivate();
             if (isPrivate)
                 Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -1120,7 +1137,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             }
             binding.profilePic.setVisibility(View.VISIBLE);
             binding.title.setVisibility(View.VISIBLE);
-            binding.isVerified.setVisibility(feedModel.getProfileModel().isVerified() ? View.VISIBLE : View.GONE);
+            binding.isVerified.setVisibility(feedModel.getProfileModel() != null
+                                             ? feedModel.getProfileModel().isVerified() ? View.VISIBLE : View.GONE
+                                             : View.GONE);
             binding.righttitle.setVisibility(View.VISIBLE);
             binding.topBg.setVisibility(View.VISIBLE);
             if (!TextUtils.isEmpty(binding.subtitle.getText())) {
