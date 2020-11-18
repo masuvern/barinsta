@@ -21,7 +21,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageMembersAdapter;
 import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
@@ -93,8 +91,9 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
                 ProfileModel model = (ProfileModel) tag;
-                final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + model.getUsername());
-                NavHostFragment.findNavController(this).navigate(action);
+                final Bundle bundle = new Bundle();
+                bundle.putString("username", "@" + model.getUsername());
+                NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle);
             }
         };
 
@@ -110,8 +109,9 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                 });
                 final DialogInterface.OnClickListener clickListener = (d, w) -> {
                     if (w == 0) {
-                        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + model.getUsername());
-                        NavHostFragment.findNavController(this).navigate(action);
+                        final Bundle bundle = new Bundle();
+                        bundle.putString("username", "@" + model.getUsername());
+                        NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle);
                     } else if (w == 1) {
                         new ChangeSettings(titleText.getText().toString()).execute("remove_users", model.getId());
                         onRefresh();

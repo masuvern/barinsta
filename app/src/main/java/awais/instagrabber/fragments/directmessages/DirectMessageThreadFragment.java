@@ -33,7 +33,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -54,7 +53,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageItemsAdapter;
 import awais.instagrabber.asyncs.ImageUploader;
@@ -71,7 +69,6 @@ import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
-import awais.instagrabber.models.enums.DownloadMethod;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.UserInboxDirection;
 import awais.instagrabber.utils.Constants;
@@ -549,8 +546,9 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void searchUsername(final String text) {
-        final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalProfileFragment("@" + text);
-        NavHostFragment.findNavController(this).navigate(action);
+        final Bundle bundle = new Bundle();
+        bundle.putString("username", "@" + text);
+        NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle);
     }
 
     public static class DirectItemModelListViewModel extends ViewModel {
