@@ -70,7 +70,7 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
                 .append("\r\nDEVICE			: ").append(Build.DEVICE)
                 .append("\r\nPRODUCT		: ").append(Build.PRODUCT)
                 .append("\r\nHOST			: ").append(Build.HOST)
-                .append("\r\nTAGS			: ").append(Build.TAGS)
+                .append("\r\nTAGS			: ").append(Build.TAGS);
 
         reportBuilder.append("\r\n\r\nStack:\r\n==============\r\n");
         final Writer result = new StringWriter();
