@@ -628,11 +628,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             });
         }
-        if (!profileModel.isReallyPrivate() && isLoggedIn) {
-            profileDetailsBinding.mainFollowing.setClickable(true);
-            profileDetailsBinding.mainFollowers.setClickable(true);
-
+        if (!profileModel.isReallyPrivate()) {
             if (isLoggedIn) {
+                profileDetailsBinding.mainFollowing.setClickable(true);
+                profileDetailsBinding.mainFollowers.setClickable(true);
                 final View.OnClickListener followClickListener = v -> {
                     final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToFollowViewerFragment(
                             profileId,
@@ -640,11 +639,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             profileModel.getUsername());
                     NavHostFragment.findNavController(this).navigate(action);
                 };
-
                 profileDetailsBinding.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
                 profileDetailsBinding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
             }
-
             binding.swipeRefreshLayout.setRefreshing(true);
             binding.postsRecyclerView.setVisibility(View.VISIBLE);
             fetchPosts();
