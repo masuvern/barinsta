@@ -208,7 +208,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (isTaskRoot() && isBackStackEmpty) {
             finishAfterTransition();
         } else {
-            super.onBackPressed();
+            try {
+                super.onBackPressed();
+            } catch (Exception ignored) {}
         }
     }
 
