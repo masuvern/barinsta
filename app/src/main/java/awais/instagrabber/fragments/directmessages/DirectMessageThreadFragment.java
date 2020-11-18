@@ -18,8 +18,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -476,9 +476,16 @@ public class DirectMessageThreadFragment extends Fragment {
             if (text != null) {
                 binding.commentText.setText("");
             } else {
-                final LinearLayout dim = (LinearLayout) binding.messageList.findViewWithTag(directItemModel).getParent();
-                if (dim.findViewById(R.id.liked_container) != null) {
-                    dim.findViewById(R.id.liked_container).setVisibility(delete ? View.GONE : View.VISIBLE);
+                final View viewWithTag = binding.messageList.findViewWithTag(directItemModel);
+                if (viewWithTag != null) {
+                    final ViewParent dim = viewWithTag.getParent();
+                    if (dim instanceof View) {
+                        final View dimView = (View) dim;
+                        final View likedContainer = dimView.findViewById(R.id.liked_container);
+                        if (likedContainer != null) {
+                            likedContainer.setVisibility(delete ? View.GONE : View.VISIBLE);
+                        }
+                    }
                 }
                 directItemModel.setLiked();
             }
