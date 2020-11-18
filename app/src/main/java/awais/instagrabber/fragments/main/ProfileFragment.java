@@ -612,7 +612,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.mainBiography
                     .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
             profileDetailsBinding.mainBiography.setOnLongClickListener(v -> {
-                if (context != null) Utils.copyText(context, biography);
+                Utils.copyText(context, biography);
                 return true;
             });
         }
@@ -624,13 +624,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.mainUrl.setText(url);
             profileDetailsBinding.mainUrl.addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
             profileDetailsBinding.mainUrl.setOnLongClickListener(v -> {
-                if (context != null) Utils.copyText(context, url);
+                Utils.copyText(context, url);
                 return true;
             });
         }
         if (!profileModel.isReallyPrivate() && isLoggedIn) {
-            binding.mainFollowing.setClickable(true);
-            binding.mainFollowers.setClickable(true);
+            profileDetailsBinding.mainFollowing.setClickable(true);
+            profileDetailsBinding.mainFollowers.setClickable(true);
 
             if (isLoggedIn) {
                 final View.OnClickListener followClickListener = v -> {
