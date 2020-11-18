@@ -44,6 +44,25 @@
         android:id="@+id/action_global_notificationsViewerFragment"
         app:destination="@id/notification_viewer_nav_graph" />
 
+    <include app:graph="@navigation/comments_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_commentsViewerFragment"
+        app:destination="@id/comments_nav_graph">
+        <argument
+            android:name="shortCode"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/directMessagesInboxFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageInboxFragment"
