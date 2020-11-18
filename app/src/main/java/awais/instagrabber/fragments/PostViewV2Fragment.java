@@ -125,8 +125,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         @Override
         public void onDragEnd() {
             // animate and dismiss if user drags the view more that 30% of the view
-            if (Math.abs(binding.getRoot().getY()) > Utils.displayMetrics.heightPixels * 0.35) {
-                animateAndDismiss(binding.getRoot().getY() < 0 ? -1 : 1);
+            if (Math.abs(binding.getRoot().getY()) > Utils.displayMetrics.heightPixels * 0.25) {
+                animateAndDismiss(binding.getRoot().getY() < 0 ? 1 : -1);
                 return;
             }
             // animate back the view to proper position
@@ -134,16 +134,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         }
 
         @Override
-        public void onFling(final float flingVelocity) {
+        public void onFling(final double flingVelocity) {
             // animate and dismiss if user flings up/down
-            animateAndDismiss(flingVelocity < 0 ? -1 : 1);
+            animateAndDismiss(flingVelocity > 0 ? 1 : -1);
         }
 
         private void animateAndDismiss(final int direction) {
             final int height = binding.getRoot().getHeight();
             final int finalYDist = height + Utils.getStatusBarHeight(context);
             // less than 0 means up direction, else down
-            final int finalY = direction < 0 ? -finalYDist : finalYDist;
+            final int finalY = direction > 0 ? -finalYDist : finalYDist;
             animateY(binding.getRoot(), finalY, 200, new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(final Animator animation) {
