@@ -25,12 +25,8 @@
     <string name="title_comments">Commentaires</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_highlight">Temps forts: %s</string>
-    <string name="title_user_story">Stories de l\'utilisateur</string>
-    <string name="title_changelog">Journal des changements</string>
-    <string name="bottom_toolbar">Afficher la barre d\'outils en bas</string>
     <string name="update_check">Rechercher les mises à jours au démarrage</string>
     <string name="download_user_folder">Télécharger les messages dans les dossiers des noms d\'utilisateurs</string>
-    <string name="autoload_posts">Chargement automatique de tous les posts de l\'utilisateur</string>
     <string name="mark_as_seen_setting">Marquer les stories comme vues après consultation</string>
     <string name="mark_as_seen_setting_summary">L\'auteur de la story saura que vous l\'avez vue</string>
     <string name="dm_mark_as_seen_setting">Marquer les messages privés comme vus après consultation</string>
@@ -38,31 +34,21 @@
     <string name="activity_setting">Activer les notifications d\'activités</string>
     <string name="error_loading_profile">Erreur de chargement du profil!\nVeuillez vous reconnecter et réessayez.</string>
     <string name="error_creating_folders">Erreur de création de dossier(s) de téléchargement.</string>
-    <string name="show_feed">Afficher le flux utilisateur (Ne fonctionne que lorsque l\'utilisateur est connecté)</string>
     <string name="save_to_folder">Enregistrer dans un dossier personnalisé</string>
     <string name="select_folder">Sélectionnez un dossier</string>
     <string name="theme_settings">Thème</string>
     <string name="login_settings">N\'affecte que les utilisateurs connectés :</string>
     <string name="anonymous_settings">N\'affecte que les utilisateurs anonymes:</string>
-    <string name="privacy_warning">Confidentialité</string>
     <string name="instadp_settings">Utiliser Instadp pour les photos de profil haute définition</string>
-    <string name="storiesig_settings">Utiliser le storesig pour les stories (mises en avant ou non) des utilisateurs publics</string>
-    <string name="stories_viewer_settings">Paramètres de visualisation des stories</string>
     <string name="import_export">Importer/Exporter</string>
     <string name="select_language">Langues</string>
-    <string name="what_to_do_dialog">Que voulez-vous faire?</string>
     <string name="main_posts_count">%s\nPosts</string>
     <string name="main_posts_count_inline">%s Publications</string>
     <string name="main_posts_followers">%s\nAbonnés</string>
     <string name="main_posts_following">%s\nAbonnements</string>
-    <string name="post_viewer_video_post">Post (vidéo)</string>
-    <string name="post_viewer_image_post">Post (image)</string>
     <string name="post_viewer_autoplay_video">Lecture automatique des vidéos</string>
     <string name="post_viewer_muted_autoplay">Toujours couper le son des vidéos</string>
-    <string name="post_viewer_post_from">%s - %s</string>
-    <string name="post_viewer_download_message" comment="post_viewer_download_message&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Note: La [Session] actuelle ne montrera pas ce dialogue tant que vous serez ici, et téléchargera toujours le post affiché.</string>
     <string name="post_viewer_download_dialog_title">Sélectionnez ce que vous souhaitez télécharger</string>
-    <string name="post_viewer_download_session" comment="post_viewer_download_session&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">[Session] actuelle</string>
     <string name="post_viewer_download_current">Actuel</string>
     <string name="post_viewer_download_album">Album complet</string>
     <string name="show_stories">Afficher les stories</string>
@@ -71,7 +57,6 @@
     <string name="view_story_post">Aperçu</string>
     <string name="view_post">Aperçu</string>
     <string name="spotify">Spotify</string>
-    <string name="stories_notloggedin">Impossible d\'interagir si vous n\'êtes pas connecté!</string>
     <string name="vote_story_poll">Vote</string>
     <string name="votef_story_poll">Vote réussi !</string>
     <string name="voted_story_poll">Vous avez déjà voté !</string>
@@ -96,18 +81,12 @@
     <string name="logout_summary">Parcourir Instagram de façon anonyme</string>
     <string name="remove_all_acc">Supprimer tous les comptes</string>
     <string name="remove_all_acc_warning">Ceci supprimera tous les comptes ajoutés sur l\'application!\nPour supprimer un seul compte, appuyez longuement sur le compte depuis la boîte de dialogue de changement de compte.\nVoulez-vous continuer?</string>
-    <string name="send_logs">Envoyer des journaux de débogage</string>
     <string name="time_settings">Format de la date</string>
-    <string name="project_link">Visiter la page du projet</string>
-    <string name="telegram_link">Rejoindre le groupe Telegram</string>
-    <string name="matrix_link">Rejoindre la salle sur Matrix</string>
     <string name="liked">Aimé</string>
     <string name="saved">Sauvegardé</string>
     <string name="tagged">Taggé</string>
     <string name="dm_person">Message</string>
-    <string name="like">Aimer (%s)</string>
-    <string name="like_without_count">Like</string>
-    <string name="unlike">Supprimer le j\'aime (%s)</string>
+    <string name="like_without_count">J\'aime</string>
     <string name="unlike_without_count">Unlike</string>
     <string name="bookmark">Ajouter aux marque-pages</string>
     <string name="unbookmark">Retirer des marque-pages</string>
@@ -144,12 +123,8 @@
     <string name="time_settings_title_date_format">Format des dates</string>
     <string name="time_settings_title_preview">Prévisualiser</string>
     <string name="time_settings_swap_time">Permuter la date et l\'heure</string>
-    <string name="quick_access_info_dialog">Le panneau des favoris permet d\'ajouter vos hashtags et/ou noms d\'utilisateur favoris.\n\nLe panneau \"Accès rapide\" permet de passer rapidement d\'un compte à l\'autre.\n\nNote 1: Assurez-vous de vous connecter à chaque compte [Paramètres &gt; Connexion] pour ajouter un compte à la liste !\n\nNote 2: Déconnectez-vous du compte courant et connectez-vous ensuite à l\'autre compte.</string>
     <string name="quick_access_cannot_delete_curr">Impossible de supprimer le compte actuellement utilisé</string>
     <string name="quick_access_confirm_delete">Êtes-vous sûr de vouloir supprimer \'%s\' ?</string>
-    <string name="profile_viewer_imageinfo">Largeur: %d\nHauteur: %d</string>
-    <string name="profile_viewer_colordepth_prefix">\nProfondeur des couleurs:</string>
-    <string name="profile_endpoint">Sélectionner l\'emplacement de téléchargement des photos de profil\n(n\'affecte pas les hashtags)</string>
     <string name="open_profile">Ouvrir le profil</string>
     <string name="view_pfp">Voir la photo de profil</string>
     <string name="direct_messages_you">Vous</string>
@@ -207,7 +182,6 @@
     <string name="comment_send_empty_comment">Aucun commentaire vide !</string>
     <string name="comment_view_mention_user_search">Souhaitez-vous faire une recherche sur le nom d\'utilisateur ?</string>
     <string name="comment_view_mention_hash_search">Souhaitez-vous faire une recherch sur le hashtag ?</string>
-    <string name="comment_view_mention_location_search">Souhaitez-vous rechercher l\'emplacement ?</string>
     <string name="followers_type_followers">Abonnés</string>
     <string name="followers_type_following">Abonnements</string>
     <string name="followers_compare">Comparer les abonnés et abonnements</string>
@@ -215,7 +189,6 @@
     <string name="followers_not_following">Comptes qui ne suivent pas %s</string>
     <string name="followers_not_follower">Comptes non suivis par %s</string>
     <string name="login_error_loading_cookies">Erreur de chargement des cookies</string>
-    <string name="login_success_loading_cookies">Cookies chargés avec succès!\nSi vous ne pouvez toujours pas ouvrir de pages/postes privés, reconnectez-vous !</string>
     <string name="comment_hint">Write a new comment…</string>
     <string name="dm_hint">Write a new message…</string>
     <string name="liked_notif">A aimé votre publication</string>
@@ -234,7 +207,6 @@
     <string name="updated">Merci d\'avoir mis à jour Barinsta !</string>
     <string name="crash_title">L\'application a planté</string>
     <string name="crash_descr">Oups.. l\'application a planté, mais ne vous inquiétez pas, vous pouvez envoyer un rapport d\'erreur au développeur pour l\'aider à résoudre le problème :)</string>
-    <string name="use_amoled_dark_theme">Utiliser le mode AMOLED pour le thème sombre</string>
     <string name="action_notif">Activité</string>
     <string name="select_picture">Sélectionnez une image</string>
     <string name="uploading">Uploading…</string>
@@ -250,8 +222,6 @@
     <string name="more">Plus</string>
     <string name="title_dm">MP</string>
     <string name="number_selected">%d sélectionné</string>
-    <string name="relogin">Reconnexion</string>
-    <string name="relogin_summary">Actualisez vos cookies en cas de problèmes</string>
     <string name="logout_success">Déconnexion réussie !</string>
     <string name="dm_thread_info">Informations</string>
     <string name="mark_as_seen">Marquer comme vu</string>
@@ -314,12 +284,23 @@
     <string name="layout">Layout</string>
     <string name="opening_post">Opening post...</string>
     <string name="share">Share</string>
+    <string name="layout_style">Layout style</string>
+    <string name="column_count">Column count</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="show_names">Show names</string>
+    <string name="show_avatars">Show avatars</string>
+    <string name="avatar_size">Avatar size</string>
+    <string name="corners">Corners</string>
+    <string name="show_grid_gap">Show grid gap</string>
+    <string name="disable_animation">Disable animation</string>
+    <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
     <plurals name="likes_count">
-        <item quantity="one">%d like</item>
-        <item quantity="other">%d likes</item>
+        <item quantity="one">%d j\'aime</item>
+        <item quantity="other">%d j\'aimes</item>
     </plurals>
     <plurals name="comments_count">
-        <item quantity="one">%d comment</item>
-        <item quantity="other">%d comments</item>
+        <item quantity="one">%d commentaire</item>
+        <item quantity="other">%d commentaires</item>
     </plurals>
 </resources>

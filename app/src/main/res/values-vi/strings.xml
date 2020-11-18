@@ -25,12 +25,8 @@
     <string name="title_comments">Bình luận</string>
     <string name="title_notifications">Thông báo</string>
     <string name="title_highlight">Highlight: %s</string>
-    <string name="title_user_story">Story người dùng</string>
-    <string name="title_changelog">Nhật ký thay đổi</string>
-    <string name="bottom_toolbar">Hiển thị thanh công cụ ở dưới</string>
     <string name="update_check">Kiểm tra cập nhật khi khởi động</string>
     <string name="download_user_folder">Tải bài viết xuống theo thư mục tên người dùng trong Downloads</string>
-    <string name="autoload_posts">Tự động tải tất cả bài viết từ người dùng</string>
     <string name="mark_as_seen_setting">Đánh dấu story là đã xem sau khi xem</string>
     <string name="mark_as_seen_setting_summary">Người đăng story sẽ biết bạn đã xem nó</string>
     <string name="dm_mark_as_seen_setting">Đánh dấu DM là đã xem sau khi xem</string>
@@ -38,31 +34,21 @@
     <string name="activity_setting">Kích hoạt thông báo hoạt động</string>
     <string name="error_loading_profile">Lỗi khi tải hồ sơ!\nHãy thử đăng nhập lại và tìm lần nữa.</string>
     <string name="error_creating_folders">Lỗi khi tạo thư mục Download.</string>
-    <string name="show_feed">Hiển thị trang người dùng (Chỉ khi người dùng đã đăng nhập)</string>
     <string name="save_to_folder">Lưu vào thư mục tùy chọn</string>
     <string name="select_folder">Chọn thư mục</string>
     <string name="theme_settings">Giao diện</string>
     <string name="login_settings">Chỉ ảnh hưởng người dùng đã đăng nhập:</string>
     <string name="anonymous_settings">Chỉ ảnh hưởng người dùng ẩn danh:</string>
-    <string name="privacy_warning">Bảo mật</string>
     <string name="instadp_settings">Dùng Instadp cho những ảnh đại diện có độ phân giải cao</string>
-    <string name="storiesig_settings">Dùng storiesig cho story và highlight từ người dùng công khai</string>
-    <string name="stories_viewer_settings">Dịch vụ xem story</string>
     <string name="import_export">Nhập/Xuất</string>
     <string name="select_language">Ngôn ngữ</string>
-    <string name="what_to_do_dialog">Phải làm gì?</string>
     <string name="main_posts_count">%s\nBài đăng</string>
     <string name="main_posts_count_inline">%s Bài đăng</string>
     <string name="main_posts_followers">%s\nNgười theo dõi</string>
     <string name="main_posts_following">%s\nĐang theo dõi</string>
-    <string name="post_viewer_video_post">Bài đăng video</string>
-    <string name="post_viewer_image_post">Bài đăng ảnh</string>
     <string name="post_viewer_autoplay_video">Tự động phát video</string>
     <string name="post_viewer_muted_autoplay">Luôn luôn tắt âm thanh video</string>
-    <string name="post_viewer_post_from">%s - %s</string>
-    <string name="post_viewer_download_message" comment="post_viewer_download_message&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">Ghi chú: [Session] hiện tại sẽ không hiện cuộc trò chuyện này cho tới khi bạn ở đây và sẽ luôn tải về những phần bài đằng đã được hiện.</string>
     <string name="post_viewer_download_dialog_title">Chọn cái để tải xuống</string>
-    <string name="post_viewer_download_session" comment="post_viewer_download_session&#10;&#10;[Session] is NOT a variable, please translate it and ignore warnings">[Session] Hiện tại</string>
     <string name="post_viewer_download_current">Hiện tại</string>
     <string name="post_viewer_download_album">Cả album</string>
     <string name="show_stories">Hiện story</string>
@@ -71,7 +57,6 @@
     <string name="view_story_post">Xem Bài đăng</string>
     <string name="view_post">Xem Bài đăng</string>
     <string name="spotify">Spotify</string>
-    <string name="stories_notloggedin">Không thể tương tác nếu bạn chưa đăng nhập!</string>
     <string name="vote_story_poll">Bình chọn</string>
     <string name="votef_story_poll">Bình chọn thành công!</string>
     <string name="voted_story_poll">Bạn đã bình chọn rồi!</string>
@@ -96,18 +81,12 @@
     <string name="logout_summary">Lướt Instagram ẩn danh</string>
     <string name="remove_all_acc">Xóa tất cả tài khoản</string>
     <string name="remove_all_acc_warning">Điều này sẽ xóa tất cả tài khoản đã thêm vào ứng dụng!\nĐể xóa một tài khoản duy nhất, nhấn giữ vào tài khoản đó trong mục đổi tài khoản.\nBạn có muốn tiếp tục không?</string>
-    <string name="send_logs">Gửi nhật ký gỡ lỗi</string>
     <string name="time_settings">Định dạng ngày tháng</string>
-    <string name="project_link">Truy cập trang của dự án</string>
-    <string name="telegram_link">Gia Nhập Nhóm Telegram</string>
-    <string name="matrix_link">Gia Nhập Phòng Matrix</string>
     <string name="liked">Đã thích</string>
     <string name="saved">Đã lưu</string>
     <string name="tagged">Đã gắn thẻ</string>
     <string name="dm_person">Tin nhắn</string>
-    <string name="like">Thích (%s)</string>
     <string name="like_without_count">Like</string>
-    <string name="unlike">Bỏ Thích (%s)</string>
     <string name="unlike_without_count">Unlike</string>
     <string name="bookmark">Dấu trang</string>
     <string name="unbookmark">Gỡ dấu trang</string>
@@ -144,12 +123,8 @@
     <string name="time_settings_title_date_format">Định dạng Ngày tháng</string>
     <string name="time_settings_title_preview">Xem trước</string>
     <string name="time_settings_swap_time">Đổi vị trí ngày và giờ</string>
-    <string name="quick_access_info_dialog">Mục yêu thích dùng để thêm những hashtag và/hoặc người dùng yêu thích của bạn\n\nVà mục Truy cập nhanh dùng để chuyển đổi nhanh giữa các tài khoản.\n\nGhi chú 1: Hãy đăng nhập vào từng tài khoản [Cài đặt &gt; Đăng nhập] để thêm tài khoản vào danh sách!\n\nGhi chú 2: Đăng xuất khỏi tài khoản hiện tại và đăng nhập vào tài khoản kia.</string>
     <string name="quick_access_cannot_delete_curr">Không thể xóa tài khoản đang được sử dụng</string>
     <string name="quick_access_confirm_delete">Bạn có chắc bạn muốn xóa \'%s\'?</string>
-    <string name="profile_viewer_imageinfo">Rộng: %d\nCao: %d</string>
-    <string name="profile_viewer_colordepth_prefix">\nĐộ sâu của màu:</string>
-    <string name="profile_endpoint">Chọn điểm dừng của ảnh\n(không ảnh hưởng hashtags)</string>
     <string name="open_profile">Mở hồ sơ</string>
     <string name="view_pfp">Xem Ảnh Đại Diện</string>
     <string name="direct_messages_you">Bạn</string>
@@ -207,7 +182,6 @@
     <string name="comment_send_empty_comment">Không được để trống bình luận!</string>
     <string name="comment_view_mention_user_search">Bạn có muốn tìm tên người dùng không?</string>
     <string name="comment_view_mention_hash_search">Bạn có muốn tìm hashtag không?</string>
-    <string name="comment_view_mention_location_search">Bạn có muốn tìm địa điểm không?</string>
     <string name="followers_type_followers">Người theo dõi</string>
     <string name="followers_type_following">Đang theo dõi</string>
     <string name="followers_compare">So sánh người theo dõi &amp; đang theo dõi</string>
@@ -215,7 +189,6 @@
     <string name="followers_not_following">không theo dõi %s</string>
     <string name="followers_not_follower">%s không theo dõi</string>
     <string name="login_error_loading_cookies">Lỗi khi tải cookies</string>
-    <string name="login_success_loading_cookies">Tải cookies thành công!\nNếu bạn vẫn không thể mở trang/bài riêng tư, hãy đăng nhập lại!</string>
     <string name="comment_hint">Write a new comment…</string>
     <string name="dm_hint">Write a new message…</string>
     <string name="liked_notif">Đã thích bài đăng của bạn</string>
@@ -234,7 +207,6 @@
     <string name="updated">Cảm ơn bạn đã cập nhật Barinsta!</string>
     <string name="crash_title">Ứng dụng đã bị crash</string>
     <string name="crash_descr">Ối.. ứng dụng đã bị crash, nhưng đừng lo bạn có thể gửi báo cáo lỗi đến cho nhà phát triển để giúp anh ấy sửa vấn đề. (:</string>
-    <string name="use_amoled_dark_theme">Sử dụng chế độ AMOLED cho nền tối</string>
     <string name="action_notif">Hoạt động</string>
     <string name="select_picture">Chọn hình ảnh</string>
     <string name="uploading">Uploading…</string>
@@ -250,8 +222,6 @@
     <string name="more">Thêm</string>
     <string name="title_dm">DM</string>
     <string name="number_selected">%d đã được chọn</string>
-    <string name="relogin">Đăng nhập lại</string>
-    <string name="relogin_summary">Tải lại cookies nếu gặp phải vấn đề nào</string>
     <string name="logout_success">Đăng xuất thành công!</string>
     <string name="dm_thread_info">Thông tin</string>
     <string name="mark_as_seen">Đánh dấu là đã đọc</string>
@@ -314,6 +284,17 @@
     <string name="layout">Layout</string>
     <string name="opening_post">Opening post...</string>
     <string name="share">Share</string>
+    <string name="layout_style">Layout style</string>
+    <string name="column_count">Column count</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="show_names">Show names</string>
+    <string name="show_avatars">Show avatars</string>
+    <string name="avatar_size">Avatar size</string>
+    <string name="corners">Corners</string>
+    <string name="show_grid_gap">Show grid gap</string>
+    <string name="disable_animation">Disable animation</string>
+    <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
     <plurals name="likes_count">
         <item quantity="other">%d likes</item>
     </plurals>
