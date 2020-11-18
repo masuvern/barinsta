@@ -484,7 +484,7 @@ public class StoryViewerFragment extends Fragment {
             if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 final List<HighlightModel> models = highlightsViewModel.getList().getValue();
-                if (models == null) return;
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) return;
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 currentStoryUsername = model.getTitle();
