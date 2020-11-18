@@ -514,12 +514,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             final String userId = CookieUtils.getUserIdFromCookie(COOKIE);
             final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
             v.setEnabled(false);
-            final int textRes;
-            if (!feedModel.getLike()) {
-                textRes = R.string.liking;
-            } else {
-                textRes = R.string.unliking;
-            }
+            // final int textRes;
+            // if (!feedModel.getLike()) {
+            //     textRes = R.string.liking;
+            // } else {
+            //     textRes = R.string.unliking;
+            // }
             if (!feedModel.getLike()) {
                 mediaService.like(feedModel.getPostId(), userId, csrfToken, likeCallback);
             } else {
@@ -535,15 +535,15 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void setLikedResources(final boolean liked) {
         final int iconResource;
         final int tintResource;
-        final int textResId;
+        // final int textResId;
         if (liked) {
             iconResource = R.drawable.ic_like;
             tintResource = R.color.red_600;
-            textResId = R.string.unlike_without_count;
+            // textResId = R.string.unlike_without_count;
         } else {
             iconResource = R.drawable.ic_not_liked;
             tintResource = R.color.white;
-            textResId = R.string.like_without_count;
+            // textResId = R.string.like_without_count;
         }
         binding.like.setIconResource(iconResource);
         binding.like.setIconTintResource(tintResource);
@@ -595,12 +595,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             final String userId = CookieUtils.getUserIdFromCookie(COOKIE);
             final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
             binding.save.setEnabled(false);
-            final int textRes;
-            if (!feedModel.isSaved()) {
-                textRes = R.string.saving;
-            } else {
-                textRes = R.string.removing;
-            }
+            // final int textRes;
+            // if (!feedModel.isSaved()) {
+            // textRes = R.string.saving;
+            // } else {
+            // textRes = R.string.removing;
+            // }
             if (!feedModel.isSaved()) {
                 mediaService.save(feedModel.getPostId(), userId, csrfToken, saveCallback);
             } else {
@@ -616,15 +616,15 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void setSavedResources(final boolean saved) {
         final int iconResource;
         final int tintResource;
-        final int textResId;
+        // final int textResId;
         if (saved) {
             iconResource = R.drawable.ic_class_24;
             tintResource = R.color.blue_700;
-            textResId = R.string.saved;
+            // textResId = R.string.saved;
         } else {
             iconResource = R.drawable.ic_outline_class_24;
             tintResource = R.color.white;
-            textResId = R.string.save;
+            // textResId = R.string.save;
         }
         binding.save.setIconResource(iconResource);
         binding.save.setIconTintResource(tintResource);
