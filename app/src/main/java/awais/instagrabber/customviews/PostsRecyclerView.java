@@ -283,9 +283,13 @@ public class PostsRecyclerView extends RecyclerView {
     }
 
     public void refresh() {
-        lazyLoader.resetState();
-        postFetcher.reset();
-        postFetcher.fetch();
+        if (lazyLoader != null) {
+            lazyLoader.resetState();
+        }
+        if (postFetcher != null) {
+            postFetcher.reset();
+            postFetcher.fetch();
+        }
         dispatchFetchStatus();
     }
 
