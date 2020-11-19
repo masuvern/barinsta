@@ -35,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
+import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
 import androidx.navigation.NavController;
@@ -1055,9 +1056,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     private void showPlayerControls() {
         hideCaption();
-
         // previously invisible view
         View view = binding.playerControls.getRoot();
+        if (!ViewCompat.isAttachedToWindow(view)) {
+            view.setVisibility(View.VISIBLE);
+            return;
+        }
         // get the center for the clipping circle
         int cx = view.getWidth() / 2;
         // int cy = view.getHeight() / 2;
@@ -1078,6 +1082,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void hidePlayerControls() {
         // previously visible view
         final View view = binding.playerControls.getRoot();
+        if (!ViewCompat.isAttachedToWindow(view)) {
+            view.setVisibility(View.GONE);
+            return;
+        }
 
         // get the center for the clipping circle
         int cx = view.getWidth() / 2;
