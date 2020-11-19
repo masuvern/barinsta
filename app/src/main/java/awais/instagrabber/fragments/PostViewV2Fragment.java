@@ -233,6 +233,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             return;
         }
         feedModel = (FeedModel) feedModelSerializable;
+        if (feedModel == null) return;
         if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
         }
@@ -258,7 +259,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        setupToolbar();
         init();
     }
 
@@ -322,6 +322,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     @Override
     public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
+        if (feedModel == null) return;
         if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             outState.putInt(ARG_SLIDER_POSITION, sliderPosition);
         }
@@ -411,6 +412,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void init() {
+        if (feedModel == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (!wasPaused && (sharedProfilePicElement != null || sharedMainPostElement != null)) {
@@ -666,14 +668,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 .build();
         binding.profilePic.setController(controller);
         binding.profilePic.setOnClickListener(v -> navigateToProfile("@" + profileModel.getUsername()));
-    }
-
-    private void setupToolbar() {
-        // fragmentActivity.fitSystemWindows(true);
-        // final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        // if (actionBar == null) return;
-        // actionBar.setTitle(null);
-        // actionBar.setSubtitle(null);
     }
 
     private void setupTitles() {
