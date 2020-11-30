@@ -74,8 +74,8 @@ public final class LocaleUtils {
         if (appLanguageIndex == 12) return "mk";
         if (appLanguageIndex == 13) return "vi";
         if (appLanguageIndex == 14) return "zh_TW";
-        if (appLanguageIndex == 15) return "hi";
-        if (appLanguageIndex == 16) return "cs";
+        if (appLanguageIndex == 15) return "ca";
+        if (appLanguageIndex == 16) return "ru";
 
         return null;
     }

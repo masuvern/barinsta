@@ -556,6 +556,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             }
             else {
                 Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
             }
         }).execute();
     }
