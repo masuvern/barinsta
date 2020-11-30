@@ -1,6 +1,7 @@
 package awais.instagrabber.utils;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -182,7 +183,13 @@ public final class Utils {
         }
         final Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
-        context.startActivity(i);
+        try {
+            context.startActivity(i);
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "openURL: No activity found to handle URL view", e);
+        } catch (Exception e) {
+            Log.e(TAG, "openURL", e);
+        }
     }
 
     public static void openEmailAddress(final Context context, final String emailAddress) {
