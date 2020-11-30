@@ -10,6 +10,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.PopupMenu;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -26,6 +27,8 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.material.slider.LabelFormatter;
+import com.google.android.material.slider.Slider;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutExoCustomControlsBinding;
@@ -39,6 +42,8 @@ import static com.google.android.exoplayer2.Player.STATE_READY;
 
 public class VideoPlayerViewHelper implements Player.EventListener {
     private static final String TAG = "VideoPlayerViewHelper";
+    private static final long INITIAL_DELAY = 0;
+    private static final long RECURRING_DELAY = 60;
 
     private final Context context;
     private final awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding binding;
@@ -52,6 +57,62 @@ public class VideoPlayerViewHelper implements Player.EventListener {
     private final DefaultDataSourceFactory dataSourceFactory;
     private SimpleExoPlayer player;
     private PopupMenu speedPopup;
+    private Runnable positionChecker;
+
+    private final Handler positionUpdateHandler = new Handler();
+    private final Player.EventListener listener = new Player.EventListener() {
+        @Override
+        public void onPlaybackStateChanged(final int state) {
+            switch (state) {
+                case Player.STATE_BUFFERING:
+                case STATE_IDLE:
+                case STATE_ENDED:
+                    positionUpdateHandler.removeCallbacks(positionChecker);
+                    return;
+                case STATE_READY:
+                    setupTimeline();
+                    positionUpdateHandler.postDelayed(positionChecker, INITIAL_DELAY);
+                    break;
+            }
+        }
+
+        @Override
+        public void onPlayWhenReadyChanged(final boolean playWhenReady, final int reason) {
+            updatePlayPauseDrawable(playWhenReady);
+        }
+    };
+    private final AudioListener audioListener = new AudioListener() {
+        @Override
+        public void onVolumeChanged(final float volume) {
+            updateMuteIcon(volume);
+        }
+    };
+    private final Slider.OnChangeListener onChangeListener = (slider, value, fromUser) -> {
+        if (!fromUser) return;
+        long actualValue = (long) value;
+        if (actualValue < 0) {
+            actualValue = 0;
+        } else if (actualValue > player.getDuration()) {
+            actualValue = player.getDuration();
+        }
+        player.seekTo(actualValue);
+    };
+    private final View.OnClickListener onClickListener = v -> player.setPlayWhenReady(!player.getPlayWhenReady());
+    private final LabelFormatter labelFormatter = value -> TextUtils.millisToTimeString((long) value);
+    private final View.OnClickListener muteOnClickListener = v -> toggleMute();
+    private final View.OnClickListener rewOnClickListener = v -> {
+        final long positionMs = player.getCurrentPosition() - 5000;
+        player.seekTo(positionMs < 0 ? 0 : positionMs);
+    };
+    private final View.OnClickListener ffOnClickListener = v -> {
+        long positionMs = player.getCurrentPosition() + 5000;
+        long duration = player.getDuration();
+        if (duration == TIME_UNSET) {
+            duration = 0;
+        }
+        player.seekTo(Math.min(positionMs, duration));
+    };
+    private final View.OnClickListener showMenu = this::showMenu;
 
     public VideoPlayerViewHelper(@NonNull final Context context,
                                  @NonNull final LayoutVideoPlayerWithThumbnailBinding binding,
@@ -130,6 +191,10 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         player = new SimpleExoPlayer.Builder(context)
                 .setLooper(Looper.getMainLooper())
                 .build();
+        positionChecker = new PositionCheckRunnable(positionUpdateHandler,
+                                                    player,
+                                                    controlsBinding.timeline,
+                                                    controlsBinding.fromTime);
         player.addListener(this);
         player.setVolume(initialVolume);
         player.setPlayWhenReady(true);
@@ -148,87 +213,22 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         binding.playerView.setUseController(false);
         if (player == null) {
             enableControls(false);
-            controlsBinding.playPause.setEnabled(true);
-            controlsBinding.playPause.setOnClickListener(v -> binding.thumbnailParent.performClick());
+            // controlsBinding.playPause.setEnabled(true);
+            // controlsBinding.playPause.setOnClickListener(new NoPlayerPlayPauseClickListener(binding.thumbnailParent));
             return;
         }
         enableControls(true);
-        final Handler handler = new Handler();
-        final long initialDelay = 0;
-        final long recurringDelay = 60;
-        final Runnable positionChecker = new Runnable() {
-            @Override
-            public void run() {
-                handler.removeCallbacks(this);
-                if (player == null) return;
-                final long currentPosition = player.getCurrentPosition();
-                final long duration = player.getDuration();
-                if (duration == TIME_UNSET) {
-                    controlsBinding.timeline.setValueFrom(0);
-                    controlsBinding.timeline.setValueTo(0);
-                    controlsBinding.timeline.setEnabled(false);
-                    return;
-                }
-                controlsBinding.timeline.setValue(Math.min(currentPosition, duration));
-                controlsBinding.fromTime.setText(TextUtils.millisToTimeString(currentPosition));
-                handler.postDelayed(this, recurringDelay);
-            }
-        };
         updatePlayPauseDrawable(player.getPlayWhenReady());
         updateMuteIcon(player.getVolume());
-        player.addListener(new Player.EventListener() {
-            @Override
-            public void onPlaybackStateChanged(final int state) {
-                switch (state) {
-                    case Player.STATE_BUFFERING:
-                    case STATE_IDLE:
-                    case STATE_ENDED:
-                        handler.removeCallbacks(positionChecker);
-                        return;
-                    case STATE_READY:
-                        setupTimeline();
-                        handler.postDelayed(positionChecker, initialDelay);
-                        break;
-                }
-            }
-
-            @Override
-            public void onPlayWhenReadyChanged(final boolean playWhenReady, final int reason) {
-                updatePlayPauseDrawable(playWhenReady);
-            }
-        });
-        player.addAudioListener(new AudioListener() {
-            @Override
-            public void onVolumeChanged(final float volume) {
-                updateMuteIcon(volume);
-            }
-        });
-        controlsBinding.timeline.addOnChangeListener((slider, value, fromUser) -> {
-            if (!fromUser) return;
-            long actualValue = (long) value;
-            if (actualValue < 0) {
-                actualValue = 0;
-            } else if (actualValue > player.getDuration()) {
-                actualValue = player.getDuration();
-            }
-            player.seekTo(actualValue);
-        });
-        controlsBinding.timeline.setLabelFormatter(value -> TextUtils.millisToTimeString((long) value));
-        controlsBinding.playPause.setOnClickListener(v -> player.setPlayWhenReady(!player.getPlayWhenReady()));
-        controlsBinding.mute.setOnClickListener(v -> toggleMute());
-        controlsBinding.rewWithAmount.setOnClickListener(v -> {
-            final long positionMs = player.getCurrentPosition() - 5000;
-            player.seekTo(positionMs < 0 ? 0 : positionMs);
-        });
-        controlsBinding.ffWithAmount.setOnClickListener(v -> {
-            long positionMs = player.getCurrentPosition() + 5000;
-            long duration = player.getDuration();
-            if (duration == TIME_UNSET) {
-                duration = 0;
-            }
-            player.seekTo(Math.min(positionMs, duration));
-        });
-        controlsBinding.speed.setOnClickListener(this::showMenu);
+        player.addListener(listener);
+        player.addAudioListener(audioListener);
+        controlsBinding.timeline.addOnChangeListener(onChangeListener);
+        controlsBinding.timeline.setLabelFormatter(labelFormatter);
+        controlsBinding.playPause.setOnClickListener(onClickListener);
+        controlsBinding.mute.setOnClickListener(muteOnClickListener);
+        controlsBinding.rewWithAmount.setOnClickListener(rewOnClickListener);
+        controlsBinding.ffWithAmount.setOnClickListener(ffOnClickListener);
+        controlsBinding.speed.setOnClickListener(showMenu);
     }
 
     private void setupTimeline() {
@@ -242,12 +242,18 @@ public class VideoPlayerViewHelper implements Player.EventListener {
 
     private void enableControls(final boolean enable) {
         controlsBinding.speed.setEnabled(enable);
+        controlsBinding.speed.setClickable(enable);
         controlsBinding.mute.setEnabled(enable);
+        controlsBinding.mute.setClickable(enable);
         controlsBinding.ffWithAmount.setEnabled(enable);
+        controlsBinding.ffWithAmount.setClickable(enable);
         controlsBinding.rewWithAmount.setEnabled(enable);
+        controlsBinding.rewWithAmount.setClickable(enable);
         controlsBinding.fromTime.setEnabled(enable);
         controlsBinding.toTime.setEnabled(enable);
         controlsBinding.playPause.setEnabled(enable);
+        controlsBinding.playPause.setClickable(enable);
+        controlsBinding.timeline.setEnabled(enable);
     }
 
     public void showMenu(View anchor) {
@@ -302,10 +308,10 @@ public class VideoPlayerViewHelper implements Player.EventListener {
 
     private void updateMuteIcon(final float volume) {
         if (volume == 0) {
-            controlsBinding.mute.setIconResource(R.drawable.ic_volume_off_24);
+            controlsBinding.mute.setIconResource(R.drawable.ic_volume_off_24_states);
             return;
         }
-        controlsBinding.mute.setIconResource(R.drawable.ic_volume_up_24);
+        controlsBinding.mute.setIconResource(R.drawable.ic_volume_up_24_states);
     }
 
     private void updatePlayPauseDrawable(final boolean playWhenReady) {
@@ -313,7 +319,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
             controlsBinding.playPause.setIconResource(R.drawable.ic_pause_24);
             return;
         }
-        controlsBinding.playPause.setIconResource(R.drawable.ic_play_arrow_24);
+        controlsBinding.playPause.setIconResource(R.drawable.ic_play_states);
     }
 
     @Override
@@ -338,23 +344,88 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         return vol;
     }
 
-    public void togglePlayback() {
-        if (player == null) return;
-        final int playbackState = player.getPlaybackState();
-        if (playbackState == STATE_IDLE || playbackState == STATE_ENDED) return;
-        final boolean playWhenReady = player.getPlayWhenReady();
-        player.setPlayWhenReady(!playWhenReady);
-    }
+    // public void togglePlayback() {
+    //     if (player == null) return;
+    //     final int playbackState = player.getPlaybackState();
+    //     if (playbackState == STATE_IDLE || playbackState == STATE_ENDED) return;
+    //     final boolean playWhenReady = player.getPlayWhenReady();
+    //     player.setPlayWhenReady(!playWhenReady);
+    // }
 
     public void releasePlayer() {
         if (player == null) return;
         player.release();
         player = null;
+        if (positionUpdateHandler != null && positionChecker != null) {
+            positionUpdateHandler.removeCallbacks(positionChecker);
+        }
     }
 
     public void pause() {
         if (player == null) return;
         player.pause();
+        if (positionUpdateHandler != null && positionChecker != null) {
+            positionUpdateHandler.removeCallbacks(positionChecker);
+        }
+    }
+
+    public void resetTimeline() {
+        if (player == null) {
+            enableControls(false);
+            return;
+        }
+        setupTimeline();
+        final long currentPosition = player.getCurrentPosition();
+        controlsBinding.timeline.setValue(Math.min(currentPosition, player.getDuration()));
+        setupControls();
+    }
+
+    public void removeCallbacks() {
+        if (player != null) {
+            player.removeListener(listener);
+            player.removeAudioListener(audioListener);
+        }
+        controlsBinding.timeline.removeOnChangeListener(onChangeListener);
+        controlsBinding.timeline.setLabelFormatter(null);
+        controlsBinding.playPause.setOnClickListener(null);
+        controlsBinding.mute.setOnClickListener(null);
+        controlsBinding.rewWithAmount.setOnClickListener(null);
+        controlsBinding.ffWithAmount.setOnClickListener(null);
+        controlsBinding.speed.setOnClickListener(null);
+    }
+
+    private static class PositionCheckRunnable implements Runnable {
+        private final Handler positionUpdateHandler;
+        private final SimpleExoPlayer player;
+        private final Slider timeline;
+        private final AppCompatTextView fromTime;
+
+        public PositionCheckRunnable(final Handler positionUpdateHandler,
+                                     final SimpleExoPlayer simpleExoPlayer,
+                                     final Slider slider,
+                                     final AppCompatTextView fromTime) {
+            this.positionUpdateHandler = positionUpdateHandler;
+            this.player = simpleExoPlayer;
+            this.timeline = slider;
+            this.fromTime = fromTime;
+        }
+
+        @Override
+        public void run() {
+            positionUpdateHandler.removeCallbacks(this);
+            if (player == null) return;
+            final long currentPosition = player.getCurrentPosition();
+            final long duration = player.getDuration();
+            if (duration == TIME_UNSET) {
+                timeline.setValueFrom(0);
+                timeline.setValueTo(0);
+                timeline.setEnabled(false);
+                return;
+            }
+            timeline.setValue(Math.min(currentPosition, duration));
+            fromTime.setText(TextUtils.millisToTimeString(currentPosition));
+            positionUpdateHandler.postDelayed(this, RECURRING_DELAY);
+        }
     }
 
     public interface VideoPlayerCallback {

@@ -53,13 +53,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:visibility="visible"
-        app:icon="@drawable/ic_replay_5_24"
+        app:icon="@drawable/ic_replay_5_24_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/play_pause"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/timeline"
+        tools:enabled="false"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
@@ -67,13 +68,14 @@
         style="@style/Widget.App.MaterialButton.IconOnly.BorderlessRipple"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:icon="@drawable/ic_play_arrow_24"
+        app:icon="@drawable/ic_play_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/ff_with_amount"
         app:layout_constraintStart_toEndOf="@id/rew_with_amount"
         app:layout_constraintTop_toBottomOf="@id/timeline"
+        tools:enabled="false"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
@@ -81,13 +83,14 @@
         style="@style/Widget.App.MaterialButton.IconOnly.BorderlessRipple"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:icon="@drawable/ic_forward_5_24"
+        app:icon="@drawable/ic_forward_5_24_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/mute"
         app:layout_constraintStart_toEndOf="@id/play_pause"
         app:layout_constraintTop_toBottomOf="@id/timeline"
+        tools:enabled="false"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
@@ -95,13 +98,14 @@
         style="@style/Widget.App.MaterialButton.IconOnly.BorderlessRipple"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:icon="@drawable/ic_volume_off_24"
+        app:icon="@drawable/ic_volume_off_24_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/speed"
         app:layout_constraintStart_toEndOf="@id/ff_with_amount"
         app:layout_constraintTop_toBottomOf="@id/timeline"
+        tools:enabled="false"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
@@ -111,10 +115,11 @@
         android:layout_height="wrap_content"
         android:text="@string/one_x"
         android:textAllCaps="false"
-        android:textColor="@color/white"
+        android:textColor="@drawable/speed_text_color_states"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/mute"
         app:layout_constraintTop_toBottomOf="@id/timeline"
+        tools:enabled="false"
         tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
@@ -54,7 +55,6 @@ import awais.instagrabber.webservices.StoriesService;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "FeedFragment";
@@ -72,7 +72,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
     private int downloadChildPosition = -1;
-    private PostsLayoutPreferences layoutPreferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(Constants.PREF_POSTS_LAYOUT));
+    private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_POSTS_LAYOUT);
+    private RecyclerView storiesRecyclerView;
 
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
@@ -249,6 +250,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                              final Bundle savedInstanceState) {
         if (root != null) {
             shouldRefresh = false;
+            if (storiesRecyclerView != null) {
+                fragmentActivity.setCollapsingView(storiesRecyclerView);
+            }
             return root;
         }
         binding = FragmentFeedBinding.inflate(inflater, container, false);
@@ -280,17 +284,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        // if (videoAwareRecyclerScroller != null) {
-        //     videoAwareRecyclerScroller.stopPlaying();
-        // }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
-        binding.feedSwipeRefreshLayout.setRefreshing(false);
+        updateSwipeRefreshState();
         // if (videoAwareRecyclerScroller != null && shouldAutoPlay) {
         //     videoAwareRecyclerScroller.startPlaying();
         // }
@@ -300,6 +296,14 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onRefresh() {
         binding.feedRecyclerView.refresh();
         fetchStories();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (storiesRecyclerView != null) {
+            fragmentActivity.removeCollapsingView(storiesRecyclerView);
+        }
     }
 
     @Override
@@ -349,8 +353,15 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         });
         final Context context = getContext();
         if (context == null) return;
-        binding.feedStoriesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
-        binding.feedStoriesRecyclerView.setAdapter(feedStoriesAdapter);
+        storiesRecyclerView = new RecyclerView(context);
+        final CollapsingToolbarLayout.LayoutParams params = new CollapsingToolbarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                                                     ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, Utils.getActionBarHeight(context), 0, 0);
+        storiesRecyclerView.setLayoutParams(params);
+        storiesRecyclerView.setClipToPadding(false);
+        storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
+        storiesRecyclerView.setAdapter(feedStoriesAdapter);
+        fragmentActivity.setCollapsingView(storiesRecyclerView);
         feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);
         fetchStories();
     }
@@ -387,6 +398,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     public void scrollToTop() {
         binding.feedRecyclerView.smoothScrollToPosition(0);
-        binding.storiesContainer.setExpanded(true);
+        // binding.storiesContainer.setExpanded(true);
     }
 }

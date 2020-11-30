@@ -216,6 +216,7 @@ public class PostsRecyclerView extends RecyclerView {
                            if (progressPercent != 100) continue;
                            final String url = progress.getString(DownloadWorker.URL);
                            final List<FeedModel> feedModels = feedViewModel.getList().getValue();
+                           if (feedModels == null) continue;
                            for (int i = 0; i < feedModels.size(); i++) {
                                final FeedModel feedModel = feedModels.get(i);
                                final List<String> displayUrls = getDisplayUrl(feedModel);
@@ -254,10 +255,15 @@ public class PostsRecyclerView extends RecyclerView {
         post(() -> {
             TransitionManager.beginDelayedTransition(this, transition);
             feedAdapter.notifyDataSetChanged();
+            final int itemDecorationCount = getItemDecorationCount();
             if (!layoutPreferences.getHasGap()) {
-                removeItemDecoration(gridSpacingItemDecoration);
+                if (itemDecorationCount == 1) {
+                    removeItemDecoration(gridSpacingItemDecoration);
+                }
             } else {
-                addItemDecoration(gridSpacingItemDecoration);
+                if (itemDecorationCount == 0) {
+                    addItemDecoration(gridSpacingItemDecoration);
+                }
             }
             if (layoutPreferences.getType() == PostsLayoutPreferences.PostsLayoutType.LINEAR) {
                 if (layoutManager.getSpanCount() != 1) {
@@ -277,9 +283,13 @@ public class PostsRecyclerView extends RecyclerView {
     }
 
     public void refresh() {
-        lazyLoader.resetState();
-        postFetcher.reset();
-        postFetcher.fetch();
+        if (lazyLoader != null) {
+            lazyLoader.resetState();
+        }
+        if (postFetcher != null) {
+            postFetcher.reset();
+            postFetcher.fetch();
+        }
         dispatchFetchStatus();
     }
 

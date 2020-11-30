@@ -15,11 +15,13 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.TextUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class ProfileFetcher extends AsyncTask<Void, Void, ProfileModel> {
     private final FetchListener<ProfileModel> fetchListener;
@@ -43,21 +45,23 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, ProfileModel> {
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 final JSONObject user = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("graphql").getJSONObject(Constants.EXTRAS_USER);
 
+                final String cookie = settingsHelper.getString(Constants.COOKIE);
+
                 boolean isPrivate = user.getBoolean("is_private");
-                boolean reallyPrivate = isPrivate;
+                final String id = user.getString(Constants.EXTRAS_ID);
+                final String uid = CookieUtils.getUserIdFromCookie(cookie);
                 final JSONObject timelineMedia = user.getJSONObject("edge_owner_to_timeline_media");
                 if (timelineMedia.has("edges")) {
                     final JSONArray edges = timelineMedia.getJSONArray("edges");
-                    if (edges.length() > 0 && timelineMedia.getLong("count") > 0L) reallyPrivate = false;
                 }
 
                 String url = user.optString("external_url");
                 if (TextUtils.isEmpty(url)) url = null;
 
                 result = new ProfileModel(isPrivate,
-                        reallyPrivate,
+                        user.optBoolean("followed_by_viewer") ? false : (id.equals(uid) ? false : isPrivate),
                         user.getBoolean("is_verified"),
-                        user.getString(Constants.EXTRAS_ID),
+                        id,
                         userName,
                         user.getString("full_name"),
                         user.getString("biography"),

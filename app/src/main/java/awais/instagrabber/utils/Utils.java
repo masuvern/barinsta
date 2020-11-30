@@ -1,6 +1,7 @@
 package awais.instagrabber.utils;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -34,6 +36,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import awais.instagrabber.R;
+import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
 import awaisomereport.LogCollector;
 
@@ -51,6 +54,7 @@ public final class Utils {
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
     private static int statusBarHeight;
+    private static int actionBarHeight;
 
     public static int convertDpToPx(final float dp) {
         if (displayMetrics == null)
@@ -162,13 +166,30 @@ public final class Utils {
         return statusBarHeight;
     }
 
+    public static int getActionBarHeight(@NonNull final Context context) {
+        if (actionBarHeight > 0) {
+            return actionBarHeight;
+        }
+        final TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, displayMetrics);
+        }
+        return actionBarHeight;
+    }
+
     public static void openURL(final Context context, final String url) {
         if (context == null || TextUtils.isEmpty(url)) {
             return;
         }
         final Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
-        context.startActivity(i);
+        try {
+            context.startActivity(i);
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "openURL: No activity found to handle URL view", e);
+        } catch (Exception e) {
+            Log.e(TAG, "openURL", e);
+        }
     }
 
     public static void openEmailAddress(final Context context, final String emailAddress) {
@@ -189,5 +210,14 @@ public final class Utils {
                          view.getLeft(),
                          view.getTop() - view.getHeight() - 4);
         toast.show();
+    }
+
+    public static PostsLayoutPreferences getPostsLayoutPreferences(final String layoutPreferenceKey) {
+        PostsLayoutPreferences layoutPreferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(layoutPreferenceKey));
+        if (layoutPreferences == null) {
+            layoutPreferences = PostsLayoutPreferences.builder().build();
+            settingsHelper.putString(layoutPreferenceKey, layoutPreferences.getJson());
+        }
+        return layoutPreferences;
     }
 }

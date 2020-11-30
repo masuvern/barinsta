@@ -45,7 +45,6 @@ import awais.instagrabber.utils.Utils;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class SavedViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
@@ -62,7 +61,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
     private int downloadChildPosition = -1;
-    private PostsLayoutPreferences layoutPreferences = PostsLayoutPreferences.fromJson(settingsHelper.getString(getPostsLayoutPreferenceKey()));
+    private PostsLayoutPreferences layoutPreferences;
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -275,46 +274,8 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         username = fragmentArgs.getUsername();
         profileId = fragmentArgs.getProfileId();
         type = fragmentArgs.getType();
+        layoutPreferences = Utils.getPostsLayoutPreferences(getPostsLayoutPreferenceKey());
         setupPosts();
-        // postsAdapter = new PostsAdapter((postModel, position) -> {
-        //     if (postsAdapter.isSelecting()) {
-        //         if (actionMode == null) return;
-        //         final String title = getString(R.string.number_selected, postsAdapter.getSelectedModels().size());
-        //         actionMode.setTitle(title);
-        //         return;
-        //     }
-        //     if (checkAndResetAction()) return;
-        //     final List<PostModel> postModels = postsViewModel.getList().getValue();
-        //     if (postModels == null || postModels.size() == 0) return;
-        //     if (postModels.get(0) == null) return;
-        //     final String postId = postModels.get(0).getPostId();
-        //     final boolean isId = postId != null;
-        //     final String[] idsOrShortCodes = new String[postModels.size()];
-        //     for (int i = 0; i < postModels.size(); i++) {
-        //         final PostModel tempPostModel = postModels.get(i);
-        //         final String tempId = tempPostModel.getPostId();
-        //         final String finalPostId = type == PostItemType.LIKED ? tempId.substring(0, tempId.indexOf("_")) : tempId;
-        //         idsOrShortCodes[i] = isId ? finalPostId
-        //                                   : tempPostModel.getShortCode();
-        //     }
-        //     final NavDirections action = ProfileFragmentDirections.actionGlobalPostViewFragment(
-        //             position,
-        //             idsOrShortCodes,
-        //             isId);
-        //     NavHostFragment.findNavController(this).navigate(action);
-        // }, (model, position) -> {
-        //     if (!postsAdapter.isSelecting()) {
-        //         checkAndResetAction();
-        //         return true;
-        //     }
-        //     final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
-        //     if (onBackPressedCallback.isEnabled()) return true;
-        //     actionMode = fragmentActivity.startActionMode(multiSelectAction);
-        //     final String title = getString(R.string.number_selected, 1);
-        //     actionMode.setTitle(title);
-        //     onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
-        //     return true;
-        // });
     }
 
     private void setupPosts() {

@@ -453,7 +453,7 @@ public final class ResponseBodyUtils {
 
                 case VIDEO_CALL_EVENT: {
                     final JSONObject videoCallEvent = itemObject.getJSONObject("video_call_event");
-                    videoCallEventModel = new DirectItemModel.DirectItemVideoCallEventModel(videoCallEvent.getLong("vc_id"),
+                    videoCallEventModel = new DirectItemModel.DirectItemVideoCallEventModel(videoCallEvent.optLong("vc_id"),
                                                                                             videoCallEvent.optBoolean("thread_has_audio_only_call"),
                                                                                             videoCallEvent.getString("action"),
                                                                                             videoCallEvent.getString("description"));
@@ -743,13 +743,13 @@ public final class ResponseBodyUtils {
         String thumbnailUrl = null;
         try {
             thumbnailUrl = feedItem.getJSONArray("display_resources")
-                    .getJSONObject(0)
-                    .getString("src");
+                                   .getJSONObject(0)
+                                   .getString("src");
         } catch (JSONException ignored) {}
         final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
                 .setProfileModel(profileModel)
                 .setItemType(isVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                        : MediaItemType.MEDIA_TYPE_IMAGE)
+                                     : MediaItemType.MEDIA_TYPE_IMAGE)
                 .setViewCount(videoViews)
                 .setPostId(feedItem.getString(Constants.EXTRAS_ID))
                 .setDisplayUrl(resourceUrl)
@@ -843,17 +843,17 @@ public final class ResponseBodyUtils {
             String thumbnailUrl = null;
             try {
                 thumbnailUrl = childNode.getJSONArray("display_resources")
-                        .getJSONObject(0)
-                        .getString("src");
+                                        .getJSONObject(0)
+                                        .getString("src");
             } catch (JSONException ignored) {}
             final PostChild sliderItem = new PostChild.Builder()
                     .setItemType(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                            : MediaItemType.MEDIA_TYPE_IMAGE)
+                                              : MediaItemType.MEDIA_TYPE_IMAGE)
                     .setPostId(childNode.getString(Constants.EXTRAS_ID))
                     .setDisplayUrl(isChildVideo ? childNode.getString("video_url")
-                            : childNode.getString("display_url"))
+                                                : childNode.getString("display_url"))
                     .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl
-                            : childNode.getString("display_url"))
+                                                          : childNode.getString("display_url"))
                     .setVideoViews(childNode.optLong("video_view_count", 0))
                     .setHeight(height)
                     .setWidth(width)

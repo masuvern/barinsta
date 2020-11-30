@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,7 +41,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +53,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
-import awais.instagrabber.customviews.helpers.CustomHideBottomViewOnScrollBehavior;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.main.FeedFragment;
@@ -80,29 +79,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             R.id.profileFragment,
             R.id.discoverFragment,
             R.id.morePreferencesFragment);
-    private static final List<Integer> KEEP_SCROLL_BEHAVIOUR_DESTINATIONS = Arrays.asList(
-            R.id.directMessagesInboxFragment,
-            R.id.feedFragment,
-            R.id.profileFragment,
-            R.id.discoverFragment,
-            R.id.morePreferencesFragment,
-            R.id.settingsPreferencesFragment,
-            R.id.aboutFragment,
-            R.id.hashTagFragment,
-            R.id.locationFragment,
-            R.id.savedViewerFragment,
-            R.id.commentsViewerFragment,
-            R.id.followViewerFragment,
-            R.id.directMessagesSettingsFragment,
-            R.id.notificationsViewer,
-            R.id.themePreferencesFragment,
-            R.id.favoritesFragment,
-            R.id.backupPreferencesFragment,
-            R.id.directMessagesThreadFragment
-    );
     private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
-    private static final List<Integer> REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS = ImmutableList.of(R.id.commentsViewerFragment,
-                                                                                                        R.id.directMessagesThreadFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
 
     private ActivityMainBinding binding;
@@ -152,7 +129,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
-        setupScrollingListener();
         setupSuggestions();
         final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
         if (checkUpdates) FlavorTown.updateCheck(this);
@@ -233,7 +209,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (isTaskRoot() && isBackStackEmpty) {
             finishAfterTransition();
         } else {
-            super.onBackPressed();
+            try {
+                super.onBackPressed();
+            } catch (Exception ignored) {}
         }
     }
 
@@ -279,12 +257,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                     break;
             }
         });
-    }
-
-    private void setupScrollingListener() {
-        final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();
-        layoutParams.setBehavior(new CustomHideBottomViewOnScrollBehavior());
-        binding.bottomNavView.requestLayout();
     }
 
     private boolean setupSearchView() {
@@ -478,16 +450,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             binding.bottomNavView.setVisibility(SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId) ? View.VISIBLE : View.GONE);
-            if (KEEP_SCROLL_BEHAVIOUR_DESTINATIONS.contains(destinationId)) {
-                setScrollingBehaviour();
-            } else {
-                removeScrollingBehaviour();
-            }
-            if (REMOVE_COLLAPSING_TOOLBAR_SCROLL_DESTINATIONS.contains(destinationId)) {
-                removeCollapsingToolbarScrollFlags();
-            } else {
-                setCollapsingToolbarScrollFlags();
-            }
         });
     }
 
@@ -512,22 +474,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.mainNavHost.getLayoutParams();
         layoutParams.setBehavior(null);
         binding.mainNavHost.requestLayout();
-    }
-
-    private void setCollapsingToolbarScrollFlags() {
-        final CollapsingToolbarLayout collapsingToolbarLayout = binding.collapsingToolbarLayout;
-        final AppBarLayout.LayoutParams toolbarLayoutLayoutParams = (AppBarLayout.LayoutParams) collapsingToolbarLayout.getLayoutParams();
-        toolbarLayoutLayoutParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-                                                         | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
-                                                         | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-        binding.collapsingToolbarLayout.requestLayout();
-    }
-
-    private void removeCollapsingToolbarScrollFlags() {
-        final CollapsingToolbarLayout collapsingToolbarLayout = binding.collapsingToolbarLayout;
-        final AppBarLayout.LayoutParams toolbarLayoutLayoutParams = (AppBarLayout.LayoutParams) collapsingToolbarLayout.getLayoutParams();
-        toolbarLayoutLayoutParams.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL);
-        binding.collapsingToolbarLayout.requestLayout();
     }
 
     private void handleIntent(final Intent intent) {
@@ -601,11 +547,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 .create();
         alertDialog.show();
         new PostFetcher(shortCode, feedModel -> {
-            final PostViewV2Fragment fragment = PostViewV2Fragment
-                    .builder(feedModel)
-                    .build();
-            fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-            fragment.show(getSupportFragmentManager(), "post_view");
+            if (feedModel != null) {
+                final PostViewV2Fragment fragment = PostViewV2Fragment
+                        .builder(feedModel)
+                        .build();
+                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+                fragment.show(getSupportFragmentManager(), "post_view");
+            }
+            else {
+                Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+            }
         }).execute();
     }
 
@@ -654,23 +605,17 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return binding.bottomNavView;
     }
 
-    // public void fitSystemWindows(final boolean fit) {
-    //     binding.appBarLayout.setBackground(null);
-    //     binding.appBarLayout.setFitsSystemWindows(fit);
-    //     binding.collapsingToolbarLayout.setBackground(null);
-    //     binding.collapsingToolbarLayout.setFitsSystemWindows(fit);
-    //     final Drawable toolbarBackground = binding.toolbar.getBackground();
-    //     binding.toolbar.setFitsSystemWindows(fit);
-    //     binding.toolbar.setBackground(null);
-    //     binding.toolbar.setClickable(false);
-    // }
-    //
-    // public int getNavHostContainerId() {
-    //     return binding.mainNavHost.getId();
-    // }
+    public void setCollapsingView(@NonNull final View view) {
+        binding.collapsingToolbarLayout.addView(view, 0);
+    }
+
+    public void removeCollapsingView(@NonNull final View view) {
+        binding.collapsingToolbarLayout.removeView(view);
+    }
 
     public void setToolbar(final Toolbar toolbar) {
         binding.appBarLayout.setVisibility(View.GONE);
+        removeScrollingBehaviour();
         setSupportActionBar(toolbar);
         if (currentNavControllerLiveData == null) return;
         setupNavigation(toolbar, currentNavControllerLiveData.getValue());
@@ -678,8 +623,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public void resetToolbar() {
         binding.appBarLayout.setVisibility(View.VISIBLE);
+        setScrollingBehaviour();
         setSupportActionBar(binding.toolbar);
         if (currentNavControllerLiveData == null) return;
         setupNavigation(binding.toolbar, currentNavControllerLiveData.getValue());
+    }
+
+    public CollapsingToolbarLayout getCollapsingToolbarView() {
+        return binding.collapsingToolbarLayout;
     }
 }

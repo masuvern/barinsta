@@ -66,9 +66,6 @@ public final class InboxFetcher extends AsyncTask<Void, Void, InboxModel> {
                 return null;
             }
             JSONObject data = new JSONObject(NetworkUtils.readFromConnection(conn));
-            // try (FileWriter fileWriter = new FileWriter(new File("/sdcard/test.json"))) {
-            //     fileWriter.write(data.toString(2));
-            // }
 
             final long seqId = data.optLong("seq_id");
             final int pendingRequestsCount = data.optInt("pending_requests_total");
@@ -94,8 +91,8 @@ public final class InboxFetcher extends AsyncTask<Void, Void, InboxModel> {
             }
 
             result = new InboxModel(hasOlder, hasPendingTopRequests,
-                    blendedInboxEnabled, unseenCount, pendingRequestsCount,
-                    seqId, unseenCountTimestamp, oldestCursor, inboxThreadModels);
+                                    blendedInboxEnabled, unseenCount, pendingRequestsCount,
+                                    seqId, unseenCountTimestamp, oldestCursor, inboxThreadModels);
 
             conn.disconnect();
         } catch (final Exception e) {
