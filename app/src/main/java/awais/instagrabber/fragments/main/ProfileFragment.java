@@ -13,6 +13,7 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -477,6 +478,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.privatePage2.setText(R.string.no_acc);
             final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.privatePage.getLayoutParams();
             layoutParams.topMargin = 0;
+            layoutParams.gravity = Gravity.CENTER;
             binding.privatePage.setLayoutParams(layoutParams);
             binding.privatePage.setVisibility(View.VISIBLE);
             return;

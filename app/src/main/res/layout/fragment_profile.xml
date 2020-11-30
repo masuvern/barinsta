@@ -41,12 +41,12 @@
         android:id="@+id/privatePage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_gravity="top"
         android:layout_marginTop="@dimen/private_page_margins"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/privatePage1"

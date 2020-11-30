@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -546,11 +547,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 .create();
         alertDialog.show();
         new PostFetcher(shortCode, feedModel -> {
-            final PostViewV2Fragment fragment = PostViewV2Fragment
-                    .builder(feedModel)
-                    .build();
-            fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-            fragment.show(getSupportFragmentManager(), "post_view");
+            if (feedModel != null) {
+                final PostViewV2Fragment fragment = PostViewV2Fragment
+                        .builder(feedModel)
+                        .build();
+                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+                fragment.show(getSupportFragmentManager(), "post_view");
+            }
+            else {
+                Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+            }
         }).execute();
     }
 
