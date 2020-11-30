@@ -113,15 +113,6 @@
       ]
     },
     {
-      "login": "Galang23",
-      "name": "Galang23",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/13700948",
-      "profile": "https://github.com/Galang23",
-      "contributions": [
-        "translation"
-      ]
-    },
-    {
       "login": "farzadx",
       "name": "farzadx",
       "avatar_url": "https://avatars2.githubusercontent.com/u/70059397?v=4",
@@ -144,6 +135,15 @@
       "name": "fouze555",
       "avatar_url": "https://avatars3.githubusercontent.com/u/71935341?v=4",
       "profile": "https://github.com/fouze555",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Galang23",
+      "name": "Galang23",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/13700948",
+      "profile": "https://github.com/Galang23",
       "contributions": [
         "translation"
       ]
@@ -221,12 +221,30 @@
       ]
     },
     {
+      "login": "retiolus",
+      "name": "retiolus",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/65604466?v=4",
+      "profile": "https://github.com/retiolus",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
       "login": "RickyM7",
       "name": "Ricardo",
       "avatar_url": "https://avatars3.githubusercontent.com/u/24703825?v=4",
       "profile": "https://github.com/RickyM7",
       "contributions": [
         "bug",
+        "translation"
+      ]
+    },
+    {
+      "login": "rikishi0071",
+      "name": "rikishi0071",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/18183855?v=4",
+      "profile": "https://github.com/rikishi0071",
+      "contributions": [
         "translation"
       ]
     },

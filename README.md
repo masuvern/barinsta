@@ -9,7 +9,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/barinsta/stargazers/)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-25-orange.svg)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-27-orange.svg)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 We're previously known as InstaGrabber.
@@ -60,12 +60,12 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
     <td align="center"><a href="https://airikr.me/"><img src="https://avatars0.githubusercontent.com/u/53869451?s=100" width="100px;" alt=""/><br /><sub><b>Airikr</b></sub></a><br /><a href="#ideas-e-edgren" title="Ideas, Planning, & Feedback">🤔</a> <a href="#question-e-edgren" title="Answering Questions">💬</a></td>
     <td align="center"><a href="https://alin.atwebpages.com/"><img src="https://avatars2.githubusercontent.com/u/13281020?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ALIN</b></sub></a><br /><a href="https://github.com/austinhuang0131/barinsta/issues?q=author%3Aalin-1" title="Bug reports">🐛</a> <a href="#ideas-alin-1" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/Akrai"><img src="https://avatars1.githubusercontent.com/u/5624597?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Akrai</b></sub></a><br /><a href="#ideas-Akrai" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
-    <td align="center"><a href="https://github.com/Galang23"><img src="https://avatars3.githubusercontent.com/u/13700948?s=100" width="100px;" alt=""/><br /><sub><b>Galang23</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/farzadx"><img src="https://avatars2.githubusercontent.com/u/70059397?v=4?s=100" width="100px;" alt=""/><br /><sub><b>farzadx</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/faydin"><img src="https://avatars2.githubusercontent.com/u/22706676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fatih Aydın</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/faydin"><img src="https://avatars2.githubusercontent.com/u/22706676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fatih Aydın</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/fouze555"><img src="https://avatars3.githubusercontent.com/u/71935341?v=4?s=100" width="100px;" alt=""/><br /><sub><b>fouze555</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/Galang23"><img src="https://avatars3.githubusercontent.com/u/13700948?s=100" width="100px;" alt=""/><br /><sub><b>Galang23</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://becauseofprog.fr/"><img src="https://avatars3.githubusercontent.com/u/24623168?s=100" width="100px;" alt=""/><br /><sub><b>kernoeb</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/Lego8486"><img src="https://avatars1.githubusercontent.com/u/47414485?s=100" width="100px;" alt=""/><br /><sub><b>Ten_Lego</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/MoaufmKlo"><img src="https://avatars1.githubusercontent.com/u/45636897?s=100" width="100px;" alt=""/><br /><sub><b>MoaufmKlo</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
@@ -76,10 +76,12 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
     <td align="center"><a href="https://github.com/PierreM0"><img src="https://avatars3.githubusercontent.com/u/71077853?v=4?s=100" width="100px;" alt=""/><br /><sub><b>PierreM0</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/RAMAR-RAR"><img src="https://avatars3.githubusercontent.com/u/47423745?s=100" width="100px;" alt=""/><br /><sub><b>RAMAR-RAR</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/rohang02"><img src="https://avatars3.githubusercontent.com/u/47921164?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rohang02</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://github.com/retiolus"><img src="https://avatars1.githubusercontent.com/u/65604466?v=4?s=100" width="100px;" alt=""/><br /><sub><b>retiolus</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/RickyM7"><img src="https://avatars3.githubusercontent.com/u/24703825?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ricardo</b></sub></a><br /><a href="https://github.com/austinhuang0131/barinsta/issues?q=author%3ARickyM7" title="Bug reports">🐛</a> <a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
-    <td align="center"><a href="https://stillu.cc/"><img src="https://avatars2.githubusercontent.com/u/5843208?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Still Hsu</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
   </tr>
   <tr>
+    <td align="center"><a href="https://github.com/rikishi0071"><img src="https://avatars3.githubusercontent.com/u/18183855?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rikishi0071</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
+    <td align="center"><a href="https://stillu.cc/"><img src="https://avatars2.githubusercontent.com/u/5843208?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Still Hsu</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/wagnim"><img src="https://avatars0.githubusercontent.com/u/30241419?s=100" width="100px;" alt=""/><br /><sub><b>wagnim</b></sub></a><br /><a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
   </tr>
 </table>
