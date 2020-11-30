@@ -22,7 +22,7 @@ public final class SliderItemsAdapter extends ListAdapter<PostChild, SliderItemV
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener;
     private final boolean loadVideoOnItemClick;
     private final SliderCallback sliderCallback;
-    private final awais.instagrabber.databinding.LayoutExoCustomControlsBinding controlsBinding;
+    private final LayoutExoCustomControlsBinding controlsBinding;
 
     private static final DiffUtil.ItemCallback<PostChild> DIFF_CALLBACK = new DiffUtil.ItemCallback<PostChild>() {
         @Override

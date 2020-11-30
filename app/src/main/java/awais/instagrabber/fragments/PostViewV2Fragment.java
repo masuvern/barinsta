@@ -113,6 +113,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private int sliderPosition = -1;
     private DialogInterface.OnShowListener onShowListener;
     private boolean isLoggedIn;
+    private boolean hasBeenToggled = false;
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
 
@@ -303,8 +304,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         switch (feedModel.getItemType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
@@ -870,6 +871,20 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         if (!wasPaused && sharedMainPostElement != null) {
             addSharedElement(sharedMainPostElement, binding.sliderParent);
         }
+        final boolean hasVideo = feedModel.getSliderItems()
+                                          .stream()
+                                          .anyMatch(postChild -> postChild.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO);
+        if (hasVideo) {
+            final View child = binding.sliderParent.getChildAt(0);
+            if (child instanceof RecyclerView) {
+                ((RecyclerView) child).setItemViewCacheSize(feedModel.getSliderItems().size());
+                ((RecyclerView) child).addRecyclerListener(holder -> {
+                    if (holder instanceof SliderVideoViewHolder) {
+                        ((SliderVideoViewHolder) holder).releasePlayer();
+                    }
+                });
+            }
+        }
         sliderItemsAdapter = new SliderItemsAdapter(onVerticalDragListener, binding.playerControls, true, new SliderCallbackAdapter() {
             @Override
             public void onThumbnailLoaded(final int position) {
@@ -879,19 +894,17 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
             @Override
             public void onItemClicked(final int position) {
-                toggleDetails();
             }
 
             @Override
             public void onPlayerPlay(final int position) {
-                if (!detailsVisible) return;
-                toggleDetails();
+                if (!detailsVisible || hasBeenToggled) return;
                 showPlayerControls();
             }
 
             @Override
             public void onPlayerPause(final int position) {
-                if (detailsVisible) return;
+                if (detailsVisible || hasBeenToggled) return;
                 toggleDetails();
             }
         });
@@ -924,7 +937,22 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 final String text = (position + 1) + "/" + size;
                 binding.mediaCounter.setText(text);
                 final PostChild postChild = feedModel.getSliderItems().get(position);
+                final View view = binding.sliderParent.getChildAt(0);
+                if (prevPosition != -1) {
+                    if (view instanceof RecyclerView) {
+                        final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(prevPosition);
+                        if (viewHolder instanceof SliderVideoViewHolder) {
+                            ((SliderVideoViewHolder) viewHolder).removeCallbacks();
+                        }
+                    }
+                }
                 if (postChild.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO) {
+                    if (view instanceof RecyclerView) {
+                        final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(position);
+                        if (viewHolder instanceof SliderVideoViewHolder) {
+                            ((SliderVideoViewHolder) viewHolder).resetPlayerTimeline();
+                        }
+                    }
                     enablePlayerControls(true);
                     return;
                 }
@@ -1052,6 +1080,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         hideCaption();
         // previously invisible view
         View view = binding.playerControls.getRoot();
+        if (view != null && view.getVisibility() == View.VISIBLE) {
+            return;
+        }
         if (!ViewCompat.isAttachedToWindow(view)) {
             view.setVisibility(View.VISIBLE);
             return;
@@ -1076,6 +1107,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void hidePlayerControls() {
         // previously visible view
         final View view = binding.playerControls.getRoot();
+        if (view != null && view.getVisibility() == View.GONE) {
+            return;
+        }
         if (!ViewCompat.isAttachedToWindow(view)) {
             view.setVisibility(View.GONE);
             return;
@@ -1106,6 +1140,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void toggleDetails() {
+        hasBeenToggled = true;
         binding.getRoot().post(() -> {
             TransitionManager.beginDelayedTransition(binding.getRoot());
             if (detailsVisible) {

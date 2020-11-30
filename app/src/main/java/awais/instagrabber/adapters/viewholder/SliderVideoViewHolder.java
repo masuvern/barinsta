@@ -135,6 +135,16 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
         videoPlayerViewHelper.releasePlayer();
     }
 
+    public void resetPlayerTimeline() {
+        if (videoPlayerViewHelper == null) return;
+        videoPlayerViewHelper.resetTimeline();
+    }
+
+    public void removeCallbacks() {
+        if (videoPlayerViewHelper == null) return;
+        videoPlayerViewHelper.removeCallbacks();
+    }
+
     // private void setDimensions(final FeedModel feedModel, final int spanCount, final boolean animate) {
     //     final ViewGroup.LayoutParams layoutParams = binding.imageViewer.getLayoutParams();
     //     final int deviceWidth = Utils.displayMetrics.widthPixels;
