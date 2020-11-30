@@ -77,7 +77,7 @@ public final class DownloadUtils {
         File dir = getDownloadDir();
 
         if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(username)) {
-            final String finaleUsername = username.startsWith("@") ? username : "@" + username;
+            final String finaleUsername = username.startsWith("@") ? username.substring(1) : username;
             dir = new File(dir, finaleUsername);
         }
 
