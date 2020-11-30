@@ -33,11 +33,13 @@ import static awais.instagrabber.utils.DownloadUtils.PERMS;
 public class RestoreBackupDialogFragment extends DialogFragment {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
 
-    private final OnResultListener onResultListener;
+    private OnResultListener onResultListener;
 
     private DialogRestoreBackupBinding binding;
     private File file;
     private boolean isEncrypted;
+
+    public RestoreBackupDialogFragment() {}
 
     public RestoreBackupDialogFragment(final OnResultListener onResultListener) {
         this.onResultListener = onResultListener;
