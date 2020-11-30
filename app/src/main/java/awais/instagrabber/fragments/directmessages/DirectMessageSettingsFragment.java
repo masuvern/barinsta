@@ -66,6 +66,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
 
         @Override
         public void onResult(final InboxThreadModel threadModel) {
+            if (threadModel == null) return;
             final List<Long> adminList = Arrays.asList(threadModel.getAdmins());
             final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
             if (userIdFromCookie == null) return;
