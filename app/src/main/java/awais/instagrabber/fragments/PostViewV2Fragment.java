@@ -220,7 +220,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_FRAME, android.R.style.Theme_Translucent);
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.PostViewV2Style);
         fragmentActivity = (MainActivity) getActivity();
         mediaService = MediaService.getInstance();
         final Bundle arguments = getArguments();
