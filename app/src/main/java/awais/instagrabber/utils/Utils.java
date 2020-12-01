@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.provider.Browser;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -181,12 +182,14 @@ public final class Utils {
         if (context == null || TextUtils.isEmpty(url)) {
             return;
         }
-        final Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(url));
+        final Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        i.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+        i.putExtra(Browser.EXTRA_CREATE_NEW_TAB, true);
         try {
             context.startActivity(i);
         } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "openURL: No activity found to handle URL view", e);
+            Log.e(TAG, "openURL: No activity found to handle URLs", e);
+            Toast.makeText(context, context.getString(R.string.no_external_app_url), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Log.e(TAG, "openURL", e);
         }
