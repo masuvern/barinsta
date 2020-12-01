@@ -642,7 +642,7 @@ public final class ResponseBodyUtils {
                 .setCommentsCount(itemJson.optInt("comment_count"))
                 .setTimestamp(itemJson.optLong("taken_at", -1))
                 .setLiked(itemJson.optBoolean("has_liked"))
-                // .setBookmarked()
+                .setBookmarked(itemJson.optBoolean("has_viewer_saved"))
                 .setLikesCount(itemJson.optInt("like_count"))
                 .setLocationName(locationJson != null ? locationJson.optString("name") : null)
                 .setLocationId(locationJson != null ? String.valueOf(locationJson.optLong("pk")) : null)
