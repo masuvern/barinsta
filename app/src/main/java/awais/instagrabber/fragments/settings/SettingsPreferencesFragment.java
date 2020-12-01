@@ -50,7 +50,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         generalCategory.addPreference(getThemePreference(context));
         generalCategory.addPreference(getDefaultTabPreference());
         generalCategory.addPreference(getUpdateCheckPreference());
-        generalCategory.addPreference(getAutoPlayVideosPreference());
+        // generalCategory.addPreference(getAutoPlayVideosPreference());
         generalCategory.addPreference(getAlwaysMuteVideosPreference());
 
         // screen.addPreference(getDivider(context));
