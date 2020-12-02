@@ -24,6 +24,10 @@ import awais.instagrabber.R;
  * from architecture-components-samples. Some modifications have been done, check git history.
  */
 public class NavigationExtensions {
+
+    private static String selectedItemTag;
+    private static boolean isOnFirstFragment;
+
     @NonNull
     public static LiveData<NavController> setupWithNavController(@NonNull final BottomNavigationView bottomNavigationView,
                                                                  @NonNull List<Integer> navGraphIds,
@@ -51,15 +55,15 @@ public class NavigationExtensions {
                 detachNavHostFragment(fragmentManager, navHostFragment);
             }
         }
-        final String[] selectedItemTag = {graphIdToTagMap.get(bottomNavigationView.getSelectedItemId())};
+        selectedItemTag = graphIdToTagMap.get(bottomNavigationView.getSelectedItemId());
         final String firstFragmentTag = graphIdToTagMap.get(firstFragmentGraphId);
-        final boolean[] isOnFirstFragment = {selectedItemTag[0] != null && selectedItemTag[0].equals(firstFragmentTag)};
+        isOnFirstFragment = selectedItemTag != null && selectedItemTag.equals(firstFragmentTag);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if (fragmentManager.isStateSaved()) {
                 return false;
             }
             String newlySelectedItemTag = graphIdToTagMap.get(item.getItemId());
-            String tag = selectedItemTag[0];
+            String tag = selectedItemTag;
             if (tag != null && !tag.equals(newlySelectedItemTag)) {
                 fragmentManager.popBackStack(firstFragmentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 Fragment fragment = fragmentManager.findFragmentByTag(newlySelectedItemTag);
@@ -94,8 +98,8 @@ public class NavigationExtensions {
                                        .setReorderingAllowed(true)
                                        .commit();
                 }
-                selectedItemTag[0] = newlySelectedItemTag;
-                isOnFirstFragment[0] = selectedItemTag[0].equals(firstFragmentTag);
+                selectedItemTag = newlySelectedItemTag;
+                isOnFirstFragment = selectedItemTag.equals(firstFragmentTag);
                 selectedNavController.setValue(selectedFragment.getNavController());
                 return true;
             }
@@ -105,7 +109,7 @@ public class NavigationExtensions {
         setupDeepLinks(bottomNavigationView, navGraphIds, fragmentManager, containerId, intent);
         final int finalFirstFragmentGraphId = firstFragmentGraphId;
         fragmentManager.addOnBackStackChangedListener(() -> {
-            if (!isOnFirstFragment[0]) {
+            if (!isOnFirstFragment) {
                 if (firstFragmentTag == null) {
                     return;
                 }
