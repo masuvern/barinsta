@@ -800,10 +800,17 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        profileDetailsBinding.btnDM.setOnClickListener(v -> new CreateThreadAction(cookie, profileModel.getId(), threadId -> {
-            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
-            NavHostFragment.findNavController(this).navigate(action);
-        }).execute());
+        profileDetailsBinding.btnDM.setOnClickListener(v -> {
+            profileDetailsBinding.btnDM.setEnabled(false);
+            new CreateThreadAction(cookie, profileModel.getId(), threadId -> {
+                if (isAdded()) {
+                    final NavDirections action = ProfileFragmentDirections
+                            .actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
+                    NavHostFragment.findNavController(this).navigate(action);
+                }
+                profileDetailsBinding.btnDM.setEnabled(true);
+            }).execute();
+        });
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic
