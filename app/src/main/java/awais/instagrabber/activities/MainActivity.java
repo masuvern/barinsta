@@ -208,10 +208,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     public void onBackPressed() {
         if (isTaskRoot() && isBackStackEmpty) {
             finishAfterTransition();
-        } else {
+            return;
+        }
+        if (!isFinishing()) {
             try {
                 super.onBackPressed();
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                Log.e(TAG, "onBackPressed: ", e);
+            }
         }
     }
 
@@ -553,11 +557,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                         .build();
                 fragment.setOnShowListener(dialog -> alertDialog.dismiss());
                 fragment.show(getSupportFragmentManager(), "post_view");
+                return;
             }
-            else {
-                Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
-                alertDialog.dismiss();
-            }
+            Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+            alertDialog.dismiss();
         }).execute();
     }
 
