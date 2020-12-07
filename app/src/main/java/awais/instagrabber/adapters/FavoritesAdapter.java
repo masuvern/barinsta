@@ -20,8 +20,8 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.FavoriteViewHolder;
 import awais.instagrabber.databinding.ItemFavSectionHeaderBinding;
 import awais.instagrabber.databinding.ItemSuggestionBinding;
+import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.models.enums.FavoriteType;
-import awais.instagrabber.utils.DataBox;
 
 public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -102,7 +102,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return getItem(position).isHeader() ? 0 : 1;
     }
 
-    public void submitList(@Nullable final List<DataBox.FavoriteModel> list) {
+    public void submitList(@Nullable final List<Favorite> list) {
         if (list == null) {
             differ.submitList(null);
             return;
@@ -110,7 +110,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         differ.submitList(sectionAndSort(list));
     }
 
-    public void submitList(@Nullable final List<DataBox.FavoriteModel> list, @Nullable final Runnable commitCallback) {
+    public void submitList(@Nullable final List<Favorite> list, @Nullable final Runnable commitCallback) {
         if (list == null) {
             differ.submitList(null, commitCallback);
             return;
@@ -119,8 +119,8 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     @NonNull
-    private List<FavoriteModelOrHeader> sectionAndSort(@NonNull final List<DataBox.FavoriteModel> list) {
-        final List<DataBox.FavoriteModel> listCopy = new ArrayList<>(list);
+    private List<FavoriteModelOrHeader> sectionAndSort(@NonNull final List<Favorite> list) {
+        final List<Favorite> listCopy = new ArrayList<>(list);
         Collections.sort(listCopy, (o1, o2) -> {
             if (o1.getType() == o2.getType()) return 0;
             // keep users at top
@@ -133,7 +133,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         });
         final List<FavoriteModelOrHeader> modelOrHeaders = new ArrayList<>();
         for (int i = 0; i < listCopy.size(); i++) {
-            final DataBox.FavoriteModel model = listCopy.get(i);
+            final Favorite model = listCopy.get(i);
             final FavoriteModelOrHeader prev = modelOrHeaders.isEmpty() ? null : modelOrHeaders.get(modelOrHeaders.size() - 1);
             boolean prevWasSameType = prev != null && prev.model.getType() == model.getType();
             if (prevWasSameType) {
@@ -156,7 +156,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private static class FavoriteModelOrHeader {
         FavoriteType header;
-        DataBox.FavoriteModel model;
+        Favorite model;
 
         boolean isHeader() {
             return header != null;
@@ -164,11 +164,11 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     public interface OnFavoriteClickListener {
-        void onClick(final DataBox.FavoriteModel model);
+        void onClick(final Favorite model);
     }
 
     public interface OnFavoriteLongClickListener {
-        boolean onLongClick(final DataBox.FavoriteModel model);
+        boolean onLongClick(final Favorite model);
     }
 
     public static class FavSectionViewHolder extends RecyclerView.ViewHolder {

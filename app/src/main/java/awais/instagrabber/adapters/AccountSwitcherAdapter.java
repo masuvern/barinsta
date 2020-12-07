@@ -14,21 +14,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
+import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DataBox;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class AccountSwitcherAdapter extends ListAdapter<DataBox.CookieModel, AccountSwitcherAdapter.ViewHolder> {
+public class AccountSwitcherAdapter extends ListAdapter<Account, AccountSwitcherAdapter.ViewHolder> {
     private static final String TAG = "AccountSwitcherAdapter";
-    private static final DiffUtil.ItemCallback<DataBox.CookieModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<DataBox.CookieModel>() {
+    private static final DiffUtil.ItemCallback<Account> DIFF_CALLBACK = new DiffUtil.ItemCallback<Account>() {
         @Override
-        public boolean areItemsTheSame(@NonNull final DataBox.CookieModel oldItem, @NonNull final DataBox.CookieModel newItem) {
+        public boolean areItemsTheSame(@NonNull final Account oldItem, @NonNull final Account newItem) {
             return oldItem.getUid().equals(newItem.getUid());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull final DataBox.CookieModel oldItem, @NonNull final DataBox.CookieModel newItem) {
+        public boolean areContentsTheSame(@NonNull final Account oldItem, @NonNull final Account newItem) {
             return oldItem.getUid().equals(newItem.getUid());
         }
     };
@@ -53,7 +53,7 @@ public class AccountSwitcherAdapter extends ListAdapter<DataBox.CookieModel, Acc
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        final DataBox.CookieModel model = getItem(position);
+        final Account model = getItem(position);
         if (model == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isCurrent = model.getCookie().equals(cookie);
@@ -61,11 +61,11 @@ public class AccountSwitcherAdapter extends ListAdapter<DataBox.CookieModel, Acc
     }
 
     public interface OnAccountClickListener {
-        void onAccountClick(final DataBox.CookieModel model, final boolean isCurrent);
+        void onAccountClick(final Account model, final boolean isCurrent);
     }
 
     public interface OnAccountLongClickListener {
-        boolean onAccountLongClick(final DataBox.CookieModel model, final boolean isCurrent);
+        boolean onAccountLongClick(final Account model, final boolean isCurrent);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -78,7 +78,7 @@ public class AccountSwitcherAdapter extends ListAdapter<DataBox.CookieModel, Acc
         }
 
         @SuppressLint("SetTextI18n")
-        public void bind(final DataBox.CookieModel model,
+        public void bind(final Account model,
                          final boolean isCurrent,
                          final OnAccountClickListener clickListener,
                          final OnAccountLongClickListener longClickListener) {

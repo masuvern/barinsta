@@ -52,15 +52,19 @@ import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentLocationBinding;
 import awais.instagrabber.databinding.LayoutLocationDetailsBinding;
+import awais.instagrabber.db.datasources.FavoriteDataSource;
+import awais.instagrabber.db.entities.Favorite;
+import awais.instagrabber.db.repositories.FavoriteRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -443,39 +447,63 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             locationDetailsBinding.locationUrl.setVisibility(View.VISIBLE);
             locationDetailsBinding.locationUrl.setText(TextUtils.getSpannableUrl(url));
         }
-        final DataBox.FavoriteModel favorite = Utils.dataBox.getFavorite(locationId, FavoriteType.LOCATION);
-        final boolean isFav = favorite != null;
+        final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(getContext());
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(new AppExecutors(), dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        locationDetailsBinding.favChip.setChipIconResource(isFav ? R.drawable.ic_star_check_24
-                                                                 : R.drawable.ic_outline_star_plus_24);
-        locationDetailsBinding.favChip.setText(isFav ? R.string.favorite_short : R.string.add_to_favorites);
-        locationDetailsBinding.favChip.setOnClickListener(v -> {
-            final DataBox.FavoriteModel fav = Utils.dataBox.getFavorite(locationId, FavoriteType.LOCATION);
-            final boolean isFavorite = fav != null;
-            final String message;
-            if (isFavorite) {
-                Utils.dataBox.deleteFavorite(locationId, FavoriteType.LOCATION);
-                locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                message = getString(R.string.removed_from_favs);
-            } else {
-                Utils.dataBox.addOrUpdateFavorite(new DataBox.FavoriteModel(
-                        -1,
-                        locationId,
-                        FavoriteType.LOCATION,
-                        locationModel.getName(),
-                        locationModel.getSdProfilePic(),
-                        new Date()
-                ));
-                locationDetailsBinding.favChip.setText(R.string.favorite_short);
+        favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
+            @Override
+            public void onSuccess(final Favorite result) {
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                message = getString(R.string.added_to_favs);
+                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                locationDetailsBinding.favChip.setText(R.string.favorite_short);
             }
-            final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
-            snackbar.setAction(R.string.ok, v1 -> snackbar.dismiss())
-                    .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
-                    .setAnchorView(fragmentActivity.getBottomNavView())
-                    .show();
+
+            @Override
+            public void onDataNotAvailable() {
+                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
+            }
+        });
+        locationDetailsBinding.favChip.setOnClickListener(v -> {
+            favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
+                @Override
+                public void onSuccess(final Favorite result) {
+                    favoriteRepository.deleteFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Void>() {
+                        @Override
+                        public void onSuccess(final Void result) {
+                            locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                            locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                            showSnackbar(getString(R.string.removed_from_favs));
+                        }
+
+                        @Override
+                        public void onDataNotAvailable() {}
+                    });
+                }
+
+                @Override
+                public void onDataNotAvailable() {
+                    favoriteRepository.insertOrUpdateFavorite(new Favorite(
+                            -1,
+                            locationId,
+                            FavoriteType.LOCATION,
+                            locationModel.getName(),
+                            locationModel.getSdProfilePic(),
+                            new Date()
+                    ), new RepositoryCallback<Favorite>() {
+                        @Override
+                        public void onSuccess(final Favorite result) {
+                            locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                            locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                            showSnackbar(getString(R.string.added_to_favs));
+                        }
+
+                        @Override
+                        public void onDataNotAvailable() {}
+                    });
+                }
+            });
         });
         locationDetailsBinding.mainLocationImage.setOnClickListener(v -> {
             if (hasStories) {
@@ -485,6 +513,14 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 NavHostFragment.findNavController(this).navigate(action);
             }
         });
+    }
+
+    private void showSnackbar(final String message) {
+        final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
+        snackbar.setAction(R.string.ok, v1 -> snackbar.dismiss())
+                .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
+                .setAnchorView(fragmentActivity.getBottomNavView())
+                .show();
     }
 
     private void fetchStories() {

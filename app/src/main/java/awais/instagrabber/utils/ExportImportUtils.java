@@ -2,6 +2,7 @@ package awais.instagrabber.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -18,12 +19,21 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import awais.instagrabber.BuildConfig;
+import awais.instagrabber.db.datasources.AccountDataSource;
+import awais.instagrabber.db.datasources.FavoriteDataSource;
+import awais.instagrabber.db.entities.Account;
+import awais.instagrabber.db.entities.Favorite;
+import awais.instagrabber.db.repositories.AccountRepository;
+import awais.instagrabber.db.repositories.FavoriteRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.PasswordUtils.IncorrectPasswordException;
@@ -47,37 +57,38 @@ public final class ExportImportUtils {
                                   @NonNull final File filePath,
                                   final FetchListener<Boolean> fetchListener,
                                   @NonNull final Context context) {
-        final String exportString = getExportString(flags, context);
-        if (TextUtils.isEmpty(exportString)) return;
-        final boolean isPass = !TextUtils.isEmpty(password);
-        byte[] exportBytes = null;
-        if (isPass) {
-            final byte[] passwordBytes = password.getBytes();
-            final byte[] bytes = new byte[32];
-            System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
-            try {
-                exportBytes = PasswordUtils.enc(exportString, bytes);
-            } catch (final Exception e) {
-                if (fetchListener != null) fetchListener.onResult(false);
-                if (logCollector != null)
-                    logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::isPass");
-                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+        getExportString(flags, context, exportString -> {
+            if (TextUtils.isEmpty(exportString)) return;
+            final boolean isPass = !TextUtils.isEmpty(password);
+            byte[] exportBytes = null;
+            if (isPass) {
+                final byte[] passwordBytes = password.getBytes();
+                final byte[] bytes = new byte[32];
+                System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
+                try {
+                    exportBytes = PasswordUtils.enc(exportString, bytes);
+                } catch (final Exception e) {
+                    if (fetchListener != null) fetchListener.onResult(false);
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::isPass");
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                }
+            } else {
+                exportBytes = Base64.encode(exportString.getBytes(), Base64.DEFAULT | Base64.NO_WRAP | Base64.NO_PADDING);
             }
-        } else {
-            exportBytes = Base64.encode(exportString.getBytes(), Base64.DEFAULT | Base64.NO_WRAP | Base64.NO_PADDING);
-        }
-        if (exportBytes != null && exportBytes.length > 1) {
-            try (final FileOutputStream fos = new FileOutputStream(filePath)) {
-                fos.write(isPass ? 'A' : 'Z');
-                fos.write(exportBytes);
-                if (fetchListener != null) fetchListener.onResult(true);
-            } catch (final Exception e) {
-                if (fetchListener != null) fetchListener.onResult(false);
-                if (logCollector != null)
-                    logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::notPass");
-                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-            }
-        } else if (fetchListener != null) fetchListener.onResult(false);
+            if (exportBytes != null && exportBytes.length > 1) {
+                try (final FileOutputStream fos = new FileOutputStream(filePath)) {
+                    fos.write(isPass ? 'A' : 'Z');
+                    fos.write(exportBytes);
+                    if (fetchListener != null) fetchListener.onResult(true);
+                } catch (final Exception e) {
+                    if (fetchListener != null) fetchListener.onResult(false);
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::notPass");
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                }
+            } else if (fetchListener != null) fetchListener.onResult(false);
+        });
     }
 
     public static void importData(@NonNull final Context context,
@@ -99,7 +110,8 @@ public final class ExportImportUtils {
                     final byte[] passwordBytes = password.getBytes();
                     final byte[] bytes = new byte[32];
                     System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
-                    importJson(new String(PasswordUtils.dec(builder.toString(), bytes)),
+                    importJson(context,
+                               new String(PasswordUtils.dec(builder.toString(), bytes)),
                                flags,
                                fetchListener);
                 } catch (final IncorrectPasswordException e) {
@@ -111,7 +123,8 @@ public final class ExportImportUtils {
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error importing backup", e);
                 }
             } else if (configType == 'Z') {
-                importJson(new String(Base64.decode(builder.toString(), Base64.DEFAULT | Base64.NO_PADDING | Base64.NO_WRAP)),
+                importJson(context,
+                           new String(Base64.decode(builder.toString(), Base64.DEFAULT | Base64.NO_PADDING | Base64.NO_WRAP)),
                            flags,
                            fetchListener);
 
@@ -129,7 +142,8 @@ public final class ExportImportUtils {
         }
     }
 
-    private static void importJson(@NonNull final String json,
+    private static void importJson(final Context context,
+                                   @NonNull final String json,
                                    @ExportImportFlags final int flags,
                                    final FetchListener<Boolean> fetchListener) {
         try {
@@ -138,10 +152,10 @@ public final class ExportImportUtils {
                 importSettings(jsonObject);
             }
             if ((flags & FLAG_COOKIES) == FLAG_COOKIES && jsonObject.has("cookies")) {
-                importAccounts(jsonObject);
+                importAccounts(context, jsonObject);
             }
             if ((flags & FLAG_FAVORITES) == FLAG_FAVORITES && jsonObject.has("favs")) {
-                importFavorites(jsonObject);
+                importFavorites(context, jsonObject);
             }
             if (fetchListener != null) fetchListener.onResult(true);
         } catch (final Exception e) {
@@ -151,7 +165,7 @@ public final class ExportImportUtils {
         }
     }
 
-    private static void importFavorites(final JSONObject jsonObject) throws JSONException {
+    private static void importFavorites(final Context context, final JSONObject jsonObject) throws JSONException {
         final JSONArray favs = jsonObject.getJSONArray("favs");
         for (int i = 0; i < favs.length(); i++) {
             final JSONObject favsObject = favs.getJSONObject(i);
@@ -175,7 +189,7 @@ public final class ExportImportUtils {
             if (query == null || favoriteType == null) {
                 continue;
             }
-            final DataBox.FavoriteModel favoriteModel = new DataBox.FavoriteModel(
+            final Favorite favorite = new Favorite(
                     -1,
                     query,
                     favoriteType,
@@ -184,41 +198,55 @@ public final class ExportImportUtils {
                                                          : favsObject.optString("pic_url"),
                     new Date(favsObject.getLong("d")));
             // Log.d(TAG, "importJson: favoriteModel: " + favoriteModel);
-            Utils.dataBox.addOrUpdateFavorite(favoriteModel);
+            FavoriteRepository.getInstance(new AppExecutors(), FavoriteDataSource.getInstance(context))
+                              .insertOrUpdateFavorite(favorite, null);
         }
     }
 
-    private static void importAccounts(final JSONObject jsonObject) throws JSONException {
-        final JSONArray cookies = jsonObject.getJSONArray("cookies");
-        for (int i = 0; i < cookies.length(); i++) {
-            final JSONObject cookieObject = cookies.getJSONObject(i);
-            final DataBox.CookieModel cookieModel = new DataBox.CookieModel(
-                    cookieObject.optString("i"),
-                    cookieObject.optString("u"),
-                    cookieObject.optString("c"),
-                    cookieObject.optString("full_name"),
-                    cookieObject.optString("profile_pic")
-            );
-            if (!cookieModel.isValid()) continue;
-            // Log.d(TAG, "importJson: cookieModel: " + cookieModel);
-            Utils.dataBox.addOrUpdateUser(cookieModel);
-        }
-    }
-
-    private static void importSettings(final JSONObject jsonObject) throws JSONException {
-        final JSONObject objSettings = jsonObject.getJSONObject("settings");
-        final Iterator<String> keys = objSettings.keys();
-        while (keys.hasNext()) {
-            final String key = keys.next();
-            final Object val = objSettings.opt(key);
-            // Log.d(TAG, "importJson: key: " + key + ", val: " + val);
-            if (val instanceof String) {
-                settingsHelper.putString(key, (String) val);
-            } else if (val instanceof Integer) {
-                settingsHelper.putInteger(key, (int) val);
-            } else if (val instanceof Boolean) {
-                settingsHelper.putBoolean(key, (boolean) val);
+    private static void importAccounts(final Context context,
+                                       final JSONObject jsonObject) {
+        final List<Account> accounts = new ArrayList<>();
+        try {
+            final JSONArray cookies = jsonObject.getJSONArray("cookies");
+            for (int i = 0; i < cookies.length(); i++) {
+                final JSONObject cookieObject = cookies.getJSONObject(i);
+                final Account account = new Account(
+                        -1,
+                        cookieObject.optString("i"),
+                        cookieObject.optString("u"),
+                        cookieObject.optString("c"),
+                        cookieObject.optString("full_name"),
+                        cookieObject.optString("profile_pic")
+                );
+                if (!account.isValid()) continue;
+                accounts.add(account);
             }
+        } catch (Exception e) {
+            Log.e(TAG, "importAccounts: Error parsing json", e);
+            return;
+        }
+        AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(context))
+                         .insertOrUpdateAccounts(accounts, null);
+    }
+
+    private static void importSettings(final JSONObject jsonObject) {
+        try {
+            final JSONObject objSettings = jsonObject.getJSONObject("settings");
+            final Iterator<String> keys = objSettings.keys();
+            while (keys.hasNext()) {
+                final String key = keys.next();
+                final Object val = objSettings.opt(key);
+                // Log.d(TAG, "importJson: key: " + key + ", val: " + val);
+                if (val instanceof String) {
+                    settingsHelper.putString(key, (String) val);
+                } else if (val instanceof Integer) {
+                    settingsHelper.putInteger(key, (int) val);
+                } else if (val instanceof Boolean) {
+                    settingsHelper.putBoolean(key, (boolean) val);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "importSettings error", e);
         }
     }
 
@@ -234,28 +262,62 @@ public final class ExportImportUtils {
         return false;
     }
 
-    @Nullable
-    private static String getExportString(@ExportImportFlags final int flags,
-                                          @NonNull final Context context) {
-        String result = null;
-        try {
-            final JSONObject jsonObject = new JSONObject();
-            if ((flags & FLAG_SETTINGS) == FLAG_SETTINGS) {
-                jsonObject.put("settings", getSettings(context));
+    //todo Need to improve logic
+    private static void getExportString(@ExportImportFlags final int flags,
+                                        @NonNull final Context context,
+                                        final OnExportStringCreatedCallback callback) {
+        final AppExecutors appExecutors = new AppExecutors();
+        final Handler innerHandler = new Handler();
+        appExecutors.tasksThread().execute(() -> {
+            final CountDownLatch responseWaiter = new CountDownLatch(3);
+            try {
+                final JSONObject jsonObject = new JSONObject();
+                innerHandler.post(() -> {
+                    if ((flags & FLAG_SETTINGS) == FLAG_SETTINGS) {
+                        try {
+                            jsonObject.put("settings", getSettings(context));
+                        } catch (JSONException e) {
+                            Log.e(TAG, "getExportString: ", e);
+                        }
+                    }
+                    responseWaiter.countDown();
+                });
+                innerHandler.post(() -> {
+                    if ((flags & FLAG_COOKIES) == FLAG_COOKIES) {
+                        getCookies(context, array -> {
+                            try {
+                                jsonObject.put("cookies", array);
+                            } catch (JSONException e) {
+                                Log.e(TAG, "error getting accounts", e);
+                            }
+                            responseWaiter.countDown();
+                        });
+                        return;
+                    }
+                    responseWaiter.countDown();
+                });
+                innerHandler.post(() -> {
+                    if ((flags & FLAG_FAVORITES) == FLAG_FAVORITES) {
+                        getFavorites(context, array -> {
+                            try {
+                                jsonObject.put("favs", array);
+                            } catch (JSONException e) {
+                                Log.e(TAG, "getExportString: ", e);
+                            }
+                            responseWaiter.countDown();
+                        });
+                        return;
+                    }
+                    responseWaiter.countDown();
+                });
+                responseWaiter.await();
+                callback.onCreated(jsonObject.toString());
+            } catch (final Exception e) {
+                if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getExportString");
+                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             }
-            if ((flags & FLAG_COOKIES) == FLAG_COOKIES) {
-                jsonObject.put("cookies", getCookies());
-            }
-            if ((flags & FLAG_FAVORITES) == FLAG_FAVORITES) {
-                jsonObject.put("favs", getFavorites());
-            }
-
-            result = jsonObject.toString();
-        } catch (final Exception e) {
-            if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getExportString");
-            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-        }
-        return result;
+            callback.onCreated(null);
+        });
     }
 
     @NonNull
@@ -277,22 +339,35 @@ public final class ExportImportUtils {
         return new JSONObject();
     }
 
-    @NonNull
-    private static JSONArray getFavorites() {
-        if (Utils.dataBox == null) return new JSONArray();
+    private static void getFavorites(final Context context, final OnFavoritesJsonLoadedCallback callback) {
+        final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(new AppExecutors(), dataSource);
         try {
-            final List<DataBox.FavoriteModel> allFavorites = Utils.dataBox.getAllFavorites();
-            final JSONArray jsonArray = new JSONArray();
-            for (final DataBox.FavoriteModel favorite : allFavorites) {
-                final JSONObject jsonObject = new JSONObject();
-                jsonObject.put("q", favorite.getQuery());
-                jsonObject.put("type", favorite.getType().toString());
-                jsonObject.put("s", favorite.getDisplayName());
-                jsonObject.put("pic_url", favorite.getPicUrl());
-                jsonObject.put("d", favorite.getDateAdded().getTime());
-                jsonArray.put(jsonObject);
-            }
-            return jsonArray;
+            favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
+                @Override
+                public void onSuccess(final List<Favorite> favorites) {
+                    final JSONArray jsonArray = new JSONArray();
+                    try {
+                        for (final Favorite favorite : favorites) {
+                            final JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("q", favorite.getQuery());
+                            jsonObject.put("type", favorite.getType().toString());
+                            jsonObject.put("s", favorite.getDisplayName());
+                            jsonObject.put("pic_url", favorite.getPicUrl());
+                            jsonObject.put("d", favorite.getDateAdded().getTime());
+                            jsonArray.put(jsonObject);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "onSuccess: Error creating json array", e);
+                    }
+                    callback.onFavoritesJsonLoaded(jsonArray);
+                }
+
+                @Override
+                public void onDataNotAvailable() {
+                    callback.onFavoritesJsonLoaded(new JSONArray());
+                }
+            });
         } catch (final Exception e) {
             if (logCollector != null) {
                 logCollector.appendException(e, LogFile.UTILS_EXPORT, "getFavorites");
@@ -301,30 +376,48 @@ public final class ExportImportUtils {
                 Log.e(TAG, "Error exporting favorites", e);
             }
         }
-        return new JSONArray();
     }
 
-    @NonNull
-    private static JSONArray getCookies() {
-        if (Utils.dataBox == null) return new JSONArray();
-        try {
-            final List<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
-            final JSONArray jsonArray = new JSONArray();
-            for (final DataBox.CookieModel cookie : allCookies) {
-                final JSONObject jsonObject = new JSONObject();
-                jsonObject.put("i", cookie.getUid());
-                jsonObject.put("u", cookie.getUsername());
-                jsonObject.put("c", cookie.getCookie());
-                jsonObject.put("full_name", cookie.getFullName());
-                jsonObject.put("profile_pic", cookie.getProfilePic());
-                jsonArray.put(jsonObject);
+    private static void getCookies(final Context context, final OnAccountJsonLoadedCallback callback) {
+        final AccountRepository accountRepository = AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(context));
+        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
+            @Override
+            public void onSuccess(final List<Account> accounts) {
+                try {
+                    final JSONArray jsonArray = new JSONArray();
+                    for (final Account cookie : accounts) {
+                        final JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("i", cookie.getUid());
+                        jsonObject.put("u", cookie.getUsername());
+                        jsonObject.put("c", cookie.getCookie());
+                        jsonObject.put("full_name", cookie.getFullName());
+                        jsonObject.put("profile_pic", cookie.getProfilePic());
+                        jsonArray.put(jsonObject);
+                    }
+                    callback.onAccountsJsonLoaded(jsonArray);
+                    return;
+                } catch (Exception e) {
+                    Log.e(TAG, "Error exporting accounts", e);
+                }
+                callback.onAccountsJsonLoaded(new JSONArray());
             }
-            return jsonArray;
-        } catch (final Exception e) {
-            if (BuildConfig.DEBUG) {
-                Log.e(TAG, "Error exporting accounts", e);
+
+            @Override
+            public void onDataNotAvailable() {
+                callback.onAccountsJsonLoaded(new JSONArray());
             }
-        }
-        return new JSONArray();
+        });
+    }
+
+    public interface OnExportStringCreatedCallback {
+        void onCreated(String exportString);
+    }
+
+    public interface OnAccountJsonLoadedCallback {
+        void onAccountsJsonLoaded(JSONArray array);
+    }
+
+    public interface OnFavoritesJsonLoadedCallback {
+        void onFavoritesJsonLoaded(JSONArray array);
     }
 }

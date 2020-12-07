@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
 import awaisomereport.CrashReporter;
@@ -21,7 +20,6 @@ import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
 import static awais.instagrabber.utils.Utils.clipboardManager;
-import static awais.instagrabber.utils.Utils.dataBox;
 import static awais.instagrabber.utils.Utils.datetimeParser;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -57,11 +55,6 @@ public final class InstaGrabberApplication extends Application {
         logCollector = new LogCollector(this);
 
         CookieHandler.setDefault(NET_COOKIE_MANAGER);
-
-        final Context appContext = getApplicationContext();
-
-        if (dataBox == null)
-            dataBox = DataBox.getInstance(appContext);
 
         if (settingsHelper == null)
             settingsHelper = new SettingsHelper(this);

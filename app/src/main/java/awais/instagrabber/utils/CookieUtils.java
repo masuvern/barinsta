@@ -1,5 +1,6 @@
 package awais.instagrabber.utils;
 
+import android.content.Context;
 import android.util.Log;
 import android.webkit.CookieManager;
 
@@ -17,9 +18,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import awais.instagrabber.BuildConfig;
+import awais.instagrabber.db.datasources.AccountDataSource;
+import awais.instagrabber.db.repositories.AccountRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awaisomereport.LogCollector;
 
 public final class CookieUtils {
+    private static final String TAG = CookieUtils.class.getSimpleName();
     public static final CookieManager COOKIE_MANAGER = CookieManager.getInstance();
     public static final java.net.CookieManager NET_COOKIE_MANAGER = new java.net.CookieManager(null, CookiePolicy.ACCEPT_ALL);
 
@@ -28,11 +33,7 @@ public final class CookieUtils {
         if (cookieStore == null || TextUtils.isEmpty(cookieRaw)) {
             return;
         }
-        if (cookieRaw.equals("REMOVE")) {
-            cookieStore.removeAll();
-            Utils.dataBox.deleteAllUserCookies();
-            return;
-        } else if (cookieRaw.equals("LOGOUT")) {
+        if (cookieRaw.equals("LOGOUT")) {
             cookieStore.removeAll();
             return;
         }
@@ -53,7 +54,19 @@ public final class CookieUtils {
         } catch (final URISyntaxException e) {
             if (Utils.logCollector != null)
                 Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "setupCookies");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+        }
+    }
+
+    public static void removeAllAccounts(final Context context, final RepositoryCallback<Void> callback) {
+        final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
+        if (cookieStore == null) return;
+        cookieStore.removeAll();
+        try {
+            AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(context))
+                             .deleteAllAccounts(callback);
+        } catch (Exception e) {
+            Log.e(TAG, "setupCookies", e);
         }
     }
 

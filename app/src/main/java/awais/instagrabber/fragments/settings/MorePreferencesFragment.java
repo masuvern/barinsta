@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,14 +27,17 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
+import awais.instagrabber.db.datasources.AccountDataSource;
+import awais.instagrabber.db.entities.Account;
+import awais.instagrabber.db.repositories.AccountRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
 import awais.instagrabber.repositories.responses.UserInfo;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
 
@@ -42,20 +46,23 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class MorePreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = "MorePreferencesFragment";
 
+    private final AccountRepository accountRepository;
+
+    public MorePreferencesFragment() {
+        accountRepository = AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(getContext()));
+    }
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         // screen.addPreference(new MoreHeaderPreference(getContext()));
-
         final Context context = getContext();
         if (context == null) return;
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
-        final List<DataBox.CookieModel> allCookies = Utils.dataBox.getAllCookies();
         if (isLoggedIn) {
             accountCategory.setSummary(R.string.account_hint);
             accountCategory.addPreference(getAccountSwitcherPreference(cookie));
@@ -67,34 +74,59 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 settingsHelper.putString(Constants.COOKIE, "");
                 return true;
             }));
-        } else {
-            if (allCookies != null && allCookies.size() > 0) {
-                accountCategory.addPreference(getAccountSwitcherPreference(null));
-            }
-            // Need to show something to trigger login activity
-            accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
-                startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
-                return true;
-            }));
         }
+        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
+            @Override
+            public void onSuccess(@NonNull final List<Account> accounts) {
+                if (!isLoggedIn) {
+                    if (accounts.size() > 0) {
+                        accountCategory.addPreference(getAccountSwitcherPreference(null));
+                    }
+                    // Need to show something to trigger login activity
+                    accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                        startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
+                        return true;
+                    }));
+                }
+                if (accounts.size() > 0) {
+                    accountCategory
+                            .addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_account_multiple_remove_24, preference -> {
+                                if (getContext() == null) return false;
+                                new AlertDialog.Builder(getContext())
+                                        .setTitle(R.string.logout)
+                                        .setMessage(R.string.remove_all_acc_warning)
+                                        .setPositiveButton(R.string.yes, (dialog, which) -> {
+                                            CookieUtils.removeAllAccounts(context, new RepositoryCallback<Void>() {
+                                                @Override
+                                                public void onSuccess(final Void result) {
+                                                    shouldRecreate();
+                                                    Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
+                                                    settingsHelper.putString(Constants.COOKIE, "");
+                                                }
 
-        if (allCookies != null && allCookies.size() > 0) {
-            accountCategory.addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_account_multiple_remove_24, preference -> {
-                if (getContext() == null) return false;
-                new AlertDialog.Builder(getContext())
-                        .setTitle(R.string.logout)
-                        .setMessage(R.string.remove_all_acc_warning)
-                        .setPositiveButton(R.string.yes, (dialog, which) -> {
-                            CookieUtils.setupCookies("REMOVE");
-                            shouldRecreate();
-                            Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
-                            settingsHelper.putString(Constants.COOKIE, "");
-                        })
-                        .setNegativeButton(R.string.cancel, null)
-                        .show();
-                return true;
-            }));
-        }
+                                                @Override
+                                                public void onDataNotAvailable() {}
+                                            });
+                                        })
+                                        .setNegativeButton(R.string.cancel, null)
+                                        .show();
+                                return true;
+                            }));
+                }
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                Log.d(TAG, "onDataNotAvailable");
+                if (!isLoggedIn) {
+                    // Need to show something to trigger login activity
+                    accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                        startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
+                        return true;
+                    }));
+                }
+            }
+        });
 
         // final PreferenceCategory generalCategory = new PreferenceCategory(context);
         // generalCategory.setTitle(R.string.pref_category_general);
@@ -163,11 +195,26 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 public void onSuccess(final UserInfo result) {
                     // Log.d(TAG, "adding userInfo: " + result);
                     if (result != null) {
-                        Utils.dataBox.addOrUpdateUser(uid, result.getUsername(), cookie, result.getFullName(), result.getProfilePicUrl());
+                        accountRepository.insertOrUpdateAccount(
+                                uid,
+                                result.getUsername(),
+                                cookie,
+                                result.getFullName(),
+                                result.getProfilePicUrl(),
+                                new RepositoryCallback<Account>() {
+                                    @Override
+                                    public void onSuccess(final Account result) {
+                                        final FragmentActivity activity = getActivity();
+                                        if (activity == null) return;
+                                        activity.recreate();
+                                    }
+
+                                    @Override
+                                    public void onDataNotAvailable() {
+                                        Log.e(TAG, "onDataNotAvailable: insert failed");
+                                    }
+                                });
                     }
-                    final FragmentActivity activity = getActivity();
-                    if (activity == null) return;
-                    activity.recreate();
                 }
 
                 @Override
@@ -181,7 +228,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie) {
         final Context context = getContext();
         if (context == null) return null;
-        return new AccountSwitcherPreference(context, cookie, v -> showAccountSwitcherDialog());
+        return new AccountSwitcherPreference(context, cookie, accountRepository, v -> showAccountSwitcherDialog());
     }
 
     private void showAccountSwitcherDialog() {
@@ -244,13 +291,16 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     public static class AccountSwitcherPreference extends Preference {
 
         private final String cookie;
+        private final AccountRepository accountRepository;
         private final View.OnClickListener onClickListener;
 
         public AccountSwitcherPreference(final Context context,
                                          final String cookie,
+                                         final AccountRepository accountRepository,
                                          final View.OnClickListener onClickListener) {
             super(context);
             this.cookie = cookie;
+            this.accountRepository = accountRepository;
             this.onClickListener = onClickListener;
             setLayoutResource(R.layout.pref_account_switcher);
         }
@@ -263,11 +313,20 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
             final String uid = CookieUtils.getUserIdFromCookie(cookie);
             if (uid == null) return;
-            final DataBox.CookieModel user = Utils.dataBox.getCookie(uid);
-            if (user == null) return;
-            binding.fullName.setText(user.getFullName());
-            binding.username.setText("@" + user.getUsername());
-            binding.profilePic.setImageURI(user.getProfilePic());
+            accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
+                @Override
+                public void onSuccess(final Account account) {
+                    binding.getRoot().post(() -> {
+                        binding.fullName.setText(account.getFullName());
+                        binding.username.setText("@" + account.getUsername());
+                        binding.profilePic.setImageURI(account.getProfilePic());
+                        binding.getRoot().requestLayout();
+                    });
+                }
+
+                @Override
+                public void onDataNotAvailable() {}
+            });
         }
     }
 }

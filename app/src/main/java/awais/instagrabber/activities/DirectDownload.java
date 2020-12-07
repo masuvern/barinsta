@@ -26,9 +26,11 @@ import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.enums.IntentModelType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 
 public final class DirectDownload extends AppCompatActivity {
     private static final int NOTIFICATION_ID = 1900000000;
@@ -88,6 +90,7 @@ public final class DirectDownload extends AppCompatActivity {
     }
 
     private synchronized void doDownload() {
+        CookieUtils.setupCookies(Utils.settingsHelper.getString(Constants.COOKIE));
         notificationManager = NotificationManagerCompat.from(getApplicationContext());
         final Intent intent = getIntent();
         final String action = intent.getAction();
