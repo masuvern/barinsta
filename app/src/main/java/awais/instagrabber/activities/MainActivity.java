@@ -215,6 +215,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 super.onBackPressed();
             } catch (Exception e) {
                 Log.e(TAG, "onBackPressed: ", e);
+                finish();
             }
         }
     }
