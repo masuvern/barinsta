@@ -25,7 +25,6 @@ import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -41,12 +40,12 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
     private DialogAccountSwitcherBinding binding;
 
     public AccountSwitcherDialogFragment() {
-        accountRepository = AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(getContext()));
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
     }
 
     public AccountSwitcherDialogFragment(final OnAddAccountClickListener onAddAccountClickListener) {
         this.onAddAccountClickListener = onAddAccountClickListener;
-        accountRepository = AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(getContext()));
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
     }
 
     private final AccountSwitcherAdapter.OnAccountClickListener accountClickListener = (model, isCurrent) -> {

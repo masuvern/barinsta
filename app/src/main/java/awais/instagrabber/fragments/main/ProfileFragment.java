@@ -82,7 +82,6 @@ import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
 import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -299,9 +298,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
         storiesService = StoriesService.getInstance();
-        final AppExecutors appExecutors = new AppExecutors();
-        accountRepository = AccountRepository.getInstance(appExecutors, AccountDataSource.getInstance(getContext()));
-        favoriteRepository = FavoriteRepository.getInstance(appExecutors, FavoriteDataSource.getInstance(getContext()));
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         setHasOptionsMenu(true);
     }
 
@@ -907,9 +905,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             profileModel.getSdProfilePic(),
                             new Date()
                     );
-                    favoriteRepository.insertOrUpdateFavorite(model, new RepositoryCallback<Favorite>() {
+                    favoriteRepository.insertOrUpdateFavorite(model, new RepositoryCallback<Void>() {
                         @Override
-                        public void onSuccess(final Favorite result) {
+                        public void onSuccess(final Void result) {
                             profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_star_check_24);
                             profileDetailsBinding.favProgress.setVisibility(View.GONE);
                             profileDetailsBinding.favCb.setVisibility(View.VISIBLE);

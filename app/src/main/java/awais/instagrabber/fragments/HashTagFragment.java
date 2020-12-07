@@ -59,7 +59,6 @@ import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -459,8 +458,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             hashtagDetailsBinding.btnFollowTag.setVisibility(View.GONE);
         }
         hashtagDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        final FavoriteRepository favoriteRepository = FavoriteRepository
-                .getInstance(new AppExecutors(), FavoriteDataSource.getInstance(getContext()));
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         favoriteRepository.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
             @Override
             public void onSuccess(final Favorite result) {
@@ -500,9 +498,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 hashtagModel.getName(),
                                 null,
                                 new Date()
-                        ), new RepositoryCallback<Favorite>() {
+                        ), new RepositoryCallback<Void>() {
                             @Override
-                            public void onSuccess(final Favorite result) {
+                            public void onSuccess(final Void result) {
                                 hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
                                 hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                                 showSnackbar(getString(R.string.added_to_favs));

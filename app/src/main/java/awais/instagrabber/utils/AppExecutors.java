@@ -35,37 +35,48 @@ import java.util.concurrent.Executors;
  */
 public class AppExecutors {
 
-    // private static final int THREAD_COUNT = 3;
+    private static final int THREAD_COUNT = 3;
+    private static final Object LOCK = new Object();
+
+    private static AppExecutors instance;
 
     private final Executor diskIO;
-    // private final Executor networkIO;
+    private final Executor networkIO;
     private final Executor mainThread;
     private final ListeningExecutorService tasksThread;
 
     private AppExecutors(Executor diskIO,
-                         // Executor networkIO,
+                         Executor networkIO,
                          Executor mainThread,
                          ListeningExecutorService tasksThread) {
         this.diskIO = diskIO;
-        // this.networkIO = networkIO;
+        this.networkIO = networkIO;
         this.mainThread = mainThread;
         this.tasksThread = tasksThread;
     }
 
-    public AppExecutors() {
-        this(Executors.newSingleThreadExecutor(),
-             // Executors.newFixedThreadPool(THREAD_COUNT),
-             new MainThreadExecutor(),
-             MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
+    public static AppExecutors getInstance() {
+        if (instance == null) {
+            synchronized (LOCK) {
+                if (instance == null) {
+                    instance = new AppExecutors(Executors.newSingleThreadExecutor(),
+                                                Executors.newFixedThreadPool(THREAD_COUNT),
+                                                new MainThreadExecutor(),
+                                                MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10)));
+                }
+            }
+        }
+        return instance;
     }
+
 
     public Executor diskIO() {
         return diskIO;
     }
 
-    // public Executor networkIO() {
-    //     return networkIO;
-    // }
+    public Executor networkIO() {
+        return networkIO;
+    }
 
 
     public ListeningExecutorService tasksThread() {

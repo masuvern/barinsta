@@ -32,7 +32,6 @@ import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.FavoritesViewModel;
 
@@ -49,7 +48,7 @@ public class FavoritesFragment extends Fragment {
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        favoriteRepository = FavoriteRepository.getInstance(new AppExecutors(), FavoriteDataSource.getInstance(getContext()));
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
     }
 
     @NonNull
@@ -186,9 +185,9 @@ public class FavoritesFragment extends Fragment {
                                             result.getSdProfilePic(),
                                             model.getDateAdded()
                                     );
-                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Favorite>() {
+                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Void>() {
                                         @Override
-                                        public void onSuccess(final Favorite result) {
+                                        public void onSuccess(final Void result) {
                                             updatedList.add(i, updated);
                                             try {
                                                 cyclicBarrier.await();
@@ -225,9 +224,9 @@ public class FavoritesFragment extends Fragment {
                                             result.getSdProfilePic(),
                                             model.getDateAdded()
                                     );
-                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Favorite>() {
+                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Void>() {
                                         @Override
-                                        public void onSuccess(final Favorite result) {
+                                        public void onSuccess(final Void result) {
                                             try {
                                                 cyclicBarrier.await();
                                             } catch (BrokenBarrierException | InterruptedException e) {

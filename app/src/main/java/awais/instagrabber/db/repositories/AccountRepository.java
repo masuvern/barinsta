@@ -21,9 +21,9 @@ public class AccountRepository {
         this.accountDataSource = accountDataSource;
     }
 
-    public static AccountRepository getInstance(final AppExecutors appExecutors, final AccountDataSource accountDataSource) {
+    public static AccountRepository getInstance(final AccountDataSource accountDataSource) {
         if (instance == null) {
-            instance = new AccountRepository(appExecutors, accountDataSource);
+            instance = new AccountRepository(AppExecutors.getInstance(), accountDataSource);
         }
         return instance;
     }

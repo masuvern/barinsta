@@ -198,7 +198,7 @@ public final class ExportImportUtils {
                                                          : favsObject.optString("pic_url"),
                     new Date(favsObject.getLong("d")));
             // Log.d(TAG, "importJson: favoriteModel: " + favoriteModel);
-            FavoriteRepository.getInstance(new AppExecutors(), FavoriteDataSource.getInstance(context))
+            FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context))
                               .insertOrUpdateFavorite(favorite, null);
         }
     }
@@ -225,7 +225,7 @@ public final class ExportImportUtils {
             Log.e(TAG, "importAccounts: Error parsing json", e);
             return;
         }
-        AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(context))
+        AccountRepository.getInstance(AccountDataSource.getInstance(context))
                          .insertOrUpdateAccounts(accounts, null);
     }
 
@@ -266,9 +266,8 @@ public final class ExportImportUtils {
     private static void getExportString(@ExportImportFlags final int flags,
                                         @NonNull final Context context,
                                         final OnExportStringCreatedCallback callback) {
-        final AppExecutors appExecutors = new AppExecutors();
         final Handler innerHandler = new Handler();
-        appExecutors.tasksThread().execute(() -> {
+        AppExecutors.getInstance().tasksThread().execute(() -> {
             final CountDownLatch responseWaiter = new CountDownLatch(3);
             try {
                 final JSONObject jsonObject = new JSONObject();
@@ -341,7 +340,7 @@ public final class ExportImportUtils {
 
     private static void getFavorites(final Context context, final OnFavoritesJsonLoadedCallback callback) {
         final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(new AppExecutors(), dataSource);
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         try {
             favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
                 @Override
@@ -379,7 +378,7 @@ public final class ExportImportUtils {
     }
 
     private static void getCookies(final Context context, final OnAccountJsonLoadedCallback callback) {
-        final AccountRepository accountRepository = AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(context));
+        final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
             @Override
             public void onSuccess(final List<Account> accounts) {

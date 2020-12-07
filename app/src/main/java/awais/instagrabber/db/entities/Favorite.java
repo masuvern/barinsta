@@ -10,26 +10,33 @@ import java.util.Date;
 
 import awais.instagrabber.models.enums.FavoriteType;
 
-@Entity(tableName = "favorites")
+@Entity(tableName = Favorite.TABLE_NAME)
 public class Favorite {
+    public final static String TABLE_NAME = "favorites";
+    public final static String COL_ID = "id";
+    public final static String COL_QUERY = "query_text";
+    public final static String COL_TYPE = "type";
+    public final static String COL_DISPLAY_NAME = "display_name";
+    public final static String COL_PIC_URL = "pic_url";
+    public final static String COL_DATE_ADDED = "date_added";
 
-    @PrimaryKey
-    @ColumnInfo(name = "id")
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = COL_ID)
     private final int id;
 
-    @ColumnInfo(name = "query_text")
+    @ColumnInfo(name = COL_QUERY)
     private final String query;
 
-    @ColumnInfo(name = "type")
+    @ColumnInfo(name = COL_TYPE)
     private final FavoriteType type;
 
-    @ColumnInfo(name = "display_name")
+    @ColumnInfo(name = COL_DISPLAY_NAME)
     private final String displayName;
 
-    @ColumnInfo(name = "pic_url")
+    @ColumnInfo(name = COL_PIC_URL)
     private final String picUrl;
 
-    @ColumnInfo(name = "date_added")
+    @ColumnInfo(name = COL_DATE_ADDED)
     private final Date dateAdded;
 
     public Favorite(final int id,

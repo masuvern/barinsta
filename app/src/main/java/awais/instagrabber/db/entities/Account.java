@@ -4,32 +4,42 @@ import androidx.annotation.NonNull;
 import androidx.core.util.ObjectsCompat;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
 
-@Entity(tableName = "cookies")
+@Entity(tableName = Account.TABLE_NAME)
 public class Account {
+    public final static String TABLE_NAME = "accounts";
+    public final static String COL_ID = "id";
+    public final static String COL_USERNAME = Constants.EXTRAS_USERNAME;
+    public final static String COL_COOKIE = "cookie";
+    public final static String COL_UID = "uid";
+    public final static String COL_FULL_NAME = "full_name";
+    public final static String COL_PROFILE_PIC = "profile_pic";
 
-    @PrimaryKey
-    @ColumnInfo(name = "id")
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = COL_ID)
     private final int id;
 
-    @ColumnInfo(name = "uid")
+    @ColumnInfo(name = COL_UID)
     private final String uid;
 
-    @ColumnInfo(name = "username")
+    @ColumnInfo(name = COL_USERNAME)
     private final String username;
 
-    @ColumnInfo(name = "cookie")
+    @ColumnInfo(name = COL_COOKIE)
     private final String cookie;
 
-    @ColumnInfo(name = "full_name")
+    @ColumnInfo(name = COL_FULL_NAME)
     private final String fullName;
 
-    @ColumnInfo(name = "profile_pic")
+    @ColumnInfo(name = COL_PROFILE_PIC)
     private final String profilePic;
 
+    @Ignore
     private boolean selected;
 
     public Account(final int id,

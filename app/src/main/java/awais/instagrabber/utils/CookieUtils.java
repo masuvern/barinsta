@@ -63,7 +63,7 @@ public final class CookieUtils {
         if (cookieStore == null) return;
         cookieStore.removeAll();
         try {
-            AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(context))
+            AccountRepository.getInstance(AccountDataSource.getInstance(context))
                              .deleteAllAccounts(callback);
         } catch (Exception e) {
             Log.e(TAG, "setupCookies", e);

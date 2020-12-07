@@ -33,7 +33,6 @@ import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
 import awais.instagrabber.repositories.responses.UserInfo;
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
@@ -49,7 +48,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     private final AccountRepository accountRepository;
 
     public MorePreferencesFragment() {
-        accountRepository = AccountRepository.getInstance(new AppExecutors(), AccountDataSource.getInstance(getContext()));
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
     }
 
     @Override

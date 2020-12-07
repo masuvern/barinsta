@@ -20,9 +20,9 @@ public class FavoriteRepository {
         this.favoriteDataSource = favoriteDataSource;
     }
 
-    public static FavoriteRepository getInstance(final AppExecutors appExecutors, final FavoriteDataSource favoriteDataSource) {
+    public static FavoriteRepository getInstance(final FavoriteDataSource favoriteDataSource) {
         if (instance == null) {
-            instance = new FavoriteRepository(appExecutors, favoriteDataSource);
+            instance = new FavoriteRepository(AppExecutors.getInstance(), favoriteDataSource);
         }
         return instance;
     }
@@ -60,18 +60,14 @@ public class FavoriteRepository {
     }
 
     public void insertOrUpdateFavorite(final Favorite favorite,
-                                       final RepositoryCallback<Favorite> callback) {
+                                       final RepositoryCallback<Void> callback) {
         // request on the I/O thread
         appExecutors.diskIO().execute(() -> {
-            final Favorite updated = favoriteDataSource.insertOrUpdateFavorite(favorite);
+            favoriteDataSource.insertOrUpdateFavorite(favorite);
             // notify on the main thread
             appExecutors.mainThread().execute(() -> {
                 if (callback == null) return;
-                if (updated == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(updated);
+                callback.onSuccess(null);
             });
         });
     }

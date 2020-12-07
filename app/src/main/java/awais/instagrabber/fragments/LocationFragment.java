@@ -62,7 +62,6 @@ import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -448,7 +447,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             locationDetailsBinding.locationUrl.setText(TextUtils.getSpannableUrl(url));
         }
         final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(getContext());
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(new AppExecutors(), dataSource);
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
         favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
             @Override
@@ -491,9 +490,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                             locationModel.getName(),
                             locationModel.getSdProfilePic(),
                             new Date()
-                    ), new RepositoryCallback<Favorite>() {
+                    ), new RepositoryCallback<Void>() {
                         @Override
-                        public void onSuccess(final Favorite result) {
+                        public void onSuccess(final Void result) {
                             locationDetailsBinding.favChip.setText(R.string.favorite_short);
                             locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                             showSnackbar(getString(R.string.added_to_favs));
