@@ -2,7 +2,6 @@ package awais.instagrabber.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -10,8 +9,14 @@ import android.widget.Toast;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +29,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.db.datasources.AccountDataSource;
@@ -48,48 +52,6 @@ public final class ExportImportUtils {
     public static final int FLAG_COOKIES = 1;
     public static final int FLAG_FAVORITES = 1 << 1;
     public static final int FLAG_SETTINGS = 1 << 2;
-
-    @IntDef(value = {FLAG_COOKIES, FLAG_FAVORITES, FLAG_SETTINGS}, flag = true)
-    @interface ExportImportFlags {}
-
-    public static void exportData(@Nullable final String password,
-                                  @ExportImportFlags final int flags,
-                                  @NonNull final File filePath,
-                                  final FetchListener<Boolean> fetchListener,
-                                  @NonNull final Context context) {
-        getExportString(flags, context, exportString -> {
-            if (TextUtils.isEmpty(exportString)) return;
-            final boolean isPass = !TextUtils.isEmpty(password);
-            byte[] exportBytes = null;
-            if (isPass) {
-                final byte[] passwordBytes = password.getBytes();
-                final byte[] bytes = new byte[32];
-                System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
-                try {
-                    exportBytes = PasswordUtils.enc(exportString, bytes);
-                } catch (final Exception e) {
-                    if (fetchListener != null) fetchListener.onResult(false);
-                    if (logCollector != null)
-                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::isPass");
-                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-                }
-            } else {
-                exportBytes = Base64.encode(exportString.getBytes(), Base64.DEFAULT | Base64.NO_WRAP | Base64.NO_PADDING);
-            }
-            if (exportBytes != null && exportBytes.length > 1) {
-                try (final FileOutputStream fos = new FileOutputStream(filePath)) {
-                    fos.write(isPass ? 'A' : 'Z');
-                    fos.write(exportBytes);
-                    if (fetchListener != null) fetchListener.onResult(true);
-                } catch (final Exception e) {
-                    if (fetchListener != null) fetchListener.onResult(false);
-                    if (logCollector != null)
-                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::notPass");
-                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-                }
-            } else if (fetchListener != null) fetchListener.onResult(false);
-        });
-    }
 
     public static void importData(@NonNull final Context context,
                                   @ExportImportFlags final int flags,
@@ -262,128 +224,177 @@ public final class ExportImportUtils {
         return false;
     }
 
-    //todo Need to improve logic
+    public static void exportData(@NonNull final Context context,
+                                  @ExportImportFlags final int flags,
+                                  @NonNull final File filePath,
+                                  final String password,
+                                  final FetchListener<Boolean> fetchListener) {
+        getExportString(flags, context, exportString -> {
+            if (TextUtils.isEmpty(exportString)) return;
+            final boolean isPass = !TextUtils.isEmpty(password);
+            byte[] exportBytes = null;
+            if (isPass) {
+                final byte[] passwordBytes = password.getBytes();
+                final byte[] bytes = new byte[32];
+                System.arraycopy(passwordBytes, 0, bytes, 0, Math.min(passwordBytes.length, 32));
+                try {
+                    exportBytes = PasswordUtils.enc(exportString, bytes);
+                } catch (final Exception e) {
+                    if (fetchListener != null) fetchListener.onResult(false);
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::isPass");
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                }
+            } else {
+                exportBytes = Base64.encode(exportString.getBytes(), Base64.DEFAULT | Base64.NO_WRAP | Base64.NO_PADDING);
+            }
+            if (exportBytes != null && exportBytes.length > 1) {
+                try (final FileOutputStream fos = new FileOutputStream(filePath)) {
+                    fos.write(isPass ? 'A' : 'Z');
+                    fos.write(exportBytes);
+                    if (fetchListener != null) fetchListener.onResult(true);
+                } catch (final Exception e) {
+                    if (fetchListener != null) fetchListener.onResult(false);
+                    if (logCollector != null)
+                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::notPass");
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                }
+            } else if (fetchListener != null) fetchListener.onResult(false);
+        });
+
+    }
+
     private static void getExportString(@ExportImportFlags final int flags,
                                         @NonNull final Context context,
                                         final OnExportStringCreatedCallback callback) {
-        final Handler innerHandler = new Handler();
-        AppExecutors.getInstance().tasksThread().execute(() -> {
-            final CountDownLatch responseWaiter = new CountDownLatch(3);
-            try {
-                final JSONObject jsonObject = new JSONObject();
-                innerHandler.post(() -> {
-                    if ((flags & FLAG_SETTINGS) == FLAG_SETTINGS) {
-                        try {
-                            jsonObject.put("settings", getSettings(context));
-                        } catch (JSONException e) {
-                            Log.e(TAG, "getExportString: ", e);
+        if (callback == null) return;
+        try {
+            final ImmutableList.Builder<ListenableFuture<?>> futures = ImmutableList.builder();
+            futures.add((flags & FLAG_SETTINGS) == FLAG_SETTINGS
+                        ? getSettings(context)
+                        : Futures.immediateFuture(null));
+            futures.add((flags & FLAG_COOKIES) == FLAG_COOKIES
+                        ? getCookies(context)
+                        : Futures.immediateFuture(null));
+            futures.add((flags & FLAG_FAVORITES) == FLAG_FAVORITES
+                        ? getFavorites(context)
+                        : Futures.immediateFuture(null));
+            //noinspection UnstableApiUsage
+            final ListenableFuture<List<Object>> allFutures = Futures.allAsList(futures.build());
+            Futures.addCallback(allFutures, new FutureCallback<List<Object>>() {
+                @Override
+                public void onSuccess(@NullableDecl final List<Object> result) {
+                    final JSONObject jsonObject = new JSONObject();
+                    if (result == null) {
+                        callback.onCreated(jsonObject.toString());
+                        return;
+                    }
+                    try {
+                        final JSONObject settings = (JSONObject) result.get(0);
+                        if (settings != null) {
+                            jsonObject.put("settings", settings);
                         }
+                    } catch (Exception e) {
+                        Log.e(TAG, "error getting settings: ", e);
                     }
-                    responseWaiter.countDown();
-                });
-                innerHandler.post(() -> {
-                    if ((flags & FLAG_COOKIES) == FLAG_COOKIES) {
-                        getCookies(context, array -> {
-                            try {
-                                jsonObject.put("cookies", array);
-                            } catch (JSONException e) {
-                                Log.e(TAG, "error getting accounts", e);
-                            }
-                            responseWaiter.countDown();
-                        });
-                        return;
+                    try {
+                        final JSONArray accounts = (JSONArray) result.get(1);
+                        if (accounts != null) {
+                            jsonObject.put("cookies", accounts);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "error getting accounts", e);
                     }
-                    responseWaiter.countDown();
-                });
-                innerHandler.post(() -> {
-                    if ((flags & FLAG_FAVORITES) == FLAG_FAVORITES) {
-                        getFavorites(context, array -> {
-                            try {
-                                jsonObject.put("favs", array);
-                            } catch (JSONException e) {
-                                Log.e(TAG, "getExportString: ", e);
-                            }
-                            responseWaiter.countDown();
-                        });
-                        return;
+                    try {
+                        final JSONArray favorites = (JSONArray) result.get(2);
+                        if (favorites != null) {
+                            jsonObject.put("favs", favorites);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "error getting favorites: ", e);
                     }
-                    responseWaiter.countDown();
-                });
-                responseWaiter.await();
-                callback.onCreated(jsonObject.toString());
-            } catch (final Exception e) {
-                if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getExportString");
-                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-            }
-            callback.onCreated(null);
-        });
+                    callback.onCreated(jsonObject.toString());
+                }
+
+                @Override
+                public void onFailure(@NonNull final Throwable t) {
+                    Log.e(TAG, "onFailure: ", t);
+                    callback.onCreated(null);
+                }
+            }, AppExecutors.getInstance().tasksThread());
+            return;
+        } catch (final Exception e) {
+            if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getExportString");
+            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+        }
+        callback.onCreated(null);
     }
 
     @NonNull
-    private static JSONObject getSettings(@NonNull final Context context) {
+    private static ListenableFuture<JSONObject> getSettings(@NonNull final Context context) {
         final SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        final Map<String, ?> allPrefs = sharedPreferences.getAll();
-        if (allPrefs == null) {
+        return AppExecutors.getInstance().tasksThread().submit(() -> {
+            final Map<String, ?> allPrefs = sharedPreferences.getAll();
+            if (allPrefs == null) {
+                return new JSONObject();
+            }
+            try {
+                final JSONObject jsonObject = new JSONObject(allPrefs);
+                jsonObject.remove(Constants.COOKIE);
+                jsonObject.remove(Constants.DEVICE_UUID);
+                jsonObject.remove(Constants.PREV_INSTALL_VERSION);
+                return jsonObject;
+            } catch (Exception e) {
+                Log.e(TAG, "Error exporting settings", e);
+            }
             return new JSONObject();
-        }
-        try {
-            final JSONObject jsonObject = new JSONObject(allPrefs);
-            jsonObject.remove(Constants.COOKIE);
-            jsonObject.remove(Constants.DEVICE_UUID);
-            jsonObject.remove(Constants.PREV_INSTALL_VERSION);
-            return jsonObject;
-        } catch (Exception e) {
-            Log.e(TAG, "Error exporting settings", e);
-        }
-        return new JSONObject();
+        });
     }
 
-    private static void getFavorites(final Context context, final OnFavoritesJsonLoadedCallback callback) {
-        final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
-        try {
-            favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
-                @Override
-                public void onSuccess(final List<Favorite> favorites) {
-                    final JSONArray jsonArray = new JSONArray();
-                    try {
-                        for (final Favorite favorite : favorites) {
-                            final JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("q", favorite.getQuery());
-                            jsonObject.put("type", favorite.getType().toString());
-                            jsonObject.put("s", favorite.getDisplayName());
-                            jsonObject.put("pic_url", favorite.getPicUrl());
-                            jsonObject.put("d", favorite.getDateAdded().getTime());
-                            jsonArray.put(jsonObject);
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "onSuccess: Error creating json array", e);
+    private static ListenableFuture<JSONArray> getFavorites(final Context context) {
+        final SettableFuture<JSONArray> future = SettableFuture.create();
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
+        favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
+            @Override
+            public void onSuccess(final List<Favorite> favorites) {
+                final JSONArray jsonArray = new JSONArray();
+                try {
+                    for (final Favorite favorite : favorites) {
+                        final JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("q", favorite.getQuery());
+                        jsonObject.put("type", favorite.getType().toString());
+                        jsonObject.put("s", favorite.getDisplayName());
+                        jsonObject.put("pic_url", favorite.getPicUrl());
+                        jsonObject.put("d", favorite.getDateAdded().getTime());
+                        jsonArray.put(jsonObject);
                     }
-                    callback.onFavoritesJsonLoaded(jsonArray);
+                } catch (Exception e) {
+                    if (logCollector != null) {
+                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "getFavorites");
+                    }
+                    if (BuildConfig.DEBUG) {
+                        Log.e(TAG, "Error exporting favorites", e);
+                    }
                 }
+                future.set(jsonArray);
+            }
 
-                @Override
-                public void onDataNotAvailable() {
-                    callback.onFavoritesJsonLoaded(new JSONArray());
-                }
-            });
-        } catch (final Exception e) {
-            if (logCollector != null) {
-                logCollector.appendException(e, LogFile.UTILS_EXPORT, "getFavorites");
+            @Override
+            public void onDataNotAvailable() {
+                future.set(new JSONArray());
             }
-            if (BuildConfig.DEBUG) {
-                Log.e(TAG, "Error exporting favorites", e);
-            }
-        }
+        });
+        return future;
     }
 
-    private static void getCookies(final Context context, final OnAccountJsonLoadedCallback callback) {
+    private static ListenableFuture<JSONArray> getCookies(final Context context) {
+        final SettableFuture<JSONArray> future = SettableFuture.create();
         final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
             @Override
             public void onSuccess(final List<Account> accounts) {
+                final JSONArray jsonArray = new JSONArray();
                 try {
-                    final JSONArray jsonArray = new JSONArray();
                     for (final Account cookie : accounts) {
                         final JSONObject jsonObject = new JSONObject();
                         jsonObject.put("i", cookie.getUid());
@@ -393,30 +404,29 @@ public final class ExportImportUtils {
                         jsonObject.put("profile_pic", cookie.getProfilePic());
                         jsonArray.put(jsonObject);
                     }
-                    callback.onAccountsJsonLoaded(jsonArray);
-                    return;
                 } catch (Exception e) {
-                    Log.e(TAG, "Error exporting accounts", e);
+                    if (logCollector != null) {
+                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "getCookies");
+                    }
+                    if (BuildConfig.DEBUG) {
+                        Log.e(TAG, "Error exporting accounts", e);
+                    }
                 }
-                callback.onAccountsJsonLoaded(new JSONArray());
+                future.set(jsonArray);
             }
 
             @Override
             public void onDataNotAvailable() {
-                callback.onAccountsJsonLoaded(new JSONArray());
+                future.set(new JSONArray());
             }
         });
+        return future;
     }
+
+    @IntDef(value = {FLAG_COOKIES, FLAG_FAVORITES, FLAG_SETTINGS}, flag = true)
+    @interface ExportImportFlags {}
 
     public interface OnExportStringCreatedCallback {
         void onCreated(String exportString);
-    }
-
-    public interface OnAccountJsonLoadedCallback {
-        void onAccountsJsonLoaded(JSONArray array);
-    }
-
-    public interface OnFavoritesJsonLoadedCallback {
-        void onFavoritesJsonLoaded(JSONArray array);
     }
 }
