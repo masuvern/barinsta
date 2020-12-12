@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>ସିଷ୍ଟମ ନିର୍ଧାରିତ</item>
-        <item>ଇଂରାଜୀ</item>
-        <item>ଫରାସୀ [@kernoeb ଙ୍କ‌ ଦ୍ୱାରା]</item>
-        <item>ସ୍ପେନୀୟ [@sguinetti ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ଚୀନିୟ ସରଳୀକୃତ</item>
-        <item>ଇନ୍ଦୋନେସିୟ [@Galang23 ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ଇତାଲିୟ [@RAR_Ramar ଙ୍କ‌ ଦ୍ୱାରା]</item>
-        <item>ଜର୍ମାନ [@peterge1998 ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ପୋଲିସ [@Lego8486 ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ତୁର୍କୀୟ [@faydin90 ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ବ୍ରାଜିଲିୟ ପ‍ର୍ତ୍ତୁଗୀଜ [@wagnim ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ପାରସୀ [@farzadx ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ମାସେଡ଼ୋନିୟ [@snajdovski ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ଭିଏତନାମୀୟ [@fouze555 ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ଚୀନୀ ପାରମ୍ପରିକ [@Still34 ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>କାଟାଲାନ୍[@retiolus ଙ୍କ ଦ୍ୱାରା]</item>
-        <item>ରୁଷୀୟ[@rikishi0071 ଙ୍କ ଦ୍ୱାରା]</item>
+        <item>System Default</item>
+        <item>English</item>
+        <item>French [Thanks to @kernoeb]</item>
+        <item>Spanish [Thanks to @sguinetti]</item>
+        <item>Chinese Simplified</item>
+        <item>Indonesian [Thanks to @Galang23]</item>
+        <item>Italian [Thanks to @RAR_Ramar]</item>
+        <item>German [Thanks to @peterge1998]</item>
+        <item>Polish [Thanks to @Lego8486]</item>
+        <item>Turkish [Thanks to @faydin90]</item>
+        <item>Brazilian Portuguese [Thanks to @wagnim]</item>
+        <item>Persian [Thanks to @farzadx]</item>
+        <item>Macedonian [Thanks to @snajdovski]</item>
+        <item>Vietnamese [Thanks to @fouze555]</item>
+        <item>Chinese Traditional [Thanks to @Still34]</item>
+        <item>Catalan [Thanks to @retiolus]</item>
+        <item>Russian [Thanks to @rikishi0071]</item>
     </string-array>
     <string-array name="languages_values">
         <item>0</item>
@@ -39,10 +39,10 @@
         <item>16</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>ସ୍ୱୟଂକ୍ରିୟ /ସିସ୍ଟମ ଅନୁସାରେ</item>
-        <item>ସ୍ୱୟଂକ୍ରିୟ /ବ୍ୟାଟେରୀ ଅନୁସାରେ</item>
-        <item>ଗାଢ</item>
-        <item>ହାଲୁକା</item>
+        <item>Auto / Follow System</item>
+        <item>Auto / Follow Battery</item>
+        <item>Dark</item>
+        <item>Light</item>
     </string-array>
     <string-array name="theme_presets_values">
         <item>0</item>
@@ -51,15 +51,15 @@
         <item>3</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>କିଛି ନୁହେଁ</item>
+        <item>None</item>
         <item>\@</item>
-        <item>ଠାରେ</item>
-        <item></item>
+        <item>at</item>
+        <item>on</item>
         <item>\|</item>
         <item>-</item>
     </string-array>
     <string-array name="discover_placeholder">
-        <item>ଖୋଲୁଅଛି...</item>
+        <item>Loading...</item>
     </string-array>
     <string-array name="date_presets">
         <item>dd-MM-yyyy</item>

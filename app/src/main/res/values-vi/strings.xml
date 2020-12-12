@@ -61,7 +61,7 @@
     <string name="votef_story_poll">Bình chọn thành công!</string>
     <string name="voted_story_poll">Bạn đã bình chọn rồi!</string>
     <string name="respond_story">Trả lời</string>
-    <string name="answer_hint">Answer…</string>
+    <string name="answer_hint">Phản hồi…</string>
     <string name="answered_story">Trả lời thành công!</string>
     <string name="reply_story">Trả lời story</string>
     <string name="reply_hint">Reply…</string>
@@ -296,6 +296,7 @@
     <string name="disable_animation">Disable animation</string>
     <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
     <string name="post_not_found">Post not found!</string>
+    <string name="no_external_app_url">No app found which opens urls</string>
     <plurals name="likes_count">
         <item quantity="other">%d likes</item>
     </plurals>

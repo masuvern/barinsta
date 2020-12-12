@@ -297,6 +297,7 @@
     <string name="disable_animation">Disable animation</string>
     <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
     <string name="post_not_found">Post not found!</string>
+    <string name="no_external_app_url">No app found which opens urls</string>
     <plurals name="likes_count">
         <item quantity="one">%d پسند</item>
         <item quantity="other">%d پسند</item>

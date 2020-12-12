@@ -84,7 +84,7 @@
     <string name="time_settings">Format daty</string>
     <string name="liked">Polubiono</string>
     <string name="saved">Zapisano</string>
-    <string name="tagged">Oznaczony</string>
+    <string name="tagged">Oznaczono</string>
     <string name="dm_person">Message</string>
     <string name="like_without_count">Polub</string>
     <string name="unlike_without_count">Cofnij polubienie</string>
@@ -295,7 +295,8 @@
     <string name="show_grid_gap">Pokaż widok siatki</string>
     <string name="disable_animation">Wyłączenie animacji</string>
     <string name="follower_wait_to_load">Poczekaj aż bieżące zadanie zostanie ukończone!</string>
-    <string name="post_not_found">Post not found!</string>
+    <string name="post_not_found">Nie znaleziono posta!</string>
+    <string name="no_external_app_url">Nie znaleziono aplikacji, która otwiera adresy URL</string>
     <plurals name="likes_count">
         <item quantity="one">%d polubienie</item>
         <item quantity="few">%d polubień</item>
