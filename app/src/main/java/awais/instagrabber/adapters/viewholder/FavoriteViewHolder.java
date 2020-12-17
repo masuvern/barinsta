@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.adapters.FavoritesAdapter;
 import awais.instagrabber.databinding.ItemSuggestionBinding;
+import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DataBox;
 
 public class FavoriteViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = "FavoriteViewHolder";
@@ -22,7 +22,7 @@ public class FavoriteViewHolder extends RecyclerView.ViewHolder {
         binding.isVerified.setVisibility(View.GONE);
     }
 
-    public void bind(final DataBox.FavoriteModel model,
+    public void bind(final Favorite model,
                      final FavoritesAdapter.OnFavoriteClickListener clickListener,
                      final FavoritesAdapter.OnFavoriteLongClickListener longClickListener) {
         // Log.d(TAG, "bind: " + model);

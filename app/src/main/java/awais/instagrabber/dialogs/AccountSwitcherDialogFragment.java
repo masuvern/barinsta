@@ -21,9 +21,12 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.AccountSwitcherAdapter;
 import awais.instagrabber.databinding.DialogAccountSwitcherBinding;
+import awais.instagrabber.db.datasources.AccountDataSource;
+import awais.instagrabber.db.entities.Account;
+import awais.instagrabber.db.repositories.AccountRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
@@ -31,8 +34,19 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class AccountSwitcherDialogFragment extends DialogFragment {
 
-    private final OnAddAccountClickListener onAddAccountClickListener;
+    private AccountRepository accountRepository;
+
+    private OnAddAccountClickListener onAddAccountClickListener;
     private DialogAccountSwitcherBinding binding;
+
+    public AccountSwitcherDialogFragment() {
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
+    }
+
+    public AccountSwitcherDialogFragment(final OnAddAccountClickListener onAddAccountClickListener) {
+        this.onAddAccountClickListener = onAddAccountClickListener;
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
+    }
 
     private final AccountSwitcherAdapter.OnAccountClickListener accountClickListener = (model, isCurrent) -> {
         if (isCurrent) {
@@ -59,18 +73,24 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
         new AlertDialog.Builder(context)
                 .setMessage(getString(R.string.quick_access_confirm_delete, model.getUsername()))
                 .setPositiveButton(R.string.yes, (dialog, which) -> {
-                    Utils.dataBox.delUserCookie(model);
-                    dismiss();
+                    if (accountRepository == null) return;
+                    accountRepository.deleteAccount(model, new RepositoryCallback<Void>() {
+                        @Override
+                        public void onSuccess(final Void result) {
+                            dismiss();
+                        }
+
+                        @Override
+                        public void onDataNotAvailable() {
+                            dismiss();
+                        }
+                    });
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
         dismiss();
         return true;
     };
-
-    public AccountSwitcherDialogFragment(final OnAddAccountClickListener onAddAccountClickListener) {
-        this.onAddAccountClickListener = onAddAccountClickListener;
-    }
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
@@ -102,11 +122,19 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
     private void init() {
         final AccountSwitcherAdapter adapter = new AccountSwitcherAdapter(accountClickListener, accountLongClickListener);
         binding.accounts.setAdapter(adapter);
-        final List<DataBox.CookieModel> allUsers = Utils.dataBox.getAllCookies();
-        if (allUsers == null) return;
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        sortUserList(cookie, allUsers);
-        adapter.submitList(allUsers);
+        if (accountRepository == null) return;
+        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
+            @Override
+            public void onSuccess(final List<Account> accounts) {
+                if (accounts == null) return;
+                final String cookie = settingsHelper.getString(Constants.COOKIE);
+                sortUserList(cookie, accounts);
+                adapter.submitList(accounts);
+            }
+
+            @Override
+            public void onDataNotAvailable() {}
+        });
         binding.addAccountBtn.setOnClickListener(v -> {
             if (onAddAccountClickListener == null) return;
             onAddAccountClickListener.onAddAccountClick(this);
@@ -125,9 +153,9 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
      * @param cookie   active cookie
      * @param allUsers list of users
      */
-    private void sortUserList(final String cookie, final List<DataBox.CookieModel> allUsers) {
+    private void sortUserList(final String cookie, final List<Account> allUsers) {
         boolean sortByName = true;
-        for (final DataBox.CookieModel user : allUsers) {
+        for (final Account user : allUsers) {
             if (TextUtils.isEmpty(user.getFullName())) {
                 sortByName = false;
                 break;

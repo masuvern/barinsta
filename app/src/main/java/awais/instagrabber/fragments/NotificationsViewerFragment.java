@@ -43,6 +43,8 @@ import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
 
+import static awais.instagrabber.utils.Utils.settingsHelper;
+
 public final class NotificationsViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "NotificationsViewer";
 
@@ -189,10 +191,12 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     }
 
     private void init() {
+        final Context context = getContext();
+        CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         notificationViewModel = new ViewModelProvider(this).get(NotificationViewModel.class);
         final NotificationsAdapter adapter = new NotificationsAdapter(clickListener, mentionClickListener);
-        binding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvComments.setLayoutManager(new LinearLayoutManager(context));
         binding.rvComments.setAdapter(adapter);
         notificationViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
         onRefresh();

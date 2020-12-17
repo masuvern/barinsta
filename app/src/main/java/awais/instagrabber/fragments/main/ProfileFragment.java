@@ -63,6 +63,13 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.databinding.LayoutProfileDetailsBinding;
+import awais.instagrabber.db.datasources.AccountDataSource;
+import awais.instagrabber.db.datasources.FavoriteDataSource;
+import awais.instagrabber.db.entities.Account;
+import awais.instagrabber.db.entities.Favorite;
+import awais.instagrabber.db.repositories.AccountRepository;
+import awais.instagrabber.db.repositories.FavoriteRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
@@ -77,7 +84,6 @@ import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootRespons
 import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -283,6 +289,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
     };
     private LayoutProfileDetailsBinding profileDetailsBinding;
+    private AccountRepository accountRepository;
+    private FavoriteRepository favoriteRepository;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -290,6 +298,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
         storiesService = StoriesService.getInstance();
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         setHasOptionsMenu(true);
     }
 
@@ -498,19 +508,26 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 setUsernameDelayed();
                 fetchProfileDetails();
             };
-            boolean found = false;
-            final DataBox.CookieModel cookieModel = Utils.dataBox.getCookie(uid);
-            if (cookieModel != null) {
-                final String username = cookieModel.getUsername();
-                if (!TextUtils.isEmpty(username)) {
-                    found = true;
-                    fetchListener.onResult("@" + username);
+            accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
+                @Override
+                public void onSuccess(final Account account) {
+                    boolean found = false;
+                    if (account != null) {
+                        final String username = account.getUsername();
+                        if (!TextUtils.isEmpty(username)) {
+                            found = true;
+                            fetchListener.onResult("@" + username);
+                        }
+                    }
+                    if (!found) {
+                        // if not in database, fetch info from instagram
+                        new UsernameFetcher(uid, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }
                 }
-            }
-            if (!found) {
-                // if not in database, fetch info from instagram
-                new UsernameFetcher(uid, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
+
+                @Override
+                public void onDataNotAvailable() {}
+            });
             return;
         }
         fetchProfileDetails();
@@ -556,9 +573,19 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         setupButtons(profileId, myId);
         if (!profileId.equals(myId)) {
             profileDetailsBinding.favCb.setVisibility(View.VISIBLE);
-            final boolean isFav = Utils.dataBox.getFavorite(username.substring(1), FavoriteType.USER) != null;
-            profileDetailsBinding.favCb.setChecked(isFav);
-            profileDetailsBinding.favCb.setButtonDrawable(isFav ? R.drawable.ic_star_check_24 : R.drawable.ic_outline_star_plus_24);
+            favoriteRepository.getFavorite(username.substring(1), FavoriteType.USER, new RepositoryCallback<Favorite>() {
+                @Override
+                public void onSuccess(final Favorite result) {
+                    profileDetailsBinding.favCb.setChecked(true);
+                    profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_star_check_24);
+                }
+
+                @Override
+                public void onDataNotAvailable() {
+                    profileDetailsBinding.favCb.setChecked(false);
+                    profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_outline_star_plus_24);
+                }
+            });
         } else {
             profileDetailsBinding.favCb.setVisibility(View.GONE);
         }
@@ -842,39 +869,65 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         });
         profileDetailsBinding.favCb.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // do not do anything if state matches the db, as listener is set before profile details are set
+            final Context context = getContext();
+            if (context == null) return;
             final String finalUsername = username.startsWith("@") ? username.substring(1) : username;
-            final DataBox.FavoriteModel favorite = Utils.dataBox.getFavorite(finalUsername, FavoriteType.USER);
-            if ((isChecked && favorite != null) || (!isChecked && favorite == null)) {
-                return;
-            }
-            buttonView.setVisibility(View.GONE);
-            profileDetailsBinding.favProgress.setVisibility(View.VISIBLE);
-            final String message;
-            if (isChecked) {
-                final DataBox.FavoriteModel model = new DataBox.FavoriteModel(
-                        -1,
-                        finalUsername,
-                        FavoriteType.USER,
-                        profileModel.getName(),
-                        profileModel.getSdProfilePic(),
-                        new Date()
-                );
-                Utils.dataBox.addOrUpdateFavorite(model);
-                profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_star_check_24);
-                message = getString(R.string.added_to_favs);
-            } else {
-                Utils.dataBox.deleteFavorite(finalUsername, FavoriteType.USER);
-                message = getString(R.string.removed_from_favs);
-                profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_outline_star_plus_24);
-            }
-            final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
-            snackbar.setAction(R.string.ok, v -> snackbar.dismiss())
-                    .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
-                    .setAnchorView(fragmentActivity.getBottomNavView())
-                    .show();
-            profileDetailsBinding.favProgress.setVisibility(View.GONE);
-            profileDetailsBinding.favCb.setVisibility(View.VISIBLE);
+            favoriteRepository.getFavorite(finalUsername, FavoriteType.USER, new RepositoryCallback<Favorite>() {
+                @Override
+                public void onSuccess(final Favorite result) {
+                    if (isChecked) return; // already a fav
+                    buttonView.setVisibility(View.GONE);
+                    profileDetailsBinding.favProgress.setVisibility(View.VISIBLE);
+                    favoriteRepository.deleteFavorite(finalUsername, FavoriteType.USER, new RepositoryCallback<Void>() {
+                        @Override
+                        public void onSuccess(final Void result) {
+                            profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_outline_star_plus_24);
+                            profileDetailsBinding.favProgress.setVisibility(View.GONE);
+                            profileDetailsBinding.favCb.setVisibility(View.VISIBLE);
+                            showSnackbar(getString(R.string.removed_from_favs));
+                        }
+
+                        @Override
+                        public void onDataNotAvailable() {}
+                    });
+                }
+
+                @Override
+                public void onDataNotAvailable() {
+                    if (!isChecked) return; // not in fav already
+                    buttonView.setVisibility(View.GONE);
+                    profileDetailsBinding.favProgress.setVisibility(View.VISIBLE);
+                    final Favorite model = new Favorite(
+                            -1,
+                            finalUsername,
+                            FavoriteType.USER,
+                            profileModel.getName(),
+                            profileModel.getSdProfilePic(),
+                            new Date()
+                    );
+                    favoriteRepository.insertOrUpdateFavorite(model, new RepositoryCallback<Void>() {
+                        @Override
+                        public void onSuccess(final Void result) {
+                            profileDetailsBinding.favCb.setButtonDrawable(R.drawable.ic_star_check_24);
+                            profileDetailsBinding.favProgress.setVisibility(View.GONE);
+                            profileDetailsBinding.favCb.setVisibility(View.VISIBLE);
+                            showSnackbar(getString(R.string.added_to_favs));
+                        }
+
+                        @Override
+                        public void onDataNotAvailable() {}
+                    });
+                }
+            });
         });
+    }
+
+    private void showSnackbar(final String message) {
+        final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
+        snackbar.setAction(R.string.ok, v -> snackbar.dismiss())
+                .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
+                .setAnchorView(fragmentActivity.getBottomNavView())
+                .show();
     }
 
     private void showProfilePicDialog() {

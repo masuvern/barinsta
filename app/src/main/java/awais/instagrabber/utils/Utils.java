@@ -47,7 +47,6 @@ public final class Utils {
 
     public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
-    public static DataBox dataBox;
     public static boolean sessionVolumeFull = false;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
     public static ClipboardManager clipboardManager;

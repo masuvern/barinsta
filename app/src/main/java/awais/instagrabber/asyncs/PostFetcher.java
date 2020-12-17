@@ -17,11 +17,9 @@ import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
@@ -39,7 +37,6 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
 
     @Override
     protected FeedModel doInBackground(final Void... voids) {
-        CookieUtils.setupCookies(Utils.settingsHelper.getString(Constants.COOKIE)); // <- direct download
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL("https://www.instagram.com/p/" + shortCode + "/?__a=1").openConnection();

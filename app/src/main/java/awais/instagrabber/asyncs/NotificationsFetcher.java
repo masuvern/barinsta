@@ -16,13 +16,11 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.NetworkUtils;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.logCollector;
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class NotificationsFetcher extends AsyncTask<Void, Void, List<NotificationModel>> {
     private static final String TAG = "NotificationsFetcher";
@@ -37,8 +35,6 @@ public final class NotificationsFetcher extends AsyncTask<Void, Void, List<Notif
     protected List<NotificationModel> doInBackground(final Void... voids) {
         List<NotificationModel> result = new ArrayList<>();
         final String url = "https://www.instagram.com/accounts/activity/?__a=1";
-        CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
-
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setInstanceFollowRedirects(false);

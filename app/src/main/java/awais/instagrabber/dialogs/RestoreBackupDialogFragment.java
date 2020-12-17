@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -93,7 +94,7 @@ public class RestoreBackupDialogFragment extends DialogFragment {
             return;
         }
         binding.btnRestore.setEnabled(false);
-        binding.btnRestore.setOnClickListener(v -> {
+        binding.btnRestore.setOnClickListener(v -> new Handler().post(() -> {
             int flags = 0;
             if (binding.cbFavorites.isChecked()) {
                 flags |= ExportImportUtils.FLAG_FAVORITES;
@@ -122,7 +123,7 @@ public class RestoreBackupDialogFragment extends DialogFragment {
             } catch (IncorrectPasswordException e) {
                 binding.passwordField.setError("Incorrect password");
             }
-        });
+        }));
         binding.etPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {}

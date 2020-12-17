@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import awais.instagrabber.utils.DataBox;
+import awais.instagrabber.db.entities.Favorite;
 
 public class FavoritesViewModel extends ViewModel {
-    private MutableLiveData<List<DataBox.FavoriteModel>> list;
+    private MutableLiveData<List<Favorite>> list;
 
-    public MutableLiveData<List<DataBox.FavoriteModel>> getList() {
+    public MutableLiveData<List<Favorite>> getList() {
         if (list == null) {
             list = new MutableLiveData<>();
         }

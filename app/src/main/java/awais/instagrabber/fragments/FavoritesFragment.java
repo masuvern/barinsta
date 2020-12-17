@@ -28,9 +28,11 @@ import awais.instagrabber.adapters.FavoritesAdapter;
 import awais.instagrabber.asyncs.LocationFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.databinding.FragmentFavoritesBinding;
-import awais.instagrabber.utils.DataBox;
+import awais.instagrabber.db.datasources.FavoriteDataSource;
+import awais.instagrabber.db.entities.Favorite;
+import awais.instagrabber.db.repositories.FavoriteRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FavoritesViewModel;
 
 public class FavoritesFragment extends Fragment {
@@ -41,6 +43,13 @@ public class FavoritesFragment extends Fragment {
     private RecyclerView root;
     private FavoritesViewModel favoritesViewModel;
     private FavoritesAdapter adapter;
+    private FavoriteRepository favoriteRepository;
+
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
+    }
 
     @NonNull
     @Override
@@ -68,9 +77,16 @@ public class FavoritesFragment extends Fragment {
         if (favoritesViewModel == null || adapter == null) return;
         // refresh list every time in onViewStateRestored since it is cheaper than implementing pull down to refresh
         favoritesViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
-        final List<DataBox.FavoriteModel> allFavorites = Utils.dataBox.getAllFavorites();
-        favoritesViewModel.getList().postValue(allFavorites);
-        fetchMissingInfo(allFavorites);
+        favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
+            @Override
+            public void onSuccess(final List<Favorite> favorites) {
+                favoritesViewModel.getList().postValue(favorites);
+                fetchMissingInfo(favorites);
+            }
+
+            @Override
+            public void onDataNotAvailable() {}
+        });
     }
 
     private void init() {
@@ -114,30 +130,43 @@ public class FavoritesFragment extends Fragment {
             if (context == null) return false;
             new MaterialAlertDialogBuilder(context)
                     .setMessage(getString(R.string.quick_access_confirm_delete, model.getQuery()))
-                    .setPositiveButton(R.string.yes, (d, which) -> {
-                        Utils.dataBox.deleteFavorite(model.getQuery(), model.getType());
-                        d.dismiss();
-                        favoritesViewModel.getList().postValue(Utils.dataBox.getAllFavorites());
-                    })
+                    .setPositiveButton(R.string.yes, (d, which) -> favoriteRepository
+                            .deleteFavorite(model.getQuery(), model.getType(), new RepositoryCallback<Void>() {
+                                @Override
+                                public void onSuccess(final Void result) {
+                                    d.dismiss();
+                                    favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
+                                        @Override
+                                        public void onSuccess(final List<Favorite> result) {
+                                            favoritesViewModel.getList().postValue(result);
+                                        }
+
+                                        @Override
+                                        public void onDataNotAvailable() {}
+                                    });
+                                }
+
+                                @Override
+                                public void onDataNotAvailable() {}
+                            }))
                     .setNegativeButton(R.string.no, null)
                     .show();
             return true;
         });
         binding.favoriteList.setAdapter(adapter);
-        // favoritesViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
 
     }
 
-    private void fetchMissingInfo(final List<DataBox.FavoriteModel> allFavorites) {
+    private void fetchMissingInfo(final List<Favorite> allFavorites) {
         final Runnable runnable = () -> {
-            final List<DataBox.FavoriteModel> updatedList = new ArrayList<>(allFavorites);
+            final List<Favorite> updatedList = new ArrayList<>(allFavorites);
             // cyclic barrier is to make the async calls synchronous
             final CyclicBarrier cyclicBarrier = new CyclicBarrier(2, () -> {
                 // Log.d(TAG, "fetchMissingInfo: barrier action");
                 favoritesViewModel.getList().postValue(new ArrayList<>(updatedList));
             });
             try {
-                for (final DataBox.FavoriteModel model : allFavorites) {
+                for (final Favorite model : allFavorites) {
                     cyclicBarrier.reset();
                     // if the model has missing pic or display name (for user and location), fetch those details
                     switch (model.getType()) {
@@ -145,27 +174,37 @@ public class FavoritesFragment extends Fragment {
                             if (TextUtils.isEmpty(model.getDisplayName())
                                     || TextUtils.isEmpty(model.getPicUrl())) {
                                 new LocationFetcher(model.getQuery(), result -> {
-                                    try {
-                                        if (result == null) return;
-                                        final int i = updatedList.indexOf(model);
-                                        updatedList.remove(i);
-                                        final DataBox.FavoriteModel updated = new DataBox.FavoriteModel(
-                                                model.getId(),
-                                                model.getQuery(),
-                                                model.getType(),
-                                                result.getName(),
-                                                result.getSdProfilePic(),
-                                                model.getDateAdded()
-                                        );
-                                        Utils.dataBox.addOrUpdateFavorite(updated);
-                                        updatedList.add(i, updated);
-                                    } finally {
-                                        try {
-                                            cyclicBarrier.await();
-                                        } catch (BrokenBarrierException | InterruptedException e) {
-                                            Log.e(TAG, "fetchMissingInfo: ", e);
+                                    if (result == null) return;
+                                    final int i = updatedList.indexOf(model);
+                                    updatedList.remove(i);
+                                    final Favorite updated = new Favorite(
+                                            model.getId(),
+                                            model.getQuery(),
+                                            model.getType(),
+                                            result.getName(),
+                                            result.getSdProfilePic(),
+                                            model.getDateAdded()
+                                    );
+                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(final Void result) {
+                                            updatedList.add(i, updated);
+                                            try {
+                                                cyclicBarrier.await();
+                                            } catch (BrokenBarrierException | InterruptedException e) {
+                                                Log.e(TAG, "fetchMissingInfo: ", e);
+                                            }
                                         }
-                                    }
+
+                                        @Override
+                                        public void onDataNotAvailable() {
+                                            try {
+                                                cyclicBarrier.await();
+                                            } catch (BrokenBarrierException | InterruptedException e) {
+                                                Log.e(TAG, "fetchMissingInfo: ", e);
+                                            }
+                                        }
+                                    });
                                 }).execute();
                                 cyclicBarrier.await();
                             }
@@ -174,27 +213,37 @@ public class FavoritesFragment extends Fragment {
                             if (TextUtils.isEmpty(model.getDisplayName())
                                     || TextUtils.isEmpty(model.getPicUrl())) {
                                 new ProfileFetcher(model.getQuery(), result -> {
-                                    try {
-                                        if (result == null) return;
-                                        final int i = updatedList.indexOf(model);
-                                        updatedList.remove(i);
-                                        final DataBox.FavoriteModel updated = new DataBox.FavoriteModel(
-                                                model.getId(),
-                                                model.getQuery(),
-                                                model.getType(),
-                                                result.getName(),
-                                                result.getSdProfilePic(),
-                                                model.getDateAdded()
-                                        );
-                                        Utils.dataBox.addOrUpdateFavorite(updated);
-                                        updatedList.add(i, updated);
-                                    } finally {
-                                        try {
-                                            cyclicBarrier.await();
-                                        } catch (BrokenBarrierException | InterruptedException e) {
-                                            Log.e(TAG, "fetchMissingInfo: ", e);
+                                    if (result == null) return;
+                                    final int i = updatedList.indexOf(model);
+                                    updatedList.remove(i);
+                                    final Favorite updated = new Favorite(
+                                            model.getId(),
+                                            model.getQuery(),
+                                            model.getType(),
+                                            result.getName(),
+                                            result.getSdProfilePic(),
+                                            model.getDateAdded()
+                                    );
+                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(final Void result) {
+                                            try {
+                                                cyclicBarrier.await();
+                                            } catch (BrokenBarrierException | InterruptedException e) {
+                                                Log.e(TAG, "fetchMissingInfo: ", e);
+                                            }
                                         }
-                                    }
+
+                                        @Override
+                                        public void onDataNotAvailable() {
+                                            try {
+                                                cyclicBarrier.await();
+                                            } catch (BrokenBarrierException | InterruptedException e) {
+                                                Log.e(TAG, "fetchMissingInfo: ", e);
+                                            }
+                                        }
+                                    });
+                                    updatedList.add(i, updated);
                                 }).execute();
                                 cyclicBarrier.await();
                             }

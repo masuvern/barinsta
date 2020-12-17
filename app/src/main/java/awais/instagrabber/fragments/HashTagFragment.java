@@ -49,6 +49,10 @@ import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentHashtagBinding;
 import awais.instagrabber.databinding.LayoutHashtagDetailsBinding;
+import awais.instagrabber.db.datasources.FavoriteDataSource;
+import awais.instagrabber.db.entities.Favorite;
+import awais.instagrabber.db.repositories.FavoriteRepository;
+import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
@@ -57,7 +61,6 @@ import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DataBox;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -454,40 +457,60 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             hashtagDetailsBinding.btnFollowTag.setVisibility(View.GONE);
         }
-        final DataBox.FavoriteModel favorite = Utils.dataBox.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG);
-        final boolean isFav = favorite != null;
         hashtagDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        hashtagDetailsBinding.favChip.setChipIconResource(isFav ? R.drawable.ic_star_check_24
-                                                                : R.drawable.ic_outline_star_plus_24);
-        hashtagDetailsBinding.favChip.setText(isFav ? R.string.favorite_short : R.string.add_to_favorites);
-        hashtagDetailsBinding.favChip.setOnClickListener(v -> {
-            final DataBox.FavoriteModel fav = Utils.dataBox.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG);
-            final boolean isFavorite = fav != null;
-            final String message;
-            if (isFavorite) {
-                Utils.dataBox.deleteFavorite(hashtag.substring(1), FavoriteType.HASHTAG);
-                hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
-                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                message = getString(R.string.removed_from_favs);
-            } else {
-                Utils.dataBox.addOrUpdateFavorite(new DataBox.FavoriteModel(
-                        -1,
-                        hashtag.substring(1),
-                        FavoriteType.HASHTAG,
-                        hashtagModel.getName(),
-                        null,
-                        new Date()
-                ));
-                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
+        favoriteRepository.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
+            @Override
+            public void onSuccess(final Favorite result) {
                 hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                message = getString(R.string.added_to_favs);
+                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
             }
-            final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
-            snackbar.setAction(R.string.ok, v1 -> snackbar.dismiss())
-                    .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
-                    .setAnchorView(fragmentActivity.getBottomNavView())
-                    .show();
+
+            @Override
+            public void onDataNotAvailable() {
+                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
+            }
         });
+        hashtagDetailsBinding.favChip.setOnClickListener(
+                v -> favoriteRepository.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
+                    @Override
+                    public void onSuccess(final Favorite result) {
+                        favoriteRepository.deleteFavorite(hashtag.substring(1), FavoriteType.HASHTAG, new RepositoryCallback<Void>() {
+                            @Override
+                            public void onSuccess(final Void result) {
+                                hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                                showSnackbar(getString(R.string.removed_from_favs));
+                            }
+
+                            @Override
+                            public void onDataNotAvailable() {}
+                        });
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
+                        favoriteRepository.insertOrUpdateFavorite(new Favorite(
+                                -1,
+                                hashtag.substring(1),
+                                FavoriteType.HASHTAG,
+                                hashtagModel.getName(),
+                                null,
+                                new Date()
+                        ), new RepositoryCallback<Void>() {
+                            @Override
+                            public void onSuccess(final Void result) {
+                                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                showSnackbar(getString(R.string.added_to_favs));
+                            }
+
+                            @Override
+                            public void onDataNotAvailable() {}
+                        });
+                    }
+                }));
         hashtagDetailsBinding.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
         final String postCount = String.valueOf(hashtagModel.getPostCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getString(R.string.main_posts_count_inline, postCount));
@@ -502,6 +525,14 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName());
             NavHostFragment.findNavController(this).navigate(action);
         });
+    }
+
+    private void showSnackbar(final String message) {
+        final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
+        snackbar.setAction(R.string.ok, v1 -> snackbar.dismiss())
+                .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
+                .setAnchorView(fragmentActivity.getBottomNavView())
+                .show();
     }
 
     private void fetchStories() {
