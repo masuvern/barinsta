@@ -86,6 +86,16 @@
                 app:backgroundTint="@color/btn_blue_background" />
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/slider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/story_slider"
+                android:textColor="@color/btn_blue_text_color"
+                android:visibility="gone"
+                app:backgroundTint="@color/btn_blue_background" />
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/swipeUp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

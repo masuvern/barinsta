@@ -2,17 +2,33 @@ package awais.instagrabber.repositories;
 
 import java.util.Map;
 
+import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import retrofit2.Call;
+import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Path;
+import retrofit2.http.POST;
 import retrofit2.http.QueryMap;
 import retrofit2.http.Url;
 
 public interface StoriesRepository {
 
-    @GET("graphql/query/")
-    Call<String> getStories(@QueryMap(encoded = true) Map<String, String> variables);
+    @FormUrlEncoded
+    @POST("/api/v1/feed/reels_tray/")
+    Call<String> getStories(@Header("User-Agent") String userAgent,
+                            @FieldMap Map<String, String> form);
 
     @GET
     Call<String> getUserStory(@Header("User-Agent") String userAgent, @Url String url);
+
+    @FormUrlEncoded
+    @POST("/api/v1/media/{storyId}/{stickerId}/{action}/")
+    Call<StoryStickerResponse> respondToSticker(@Header("User-Agent") String userAgent,
+                                                @Path("storyId") String storyId,
+                                                @Path("stickerId") String stickerId,
+                                                @Path("action") String action,
+                                                // story_poll_vote, story_question_response, story_slider_vote, story_quiz_answer
+                                                @FieldMap Map<String, String> form);
 }

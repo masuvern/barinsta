@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -55,6 +59,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -63,10 +68,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
-import awais.instagrabber.asyncs.QuizAction;
-import awais.instagrabber.asyncs.RespondAction;
 import awais.instagrabber.asyncs.SeenAction;
-import awais.instagrabber.asyncs.VoteAction;
 import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
@@ -80,7 +82,10 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SliderModel;
+import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -117,13 +122,15 @@ public class StoryViewerFragment extends Fragment {
     private QuestionModel question;
     private String[] mentions;
     private QuizModel quiz;
+    private SliderModel slider;
     private MenuItem menuDownload;
     private MenuItem menuDm;
     private SimpleExoPlayer player;
     private boolean isHashtag, isLoc;
     private String highlight;
-    private boolean fetching = false;
+    private boolean fetching = false, sticking = false;
     private int currentFeedStoryIndex;
+    private double sliderValue;
     private StoriesViewModel storiesViewModel;
     private boolean shouldRefresh = true;
     private StoryViewerFragmentArgs fragmentArgs;
@@ -190,7 +197,7 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.reply_story)
                         .setView(input)
-                        .setPositiveButton(R.string.ok, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
+                        .setPositiveButton(R.string.confirm, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
                             try {
                                 final DirectThreadBroadcaster.StoryReplyBroadcastOptions options = new DirectThreadBroadcaster.StoryReplyBroadcastOptions(
                                         input.getText().toString(),
@@ -273,6 +280,7 @@ public class StoryViewerFragment extends Fragment {
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupListeners() {
+        final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         final boolean hasFeedStories;
         List<?> models = null;
         if (currentFeedStoryIndex >= 0) {
@@ -297,6 +305,10 @@ public class StoryViewerFragment extends Fragment {
         swipeEvent = isRightSwipe -> {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             final int storiesLen = storyModels == null ? 0 : storyModels.size();
+            if (sticking) {
+                Toast.makeText(context, R.string.follower_wait_to_load, Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (storiesLen <= 0) return;
             final boolean isLeftSwipe = !isRightSwipe;
             final boolean endOfCurrentStories = slidePos + 1 >= storiesLen;
@@ -407,15 +419,30 @@ public class StoryViewerFragment extends Fragment {
                                     poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
-                                if (!TextUtils.isEmpty(cookie))
-                                    new VoteAction(currentStory, poll, cookie, choice -> {
-                                        if (choice > -1) {
-                                            poll.setMyChoice(choice);
-                                            Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
-                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                    }).execute(w);
+                                if (!TextUtils.isEmpty(cookie)) {
+                                    sticking = true;
+                                    storiesService.respondToPoll(
+                                            currentStory.getStoryMediaId().split("_")[0],
+                                            poll.getId(),
+                                            w,
+                                            userIdFromCookie,
+                                            CookieUtils.getCsrfTokenFromCookie(cookie),
+                                            new ServiceCallback<StoryStickerResponse>() {
+                                                @Override
+                                                public void onSuccess(final StoryStickerResponse result) {
+                                                    sticking = false;
+                                                    poll.setMyChoice(w);
+                                                    Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                                }
+
+                                                @Override
+                                                public void onFailure(final Throwable t) {
+                                                    sticking = false;
+                                                    Log.e(TAG, "Error responding", t);
+                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                }
                             })
                             .setPositiveButton(R.string.cancel, null)
                             .show();
@@ -427,12 +454,29 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(question.getQuestion())
                         .setView(input)
-                        .setPositiveButton(R.string.ok, (d, w) -> new RespondAction(currentStory, question, cookie, result -> {
-                            if (result) {
-                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                            } else
-                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        }).execute(input.getText().toString()))
+                        .setPositiveButton(R.string.confirm, (d, w) -> {
+                                sticking = true;
+                                storiesService.respondToQuestion(
+                                        currentStory.getStoryMediaId().split("_")[0],
+                                        question.getId(),
+                                        input.getText().toString(),
+                                        userIdFromCookie,
+                                        CookieUtils.getCsrfTokenFromCookie(cookie),
+                                        new ServiceCallback<StoryStickerResponse>() {
+                                            @Override
+                                            public void onSuccess(final StoryStickerResponse result) {
+                                                sticking = false;
+                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            }
+
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                sticking = false;
+                                                Log.e(TAG, "Error responding", t);
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                        })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (tag instanceof String[]) {
@@ -452,24 +496,119 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
-                            if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie))
-                                new QuizAction(currentStory, quiz, cookie, choice -> {
-                                    if (choice > -1) {
-                                        quiz.setMyChoice(choice);
-                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                }).execute(w);
+                            if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie)) {
+                                sticking = true;
+                                storiesService.respondToQuiz(
+                                        currentStory.getStoryMediaId().split("_")[0],
+                                        quiz.getId(),
+                                        w,
+                                        userIdFromCookie,
+                                        CookieUtils.getCsrfTokenFromCookie(cookie),
+                                        new ServiceCallback<StoryStickerResponse>() {
+                                            @Override
+                                            public void onSuccess(final StoryStickerResponse result) {
+                                                sticking = false;
+                                                quiz.setMyChoice(w);
+                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            }
+
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                sticking = false;
+                                                Log.e(TAG, "Error responding", t);
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
                         })
                         .setPositiveButton(R.string.cancel, null)
                         .show();
+            } else if (tag instanceof SliderModel) {
+                slider = (SliderModel) tag;
+                NumberFormat percentage = NumberFormat.getPercentInstance();
+                percentage.setMaximumFractionDigits(2);
+                LinearLayout sliderView = new LinearLayout(context);
+                sliderView.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+                sliderView.setOrientation(LinearLayout.VERTICAL);
+                TextView tv = new TextView(context);
+                tv.setGravity(Gravity.CENTER_HORIZONTAL);
+                final SeekBar input = new SeekBar(context);
+                Double avg = slider.getAverage() * 100;
+                input.setProgress(avg.intValue());
+                sliderView.addView(input);
+                sliderView.addView(tv);
+                if (slider.getMyChoice().isNaN() && slider.canVote()) {
+                    input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            sliderValue = progress / 100.0;
+                            tv.setText(percentage.format(sliderValue));
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+                    new AlertDialog.Builder(context)
+                            .setTitle(TextUtils.isEmpty(slider.getQuestion()) ? slider.getEmoji() : slider.getQuestion())
+                            .setMessage(getResources().getQuantityString(R.plurals.slider_info,
+                                    slider.getVoteCount(),
+                                    slider.getVoteCount(),
+                                    percentage.format(slider.getAverage())))
+                            .setView(sliderView)
+                            .setPositiveButton(R.string.confirm, (d, w) -> {
+                                sticking = true;
+                                storiesService.respondToSlider(
+                                        currentStory.getStoryMediaId().split("_")[0],
+                                        slider.getId(),
+                                        sliderValue,
+                                        userIdFromCookie,
+                                        CookieUtils.getCsrfTokenFromCookie(cookie),
+                                        new ServiceCallback<StoryStickerResponse>() {
+                                            @Override
+                                            public void onSuccess(final StoryStickerResponse result) {
+                                                sticking = false;
+                                                slider.setMyChoice(sliderValue);
+                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            }
+
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                sticking = false;
+                                                Log.e(TAG, "Error responding", t);
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                }
+                else {
+                    input.setEnabled(false);
+                    tv.setText(getString(R.string.slider_answer, percentage.format(slider.getMyChoice())));
+                    new AlertDialog.Builder(context)
+                            .setTitle(TextUtils.isEmpty(slider.getQuestion()) ? slider.getEmoji() : slider.getQuestion())
+                            .setMessage(getResources().getQuantityString(R.plurals.slider_info,
+                                    slider.getVoteCount(),
+                                    slider.getVoteCount(),
+                                    percentage.format(slider.getAverage())))
+                            .setView(sliderView)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
+                }
             }
         };
         binding.poll.setOnClickListener(storyActionListener);
         binding.answer.setOnClickListener(storyActionListener);
         binding.mention.setOnClickListener(storyActionListener);
         binding.quiz.setOnClickListener(storyActionListener);
+        binding.slider.setOnClickListener(storyActionListener);
     }
 
     private void resetView() {
@@ -587,6 +726,10 @@ public class StoryViewerFragment extends Fragment {
         quiz = currentStory.getQuiz();
         binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
         binding.quiz.setTag(quiz);
+
+        slider = currentStory.getSlider();
+        binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
+        binding.slider.setTag(slider);
 
         releasePlayer();
         if (isHashtag || isLoc) {

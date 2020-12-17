@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.ProfileModel;
@@ -26,9 +27,13 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SliderModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.StoriesRepository;
+import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,7 +49,7 @@ public class StoriesService extends BaseService {
 
     private StoriesService() {
         final Retrofit retrofit = getRetrofitBuilder()
-                .baseUrl("https://www.instagram.com")
+                .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(StoriesRepository.class);
     }
@@ -56,7 +61,7 @@ public class StoriesService extends BaseService {
         return instance;
     }
 
-    public void getFeedStories(final ServiceCallback<List<FeedStoryModel>> callback) {
+    public void getFeedStories(final String csrfToken, final ServiceCallback<List<FeedStoryModel>> callback) {
         if (loadFromMock) {
             final Handler handler = new Handler();
             handler.postDelayed(() -> {
@@ -81,10 +86,13 @@ public class StoriesService extends BaseService {
             }, 1000);
             return;
         }
-        final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("query_hash", "b7b84d884400bc5aa7cfe12ae843a091");
-        queryMap.put("variables", "{\"only_stories\":true,\"stories_prefetch\":false,\"stories_video_dash_manifest\":false}");
-        final Call<String> response = repository.getStories(queryMap);
+        final Map<String, Object> form = new HashMap<>(4);
+        form.put("reason", "cold_start");
+        form.put("_csrftoken", csrfToken);
+        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("supported_capabilities_new", Constants.SUPPORTED_CAPABILITIES);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<String> response = repository.getStories(Constants.I_USER_AGENT, signedForm);
         response.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -106,17 +114,12 @@ public class StoriesService extends BaseService {
     private void parseStoriesBody(final String body, final ServiceCallback<List<FeedStoryModel>> callback) {
         try {
             final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
-            final JSONArray feedStoriesReel = new JSONObject(body)
-                    .getJSONObject("data")
-                    .getJSONObject(Constants.EXTRAS_USER)
-                    .getJSONObject("feed_reels_tray")
-                    .getJSONObject("edge_reels_tray_to_reel")
-                    .getJSONArray("edges");
+            final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
-                final JSONObject node = feedStoriesReel.getJSONObject(i).getJSONObject("node");
+                final JSONObject node = feedStoriesReel.getJSONObject(i);
                 final JSONObject user = node.getJSONObject(node.has("user") ? "user" : "owner");
                 final ProfileModel profileModel = new ProfileModel(false, false, false,
-                                                                   user.getString("id"),
+                                                                   user.getString("pk"),
                                                                    user.getString("username"),
                                                                    null, null, null,
                                                                    user.getString("profile_pic_url"),
@@ -240,6 +243,27 @@ public class StoriesService extends BaseService {
                                     ));
                                 }
                             }
+                            if (data.has("story_cta") && data.has("link_text")) {
+                                JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
+                                String swipeUpUrl = tappableObject.getString("webUri");
+                                if (swipeUpUrl.startsWith("http")) {
+                                    model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+                                }
+                            }
+                            if (data.has("story_sliders")) {
+                                final JSONObject tappableObject = data.getJSONArray("story_sliders").getJSONObject(0)
+                                        .optJSONObject("slider_sticker");
+                                if (tappableObject != null)
+                                    model.setSlider(new SliderModel(
+                                            String.valueOf(tappableObject.getLong("slider_id")),
+                                            tappableObject.getString("question"),
+                                            tappableObject.getString("emoji"),
+                                            tappableObject.getBoolean("viewer_can_vote"),
+                                            tappableObject.getDouble("slider_vote_average"),
+                                            tappableObject.getInt("slider_vote_count"),
+                                            tappableObject.optDouble("viewer_vote")
+                                    ));
+                            }
                             JSONArray hashtags = data.optJSONArray("story_hashtags");
                             JSONArray locations = data.optJSONArray("story_locations");
                             JSONArray atmarks = data.optJSONArray("reel_mentions");
@@ -281,6 +305,83 @@ public class StoriesService extends BaseService {
                 callback.onFailure(t);
             }
         });
+    }
+
+    private void respondToSticker(final String storyId,
+                                  final String stickerId,
+                                  final String action,
+                                  final String arg1,
+                                  final String arg2,
+                                  final String userId,
+                                  final String csrfToken,
+                                  final ServiceCallback<StoryStickerResponse> callback) {
+        final Map<String, Object> form = new HashMap<>();
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("mutation_token", UUID.randomUUID().toString());
+        form.put("client_context", UUID.randomUUID().toString());
+        form.put("radio_type", "wifi-none");
+        form.put(arg1, arg2);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<StoryStickerResponse> request =
+                repository.respondToSticker(Constants.I_USER_AGENT, storyId, stickerId, action, signedForm);
+        request.enqueue(new Callback<StoryStickerResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<StoryStickerResponse> call,
+                                   @NonNull final Response<StoryStickerResponse> response) {
+                if (callback != null) {
+                    callback.onSuccess(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<StoryStickerResponse> call,
+                                  @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    // RespondAction.java
+    public void respondToQuestion(final String storyId,
+                                   final String stickerId,
+                                   final String answer,
+                                   final String userId,
+                                   final String csrfToken,
+                                   final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_question_response", "response", answer, userId, csrfToken, callback);
+    }
+
+    // QuizAction.java
+    public void respondToQuiz(final String storyId,
+                               final String stickerId,
+                               final int answer,
+                               final String userId,
+                               final String csrfToken,
+                               final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), userId, csrfToken, callback);
+    }
+
+    // VoteAction.java
+    public void respondToPoll(final String storyId,
+                               final String stickerId,
+                               final int answer,
+                               final String userId,
+                               final String csrfToken,
+                               final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
+    }
+
+    public void respondToSlider(final String storyId,
+                              final String stickerId,
+                              final double answer,
+                              final String userId,
+                              final String csrfToken,
+                              final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
     }
 
     private String buildUrl(final String id, final boolean isLoc, final boolean isHashtag, final boolean highlight) {

@@ -47,6 +47,7 @@ import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
@@ -55,6 +56,7 @@ import awais.instagrabber.webservices.StoriesService;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "FeedFragment";
@@ -367,9 +369,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void fetchStories() {
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
         storiesFetching = true;
         updateSwipeRefreshState();
-        storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
+        storiesService.getFeedStories(CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<List<FeedStoryModel>>() {
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
                 feedStoriesViewModel.getList().postValue(result);
