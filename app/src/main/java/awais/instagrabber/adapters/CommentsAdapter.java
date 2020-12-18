@@ -83,8 +83,8 @@ public final class CommentsAdapter extends ListAdapter<CommentModel, RecyclerVie
         }
     };
     private final CommentCallback commentCallback;
-    private CommentModel selected;
-    private int selectedIndex;
+    private CommentModel selected, toChangeLike;
+    private int selectedIndex, likedIndex;
 
     public CommentsAdapter(final CommentCallback commentCallback) {
         super(DIFF_CALLBACK);
@@ -106,10 +106,12 @@ public final class CommentsAdapter extends ListAdapter<CommentModel, RecyclerVie
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
-        final CommentModel commentModel = getItem(position);
+        CommentModel commentModel = getItem(position);
         if (commentModel == null) return;
         final int type = getItemViewType(position);
         final boolean selected = this.selected != null && this.selected.getId().equals(commentModel.getId());
+        final boolean toLike = this.toChangeLike != null && this.toChangeLike.getId().equals(commentModel.getId());
+        if (toLike) commentModel = this.toChangeLike;
         if (type == TYPE_PARENT) {
             final ParentCommentViewHolder viewHolder = (ParentCommentViewHolder) holder;
             viewHolder.bind(commentModel, selected, commentCallback);
@@ -172,6 +174,14 @@ public final class CommentsAdapter extends ListAdapter<CommentModel, RecyclerVie
     public void clearSelection() {
         this.selected = null;
         notifyItemChanged(selectedIndex);
+    }
+
+    public void setLiked(final CommentModel commentModel, final boolean liked) {
+        likedIndex = getCurrentList().indexOf(commentModel);
+        CommentModel newCommentModel = commentModel;
+        newCommentModel.setLiked(liked);
+        this.toChangeLike = newCommentModel;
+        notifyItemChanged(likedIndex);
     }
 
     public CommentModel getSelected() {

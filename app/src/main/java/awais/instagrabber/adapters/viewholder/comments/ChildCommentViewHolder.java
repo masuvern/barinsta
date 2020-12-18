@@ -89,8 +89,7 @@ public final class ChildCommentViewHolder extends RecyclerView.ViewHolder {
 
     public final void setLiked(final boolean liked) {
         if (liked) {
-            // container.setBackgroundColor(0x40FF69B4);
-            return;
+            itemView.setBackgroundColor(itemView.getResources().getColor(R.color.comment_liked));
         }
     }
 }
