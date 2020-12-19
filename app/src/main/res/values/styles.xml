@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+    <style name="AppTheme.LaunchTheme" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/launch</item>
+    </style>
+    -->
+
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -11,10 +17,12 @@
 
     <style name="PlayButtonCard" parent="CardView.Dark" />
 
+    <!--
     <style name="FlyingGayDialog" parent="Theme.MaterialComponents.DayNight.Dialog.FixedSize">
         <item name="windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
     </style>
+    -->
 
     <!--<style name="AppTheme.BottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog" />-->
 

@@ -8,9 +8,6 @@
     <color name="btn_green_background">#5CE362</color>
     <color name="btn_green_text_color">@color/text_color_light</color>
 
-    <color name="btn_black_background">#000000</color>
-    <color name="btn_black_text_color">@color/text_color_dark</color>
-
     <color name="btn_blue_background">#0288D1</color>
     <color name="btn_blue_text_color">@color/text_color_light</color>
 
@@ -18,8 +15,6 @@
     <color name="btn_red_text_color">@color/text_color_dark</color>
 
     <color name="btn_purple_background">#909090</color>
-    <color name="btn_pink_background">#FF69B4</color>
-    <color name="btn_pink_text_color">@color/text_color_dark</color>
     <color name="btn_lightpink_background">#FFB6C1</color>
     <color name="btn_lightpink_text_color">@color/text_color_light</color>
 

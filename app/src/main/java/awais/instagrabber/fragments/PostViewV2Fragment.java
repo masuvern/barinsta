@@ -306,6 +306,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (feedModel == null) return;
         switch (feedModel.getItemType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {

@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
@@ -311,9 +312,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        final boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
         final Context context = getContext();
         if (context == null) return;
+        if (!granted) {
+            Toast.makeText(context, R.string.download_permission, Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
             if (downloadFeedModel == null) return;
             DownloadUtils.showDownloadDialog(context, downloadFeedModel, downloadChildPosition);

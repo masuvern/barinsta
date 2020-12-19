@@ -612,6 +612,7 @@ public class StoryViewerFragment extends Fragment {
     }
 
     private void resetView() {
+        final Context context = getContext();
         slidePos = 0;
         lastSlidePos = 0;
         if (menuDownload != null) menuDownload.setVisible(false);
@@ -623,7 +624,10 @@ public class StoryViewerFragment extends Fragment {
             if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 final List<HighlightModel> models = highlightsViewModel.getList().getValue();
-                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) return;
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 currentStoryUsername = model.getTitle();
@@ -683,7 +687,7 @@ public class StoryViewerFragment extends Fragment {
     private void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
-            if (storyModels != null) {
+            if (storyModels != null && storyModels.size() > 0) {
                 StoryModel item = storyModels.get(lastSlidePos);
                 if (item != null) {
                     item.setCurrentSlide(false);
