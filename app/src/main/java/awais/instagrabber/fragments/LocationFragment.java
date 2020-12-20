@@ -456,6 +456,20 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                 locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                favoriteRepository.insertOrUpdateFavorite(new Favorite(
+                        result.getId(),
+                        locationId,
+                        FavoriteType.LOCATION,
+                        locationModel.getName(),
+                        locationModel.getSdProfilePic(),
+                        result.getDateAdded()
+                ), new RepositoryCallback<Void>() {
+                    @Override
+                    public void onSuccess(final Void result) {}
+
+                    @Override
+                    public void onDataNotAvailable() {}
+                });
             }
 
             @Override

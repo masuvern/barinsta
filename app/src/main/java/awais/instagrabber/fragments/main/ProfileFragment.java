@@ -578,6 +578,20 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             public void onSuccess(final Favorite result) {
                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                 profileDetailsBinding.favChip.setText(R.string.added_to_favs);
+                favoriteRepository.insertOrUpdateFavorite(new Favorite(
+                        result.getId(),
+                        finalUsername,
+                        FavoriteType.USER,
+                        profileModel.getName(),
+                        profileModel.getSdProfilePic(),
+                        result.getDateAdded()
+                ), new RepositoryCallback<Void>() {
+                    @Override
+                    public void onSuccess(final Void result) {}
+
+                    @Override
+                    public void onDataNotAvailable() {}
+                });
             }
 
             @Override

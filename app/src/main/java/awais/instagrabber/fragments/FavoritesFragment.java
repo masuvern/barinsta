@@ -81,7 +81,6 @@ public class FavoritesFragment extends Fragment {
             @Override
             public void onSuccess(final List<Favorite> favorites) {
                 favoritesViewModel.getList().postValue(favorites);
-                fetchMissingInfo(favorites);
             }
 
             @Override
@@ -155,110 +154,5 @@ public class FavoritesFragment extends Fragment {
         });
         binding.favoriteList.setAdapter(adapter);
 
-    }
-
-    private void fetchMissingInfo(final List<Favorite> allFavorites) {
-        final Runnable runnable = () -> {
-            final List<Favorite> updatedList = new ArrayList<>(allFavorites);
-            // cyclic barrier is to make the async calls synchronous
-            final CyclicBarrier cyclicBarrier = new CyclicBarrier(2, () -> {
-                // Log.d(TAG, "fetchMissingInfo: barrier action");
-                favoritesViewModel.getList().postValue(new ArrayList<>(updatedList));
-            });
-            try {
-                for (final Favorite model : allFavorites) {
-                    cyclicBarrier.reset();
-                    // if the model has missing pic or display name (for user and location), fetch those details
-                    switch (model.getType()) {
-                        case LOCATION:
-                            if (TextUtils.isEmpty(model.getDisplayName())
-                                    || TextUtils.isEmpty(model.getPicUrl())) {
-                                new LocationFetcher(model.getQuery(), result -> {
-                                    if (result == null) return;
-                                    final int i = updatedList.indexOf(model);
-                                    updatedList.remove(i);
-                                    final Favorite updated = new Favorite(
-                                            model.getId(),
-                                            model.getQuery(),
-                                            model.getType(),
-                                            result.getName(),
-                                            result.getSdProfilePic(),
-                                            model.getDateAdded()
-                                    );
-                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Void>() {
-                                        @Override
-                                        public void onSuccess(final Void result) {
-                                            updatedList.add(i, updated);
-                                            try {
-                                                cyclicBarrier.await();
-                                            } catch (BrokenBarrierException | InterruptedException e) {
-                                                Log.e(TAG, "fetchMissingInfo: ", e);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onDataNotAvailable() {
-                                            try {
-                                                cyclicBarrier.await();
-                                            } catch (BrokenBarrierException | InterruptedException e) {
-                                                Log.e(TAG, "fetchMissingInfo: ", e);
-                                            }
-                                        }
-                                    });
-                                }).execute();
-                                cyclicBarrier.await();
-                            }
-                            break;
-                        case USER:
-                            if (TextUtils.isEmpty(model.getDisplayName())
-                                    || TextUtils.isEmpty(model.getPicUrl())) {
-                                new ProfileFetcher(model.getQuery(), result -> {
-                                    if (result == null) return;
-                                    final int i = updatedList.indexOf(model);
-                                    updatedList.remove(i);
-                                    final Favorite updated = new Favorite(
-                                            model.getId(),
-                                            model.getQuery(),
-                                            model.getType(),
-                                            result.getName(),
-                                            result.getSdProfilePic(),
-                                            model.getDateAdded()
-                                    );
-                                    favoriteRepository.insertOrUpdateFavorite(updated, new RepositoryCallback<Void>() {
-                                        @Override
-                                        public void onSuccess(final Void result) {
-                                            try {
-                                                cyclicBarrier.await();
-                                            } catch (BrokenBarrierException | InterruptedException e) {
-                                                Log.e(TAG, "fetchMissingInfo: ", e);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onDataNotAvailable() {
-                                            try {
-                                                cyclicBarrier.await();
-                                            } catch (BrokenBarrierException | InterruptedException e) {
-                                                Log.e(TAG, "fetchMissingInfo: ", e);
-                                            }
-                                        }
-                                    });
-                                    updatedList.add(i, updated);
-                                }).execute();
-                                cyclicBarrier.await();
-                            }
-                            break;
-                        case HASHTAG:
-                        default:
-                            // hashtags don't require displayName or pic
-                            // updatedList.add(model);
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "fetchMissingInfo: ", e);
-            }
-            favoritesViewModel.getList().postValue(updatedList);
-        };
-        new Thread(runnable).start();
     }
 }
