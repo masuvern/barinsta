@@ -535,7 +535,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             }
         });
         binding.like.setOnLongClickListener(v -> {
-            Utils.displayToastAboveView(context, v, getString(R.string.like_without_count));
+            final NavController navController = getNavController();
+            if (navController != null) {
+                final Bundle bundle = new Bundle();
+                bundle.putString("postId", feedModel.getPostId());
+                navController.navigate(R.id.action_global_likesViewerFragment, bundle);
+            }
             return true;
         });
     }

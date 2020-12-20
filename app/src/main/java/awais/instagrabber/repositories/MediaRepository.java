@@ -5,11 +5,15 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface MediaRepository {
+    @GET("/api/v1/media/{mediaId}/likers/")
+    Call<String> fetchLikes(@Header("User-Agent") final String userAgent,
+                            @Path("mediaId") final String mediaId);
 
     @FormUrlEncoded
     @POST("/api/v1/media/{mediaId}/{action}/")

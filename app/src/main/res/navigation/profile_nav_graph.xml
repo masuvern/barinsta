@@ -24,6 +24,18 @@
             app:nullable="false" />
     </action>
 
+    <include app:graph="@navigation/likes_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_likesViewerFragment"
+        app:destination="@id/likes_nav_graph">
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+
     <include app:graph="@navigation/hashtag_nav_graph" />
 
     <action

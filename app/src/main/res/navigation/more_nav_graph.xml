@@ -8,6 +8,7 @@
     <include app:graph="@navigation/hashtag_nav_graph" />
     <include app:graph="@navigation/location_nav_graph" />
     <include app:graph="@navigation/comments_nav_graph" />
+    <include app:graph="@navigation/likes_nav_graph" />
     <include app:graph="@navigation/notification_viewer_nav_graph" />
 
     <action

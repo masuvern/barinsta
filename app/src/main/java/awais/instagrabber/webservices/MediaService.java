@@ -5,15 +5,18 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.MediaRepository;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
@@ -273,6 +276,50 @@ public class MediaService extends BaseService {
             @Override
             public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error unliking comment", t);
+                callback.onFailure(t);
+            }
+        });
+    }
+
+    public void fetchLikes(final String mediaId,
+                           @NonNull final ServiceCallback<List<ProfileModel>> callback) {
+        final Call<String> likesRequest = repository.fetchLikes(Constants.I_USER_AGENT, mediaId);
+        likesRequest.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String body = response.body();
+                if (body == null) {
+                    Log.e(TAG, "Error occurred while fetching likes of "+mediaId);
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject data = new JSONObject(body);
+                    final JSONArray users = data.getJSONArray("users");
+                    final int usersLen = users.length();
+                    final List<ProfileModel> userModels = new ArrayList<>();
+                    for (int j = 0; j < usersLen; ++j) {
+                        final JSONObject userObject = users.getJSONObject(j);
+                        userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
+                                false,
+                                userObject.optBoolean("is_verified"),
+                                String.valueOf(userObject.get("pk")),
+                                userObject.getString("username"),
+                                userObject.optString("full_name"),
+                                null, null,
+                                userObject.getString("profile_pic_url"),
+                                null, 0, 0, 0, false, false, false, false, false));
+                    }
+                    callback.onSuccess(userModels);
+                } catch (JSONException e) {
+                    // Log.e(TAG, "Error parsing body", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "Error getting likes", t);
                 callback.onFailure(t);
             }
         });
