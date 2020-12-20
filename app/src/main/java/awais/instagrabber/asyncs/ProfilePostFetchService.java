@@ -7,29 +7,34 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
 
 public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "ProfilePostFetchService";
     private final ProfileService profileService;
+    private final GraphQLService graphQLService;
     private final ProfileModel profileModel;
-    private String nextCursor;
-    private boolean hasNextPage;
+    private final boolean isLoggedIn;
+    private String nextMaxId;
+    private boolean moreAvailable;
 
-    public ProfilePostFetchService(final ProfileModel profileModel) {
+    public ProfilePostFetchService(final ProfileModel profileModel, final boolean isLoggedIn) {
         this.profileModel = profileModel;
-        profileService = ProfileService.getInstance();
+        this.isLoggedIn = isLoggedIn;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        profileService.fetchPosts(profileModel, 30, nextCursor, new ServiceCallback<PostsFetchResponse>() {
+        final ServiceCallback cb = new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;
-                nextCursor = result.getNextCursor();
-                hasNextPage = result.hasNextPage();
+                nextMaxId = result.getNextCursor();
+                moreAvailable = result.hasNextPage();
                 if (fetchListener != null) {
                     fetchListener.onResult(result.getFeedModels());
                 }
@@ -42,16 +47,18 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
                     fetchListener.onFailure(t);
                 }
             }
-        });
+        };
+        if (isLoggedIn) profileService.fetchPosts(profileModel.getId(), nextMaxId, cb);
+        else graphQLService.fetchProfilePosts(profileModel.getId(), 30, nextMaxId, cb);
     }
 
     @Override
     public void reset() {
-        nextCursor = null;
+        nextMaxId = null;
     }
 
     @Override
     public boolean hasNextPage() {
-        return hasNextPage;
+        return moreAvailable;
     }
 }

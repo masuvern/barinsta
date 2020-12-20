@@ -12,15 +12,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostChild;
-import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.ProfileRepository;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.UserInfo;
@@ -36,7 +30,6 @@ public class ProfileService extends BaseService {
     private static final String TAG = "ProfileService";
 
     private final ProfileRepository repository;
-    private final ProfileRepository wwwRepository;
 
     private static ProfileService instance;
 
@@ -44,11 +37,7 @@ public class ProfileService extends BaseService {
         final Retrofit retrofit = getRetrofitBuilder()
                 .baseUrl("https://i.instagram.com")
                 .build();
-        final Retrofit wwwRetrofit = getRetrofitBuilder()
-                .baseUrl("https://www.instagram.com")
-                .build();
         repository = retrofit.create(ProfileRepository.class);
-        wwwRepository = wwwRetrofit.create(ProfileRepository.class);
     }
 
     public static ProfileService getInstance() {
@@ -89,32 +78,31 @@ public class ProfileService extends BaseService {
         });
     }
 
-    public void fetchPosts(final ProfileModel profileModel,
-                           final int postsPerPage,
-                           final String cursor,
+    public void fetchPosts(final String userId,
+                           final String maxId,
                            final ServiceCallback<PostsFetchResponse> callback) {
-        final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("query_hash", "18a7b935ab438c4514b1f742d8fa07a7");
-        queryMap.put("variables", "{" +
-                "\"id\":\"" + profileModel.getId() + "\"," +
-                "\"first\":" + postsPerPage + "," +
-                "\"after\":\"" + (cursor == null ? "" : cursor) + "\"" +
-                "}");
-        final Call<String> request = wwwRepository.fetch(queryMap);
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        if (!TextUtils.isEmpty(maxId)) {
+            builder.put("max_id", maxId);
+        }
+        final Call<String> request = repository.fetch(userId, builder.build());
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 try {
-                    // Log.d(TAG, "onResponse: body: " + response.body());
-                    final PostsFetchResponse postsFetchResponse = parseResponse(profileModel, response);
-                    if (callback != null) {
-                        callback.onSuccess(postsFetchResponse);
+                    if (callback == null) {
+                        return;
                     }
+                    final String body = response.body();
+                    if (TextUtils.isEmpty(body)) {
+                        callback.onSuccess(null);
+                        return;
+                    }
+                    final PostsFetchResponse postsFetchResponse = parseProfilePostsResponse(body, false);
+                    callback.onSuccess(postsFetchResponse);
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
-                    if (callback != null) {
-                        callback.onFailure(e);
-                    }
+                    callback.onFailure(e);
                 }
             }
 
@@ -127,48 +115,8 @@ public class ProfileService extends BaseService {
         });
     }
 
-    private PostsFetchResponse parseResponse(final ProfileModel profileModel, final Response<String> response) throws JSONException {
-        if (TextUtils.isEmpty(response.body())) {
-            Log.e(TAG, "parseResponse: feed response body is empty with status code: " + response.code());
-            return new PostsFetchResponse(Collections.emptyList(), false, null);
-        }
-        return parseResponseBody(profileModel, response.body());
-    }
-
-    private PostsFetchResponse parseResponseBody(final ProfileModel profileModel, final String body) throws JSONException {
-        // Log.d(TAG, "parseResponseBody: body: " + body);
-        final List<FeedModel> feedModels = new ArrayList<>();
-        // return new FeedFetchResponse(feedModels, false, null);
-        final JSONObject mediaPosts = new JSONObject(body)
-                .getJSONObject("data")
-                .getJSONObject(Constants.EXTRAS_USER)
-                .getJSONObject("edge_owner_to_timeline_media");
-        final String endCursor;
-        final boolean hasNextPage;
-        final JSONObject pageInfo = mediaPosts.getJSONObject("page_info");
-        if (pageInfo.has("has_next_page")) {
-            hasNextPage = pageInfo.getBoolean("has_next_page");
-            endCursor = hasNextPage ? pageInfo.getString("end_cursor") : null;
-        } else {
-            hasNextPage = false;
-            endCursor = null;
-        }
-        final JSONArray edges = mediaPosts.getJSONArray("edges");
-        for (int i = 0; i < edges.length(); ++i) {
-            final JSONObject itemJson = edges.optJSONObject(i);
-            if (itemJson == null) {
-                continue;
-            }
-            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
-            if (feedModel != null) {
-                feedModels.add(feedModel);
-            }
-        }
-        return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
-    }
-
     public void fetchSaved(final String maxId,
-                           final ServiceCallback<SavedPostsFetchResponse> callback) {
+                           final ServiceCallback<PostsFetchResponse> callback) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         if (!TextUtils.isEmpty(maxId)) {
             builder.put("max_id", maxId);
@@ -186,8 +134,8 @@ public class ProfileService extends BaseService {
                         callback.onSuccess(null);
                         return;
                     }
-                    final SavedPostsFetchResponse savedPostsFetchResponse = parseSavedPostsResponse(body, true);
-                    callback.onSuccess(savedPostsFetchResponse);
+                    final PostsFetchResponse PostsFetchResponse = parseSavedPostsResponse(body, true);
+                    callback.onSuccess(PostsFetchResponse);
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
                     callback.onFailure(e);
@@ -204,7 +152,7 @@ public class ProfileService extends BaseService {
     }
 
     public void fetchLiked(final String maxId,
-                           final ServiceCallback<SavedPostsFetchResponse> callback) {
+                           final ServiceCallback<PostsFetchResponse> callback) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         if (!TextUtils.isEmpty(maxId)) {
             builder.put("max_id", maxId);
@@ -222,8 +170,8 @@ public class ProfileService extends BaseService {
                         callback.onSuccess(null);
                         return;
                     }
-                    final SavedPostsFetchResponse savedPostsFetchResponse = parseSavedPostsResponse(body, false);
-                    callback.onSuccess(savedPostsFetchResponse);
+                    final PostsFetchResponse PostsFetchResponse = parseSavedPostsResponse(body, false);
+                    callback.onSuccess(PostsFetchResponse);
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
                     callback.onFailure(e);
@@ -240,17 +188,13 @@ public class ProfileService extends BaseService {
     }
 
     public void fetchTagged(final String profileId,
-                            final int postsPerPage,
-                            final String cursor,
-                            final ServiceCallback<SavedPostsFetchResponse> callback) {
-        final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("query_hash", "31fe64d9463cbbe58319dced405c6206");
-        queryMap.put("variables", "{" +
-                "\"id\":\"" + profileId + "\"," +
-                "\"first\":" + postsPerPage + "," +
-                "\"after\":\"" + (cursor == null ? "" : cursor) + "\"" +
-                "}");
-        final Call<String> request = wwwRepository.fetch(queryMap);
+                            final String maxId,
+                            final ServiceCallback<PostsFetchResponse> callback) {
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        if (!TextUtils.isEmpty(maxId)) {
+            builder.put("max_id", maxId);
+        }
+        final Call<String> request = repository.fetchTagged(profileId, builder.build());
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -263,8 +207,8 @@ public class ProfileService extends BaseService {
                         callback.onSuccess(null);
                         return;
                     }
-                    final SavedPostsFetchResponse savedPostsFetchResponse = parseTaggedPostsResponse(body);
-                    callback.onSuccess(savedPostsFetchResponse);
+                    final PostsFetchResponse PostsFetchResponse = parseSavedPostsResponse(body, false);
+                    callback.onSuccess(PostsFetchResponse);
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
                     callback.onFailure(e);
@@ -280,7 +224,7 @@ public class ProfileService extends BaseService {
         });
     }
 
-    private SavedPostsFetchResponse parseSavedPostsResponse(final String body, final boolean isInMedia) throws JSONException {
+    private PostsFetchResponse parseProfilePostsResponse(final String body, final boolean isInMedia) throws JSONException {
         final JSONObject root = new JSONObject(body);
         final boolean moreAvailable = root.optBoolean("more_available");
         final String nextMaxId = root.optString("next_max_id");
@@ -288,48 +232,26 @@ public class ProfileService extends BaseService {
         final String status = root.optString("status");
         final JSONArray itemsJson = root.optJSONArray("items");
         final List<FeedModel> items = parseItems(itemsJson, isInMedia);
-        return new SavedPostsFetchResponse(
+        return new PostsFetchResponse(
+                items,
                 moreAvailable,
-                nextMaxId,
-                numResults,
-                status,
-                items
+                nextMaxId
         );
     }
 
-    @NonNull
-    private SavedPostsFetchResponse parseTaggedPostsResponse(@NonNull final String body)
-            throws JSONException {
-        final List<FeedModel> feedModels = new ArrayList<>();
-        final JSONObject timelineFeed = new JSONObject(body)
-                .getJSONObject("data")
-                .getJSONObject(Constants.EXTRAS_USER)
-                .getJSONObject("edge_user_to_photos_of_you");
-        final String endCursor;
-        final boolean hasNextPage;
-
-        final JSONObject pageInfo = timelineFeed.getJSONObject("page_info");
-        if (pageInfo.has("has_next_page")) {
-            hasNextPage = pageInfo.getBoolean("has_next_page");
-            endCursor = hasNextPage ? pageInfo.getString("end_cursor") : null;
-        } else {
-            hasNextPage = false;
-            endCursor = null;
-        }
-
-        final JSONArray feedItems = timelineFeed.getJSONArray("edges");
-
-        for (int i = 0; i < feedItems.length(); ++i) {
-            final JSONObject itemJson = feedItems.optJSONObject(i);
-            if (itemJson == null) {
-                continue;
-            }
-            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
-            if (feedModel != null) {
-                feedModels.add(feedModel);
-            }
-        }
-        return new SavedPostsFetchResponse(hasNextPage, endCursor, timelineFeed.getInt("count"), "ok", feedModels);
+    private PostsFetchResponse parseSavedPostsResponse(final String body, final boolean isInMedia) throws JSONException {
+        final JSONObject root = new JSONObject(body);
+        final boolean moreAvailable = root.optBoolean("more_available");
+        final String nextMaxId = root.optString("next_max_id");
+        final int numResults = root.optInt("num_results");
+        final String status = root.optString("status");
+        final JSONArray itemsJson = root.optJSONArray("items");
+        final List<FeedModel> items = parseItems(itemsJson, isInMedia);
+        return new PostsFetchResponse(
+                items,
+                moreAvailable,
+                nextMaxId
+        );
     }
 
     private List<FeedModel> parseItems(final JSONArray items, final boolean isInMedia) throws JSONException {
@@ -348,99 +270,5 @@ public class ProfileService extends BaseService {
             }
         }
         return feedModels;
-    }
-
-    public static class SavedPostsFetchResponse {
-        private boolean moreAvailable;
-        private String nextMaxId;
-        private int numResults;
-        private String status;
-        private List<FeedModel> items;
-
-        public SavedPostsFetchResponse(final boolean moreAvailable,
-                                       final String nextMaxId,
-                                       final int numResults,
-                                       final String status,
-                                       final List<FeedModel> items) {
-            this.moreAvailable = moreAvailable;
-            this.nextMaxId = nextMaxId;
-            this.numResults = numResults;
-            this.status = status;
-            this.items = items;
-        }
-
-        public boolean isMoreAvailable() {
-            return moreAvailable;
-        }
-
-        public SavedPostsFetchResponse setMoreAvailable(final boolean moreAvailable) {
-            this.moreAvailable = moreAvailable;
-            return this;
-        }
-
-        public String getNextMaxId() {
-            return nextMaxId;
-        }
-
-        public SavedPostsFetchResponse setNextMaxId(final String nextMaxId) {
-            this.nextMaxId = nextMaxId;
-            return this;
-        }
-
-        public int getNumResults() {
-            return numResults;
-        }
-
-        public SavedPostsFetchResponse setNumResults(final int numResults) {
-            this.numResults = numResults;
-            return this;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public SavedPostsFetchResponse setStatus(final String status) {
-            this.status = status;
-            return this;
-        }
-
-        public List<FeedModel> getItems() {
-            return items;
-        }
-
-        public SavedPostsFetchResponse setItems(final List<FeedModel> items) {
-            this.items = items;
-            return this;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            final SavedPostsFetchResponse that = (SavedPostsFetchResponse) o;
-            return moreAvailable == that.moreAvailable &&
-                    numResults == that.numResults &&
-                    Objects.equals(nextMaxId, that.nextMaxId) &&
-                    Objects.equals(status, that.status) &&
-                    Objects.equals(items, that.items);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(moreAvailable, nextMaxId, numResults, status, items);
-        }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return "SavedPostsFetchResponse{" +
-                    "moreAvailable=" + moreAvailable +
-                    ", nextMaxId='" + nextMaxId + '\'' +
-                    ", numResults=" + numResults +
-                    ", status='" + status + '\'' +
-                    ", items=" + items +
-                    '}';
-        }
     }
 }

@@ -6,7 +6,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.QueryMap;
 
-public interface FeedRepository {
+public interface GraphQLRepository {
     @GET("/graphql/query/")
     Call<String> fetch(@QueryMap(encoded = true) Map<String, String> queryParams);
 }

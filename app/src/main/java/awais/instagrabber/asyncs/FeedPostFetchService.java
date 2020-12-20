@@ -6,22 +6,22 @@ import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
-import awais.instagrabber.webservices.FeedService;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
 
 public class FeedPostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "FeedPostFetchService";
-    private final FeedService feedService;
+    private final GraphQLService graphQLService;
     private String nextCursor;
     private boolean hasNextPage;
 
     public FeedPostFetchService() {
-        feedService = FeedService.getInstance();
+        graphQLService = GraphQLService.getInstance();
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        feedService.fetch(25, nextCursor, new ServiceCallback<PostsFetchResponse>() {
+        graphQLService.fetchFeed(25, nextCursor, new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;

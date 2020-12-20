@@ -54,7 +54,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
-import awais.instagrabber.asyncs.HighlightsFetcher;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
 import awais.instagrabber.asyncs.UsernameFetcher;
@@ -75,6 +74,7 @@ import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
@@ -729,6 +729,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void setupButtons(final String profileId, final String myId) {
+        profileDetailsBinding.btnTagged.setVisibility(profileModel.isReallyPrivate() ? View.GONE : View.VISIBLE);
         if (isLoggedIn) {
             if (profileId.equals(myId)) {
                 profileDetailsBinding.btnTagged.setVisibility(View.VISIBLE);
@@ -738,7 +739,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 profileDetailsBinding.btnSaved.setText(R.string.saved);
                 return;
             }
-            profileDetailsBinding.btnTagged.setVisibility(View.GONE);
             profileDetailsBinding.btnSaved.setVisibility(View.GONE);
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
             profileDetailsBinding.btnDM.setVisibility(View.VISIBLE); // maybe there is a judgment mechanism?
@@ -776,7 +776,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     restrictMenuItem.setTitle(R.string.restrict);
                 }
             }
-            profileDetailsBinding.btnTagged.setVisibility(profileModel.isReallyPrivate() ? View.GONE : View.VISIBLE);
             if (blockMenuItem != null) {
                 blockMenuItem.setVisible(true);
                 if (profileModel.isBlocked()) {
@@ -817,14 +816,24 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                             Log.e(TAG, "Error", t);
                                         }
                                     });
-        new HighlightsFetcher(profileId,
-                              result -> {
-                                  highlightsFetching = false;
-                                  if (result != null) {
-                                      profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
-                                      highlightsViewModel.getList().postValue(result);
-                                  } else profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                              }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        storiesService.fetchHighlights(profileId,
+                                        new ServiceCallback<List<HighlightModel>>() {
+                                            @Override
+                                            public void onSuccess(final List<HighlightModel> result) {
+                                                highlightsFetching = false;
+                                                if (result != null) {
+                                                    profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
+                                                    highlightsViewModel.getList().postValue(result);
+                                                }
+                                                else profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                                            }
+
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                                                Log.e(TAG, "Error", t);
+                                            }
+                                        });
     }
 
     private void setupCommonListeners() {
@@ -979,7 +988,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void setupPosts() {
         binding.postsRecyclerView.setViewModelStoreOwner(this)
                                  .setLifeCycleOwner(this)
-                                 .setPostFetchService(new ProfilePostFetchService(profileModel))
+                                 .setPostFetchService(new ProfilePostFetchService(profileModel, isLoggedIn))
                                  .setLayoutPreferences(layoutPreferences)
                                  .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                                  .setFeedItemCallback(feedItemCallback)

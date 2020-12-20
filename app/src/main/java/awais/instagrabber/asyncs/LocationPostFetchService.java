@@ -6,12 +6,14 @@ import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.LocationModel;
+import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.LocationService;
-import awais.instagrabber.webservices.LocationService.LocationPostsFetchResponse;
 import awais.instagrabber.webservices.ServiceCallback;
 
 public class LocationPostFetchService implements PostFetcher.PostFetchService {
     private final LocationService locationService;
+    private final GraphQLService graphQLService;
     private final LocationModel locationModel;
     private String nextMaxId;
     private boolean moreAvailable;
@@ -20,19 +22,20 @@ public class LocationPostFetchService implements PostFetcher.PostFetchService {
     public LocationPostFetchService(final LocationModel locationModel, final boolean isLoggedIn) {
         this.locationModel = locationModel;
         this.isLoggedIn = isLoggedIn;
-        locationService = LocationService.getInstance();
+        locationService = isLoggedIn ? LocationService.getInstance() : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        final ServiceCallback cb = new ServiceCallback<LocationPostsFetchResponse>() {
+        final ServiceCallback cb = new ServiceCallback<PostsFetchResponse>() {
             @Override
-            public void onSuccess(final LocationPostsFetchResponse result) {
+            public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;
-                nextMaxId = result.getNextMaxId();
-                moreAvailable = result.isMoreAvailable();
+                nextMaxId = result.getNextCursor();
+                moreAvailable = result.hasNextPage();
                 if (fetchListener != null) {
-                    fetchListener.onResult(result.getItems());
+                    fetchListener.onResult(result.getFeedModels());
                 }
             }
 
@@ -45,7 +48,7 @@ public class LocationPostFetchService implements PostFetcher.PostFetchService {
             }
         };
         if (isLoggedIn) locationService.fetchPosts(locationModel.getId(), nextMaxId, cb);
-        else locationService.fetchGraphQLPosts(locationModel.getId(), nextMaxId, cb);
+        else graphQLService.fetchLocationPosts(locationModel.getId(), nextMaxId, cb);
     }
 
     @Override

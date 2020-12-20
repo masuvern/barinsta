@@ -17,8 +17,11 @@ public interface StoriesRepository {
 
     @FormUrlEncoded
     @POST("/api/v1/feed/reels_tray/")
-    Call<String> getStories(@Header("User-Agent") String userAgent,
-                            @FieldMap Map<String, String> form);
+    Call<String> getFeedStories(@Header("User-Agent") String userAgent,
+                                @FieldMap Map<String, String> form);
+
+    @GET("/api/v1/highlights/{uid}/highlights_tray/")
+    Call<String> fetchHighlights(@Path("uid") final String uid);
 
     @GET
     Call<String> getUserStory(@Header("User-Agent") String userAgent, @Url String url);

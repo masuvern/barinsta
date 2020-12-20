@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
+import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -33,6 +34,7 @@ import awais.instagrabber.repositories.StoriesRepository;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -92,7 +94,7 @@ public class StoriesService extends BaseService {
         form.put("_uuid", UUID.randomUUID().toString());
         form.put("supported_capabilities_new", Constants.SUPPORTED_CAPABILITIES);
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> response = repository.getStories(Constants.I_USER_AGENT, signedForm);
+        final Call<String> response = repository.getFeedStories(Constants.I_USER_AGENT, signedForm);
         response.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -132,6 +134,52 @@ public class StoriesService extends BaseService {
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing json", e);
         }
+    }
+
+    public void fetchHighlights(final String profileId,
+                                final ServiceCallback<List<HighlightModel>> callback) {
+        final Call<String> request = repository.fetchHighlights(profileId);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                try {
+                    if (callback == null) {
+                        return;
+                    }
+                    final String body = response.body();
+                    if (TextUtils.isEmpty(body)) {
+                        callback.onSuccess(null);
+                        return;
+                    }
+                    final JSONArray highlightsReel = new JSONObject(body).getJSONArray("tray");
+
+                    final int length = highlightsReel.length();
+                    final List<HighlightModel> highlightModels = new ArrayList<>();
+                    // final String[] highlightIds = new String[length];
+                    for (int i = 0; i < length; ++i) {
+                        final JSONObject highlightNode = highlightsReel.getJSONObject(i);
+                        highlightModels.add(new HighlightModel(
+                                highlightNode.getString("title"),
+                                highlightNode.getString(Constants.EXTRAS_ID),
+                                highlightNode.getJSONObject("cover_media")
+                                        .getJSONObject("cropped_image_version")
+                                        .getString("url")
+                        ));
+                    }
+                    callback.onSuccess(highlightModels);
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
     }
 
     public void getUserStory(final String id,

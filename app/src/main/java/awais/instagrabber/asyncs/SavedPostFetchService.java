@@ -6,34 +6,39 @@ import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ProfileService;
-import awais.instagrabber.webservices.ProfileService.SavedPostsFetchResponse;
 import awais.instagrabber.webservices.ServiceCallback;
 
 public class SavedPostFetchService implements PostFetcher.PostFetchService {
     private final ProfileService profileService;
+    private final GraphQLService graphQLService;
     private final String profileId;
     private final PostItemType type;
+    private final boolean isLoggedIn;
 
     private String nextMaxId;
     private boolean moreAvailable;
 
-    public SavedPostFetchService(final String profileId, final PostItemType type) {
+    public SavedPostFetchService(final String profileId, final PostItemType type, final boolean isLoggedIn) {
         this.profileId = profileId;
         this.type = type;
-        profileService = ProfileService.getInstance();
+        this.isLoggedIn = isLoggedIn;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        final ServiceCallback<SavedPostsFetchResponse> callback = new ServiceCallback<SavedPostsFetchResponse>() {
+        final ServiceCallback<PostsFetchResponse> callback = new ServiceCallback<PostsFetchResponse>() {
             @Override
-            public void onSuccess(final SavedPostsFetchResponse result) {
+            public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;
-                nextMaxId = result.getNextMaxId();
-                moreAvailable = result.isMoreAvailable();
+                nextMaxId = result.getNextCursor();
+                moreAvailable = result.hasNextPage();
                 if (fetchListener != null) {
-                    fetchListener.onResult(result.getItems());
+                    fetchListener.onResult(result.getFeedModels());
                 }
             }
 
@@ -50,7 +55,8 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
                 profileService.fetchLiked(nextMaxId, callback);
                 break;
             case TAGGED:
-                profileService.fetchTagged(profileId, 30, nextMaxId, callback);
+                if (isLoggedIn) profileService.fetchTagged(profileId, nextMaxId, callback);
+                else graphQLService.fetchTaggedPosts(profileId, 30, nextMaxId, callback);
                 break;
             case SAVED:
             default:
