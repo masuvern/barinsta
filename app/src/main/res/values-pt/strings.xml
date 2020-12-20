@@ -42,10 +42,15 @@
     <string name="instadp_settings">Usar Instadp para fotos de perfil de alta definição</string>
     <string name="import_export">Importar/Exportar</string>
     <string name="select_language">Idioma</string>
-    <string name="main_posts_count">%s\nPublicações</string>
-    <string name="main_posts_count_inline">%s Publicações</string>
-    <string name="main_posts_followers">%s\nSeguidores</string>
-    <string name="main_posts_following">%s\nSeguindo</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Publicação</item>
+        <item quantity="other">%s Publicações</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Seguidor</item>
+        <item quantity="other">%s Seguidores</item>
+    </plurals>
+    <string name="main_posts_following">%s Seguindo </string>
     <string name="post_viewer_autoplay_video">Reprodução automática de vídeos</string>
     <string name="post_viewer_muted_autoplay">Sempre silenciar vídeos</string>
     <string name="post_viewer_download_dialog_title">Selecionar o que baixar</string>
@@ -63,9 +68,15 @@
     <string name="respond_story">Responder</string>
     <string name="answer_hint">Responder…</string>
     <string name="answered_story">Resposta enviada!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d resposta em uma média de %s</item>
+        <item quantity="other">%d respostas em uma média de %s</item>
+    </plurals>
+    <string name="slider_answer">Sua resposta: %s</string>
     <string name="reply_story">Responder o story</string>
     <string name="reply_hint">Responder…</string>
     <string name="story_quiz">Quiz</string>
+    <string name="story_slider">Deslizante</string>
     <string name="story_quizzed">Você já respondeu!</string>
     <string name="story_mentions">Menções</string>
     <string name="priv_acc">Esta conta é privada</string>
@@ -98,6 +109,9 @@
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Deixar de restringir</string>
+    <string name="status_mutual">Seguindo um ao outro</string>
+    <string name="status_following">Seguido por você</string>
+    <string name="status_follower">Segue você</string>
     <string name="map">Mapa</string>
     <string name="dialog_export_btn_export">Exportar</string>
     <string name="dialog_export_btn_import">Importar</string>
@@ -281,19 +295,19 @@
     <string name="downloader_downloading_child">Baixar item %d de %d</string>
     <string name="delete">Excluir</string>
     <string name="comment">Comentar</string>
-    <string name="layout">Aparência</string>
+    <string name="layout">Visualização</string>
     <string name="opening_post">Abrindo publicação...</string>
     <string name="share">Compartilhar</string>
-    <string name="layout_style">Estilo da aparência</string>
-    <string name="column_count">Número de colunas</string>
+    <string name="layout_style">Estilo do layout</string>
+    <string name="column_count">Colunas</string>
     <string name="two">2</string>
     <string name="three">3</string>
     <string name="show_names">Mostrar nomes</string>
     <string name="show_avatars">Mostrar avatares</string>
-    <string name="avatar_size">Tamanho do avatar</string>
+    <string name="avatar_size">Avatar</string>
     <string name="corners">Bordas</string>
-    <string name="show_grid_gap">Mostrar separação das grades</string>
-    <string name="disable_animation">Desativar animação</string>
+    <string name="show_grid_gap">Grades separadas</string>
+    <string name="disable_animation">Animação</string>
     <string name="follower_wait_to_load">Por favor, espere a tarefa atual ser concluída primeiro!</string>
     <string name="post_not_found">Publicação não encontrada!</string>
     <string name="no_external_app_url">Nenhum aplicativo para abrir urls encontrado</string>
@@ -305,4 +319,5 @@
         <item quantity="one">%d comentário</item>
         <item quantity="other">%d comentários</item>
     </plurals>
+    <string name="download_permission">Permissão de armazenamento não concedida!</string>
 </resources>

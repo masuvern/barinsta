@@ -42,10 +42,19 @@
     <string name="instadp_settings">Użyj Instadp dla zdjęć profilowych o wysokiej rozdzielczości</string>
     <string name="import_export">Importuj/Eksportuj</string>
     <string name="select_language">Język</string>
-    <string name="main_posts_count">%s\nPosty</string>
-    <string name="main_posts_count_inline">%s postów</string>
-    <string name="main_posts_followers">%s\nObserwujący</string>
-    <string name="main_posts_following">%s\nObserwuje</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="few">%s Posts</item>
+        <item quantity="many">%s Posts</item>
+        <item quantity="other">%s Posts</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="few">%s Followers</item>
+        <item quantity="many">%s Followers</item>
+        <item quantity="other">%s Followers</item>
+    </plurals>
+    <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">Automatyczne odtwarzanie filmów</string>
     <string name="post_viewer_muted_autoplay">Zawsze wyciszaj filmy</string>
     <string name="post_viewer_download_dialog_title">Wybierz, co chcesz pobrać</string>
@@ -63,9 +72,17 @@
     <string name="respond_story">Odpowiedz</string>
     <string name="answer_hint">Odpowiedz…</string>
     <string name="answered_story">Odpowiedziano pomyślnie!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d response averaging %s</item>
+        <item quantity="few">%d responses averaging %s</item>
+        <item quantity="many">%d responses averaging %s</item>
+        <item quantity="other">%d responses averaging %s</item>
+    </plurals>
+    <string name="slider_answer">Your answer: %s</string>
     <string name="reply_story">Odpowiedz na relację</string>
     <string name="reply_hint">Odpowiedź…</string>
     <string name="story_quiz">Quiz</string>
+    <string name="story_slider">Slider</string>
     <string name="story_quizzed">Już odpowiedziałeś!</string>
     <string name="story_mentions">Wzmianki</string>
     <string name="priv_acc">To konto jest prywatne</string>
@@ -98,6 +115,9 @@
     <string name="unblock">Odblokuj</string>
     <string name="restrict">Ogranicz</string>
     <string name="unrestrict">Nieograniczone</string>
+    <string name="status_mutual">Following each other</string>
+    <string name="status_following">Followed by you</string>
+    <string name="status_follower">Following you</string>
     <string name="map">Mapa</string>
     <string name="dialog_export_btn_export">Eksportuj</string>
     <string name="dialog_export_btn_import">Importuj</string>
@@ -309,4 +329,5 @@
         <item quantity="many">%d komentarzy</item>
         <item quantity="other">%d komentarzy</item>
     </plurals>
+    <string name="download_permission">Storage permission not granted!</string>
 </resources>

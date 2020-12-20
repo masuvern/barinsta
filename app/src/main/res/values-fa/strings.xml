@@ -42,10 +42,15 @@
     <string name="instadp_settings">استفاده از Instadp برای بالا بردن وضوح عکس‌های نمایه</string>
     <string name="import_export">وارد کردن/خروجی گرفتن</string>
     <string name="select_language">زبان</string>
-    <string name="main_posts_count">%s\n پست‌ها</string>
-    <string name="main_posts_count_inline">%s پست ها</string>
-    <string name="main_posts_followers">%s\nدنبال کننده ها</string>
-    <string name="main_posts_following">%s\nدنبال کننده ها</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="other">%s Followers</item>
+    </plurals>
+    <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">پخش خودکار فیلم ها</string>
     <string name="post_viewer_muted_autoplay">همیشه فیلم هارو بی صدا کن</string>
     <string name="post_viewer_download_dialog_title">انتخاب کن چی دانلود کنی</string>
@@ -63,9 +68,15 @@
     <string name="respond_story">پاسخ</string>
     <string name="answer_hint">پاسخ…</string>
     <string name="answered_story">جواب درست است!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d response averaging %s</item>
+        <item quantity="other">%d responses averaging %s</item>
+    </plurals>
+    <string name="slider_answer">Your answer: %s</string>
     <string name="reply_story">پاسخ به استوری</string>
     <string name="reply_hint">پاسخ…</string>
     <string name="story_quiz">نظرسنجی</string>
+    <string name="story_slider">Slider</string>
     <string name="story_quizzed">در حال حاظر شما رای داده اید!</string>
     <string name="story_mentions">یادآوری ها</string>
     <string name="priv_acc">این اکانت شخصی است</string>
@@ -99,6 +110,9 @@
     <string name="unblock">رفع مسدودیت</string>
     <string name="restrict">محدود کردن</string>
     <string name="unrestrict">حذف محدودیت</string>
+    <string name="status_mutual">Following each other</string>
+    <string name="status_following">Followed by you</string>
+    <string name="status_follower">Following you</string>
     <string name="map">نقشه</string>
     <string name="dialog_export_btn_export">صادر کردن</string>
     <string name="dialog_export_btn_import">وارد کردن</string>
@@ -306,4 +320,5 @@
         <item quantity="one">%d دیدگاه</item>
         <item quantity="other">%d دیدگاه</item>
     </plurals>
+    <string name="download_permission">Storage permission not granted!</string>
 </resources>

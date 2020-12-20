@@ -42,10 +42,15 @@
     <string name="instadp_settings">Usar Instadp para imágenes de perfil de alta definición</string>
     <string name="import_export">Importar/Exportar</string>
     <string name="select_language">Idioma</string>
-    <string name="main_posts_count">%s\nPublicaciones</string>
-    <string name="main_posts_count_inline">%s Publicaciones</string>
-    <string name="main_posts_followers">%s\nSeguidores</string>
-    <string name="main_posts_following">%s\nSiguiendo</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s publicaciones</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="other">%s seguidores</item>
+    </plurals>
+    <string name="main_posts_following">%s seguidos </string>
     <string name="post_viewer_autoplay_video">Autorreproducir vídeos</string>
     <string name="post_viewer_muted_autoplay">Siempre silenciar vídeos</string>
     <string name="post_viewer_download_dialog_title">Seleccionar qué descargar</string>
@@ -63,9 +68,15 @@
     <string name="respond_story">Comentar</string>
     <string name="answer_hint">Responder…</string>
     <string name="answered_story">¡Has respondido con éxito!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d respuesta promediando un %s</item>
+        <item quantity="other">%d respuestas promediando un %s</item>
+    </plurals>
+    <string name="slider_answer">Tu respuesta: %s</string>
     <string name="reply_story">Responder a la historia</string>
     <string name="reply_hint">Responder…</string>
     <string name="story_quiz">Cuestionario</string>
+    <string name="story_slider">Deslizador</string>
     <string name="story_quizzed">¡Ya has respondido!</string>
     <string name="story_mentions">Menciones</string>
     <string name="priv_acc">Esta cuenta es privada</string>
@@ -98,6 +109,9 @@
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Desrestringir</string>
+    <string name="status_mutual">Siguiéndose mutuamente</string>
+    <string name="status_following">Seguido por ti</string>
+    <string name="status_follower">Siguiéndote</string>
     <string name="map">Mapa</string>
     <string name="dialog_export_btn_export">Exportar</string>
     <string name="dialog_export_btn_import">Importar</string>
@@ -305,4 +319,5 @@
         <item quantity="one">%d comentario</item>
         <item quantity="other">%d comentarios</item>
     </plurals>
+    <string name="download_permission">¡Permiso de almacenamiento no concecido!</string>
 </resources>

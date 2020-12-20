@@ -42,10 +42,13 @@
     <string name="instadp_settings">使用 Instadp 获取高清头像</string>
     <string name="import_export">导入/导出</string>
     <string name="select_language">语言</string>
-    <string name="main_posts_count">%s\n帖子</string>
-    <string name="main_posts_count_inline">%s 个帖子</string>
-    <string name="main_posts_followers">%s\n粉丝</string>
-    <string name="main_posts_following">%s\n已关注</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="other">%s 帖子</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="other">%s 粉丝</item>
+    </plurals>
+    <string name="main_posts_following">%s 关注 </string>
     <string name="post_viewer_autoplay_video">自动播放视频</string>
     <string name="post_viewer_muted_autoplay">视频默认静音</string>
     <string name="post_viewer_download_dialog_title">选择要下载的</string>
@@ -63,9 +66,14 @@
     <string name="respond_story">回复</string>
     <string name="answer_hint">回答…</string>
     <string name="answered_story">回答成功！</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="other">%d 个回答，平均 %s</item>
+    </plurals>
+    <string name="slider_answer">您的回答：%s</string>
     <string name="reply_story">回复快拍</string>
     <string name="reply_hint">回复…</string>
     <string name="story_quiz">测验</string>
+    <string name="story_slider">滑块</string>
     <string name="story_quizzed">您已回答过了！</string>
     <string name="story_mentions">提及</string>
     <string name="priv_acc">私密账户</string>
@@ -98,6 +106,9 @@
     <string name="unblock">解禁</string>
     <string name="restrict">限制</string>
     <string name="unrestrict">放开</string>
+    <string name="status_mutual">互相关注</string>
+    <string name="status_following">您已关注</string>
+    <string name="status_follower">关注了您</string>
     <string name="map">地图</string>
     <string name="dialog_export_btn_export">导出</string>
     <string name="dialog_export_btn_import">导入</string>
@@ -303,4 +314,5 @@
     <plurals name="comments_count">
         <item quantity="other">%d 条评论</item>
     </plurals>
+    <string name="download_permission">未授予存储权限！</string>
 </resources>

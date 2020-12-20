@@ -42,10 +42,19 @@
     <string name="instadp_settings">Использовать Instadp для фотографий профиля с высокой четкостью</string>
     <string name="import_export">Импорт/Экспорт</string>
     <string name="select_language">Язык</string>
-    <string name="main_posts_count">%s\nПубликаций</string>
-    <string name="main_posts_count_inline">%s Публикаций</string>
-    <string name="main_posts_followers">%s\nПодписчиков</string>
-    <string name="main_posts_following">%s\nПоследователей</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="few">%s Posts</item>
+        <item quantity="many">%s Posts</item>
+        <item quantity="other">%s Posts</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="few">%s Followers</item>
+        <item quantity="many">%s Followers</item>
+        <item quantity="other">%s Followers</item>
+    </plurals>
+    <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">Автовоспроизведение видео</string>
     <string name="post_viewer_muted_autoplay">Всегда заглушать видео</string>
     <string name="post_viewer_download_dialog_title">Выберите, что скачивать</string>
@@ -63,9 +72,17 @@
     <string name="respond_story">Отреагировать</string>
     <string name="answer_hint">Ответить…</string>
     <string name="answered_story">Ответ успешно представлен!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d response averaging %s</item>
+        <item quantity="few">%d responses averaging %s</item>
+        <item quantity="many">%d responses averaging %s</item>
+        <item quantity="other">%d responses averaging %s</item>
+    </plurals>
+    <string name="slider_answer">Your answer: %s</string>
     <string name="reply_story">Ответить на историю</string>
     <string name="reply_hint">Ответить…</string>
     <string name="story_quiz">Опрос</string>
+    <string name="story_slider">Slider</string>
     <string name="story_quizzed">Вы уже ответили!</string>
     <string name="story_mentions">Упоминания</string>
     <string name="priv_acc">Это частная учётная запись</string>
@@ -98,6 +115,9 @@
     <string name="unblock">Разблокировать</string>
     <string name="restrict">Ограничить</string>
     <string name="unrestrict">Снять ограничение</string>
+    <string name="status_mutual">Following each other</string>
+    <string name="status_following">Followed by you</string>
+    <string name="status_follower">Following you</string>
     <string name="map">Карта</string>
     <string name="dialog_export_btn_export">Экспорт</string>
     <string name="dialog_export_btn_import">Импорт</string>
@@ -309,4 +329,5 @@
         <item quantity="many">%d комментариев</item>
         <item quantity="other">%d комментарии</item>
     </plurals>
+    <string name="download_permission">Storage permission not granted!</string>
 </resources>

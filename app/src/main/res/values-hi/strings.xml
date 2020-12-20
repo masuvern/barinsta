@@ -42,10 +42,15 @@
     <string name="instadp_settings">अधिक स्पष्ट रूपरेखा के लिये instadp कि ब्यबहार करें।</string>
     <string name="import_export">आयात/निर्यात</string>
     <string name="select_language">भाषा</string>
-    <string name="main_posts_count">%s\n पोस्टस</string>
-    <string name="main_posts_count_inline">%s पोस्टस</string>
-    <string name="main_posts_followers">%s\n अनुगामीयाॅ</string>
-    <string name="main_posts_following">%s\n फलो कर रहें है</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="other">%s Followers</item>
+    </plurals>
+    <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">वीडियो ऑटोप्ले करें</string>
     <string name="post_viewer_muted_autoplay">सर्बदा वीडियो को शब्दहिन रखें</string>
     <string name="post_viewer_download_dialog_title">डाउनलोड करने के लिए चयन करें</string>
@@ -63,9 +68,15 @@
     <string name="respond_story">जवाब</string>
     <string name="answer_hint">उत्तर…</string>
     <string name="answered_story">सही उत्तर</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d response averaging %s</item>
+        <item quantity="other">%d responses averaging %s</item>
+    </plurals>
+    <string name="slider_answer">Your answer: %s</string>
     <string name="reply_story">स्टोरि पे प्रतिक्रिया करें</string>
     <string name="reply_hint">जवाब…</string>
     <string name="story_quiz">प्रश्नोत्तरी</string>
+    <string name="story_slider">Slider</string>
     <string name="story_quizzed">आप पहले से ही उत्तर दिये हो!</string>
     <string name="story_mentions">उल्लेख</string>
     <string name="priv_acc">यह एकाउॅट निजी है</string>
@@ -99,6 +110,9 @@
     <string name="unblock">अनब्ल़ॉक करें</string>
     <string name="restrict">प्रतिबंध लगाए</string>
     <string name="unrestrict">प्रतिबंध न लगाए</string>
+    <string name="status_mutual">Following each other</string>
+    <string name="status_following">Followed by you</string>
+    <string name="status_follower">Following you</string>
     <string name="map">नक्शा</string>
     <string name="dialog_export_btn_export">निर्यात करें</string>
     <string name="dialog_export_btn_import">आयात करें</string>
@@ -306,4 +320,5 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
+    <string name="download_permission">Storage permission not granted!</string>
 </resources>

@@ -42,10 +42,15 @@
     <string name="instadp_settings">Usa Instadp per immagini del profilo ad alta definizione</string>
     <string name="import_export">Importa/Esporta</string>
     <string name="select_language">Lingua</string>
-    <string name="main_posts_count">%s\nPost</string>
-    <string name="main_posts_count_inline">%s Post</string>
-    <string name="main_posts_followers">%s\nSeguaci</string>
-    <string name="main_posts_following">%s\nSeguiti</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Post</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Seguace</item>
+        <item quantity="other">%s Seguaci</item>
+    </plurals>
+    <string name="main_posts_following">%s Seguiti </string>
     <string name="post_viewer_autoplay_video">Riproduzione automatica video</string>
     <string name="post_viewer_muted_autoplay">Silenzia sempre i video</string>
     <string name="post_viewer_download_dialog_title">Seleziona cosa scaricare</string>
@@ -63,9 +68,15 @@
     <string name="respond_story">Rispondi</string>
     <string name="answer_hint">Rispondi…</string>
     <string name="answered_story">Risposta corretta!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d risposta media %s</item>
+        <item quantity="other">%d risposte medie %s</item>
+    </plurals>
+    <string name="slider_answer">La tua risposta: %s</string>
     <string name="reply_story">Rispondi alla storia</string>
     <string name="reply_hint">Rispondi…</string>
     <string name="story_quiz">Quiz</string>
+    <string name="story_slider">Scorrimento</string>
     <string name="story_quizzed">Hai già risposto!</string>
     <string name="story_mentions">Menzioni</string>
     <string name="priv_acc">Questo Profilo è Privato</string>
@@ -98,6 +109,9 @@
     <string name="unblock">Sblocca</string>
     <string name="restrict">Limita</string>
     <string name="unrestrict">Rimuovi limitazione</string>
+    <string name="status_mutual">Si seguono a vicenda</string>
+    <string name="status_following">Seguito da te</string>
+    <string name="status_follower">Ti segue</string>
     <string name="map">Mappa</string>
     <string name="dialog_export_btn_export">Esporta</string>
     <string name="dialog_export_btn_import">Importa</string>
@@ -305,4 +319,5 @@
         <item quantity="one">%d commento</item>
         <item quantity="other">%d commenti</item>
     </plurals>
+    <string name="download_permission">Permesso di archiviazione non garantito!</string>
 </resources>
