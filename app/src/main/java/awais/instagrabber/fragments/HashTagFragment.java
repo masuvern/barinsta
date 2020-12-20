@@ -513,7 +513,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 }));
         hashtagDetailsBinding.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
         final String postCount = String.valueOf(hashtagModel.getPostCount());
-        final SpannableStringBuilder span = new SpannableStringBuilder(getString(R.string.main_posts_count_inline, postCount));
+        final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
+                hashtagModel.getPostCount() > 2000000000L ? 2000000000 : hashtagModel.getPostCount().intValue(),
+                postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         hashtagDetailsBinding.mainTagPostCount.setText(span);

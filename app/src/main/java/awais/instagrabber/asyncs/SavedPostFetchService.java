@@ -50,7 +50,7 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
                 profileService.fetchLiked(nextMaxId, callback);
                 break;
             case TAGGED:
-                profileService.fetchTagged(profileId, nextMaxId, callback);
+                profileService.fetchTagged(profileId, 30, nextMaxId, callback);
                 break;
             case SAVED:
             default:

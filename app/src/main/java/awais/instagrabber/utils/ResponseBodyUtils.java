@@ -203,7 +203,7 @@ public final class ResponseBodyUtils {
                         userObj.getString("full_name"),
                         null, null,
                         userObj.getString("profile_pic_url"),
-                        null, 0, 0, 0, false, false, false, false);
+                        null, 0, 0, 0, false, false, false, false, false);
             }
 
             final MediaItemType mediaType = getMediaItemType(mediaObj.optInt("media_type", -1));
@@ -291,7 +291,7 @@ public final class ResponseBodyUtils {
                                              userObject.getString("full_name"),
                                              null, null,
                                              userObject.getString("profile_pic_url"),
-                                             null, 0, 0, 0, false, false, false, false);
+                                             null, 0, 0, 0, false, false, false, false, false);
         }
 
         final ProfileModel[] leftuserModels = new ProfileModel[leftusersLen];
@@ -305,7 +305,7 @@ public final class ResponseBodyUtils {
                                                  userObject.getString("full_name"),
                                                  null, null,
                                                  userObject.getString("profile_pic_url"),
-                                                 null, 0, 0, 0, false, false, false, false);
+                                                 null, 0, 0, 0, false, false, false, false, false);
         }
 
         final Long[] adminIDs = new Long[adminsLen];
@@ -470,7 +470,7 @@ public final class ResponseBodyUtils {
                                                     profile.getString("full_name"),
                                                     null, null,
                                                     profile.getString("profile_pic_url"),
-                                                    null, 0, 0, 0, false, false, false, false);
+                                                    null, 0, 0, 0, false, false, false, false, false);
                 }
                 break;
 
@@ -622,6 +622,7 @@ public final class ResponseBodyUtils {
                     0,
                     0,
                     following,
+                    false,
                     restricted,
                     false,
                     requested);
@@ -702,6 +703,7 @@ public final class ResponseBodyUtils {
                     0,
                     0,
                     0,
+                    false,
                     false,
                     false,
                     false,

@@ -165,6 +165,7 @@ public class DiscoverService extends BaseService {
                     false,
                     false,
                     false,
+                    false,
                     false);
         }
         final String resourceUrl = ResponseBodyUtils.getHighQualityImage(coverMediaJson);

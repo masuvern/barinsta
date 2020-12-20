@@ -4,6 +4,7 @@
     <dimen name="private_page_margins">@dimen/profile_picture_size</dimen>
 
     <dimen name="profile_picture_size">90dp</dimen>
+    <dimen name="profile_chip_size">40dp</dimen>
     <dimen name="image_size_40">40dp</dimen>
 
     <dimen name="profile_pic_size_tiny">24dp</dimen>

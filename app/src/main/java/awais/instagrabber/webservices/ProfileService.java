@@ -89,7 +89,6 @@ public class ProfileService extends BaseService {
         });
     }
 
-
     public void fetchPosts(final ProfileModel profileModel,
                            final int postsPerPage,
                            final String cursor,
@@ -156,133 +155,16 @@ public class ProfileService extends BaseService {
         }
         final JSONArray edges = mediaPosts.getJSONArray("edges");
         for (int i = 0; i < edges.length(); ++i) {
-            final JSONObject mediaNode = edges.getJSONObject(i).getJSONObject("node");
-            final String mediaType = mediaNode.optString("__typename");
-            if (mediaType.isEmpty() || "GraphSuggestedUserFeedUnit".equals(mediaType))
+            final JSONObject itemJson = edges.optJSONObject(i);
+            if (itemJson == null) {
                 continue;
-            final boolean isVideo = mediaNode.getBoolean("is_video");
-            final long videoViews = mediaNode.optLong("video_view_count", 0);
-
-            final String displayUrl = mediaNode.optString("display_url");
-            if (TextUtils.isEmpty(displayUrl)) continue;
-            final String resourceUrl;
-
-            if (isVideo) {
-                resourceUrl = mediaNode.getString("video_url");
-            } else {
-                resourceUrl = mediaNode.has("display_resources") ? ResponseBodyUtils.getHighQualityImage(mediaNode) : displayUrl;
             }
-            JSONObject tempJsonObject = mediaNode.optJSONObject("edge_media_to_comment");
-            final long commentsCount = tempJsonObject != null ? tempJsonObject.optLong("count") : 0;
-            tempJsonObject = mediaNode.optJSONObject("edge_media_preview_like");
-            final long likesCount = tempJsonObject != null ? tempJsonObject.optLong("count") : 0;
-            tempJsonObject = mediaNode.optJSONObject("edge_media_to_caption");
-            final JSONArray captions = tempJsonObject != null ? tempJsonObject.getJSONArray("edges") : null;
-            String captionText = null;
-            if (captions != null && captions.length() > 0) {
-                if ((tempJsonObject = captions.optJSONObject(0)) != null &&
-                        (tempJsonObject = tempJsonObject.optJSONObject("node")) != null) {
-                    captionText = tempJsonObject.getString("text");
-                }
+            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
+            if (feedModel != null) {
+                feedModels.add(feedModel);
             }
-            final JSONObject location = mediaNode.optJSONObject("location");
-            // Log.d(TAG, "location: " + (location == null ? null : location.toString()));
-            String locationId = null;
-            String locationName = null;
-            if (location != null) {
-                locationName = location.optString("name");
-                if (location.has("id")) {
-                    locationId = location.getString("id");
-                } else if (location.has("pk")) {
-                    locationId = location.getString("pk");
-                }
-                // Log.d(TAG, "locationId: " + locationId);
-            }
-            int height = 0;
-            int width = 0;
-            final JSONObject dimensions = mediaNode.optJSONObject("dimensions");
-            if (dimensions != null) {
-                height = dimensions.optInt("height");
-                width = dimensions.optInt("width");
-            }
-            String thumbnailUrl = null;
-            try {
-                thumbnailUrl = mediaNode.getJSONArray("display_resources")
-                                        .getJSONObject(0)
-                                        .getString("src");
-            } catch (JSONException ignored) {}
-            final FeedModel.Builder builder = new FeedModel.Builder()
-                    .setProfileModel(profileModel)
-                    .setItemType(isVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                                         : MediaItemType.MEDIA_TYPE_IMAGE)
-                    .setViewCount(videoViews)
-                    .setPostId(mediaNode.getString(Constants.EXTRAS_ID))
-                    .setDisplayUrl(resourceUrl)
-                    .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl : displayUrl)
-                    .setShortCode(mediaNode.getString(Constants.EXTRAS_SHORTCODE))
-                    .setPostCaption(captionText)
-                    .setCommentsCount(commentsCount)
-                    .setTimestamp(mediaNode.optLong("taken_at_timestamp", -1))
-                    .setLiked(mediaNode.getBoolean("viewer_has_liked"))
-                    .setBookmarked(mediaNode.getBoolean("viewer_has_saved"))
-                    .setLikesCount(likesCount)
-                    .setLocationName(locationName)
-                    .setLocationId(locationId)
-                    .setImageHeight(height)
-                    .setImageWidth(width);
-            final boolean isSlider = "GraphSidecar".equals(mediaType) && mediaNode.has("edge_sidecar_to_children");
-            if (isSlider) {
-                builder.setItemType(MediaItemType.MEDIA_TYPE_SLIDER);
-                final JSONObject sidecar = mediaNode.optJSONObject("edge_sidecar_to_children");
-                if (sidecar != null) {
-                    final JSONArray children = sidecar.optJSONArray("edges");
-                    if (children != null) {
-                        final List<PostChild> sliderItems = getSliderItems(children);
-                        builder.setSliderItems(sliderItems);
-                    }
-                }
-            }
-            final FeedModel feedModel = builder.build();
-            feedModels.add(feedModel);
         }
         return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
-    }
-
-    @NonNull
-    private List<PostChild> getSliderItems(final JSONArray children) throws JSONException {
-        final List<PostChild> sliderItems = new ArrayList<>();
-        for (int j = 0; j < children.length(); ++j) {
-            final JSONObject childNode = children.optJSONObject(j).getJSONObject("node");
-            final boolean isChildVideo = childNode.optBoolean("is_video");
-            int height = 0;
-            int width = 0;
-            final JSONObject dimensions = childNode.optJSONObject("dimensions");
-            if (dimensions != null) {
-                height = dimensions.optInt("height");
-                width = dimensions.optInt("width");
-            }
-            String thumbnailUrl = null;
-            try {
-                thumbnailUrl = childNode.getJSONArray("display_resources")
-                                        .getJSONObject(0)
-                                        .getString("src");
-            } catch (JSONException ignored) {}
-            final PostChild sliderItem = new PostChild.Builder()
-                    .setItemType(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                                              : MediaItemType.MEDIA_TYPE_IMAGE)
-                    .setPostId(childNode.getString(Constants.EXTRAS_ID))
-                    .setDisplayUrl(isChildVideo ? childNode.getString("video_url")
-                                                : childNode.getString("display_url"))
-                    .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl
-                                                          : childNode.getString("display_url"))
-                    .setVideoViews(childNode.optLong("video_view_count", 0))
-                    .setHeight(height)
-                    .setWidth(width)
-                    .build();
-            // Log.d(TAG, "getSliderItems: sliderItem: " + sliderItem);
-            sliderItems.add(sliderItem);
-        }
-        return sliderItems;
     }
 
     public void fetchSaved(final String maxId,
@@ -358,13 +240,17 @@ public class ProfileService extends BaseService {
     }
 
     public void fetchTagged(final String profileId,
-                            final String maxId,
+                            final int postsPerPage,
+                            final String cursor,
                             final ServiceCallback<SavedPostsFetchResponse> callback) {
-        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        if (!TextUtils.isEmpty(maxId)) {
-            builder.put("max_id", maxId);
-        }
-        final Call<String> request = repository.fetchTagged(profileId, builder.build());
+        final Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("query_hash", "31fe64d9463cbbe58319dced405c6206");
+        queryMap.put("variables", "{" +
+                "\"id\":\"" + profileId + "\"," +
+                "\"first\":" + postsPerPage + "," +
+                "\"after\":\"" + (cursor == null ? "" : cursor) + "\"" +
+                "}");
+        final Call<String> request = wwwRepository.fetch(queryMap);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -377,7 +263,7 @@ public class ProfileService extends BaseService {
                         callback.onSuccess(null);
                         return;
                     }
-                    final SavedPostsFetchResponse savedPostsFetchResponse = parseSavedPostsResponse(body, false);
+                    final SavedPostsFetchResponse savedPostsFetchResponse = parseTaggedPostsResponse(body);
                     callback.onSuccess(savedPostsFetchResponse);
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
@@ -409,6 +295,41 @@ public class ProfileService extends BaseService {
                 status,
                 items
         );
+    }
+
+    @NonNull
+    private SavedPostsFetchResponse parseTaggedPostsResponse(@NonNull final String body)
+            throws JSONException {
+        final List<FeedModel> feedModels = new ArrayList<>();
+        final JSONObject timelineFeed = new JSONObject(body)
+                .getJSONObject("data")
+                .getJSONObject(Constants.EXTRAS_USER)
+                .getJSONObject("edge_user_to_photos_of_you");
+        final String endCursor;
+        final boolean hasNextPage;
+
+        final JSONObject pageInfo = timelineFeed.getJSONObject("page_info");
+        if (pageInfo.has("has_next_page")) {
+            hasNextPage = pageInfo.getBoolean("has_next_page");
+            endCursor = hasNextPage ? pageInfo.getString("end_cursor") : null;
+        } else {
+            hasNextPage = false;
+            endCursor = null;
+        }
+
+        final JSONArray feedItems = timelineFeed.getJSONArray("edges");
+
+        for (int i = 0; i < feedItems.length(); ++i) {
+            final JSONObject itemJson = feedItems.optJSONObject(i);
+            if (itemJson == null) {
+                continue;
+            }
+            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
+            if (feedModel != null) {
+                feedModels.add(feedModel);
+            }
+        }
+        return new SavedPostsFetchResponse(hasNextPage, endCursor, timelineFeed.getInt("count"), "ok", feedModels);
     }
 
     private List<FeedModel> parseItems(final JSONArray items, final boolean isInMedia) throws JSONException {

@@ -123,7 +123,7 @@ public class StoriesService extends BaseService {
                                                                    user.getString("username"),
                                                                    null, null, null,
                                                                    user.getString("profile_pic_url"),
-                                                                   null, 0, 0, 0, false, false, false, false);
+                                                                   null, 0, 0, 0, false, false, false, false, false);
                 final String id = node.getString("id");
                 final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == node.getLong("latest_reel_media");
                 feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead));

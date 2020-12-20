@@ -122,6 +122,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                                    false,
                                                                                    false,
                                                                                    false,
+                                                                                   false,
                                                                                    false);
 
                                 final JSONObject likedBy = childComment.optJSONObject("edge_liked_by");
@@ -207,6 +208,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                            false,
                                                                            false,
                                                                            false,
+                                                                           false,
                                                                            false);
 
                         final JSONObject likedBy = comment.optJSONObject("edge_liked_by");
@@ -253,6 +255,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                                         0,
                                                                                         0,
                                                                                         0,
+                                                                                        false,
                                                                                         false,
                                                                                         false,
                                                                                         false,
