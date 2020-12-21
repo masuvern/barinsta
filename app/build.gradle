@@ -87,7 +87,7 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
     // implementation 'com.github.hendrawd:StorageUtil:1.1.0'
-    implementation 'com.github.ammargitham:AutoLinkTextViewV2:master-SNAPSHOT'
+    implementation 'me.austinhuang:AutoLinkTextViewV2:-SNAPSHOT'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'

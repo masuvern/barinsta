@@ -580,7 +580,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 profileDetailsBinding.favChip.setText(R.string.added_to_favs);
                 favoriteRepository.insertOrUpdateFavorite(new Favorite(
                         result.getId(),
-                        finalUsername,
+                        profileModel.getUsername(),
                         FavoriteType.USER,
                         profileModel.getName(),
                         profileModel.getSdProfilePic(),
@@ -619,10 +619,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
                     @Override
                     public void onDataNotAvailable() {
-                        final String finalUsername = username.startsWith("@") ? username.substring(1) : username;
                         favoriteRepository.insertOrUpdateFavorite(new Favorite(
                                 -1,
-                                finalUsername,
+                                profileModel.getUsername(),
                                 FavoriteType.USER,
                                 profileModel.getName(),
                                 profileModel.getSdProfilePic(),

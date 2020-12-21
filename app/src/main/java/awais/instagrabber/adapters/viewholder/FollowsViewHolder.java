@@ -23,7 +23,6 @@ public final class FollowsViewHolder extends RecyclerView.ViewHolder {
     public void bind(final ProfileModel model,
                      final List<Long> admins,
                      final View.OnClickListener onClickListener) {
-        Log.d("austin_debug", "bind "+model);
         if (model == null) return;
         itemView.setTag(model);
         itemView.setOnClickListener(onClickListener);
