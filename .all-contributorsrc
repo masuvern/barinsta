@@ -62,6 +62,15 @@
       ]
     },
     {
+      "login": "CrazyMarvin",
+      "name": "CrazyMarvin",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/15004217?v=4",
+      "profile": "https://github.com/CrazyMarvin",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
       "login": "KevinNThomas",
       "name": "Kevin Thomas",
       "avatar_url": "https://avatars2.githubusercontent.com/u/15370181",
@@ -113,6 +122,15 @@
       ]
     },
     {
+      "login": "cizordj",
+      "name": "Cézar Augusto",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/32869222?v=4",
+      "profile": "https://github.com/cizordj",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
       "login": "farzadx",
       "name": "farzadx",
       "avatar_url": "https://avatars2.githubusercontent.com/u/70059397?v=4",
@@ -144,6 +162,15 @@
       "name": "Galang23",
       "avatar_url": "https://avatars3.githubusercontent.com/u/13700948",
       "profile": "https://github.com/Galang23",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "initdebugs",
+      "name": "Initdebugs",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/75781464?v=4",
+      "profile": "https://github.com/initdebugs",
       "contributions": [
         "translation"
       ]
