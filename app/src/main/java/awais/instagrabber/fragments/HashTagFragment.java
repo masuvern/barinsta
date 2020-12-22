@@ -410,9 +410,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 hashtagDetailsBinding.btnFollowTag.setClickable(true);
                                 if (!result) {
                                     Log.e(TAG, "onSuccess: result is false");
+                                    Snackbar.make(root, R.string.downloader_unknown_error, BaseTransientBottomBar.LENGTH_LONG)
+                                            .show();
                                     return;
                                 }
-                                onRefresh();
+                                hashtagDetailsBinding.btnFollowTag.setText(R.string.unfollow);
+                                hashtagDetailsBinding.btnFollowTag.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
                             }
 
                             @Override
@@ -435,9 +438,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             hashtagDetailsBinding.btnFollowTag.setClickable(true);
                             if (!result) {
                                 Log.e(TAG, "onSuccess: result is false");
+                                Snackbar.make(root, R.string.downloader_unknown_error, BaseTransientBottomBar.LENGTH_LONG)
+                                        .show();
                                 return;
                             }
-                            onRefresh();
+                            hashtagDetailsBinding.btnFollowTag.setText(R.string.follow);
+                            hashtagDetailsBinding.btnFollowTag.setChipIconResource(R.drawable.ic_outline_person_add_24);
                         }
 
                         @Override
@@ -462,8 +468,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         favoriteRepository.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
             @Override
             public void onSuccess(final Favorite result) {
-                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
                 favoriteRepository.insertOrUpdateFavorite(new Favorite(
                         result.getId(),
                         hashtag.substring(1),
@@ -473,7 +477,10 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         result.getDateAdded()
                 ), new RepositoryCallback<Void>() {
                     @Override
-                    public void onSuccess(final Void result) {}
+                    public void onSuccess(final Void result) {
+                        hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                        hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                    }
 
                     @Override
                     public void onDataNotAvailable() {}
