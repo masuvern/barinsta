@@ -118,18 +118,41 @@ public class FeedService extends BaseService {
             throws JSONException {
         final JSONObject root = new JSONObject(body);
         final boolean moreAvailable = root.optBoolean("more_available");
-        final String nextMaxId = root.optString("next_max_id");
+        String nextMaxId = root.optString("next_max_id");
+        final boolean needNewMaxId = nextMaxId.equals("feed_recs_head_load");
         final JSONArray feedItems = root.optJSONArray("items");
         final List<FeedModel> feedModels = new ArrayList<>();
         for (int i = 0; i < feedItems.length(); ++i) {
             final JSONObject itemJson = feedItems.optJSONObject(i);
-            if (itemJson == null || itemJson.has("injected")
-            ) {
+            if (itemJson == null || itemJson.has("injected")) {
                 continue;
             }
-            final FeedModel feedModel = ResponseBodyUtils.parseItem(itemJson);
-            if (feedModel != null) {
-                feedModels.add(feedModel);
+            else if (itemJson.has("end_of_feed_demarcator") && needNewMaxId) {
+                final JSONArray groups = itemJson.getJSONObject("end_of_feed_demarcator").getJSONObject("group_set").getJSONArray("groups");
+                for (int j = 0; j < groups.length(); ++j) {
+                    final JSONObject groupJson = groups.optJSONObject(j);
+                    if (groupJson.getString("id").equals("past_posts")) {
+                        nextMaxId = groupJson.optString("next_max_id");
+                        final JSONArray miniFeedItems = groupJson.optJSONArray("feed_items");
+                        for (int k = 0; k < miniFeedItems.length(); ++k) {
+                            final JSONObject miniItemJson = miniFeedItems.optJSONObject(k);
+                            if (miniItemJson == null || miniItemJson.has("injected")) {
+                                continue;
+                            }
+                            final FeedModel feedModel = ResponseBodyUtils.parseItem(miniItemJson);
+                            if (feedModel != null) {
+                                feedModels.add(feedModel);
+                            }
+                        }
+                    }
+                    else continue;
+                }
+            }
+            else {
+                final FeedModel feedModel = ResponseBodyUtils.parseItem(itemJson);
+                if (feedModel != null) {
+                    feedModels.add(feedModel);
+                }
             }
         }
         return new PostsFetchResponse(feedModels, moreAvailable, nextMaxId);
