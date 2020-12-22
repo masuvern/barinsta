@@ -115,6 +115,8 @@
     <string name="unblock">Разблокировать</string>
     <string name="restrict">Ограничить</string>
     <string name="unrestrict">Снять ограничение</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Following each other</string>
     <string name="status_following">Followed by you</string>
     <string name="status_follower">Following you</string>
@@ -198,6 +200,7 @@
     <string name="comment_viewer_reply_comment">Ответить на комментарий</string>
     <string name="comment_viewer_like_comment">Мне нравится комментарий</string>
     <string name="comment_viewer_unlike_comment">Не нравится комментарий</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Удалить комментарий</string>
     <string name="comment_send_empty_comment">Нет пустых комментариев!</string>
     <string name="comment_view_mention_user_search">Вы хотите найти имя пользователя?</string>
@@ -287,6 +290,7 @@
     <string name="apply">Применить</string>
     <string name="save">Сохранить</string>
     <string name="caption">Заголовок</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Лента времени видеопроигрывателя</string>
     <string name="liking">Нравится…</string>
     <string name="like_unsuccessful">Нравится неудачно</string>
@@ -315,6 +319,7 @@
     <string name="show_grid_gap">Показать разрыв сетки</string>
     <string name="disable_animation">Отключить анимацию</string>
     <string name="follower_wait_to_load">Пожалуйста, дождитесь сначала выполнения текущей задачи!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Публикация не найдена!</string>
     <string name="no_external_app_url">Нет приложения, чтоб открыть ссылку</string>
     <plurals name="likes_count">
