@@ -106,6 +106,8 @@
     <string name="unblock">解禁</string>
     <string name="restrict">限制</string>
     <string name="unrestrict">放开</string>
+    <string name="bio_copy">复制简介</string>
+    <string name="bio_translate">翻译简介</string>
     <string name="status_mutual">互相关注</string>
     <string name="status_following">您已关注</string>
     <string name="status_follower">关注了您</string>
@@ -189,6 +191,7 @@
     <string name="comment_viewer_reply_comment">回复评论</string>
     <string name="comment_viewer_like_comment">赞评论</string>
     <string name="comment_viewer_unlike_comment">取消赞</string>
+    <string name="comment_viewer_translate_comment">翻译评论</string>
     <string name="comment_viewer_delete_comment">删除评论</string>
     <string name="comment_send_empty_comment">评论要写字的！</string>
     <string name="comment_view_mention_user_search">要搜索用户名吗?</string>
@@ -278,6 +281,7 @@
     <string name="apply">应用</string>
     <string name="save">保存</string>
     <string name="caption">说明</string>
+    <string name="translate_caption">翻译内容...</string>
     <string name="player_timeline_desc">视频播放器时间线</string>
     <string name="liking">正在赞…</string>
     <string name="like_unsuccessful">点赞失败</string>
@@ -306,6 +310,7 @@
     <string name="show_grid_gap">显示网格间距</string>
     <string name="disable_animation">禁用动画</string>
     <string name="follower_wait_to_load">请等待当前任务完成！</string>
+    <string name="follower_start_compare">根据用户数量的不同，加载过程可能需要一段时间。请耐心等待。</string>
     <string name="post_not_found">找不到该帖！</string>
     <string name="no_external_app_url">没有找到打开网址的应用</string>
     <plurals name="likes_count">

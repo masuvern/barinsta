@@ -109,6 +109,8 @@
     <string name="unblock">Sblocca</string>
     <string name="restrict">Limita</string>
     <string name="unrestrict">Rimuovi limitazione</string>
+    <string name="bio_copy">Copia bio</string>
+    <string name="bio_translate">Traduci bio</string>
     <string name="status_mutual">Si seguono a vicenda</string>
     <string name="status_following">Seguito da te</string>
     <string name="status_follower">Ti segue</string>
@@ -192,6 +194,7 @@
     <string name="comment_viewer_reply_comment">Rispondi al commento</string>
     <string name="comment_viewer_like_comment">Mi Piace il commento</string>
     <string name="comment_viewer_unlike_comment">Il commento Non mi Piace Più</string>
+    <string name="comment_viewer_translate_comment">Traduci commento</string>
     <string name="comment_viewer_delete_comment">Elimina commento</string>
     <string name="comment_send_empty_comment">Nessun commento vuoto!</string>
     <string name="comment_view_mention_user_search">Vuoi cercare il nome utente?</string>
@@ -281,6 +284,7 @@
     <string name="apply">Applica</string>
     <string name="save">Salva</string>
     <string name="caption">Didascalia</string>
+    <string name="translate_caption">Traduci didascalia...</string>
     <string name="player_timeline_desc">Barra temporale del lettore video</string>
     <string name="liking">Mettendo Mi Piace…</string>
     <string name="like_unsuccessful">Impossibile mettere Mi Piace</string>
@@ -309,6 +313,7 @@
     <string name="show_grid_gap">Mostra divario griglia</string>
     <string name="disable_animation">Disabilita animazione</string>
     <string name="follower_wait_to_load">Prima, sei pregato di attendere che l\'attività corrente sia completata!</string>
+    <string name="follower_start_compare">A seconda del numero di utenti, questo può richiedere un po\' di tempo. Si prega di essere pazienti.</string>
     <string name="post_not_found">Post non trovato!</string>
     <string name="no_external_app_url">Nessuna applicazione trovata che apre gli urls</string>
     <plurals name="likes_count">

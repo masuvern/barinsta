@@ -109,6 +109,8 @@
     <string name="unblock">Débloquer</string>
     <string name="restrict">Restreindre</string>
     <string name="unrestrict">Retirer des restrictions</string>
+    <string name="bio_copy">Copier la bio</string>
+    <string name="bio_translate">Traduire la bio</string>
     <string name="status_mutual">Following each other</string>
     <string name="status_following">Followed by you</string>
     <string name="status_follower">Following you</string>
@@ -192,6 +194,7 @@
     <string name="comment_viewer_reply_comment">Répondre au commentaire</string>
     <string name="comment_viewer_like_comment">Aimer le commentaire</string>
     <string name="comment_viewer_unlike_comment">Retirer le j\'aime du commentaire</string>
+    <string name="comment_viewer_translate_comment">Traduire le commentaire</string>
     <string name="comment_viewer_delete_comment">Supprimer le commentaire</string>
     <string name="comment_send_empty_comment">Aucun commentaire vide !</string>
     <string name="comment_view_mention_user_search">Souhaitez-vous faire une recherche sur le nom d\'utilisateur ?</string>
@@ -281,6 +284,7 @@
     <string name="apply">Appliquer</string>
     <string name="save">Sauvegarder</string>
     <string name="caption">Légende</string>
+    <string name="translate_caption">Traduire la légende...</string>
     <string name="player_timeline_desc">Chronologie du lecteur vidéo</string>
     <string name="liking">Entrain d\'aimer…</string>
     <string name="like_unsuccessful">Erreur lors du \"j\'aime\"</string>
@@ -309,6 +313,7 @@
     <string name="show_grid_gap">Afficher les lacunes de la grille</string>
     <string name="disable_animation">Désactiver les animations</string>
     <string name="follower_wait_to_load">Veuillez d\'abord attendre que la tâche en cours soit terminée !</string>
+    <string name="follower_start_compare">Selon le nombre d\'utilisateurs, cela peut prendre un certain temps à charger. Veuillez patienter.</string>
     <string name="post_not_found">Publication non trouvée!</string>
     <string name="no_external_app_url">Aucune application trouvée qui ouvre les urls</string>
     <plurals name="likes_count">

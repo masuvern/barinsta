@@ -109,6 +109,8 @@
     <string name="unblock">Engeli kaldır</string>
     <string name="restrict">Kısıtla</string>
     <string name="unrestrict">Kısıtlamayı Kaldır</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Karşılıklı takip ediliyor</string>
     <string name="status_following">Takip ediliyor</string>
     <string name="status_follower">Seni takip ediyor</string>
@@ -192,6 +194,7 @@
     <string name="comment_viewer_reply_comment">Yoruma cevap ver</string>
     <string name="comment_viewer_like_comment">Yorumu beğen</string>
     <string name="comment_viewer_unlike_comment">Yorum beğenisini geri al</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Yorumu sil</string>
     <string name="comment_send_empty_comment">Boş yorum yapılamaz!</string>
     <string name="comment_view_mention_user_search">Kullanıcı adını aratmak istiyor musun?</string>
@@ -281,6 +284,7 @@
     <string name="apply">Uygula</string>
     <string name="save">Kaydet</string>
     <string name="caption">Başlık</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Video oynatıcı zaman çizelgesi</string>
     <string name="liking">Beğeniliyor…</string>
     <string name="like_unsuccessful">Beğenme başarısız oldu</string>
@@ -309,6 +313,7 @@
     <string name="show_grid_gap">Izgara boşluklarını göster</string>
     <string name="disable_animation">Animasyonları devre dışı bırak</string>
     <string name="follower_wait_to_load">Lütfen önce aktif görevin tamamlanmasını bekle!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Gönderi bulunamadı!</string>
     <string name="no_external_app_url">Linki açabilecek uygulama bulunamadı</string>
     <plurals name="likes_count">
