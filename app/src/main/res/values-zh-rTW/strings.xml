@@ -106,6 +106,8 @@
     <string name="unblock">解除封鎖</string>
     <string name="restrict">限制</string>
     <string name="unrestrict">移除限制</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">正彼此追蹤</string>
     <string name="status_following">您已追蹤</string>
     <string name="status_follower">關注了你</string>
@@ -189,6 +191,7 @@
     <string name="comment_viewer_reply_comment">回覆評論</string>
     <string name="comment_viewer_like_comment">對此評論說讚</string>
     <string name="comment_viewer_unlike_comment">收回評論的讚</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">刪除評論</string>
     <string name="comment_send_empty_comment">無空評論！</string>
     <string name="comment_view_mention_user_search">您要搜尋用戶名嗎？</string>
@@ -278,6 +281,7 @@
     <string name="apply">套用</string>
     <string name="save">儲存</string>
     <string name="caption">說明</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">影片播放器時間軸</string>
     <string name="liking">按讚中…</string>
     <string name="like_unsuccessful">按讚失敗</string>
@@ -306,6 +310,7 @@
     <string name="show_grid_gap">網格間保留間距</string>
     <string name="disable_animation">停用動畫</string>
     <string name="follower_wait_to_load">請先等候目前的工作完成！</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">貼文不存在！</string>
     <string name="no_external_app_url">No app found which opens urls</string>
     <plurals name="likes_count">
