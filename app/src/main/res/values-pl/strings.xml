@@ -115,6 +115,8 @@
     <string name="unblock">Odblokuj</string>
     <string name="restrict">Ogranicz</string>
     <string name="unrestrict">Nieograniczone</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Following each other</string>
     <string name="status_following">Followed by you</string>
     <string name="status_follower">Following you</string>
@@ -198,6 +200,7 @@
     <string name="comment_viewer_reply_comment">Odpowiedz na komentarz</string>
     <string name="comment_viewer_like_comment">Polub komentarz</string>
     <string name="comment_viewer_unlike_comment">Usuń polubienie komentarza</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Usuń komentarz</string>
     <string name="comment_send_empty_comment">Brak komentarzy!</string>
     <string name="comment_view_mention_user_search">Czy chcesz wyszukać przy pomocy nazwy użytkownika?</string>
@@ -287,6 +290,7 @@
     <string name="apply">Zastosuj</string>
     <string name="save">Zapisz</string>
     <string name="caption">Nagłówek</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Oś czasu odtwarzacza wideo</string>
     <string name="liking">Przesyłanie polubienia…</string>
     <string name="like_unsuccessful">Nie udało się polubić</string>
@@ -315,6 +319,7 @@
     <string name="show_grid_gap">Pokaż widok siatki</string>
     <string name="disable_animation">Wyłączenie animacji</string>
     <string name="follower_wait_to_load">Poczekaj aż bieżące zadanie zostanie ukończone!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Nie znaleziono posta!</string>
     <string name="no_external_app_url">Nie znaleziono aplikacji, która otwiera adresy URL</string>
     <plurals name="likes_count">
