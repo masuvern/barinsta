@@ -1,34 +1,55 @@
 package awais.instagrabber.asyncs;
 
+import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.webservices.FeedService;
 import awais.instagrabber.webservices.ServiceCallback;
+
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class FeedPostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "FeedPostFetchService";
-    private final GraphQLService graphQLService;
+    private final FeedService feedService;
     private String nextCursor;
     private boolean hasNextPage;
 
     public FeedPostFetchService() {
-        graphQLService = GraphQLService.getInstance();
+        feedService = FeedService.getInstance();
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        graphQLService.fetchFeed(25, nextCursor, new ServiceCallback<PostsFetchResponse>() {
+        final List<FeedModel> feedModels = new ArrayList<>();
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        feedModels.clear();
+        feedService.fetch(csrfToken, nextCursor, new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
-                if (result == null) return;
+                if (result == null && feedModels.size() > 0) {
+                    fetchListener.onResult(feedModels);
+                    return;
+                }
+                else if (result == null) return;
                 nextCursor = result.getNextCursor();
                 hasNextPage = result.hasNextPage();
+                feedModels.addAll(result.getFeedModels());
                 if (fetchListener != null) {
-                    fetchListener.onResult(result.getFeedModels());
+                    if (feedModels.size() < 15 && hasNextPage) {
+                        feedService.fetch(csrfToken, nextCursor, this);
+                    }
+                    else {
+                        fetchListener.onResult(feedModels);
+                    }
                 }
             }
 

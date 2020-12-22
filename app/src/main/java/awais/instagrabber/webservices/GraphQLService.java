@@ -88,42 +88,6 @@ public class GraphQLService extends BaseService {
         });
     }
 
-    public void fetchFeed(final int maxItemsToLoad,
-                          final String cursor,
-                          final ServiceCallback<PostsFetchResponse> callback) {
-        if (loadFromMock) {
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> {
-                final ClassLoader classLoader = getClass().getClassLoader();
-                if (classLoader == null) {
-                    Log.e(TAG, "fetch: classLoader is null!");
-                    return;
-                }
-                try (InputStream resourceAsStream = classLoader.getResourceAsStream("feed_response.json");
-                     Reader in = new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8)) {
-                    final int bufferSize = 1024;
-                    final char[] buffer = new char[bufferSize];
-                    final StringBuilder out = new StringBuilder();
-                    int charsRead;
-                    while ((charsRead = in.read(buffer, 0, buffer.length)) > 0) {
-                        out.append(buffer, 0, charsRead);
-                    }
-                    callback.onSuccess(parseResponseBody(out.toString(), Constants.EXTRAS_USER, "edge_web_feed_timeline"));
-                } catch (IOException | JSONException e) {
-                    Log.e(TAG, "fetch: ", e);
-                }
-            }, 1000);
-            return;
-        }
-        fetch("c699b185975935ae2a457f24075de8c7",
-                "{\"fetch_media_item_count\":" + maxItemsToLoad + "," +
-                "\"fetch_like\":3,\"has_stories\":false,\"has_stories\":false,\"has_threaded_comments\":true," +
-                "\"fetch_media_item_cursor\":\"" + (cursor == null ? "" : cursor) + "\"}",
-                Constants.EXTRAS_USER,
-                "edge_web_feed_timeline",
-                callback);
-    }
-
     public void fetchLocationPosts(@NonNull final String locationId,
                                    final String maxId,
                                    final ServiceCallback<PostsFetchResponse> callback) {

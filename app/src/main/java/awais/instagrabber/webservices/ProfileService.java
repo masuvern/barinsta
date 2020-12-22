@@ -228,8 +228,6 @@ public class ProfileService extends BaseService {
         final JSONObject root = new JSONObject(body);
         final boolean moreAvailable = root.optBoolean("more_available");
         final String nextMaxId = root.optString("next_max_id");
-        final int numResults = root.optInt("num_results");
-        final String status = root.optString("status");
         final JSONArray itemsJson = root.optJSONArray("items");
         final List<FeedModel> items = parseItems(itemsJson, isInMedia);
         return new PostsFetchResponse(
