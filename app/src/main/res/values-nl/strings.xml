@@ -109,6 +109,8 @@
     <string name="unblock">Deblokkeer</string>
     <string name="restrict">Beperk</string>
     <string name="unrestrict">De-restrict</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Following each other</string>
     <string name="status_following">Followed by you</string>
     <string name="status_follower">Following you</string>
@@ -192,6 +194,7 @@
     <string name="comment_viewer_reply_comment">Reageer op opmerking</string>
     <string name="comment_viewer_like_comment">Vind reactie leuk</string>
     <string name="comment_viewer_unlike_comment">Vind reactie niet meer leuk</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Verwijder opmerking</string>
     <string name="comment_send_empty_comment">Geen lege reacties!</string>
     <string name="comment_view_mention_user_search">Wil je de gebruikersnaam zoeken?</string>
@@ -281,6 +284,7 @@
     <string name="apply">Toepassen</string>
     <string name="save">Opslaan</string>
     <string name="caption">Bijschrift</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Videospeler tijdlijn</string>
     <string name="liking">Liken…</string>
     <string name="like_unsuccessful">Like niet gelukt</string>
@@ -309,6 +313,7 @@
     <string name="show_grid_gap">Rasterruimte weergeven</string>
     <string name="disable_animation">Animatie uitschakelen</string>
     <string name="follower_wait_to_load">Wacht eerst tot de huidige taak voltooid is!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Bericht niet gevonden!</string>
     <string name="no_external_app_url">Geen app gevonden om URL\'s te openen</string>
     <plurals name="likes_count">
