@@ -19,6 +19,7 @@ public class PostModel extends BasePostModel {
                      final String thumbnailUrl,
                      final String shortCode,
                      final CharSequence postCaption,
+                     final String captionId,
                      long timestamp,
                      boolean liked,
                      boolean bookmarked) {
@@ -28,6 +29,7 @@ public class PostModel extends BasePostModel {
         this.thumbnailUrl = thumbnailUrl;
         this.shortCode = shortCode;
         this.postCaption = postCaption;
+        this.captionId = captionId;
         this.timestamp = timestamp;
         this.liked = liked;
         this.saved = bookmarked;

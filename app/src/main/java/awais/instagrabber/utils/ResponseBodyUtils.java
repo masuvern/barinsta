@@ -640,6 +640,7 @@ public final class ResponseBodyUtils {
                 .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(itemJson) : null)
                 .setShortCode(itemJson.getString("code"))
                 .setPostCaption(captionJson != null ? captionJson.optString("text") : null)
+                .setCaptionId(captionJson != null ? captionJson.optString("pk") : null)
                 .setCommentsCount(itemJson.optInt("comment_count"))
                 .setTimestamp(itemJson.optLong("taken_at", -1))
                 .setLiked(itemJson.optBoolean("has_liked"))

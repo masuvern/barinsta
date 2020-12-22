@@ -287,29 +287,25 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 && (userIdFromCookie.equals(commentModel.getProfileModel().getId()) || userIdFromCookie.equals(userId))) {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.view_pfp),
-//                    resources.getString(R.string.comment_viewer_copy_user),
                     resources.getString(R.string.comment_viewer_copy_comment),
                     resources.getString(R.string.comment_viewer_reply_comment),
                     commentModel.getLiked() ? resources.getString(R.string.comment_viewer_unlike_comment)
                                             : resources.getString(R.string.comment_viewer_like_comment),
+                    resources.getString(R.string.comment_viewer_translate_comment),
                     resources.getString(R.string.comment_viewer_delete_comment)
             };
         } else if (!TextUtils.isEmpty(cookie)) {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.view_pfp),
-//                    resources.getString(R.string.comment_viewer_copy_user),
                     resources.getString(R.string.comment_viewer_copy_comment),
                     resources.getString(R.string.comment_viewer_reply_comment),
                     commentModel.getLiked() ? resources.getString(R.string.comment_viewer_unlike_comment)
                                             : resources.getString(R.string.comment_viewer_like_comment),
+                    resources.getString(R.string.comment_viewer_translate_comment)
             };
         } else {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.view_pfp),
-//                    resources.getString(R.string.comment_viewer_copy_user),
                     resources.getString(R.string.comment_viewer_copy_comment)
             };
         }
@@ -322,23 +318,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 case 0: // open profile
                     openProfile("@" + profileModel.getUsername());
                     break;
-                case 1: // view profile pic
-                    final FragmentManager fragmentManager = getParentFragmentManager();
-                    final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(),
-                                                                                           profileModel.getUsername(),
-                                                                                           profileModel.getHdProfilePic());
-                    final FragmentTransaction ft = fragmentManager.beginTransaction();
-                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                      .add(fragment, "profilePicDialog")
-                      .commit();
-                    break;
-//              case 2: // copy username
-//                  Utils.copyText(context, profileModel.getUsername());
-//                  break;
-                case 2: // copy comment
+                case 1: // copy comment
                     Utils.copyText(context, "@" + profileModel.getUsername() + ": " + commentModel.getText());
                     break;
-                case 3: // reply to comment
+                case 2: // reply to comment
                     commentsAdapter.setSelected(commentModel);
                     String mention = "@" + profileModel.getUsername() + " ";
                     binding.commentText.setText(mention);
@@ -350,7 +333,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         imm.showSoftInput(binding.commentText, 0);
                     }, 200);
                     break;
-                case 4: // like/unlike comment
+                case 3: // like/unlike comment
                     if (csrfToken == null) {
                         return;
                     }
@@ -386,6 +369,28 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         @Override
                         public void onFailure(final Throwable t) {
                             Log.e(TAG, "Error unliking comment", t);
+                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
+                case 4: // translate comment
+                    mediaService.translate(commentModel.getId(), "2", new ServiceCallback<String>() {
+                        @Override
+                        public void onSuccess(final String result) {
+                            if (TextUtils.isEmpty(result)) {
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            new AlertDialog.Builder(context)
+                                    .setTitle(username)
+                                    .setMessage(result)
+                                    .setPositiveButton(R.string.ok, null)
+                                    .show();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error translating comment", t);
                             Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });

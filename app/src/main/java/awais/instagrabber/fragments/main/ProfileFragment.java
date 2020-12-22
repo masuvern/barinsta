@@ -89,6 +89,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 
@@ -113,6 +114,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private Handler usernameSettingHandler;
     private FriendshipService friendshipService;
     private StoriesService storiesService;
+    private MediaService mediaService;
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
     private HighlightsAdapter highlightsAdapter;
@@ -298,6 +300,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = FriendshipService.getInstance();
         storiesService = StoriesService.getInstance();
+        mediaService = MediaService.getInstance();
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         setHasOptionsMenu(true);
@@ -695,6 +698,51 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                                            .trim()));
             profileDetailsBinding.mainBiography
                     .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+            profileDetailsBinding.mainBiography.setOnClickListener(v -> {
+                String[] commentDialogList;
+                if (!TextUtils.isEmpty(cookie)) {
+                    commentDialogList = new String[]{
+                            getResources().getString(R.string.bio_copy),
+                            getResources().getString(R.string.bio_translate)
+                    };
+                } else {
+                    commentDialogList = new String[]{
+                            getResources().getString(R.string.bio_copy)
+                    };
+                }
+                new AlertDialog.Builder(context)
+                        .setItems(commentDialogList, (d,w) -> {
+                            switch (w) {
+                                case 0:
+                                    Utils.copyText(context, biography);
+                                    break;
+                                case 1:
+                                    mediaService.translate(profileModel.getId(), "3", new ServiceCallback<String>() {
+                                        @Override
+                                        public void onSuccess(final String result) {
+                                            if (TextUtils.isEmpty(result)) {
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                            new AlertDialog.Builder(context)
+                                                    .setTitle(profileModel.getUsername())
+                                                    .setMessage(result)
+                                                    .setPositiveButton(R.string.ok, null)
+                                                    .show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(final Throwable t) {
+                                            Log.e(TAG, "Error translating bio", t);
+                                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                    break;
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+            });
             profileDetailsBinding.mainBiography.setOnLongClickListener(v -> {
                 Utils.copyText(context, biography);
                 return true;

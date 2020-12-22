@@ -86,7 +86,7 @@ public class MediaService extends BaseService {
         form.put("_uuid", UUID.randomUUID().toString());
         // form.put("radio_type", "wifi-none");
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> request = repository.action(Constants.I_USER_AGENT, action, mediaId, signedForm);
+        final Call<String> request = repository.action(action, mediaId, signedForm);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call,
@@ -135,7 +135,7 @@ public class MediaService extends BaseService {
             form.put("replied_to_comment_id", replyToCommentId);
         }
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> commentRequest = repository.comment(Constants.I_USER_AGENT, mediaId, signedForm);
+        final Call<String> commentRequest = repository.comment(mediaId, signedForm);
         commentRequest.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -181,7 +181,7 @@ public class MediaService extends BaseService {
         form.put("_uid", userId);
         form.put("_uuid", UUID.randomUUID().toString());
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> bulkDeleteRequest = repository.commentsBulkDelete(Constants.USER_AGENT, mediaId, signedForm);
+        final Call<String> bulkDeleteRequest = repository.commentsBulkDelete(mediaId, signedForm);
         bulkDeleteRequest.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -217,7 +217,7 @@ public class MediaService extends BaseService {
         // form.put("_uid", userId);
         // form.put("_uuid", UUID.randomUUID().toString());
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> commentLikeRequest = repository.commentLike(Constants.USER_AGENT, commentId, signedForm);
+        final Call<String> commentLikeRequest = repository.commentLike(commentId, signedForm);
         commentLikeRequest.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -253,7 +253,7 @@ public class MediaService extends BaseService {
         // form.put("_uid", userId);
         // form.put("_uuid", UUID.randomUUID().toString());
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> commentUnlikeRequest = repository.commentUnlike(Constants.USER_AGENT, commentId, signedForm);
+        final Call<String> commentUnlikeRequest = repository.commentUnlike(commentId, signedForm);
         commentUnlikeRequest.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -283,7 +283,7 @@ public class MediaService extends BaseService {
 
     public void fetchLikes(final String mediaId,
                            @NonNull final ServiceCallback<List<ProfileModel>> callback) {
-        final Call<String> likesRequest = repository.fetchLikes(Constants.I_USER_AGENT, mediaId);
+        final Call<String> likesRequest = repository.fetchLikes(mediaId);
         likesRequest.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -320,6 +320,40 @@ public class MediaService extends BaseService {
             @Override
             public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error getting likes", t);
+                callback.onFailure(t);
+            }
+        });
+    }
+
+    public void translate(final String id,
+                          final String type, // 1 caption 2 comment 3 bio
+                          @NonNull final ServiceCallback<String> callback) {
+        final Map<String, String> form = new HashMap<>();
+        form.put("id", id);
+        form.put("type", type);
+        final Call<String> request = repository.translate(form);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String body = response.body();
+                if (body == null) {
+                    Log.e(TAG, "Error occurred while translating");
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject jsonObject = new JSONObject(body);
+                    final String translation = jsonObject.optString("translation");
+                    callback.onSuccess(translation);
+                } catch (JSONException e) {
+                    // Log.e(TAG, "Error parsing body", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "Error translating", t);
                 callback.onFailure(t);
             }
         });

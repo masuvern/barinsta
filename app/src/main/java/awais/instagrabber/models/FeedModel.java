@@ -24,7 +24,7 @@ public final class FeedModel extends PostModel {
         private String displayUrl;
         private String thumbnailUrl;
         private String shortCode;
-        private String postCaption;
+        private String postCaption, captionId;
         private long commentsCount;
         private long timestamp;
         private boolean liked;
@@ -73,6 +73,11 @@ public final class FeedModel extends PostModel {
 
         public Builder setPostCaption(final String postCaption) {
             this.postCaption = postCaption;
+            return this;
+        }
+
+        public Builder setCaptionId(final String captionId) {
+            this.captionId = captionId;
             return this;
         }
 
@@ -127,8 +132,8 @@ public final class FeedModel extends PostModel {
         }
 
         public FeedModel build() {
-            return new FeedModel(profileModel, itemType, viewCount, postId, displayUrl, thumbnailUrl, shortCode, postCaption, commentsCount,
-                                 timestamp, liked, bookmarked, likesCount, locationName, locationId, sliderItems, imageHeight, imageWidth);
+            return new FeedModel(profileModel, itemType, viewCount, postId, displayUrl, thumbnailUrl, shortCode, postCaption, captionId,
+                    commentsCount, timestamp, liked, bookmarked, likesCount, locationName, locationId, sliderItems, imageHeight, imageWidth);
         }
     }
 
@@ -140,6 +145,7 @@ public final class FeedModel extends PostModel {
                       final String thumbnailUrl,
                       final String shortCode,
                       final String postCaption,
+                      final String captionId,
                       final long commentsCount,
                       final long timestamp,
                       final boolean liked,
@@ -150,7 +156,7 @@ public final class FeedModel extends PostModel {
                       final List<PostChild> sliderItems,
                       final int imageHeight,
                       final int imageWidth) {
-        super(itemType, postId, displayUrl, thumbnailUrl, shortCode, postCaption, timestamp, liked, bookmarked);
+        super(itemType, postId, displayUrl, thumbnailUrl, shortCode, postCaption, captionId, timestamp, liked, bookmarked);
         this.profileModel = profileModel;
         this.commentsCount = commentsCount;
         this.likesCount = likesCount;

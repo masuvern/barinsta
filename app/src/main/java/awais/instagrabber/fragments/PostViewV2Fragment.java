@@ -743,10 +743,32 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 binding.captionParent.getBackground().mutate().setAlpha((int) (128 + (128 * (slideOffset < 0 ? 0 : slideOffset))));
             }
         });
-        binding.caption.setOnClickListener(v -> {
+        binding.captionFrame.setOnClickListener(v -> {
             if (bottomSheetBehavior == null) return;
             if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) return;
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        });
+        if (TextUtils.isEmpty(feedModel.getCaptionId()))
+            binding.translateTitle.setVisibility(View.GONE);
+        else binding.translateTitle.setOnClickListener(v -> {
+            mediaService.translate(feedModel.getCaptionId(), "1", new ServiceCallback<String>() {
+                @Override
+                public void onSuccess(final String result) {
+                    if (TextUtils.isEmpty(result)) {
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    binding.translateTitle.setOnClickListener(null);
+                    binding.translatedCaption.setVisibility(View.VISIBLE);
+                    binding.translatedCaption.setText(result);
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error translating comment", t);
+                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
         binding.captionToggle.setOnClickListener(v -> {
             if (bottomSheetBehavior == null) return;

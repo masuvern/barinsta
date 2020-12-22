@@ -250,15 +250,20 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         setSubtitle(R.string.followers_compare);
         allFollowing.clear();
         binding.swipeRefreshLayout.setRefreshing(true);
-        if (moreAvailable) friendshipService.getList(isFollowersList,
-                                                     profileId,
-                                                     endCursor,
-                                                     isFollowersList ? followersFetchCb : followingFetchCb);
-        else if (followersModels.size() == 0 || followingModels.size() == 0)
+        if (moreAvailable) {
+            Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
+            friendshipService.getList(isFollowersList,
+                    profileId,
+                    endCursor,
+                    isFollowersList ? followersFetchCb : followingFetchCb);
+        }
+        else if (followersModels.size() == 0 || followingModels.size() == 0) {
+            Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
             friendshipService.getList(!isFollowersList,
-                                       profileId,
-                                       null,
-                                       isFollowersList ? followingFetchCb : followersFetchCb);
+                    profileId,
+                    null,
+                    isFollowersList ? followingFetchCb : followersFetchCb);
+        }
         else showCompare();
     }
 
