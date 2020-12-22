@@ -109,6 +109,8 @@
     <string name="unblock">Одблокни</string>
     <string name="restrict">Ограничи</string>
     <string name="unrestrict">Одограничи</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Following each other</string>
     <string name="status_following">Followed by you</string>
     <string name="status_follower">Following you</string>
@@ -192,6 +194,7 @@
     <string name="comment_viewer_reply_comment">Одговори на коментар</string>
     <string name="comment_viewer_like_comment">Лајкни коментар</string>
     <string name="comment_viewer_unlike_comment">Одлајкни коментар</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Избриши коментар</string>
     <string name="comment_send_empty_comment">Не смее празни коментари!</string>
     <string name="comment_view_mention_user_search">Дали сакате да го пребарате ова корисничко име?</string>
@@ -281,6 +284,7 @@
     <string name="apply">Apply</string>
     <string name="save">Save</string>
     <string name="caption">Caption</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="liking">Liking…</string>
     <string name="like_unsuccessful">Like unsuccessful</string>
@@ -309,6 +313,7 @@
     <string name="show_grid_gap">Show grid gap</string>
     <string name="disable_animation">Disable animation</string>
     <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Post not found!</string>
     <string name="no_external_app_url">No app found which opens urls</string>
     <plurals name="likes_count">
