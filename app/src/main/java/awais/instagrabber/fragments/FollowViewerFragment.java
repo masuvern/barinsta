@@ -249,8 +249,8 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         loading = true;
         setSubtitle(R.string.followers_compare);
         allFollowing.clear();
-        binding.swipeRefreshLayout.setRefreshing(true);
         if (moreAvailable) {
+            binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
             friendshipService.getList(isFollowersList,
                     profileId,
@@ -258,6 +258,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     isFollowersList ? followersFetchCb : followingFetchCb);
         }
         else if (followersModels.size() == 0 || followingModels.size() == 0) {
+            binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
             friendshipService.getList(!isFollowersList,
                     profileId,

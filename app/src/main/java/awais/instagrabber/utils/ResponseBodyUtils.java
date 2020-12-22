@@ -27,6 +27,8 @@ import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
 import awaisomereport.LogCollector;
 
+import static awais.instagrabber.utils.Utils.settingsHelper;
+
 public final class ResponseBodyUtils {
     private static final String TAG = "ResponseBodyUtils";
 
@@ -261,7 +263,10 @@ public final class ResponseBodyUtils {
         final String threadPrevCursor = data.has("prev_cursor") ? data.getString("prev_cursor") : null;
 
         final boolean threadHasOlder = data.getBoolean("has_older");
-        final long unreadCount = data.optLong("read_state", 0);
+
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+        final long unreadCount = data.getJSONObject("last_seen_at").getJSONObject(userIdFromCookie).getString("item_id").equals(threadNewestCursor) ? 0 : 1;
 
         final long lastActivityAt = data.optLong("last_activity_at");
         final boolean named = data.optBoolean("named");
