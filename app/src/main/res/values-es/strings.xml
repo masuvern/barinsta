@@ -109,8 +109,8 @@
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Desrestringir</string>
-    <string name="bio_copy">Copy bio</string>
-    <string name="bio_translate">Translate bio</string>
+    <string name="bio_copy">Copiar biografía</string>
+    <string name="bio_translate">Traducir biografía</string>
     <string name="status_mutual">Siguiéndose mutuamente</string>
     <string name="status_following">Seguido por ti</string>
     <string name="status_follower">Siguiéndote</string>
@@ -194,7 +194,7 @@
     <string name="comment_viewer_reply_comment">Responder a comentario</string>
     <string name="comment_viewer_like_comment">Dar me gusta a comentario</string>
     <string name="comment_viewer_unlike_comment">Quitar me gusta a comentario</string>
-    <string name="comment_viewer_translate_comment">Translate comment</string>
+    <string name="comment_viewer_translate_comment">Traducir comentario</string>
     <string name="comment_viewer_delete_comment">Eliminar comentario</string>
     <string name="comment_send_empty_comment">¡No hay comentarios vacíos!</string>
     <string name="comment_view_mention_user_search">¿Quieres buscar el nombre de usuario?</string>
@@ -284,7 +284,7 @@
     <string name="apply">Aplicar</string>
     <string name="save">Guardar</string>
     <string name="caption">Leyenda</string>
-    <string name="translate_caption">Translate caption...</string>
+    <string name="translate_caption">Traducir leyenda...</string>
     <string name="player_timeline_desc">Línea de tiempo del reproductor de vídeo</string>
     <string name="liking">Gustando…</string>
     <string name="like_unsuccessful">Me gusta fallido</string>
@@ -313,7 +313,7 @@
     <string name="show_grid_gap">Mostrar espaciado de cuadrícula</string>
     <string name="disable_animation">Desactivar animaciones</string>
     <string name="follower_wait_to_load">¡Por favor, espera a que la tarea actual se complete primero!</string>
-    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
+    <string name="follower_start_compare">Dependiendo de la cuenta de usuario, esto puede tardar un tiempo. Por favor, sea paciente.</string>
     <string name="post_not_found">¡Publicación no encontrada!</string>
     <string name="no_external_app_url">No se encontró ninguna aplicación que abra los enlaces</string>
     <plurals name="likes_count">
