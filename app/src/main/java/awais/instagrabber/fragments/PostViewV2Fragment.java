@@ -751,7 +751,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) return;
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
-        if (TextUtils.isEmpty(feedModel.getCaptionId()))
+        if (TextUtils.isEmpty(feedModel.getCaptionId()) || TextUtils.isEmpty(feedModel.getPostCaption()))
             binding.translateTitle.setVisibility(View.GONE);
         else binding.translateTitle.setOnClickListener(v -> {
             mediaService.translate(feedModel.getCaptionId(), "1", new ServiceCallback<String>() {
