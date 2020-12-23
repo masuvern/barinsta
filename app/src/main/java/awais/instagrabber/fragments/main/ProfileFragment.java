@@ -623,7 +623,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     @Override
                     public void onDataNotAvailable() {
                         favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                                -1,
+                                0,
                                 profileModel.getUsername(),
                                 FavoriteType.USER,
                                 profileModel.getName(),

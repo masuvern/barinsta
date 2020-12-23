@@ -499,7 +499,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 @Override
                 public void onDataNotAvailable() {
                     favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                            -1,
+                            0,
                             locationId,
                             FavoriteType.LOCATION,
                             locationModel.getName(),

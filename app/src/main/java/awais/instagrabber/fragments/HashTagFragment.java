@@ -513,7 +513,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     @Override
                     public void onDataNotAvailable() {
                         favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                                -1,
+                                0,
                                 hashtag.substring(1),
                                 FavoriteType.HASHTAG,
                                 hashtagModel.getName(),
