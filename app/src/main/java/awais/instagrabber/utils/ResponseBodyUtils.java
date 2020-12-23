@@ -666,7 +666,9 @@ public final class ResponseBodyUtils {
                 break;
             case MEDIA_TYPE_SLIDER:
                 final List<PostChild> childPosts = getChildPosts(itemJson);
-                feedModelBuilder.setSliderItems(childPosts);
+                feedModelBuilder.setSliderItems(childPosts)
+                                .setImageHeight(childPosts.get(0).getHeight())
+                                .setImageWidth(childPosts.get(0).getWidth());
                 break;
         }
         return feedModelBuilder.build();
@@ -783,7 +785,9 @@ public final class ResponseBodyUtils {
                 final JSONArray children = sidecar.optJSONArray("edges");
                 if (children != null) {
                     final List<PostChild> sliderItems = getSliderItems(children);
-                    feedModelBuilder.setSliderItems(sliderItems);
+                    feedModelBuilder.setSliderItems(sliderItems)
+                            .setImageHeight(sliderItems.get(0).getHeight())
+                            .setImageWidth(sliderItems.get(0).getWidth());
                 }
             }
         }

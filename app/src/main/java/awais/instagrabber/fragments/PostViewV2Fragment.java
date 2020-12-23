@@ -714,6 +714,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         binding.date.setText(Utils.datetimeParser.format(new Date(feedModel.getTimestamp() * 1000L)));
         if (TextUtils.isEmpty(postCaption)) {
             binding.caption.setVisibility(View.GONE);
+            binding.translateTitle.setVisibility(View.GONE);
             binding.captionToggle.setVisibility(View.GONE);
             return;
         }
@@ -751,7 +752,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) return;
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
-        if (TextUtils.isEmpty(feedModel.getCaptionId()) || TextUtils.isEmpty(feedModel.getPostCaption()))
+        if (TextUtils.isEmpty(feedModel.getCaptionId()))
             binding.translateTitle.setVisibility(View.GONE);
         else binding.translateTitle.setOnClickListener(v -> {
             mediaService.translate(feedModel.getCaptionId(), "1", new ServiceCallback<String>() {

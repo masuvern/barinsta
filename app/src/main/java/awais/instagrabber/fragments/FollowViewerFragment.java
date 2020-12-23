@@ -226,13 +226,13 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
             if (!TextUtils.isEmpty(endCursor)) {
                 binding.swipeRefreshLayout.setRefreshing(true);
+                layoutManager.setStackFromEnd(true);
                 friendshipService.getList(isFollowersList, profileId, endCursor, cb);
             }
             endCursor = null;
         });
         binding.rvFollow.addOnScrollListener(lazyLoader);
         binding.rvFollow.setLayoutManager(layoutManager);
-        layoutManager.setStackFromEnd(true);
         if (moreAvailable) {
             binding.swipeRefreshLayout.setRefreshing(true);
             friendshipService.getList(isFollowersList, profileId, endCursor, cb);
