@@ -23,7 +23,7 @@
     <string name="title_favorites">ପସନ୍ଦିତ</string>
     <string name="title_discover">ଖୋଜିବା</string>
     <string name="title_comments">ଟିପ୍ପଣୀ</string>
-    <string name="title_notifications">ସୂଚନା</string>
+    <string name="title_notifications">Activity</string>
     <string name="title_highlight">ବିଶେଷତା: %s</string>
     <string name="update_check">ଖୋଲିବା ସମୟରେ ଅପଡେଟ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ</string>
     <string name="download_user_folder">ଡାଉନଲୋଡ ପୋଷ୍ଟକୁ ବ୍ୟବହାରକାରୀଙ୍କ ନାମରେ ହୋଇଥିବା ସ୍ଥାନ ରେ ରଖ</string>
@@ -111,9 +111,9 @@
     <string name="unrestrict">Unrestrict</string>
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
-    <string name="status_mutual">Following each other</string>
-    <string name="status_following">Followed by you</string>
-    <string name="status_follower">Following you</string>
+    <string name="status_mutual">Mutual</string>
+    <string name="status_following">Following</string>
+    <string name="status_follower">Follower</string>
     <string name="map">Map</string>
     <string name="dialog_export_btn_export">Export</string>
     <string name="dialog_export_btn_import">Import</string>

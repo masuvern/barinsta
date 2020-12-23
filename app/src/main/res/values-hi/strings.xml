@@ -23,7 +23,7 @@
     <string name="title_favorites">पसंदीदा</string>
     <string name="title_discover">खोजिए</string>
     <string name="title_comments">टिप्पणियाँ</string>
-    <string name="title_notifications">सूचनाएँ</string>
+    <string name="title_notifications">कार्यकलाप</string>
     <string name="title_highlight">विशेषताएँ: %s</string>
     <string name="update_check">खुलने पर अपडेट के लिए जाँच करें</string>
     <string name="download_user_folder">पोस्ट को ब्यबहारकारी के नाम पर किये फोल्डरस में रखें</string>
@@ -112,9 +112,9 @@
     <string name="unrestrict">प्रतिबंध न लगाए</string>
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
-    <string name="status_mutual">Following each other</string>
-    <string name="status_following">Followed by you</string>
-    <string name="status_follower">Following you</string>
+    <string name="status_mutual">Mutual</string>
+    <string name="status_following">Following</string>
+    <string name="status_follower">Follower</string>
     <string name="map">नक्शा</string>
     <string name="dialog_export_btn_export">निर्यात करें</string>
     <string name="dialog_export_btn_import">आयात करें</string>

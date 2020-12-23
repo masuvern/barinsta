@@ -23,7 +23,7 @@
     <string name="title_favorites">Favoris</string>
     <string name="title_discover">Découvrir</string>
     <string name="title_comments">Commentaires</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_notifications">Activité</string>
     <string name="title_highlight">Temps forts: %s</string>
     <string name="update_check">Rechercher les mises à jours au démarrage</string>
     <string name="download_user_folder">Télécharger les messages dans les dossiers des noms d\'utilisateurs</string>
@@ -111,9 +111,9 @@
     <string name="unrestrict">Retirer des restrictions</string>
     <string name="bio_copy">Copier la bio</string>
     <string name="bio_translate">Traduire la bio</string>
-    <string name="status_mutual">Following each other</string>
-    <string name="status_following">Followed by you</string>
-    <string name="status_follower">Following you</string>
+    <string name="status_mutual">Mutual</string>
+    <string name="status_following">Following</string>
+    <string name="status_follower">Follower</string>
     <string name="map">Carte</string>
     <string name="dialog_export_btn_export">Exporter</string>
     <string name="dialog_export_btn_import">Importer</string>

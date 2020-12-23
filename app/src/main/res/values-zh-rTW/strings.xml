@@ -23,7 +23,7 @@
     <string name="title_favorites">收藏</string>
     <string name="title_discover">探索</string>
     <string name="title_comments">評論</string>
-    <string name="title_notifications">通知</string>
+    <string name="title_notifications">動態</string>
     <string name="title_highlight">標記: %s</string>
     <string name="update_check">啟動時檢查更新</string>
     <string name="download_user_folder">將貼文下載到用戶名資料夾</string>
@@ -109,8 +109,8 @@
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">正彼此追蹤</string>
-    <string name="status_following">您已追蹤</string>
-    <string name="status_follower">關注了你</string>
+    <string name="status_following">追蹤中</string>
+    <string name="status_follower">追蹤者</string>
     <string name="map">地圖</string>
     <string name="dialog_export_btn_export">匯出</string>
     <string name="dialog_export_btn_import">匯入</string>
