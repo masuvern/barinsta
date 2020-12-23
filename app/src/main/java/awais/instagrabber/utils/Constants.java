@@ -56,9 +56,9 @@ public final class Constants {
     // spoof
     public static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) " +
             "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 " +
-            "Instagram 166.1.0.42.245 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 256099205)";
+            "Instagram 169.1.0.29.135 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 262886998)";
     public static final String I_USER_AGENT =
-            "Instagram 166.1.0.42.245 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 256099205)";
+            "Instagram 169.1.0.29.135 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 262886998)";
     public static final String A_USER_AGENT = "https://Barinsta.AustinHuang.me / mailto:Barinsta@AustinHuang.me";
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
     public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
