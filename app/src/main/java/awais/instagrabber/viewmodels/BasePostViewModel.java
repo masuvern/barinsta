@@ -16,4 +16,12 @@ public class BasePostViewModel<T extends BasePostModel> extends ViewModel {
         }
         return list;
     }
+
+    public void edit(int index, T post) {
+
+    }
+
+    public void delete(int index) {
+
+    }
 }

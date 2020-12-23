@@ -281,6 +281,47 @@ public class MediaService extends BaseService {
         });
     }
 
+    public void editCaption(final String postId,
+                            final String userId,
+                            final String newCaption,
+                            @NonNull final String csrfToken,
+                            @NonNull final ServiceCallback<Boolean> callback) {
+        final Map<String, Object> form = new HashMap<>();
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("igtv_feed_preview", "false");
+        form.put("media_id", postId);
+        form.put("caption_text", newCaption);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<String> request = repository.editCaption(postId, signedForm);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String body = response.body();
+                if (body == null) {
+                    Log.e(TAG, "Error occurred while editing caption");
+                    callback.onSuccess(false);
+                    return;
+                }
+                try {
+                    final JSONObject jsonObject = new JSONObject(body);
+                    final String status = jsonObject.optString("status");
+                    callback.onSuccess(status.equals("ok"));
+                } catch (JSONException e) {
+                    // Log.e(TAG, "Error parsing body", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "Error editing caption", t);
+                callback.onFailure(t);
+            }
+        });
+    }
+
     public void fetchLikes(final String mediaId,
                            @NonNull final ServiceCallback<List<ProfileModel>> callback) {
         final Call<String> likesRequest = repository.fetchLikes(mediaId);

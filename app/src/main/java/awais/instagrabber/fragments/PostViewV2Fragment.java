@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -33,6 +34,7 @@ import android.widget.ViewSwitcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.core.view.ViewCompat;
@@ -114,6 +116,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private DialogInterface.OnShowListener onShowListener;
     private boolean isLoggedIn;
     private boolean hasBeenToggled = false;
+    private CharSequence postCaption = null;
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
 
@@ -415,8 +418,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
     private void init() {
         if (feedModel == null) return;
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(COOKIE) && CookieUtils.getUserIdFromCookie(COOKIE) != null;
         if (!wasPaused && (sharedProfilePicElement != null || sharedMainPostElement != null)) {
             binding.getRoot().getBackground().mutate().setAlpha(0);
         }
@@ -710,13 +712,50 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void setupCaption() {
-        final CharSequence postCaption = feedModel.getPostCaption();
+        if (postCaption == null) postCaption = feedModel.getPostCaption();
         binding.date.setText(Utils.datetimeParser.format(new Date(feedModel.getTimestamp() * 1000L)));
-        if (TextUtils.isEmpty(postCaption)) {
+        if (!feedModel.getProfileModel().getId().equals(CookieUtils.getUserIdFromCookie(COOKIE)) && TextUtils.isEmpty(postCaption)) {
             binding.caption.setVisibility(View.GONE);
             binding.translateTitle.setVisibility(View.GONE);
             binding.captionToggle.setVisibility(View.GONE);
             return;
+        }
+        if (feedModel.getProfileModel().getId().equals(CookieUtils.getUserIdFromCookie(COOKIE))) {
+            binding.editCaption.setVisibility(View.VISIBLE);
+            binding.editCaption.setOnClickListener(v -> {
+                final EditText input = new EditText(context);
+                input.setText(postCaption);
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.edit_caption)
+                        .setView(input)
+                        .setPositiveButton(R.string.confirm, (d, w) -> {
+                            binding.editCaption.setVisibility(View.GONE);
+                            mediaService.editCaption(
+                                    feedModel.getPostId(),
+                                    CookieUtils.getUserIdFromCookie(COOKIE),
+                                    input.getText().toString(),
+                                    CookieUtils.getCsrfTokenFromCookie(COOKIE),
+                                    new ServiceCallback<Boolean>() {
+                                        @Override
+                                        public void onSuccess(final Boolean result) {
+                                            binding.editCaption.setVisibility(View.VISIBLE);
+                                            if (result) {
+                                                binding.caption.setText(input.getText().toString());
+                                            }
+                                            else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(final Throwable t) {
+                                            Log.e(TAG, "Error editing caption", t);
+                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            binding.editCaption.setVisibility(View.VISIBLE);
+                                        }
+                                    });
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+            });
         }
         binding.caption.addOnHashtagListener(autoLinkItem -> {
             final NavController navController = NavHostFragment.findNavController(this);

@@ -41,6 +41,11 @@ public interface MediaRepository {
     Call<String> commentUnlike(@Path("commentId") final String commentId,
                                @FieldMap final Map<String, String> signedForm);
 
+    @FormUrlEncoded
+    @POST("/api/v1/media/{mediaId}/edit_media/")
+    Call<String> editCaption(@Path("mediaId") final String mediaId,
+                             @FieldMap final Map<String, String> signedForm);
+
     @GET("/api/v1/language/translate/")
     Call<String> translate(@QueryMap final Map<String, String> form);
 }
