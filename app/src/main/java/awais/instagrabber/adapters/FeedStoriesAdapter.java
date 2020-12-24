@@ -1,5 +1,6 @@
 package awais.instagrabber.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -22,7 +23,7 @@ public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedSt
 
         @Override
         public boolean areContentsTheSame(@NonNull final FeedStoryModel oldItem, @NonNull final FeedStoryModel newItem) {
-            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId());
+            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId()) && oldItem.isFullyRead().equals(newItem.isFullyRead());
         }
     };
 
@@ -47,5 +48,7 @@ public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedSt
 
     public interface OnFeedStoryClickListener {
         void onFeedStoryClick(FeedStoryModel model, int position);
+
+        void onFeedStoryLongClick(FeedStoryModel model, int position);
     }
 }

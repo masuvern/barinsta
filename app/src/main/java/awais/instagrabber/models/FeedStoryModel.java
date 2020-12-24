@@ -1,12 +1,14 @@
 package awais.instagrabber.models;
 
+import android.util.Log;
+
 import java.io.Serializable;
 
 public final class FeedStoryModel implements Serializable {
     private final String storyMediaId;
     private final ProfileModel profileModel;
     private StoryModel[] storyModels;
-    private boolean fullyRead;
+    private Boolean fullyRead;
 
     public FeedStoryModel(final String storyMediaId, final ProfileModel profileModel, final boolean fullyRead) {
         this.storyMediaId = storyMediaId;
@@ -30,7 +32,11 @@ public final class FeedStoryModel implements Serializable {
         return storyModels;
     }
 
-    public boolean getFullyRead() {
+    public Boolean isFullyRead() {
         return fullyRead;
+    }
+
+    public void setFullyRead(final boolean fullyRead) {
+        this.fullyRead = fullyRead;
     }
 }

@@ -644,7 +644,7 @@ public final class ResponseBodyUtils {
                 .setPostId(itemJson.getString(Constants.EXTRAS_ID))
                 .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(itemJson) : null)
                 .setShortCode(itemJson.getString("code"))
-                .setPostCaption(captionJson != null ? captionJson.optString("text") : null)
+                .setPostCaption(captionJson != null ? captionJson.optString("text") : "")
                 .setCaptionId(captionJson != null ? captionJson.optString("pk") : null)
                 .setCommentsCount(itemJson.optInt("comment_count"))
                 .setTimestamp(itemJson.optLong("taken_at", -1))

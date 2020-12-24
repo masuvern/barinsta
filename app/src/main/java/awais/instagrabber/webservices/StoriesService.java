@@ -64,30 +64,6 @@ public class StoriesService extends BaseService {
     }
 
     public void getFeedStories(final String csrfToken, final ServiceCallback<List<FeedStoryModel>> callback) {
-        if (loadFromMock) {
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> {
-                final ClassLoader classLoader = getClass().getClassLoader();
-                if (classLoader == null) {
-                    Log.e(TAG, "getFeedStories: classLoader is null!");
-                    return;
-                }
-                try (InputStream resourceAsStream = classLoader.getResourceAsStream("stories_response.json");
-                     Reader in = new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8)) {
-                    final int bufferSize = 1024;
-                    final char[] buffer = new char[bufferSize];
-                    final StringBuilder out = new StringBuilder();
-                    int charsRead;
-                    while ((charsRead = in.read(buffer, 0, buffer.length)) > 0) {
-                        out.append(buffer, 0, charsRead);
-                    }
-                    parseStoriesBody(out.toString(), callback);
-                } catch (IOException e) {
-                    Log.e(TAG, "getFeedStories: ", e);
-                }
-            }, 1000);
-            return;
-        }
         final Map<String, Object> form = new HashMap<>(4);
         form.put("reason", "cold_start");
         form.put("_csrftoken", csrfToken);
@@ -115,6 +91,7 @@ public class StoriesService extends BaseService {
 
     private void parseStoriesBody(final String body, final ServiceCallback<List<FeedStoryModel>> callback) {
         try {
+            Log.d("austin_debug", body);
             final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
             final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {

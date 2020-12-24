@@ -24,10 +24,14 @@ public final class FeedStoryViewHolder extends RecyclerView.ViewHolder {
             if (listener == null) return;
             listener.onFeedStoryClick(model, position);
         });
+        binding.getRoot().setOnLongClickListener(v -> {
+            if (listener != null) listener.onFeedStoryLongClick(model, position);
+            return true;
+        });
         final ProfileModel profileModel = model.getProfileModel();
         binding.title.setText(profileModel.getUsername());
-        binding.title.setAlpha(model.getFullyRead() ? 0.5F : 1.0F);
+        binding.title.setAlpha(model.isFullyRead() ? 0.5F : 1.0F);
         binding.icon.setImageURI(profileModel.getSdProfilePic());
-        binding.icon.setAlpha(model.getFullyRead() ? 0.5F : 1.0F);
+        binding.icon.setAlpha(model.isFullyRead() ? 0.5F : 1.0F);
     }
 }

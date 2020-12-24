@@ -60,6 +60,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -315,9 +316,6 @@ public class StoryViewerFragment extends Fragment {
             final boolean swipingBeyondCurrentStories = (endOfCurrentStories && isLeftSwipe) || (slidePos == 0 && isRightSwipe);
             if (swipingBeyondCurrentStories && hasFeedStories) {
                 final int index = currentFeedStoryIndex;
-                if (settingsHelper.getBoolean(MARK_AS_SEEN)) {
-                    new SeenAction(cookie, currentStory).execute();
-                }
                 if ((isRightSwipe && index == 0) || (isLeftSwipe && index == finalModels.size() - 1)) {
                     Toast.makeText(context, R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                     return;
@@ -325,7 +323,7 @@ public class StoryViewerFragment extends Fragment {
                 final Object feedStoryModel = isRightSwipe
                                               ? finalModels.get(index - 1)
                                               : finalModels.size() == index + 1 ? null : finalModels.get(index + 1);
-                paginateStories(feedStoryModel, context, isRightSwipe, currentFeedStoryIndex == finalModels.size() - 2);
+                paginateStories(feedStoryModel, finalModels.get(index), context, isRightSwipe, currentFeedStoryIndex == finalModels.size() - 2);
                 return;
             }
             if (isRightSwipe) {
@@ -364,8 +362,12 @@ public class StoryViewerFragment extends Fragment {
         if (hasFeedStories) {
             binding.btnBackward.setVisibility(currentFeedStoryIndex == 0 ? View.INVISIBLE : View.VISIBLE);
             binding.btnForward.setVisibility(currentFeedStoryIndex == finalModels.size() - 1 ? View.INVISIBLE : View.VISIBLE);
-            binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1), context, true, false));
-            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1), context, false,
+            binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1),
+                                                                        finalModels.get(currentFeedStoryIndex),
+                                                                        context, true, false));
+            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1),
+                                                                       finalModels.get(currentFeedStoryIndex),
+                                                                       context, false,
                                                                        currentFeedStoryIndex == finalModels.size() - 2));
         }
 
@@ -893,12 +895,27 @@ public class StoryViewerFragment extends Fragment {
         player = null;
     }
 
-    private void paginateStories(Object feedStory, Context context, boolean backward, boolean last) {
-        if (feedStory != null) {
+    private void paginateStories(Object newFeedStory, Object oldFeedStory, Context context, boolean backward, boolean last) {
+        if (newFeedStory != null) {
             if (fetching) {
                 Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
                 return;
             }
+//            if (settingsHelper.getBoolean(MARK_AS_SEEN)
+//                    && oldFeedStory != null
+//                    && oldFeedStory instanceof FeedStoryModel
+//                    && viewModel instanceof FeedStoriesViewModel) {
+//                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+//                final FeedStoryModel oldFeedStoryModel = (FeedStoryModel) oldFeedStory;
+//                if (oldFeedStoryModel.isFullyRead()) {
+//                    oldFeedStoryModel.setFullyRead(false);
+//                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+//                    final List<FeedStoryModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+//                    Log.d("austin_debug", oldFeedStoryModel.getProfileModel().getUsername() + ", v " + models.get(currentFeedStoryIndex).isFullyRead() + " l " + oldFeedStoryModel.isFullyRead());
+//                    modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
+//                    feedStoriesViewModel.getList().setValue(models);
+//                }
+//            }
             fetching = true;
             binding.btnBackward.setVisibility(currentFeedStoryIndex == 1 && backward ? View.INVISIBLE : View.VISIBLE);
             binding.btnForward.setVisibility(last ? View.INVISIBLE : View.VISIBLE);

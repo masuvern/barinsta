@@ -354,10 +354,21 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private void setupFeedStories() {
         feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
-        final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter((model, position) -> {
-            final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null);
-            NavHostFragment.findNavController(this).navigate(action);
-        });
+        final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(
+            new FeedStoriesAdapter.OnFeedStoryClickListener() {
+                @Override
+                public void onFeedStoryClick(FeedStoryModel model, int position) {
+                    Log.d("austin_debug", "read status is "+model.isFullyRead());
+                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null);
+                    NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+                }
+
+                @Override
+                public void onFeedStoryLongClick(FeedStoryModel model, int position) {
+                    navigateToProfile("@" + model.getProfileModel().getUsername());
+                }
+            }
+        );
         final Context context = getContext();
         if (context == null) return;
         storiesRecyclerView = new RecyclerView(context);
@@ -369,7 +380,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         storiesRecyclerView.setAdapter(feedStoriesAdapter);
         fragmentActivity.setCollapsingView(storiesRecyclerView);
-        feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);
+        feedStoriesViewModel.getList().observe(fragmentActivity, list -> {
+            Log.d("austin_debug", "observed");
+            feedStoriesAdapter.submitList(list);
+        });
         fetchStories();
     }
 
