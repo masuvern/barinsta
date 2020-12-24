@@ -72,6 +72,7 @@ import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
 import awais.instagrabber.databinding.DialogPostViewBinding;
+import awais.instagrabber.fragments.main.ProfileFragment;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
@@ -712,7 +713,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     }
 
     private void setupCaption() {
-        if (postCaption == null) postCaption = feedModel.getPostCaption();
+        postCaption = feedModel.getPostCaption();
         binding.date.setText(Utils.datetimeParser.format(new Date(feedModel.getTimestamp() * 1000L)));
         if (!feedModel.getProfileModel().getId().equals(CookieUtils.getUserIdFromCookie(COOKIE)) && TextUtils.isEmpty(postCaption)) {
             binding.caption.setVisibility(View.GONE);
@@ -740,6 +741,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                                         public void onSuccess(final Boolean result) {
                                             binding.editCaption.setVisibility(View.VISIBLE);
                                             if (result) {
+                                                feedModel.setPostCaption(input.getText().toString());
                                                 binding.caption.setText(input.getText().toString());
                                             }
                                             else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
