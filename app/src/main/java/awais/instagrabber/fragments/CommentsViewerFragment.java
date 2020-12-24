@@ -84,8 +84,8 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
         @Override
         public void onResult(final List<CommentModel> commentModels) {
-            endCursor = commentModels.get(0).getEndCursor();
             if (commentModels != null && commentModels.size() > 0) {
+                endCursor = commentModels.get(0).getEndCursor();
                 List<CommentModel> list = commentsViewModel.getList().getValue();
                 list = list != null ? new LinkedList<>(list) : new LinkedList<>();
                 // final int oldSize = list != null ? list.size() : 0;
