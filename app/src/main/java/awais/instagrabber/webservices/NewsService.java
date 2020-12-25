@@ -1,14 +1,25 @@
 package awais.instagrabber.webservices;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import awais.instagrabber.models.NotificationModel;
+import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
+import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.NetworkUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,25 +46,34 @@ public class NewsService extends BaseService {
         return instance;
     }
 
-    public void markChecked(final String timestamp,
-                            final String csrfToken,
-                            final ServiceCallback<Boolean> callback) {
-        final Map<String, String> map = new HashMap<>();
-        map.put("timestamp", timestamp);
-        final Call<String> request = repository.markChecked(csrfToken, map);
+    public void fetchAppInbox(final boolean markAsSeen,
+                              final ServiceCallback<List<NotificationModel>> callback) {
+        final List<NotificationModel> result = new ArrayList<>();
+        final Call<String> request = repository.appInbox(markAsSeen);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 final String body = response.body();
                 if (body == null) {
-                    callback.onSuccess(false);
+                    callback.onSuccess(null);
                     return;
                 }
                 try {
                     final JSONObject jsonObject = new JSONObject(body);
-                    final String status = jsonObject.optString("status");
-                    callback.onSuccess(status.equals("ok"));
+                    final JSONArray oldStories = jsonObject.getJSONArray("old_stories"),
+                                    newStories = jsonObject.getJSONArray("new_stories");
 
+                    for (int j = 0; j < newStories.length(); ++j) {
+                        final NotificationModel newsItem = parseNewsItem(newStories.getJSONObject(j));
+                        if (newsItem != null) result.add(newsItem);
+                    }
+
+                    for (int i = 0; i < oldStories.length(); ++i) {
+                        final NotificationModel newsItem = parseNewsItem(oldStories.getJSONObject(i));
+                        if (newsItem != null) result.add(newsItem);
+                    }
+
+                    callback.onSuccess(result);
                 } catch (JSONException e) {
                     callback.onFailure(e);
                 }
@@ -65,5 +85,113 @@ public class NewsService extends BaseService {
                 // Log.e(TAG, "onFailure: ", t);
             }
         });
+    }
+
+    public void fetchWebInbox(final boolean markAsSeen,
+                              final ServiceCallback<List<NotificationModel>> callback) {
+        final List<NotificationModel> result = new ArrayList<>();
+        final Call<String> request = repository.webInbox();
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String body = response.body();
+                if (body == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject page = new JSONObject(body)
+                            .getJSONObject("graphql")
+                            .getJSONObject("user");
+                    final JSONObject ewaf = page.getJSONObject("activity_feed")
+                            .optJSONObject("edge_web_activity_feed");
+                    final JSONObject efr = page.optJSONObject("edge_follow_requests");
+                    JSONObject data;
+                    JSONArray media;
+                    if (ewaf != null
+                            && (media = ewaf.optJSONArray("edges")) != null
+                            && media.length() > 0
+                            && media.optJSONObject(0).optJSONObject("node") != null) {
+                        for (int i = 0; i < media.length(); ++i) {
+                            data = media.optJSONObject(i).optJSONObject("node");
+                            if (data == null) continue;
+                            final String type = data.getString("__typename");
+                            final NotificationType notificationType = NotificationType.valueOfType(type);
+                            if (notificationType == null) continue;
+                            final JSONObject user = data.getJSONObject("user");
+                            result.add(new NotificationModel(
+                                    data.getString(Constants.EXTRAS_ID),
+                                    data.optString("text"), // comments or mentions
+                                    data.getLong("timestamp"),
+                                    user.getString("id"),
+                                    user.getString("username"),
+                                    user.getString("profile_pic_url"),
+                                    !data.isNull("media") ? data.getJSONObject("media").getString("id") : null,
+                                    !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null, notificationType));
+                        }
+                    }
+
+                    if (efr != null
+                            && (media = efr.optJSONArray("edges")) != null
+                            && media.length() > 0
+                            && media.optJSONObject(0).optJSONObject("node") != null) {
+                        for (int i = 0; i < media.length(); ++i) {
+                            data = media.optJSONObject(i).optJSONObject("node");
+                            if (data == null) continue;
+                            result.add(new NotificationModel(
+                                    data.getString(Constants.EXTRAS_ID),
+                                    data.optString("full_name"),
+                                    0L,
+                                    data.getString(Constants.EXTRAS_ID),
+                                    data.getString("username"),
+                                    data.getString("profile_pic_url"),
+                                    null,
+                                    null, NotificationType.REQUEST));
+                        }
+                    }
+                    callback.onSuccess(result);
+                } catch (JSONException e) {
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                callback.onFailure(t);
+                // Log.e(TAG, "onFailure: ", t);
+            }
+        });
+    }
+
+    private NotificationModel parseNewsItem(final JSONObject itemJson) throws JSONException {
+        if (itemJson == null) return null;
+        final String type = itemJson.getString("story_type");
+        final NotificationType notificationType = NotificationType.valueOfType(type);
+        if (notificationType == null) {
+            Log.d("austin_debug", "unhandled news type: "+itemJson);
+            return null;
+        }
+        final JSONObject data = itemJson.getJSONObject("args");
+        return new NotificationModel(
+                data.getString("tuuid"),
+                data.has("text") ? data.getString("text") : cleanRichText(data.optString("rich_text", "")),
+                data.getLong("timestamp"),
+                data.getString("profile_id"),
+                data.getString("profile_name"),
+                data.getString("profile_image"),
+                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("id") : null,
+                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("image") : null,
+                notificationType);
+    }
+
+    private String cleanRichText(final String raw) {
+        final Matcher matcher = Pattern.compile("\\{[\\p{L}\\d._]+\\|000000\\|1\\|user\\?id=\\d+\\}").matcher(raw);
+        String result = raw;
+        while (matcher.find()) {
+            final String richObject = raw.substring(matcher.start(), matcher.end());
+            final String username = richObject.split("\\|")[0].substring(1);
+            result = result.replace(richObject, username);
+        }
+        return result;
     }
 }

@@ -16,11 +16,20 @@ import awais.instagrabber.utils.TextUtils;
 public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsyncTask.NotificationCounts> {
     private static final String TAG = "GetActivityAsyncTask";
 
-    private OnTaskCompleteListener onTaskCompleteListener;
+    private final OnTaskCompleteListener onTaskCompleteListener;
 
     public GetActivityAsyncTask(final OnTaskCompleteListener onTaskCompleteListener) {
         this.onTaskCompleteListener = onTaskCompleteListener;
     }
+
+    /*
+    This needs to be redone to fetch i inbox instead
+    Within inbox, data is (body JSON => counts)
+    Then we have these counts:
+    new_posts, activity_feed_dot_badge, relationships, campaign_notification
+    usertags, likes, comment_likes, shopping_notification, comments
+    photos_of_you (not sure about difference to usertags), requests
+     */
 
     protected NotificationCounts doInBackground(final String... cookiesArray) {
         if (cookiesArray == null) return null;
@@ -70,11 +79,11 @@ public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsy
     }
 
     public static class NotificationCounts {
-        private int relationshipsCount;
-        private int userTagsCount;
-        private int commentsCount;
-        private int commentLikesCount;
-        private int likesCount;
+        private final int relationshipsCount;
+        private final int userTagsCount;
+        private final int commentsCount;
+        private final int commentLikesCount;
+        private final int likesCount;
 
         public NotificationCounts(final int relationshipsCount,
                                   final int userTagsCount,

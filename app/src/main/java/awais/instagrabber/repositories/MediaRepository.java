@@ -12,6 +12,9 @@ import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 
 public interface MediaRepository {
+    @GET("/api/v1/media/{mediaId}/info/")
+    Call<String> fetch(@Path("mediaId") final String mediaId);
+
     @GET("/api/v1/media/{mediaId}/likers/")
     Call<String> fetchLikes(@Path("mediaId") final String mediaId);
 

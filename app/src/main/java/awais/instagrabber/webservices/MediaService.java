@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.MediaRepository;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,6 +46,37 @@ public class MediaService extends BaseService {
             instance = new MediaService();
         }
         return instance;
+    }
+
+    public void fetch(final String mediaId,
+                      final ServiceCallback<FeedModel> callback) {
+        final Call<String> request = repository.fetch(mediaId);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call,
+                                   @NonNull final Response<String> response) {
+                if (callback == null) return;
+                final String body = response.body();
+                if (body == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject itemJson = new JSONObject(body).getJSONArray("items").getJSONObject(0);
+                    callback.onSuccess(ResponseBodyUtils.parseItem(itemJson));
+                } catch (JSONException e) {
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call,
+                                  @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
     }
 
     public void like(final String mediaId,

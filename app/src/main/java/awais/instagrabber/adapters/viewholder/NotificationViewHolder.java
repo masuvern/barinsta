@@ -24,10 +24,6 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
     public void bind(final NotificationModel model,
                      final OnNotificationClickListener notificationClickListener) {
         if (model == null) return;
-        itemView.setOnClickListener(v -> {
-            if (notificationClickListener == null) return;
-            notificationClickListener.onNotificationClick(model);
-        });
         int text = -1;
         CharSequence subtext = null;
         switch (model.getType()) {
@@ -52,20 +48,47 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
                 text = R.string.request_notif;
                 subtext = model.getText();
                 break;
+            case COMMENT_LIKE:
+            case TAGGED_COMMENT:
+            case RESPONDED_STORY:
+                subtext = model.getText();
+                break;
         }
-        binding.tvUsername.setText(model.getUsername());
-        binding.tvComment.setText(text);
-        binding.tvSubComment.setText(subtext, subtext instanceof Spannable ? TextView.BufferType.SPANNABLE : TextView.BufferType.NORMAL);
-        // binding.tvSubComment.setMentionClickListener(mentionClickListener);
+        if (text == -1 && subtext != null) {
+            binding.tvComment.setText(subtext);
+            binding.tvSubComment.setVisibility(View.GONE);
+        }
+        else if (text != -1) {
+            binding.tvComment.setText(text);
+            binding.tvSubComment.setText(subtext);
+            binding.tvSubComment.setVisibility(subtext == null ? View.GONE : View.VISIBLE);
+        }
+
         if (model.getType() != NotificationType.REQUEST) {
             binding.tvDate.setText(model.getDateTime());
         }
+
+        binding.tvUsername.setText(model.getUsername());
         binding.ivProfilePic.setImageURI(model.getProfilePic());
+        binding.ivProfilePic.setOnClickListener(v -> {
+            if (notificationClickListener == null) return;
+            notificationClickListener.onProfileClick(model.getUsername());
+        });
+
         if (TextUtils.isEmpty(model.getPreviewPic())) {
-            binding.ivPreviewPic.setVisibility(View.GONE);
+            binding.ivPreviewPic.setVisibility(View.INVISIBLE);
         } else {
             binding.ivPreviewPic.setVisibility(View.VISIBLE);
             binding.ivPreviewPic.setImageURI(model.getPreviewPic());
+            binding.ivPreviewPic.setOnClickListener(v -> {
+                if (notificationClickListener == null) return;
+                notificationClickListener.onPreviewClick(model);
+            });
         }
+
+        itemView.setOnClickListener(v -> {
+            if (notificationClickListener == null) return;
+            notificationClickListener.onNotificationClick(model);
+        });
     }
 }

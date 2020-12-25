@@ -76,16 +76,23 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
     private List<NotificationModel> sort(final List<NotificationModel> list) {
         final List<NotificationModel> listCopy = new ArrayList<>(list);
         Collections.sort(listCopy, (o1, o2) -> {
-            if (o1.getType() == o2.getType()) return 0;
             // keep requests at top
-            if (o1.getType() == NotificationType.REQUEST) return -1;
-            if (o2.getType() == NotificationType.REQUEST) return 1;
-            return 0;
+            if (o1.getType() == o2.getType()
+                    && o1.getType() == NotificationType.REQUEST
+                    && o2.getType() == NotificationType.REQUEST) return 0;
+            else if (o1.getType() == NotificationType.REQUEST) return -1;
+            else if (o2.getType() == NotificationType.REQUEST) return 1;
+            // timestamp
+            return o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
         });
         return listCopy;
     }
 
     public interface OnNotificationClickListener {
         void onNotificationClick(final NotificationModel model);
+
+        void onProfileClick(final String username);
+
+        void onPreviewClick(final NotificationModel model);
     }
 }

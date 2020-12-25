@@ -5,11 +5,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum NotificationType implements Serializable {
+    // web
     LIKE("GraphLikeAggregatedStory"),
     FOLLOW("GraphFollowAggregatedStory"),
     COMMENT("GraphCommentMediaStory"),
     MENTION("GraphMentionStory"),
     TAGGED("GraphUserTaggedStory"),
+    // app story_type
+    COMMENT_LIKE("13"),
+    TAGGED_COMMENT("14"),
+    RESPONDED_STORY("213"),
+    // efr
     REQUEST("REQUEST");
 
     private final String itemType;
