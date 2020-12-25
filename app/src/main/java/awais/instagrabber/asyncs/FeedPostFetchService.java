@@ -1,7 +1,7 @@
 package awais.instagrabber.asyncs;
 
-import android.os.Handler;
-import android.util.Log;
+//import android.os.Handler;
+//import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +21,13 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "FeedPostFetchService";
     private final FeedService feedService;
     private String nextCursor;
-    private final Handler handler;
+//    private final Handler handler;
     private boolean hasNextPage;
-    private static final int DELAY_MILLIS = 500;
+//    private static final int DELAY_MILLIS = 500;
 
     public FeedPostFetchService() {
         feedService = FeedService.getInstance();
-        handler = new Handler();
+//        handler = new Handler();
     }
 
     @Override
@@ -49,9 +49,9 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 feedModels.addAll(result.getFeedModels());
                 if (fetchListener != null) {
                     if (feedModels.size() < 15 && hasNextPage) {
-                        handler.postDelayed(() -> {
+//                        handler.postDelayed(() -> {
                             feedService.fetch(csrfToken, nextCursor, this);
-                        }, DELAY_MILLIS);
+//                        }, DELAY_MILLIS);
                     }
                     else {
                         fetchListener.onResult(feedModels);

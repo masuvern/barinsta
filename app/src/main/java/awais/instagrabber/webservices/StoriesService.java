@@ -91,7 +91,6 @@ public class StoriesService extends BaseService {
 
     private void parseStoriesBody(final String body, final ServiceCallback<List<FeedStoryModel>> callback) {
         try {
-            Log.d("austin_debug", body);
             final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
             final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
