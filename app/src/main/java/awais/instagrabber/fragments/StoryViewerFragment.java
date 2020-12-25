@@ -84,6 +84,7 @@ import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.stickers.SliderModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -124,6 +125,7 @@ public class StoryViewerFragment extends Fragment {
     private String[] mentions;
     private QuizModel quiz;
     private SliderModel slider;
+    private SwipeUpModel swipeUp;
     private MenuItem menuDownload;
     private MenuItem menuDm;
     private SimpleExoPlayer player;
@@ -373,6 +375,14 @@ public class StoryViewerFragment extends Fragment {
 
         binding.imageViewer.setTapListener(simpleOnGestureListener);
         binding.spotify.setOnClickListener(v -> {
+            final Object tag = v.getTag();
+            if (tag instanceof CharSequence) {
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(tag.toString()));
+                startActivity(intent);
+            }
+        });
+        binding.swipeUp.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
                 final Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -736,6 +746,13 @@ public class StoryViewerFragment extends Fragment {
         slider = currentStory.getSlider();
         binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
         binding.slider.setTag(slider);
+
+        swipeUp = currentStory.getSwipeUp();
+        if (swipeUp != null) {
+            binding.swipeUp.setVisibility(View.VISIBLE);
+            binding.swipeUp.setText(swipeUp.getText());
+            binding.swipeUp.setTag(swipeUp.getUrl());
+        }
 
         releasePlayer();
         if (isHashtag || isLoc) {
