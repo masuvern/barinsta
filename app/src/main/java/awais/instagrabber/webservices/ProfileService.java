@@ -63,7 +63,9 @@ public class ProfileService extends BaseService {
                             uid,
                             user.getString(Constants.EXTRAS_USERNAME),
                             user.optString("full_name"),
-                            user.optString("profile_pic_url")
+                            user.optString("profile_pic_url"),
+                            user.has("hd_profile_pic_url_info")
+                                    ? user.getJSONObject("hd_profile_pic_url_info").optString("url") : null
                     );
                     callback.onSuccess(userInfo);
                 } catch (JSONException e) {

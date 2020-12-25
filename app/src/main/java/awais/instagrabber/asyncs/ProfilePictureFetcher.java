@@ -40,51 +40,34 @@ public final class ProfilePictureFetcher extends AsyncTask<Void, Void, String> {
     protected String doInBackground(final Void... voids) {
         String out = null;
         if (isHashtag) out = picUrl;
-        else try {
-            final HttpURLConnection conn =
-                    (HttpURLConnection) new URL("https://i.instagram.com/api/v1/users/"+userId+"/info/").openConnection();
-            conn.setUseCaches(false);
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", Constants.USER_AGENT);
+        else if (Utils.settingsHelper.getBoolean(Constants.INSTADP)) try {
+            final HttpURLConnection backup =
+                    (HttpURLConnection) new URL("https://instadp.com/fullsize/" + userName).openConnection();
+            backup.setUseCaches(false);
+            backup.setRequestMethod("GET");
+            backup.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
 
-            final String result = conn.getResponseCode() == HttpURLConnection.HTTP_OK ? NetworkUtils.readFromConnection(conn) : null;
-            conn.disconnect();
+            final String instadp = backup.getResponseCode() == HttpURLConnection.HTTP_OK ? NetworkUtils.readFromConnection(backup) : null;
+            backup.disconnect();
 
-            if (!TextUtils.isEmpty(result)) {
-                JSONObject data = new JSONObject(result).getJSONObject("user");
-                if (data.has("hd_profile_pic_url_info"))
-                    out = data.getJSONObject("hd_profile_pic_url_info").optString("url");
-            }
+            if (!TextUtils.isEmpty(instadp)) {
+                final Document doc = Jsoup.parse(instadp);
+                boolean fallback = false;
 
-            if (TextUtils.isEmpty(out) && Utils.settingsHelper.getBoolean(Constants.INSTADP)) {
-                final HttpURLConnection backup =
-                        (HttpURLConnection) new URL("https://instadp.com/fullsize/" + userName).openConnection();
-                backup.setUseCaches(false);
-                backup.setRequestMethod("GET");
-                backup.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
+                final int imgIndex = instadp.indexOf("preloadImg('"), lastIndex;
 
-                final String instadp = backup.getResponseCode() == HttpURLConnection.HTTP_OK ? NetworkUtils.readFromConnection(backup) : null;
-                backup.disconnect();
-
-                if (!TextUtils.isEmpty(instadp)) {
-                    final Document doc = Jsoup.parse(instadp);
-                    boolean fallback = false;
-
-                    final int imgIndex = instadp.indexOf("preloadImg('"), lastIndex;
-
-                    Element element = doc.selectFirst(".instadp");
-                    if (element != null && (element = element.selectFirst(".picture")) != null)
-                        out = element.attr("src");
-                    else if ((element = doc.selectFirst(".download-btn")) != null)
-                        out = element.attr("href");
-                    else if (imgIndex != -1 && (lastIndex = instadp.indexOf("')", imgIndex)) != -1)
-                        out = instadp.substring(imgIndex + 12, lastIndex);
-                    else {
-                        final Elements imgs = doc.getElementsByTag("img");
-                        for (final Element img : imgs) {
-                            final String imgStr = img.toString();
-                            if (imgStr.contains("cdninstagram.com")) out = img.attr("src");
-                        }
+                Element element = doc.selectFirst(".instadp");
+                if (element != null && (element = element.selectFirst(".picture")) != null)
+                    out = element.attr("src");
+                else if ((element = doc.selectFirst(".download-btn")) != null)
+                    out = element.attr("href");
+                else if (imgIndex != -1 && (lastIndex = instadp.indexOf("')", imgIndex)) != -1)
+                    out = instadp.substring(imgIndex + 12, lastIndex);
+                else {
+                    final Elements imgs = doc.getElementsByTag("img");
+                    for (final Element img : imgs) {
+                        final String imgStr = img.toString();
+                        if (imgStr.contains("cdninstagram.com")) out = img.attr("src");
                     }
                 }
             }

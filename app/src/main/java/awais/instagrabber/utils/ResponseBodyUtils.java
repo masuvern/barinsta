@@ -18,6 +18,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.direct_messages.DirectItemModel;
 import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.models.enums.DirectItemType;
@@ -25,6 +26,11 @@ import awais.instagrabber.models.enums.InboxReadState;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenExpiringMediaType;
 import awais.instagrabber.models.enums.RavenMediaViewType;
+import awais.instagrabber.models.stickers.PollModel;
+import awais.instagrabber.models.stickers.QuestionModel;
+import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SliderModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -874,5 +880,128 @@ public final class ResponseBodyUtils {
             sliderItems.add(sliderItem);
         }
         return sliderItems;
+    }
+
+    public static StoryModel parseStoryItem(final JSONObject data,
+                                            final boolean isLoc,
+                                            final boolean isHashtag,
+                                            final String localUsername) throws JSONException {
+        final boolean isVideo = data.has("video_duration");
+        final StoryModel model = new StoryModel(data.getString("id"),
+                data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
+                        .getString("url"),
+                isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                data.optLong("taken_at", 0),
+                (isLoc || isHashtag)
+                        ? data.getJSONObject("user").getString("username")
+                        : localUsername,
+                data.getJSONObject("user").getString("pk"),
+                data.optBoolean("can_reply"));
+
+        final JSONArray videoResources = data.optJSONArray("video_versions");
+        if (isVideo && videoResources != null)
+            model.setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
+
+        if (data.has("story_feed_media")) {
+            model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_code"));
+        }
+
+        // TODO: this may not be limited to spotify
+        if (!data.isNull("story_app_attribution"))
+            model.setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
+
+        if (data.has("story_polls")) {
+            final JSONArray storyPolls = data.optJSONArray("story_polls");
+            JSONObject tappableObject = null;
+            if (storyPolls != null) {
+                tappableObject = storyPolls.getJSONObject(0).optJSONObject("poll_sticker");
+            }
+            if (tappableObject != null) model.setPoll(new PollModel(
+                    String.valueOf(tappableObject.getLong("poll_id")),
+                    tappableObject.getString("question"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
+                    tappableObject.optInt("viewer_vote", -1)
+            ));
+        }
+        if (data.has("story_questions")) {
+            final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0)
+                    .optJSONObject("question_sticker");
+            if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
+                model.setQuestion(new QuestionModel(
+                        String.valueOf(tappableObject.getLong("question_id")),
+                        tappableObject.getString("question")
+                ));
+        }
+        if (data.has("story_quizs")) {
+            JSONObject tappableObject = data.getJSONArray("story_quizs").getJSONObject(0).optJSONObject("quiz_sticker");
+            if (tappableObject != null) {
+                String[] choices = new String[tappableObject.getJSONArray("tallies").length()];
+                Long[] counts = new Long[choices.length];
+                for (int q = 0; q < choices.length; ++q) {
+                    JSONObject tempchoice = tappableObject.getJSONArray("tallies").getJSONObject(q);
+                    choices[q] = (q == tappableObject.getInt("correct_answer") ? "*** " : "")
+                            + tempchoice.getString("text");
+                    counts[q] = tempchoice.getLong("count");
+                }
+                model.setQuiz(new QuizModel(
+                        String.valueOf(tappableObject.getLong("quiz_id")),
+                        tappableObject.getString("question"),
+                        choices,
+                        counts,
+                        tappableObject.optInt("viewer_answer", -1)
+                ));
+            }
+        }
+        if (data.has("story_cta") && data.has("link_text")) {
+            JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
+            String swipeUpUrl = tappableObject.getString("webUri");
+            if (swipeUpUrl.startsWith("http")) {
+                model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+            }
+        }
+        if (data.has("story_sliders")) {
+            final JSONObject tappableObject = data.getJSONArray("story_sliders").getJSONObject(0)
+                    .optJSONObject("slider_sticker");
+            if (tappableObject != null)
+                model.setSlider(new SliderModel(
+                        String.valueOf(tappableObject.getLong("slider_id")),
+                        tappableObject.getString("question"),
+                        tappableObject.getString("emoji"),
+                        tappableObject.getBoolean("viewer_can_vote"),
+                        tappableObject.getDouble("slider_vote_average"),
+                        tappableObject.getInt("slider_vote_count"),
+                        tappableObject.optDouble("viewer_vote")
+                ));
+        }
+        JSONArray hashtags = data.optJSONArray("story_hashtags");
+        JSONArray locations = data.optJSONArray("story_locations");
+        JSONArray atmarks = data.optJSONArray("reel_mentions");
+        String[] mentions = new String[(hashtags == null ? 0 : hashtags.length())
+                + (atmarks == null ? 0 : atmarks.length())
+                + (locations == null ? 0 : locations.length())];
+        if (hashtags != null) {
+            for (int h = 0; h < hashtags.length(); ++h) {
+                mentions[h] = "#" + hashtags.getJSONObject(h).getJSONObject("hashtag").getString("name");
+            }
+        }
+        if (atmarks != null) {
+            for (int h = 0; h < atmarks.length(); ++h) {
+                mentions[h + (hashtags == null ? 0 : hashtags.length())] =
+                        "@" + atmarks.getJSONObject(h).getJSONObject("user").getString("username");
+            }
+        }
+        if (locations != null) {
+            for (int h = 0; h < locations.length(); ++h) {
+                mentions[h + (hashtags == null ? 0 : hashtags.length()) + (atmarks == null ? 0 : atmarks.length())] =
+                        locations.getJSONObject(h).getJSONObject("location").getString("short_name")
+                                + " (" + locations.getJSONObject(h).getJSONObject("location").getLong("pk") + ")";
+            }
+        }
+        if (mentions.length != 0) model.setMentions(mentions);
+
+        return model;
     }
 }
