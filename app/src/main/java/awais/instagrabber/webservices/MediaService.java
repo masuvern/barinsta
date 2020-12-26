@@ -356,8 +356,9 @@ public class MediaService extends BaseService {
     }
 
     public void fetchLikes(final String mediaId,
+                           final boolean isComment,
                            @NonNull final ServiceCallback<List<ProfileModel>> callback) {
-        final Call<String> likesRequest = repository.fetchLikes(mediaId);
+        final Call<String> likesRequest = repository.fetchLikes(mediaId, isComment ? "comment_likers" : "likers");
         likesRequest.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {

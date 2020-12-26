@@ -15,8 +15,9 @@ public interface MediaRepository {
     @GET("/api/v1/media/{mediaId}/info/")
     Call<String> fetch(@Path("mediaId") final String mediaId);
 
-    @GET("/api/v1/media/{mediaId}/likers/")
-    Call<String> fetchLikes(@Path("mediaId") final String mediaId);
+    @GET("/api/v1/media/{mediaId}/{action}/")
+    Call<String> fetchLikes(@Path("mediaId") final String mediaId,
+                            @Path("action") final String action); // one of "likers" or "comment_likers"
 
     @FormUrlEncoded
     @POST("/api/v1/media/{mediaId}/{action}/")

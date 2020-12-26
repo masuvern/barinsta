@@ -27,6 +27,10 @@
             android:name="postId"
             app:argType="string"
             app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
+            app:nullable="false" />
     </dialog>
 
     <action
@@ -35,6 +39,10 @@
         <argument
             android:name="postId"
             app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
             app:nullable="false" />
     </action>
 </navigation>

@@ -25,6 +25,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -288,6 +289,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
                     resources.getString(R.string.comment_viewer_copy_comment),
+                    resources.getString(R.string.comment_viewer_see_likers),
                     resources.getString(R.string.comment_viewer_reply_comment),
                     commentModel.getLiked() ? resources.getString(R.string.comment_viewer_unlike_comment)
                                             : resources.getString(R.string.comment_viewer_like_comment),
@@ -298,6 +300,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
                     resources.getString(R.string.comment_viewer_copy_comment),
+                    resources.getString(R.string.comment_viewer_see_likers),
                     resources.getString(R.string.comment_viewer_reply_comment),
                     commentModel.getLiked() ? resources.getString(R.string.comment_viewer_unlike_comment)
                                             : resources.getString(R.string.comment_viewer_like_comment),
@@ -306,7 +309,8 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         } else {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.comment_viewer_copy_comment)
+                    resources.getString(R.string.comment_viewer_copy_comment),
+                    resources.getString(R.string.comment_viewer_see_likers)
             };
         }
         final Context context = getContext();
@@ -321,7 +325,17 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 case 1: // copy comment
                     Utils.copyText(context, "@" + profileModel.getUsername() + ": " + commentModel.getText());
                     break;
-                case 2: // reply to comment
+                case 2: // see comment likers, this is surprisingly available to anons
+                    final NavController navController = getNavController();
+                    if (navController != null) {
+                        final Bundle bundle = new Bundle();
+                        bundle.putString("postId", commentModel.getId());
+                        bundle.putBoolean("isComment", true);
+                        navController.navigate(R.id.action_global_likesViewerFragment, bundle);
+                    }
+                    else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    break;
+                case 3: // reply to comment
                     commentsAdapter.setSelected(commentModel);
                     String mention = "@" + profileModel.getUsername() + " ";
                     binding.commentText.setText(mention);
@@ -333,7 +347,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         imm.showSoftInput(binding.commentText, 0);
                     }, 200);
                     break;
-                case 3: // like/unlike comment
+                case 4: // like/unlike comment
                     if (csrfToken == null) {
                         return;
                     }
@@ -373,7 +387,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         }
                     });
                     break;
-                case 4: // translate comment
+                case 5: // translate comment
                     mediaService.translate(commentModel.getId(), "2", new ServiceCallback<String>() {
                         @Override
                         public void onSuccess(final String result) {
@@ -395,7 +409,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         }
                     });
                     break;
-                case 5: // delete comment
+                case 6: // delete comment
                     final String userId = CookieUtils.getUserIdFromCookie(cookie);
                     if (userId == null) return;
                     mediaService.deleteComment(
@@ -439,5 +453,16 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             }
         }
+    }
+
+    @Nullable
+    private NavController getNavController() {
+        NavController navController = null;
+        try {
+            navController = NavHostFragment.findNavController(this);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "navigateToProfile", e);
+        }
+        return navController;
     }
 }

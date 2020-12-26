@@ -14,27 +14,29 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.util.Collections;
 import java.util.List;
 
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.LikesAdapter;
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentLikesBinding;
 import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.GraphQLUserListFetchResponse;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
+
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class LikesViewerFragment extends BottomSheetDialogFragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "LikesViewerFragment";
@@ -47,8 +49,12 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     private Resources resources;
     private AppCompatActivity fragmentActivity;
     private LinearLayoutCompat root;
+    private RecyclerLazyLoader lazyLoader;
     private MediaService mediaService;
-    private String postId;
+    private GraphQLService graphQLService;
+    private boolean isLoggedIn;
+    private String postId, endCursor;
+    private boolean isComment;
 
     private final ServiceCallback<List<ProfileModel>> cb = new ServiceCallback<List<ProfileModel>>() {
         @Override
@@ -78,11 +84,44 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         }
     };
 
+    private final ServiceCallback<GraphQLUserListFetchResponse> acb = new ServiceCallback<GraphQLUserListFetchResponse>() {
+        @Override
+        public void onSuccess(final GraphQLUserListFetchResponse result) {
+            endCursor = result.getNextMaxId();
+            final LikesAdapter likesAdapter = new LikesAdapter(result.getItems(), v -> {
+                final Object tag = v.getTag();
+                if (tag instanceof ProfileModel) {
+                    ProfileModel model = (ProfileModel) tag;
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("username", "@" + model.getUsername());
+                    NavHostFragment.findNavController(LikesViewerFragment.this).navigate(R.id.action_global_profileFragment, bundle);
+                }
+            });
+            layoutManager = new LinearLayoutManager(getContext());
+            binding.rvLikes.setAdapter(likesAdapter);
+            binding.rvLikes.setLayoutManager(layoutManager);
+            binding.swipeRefreshLayout.setRefreshing(false);
+        }
+
+        @Override
+        public void onFailure(final Throwable t) {
+            Log.e(TAG, "Error", t);
+            try {
+                final Context context = getContext();
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch (Exception e) {}
+        }
+    };
+
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         fragmentActivity = (AppCompatActivity) getActivity();
-        mediaService = MediaService.getInstance();
+        mediaService = isLoggedIn ? MediaService.getInstance() : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         // setHasOptionsMenu(true);
     }
 
@@ -103,16 +142,29 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
 
     @Override
     public void onRefresh() {
-        mediaService.fetchLikes(postId, cb);
+        if (isComment && !isLoggedIn) {
+            lazyLoader.resetState();
+            graphQLService.fetchCommentLikers(postId, null, acb);
+        }
+        else mediaService.fetchLikes(postId, isComment, cb);
     }
 
     private void init() {
         if (getArguments() == null) return;
         final LikesViewerFragmentArgs fragmentArgs = LikesViewerFragmentArgs.fromBundle(getArguments());
         postId = fragmentArgs.getPostId();
+        isComment = fragmentArgs.getIsComment();
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         binding.swipeRefreshLayout.setRefreshing(true);
         resources = getResources();
+        if (isComment && !isLoggedIn) {
+            lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+                if (!TextUtils.isEmpty(endCursor))
+                    graphQLService.fetchCommentLikers(postId, null, acb);
+                endCursor = null;
+            });
+            binding.rvLikes.addOnScrollListener(lazyLoader);
+        }
         onRefresh();
     }
 }

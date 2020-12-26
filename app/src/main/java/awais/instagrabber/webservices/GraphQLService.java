@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.GraphQLRepository;
+import awais.instagrabber.repositories.responses.GraphQLUserListFetchResponse;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -180,5 +182,62 @@ public class GraphQLService extends BaseService {
             }
         }
         return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
+    }
+
+    public void fetchCommentLikers(final String commentId,
+                                    final String endCursor,
+                                    final ServiceCallback<GraphQLUserListFetchResponse> callback) {
+        final Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("query_hash", "5f0b1f6281e72053cbc07909c8d154ae");
+        queryMap.put("variables", "{\"comment_id\":\"" + commentId + "\"," +
+                "\"first\":30," +
+                "\"after\":\"" + (endCursor == null ? "" : endCursor) + "\"}");
+        final Call<String> request = repository.fetch(queryMap);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String rawBody = response.body();
+                if (rawBody == null) {
+                    Log.e(TAG, "Error occurred while fetching gql comment likes of "+commentId);
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject body = new JSONObject(rawBody);
+                    final String status = body.getString("status");
+                    final JSONObject data = body.getJSONObject("data").getJSONObject("comment").getJSONObject("edge_liked_by");
+                    final JSONObject pageInfo = data.getJSONObject("page_info");
+                    final String endCursor = pageInfo.getBoolean("has_next_page") ? pageInfo.getString("end_cursor") : null;
+                    final JSONArray users = data.getJSONArray("edges");
+                    final int usersLen = users.length();
+                    final List<ProfileModel> userModels = new ArrayList<>();
+                    for (int j = 0; j < usersLen; ++j) {
+                        final JSONObject userObject = users.getJSONObject(j).getJSONObject("node");
+                        userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
+                                false,
+                                userObject.optBoolean("is_verified"),
+                                userObject.getString("id"),
+                                userObject.getString("username"),
+                                userObject.optString("full_name"),
+                                null, null,
+                                userObject.getString("profile_pic_url"),
+                                null, 0, 0, 0, false, false, false, false, false));
+                    }
+                    callback.onSuccess(new GraphQLUserListFetchResponse(endCursor, status, userModels));
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    if (callback != null) {
+                        callback.onFailure(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
     }
 }

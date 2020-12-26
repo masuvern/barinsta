@@ -16,7 +16,6 @@
         app:destination="@id/notificationsViewer" />
 
     <include app:graph="@navigation/comments_nav_graph" />
-    <include app:graph="@navigation/likes_nav_graph" />
 
     <action
         android:id="@+id/action_global_commentsViewerFragment"
@@ -32,6 +31,21 @@
         <argument
             android:name="postUserId"
             app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/likes_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_likesViewerFragment"
+        app:destination="@id/likes_nav_graph">
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
             app:nullable="false" />
     </action>
 </navigation>

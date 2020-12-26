@@ -542,6 +542,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             if (navController != null && isLoggedIn) {
                 final Bundle bundle = new Bundle();
                 bundle.putString("postId", feedModel.getPostId());
+                bundle.putBoolean("isComment", false);
                 navController.navigate(R.id.action_global_likesViewerFragment, bundle);
             }
             else {
