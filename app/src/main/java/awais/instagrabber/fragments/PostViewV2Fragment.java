@@ -968,6 +968,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
 
             @Override
             public void onItemClicked(final int position) {
+                toggleDetails();
             }
 
             @Override
