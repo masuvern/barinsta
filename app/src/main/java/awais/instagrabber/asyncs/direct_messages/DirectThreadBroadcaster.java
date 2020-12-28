@@ -161,7 +161,7 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
         public TextBroadcastOptions(String text) throws UnsupportedEncodingException {
             super(ItemType.TEXT);
             this.text = URLEncoder.encode(text, "UTF-8")
-                    .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
+                    .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'").replaceAll("%22", "\\\"")
                     .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~").replaceAll("%0A", "\n");
         }
 
@@ -234,8 +234,8 @@ public class DirectThreadBroadcaster extends AsyncTask<DirectThreadBroadcaster.B
     }
 
     public static class DirectThreadBroadcastResponse {
-        private int responseCode;
-        private JSONObject response;
+        private final int responseCode;
+        private final JSONObject response;
 
         public DirectThreadBroadcastResponse(int responseCode, JSONObject response) {
             this.responseCode = responseCode;
