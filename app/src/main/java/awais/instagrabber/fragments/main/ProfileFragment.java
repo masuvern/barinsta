@@ -437,6 +437,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     @Override
     public void onRefresh() {
+        profileDetailsBinding.mainProfileImage.setVisibility(View.INVISIBLE);
         fetchProfileDetails();
     }
 
@@ -643,6 +644,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     }
                 }));
         profileDetailsBinding.mainProfileImage.setImageURI(profileModel.getHdProfilePic());
+        profileDetailsBinding.mainProfileImage.setVisibility(View.VISIBLE);
 
         final Long followersCount = profileModel.getFollowersCount();
         final Long followingCount = profileModel.getFollowingCount();

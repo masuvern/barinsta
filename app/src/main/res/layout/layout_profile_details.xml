@@ -14,6 +14,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:transitionName="profile_pic"
+        android:visibility="invisible"
         app:actualImageScaleType="centerCrop"
         app:layout_constraintEnd_toStartOf="@id/mainPostCount"
         app:layout_constraintStart_toStartOf="parent"
