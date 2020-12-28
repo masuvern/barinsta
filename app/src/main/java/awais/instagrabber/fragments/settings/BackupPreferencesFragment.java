@@ -26,8 +26,28 @@ public class BackupPreferencesFragment extends BasePreferencesFragment {
         if (context == null) {
             return;
         }
+        screen.addPreference(getAboutPreference(context));
+        screen.addPreference(getWarningPreference(context));
         screen.addPreference(getCreatePreference(context));
         screen.addPreference(getRestorePreference(context));
+    }
+
+    private Preference getAboutPreference(@NonNull final Context context) {
+        final Preference preference = new Preference(context);
+        preference.setSummary(R.string.backup_summary);
+        preference.setEnabled(false);
+        preference.setIcon(R.drawable.ic_outline_info_24);
+        preference.setIconSpaceReserved(true);
+        return preference;
+    }
+
+    private Preference getWarningPreference(@NonNull final Context context) {
+        final Preference preference = new Preference(context);
+        preference.setSummary(R.string.backup_warning);
+        preference.setEnabled(false);
+        preference.setIcon(R.drawable.ic_warning);
+        preference.setIconSpaceReserved(true);
+        return preference;
     }
 
     private Preference getCreatePreference(@NonNull final Context context) {
