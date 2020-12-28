@@ -54,7 +54,7 @@ public final class CrashReporter implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(@NonNull final Thread t, @NonNull final Throwable exception) {
         final StringBuilder reportBuilder = new StringBuilder();
         reportBuilder.append("IMPORTANT: If sending by email, your email address and the entire content will be made public on GitHub issues.");
-        reportBuilder.append("IMPORTANT: When possible, please describe the steps leading to this crash. Thank you for your cooperation.");
+        reportBuilder.append("\r\nIMPORTANT: When possible, please describe the steps leading to this crash. Thank you for your cooperation.");
         reportBuilder.append("\r\n\r\nError report collected on: ").append(new Date().toString());
 
         reportBuilder
