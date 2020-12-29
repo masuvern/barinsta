@@ -18,12 +18,6 @@ import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.models.stickers.PollModel;
-import awais.instagrabber.models.stickers.QuestionModel;
-import awais.instagrabber.models.stickers.QuizModel;
-import awais.instagrabber.models.stickers.SliderModel;
-import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.StoriesRepository;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.Constants;
@@ -128,8 +122,9 @@ public class StoriesService extends BaseService {
                                                                    user.getString("profile_pic_url"),
                                                                    null, 0, 0, 0, false, false, false, false, false);
                 final String id = node.getString("id");
-                final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == node.getLong("latest_reel_media");
-                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead));
+                final long timestamp = node.getLong("latest_reel_media");
+                final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp));
             }
             callback.onSuccess(feedStoryModels);
         } catch (JSONException e) {
@@ -156,7 +151,7 @@ public class StoriesService extends BaseService {
 
                     final int length = highlightsReel.length();
                     final List<HighlightModel> highlightModels = new ArrayList<>();
-                    // final String[] highlightIds = new String[length];
+
                     for (int i = 0; i < length; ++i) {
                         final JSONObject highlightNode = highlightsReel.getJSONObject(i);
                         highlightModels.add(new HighlightModel(
@@ -164,7 +159,8 @@ public class StoriesService extends BaseService {
                                 highlightNode.getString(Constants.EXTRAS_ID),
                                 highlightNode.getJSONObject("cover_media")
                                         .getJSONObject("cropped_image_version")
-                                        .getString("url")
+                                        .getString("url"),
+                                highlightNode.getLong("latest_reel_media")
                         ));
                     }
                     callback.onSuccess(highlightModels);
@@ -337,4 +333,29 @@ public class StoriesService extends BaseService {
         }
         return builder.toString();
     }
+
+    public class ArchiveFetchResponse {
+        private List<HighlightModel> archives;
+        private final boolean hasNextPage;
+        private final String nextCursor;
+
+        public ArchiveFetchResponse(final List<HighlightModel> highlightModels, final boolean hasNextPage, final String nextCursor) {
+            this.archives = archives;
+            this.hasNextPage = hasNextPage;
+            this.nextCursor = nextCursor;
+        }
+
+        public List<HighlightModel> getArchives() {
+            return archives;
+        }
+
+        public boolean hasNextPage() {
+            return hasNextPage;
+        }
+
+        public String getNextCursor() {
+            return nextCursor;
+        }
+    }
+
 }
