@@ -10,6 +10,7 @@
     <include app:graph="@navigation/comments_nav_graph" />
     <include app:graph="@navigation/likes_nav_graph" />
     <include app:graph="@navigation/notification_viewer_nav_graph" />
+    <include app:graph="@navigation/story_list_nav_graph" />
 
     <action
         android:id="@+id/action_global_profileFragment"
@@ -34,6 +35,15 @@
         app:destination="@id/location_nav_graph">
         <argument
             android:name="locationId"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <action
+        android:id="@+id/action_global_storyListViewerFragment"
+        app:destination="@id/story_list_nav_graph">
+        <argument
+            android:name="type"
             app:argType="string"
             app:nullable="false" />
     </action>

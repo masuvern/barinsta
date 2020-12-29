@@ -137,6 +137,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 NavHostFragment.findNavController(this).navigate(R.id.action_global_notificationsViewerFragment);
                 return true;
             }));
+            screen.addPreference(getPreference(R.string.action_archive, R.drawable.ic_archive, preference -> {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalStoryListViewerFragment("archive");
+                NavHostFragment.findNavController(this).navigate(navDirections);
+                return true;
+            }));
         }
         screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
             final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();

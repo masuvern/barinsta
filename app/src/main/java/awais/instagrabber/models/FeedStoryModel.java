@@ -2,21 +2,27 @@ package awais.instagrabber.models;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
+import java.util.Date;
+
+import awais.instagrabber.utils.Utils;
 
 public final class FeedStoryModel implements Serializable {
     private final String storyMediaId;
     private final ProfileModel profileModel;
-//    private StoryModel[] storyModels;
+    private final StoryModel firstStoryModel;
     private Boolean fullyRead;
     private final long timestamp;
 
     public FeedStoryModel(final String storyMediaId, final ProfileModel profileModel,
-                          final boolean fullyRead, final long timestamp) {
+                          final boolean fullyRead, final long timestamp, final StoryModel firstStoryModel) {
         this.storyMediaId = storyMediaId;
         this.profileModel = profileModel;
         this.fullyRead = fullyRead;
         this.timestamp = timestamp;
+        this.firstStoryModel = firstStoryModel;
     }
 
     public String getStoryMediaId() {
@@ -27,17 +33,22 @@ public final class FeedStoryModel implements Serializable {
         return timestamp;
     }
 
+    @NonNull
+    public String getDateTime() {
+        return Utils.datetimeParser.format(new Date(timestamp * 1000L));
+    }
+
     public ProfileModel getProfileModel() {
         return profileModel;
     }
 
-//    public void setStoryModels(final StoryModel[] storyModels) {
-//        this.storyModels = storyModels;
+//    public void setFirstStoryModel(final StoryModel firstStoryModel) {
+//        this.firstStoryModel = firstStoryModel;
 //    }
 
-//    public StoryModel[] getStoryModels() {
-//        return storyModels;
-//    }
+    public StoryModel getFirstStoryModel() {
+        return firstStoryModel;
+    }
 
     public Boolean isFullyRead() {
         return fullyRead;

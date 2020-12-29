@@ -890,6 +890,8 @@ public final class ResponseBodyUtils {
         final StoryModel model = new StoryModel(data.getString("id"),
                 data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
                         .getString("url"),
+                data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(1)
+                        .getString("url"),
                 isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                 data.optLong("taken_at", 0),
                 (isLoc || isHashtag)

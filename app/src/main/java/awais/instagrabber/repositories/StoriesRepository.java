@@ -26,6 +26,9 @@ public interface StoriesRepository {
     @GET("/api/v1/highlights/{uid}/highlights_tray/")
     Call<String> fetchHighlights(@Path("uid") final String uid);
 
+    @GET("/api/v1/archive/reel/day_shells/")
+    Call<String> fetchArchive(@QueryMap Map<String, String> queryParams);
+
     @GET
     Call<String> getUserStory(@Header("User-Agent") String userAgent, @Url String url);
 

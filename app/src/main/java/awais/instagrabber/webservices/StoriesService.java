@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
@@ -124,7 +125,9 @@ public class StoriesService extends BaseService {
                 final String id = node.getString("id");
                 final long timestamp = node.getLong("latest_reel_media");
                 final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
-                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp));
+                final JSONObject itemJson = node.getJSONArray("items").getJSONObject(0);
+                final StoryModel firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel));
             }
             callback.onSuccess(feedStoryModels);
         } catch (JSONException e) {
@@ -164,6 +167,62 @@ public class StoriesService extends BaseService {
                         ));
                     }
                     callback.onSuccess(highlightModels);
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    public void fetchArchive(final String maxId,
+                             final ServiceCallback<ArchiveFetchResponse> callback) {
+        final Map<String, String> form = new HashMap<>();
+        form.put("include_suggested_highlights", "false");
+        form.put("is_in_archive_home", "true");
+        form.put("include_cover", "1");
+        form.put("timezone_offset", String.valueOf(TimeZone.getDefault().getRawOffset() / 1000));
+        if (!TextUtils.isEmpty(maxId)) {
+            form.put("max_id", maxId); // NOT TESTED
+        }
+        final Call<String> request = repository.fetchArchive(form);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                try {
+                    if (callback == null) {
+                        return;
+                    }
+                    final String body = response.body();
+                    if (TextUtils.isEmpty(body)) {
+                        callback.onSuccess(null);
+                        return;
+                    }
+                    final JSONObject data = new JSONObject(body);
+                    final JSONArray highlightsReel = data.getJSONArray("items");
+
+                    final int length = highlightsReel.length();
+                    final List<HighlightModel> highlightModels = new ArrayList<>();
+
+                    for (int i = 0; i < length; ++i) {
+                        final JSONObject highlightNode = highlightsReel.getJSONObject(i);
+                        highlightModels.add(new HighlightModel(
+                                null,
+                                highlightNode.getString(Constants.EXTRAS_ID),
+                                highlightNode.getJSONObject("cover_image_version").getString("url"),
+                                highlightNode.getLong("timestamp")
+                        ));
+                    }
+                    callback.onSuccess(new ArchiveFetchResponse(highlightModels,
+                                                                data.getBoolean("more_available"),
+                                                                data.getString("max_id")));
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
                     callback.onFailure(e);
@@ -335,11 +394,11 @@ public class StoriesService extends BaseService {
     }
 
     public class ArchiveFetchResponse {
-        private List<HighlightModel> archives;
+        private final List<HighlightModel> archives;
         private final boolean hasNextPage;
         private final String nextCursor;
 
-        public ArchiveFetchResponse(final List<HighlightModel> highlightModels, final boolean hasNextPage, final String nextCursor) {
+        public ArchiveFetchResponse(final List<HighlightModel> archives, final boolean hasNextPage, final String nextCursor) {
             this.archives = archives;
             this.hasNextPage = hasNextPage;
             this.nextCursor = nextCursor;

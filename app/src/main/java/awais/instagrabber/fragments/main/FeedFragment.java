@@ -279,7 +279,11 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        if (item.getItemId() == R.id.layout) {
+        if (item.getItemId() == R.id.storyList) {
+            final NavDirections action = FeedFragmentDirections.actionGlobalStoryListViewerFragment("feed");
+            NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+        }
+        else if (item.getItemId() == R.id.layout) {
             showPostsLayoutPreferences();
             return true;
         }
@@ -358,7 +362,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             new FeedStoriesAdapter.OnFeedStoryClickListener() {
                 @Override
                 public void onFeedStoryClick(FeedStoryModel model, int position) {
-                    Log.d("austin_debug", "read status is "+model.isFullyRead());
                     final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null);
                     NavHostFragment.findNavController(FeedFragment.this).navigate(action);
                 }

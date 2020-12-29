@@ -11,7 +11,7 @@ import awais.instagrabber.models.stickers.SwipeUpModel;
 
 public final class StoryModel implements Serializable {
     private final String storyMediaId;
-    private final String storyUrl;
+    private final String storyUrl, thumbnail;
     private final String username;
     private final String userId;
     private final MediaItemType itemType;
@@ -30,10 +30,11 @@ public final class StoryModel implements Serializable {
     private boolean isCurrentSlide = false;
     private final boolean canReply;
 
-    public StoryModel(final String storyMediaId, final String storyUrl, final MediaItemType itemType,
+    public StoryModel(final String storyMediaId, final String storyUrl, final String thumbnail, final MediaItemType itemType,
                       final long timestamp, final String username, final String userId, final boolean canReply) {
         this.storyMediaId = storyMediaId;
         this.storyUrl = storyUrl;
+        this.thumbnail = thumbnail;
         this.itemType = itemType;
         this.timestamp = timestamp;
         this.username = username;
@@ -43,6 +44,10 @@ public final class StoryModel implements Serializable {
 
     public String getStoryUrl() {
         return storyUrl;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 
     public String getStoryMediaId() {

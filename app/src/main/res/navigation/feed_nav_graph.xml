@@ -78,6 +78,17 @@
         android:id="@+id/action_global_notificationsViewerFragment"
         app:destination="@id/notification_viewer_nav_graph" />
 
+    <include app:graph="@navigation/story_list_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_storyListViewerFragment"
+        app:destination="@id/story_list_nav_graph">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
     <fragment
         android:id="@+id/feedFragment"
         android:name="awais.instagrabber.fragments.main.FeedFragment"
