@@ -136,11 +136,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                                 friendshipService.approve(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                                     @Override
                                     public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                        // Log.d(TAG, "onSuccess: " + result);
-                                        if (result.getStatus().equals("ok")) {
-                                            onRefresh();
-                                            return;
-                                        }
+                                        onRefresh();
                                         Log.e(TAG, "approve: status was not ok!");
                                     }
 
@@ -180,12 +176,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
                                 @Override
                                 public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                    // Log.d(TAG, "onSuccess: " + result);
-                                    if (result.getStatus().equals("ok")) {
-                                        onRefresh();
-                                        return;
-                                    }
-                                    Log.e(TAG, "ignore: status was not ok!");
+                                    onRefresh();
                                 }
 
                                 @Override
