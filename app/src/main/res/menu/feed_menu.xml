@@ -5,6 +5,7 @@
         android:id="@+id/storyList"
         android:icon="@drawable/ic_story_list"
         android:title="@string/feed_stories"
+        android:visible="false"
         app:showAsAction="always" />
     <item
         android:id="@+id/layout"

@@ -77,6 +77,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_POSTS_LAYOUT);
     private RecyclerView storiesRecyclerView;
+    private MenuItem storyListMenu;
 
     public static List<FeedStoryModel> feedStories;
 
@@ -277,6 +278,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.feed_menu, menu);
+        storyListMenu = menu.findItem(R.id.storyList);
     }
 
     @Override
@@ -396,12 +398,14 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         storiesFetching = true;
         updateSwipeRefreshState();
+        storyListMenu.setVisible(false);
         storiesService.getFeedStories(CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<List<FeedStoryModel>>() {
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
                 feedStoriesViewModel.getList().postValue(result);
                 feedStories = result;
                 storiesFetching = false;
+                storyListMenu.setVisible(true);
                 updateSwipeRefreshState();
             }
 
