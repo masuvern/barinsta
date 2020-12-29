@@ -18,10 +18,8 @@ public interface StoriesRepository {
     Call<String> fetch(@Path("mediaId") final String mediaId);
     // this one is the same as MediaRepository.fetch BUT you need to make sure it's a story
 
-    @FormUrlEncoded
-    @POST("/api/v1/feed/reels_tray/")
-    Call<String> getFeedStories(@Header("User-Agent") String userAgent,
-                                @FieldMap Map<String, String> form);
+    @GET("/api/v1/feed/reels_tray/")
+    Call<String> getFeedStories();
 
     @GET("/api/v1/highlights/{uid}/highlights_tray/")
     Call<String> fetchHighlights(@Path("uid") final String uid);

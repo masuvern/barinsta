@@ -21,9 +21,14 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(final FeedStoryModel model,
+                     final int position,
                      final OnFeedStoryClickListener notificationClickListener) {
         if (model == null) return;
-        binding.tvComment.setVisibility(View.GONE);
+
+        final int storiesCount = model.getMediaCount();
+        binding.tvComment.setVisibility(View.VISIBLE);
+        binding.tvComment.setText(itemView.getResources().getQuantityString(R.plurals.stories_count, storiesCount, storiesCount));
+
         binding.tvSubComment.setVisibility(View.GONE);
 
         binding.tvDate.setText(model.getDateTime());
@@ -36,22 +41,27 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
         });
 
         binding.ivPreviewPic.setVisibility(View.VISIBLE);
-        binding.ivPreviewPic.setImageURI(model.getFirstStoryModel().getThumbnail());
-        binding.ivPreviewPic.setOnClickListener(v -> {
-            if (notificationClickListener == null) return;
-            notificationClickListener.onFeedStoryClick(model);
-        });
+        if (model.getFirstStoryModel() != null) {
+            binding.ivPreviewPic.setVisibility(View.VISIBLE);
+            binding.ivPreviewPic.setImageURI(model.getFirstStoryModel().getThumbnail());
+        }
+        else binding.ivPreviewPic.setVisibility(View.INVISIBLE);
 
         itemView.setOnClickListener(v -> {
             if (notificationClickListener == null) return;
-            notificationClickListener.onFeedStoryClick(model);
+            notificationClickListener.onFeedStoryClick(model, position);
         });
     }
 
     public void bind(final HighlightModel model,
+                     final int position,
                      final OnHighlightStoryClickListener notificationClickListener) {
         if (model == null) return;
-        binding.tvComment.setVisibility(View.GONE);
+
+        final int storiesCount = model.getMediaCount();
+        binding.tvComment.setVisibility(View.VISIBLE);
+        binding.tvComment.setText(itemView.getResources().getQuantityString(R.plurals.stories_count, storiesCount, storiesCount));
+
         binding.tvSubComment.setVisibility(View.GONE);
 
         binding.tvUsername.setText(model.getDateTime());
@@ -63,7 +73,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
 
         itemView.setOnClickListener(v -> {
             if (notificationClickListener == null) return;
-            notificationClickListener.onHighlightClick(model);
+            notificationClickListener.onHighlightClick(model, position);
         });
     }
 }

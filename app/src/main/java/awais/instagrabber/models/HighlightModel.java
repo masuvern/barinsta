@@ -11,15 +11,18 @@ public final class HighlightModel {
     private final String id;
     private final String thumbnailUrl;
     private final long timestamp;
+    private final int mediaCount;
 
     public HighlightModel(final String title,
                           final String id,
                           final String thumbnailUrl,
-                          final long timestamp) {
+                          final long timestamp,
+                          final int mediaCount) {
         this.title = title;
         this.id = id;
         this.thumbnailUrl = thumbnailUrl;
         this.timestamp = timestamp;
+        this.mediaCount = mediaCount;
     }
 
     public String getTitle() {
@@ -41,5 +44,9 @@ public final class HighlightModel {
     @NonNull
     public String getDateTime() {
         return Utils.datetimeParser.format(new Date(timestamp * 1000L));
+    }
+
+    public int getMediaCount() {
+        return mediaCount;
     }
 }

@@ -15,7 +15,6 @@ import java.util.List;
 import awais.instagrabber.adapters.viewholder.StoryListViewHolder;
 import awais.instagrabber.databinding.ItemNotificationBinding;
 import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Utils;
 
 public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, StoryListViewHolder> {
@@ -49,48 +48,11 @@ public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, St
     @Override
     public void onBindViewHolder(@NonNull final StoryListViewHolder holder, final int position) {
         final FeedStoryModel model = getItem(position);
-        holder.bind(model, listener);
-    }
-
-    @Override
-    public void submitList(@Nullable final List<FeedStoryModel> list, @Nullable final Runnable commitCallback) {
-        if (list == null) {
-            super.submitList(null, commitCallback);
-            return;
-        }
-        super.submitList(sort(list), commitCallback);
-    }
-
-    @Override
-    public void submitList(@Nullable final List<FeedStoryModel> list) {
-        if (list == null) {
-            super.submitList(null);
-            return;
-        }
-        super.submitList(sort(list));
-    }
-
-    private List<FeedStoryModel> sort(final List<FeedStoryModel> list) {
-        final List<FeedStoryModel> listCopy = new ArrayList<>(list);
-        Collections.sort(listCopy, (o1, o2) -> {
-            int result;
-            switch (Utils.settingsHelper.getString(Constants.STORY_SORT)) {
-                case "1":
-                    result = o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
-                    break;
-                case "2":
-                    result = o1.getTimestamp() > o2.getTimestamp() ? 1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : -1);
-                    break;
-                default:
-                    result = 0;
-            }
-            return result;
-        });
-        return listCopy;
+        holder.bind(model, position, listener);
     }
 
     public interface OnFeedStoryClickListener {
-        void onFeedStoryClick(final FeedStoryModel model);
+        void onFeedStoryClick(final FeedStoryModel model, final int position);
 
         void onProfileClick(final String username);
     }

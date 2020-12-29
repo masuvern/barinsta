@@ -1008,7 +1008,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 if (which == 1) {
                     // show stories
                     final NavDirections action = ProfileFragmentDirections
-                            .actionProfileFragmentToStoryViewerFragment(-1, null, false, false, profileModel.getId(), username);
+                            .actionProfileFragmentToStoryViewerFragment(-1, null, false, false, profileModel.getId(), username, false);
                     NavHostFragment.findNavController(this).navigate(action);
                     return;
                 }
@@ -1069,7 +1069,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         highlightsViewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
         highlightsAdapter = new HighlightsAdapter((model, position) -> {
             final NavDirections action = ProfileFragmentDirections
-                    .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, false, null, null);
+                    .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, false, null, null, false);
             NavHostFragment.findNavController(this).navigate(action);
         });
         final Context context = getContext();

@@ -78,6 +78,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_POSTS_LAYOUT);
     private RecyclerView storiesRecyclerView;
 
+    public static List<FeedStoryModel> feedStories;
+
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
         public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
@@ -362,7 +364,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             new FeedStoriesAdapter.OnFeedStoryClickListener() {
                 @Override
                 public void onFeedStoryClick(FeedStoryModel model, int position) {
-                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null);
+                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null, false);
                     NavHostFragment.findNavController(FeedFragment.this).navigate(action);
                 }
 
@@ -398,6 +400,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
                 feedStoriesViewModel.getList().postValue(result);
+                feedStories = result;
                 storiesFetching = false;
                 updateSwipeRefreshState();
             }

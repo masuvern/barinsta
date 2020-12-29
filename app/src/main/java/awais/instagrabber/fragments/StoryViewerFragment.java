@@ -91,6 +91,7 @@ import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
@@ -138,7 +139,7 @@ public class StoryViewerFragment extends Fragment {
     private boolean shouldRefresh = true;
     private StoryViewerFragmentArgs fragmentArgs;
     private ViewModel viewModel;
-    private boolean isHighlight;
+    private boolean isHighlight, isArchive;
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
 
@@ -255,9 +256,12 @@ public class StoryViewerFragment extends Fragment {
         currentFeedStoryIndex = fragmentArgs.getFeedStoryIndex();
         highlight = fragmentArgs.getHighlight();
         isHighlight = !TextUtils.isEmpty(highlight);
+        isArchive = fragmentArgs.getIsArchive();
         if (currentFeedStoryIndex >= 0) {
             viewModel = isHighlight
-                        ? new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
+                        ? isArchive
+                            ? new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class)
+                            : new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
                         : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         }
         // feedStoryModels = feedStoriesViewModel.getList().getValue();
@@ -287,7 +291,11 @@ public class StoryViewerFragment extends Fragment {
         final boolean hasFeedStories;
         List<?> models = null;
         if (currentFeedStoryIndex >= 0) {
-            if (isHighlight) {
+            if (isArchive) {
+                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                models = archivesViewModel.getList().getValue();
+            }
+            else if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 models = highlightsViewModel.getList().getValue();
                 // final HighlightModel model = models.get(currentFeedStoryIndex);
@@ -633,7 +641,18 @@ public class StoryViewerFragment extends Fragment {
         releasePlayer();
         String currentStoryMediaId = null;
         if (currentFeedStoryIndex >= 0) {
-            if (isHighlight) {
+            if (isArchive) {
+                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                final List<HighlightModel> models = archivesViewModel.getList().getValue();
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                final HighlightModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getId();
+                currentStoryUsername = model.getTitle();
+            }
+            else if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 final List<HighlightModel> models = highlightsViewModel.getList().getValue();
                 if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
@@ -658,7 +677,13 @@ public class StoryViewerFragment extends Fragment {
         isHashtag = fragmentArgs.getIsHashtag();
         isLoc = fragmentArgs.getIsLoc();
         final boolean hasUsername = !TextUtils.isEmpty(currentStoryUsername);
-        if (hasUsername) {
+        if (isHighlight) {
+            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(highlight);
+            }
+        }
+        else if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {

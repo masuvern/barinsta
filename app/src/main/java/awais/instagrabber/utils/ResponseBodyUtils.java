@@ -889,9 +889,7 @@ public final class ResponseBodyUtils {
         final boolean isVideo = data.has("video_duration");
         final StoryModel model = new StoryModel(data.getString("id"),
                 data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
-                        .getString("url"),
-                data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(1)
-                        .getString("url"),
+                        .getString("url"), null,
                 isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                 data.optLong("taken_at", 0),
                 (isLoc || isHashtag)
@@ -899,6 +897,11 @@ public final class ResponseBodyUtils {
                         : localUsername,
                 data.getJSONObject("user").getString("pk"),
                 data.optBoolean("can_reply"));
+
+        if (data.getJSONObject("image_versions2").getJSONArray("candidates").length() > 1) {
+            model.setThumbnail(data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(1)
+                    .getString("url"));
+        }
 
         final JSONArray videoResources = data.optJSONArray("video_versions");
         if (isVideo && videoResources != null)

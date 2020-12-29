@@ -105,5 +105,9 @@
             android:name="username"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="isArchive"
+            app:argType="boolean"
+            app:nullable="false" />
     </fragment>
 </navigation>

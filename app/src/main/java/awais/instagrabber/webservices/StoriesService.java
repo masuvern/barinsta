@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,13 +85,7 @@ public class StoriesService extends BaseService {
     }
 
     public void getFeedStories(final String csrfToken, final ServiceCallback<List<FeedStoryModel>> callback) {
-        final Map<String, Object> form = new HashMap<>(4);
-        form.put("reason", "cold_start");
-        form.put("_csrftoken", csrfToken);
-        form.put("_uuid", UUID.randomUUID().toString());
-        form.put("supported_capabilities_new", Constants.SUPPORTED_CAPABILITIES);
-        final Map<String, String> signedForm = Utils.sign(form);
-        final Call<String> response = repository.getFeedStories(Constants.I_USER_AGENT, signedForm);
+        final Call<String> response = repository.getFeedStories();
         response.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -124,12 +119,17 @@ public class StoriesService extends BaseService {
                                                                    null, 0, 0, 0, false, false, false, false, false);
                 final String id = node.getString("id");
                 final long timestamp = node.getLong("latest_reel_media");
+                final int mediaCount = node.getInt("media_count");
                 final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
-                final JSONObject itemJson = node.getJSONArray("items").getJSONObject(0);
-                final StoryModel firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
-                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel));
+                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                StoryModel firstStoryModel = null;
+                if (itemJson != null) {
+                    firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
+                }
+                else Log.d("austin_debug", "node: "+node);
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel, mediaCount));
             }
-            callback.onSuccess(feedStoryModels);
+            callback.onSuccess(sort(feedStoryModels));
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing json", e);
         }
@@ -163,7 +163,8 @@ public class StoriesService extends BaseService {
                                 highlightNode.getJSONObject("cover_media")
                                         .getJSONObject("cropped_image_version")
                                         .getString("url"),
-                                highlightNode.getLong("latest_reel_media")
+                                highlightNode.getLong("latest_reel_media"),
+                                highlightNode.getInt("media_count")
                         ));
                     }
                     callback.onSuccess(highlightModels);
@@ -217,7 +218,8 @@ public class StoriesService extends BaseService {
                                 null,
                                 highlightNode.getString(Constants.EXTRAS_ID),
                                 highlightNode.getJSONObject("cover_image_version").getString("url"),
-                                highlightNode.getLong("timestamp")
+                                highlightNode.getLong("timestamp"),
+                                highlightNode.getInt("media_count")
                         ));
                     }
                     callback.onSuccess(new ArchiveFetchResponse(highlightModels,
@@ -393,6 +395,25 @@ public class StoriesService extends BaseService {
         return builder.toString();
     }
 
+    private List<FeedStoryModel> sort(final List<FeedStoryModel> list) {
+        final List<FeedStoryModel> listCopy = new ArrayList<>(list);
+        Collections.sort(listCopy, (o1, o2) -> {
+            int result;
+            switch (Utils.settingsHelper.getString(Constants.STORY_SORT)) {
+                case "1":
+                    result = o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
+                    break;
+                case "2":
+                    result = o1.getTimestamp() > o2.getTimestamp() ? 1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : -1);
+                    break;
+                default:
+                    result = 0;
+            }
+            return result;
+        });
+        return listCopy;
+    }
+
     public class ArchiveFetchResponse {
         private final List<HighlightModel> archives;
         private final boolean hasNextPage;
@@ -404,7 +425,7 @@ public class StoriesService extends BaseService {
             this.nextCursor = nextCursor;
         }
 
-        public List<HighlightModel> getArchives() {
+        public List<HighlightModel> getResult() {
             return archives;
         }
 
@@ -416,5 +437,4 @@ public class StoriesService extends BaseService {
             return nextCursor;
         }
     }
-
 }

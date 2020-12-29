@@ -42,12 +42,12 @@ public final class HighlightStoriesListAdapter extends ListAdapter<HighlightMode
     @Override
     public void onBindViewHolder(@NonNull final StoryListViewHolder holder, final int position) {
         final HighlightModel model = getItem(position);
-        holder.bind(model, listener);
+        holder.bind(model, position, listener);
     }
 
     public interface OnHighlightStoryClickListener {
-        void onHighlightClick(HighlightModel model);
+        void onHighlightClick(final HighlightModel model, final int position);
 
-        void onProfileClick(String username);
+        void onProfileClick(final String username);
     }
 }

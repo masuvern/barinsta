@@ -523,7 +523,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (hasStories) {
                 // show stories
                 final NavDirections action = LocationFragmentDirections
-                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName());
+                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName(), false);
                 NavHostFragment.findNavController(this).navigate(action);
             }
         });

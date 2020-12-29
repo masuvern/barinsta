@@ -160,7 +160,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         if (isComment && !isLoggedIn) {
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
                 if (!TextUtils.isEmpty(endCursor))
-                    graphQLService.fetchCommentLikers(postId, null, acb);
+                    graphQLService.fetchCommentLikers(postId, endCursor, acb);
                 endCursor = null;
             });
             binding.rvLikes.addOnScrollListener(lazyLoader);
