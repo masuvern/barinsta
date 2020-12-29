@@ -46,7 +46,6 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.MediaService;
-import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -62,7 +61,6 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private MediaService mediaService;
     private String userId;
     private String csrfToken;
-    private NewsService newsService;
     private Context context;
 
     private final OnNotificationClickListener clickListener = new OnNotificationClickListener() {
@@ -228,7 +226,6 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
         friendshipService = FriendshipService.getInstance();
-        newsService = NewsService.getInstance();
         mediaService = MediaService.getInstance();
         userId = CookieUtils.getUserIdFromCookie(cookie);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
