@@ -48,7 +48,6 @@ import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -61,7 +60,6 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private NotificationViewModel notificationViewModel;
     private FriendshipService friendshipService;
     private MediaService mediaService;
-    private StoriesService storiesService;
     private String userId;
     private String csrfToken;
     private NewsService newsService;
