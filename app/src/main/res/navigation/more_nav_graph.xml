@@ -50,7 +50,12 @@
 
     <action
         android:id="@+id/action_global_notificationsViewerFragment"
-        app:destination="@id/notification_viewer_nav_graph" />
+        app:destination="@id/notification_viewer_nav_graph">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
 
     <fragment
         android:id="@+id/morePreferencesFragment"

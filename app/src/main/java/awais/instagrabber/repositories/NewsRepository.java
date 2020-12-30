@@ -21,4 +21,9 @@ public interface NewsRepository {
     @Headers("User-Agent: " + Constants.I_USER_AGENT)
     @GET("/api/v1/news/inbox/")
     Call<String> appInbox(@Query(value = "mark_as_seen", encoded = true) boolean markAsSeen);
+
+    @FormUrlEncoded
+    @Headers("User-Agent: " + Constants.I_USER_AGENT)
+    @POST("/api/v1/discover/ayml/")
+    Call<String> getAyml(@FieldMap final Map<String, String> form);
 }

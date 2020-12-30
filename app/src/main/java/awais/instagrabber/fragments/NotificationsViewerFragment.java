@@ -26,6 +26,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import java.util.List;
+
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
 import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListener;
@@ -46,6 +48,7 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -59,8 +62,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private NotificationViewModel notificationViewModel;
     private FriendshipService friendshipService;
     private MediaService mediaService;
-    private String userId;
-    private String csrfToken;
+    private NewsService newsService;
+    private String userId, csrfToken, type;
     private Context context;
 
     private final OnNotificationClickListener clickListener = new OnNotificationClickListener() {
@@ -96,7 +99,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         public void onNotificationClick(final NotificationModel model) {
             if (model == null) return;
             final String username = model.getUsername();
-            if (model.getType() == NotificationType.FOLLOW) {
+            if (model.getType() == NotificationType.FOLLOW || model.getType() == NotificationType.AYML) {
                 openProfile(username);
             }
             else {
@@ -242,6 +245,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     }
 
     private void init() {
+        final NotificationsViewerFragmentArgs fragmentArgs = NotificationsViewerFragmentArgs.fromBundle(getArguments());
+        type = fragmentArgs.getType();
         final Context context = getContext();
         CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
         binding.swipeRefreshLayout.setOnRefreshListener(this);
@@ -256,10 +261,30 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     @Override
     public void onRefresh() {
         binding.swipeRefreshLayout.setRefreshing(true);
-        new NotificationsFetcher(true, notificationModels -> {
-            binding.swipeRefreshLayout.setRefreshing(false);
-            notificationViewModel.getList().postValue(notificationModels);
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        switch (type) {
+            case "notif":
+                new NotificationsFetcher(true, notificationModels -> {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    notificationViewModel.getList().postValue(notificationModels);
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                break;
+            case "ayml":
+                newsService = NewsService.getInstance();
+                newsService.fetchSuggestions(csrfToken, new ServiceCallback<List<NotificationModel>>() {
+                    @Override
+                    public void onSuccess(final List<NotificationModel> notificationModels) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        notificationViewModel.getList().postValue(notificationModels);
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                break;
+        }
     }
 
     private void openProfile(final String username) {

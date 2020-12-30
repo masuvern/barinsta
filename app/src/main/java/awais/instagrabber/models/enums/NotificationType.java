@@ -15,8 +15,10 @@ public enum NotificationType implements Serializable {
     COMMENT_LIKE("13"),
     TAGGED_COMMENT("14"),
     RESPONDED_STORY("213"),
-    // efr
-    REQUEST("REQUEST");
+    // efr - random value
+    REQUEST("REQUEST"),
+    // ayml - random value
+    AYML("AYML");
 
     private final String itemType;
     private static final Map<String, NotificationType> map = new HashMap<>();

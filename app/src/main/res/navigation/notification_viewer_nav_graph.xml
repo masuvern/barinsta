@@ -9,11 +9,21 @@
         android:id="@+id/notificationsViewer"
         android:name="awais.instagrabber.fragments.NotificationsViewerFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications_viewer" />
+        tools:layout="@layout/fragment_notifications_viewer">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </fragment>
 
     <action
         android:id="@+id/action_global_notificationsViewerFragment"
-        app:destination="@id/notificationsViewer" />
+        app:destination="@id/notificationsViewer">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
 
     <include app:graph="@navigation/comments_nav_graph" />
 

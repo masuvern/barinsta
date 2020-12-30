@@ -53,18 +53,22 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
             case RESPONDED_STORY:
                 subtext = model.getText();
                 break;
+            case AYML:
+                subtext = model.getPostId();
+                break;
         }
+        binding.tvSubComment.setText(model.getType() == NotificationType.AYML ? model.getText() : subtext);
         if (text == -1 && subtext != null) {
             binding.tvComment.setText(subtext);
-            binding.tvSubComment.setVisibility(View.GONE);
+            binding.tvComment.setVisibility(TextUtils.isEmpty(subtext) ? View.GONE : View.VISIBLE);
+            binding.tvSubComment.setVisibility(model.getType() == NotificationType.AYML ? View.VISIBLE : View.GONE);
         }
         else if (text != -1) {
             binding.tvComment.setText(text);
-            binding.tvSubComment.setText(subtext);
             binding.tvSubComment.setVisibility(subtext == null ? View.GONE : View.VISIBLE);
         }
 
-        if (model.getType() != NotificationType.REQUEST) {
+        if (model.getType() != NotificationType.REQUEST && model.getType() != NotificationType.AYML) {
             binding.tvDate.setText(model.getDateTime());
         }
 

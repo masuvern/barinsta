@@ -12,14 +12,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import awais.instagrabber.BuildConfig;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.NetworkUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -89,7 +90,6 @@ public class NewsService extends BaseService {
 
     public void fetchWebInbox(final boolean markAsSeen,
                               final ServiceCallback<List<NotificationModel>> callback) {
-        final List<NotificationModel> result = new ArrayList<>();
         final Call<String> request = repository.webInbox();
         request.enqueue(new Callback<String>() {
             @Override
@@ -100,6 +100,7 @@ public class NewsService extends BaseService {
                     return;
                 }
                 try {
+                    final List<NotificationModel> result = new ArrayList<>();
                     final JSONObject page = new JSONObject(body)
                             .getJSONObject("graphql")
                             .getJSONObject("user");
@@ -168,7 +169,7 @@ public class NewsService extends BaseService {
         final String type = itemJson.getString("story_type");
         final NotificationType notificationType = NotificationType.valueOfType(type);
         if (notificationType == null) {
-            Log.d("austin_debug", "unhandled news type: "+itemJson);
+            if (BuildConfig.DEBUG) Log.d("austin_debug", "unhandled news type: "+itemJson);
             return null;
         }
         final JSONObject data = itemJson.getJSONObject("args");
@@ -193,5 +194,68 @@ public class NewsService extends BaseService {
             result = result.replace(richObject, username);
         }
         return result;
+    }
+
+    public void fetchSuggestions(final String csrfToken,
+                                 final ServiceCallback<List<NotificationModel>> callback) {
+        final Map<String, String> form = new HashMap<>();
+        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_csrftoken", csrfToken);
+        form.put("phone_id", UUID.randomUUID().toString());
+        form.put("device_id", UUID.randomUUID().toString());
+        form.put("module", "discover_people");
+        form.put("paginate", "false");
+        final Call<String> request = repository.getAyml(form);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String body = response.body();
+                if (body == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final List<NotificationModel> result = new ArrayList<>();
+                    final JSONObject jsonObject = new JSONObject(body);
+                    final JSONArray oldStories = jsonObject.getJSONObject("suggested_users").getJSONArray("suggestions"),
+                            newStories = jsonObject.getJSONObject("new_suggested_users").getJSONArray("suggestions");
+
+                    for (int j = 0; j < newStories.length(); ++j) {
+                        final NotificationModel newsItem = parseAymlItem(newStories.getJSONObject(j));
+                        if (newsItem != null) result.add(newsItem);
+                    }
+
+                    for (int i = 0; i < oldStories.length(); ++i) {
+                        final NotificationModel newsItem = parseAymlItem(oldStories.getJSONObject(i));
+                        if (newsItem != null) result.add(newsItem);
+                    }
+
+                    callback.onSuccess(result);
+                } catch (JSONException e) {
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                callback.onFailure(t);
+                // Log.e(TAG, "onFailure: ", t);
+            }
+        });
+    }
+
+    private NotificationModel parseAymlItem(final JSONObject itemJson) throws JSONException {
+        if (itemJson == null) return null;
+        final JSONObject data = itemJson.getJSONObject("user");
+        return new NotificationModel(
+                itemJson.getString("uuid"),
+                itemJson.getString("social_context"),
+                0L,
+                data.getString("pk"),
+                data.getString("username"),
+                data.getString("profile_pic_url"),
+                data.getString("full_name"), // just borrowing this field
+                null,
+                NotificationType.AYML);
     }
 }
