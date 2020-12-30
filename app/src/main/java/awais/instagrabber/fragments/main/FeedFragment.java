@@ -279,6 +279,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.feed_menu, menu);
         storyListMenu = menu.findItem(R.id.storyList);
+        storyListMenu.setVisible(!storiesFetching);
     }
 
     @Override
@@ -361,6 +362,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void setupFeedStories() {
+        if (storyListMenu != null) storyListMenu.setVisible(false);
         feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(
             new FeedStoriesAdapter.OnFeedStoryClickListener() {
@@ -398,14 +400,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         storiesFetching = true;
         updateSwipeRefreshState();
-        storyListMenu.setVisible(false);
         storiesService.getFeedStories(CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<List<FeedStoryModel>>() {
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
                 feedStoriesViewModel.getList().postValue(result);
                 feedStories = result;
                 storiesFetching = false;
-                storyListMenu.setVisible(true);
+                if (storyListMenu != null) storyListMenu.setVisible(true);
                 updateSwipeRefreshState();
             }
 
