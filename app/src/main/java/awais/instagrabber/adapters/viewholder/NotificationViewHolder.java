@@ -79,7 +79,10 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
             notificationClickListener.onProfileClick(model.getUsername());
         });
 
-        if (TextUtils.isEmpty(model.getPreviewPic())) {
+        if (model.getType() == NotificationType.AYML) {
+            binding.ivPreviewPic.setVisibility(View.GONE);
+        }
+        else if (TextUtils.isEmpty(model.getPreviewPic())) {
             binding.ivPreviewPic.setVisibility(View.INVISIBLE);
         } else {
             binding.ivPreviewPic.setVisibility(View.VISIBLE);
