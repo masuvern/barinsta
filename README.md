@@ -102,9 +102,9 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
 This app is originally made by [@AwaisKing](https://github.com/AwaisKing) on [GitLab](https://gitlab.com/AwaisKing/instagrabber).
 
     Barinsta (ex-InstaGrabber)
-    Copyright (C) 2019  AWAiS        <chapter50000@hotmail.com>
-    Copyright (C) 2020  Austin Huang <im@austinhuang.me>
-                        Ammar Githam <ammargitham786@gmail.com>
+    Copyright (C) 2019-2020  AWAiS        <chapter50000@hotmail.com>
+    Copyright (C) 2020-2021  Austin Huang <im@austinhuang.me>
+                             Ammar Githam <ammargitham786@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
