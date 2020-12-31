@@ -74,6 +74,7 @@ import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
+import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
@@ -692,33 +693,57 @@ public class StoryViewerFragment extends Fragment {
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (currentStoryMediaId == null) return;
-        final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
-            @Override
-            public void onSuccess(final List<StoryModel> storyModels) {
-                fetching = false;
-                if (storyModels == null || storyModels.isEmpty()) {
-                    storiesViewModel.getList().setValue(Collections.emptyList());
-                    currentStory = null;
+        else if (currentFeedStoryIndex == -1) {
+            storiesService.fetch(currentStoryMediaId, new ServiceCallback<StoryModel>() {
+                @Override
+                public void onSuccess(final StoryModel storyModel) {
+                    fetching = false;
                     binding.storiesList.setVisibility(View.GONE);
-                    return;
+                    if (storyModel == null) {
+                        storiesViewModel.getList().setValue(Collections.emptyList());
+                        currentStory = null;
+                        return;
+                    }
+                    storiesViewModel.getList().setValue(Collections.singletonList(storyModel));
+                    currentStory = storyModel;
+                    refreshStory();
                 }
-                binding.storiesList.setVisibility(View.VISIBLE);
-                storiesViewModel.getList().setValue(storyModels);
-                currentStory = storyModels.get(0);
-                refreshStory();
-            }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error", t);
-            }
-        };
-        storiesService.getUserStory(currentStoryMediaId,
-                                    currentStoryUsername,
-                                    isLoc,
-                                    isHashtag,
-                                    isHighlight,
-                                    storyCallback);
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error", t);
+                }
+            });
+        }
+        else {
+            final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
+                @Override
+                public void onSuccess(final List<StoryModel> storyModels) {
+                    fetching = false;
+                    if (storyModels == null || storyModels.isEmpty()) {
+                        storiesViewModel.getList().setValue(Collections.emptyList());
+                        currentStory = null;
+                        binding.storiesList.setVisibility(View.GONE);
+                        return;
+                    }
+                    binding.storiesList.setVisibility(View.VISIBLE);
+                    storiesViewModel.getList().setValue(storyModels);
+                    currentStory = storyModels.get(0);
+                    refreshStory();
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error", t);
+                }
+            };
+            storiesService.getUserStory(currentStoryMediaId,
+                    currentStoryUsername,
+                    isLoc,
+                    isHashtag,
+                    isHighlight,
+                    storyCallback);
+        }
     }
 
     private void refreshStory() {

@@ -43,7 +43,6 @@ import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -104,8 +103,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         init();
-        if (id.contains("_")) fetchStory();
-        else fetchAvatar();
+        fetchAvatar();
     }
 
     private void init() {
@@ -148,26 +146,6 @@ public class ProfilePicDialogFragment extends DialogFragment {
             });
         }
         else new ProfilePictureFetcher(name, id, fetchListener, fallbackUrl, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private void fetchStory() {
-        final StoriesService storiesService = StoriesService.getInstance();
-        storiesService.fetch(id, new ServiceCallback<StoryModel>() {
-            @Override
-            public void onSuccess(final StoryModel result) {
-                if (result != null) {
-                    fetchListener.onResult(result.getStoryUrl());
-                }
-            }
-
-            @Override
-            public void onFailure(final Throwable t) {
-                final Context context = getContext();
-                Log.d("austin_debug", "error", t);
-                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                getDialog().dismiss();
-            }
-        });
     }
 
     private void setupPhoto() {

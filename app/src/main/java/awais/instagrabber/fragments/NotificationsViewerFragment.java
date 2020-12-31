@@ -75,7 +75,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         @Override
         public void onPreviewClick(final NotificationModel model) {
             if (model.getType() == NotificationType.RESPONDED_STORY) {
-                showProfilePicDialog(model);
+                final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
+                        -1, null, false, false, model.getPostId(), model.getUsername(), false);
+                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
             }
             else {
                 mediaService.fetch(model.getPostId(), new ServiceCallback<FeedModel>() {
@@ -151,7 +153,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                                 return;
                             }
                             else if (model.getType() == NotificationType.RESPONDED_STORY) {
-                                showProfilePicDialog(model);
+                                final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
+                                        -1, null, false, false, model.getPostId(), model.getUsername(), false);
+                                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
                                 return;
                             }
                             final AlertDialog alertDialog = new AlertDialog.Builder(context)
@@ -291,16 +295,5 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         final NavDirections action = MorePreferencesFragmentDirections
                 .actionGlobalProfileFragment("@" + username);
         NavHostFragment.findNavController(this).navigate(action);
-    }
-
-    private void showProfilePicDialog(final NotificationModel model) {
-        final FragmentManager fragmentManager = getParentFragmentManager();
-        final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(model.getPostId(),
-                                                                               model.getUsername(),
-                                                                               model.getPreviewPic());
-        final FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(fragment, "profilePicDialog")
-                .commit();
     }
 }
