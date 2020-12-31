@@ -71,7 +71,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     private InputMethodManager imm;
     private AppCompatActivity fragmentActivity;
     private LinearLayoutCompat root;
-    private boolean shouldRefresh = true;
+    private boolean shouldRefresh = true, hasNextPage = false;
     private MediaService mediaService;
     private String postId;
     private AsyncTask<Void, Void, List<CommentModel>> currentlyRunning;
@@ -87,6 +87,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         public void onResult(final List<CommentModel> commentModels) {
             if (commentModels != null && commentModels.size() > 0) {
                 endCursor = commentModels.get(0).getEndCursor();
+                hasNextPage = commentModels.get(0).hasNextPage();
                 List<CommentModel> list = commentsViewModel.getList().getValue();
                 list = list != null ? new LinkedList<>(list) : new LinkedList<>();
                 // final int oldSize = list != null ? list.size() : 0;
@@ -259,7 +260,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             binding.commentField.setEndIconOnClickListener(newCommentListener);
         }
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!TextUtils.isEmpty(endCursor))
+            if (hasNextPage && !TextUtils.isEmpty(endCursor))
                 currentlyRunning = new CommentsFetcher(shortCode, endCursor, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             endCursor = null;
         });

@@ -171,6 +171,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
 
                     final JSONObject pageInfo = parentComments.getJSONObject("page_info");
                     final String foundEndCursor = pageInfo.optString("end_cursor");
+                    final boolean hasNextPage = pageInfo.optBoolean("has_next_page", !TextUtils.isEmpty(foundEndCursor));
 
                     // final boolean containsToken = endCursor.contains("bifilter_token");
                     // if (!Utils.isEmpty(endCursor) && (containsToken || endCursor.contains("cached_comments_cursor"))) {
@@ -219,7 +220,8 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                            likedBy != null ? likedBy.optLong("count", 0) : 0,
                                                                            comment.getBoolean("viewer_has_liked"),
                                                                            profileModel);
-                        commentModel.setPageCursor(!TextUtils.isEmpty(foundEndCursor), TextUtils.isEmpty(foundEndCursor) ? null : foundEndCursor);
+                        if (i == 0 && !foundEndCursor.contains("tao_cursor"))
+                            commentModel.setPageCursor(hasNextPage, TextUtils.isEmpty(foundEndCursor) ? null : foundEndCursor);
                         JSONObject tempJsonObject;
                         final JSONArray childCommentsArray;
                         final int childCommentsLen;
@@ -228,13 +230,13 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                 && (childCommentsLen = childCommentsArray.length()) > 0) {
 
                             final String childEndCursor;
-                            final boolean hasNextPage;
+                            final boolean childHasNextPage;
                             if ((tempJsonObject = tempJsonObject.optJSONObject("page_info")) != null) {
                                 childEndCursor = tempJsonObject.optString("end_cursor");
-                                hasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
+                                childHasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
                             } else {
                                 childEndCursor = null;
-                                hasNextPage = false;
+                                childHasNextPage = false;
                             }
 
                             final List<CommentModel> childCommentModels = new ArrayList<>();
@@ -269,7 +271,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                         childComment.getBoolean("viewer_has_liked"),
                                                                         childProfileModel));
                             }
-                            childCommentModels.get(childCommentsLen - 1).setPageCursor(hasNextPage, childEndCursor);
+                            childCommentModels.get(childCommentsLen - 1).setPageCursor(childHasNextPage, childEndCursor);
                             commentModel.setChildCommentModels(childCommentModels);
                         }
                         commentModels.add(commentModel);
