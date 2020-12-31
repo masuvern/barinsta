@@ -57,6 +57,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     private Context context;
     private String type, endCursor = null;
     private RecyclerLazyLoader lazyLoader;
+    private FeedStoriesListAdapter adapter;
 
     private final OnFeedStoryClickListener clickListener = new OnFeedStoryClickListener() {
         @Override
@@ -153,8 +154,8 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (type == "feed") {
             if (actionBar != null) actionBar.setTitle(R.string.feed_stories);
-            feedStoriesViewModel = new ViewModelProvider(this).get(FeedStoriesViewModel.class);
-            final FeedStoriesListAdapter adapter = new FeedStoriesListAdapter(clickListener);
+            feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+            adapter = new FeedStoriesListAdapter(clickListener);
             binding.rvStories.setLayoutManager(layoutManager);
             binding.rvStories.setAdapter(adapter);
             feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
@@ -180,7 +181,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         binding.swipeRefreshLayout.setRefreshing(true);
         if (type == "feed" && firstRefresh) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            feedStoriesViewModel.getList().postValue(FeedFragment.feedStories);
+            adapter.submitList(feedStoriesViewModel.getList().getValue());
             firstRefresh = false;
         }
         else if (type == "feed") {
@@ -189,7 +190,6 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                 @Override
                 public void onSuccess(final List<FeedStoryModel> result) {
                     feedStoriesViewModel.getList().postValue(result);
-                    FeedFragment.feedStories = result;
                     binding.swipeRefreshLayout.setRefreshing(false);
                 }
 

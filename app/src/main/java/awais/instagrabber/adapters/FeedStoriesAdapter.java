@@ -52,43 +52,6 @@ public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedSt
         holder.bind(model, position, listener);
     }
 
-    @Override
-    public void submitList(@Nullable final List<FeedStoryModel> list, @Nullable final Runnable commitCallback) {
-        if (list == null) {
-            super.submitList(null, commitCallback);
-            return;
-        }
-        super.submitList(sort(list), commitCallback);
-    }
-
-    @Override
-    public void submitList(@Nullable final List<FeedStoryModel> list) {
-        if (list == null) {
-            super.submitList(null);
-            return;
-        }
-        super.submitList(sort(list));
-    }
-
-    private List<FeedStoryModel> sort(final List<FeedStoryModel> list) {
-        final List<FeedStoryModel> listCopy = new ArrayList<>(list);
-        Collections.sort(listCopy, (o1, o2) -> {
-            int result;
-            switch (Utils.settingsHelper.getString(Constants.STORY_SORT)) {
-                case "1":
-                    result = o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
-                    break;
-                case "2":
-                    result = o1.getTimestamp() > o2.getTimestamp() ? 1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : -1);
-                    break;
-                default:
-                    result = 0;
-            }
-            return result;
-        });
-        return listCopy;
-    }
-
     public interface OnFeedStoryClickListener {
         void onFeedStoryClick(FeedStoryModel model, int position);
 

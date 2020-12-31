@@ -79,8 +79,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private RecyclerView storiesRecyclerView;
     private MenuItem storyListMenu;
 
-    public static List<FeedStoryModel> feedStories;
-
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
         public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
@@ -296,15 +294,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        updateSwipeRefreshState();
-        // if (videoAwareRecyclerScroller != null && shouldAutoPlay) {
-        //     videoAwareRecyclerScroller.startPlaying();
-        // }
-    }
-
-    @Override
     public void onRefresh() {
         binding.feedRecyclerView.refresh();
         fetchStories();
@@ -401,7 +390,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
                 feedStoriesViewModel.getList().postValue(result);
-                feedStories = result;
                 storiesFetching = false;
                 if (storyListMenu != null) storyListMenu.setVisible(true);
                 updateSwipeRefreshState();

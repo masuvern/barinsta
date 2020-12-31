@@ -126,7 +126,6 @@ public class StoriesService extends BaseService {
                 if (itemJson != null) {
                     firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
                 }
-                else Log.d("austin_debug", "node: "+node);
                 feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel, mediaCount));
             }
             callback.onSuccess(sort(feedStoryModels));

@@ -978,10 +978,8 @@ public class StoryViewerFragment extends Fragment {
                     oldFeedStoryModel.setFullyRead(true);
                     final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
                     final List<FeedStoryModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
-                    Log.d("austin_debug", oldFeedStoryModel.getProfileModel().getUsername() + ", v " + models.get(currentFeedStoryIndex).isFullyRead() + " l " + oldFeedStoryModel.isFullyRead());
                     modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
-                    FeedFragment.feedStories = modelsCopy;
-                    feedStoriesViewModel.getList().setValue(models);
+                    feedStoriesViewModel.getList().postValue(models);
                 }
             }
             fetching = true;
