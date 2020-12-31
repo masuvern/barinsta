@@ -968,21 +968,22 @@ public class StoryViewerFragment extends Fragment {
                 Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
                 return;
             }
-//            if (settingsHelper.getBoolean(MARK_AS_SEEN)
-//                    && oldFeedStory != null
-//                    && oldFeedStory instanceof FeedStoryModel
-//                    && viewModel instanceof FeedStoriesViewModel) {
-//                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-//                final FeedStoryModel oldFeedStoryModel = (FeedStoryModel) oldFeedStory;
-//                if (oldFeedStoryModel.isFullyRead()) {
-//                    oldFeedStoryModel.setFullyRead(false);
-//                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
-//                    final List<FeedStoryModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
-//                    Log.d("austin_debug", oldFeedStoryModel.getProfileModel().getUsername() + ", v " + models.get(currentFeedStoryIndex).isFullyRead() + " l " + oldFeedStoryModel.isFullyRead());
-//                    modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
-//                    feedStoriesViewModel.getList().setValue(models);
-//                }
-//            }
+            if (settingsHelper.getBoolean(MARK_AS_SEEN)
+                    && oldFeedStory != null
+                    && oldFeedStory instanceof FeedStoryModel
+                    && viewModel instanceof FeedStoriesViewModel) {
+                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                final FeedStoryModel oldFeedStoryModel = (FeedStoryModel) oldFeedStory;
+                if (!oldFeedStoryModel.isFullyRead()) {
+                    oldFeedStoryModel.setFullyRead(true);
+                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+                    final List<FeedStoryModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+                    Log.d("austin_debug", oldFeedStoryModel.getProfileModel().getUsername() + ", v " + models.get(currentFeedStoryIndex).isFullyRead() + " l " + oldFeedStoryModel.isFullyRead());
+                    modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
+                    FeedFragment.feedStories = modelsCopy;
+                    feedStoriesViewModel.getList().setValue(models);
+                }
+            }
             fetching = true;
             binding.btnBackward.setVisibility(currentFeedStoryIndex == 1 && backward ? View.INVISIBLE : View.VISIBLE);
             binding.btnForward.setVisibility(last ? View.INVISIBLE : View.VISIBLE);

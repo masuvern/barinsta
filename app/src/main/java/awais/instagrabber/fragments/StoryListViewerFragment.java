@@ -33,6 +33,8 @@ import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
+import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.ArchivesViewModel;
@@ -40,13 +42,15 @@ import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.StoriesService.ArchiveFetchResponse;
 
+import static awais.instagrabber.utils.Utils.settingsHelper;
+
 public final class StoryListViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "StoryListViewerFragment";
 
     private AppCompatActivity fragmentActivity;
     private FragmentStoryListViewerBinding binding;
     private SwipeRefreshLayout root;
-    private boolean shouldRefresh = true;
+    private boolean shouldRefresh = true, firstRefresh = true;
     private FeedStoriesViewModel feedStoriesViewModel;
     private ArchivesViewModel archivesViewModel;
     private StoriesService storiesService;
@@ -174,9 +178,27 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     @Override
     public void onRefresh() {
         binding.swipeRefreshLayout.setRefreshing(true);
-        if (type == "feed") {
+        if (type == "feed" && firstRefresh) {
             binding.swipeRefreshLayout.setRefreshing(false);
             feedStoriesViewModel.getList().postValue(FeedFragment.feedStories);
+            firstRefresh = false;
+        }
+        else if (type == "feed") {
+            final String cookie = settingsHelper.getString(Constants.COOKIE);
+            storiesService.getFeedStories(CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<List<FeedStoryModel>>() {
+                @Override
+                public void onSuccess(final List<FeedStoryModel> result) {
+                    feedStoriesViewModel.getList().postValue(result);
+                    FeedFragment.feedStories = result;
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "failed", t);
+                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         else if (type == "archive") {
             storiesService.fetchArchive(endCursor, cb);

@@ -40,12 +40,18 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
             notificationClickListener.onProfileClick(model.getProfileModel().getUsername());
         });
 
-        binding.ivPreviewPic.setVisibility(View.VISIBLE);
         if (model.getFirstStoryModel() != null) {
             binding.ivPreviewPic.setVisibility(View.VISIBLE);
             binding.ivPreviewPic.setImageURI(model.getFirstStoryModel().getThumbnail());
         }
         else binding.ivPreviewPic.setVisibility(View.INVISIBLE);
+
+        float alpha = model.isFullyRead() ? 0.5F : 1.0F;
+        binding.ivProfilePic.setAlpha(alpha);
+        binding.ivPreviewPic.setAlpha(alpha);
+        binding.tvUsername.setAlpha(alpha);
+        binding.tvComment.setAlpha(alpha);
+        binding.tvDate.setAlpha(alpha);
 
         itemView.setOnClickListener(v -> {
             if (notificationClickListener == null) return;

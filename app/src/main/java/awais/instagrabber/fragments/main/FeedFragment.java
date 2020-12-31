@@ -389,10 +389,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         storiesRecyclerView.setAdapter(feedStoriesAdapter);
         fragmentActivity.setCollapsingView(storiesRecyclerView);
-        feedStoriesViewModel.getList().observe(fragmentActivity, list -> {
-            Log.d("austin_debug", "observed");
-            feedStoriesAdapter.submitList(list);
-        });
+        feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), feedStoriesAdapter::submitList);
         fetchStories();
     }
 
