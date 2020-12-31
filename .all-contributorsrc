@@ -92,16 +92,6 @@
       ]
     },
     {
-      "login": "e-edgren",
-      "name": "Airikr",
-      "avatar_url": "https://avatars0.githubusercontent.com/u/53869451",
-      "profile": "https://airikr.me/",
-      "contributions": [
-        "ideas",
-        "question"
-      ]
-    },
-    {
       "login": "alin-1",
       "name": "ALIN",
       "avatar_url": "https://avatars2.githubusercontent.com/u/13281020?v=4",
@@ -109,6 +99,26 @@
       "contributions": [
         "bug",
         "ideas"
+      ]
+    },
+    {
+      "login": "RickyM7",
+      "name": "Ricardo",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/24703825?v=4",
+      "profile": "https://github.com/RickyM7",
+      "contributions": [
+        "bug",
+        "translation"
+      ]
+    },
+    {
+      "login": "e-edgren",
+      "name": "Airikr",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/53869451",
+      "profile": "https://airikr.me/",
+      "contributions": [
+        "ideas",
+        "question"
       ]
     },
     {
@@ -126,15 +136,6 @@
       "name": "Cézar Augusto",
       "avatar_url": "https://avatars2.githubusercontent.com/u/32869222?v=4",
       "profile": "https://github.com/cizordj",
-      "contributions": [
-        "translation"
-      ]
-    },
-    {
-      "login": "CrafterSvK",
-      "name": "Jakub Janek",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/8365659?v=4",
-      "profile": "https://janek.xyz/",
       "contributions": [
         "translation"
       ]
@@ -185,19 +186,19 @@
       ]
     },
     {
-      "login": "kernoeb",
-      "name": "kernoeb",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/24623168",
-      "profile": "https://becauseofprog.fr/",
+      "login": "CrafterSvK",
+      "name": "Jakub Janek",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/8365659?v=4",
+      "profile": "https://janek.xyz/",
       "contributions": [
         "translation"
       ]
     },
     {
-      "login": "Lego8486",
-      "name": "Ten_Lego",
-      "avatar_url": "https://avatars1.githubusercontent.com/u/47414485",
-      "profile": "https://github.com/Lego8486",
+      "login": "kernoeb",
+      "name": "kernoeb",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/24623168",
+      "profile": "https://becauseofprog.fr/",
       "contributions": [
         "translation"
       ]
@@ -266,16 +267,6 @@
       ]
     },
     {
-      "login": "RickyM7",
-      "name": "Ricardo",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/24703825?v=4",
-      "profile": "https://github.com/RickyM7",
-      "contributions": [
-        "bug",
-        "translation"
-      ]
-    },
-    {
       "login": "rikishi0071",
       "name": "rikishi0071",
       "avatar_url": "https://avatars3.githubusercontent.com/u/18183855?v=4",
@@ -289,6 +280,15 @@
       "name": "Still Hsu",
       "avatar_url": "https://avatars2.githubusercontent.com/u/5843208?v=4",
       "profile": "https://stillu.cc/",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Lego8486",
+      "name": "Ten_Lego",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/47414485",
+      "profile": "https://github.com/Lego8486",
       "contributions": [
         "translation"
       ]
