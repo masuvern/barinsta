@@ -79,6 +79,7 @@ public final class LocaleUtils {
         if (appLanguageIndex == 17) return "hi";
         if (appLanguageIndex == 18) return "nl";
         if (appLanguageIndex == 19) return "sk";
+        if (appLanguageIndex == 20) return "ja";
 
         return null;
     }
