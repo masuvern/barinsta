@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">Mark DM as seen after viewing</string>
     <string name="dm_mark_as_seen_setting_summary">Other members will know you viewed it</string>
     <string name="activity_setting">Enable activity notifications</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">Error loading profile!\nTry logging in and search again.</string>
     <string name="error_creating_folders">Error creating Download folder(s).</string>
     <string name="save_to_folder">Save to custom folder</string>
@@ -142,6 +143,7 @@
     <string name="quick_access_cannot_delete_curr">Cannot delete currently in use account</string>
     <string name="quick_access_confirm_delete">Are you sure you want to delete \'%s\'?</string>
     <string name="open_profile">Open profile</string>
+    <string name="view_story">View story</string>
     <string name="view_pfp">View profile picture</string>
     <string name="direct_messages_you">You</string>
     <string name="direct_messages_sent_link">Shared a link</string>
@@ -191,6 +193,7 @@
     <string name="downloader_too_many">You can only download 100 posts at a time. Don\'t be too greedy!</string>
     <string name="comment_viewer_copy_user">Copy username</string>
     <string name="comment_viewer_copy_comment">Copy comment</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">Reply to comment</string>
     <string name="comment_viewer_like_comment">Like comment</string>
     <string name="comment_viewer_unlike_comment">Unlike comment</string>
@@ -225,6 +228,8 @@
     <string name="crash_title">App crashed</string>
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
     <string name="action_notif">Activity</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">Select Picture</string>
     <string name="uploading">Uploading…</string>
     <string name="activity_count_prefix">You have:</string>
@@ -269,21 +274,25 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">Added to Favorites</string>
-    <string name="add_to_favorites">Add to favorites</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
     <string name="accounts">Accounts</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Locations</string>
     <string name="unknown">Unknown</string>
     <string name="removed_from_favs">Removed from Favourites</string>
-    <string name="backup_and_restore">Backup &amp; Restore</string>
-    <string name="create_backup">Create</string>
-    <string name="restore_backup">Restore</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">File:</string>
     <string name="enter_password">Enter password</string>
     <string name="select_backup_file">Select a backup file (.zaai/.backup)</string>
     <string name="apply">Apply</string>
     <string name="save">Save</string>
     <string name="caption">Caption</string>
+    <string name="edit_caption">Edit caption...</string>
     <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="liking">Liking…</string>
@@ -300,6 +309,7 @@
     <string name="delete">Delete</string>
     <string name="comment">Comment</string>
     <string name="layout">Layout</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">Opening post...</string>
     <string name="share">Share</string>
     <string name="layout_style">Layout style</string>
@@ -323,6 +333,10 @@
     <plurals name="comments_count">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
+    </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
     </plurals>
     <string name="download_permission">Storage permission not granted!</string>
 </resources>

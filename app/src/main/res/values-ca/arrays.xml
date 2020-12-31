@@ -20,12 +20,19 @@
         <item translatable="false">Русский [Спасибо @rikishi0071]</item>
         <item translatable="false">हिन्दी</item>
         <item translatable="false">Nederlands [Met dank aan Lesley Natrop]</item>
+        <item translatable="false">Slovenčina [Vďaka @CrafterSvK]</item>
+        <item translatable="false">日本語 [協力 ysakamoto]</item>
     </string-array>
     <string-array name="theme_presets">
         <item>Automàtic / Predeterminat del sistema</item>
         <item>Automàtic / Seguir la bateria</item>
         <item>Fosc</item>
         <item>Clar</item>
+    </string-array>
+    <string-array name="story_sorts">
+        <item>Predeterminat d\'Instagram (no llegits i després llegits)</item>
+        <item>De més recent a més antic</item>
+        <item>De més antic a més recent</item>
     </string-array>
     <string-array name="separator_presets">
         <item>Ningún</item>

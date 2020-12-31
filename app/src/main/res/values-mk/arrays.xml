@@ -20,12 +20,19 @@
         <item translatable="false">Русский [Спасибо @rikishi0071]</item>
         <item translatable="false">हिन्दी</item>
         <item translatable="false">Nederlands [Met dank aan Lesley Natrop]</item>
+        <item translatable="false">Slovenčina [Vďaka @CrafterSvK]</item>
+        <item translatable="false">日本語 [協力 ysakamoto]</item>
     </string-array>
     <string-array name="theme_presets">
         <item>Автоматска тема</item>
         <item>Автоматска Тема која зависи од нивото на Батеријата</item>
         <item>Темно</item>
         <item>Светло</item>
+    </string-array>
+    <string-array name="story_sorts">
+        <item>Стандардно (Од непрочитано па прочитано)</item>
+        <item>Од најнови до најстари</item>
+        <item>Од најнови до најстари</item>
     </string-array>
     <string-array name="separator_presets">
         <item>Ништо</item>

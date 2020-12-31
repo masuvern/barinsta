@@ -20,12 +20,19 @@
         <item translatable="false">Русский [Спасибо @rikishi0071]</item>
         <item translatable="false">हिन्दी</item>
         <item translatable="false">Nederlands [Met dank aan Lesley Natrop]</item>
+        <item translatable="false">Slovenčina [Vďaka @CrafterSvK]</item>
+        <item translatable="false">日本語 [協力 ysakamoto]</item>
     </string-array>
     <string-array name="theme_presets">
         <item>自动 / 跟随系统</item>
         <item>自动 / 跟随电池</item>
         <item>暗黑</item>
         <item>明亮</item>
+    </string-array>
+    <string-array name="story_sorts">
+        <item>Instagram 默认 (先未读后已读)</item>
+        <item>由新到旧</item>
+        <item>由旧到新</item>
     </string-array>
     <string-array name="separator_presets">
         <item>无</item>

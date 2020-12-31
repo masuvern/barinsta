@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>系統預設</item>
+        <item>システムのデフォルト</item>
         <item translatable="false">English</item>
         <item translatable="false">Français [Merci à @kernoeb et @PierreM0]</item>
         <item translatable="false">Español [Gracias a @sguinetti, @akrai y @retiolus]</item>
@@ -24,21 +24,21 @@
         <item translatable="false">日本語 [協力 ysakamoto]</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>自動/跟隨系統</item>
-        <item>自動/跟隨電量</item>
-        <item>暗黑</item>
-        <item>明亮</item>
+        <item>自動/システム設定に従う</item>
+        <item>自動 / バッテリー設定に従う</item>
+        <item>ダーク</item>
+        <item>ライト</item>
     </string-array>
     <string-array name="story_sorts">
-        <item>Instagram default (Unread then read)</item>
-        <item>From newest to oldest</item>
-        <item>From oldest to newest</item>
+        <item>Instagramのデフォルト(未読を上位に)</item>
+        <item>最新を上位に</item>
+        <item>古いものを上位に</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>無</item>
+        <item>なし</item>
         <item>\@</item>
-        <item>於</item>
-        <item>在</item>
+        <item>at</item>
+        <item>on</item>
         <item>\|</item>
         <item>-</item>
     </string-array>

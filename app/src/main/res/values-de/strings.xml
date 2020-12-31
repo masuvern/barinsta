@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">Direktnachrichten nach dem Ansehen als gesehen markieren</string>
     <string name="dm_mark_as_seen_setting_summary">Andere Mitglieder werden wissen, dass du sie gesehen hast</string>
     <string name="activity_setting">Aktivitätsbenachrichtigungen aktivieren</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">Fehler beim Laden des Profils!\nVersuche dich einzuloggen und erneut zu suchen.</string>
     <string name="error_creating_folders">Fehler beim Erstellen von Download-Ordner(n).</string>
     <string name="save_to_folder">In benutzerdefiniertem Ordner speichern</string>
@@ -43,14 +44,14 @@
     <string name="import_export">Importieren/Exportieren</string>
     <string name="select_language">Sprache</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="one">%s Beitrag</item>
+        <item quantity="other">%s Beiträge</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s Follower</item>
-        <item quantity="other">%s Followers</item>
+        <item quantity="one">%s Abonnent</item>
+        <item quantity="other">%s Abonnenten</item>
     </plurals>
-    <string name="main_posts_following">%s Following </string>
+    <string name="main_posts_following">%s Abonniert </string>
     <string name="post_viewer_autoplay_video">Videos automatisch abspielen</string>
     <string name="post_viewer_muted_autoplay">Videos immer stummschalten</string>
     <string name="post_viewer_download_dialog_title">Datei zum Download auswählen</string>
@@ -69,14 +70,14 @@
     <string name="answer_hint">Antworten…</string>
     <string name="answered_story">Antwort erfolgreich!</string>
     <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
-        <item quantity="one">%d response averaging %s</item>
-        <item quantity="other">%d responses averaging %s</item>
+        <item quantity="one">%d Antwort im Durchschnitt %s</item>
+        <item quantity="other">%d Antworten im Durchschnitt %s</item>
     </plurals>
-    <string name="slider_answer">Your answer: %s</string>
+    <string name="slider_answer">Deine Antwort: %s</string>
     <string name="reply_story">Auf Story antworten</string>
     <string name="reply_hint">Antworten…</string>
     <string name="story_quiz">Quiz</string>
-    <string name="story_slider">Slider</string>
+    <string name="story_slider">Schieberegler</string>
     <string name="story_quizzed">Du hast bereits geantwortet!</string>
     <string name="story_mentions">Erwähnungen</string>
     <string name="priv_acc">Dieser Account ist privat</string>
@@ -109,11 +110,11 @@
     <string name="unblock">Nicht mehr blockieren</string>
     <string name="restrict">Einschränken</string>
     <string name="unrestrict">Nicht mehr einschränken</string>
-    <string name="bio_copy">Copy bio</string>
-    <string name="bio_translate">Translate bio</string>
+    <string name="bio_copy">Steckbrief kopieren</string>
+    <string name="bio_translate">Steckbrief übersetzen</string>
     <string name="status_mutual">Mutual</string>
-    <string name="status_following">Following</string>
-    <string name="status_follower">Follower</string>
+    <string name="status_following">Abonniert</string>
+    <string name="status_follower">Abonnent</string>
     <string name="map">Karte</string>
     <string name="dialog_export_btn_export">Exportieren</string>
     <string name="dialog_export_btn_import">Importieren</string>
@@ -142,6 +143,7 @@
     <string name="quick_access_cannot_delete_curr">Derzeit verwendetes Konto kann nicht gelöscht werden</string>
     <string name="quick_access_confirm_delete">Bist du sicher, dass du \'%s \' löschen möchtest?</string>
     <string name="open_profile">Profil öffnen</string>
+    <string name="view_story">Story ansehen</string>
     <string name="view_pfp">Profilbild ansehen</string>
     <string name="direct_messages_you">Du</string>
     <string name="direct_messages_sent_link">Einen Link geteilt</string>
@@ -191,10 +193,11 @@
     <string name="downloader_too_many">Du kannst nur 100 Beiträge gleichzeitig herunterladen. Sei nicht zu gierig!</string>
     <string name="comment_viewer_copy_user">Benutzername kopieren</string>
     <string name="comment_viewer_copy_comment">Kommentar kopieren</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">Auf Kommentar antworten</string>
     <string name="comment_viewer_like_comment">Kommentar gefällt mir</string>
     <string name="comment_viewer_unlike_comment">Kommentar gefällt mir nicht mehr</string>
-    <string name="comment_viewer_translate_comment">Translate comment</string>
+    <string name="comment_viewer_translate_comment">Kommentar übersetzen</string>
     <string name="comment_viewer_delete_comment">Kommentar löschen</string>
     <string name="comment_send_empty_comment">Keine leeren Kommentare!</string>
     <string name="comment_view_mention_user_search">Möchtest du nach dem Benutzernamen suchen?</string>
@@ -225,6 +228,8 @@
     <string name="crash_title">App abgestürzt</string>
     <string name="crash_descr">Hoppla.. die App ist abgestürzt, aber keine Sorge — du kannst Fehlerberichte an den Entwickler senden, um ihm zu helfen, das Problem zu beheben. (:</string>
     <string name="action_notif">Aktivität</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">Bild auswählen</string>
     <string name="uploading">Hochladen…</string>
     <string name="activity_count_prefix">Du hast:</string>
@@ -269,28 +274,32 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">Zu Favoriten hinzugefügt</string>
-    <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorisiert</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorisieren</string>
     <string name="accounts">Konten</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Standorte</string>
     <string name="unknown">Unbekannt</string>
     <string name="removed_from_favs">Aus Favoriten entfernt</string>
-    <string name="backup_and_restore">Sichern &amp; Wiederherstellen</string>
-    <string name="create_backup">Erstellen</string>
-    <string name="restore_backup">Wiederherstellen</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">Datei:</string>
     <string name="enter_password">Passwort eingeben</string>
     <string name="select_backup_file">Wähle eine Sicherungsdatei (.zaai/.backup)</string>
     <string name="apply">Anwenden</string>
     <string name="save">Speichern</string>
     <string name="caption">Bildunterschrift</string>
-    <string name="translate_caption">Translate caption...</string>
+    <string name="edit_caption">Beschriftung bearbeiten...</string>
+    <string name="translate_caption">Bildunterschrift übersetzen...</string>
     <string name="player_timeline_desc">Zeitleiste des Videoplayers</string>
-    <string name="liking">Liking…</string>
-    <string name="like_unsuccessful">Like unsuccessful</string>
-    <string name="unlike_unsuccessful">Unlike unsuccessful</string>
-    <string name="unliking">Unliking…</string>
-    <string name="controls">Controls</string>
+    <string name="liking">Gefällt…</string>
+    <string name="like_unsuccessful">Hinzufügen fehlgeschlagen</string>
+    <string name="unlike_unsuccessful">Entfernen fehlgeschlagen</string>
+    <string name="unliking">…entfernen</string>
+    <string name="controls">Steuerung</string>
     <string name="saving">Speichern…</string>
     <string name="removing">Wird entfernt…</string>
     <string name="save_unsuccessful">Speichern fehlgeschlagen</string>
@@ -300,6 +309,7 @@
     <string name="delete">Löschen</string>
     <string name="comment">Kommentar</string>
     <string name="layout">Layout</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">Öffne Beitrag...</string>
     <string name="share">Teilen</string>
     <string name="layout_style">Layoutstil</string>
@@ -313,7 +323,7 @@
     <string name="show_grid_gap">Rasterabstand anzeigen</string>
     <string name="disable_animation">Animationen deaktivieren</string>
     <string name="follower_wait_to_load">Bitte warte bis die aktuelle Aufgabe abgeschlossen ist!</string>
-    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
+    <string name="follower_start_compare">Abhängig von der Anzahl der Benutzer kann dies eine Weile dauern. Bitte haben Sie etwas Geduld.</string>
     <string name="post_not_found">Beitrag nicht gefunden!</string>
     <string name="no_external_app_url">Keine App gefunden, die URLs öffnet</string>
     <plurals name="likes_count">
@@ -324,5 +334,9 @@
         <item quantity="one">%d Kommentar</item>
         <item quantity="other">%d Kommentare</item>
     </plurals>
-    <string name="download_permission">Storage permission not granted!</string>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
+    </plurals>
+    <string name="download_permission">Speicher-Zugriff nicht erteilt!</string>
 </resources>

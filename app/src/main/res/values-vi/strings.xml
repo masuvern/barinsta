@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">Đánh dấu DM là đã xem sau khi xem</string>
     <string name="dm_mark_as_seen_setting_summary">Những thành viên khác sẽ biết bạn đã xem nó</string>
     <string name="activity_setting">Kích hoạt thông báo hoạt động</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">Lỗi khi tải hồ sơ!\nHãy thử đăng nhập lại và tìm lần nữa.</string>
     <string name="error_creating_folders">Lỗi khi tạo thư mục Download.</string>
     <string name="save_to_folder">Lưu vào thư mục tùy chọn</string>
@@ -139,6 +140,7 @@
     <string name="quick_access_cannot_delete_curr">Không thể xóa tài khoản đang được sử dụng</string>
     <string name="quick_access_confirm_delete">Bạn có chắc bạn muốn xóa \'%s\'?</string>
     <string name="open_profile">Mở hồ sơ</string>
+    <string name="view_story">View story</string>
     <string name="view_pfp">Xem Ảnh Đại Diện</string>
     <string name="direct_messages_you">Bạn</string>
     <string name="direct_messages_sent_link">Đã chia sẻ liên kết</string>
@@ -188,6 +190,7 @@
     <string name="downloader_too_many">Bạn chỉ có thể tải xuống 100 bài cùng một lúc. Đừng tham lam quá!</string>
     <string name="comment_viewer_copy_user">Sao chép tên người dùng</string>
     <string name="comment_viewer_copy_comment">Sao chép bình luận</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">Trả lời bình luận</string>
     <string name="comment_viewer_like_comment">Thích bình luận</string>
     <string name="comment_viewer_unlike_comment">Bỏ thích bình luận</string>
@@ -222,6 +225,8 @@
     <string name="crash_title">Ứng dụng đã bị crash</string>
     <string name="crash_descr">Ối.. ứng dụng đã bị crash, nhưng đừng lo bạn có thể gửi báo cáo lỗi đến cho nhà phát triển để giúp anh ấy sửa vấn đề. (:</string>
     <string name="action_notif">Hoạt động</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">Chọn hình ảnh</string>
     <string name="uploading">Đang tải lên…</string>
     <string name="activity_count_prefix">Bạn có:</string>
@@ -266,21 +271,25 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Tối</string>
     <string name="added_to_favs">Đã thêm vào mục Ưa thích</string>
-    <string name="add_to_favorites">Thêm vào Yêu thích</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
     <string name="accounts">Tài khoản</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Địa điểm</string>
     <string name="unknown">Không rõ</string>
     <string name="removed_from_favs">Đã loại bỏ khỏi danh sách yêu thích</string>
-    <string name="backup_and_restore">Sao lưu &amp; Khôi phục</string>
-    <string name="create_backup">Tạo</string>
-    <string name="restore_backup">Khôi phục</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">Tập tin:</string>
     <string name="enter_password">Nhập mật khẩu</string>
     <string name="select_backup_file">Chọn tệp sao lưu (.zaai/.backup)</string>
     <string name="apply">Áp dụng</string>
     <string name="save">Lưu</string>
     <string name="caption">Chú thích</string>
+    <string name="edit_caption">Edit caption...</string>
     <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Thanh thời gian của trình phát video</string>
     <string name="liking">Đang thích…</string>
@@ -297,6 +306,7 @@
     <string name="delete">Xóa</string>
     <string name="comment">Bình luận</string>
     <string name="layout">Giao diện</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">Đang mở bài đăng...</string>
     <string name="share">Chia sẻ</string>
     <string name="layout_style">Phong cach giao diện</string>
@@ -318,6 +328,9 @@
     </plurals>
     <plurals name="comments_count">
         <item quantity="other">%d bình luận</item>
+    </plurals>
+    <plurals name="stories_count">
+        <item quantity="other">%s stories</item>
     </plurals>
     <string name="download_permission">Storage permission not granted!</string>
 </resources>

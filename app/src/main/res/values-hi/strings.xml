@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">तुम देखने के बाद सीधा संदेश को \"दिखागया\" लिखा जाएगा</string>
     <string name="dm_mark_as_seen_setting_summary">अलग सदस्य जानेंगे कि तुम देखे हो</string>
     <string name="activity_setting">क्रियाकलाप सूचनाएँ दिखायें</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">रूपरेखा लोड नहिं हो रहा है!\n लग इन करके पुनः खोज करें</string>
     <string name="error_creating_folders">डाउनलोड के फोल्डर(स) बनाने में त्रुटि आ रहा है।</string>
     <string name="save_to_folder">खुद के द्बारा निर्धारित फोल्डर पे रखें</string>
@@ -143,6 +144,7 @@
     <string name="quick_access_cannot_delete_curr">बर्तमीन ब्यबह्रत एकाउँट को मिटा नहिं सकते</string>
     <string name="quick_access_confirm_delete">क्या आप सचमुच %s मिटाना चाहते हैं?</string>
     <string name="open_profile">प्रोफाइल खुलें</string>
+    <string name="view_story">View story</string>
     <string name="view_pfp">प्रोफ़ाइल चित्र देखें</string>
     <string name="direct_messages_you">आप</string>
     <string name="direct_messages_sent_link">लिंक साझा किया</string>
@@ -192,6 +194,7 @@
     <string name="downloader_too_many">आप सिर्फ १०० पोस्टस एक बार में डाउनलोड कर सकते हैं. ज्यादा लोभी बनना हानिकारक हैं!</string>
     <string name="comment_viewer_copy_user">उपयोगकर्ता नाम की प्रतिलिपि बनाएँ</string>
     <string name="comment_viewer_copy_comment">टिप्पणी की प्रतिलिपि बनाएँ</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">टिप्पणी का जवाब दें</string>
     <string name="comment_viewer_like_comment">टिप्पणी को पसन्द करें</string>
     <string name="comment_viewer_unlike_comment">टिप्पणी को पसन्द न करें</string>
@@ -226,6 +229,8 @@
     <string name="crash_title">एप में त्रुटि हुयी।</string>
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
     <string name="action_notif">कार्यकलाप</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">चित्र का चयन करें</string>
     <string name="uploading">अपलोड हो रहा है...</string>
     <string name="activity_count_prefix">आपके पास है:</string>
@@ -270,21 +275,25 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">Added to Favorites</string>
-    <string name="add_to_favorites">Add to favorites</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
     <string name="accounts">Accounts</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Locations</string>
     <string name="unknown">Unknown</string>
     <string name="removed_from_favs">Removed from Favourites</string>
-    <string name="backup_and_restore">Backup &amp; Restore</string>
-    <string name="create_backup">Create</string>
-    <string name="restore_backup">Restore</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">File:</string>
     <string name="enter_password">Enter password</string>
     <string name="select_backup_file">Select a backup file (.zaai/.backup)</string>
     <string name="apply">Apply</string>
     <string name="save">Save</string>
     <string name="caption">Caption</string>
+    <string name="edit_caption">Edit caption...</string>
     <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="liking">Liking…</string>
@@ -301,6 +310,7 @@
     <string name="delete">Delete</string>
     <string name="comment">Comment</string>
     <string name="layout">Layout</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">Opening post...</string>
     <string name="share">Share</string>
     <string name="layout_style">Layout style</string>
@@ -324,6 +334,10 @@
     <plurals name="comments_count">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
+    </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
     </plurals>
     <string name="download_permission">Storage permission not granted!</string>
 </resources>

@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">查看私信后将其标记为已读</string>
     <string name="dm_mark_as_seen_setting_summary">其他成员会知道你看过了</string>
     <string name="activity_setting">启用活动通知</string>
+    <string name="story_sort_setting">快拍动态排序</string>
     <string name="error_loading_profile">载入主页时出错！\n请尝试再次登录并搜索。</string>
     <string name="error_creating_folders">创建下载文件夹时出错</string>
     <string name="save_to_folder">保存至自定义文件夹</string>
@@ -52,7 +53,7 @@
     <string name="post_viewer_autoplay_video">自动播放视频</string>
     <string name="post_viewer_muted_autoplay">视频默认静音</string>
     <string name="post_viewer_download_dialog_title">选择要下载的</string>
-    <string name="post_viewer_download_current">当前</string>
+    <string name="post_viewer_download_current">当前照片</string>
     <string name="post_viewer_download_album">整个图集</string>
     <string name="show_stories">显示快拍</string>
     <string name="no_more_stories">到底啦！</string>
@@ -139,6 +140,7 @@
     <string name="quick_access_cannot_delete_curr">无法删除正在使用的账户</string>
     <string name="quick_access_confirm_delete">您确定要删除\"%s\"吗？</string>
     <string name="open_profile">打开主页</string>
+    <string name="view_story">查看快拍</string>
     <string name="view_pfp">查看头像</string>
     <string name="direct_messages_you">你</string>
     <string name="direct_messages_sent_link">分享了</string>
@@ -188,6 +190,7 @@
     <string name="downloader_too_many">您一次只能下载100个帖子。切勿贪得无厌！</string>
     <string name="comment_viewer_copy_user">复制用户名</string>
     <string name="comment_viewer_copy_comment">复制评论</string>
+    <string name="comment_viewer_see_likers">查看评论赞</string>
     <string name="comment_viewer_reply_comment">回复评论</string>
     <string name="comment_viewer_like_comment">赞评论</string>
     <string name="comment_viewer_unlike_comment">取消赞</string>
@@ -222,6 +225,8 @@
     <string name="crash_title">应用崩溃了</string>
     <string name="crash_descr">糟糕.. 应用崩溃了，不过别担心，你可以向开发者发送错误报告来帮助他修复问题。(:</string>
     <string name="action_notif">动态</string>
+    <string name="action_archive">快拍回忆</string>
+    <string name="action_ayml">推荐用户</string>
     <string name="select_picture">选择图片</string>
     <string name="uploading">上传中...</string>
     <string name="activity_count_prefix">您有：</string>
@@ -266,21 +271,25 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">咖啡棕</string>
     <string name="dark_material_dark_theme">Material 黑</string>
     <string name="added_to_favs">已添加至收藏夹</string>
-    <string name="add_to_favorites">添加到收藏</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">已收藏</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">收藏</string>
     <string name="accounts">帐户</string>
     <string name="hashtags">话题</string>
     <string name="locations">地点</string>
     <string name="unknown">未知</string>
     <string name="removed_from_favs">已从收藏夹中删除</string>
-    <string name="backup_and_restore">备份 &amp; 还原</string>
-    <string name="create_backup">创建</string>
-    <string name="restore_backup">还原</string>
+    <string name="backup_and_restore">用户设置备份及还原</string>
+    <string name="backup_summary">将应用设置，帐户登录信息，和/或收藏数据备份至纯文本或加密文本，以备日后恢复。</string>
+    <string name="backup_warning">如果您备份登录信息，请务必妥善保管您的备份文件：把它当作密码看待！</string>
+    <string name="create_backup">创建新备份文件</string>
+    <string name="restore_backup">从现有备份文件恢复</string>
     <string name="file_chosen_label">文件:</string>
     <string name="enter_password">输入密码</string>
     <string name="select_backup_file">选择备份文件(.zaai/.backup)</string>
     <string name="apply">应用</string>
     <string name="save">保存</string>
     <string name="caption">说明</string>
+    <string name="edit_caption">编辑说明...</string>
     <string name="translate_caption">翻译内容...</string>
     <string name="player_timeline_desc">视频播放器时间线</string>
     <string name="liking">正在赞…</string>
@@ -297,6 +306,7 @@
     <string name="delete">删除</string>
     <string name="comment">评论</string>
     <string name="layout">布局</string>
+    <string name="feed_stories">快拍动态</string>
     <string name="opening_post">正在打开帖子...</string>
     <string name="share">分享</string>
     <string name="layout_style">布局样式</string>
@@ -318,6 +328,9 @@
     </plurals>
     <plurals name="comments_count">
         <item quantity="other">%d 条评论</item>
+    </plurals>
+    <plurals name="stories_count">
+        <item quantity="other">%s 个故事</item>
     </plurals>
     <string name="download_permission">未授予存储权限！</string>
 </resources>

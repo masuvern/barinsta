@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">Markeer privéberichten als gelezen na bekijken</string>
     <string name="dm_mark_as_seen_setting_summary">Andere gebruikers zullen het weten als je het hebt bekeken</string>
     <string name="activity_setting">Activiteitmeldingen inschakelen</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">Fout tijdens het laden van profiel!\nProbeer opnieuw in te loggen en te zoeken.</string>
     <string name="error_creating_folders">Fout bij maken download map(en).</string>
     <string name="save_to_folder">Opslaan in aangepaste map</string>
@@ -142,6 +143,7 @@
     <string name="quick_access_cannot_delete_curr">Kan momenteel niet het account verwijderen dat in gebruik is</string>
     <string name="quick_access_confirm_delete">Weet je zeker dat je \'%s\' wilt verwijderen?</string>
     <string name="open_profile">Open profiel</string>
+    <string name="view_story">View story</string>
     <string name="view_pfp">Bekijk profielfoto</string>
     <string name="direct_messages_you">Jij</string>
     <string name="direct_messages_sent_link">Heeft een link gedeeld</string>
@@ -191,6 +193,7 @@
     <string name="downloader_too_many">Je kunt slechts 100 berichten per keer downloaden. Wees niet te hebberig!</string>
     <string name="comment_viewer_copy_user">Kopieer gebruikersnaam</string>
     <string name="comment_viewer_copy_comment">Kopieer reactie</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">Reageer op opmerking</string>
     <string name="comment_viewer_like_comment">Vind reactie leuk</string>
     <string name="comment_viewer_unlike_comment">Vind reactie niet meer leuk</string>
@@ -225,6 +228,8 @@
     <string name="crash_title">App is gecrasht</string>
     <string name="crash_descr">Oeps.. de app is gecrasht, maar geen zorgen. Je kan een foutrapportage naar de ontwikkelaar sturen om hem te helpen met oplossen. (:</string>
     <string name="action_notif">Activiteit</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">Selecteer Afbeelding</string>
     <string name="uploading">Bezig met uploaden…</string>
     <string name="activity_count_prefix">Je hebt:</string>
@@ -269,21 +274,25 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Materiaal Donker</string>
     <string name="added_to_favs">Toegevoegd aan favorieten</string>
-    <string name="add_to_favorites">Voeg toe aan Favorieten</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
     <string name="accounts">Accounts</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Locaties</string>
     <string name="unknown">Onbekend</string>
     <string name="removed_from_favs">Verwijderd uit Favorieten</string>
-    <string name="backup_and_restore">Back-up &amp; Terugzetten</string>
-    <string name="create_backup">Maak</string>
-    <string name="restore_backup">Herstel</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">Bestand:</string>
     <string name="enter_password">Voer wachtwoord in</string>
     <string name="select_backup_file">Backup-bestand selecteren (.zaai/.backup)</string>
     <string name="apply">Toepassen</string>
     <string name="save">Opslaan</string>
     <string name="caption">Bijschrift</string>
+    <string name="edit_caption">Edit caption...</string>
     <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Videospeler tijdlijn</string>
     <string name="liking">Liken…</string>
@@ -300,6 +309,7 @@
     <string name="delete">Verwijder</string>
     <string name="comment">Reageeer</string>
     <string name="layout">Lay-out</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">Bericht openen...</string>
     <string name="share">Delen</string>
     <string name="layout_style">Lay-out stijl</string>
@@ -323,6 +333,10 @@
     <plurals name="comments_count">
         <item quantity="one">%d opmerking</item>
         <item quantity="other">%d opmerkingen</item>
+    </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
     </plurals>
     <string name="download_permission">Storage permission not granted!</string>
 </resources>

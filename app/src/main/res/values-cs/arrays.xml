@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>System Default</item>
+        <item>Podle nastavení systému</item>
         <item translatable="false">English</item>
         <item translatable="false">Français [Merci à @kernoeb et @PierreM0]</item>
         <item translatable="false">Español [Gracias a @sguinetti, @akrai y @retiolus]</item>
@@ -20,15 +20,22 @@
         <item translatable="false">Русский [Спасибо @rikishi0071]</item>
         <item translatable="false">हिन्दी</item>
         <item translatable="false">Nederlands [Met dank aan Lesley Natrop]</item>
+        <item translatable="false">Slovenčina [Vďaka @CrafterSvK]</item>
+        <item translatable="false">日本語 [協力 ysakamoto]</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>Auto / Follow System</item>
-        <item>Auto / Follow Battery</item>
-        <item>Dark</item>
-        <item>Light</item>
+        <item>Automaticky / Podle systému</item>
+        <item>Automaticky / Podle baterie</item>
+        <item>Tmavý</item>
+        <item>Světlý</item>
+    </string-array>
+    <string-array name="story_sorts">
+        <item>Instagram default (Unread then read)</item>
+        <item>Od nejnovějších po nejstarší</item>
+        <item>Od nejstarších po nejnovější</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>None</item>
+        <item>Žádný</item>
         <item>\@</item>
         <item>at</item>
         <item>on</item>
