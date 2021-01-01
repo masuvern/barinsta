@@ -183,11 +183,13 @@ public class PostsRecyclerView extends RecyclerView {
 
     private void initSelf() {
         feedViewModel = new ViewModelProvider(viewModelStoreOwner).get(FeedViewModel.class);
-        feedViewModel.getList().observe(lifeCycleOwner, list -> feedAdapter.submitList(list, () -> {
-            if (!shouldScrollToTop) return;
-            smoothScrollToPosition(0);
-            shouldScrollToTop = false;
-        }));
+        feedViewModel.getList().observe(lifeCycleOwner, list -> {
+            if (list.size() > 0) feedAdapter.submitList(list, () -> {
+                if (!shouldScrollToTop) return;
+                smoothScrollToPosition(0);
+                shouldScrollToTop = false;
+            });
+        });
         postFetcher = new PostFetcher(postFetchService, fetchListener);
         if (layoutPreferences.getHasGap()) {
             addItemDecoration(gridSpacingItemDecoration);

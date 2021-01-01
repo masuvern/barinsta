@@ -510,7 +510,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                         public void onSuccess(final Void result) {
                             locationDetailsBinding.favChip.setText(R.string.favorite_short);
                             locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                            showSnackbar(getString(R.string.added_to_favs));
+                            showSnackbar(getString(R.string.added_to_favs_short));
                         }
 
                         @Override

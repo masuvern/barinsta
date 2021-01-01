@@ -711,6 +711,8 @@ public class StoryViewerFragment extends Fragment {
 
                 @Override
                 public void onFailure(final Throwable t) {
+                    final Context context = getContext();
+                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error", t);
                 }
             });
@@ -734,6 +736,8 @@ public class StoryViewerFragment extends Fragment {
 
                 @Override
                 public void onFailure(final Throwable t) {
+                    final Context context = getContext();
+                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error", t);
                 }
             };

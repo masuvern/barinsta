@@ -581,7 +581,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             @Override
             public void onSuccess(final Favorite result) {
                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                profileDetailsBinding.favChip.setText(R.string.added_to_favs);
+                profileDetailsBinding.favChip.setText(R.string.added_to_favs_short);
                 favoriteRepository.insertOrUpdateFavorite(new Favorite(
                         result.getId(),
                         profileModel.getUsername(),
