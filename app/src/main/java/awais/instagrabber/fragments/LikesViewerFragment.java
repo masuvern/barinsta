@@ -97,9 +97,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
                     NavHostFragment.findNavController(LikesViewerFragment.this).navigate(R.id.action_global_profileFragment, bundle);
                 }
             });
-            layoutManager = new LinearLayoutManager(getContext());
             binding.rvLikes.setAdapter(likesAdapter);
-            binding.rvLikes.setLayoutManager(layoutManager);
             binding.swipeRefreshLayout.setRefreshing(false);
         }
 
@@ -158,6 +156,8 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         binding.swipeRefreshLayout.setRefreshing(true);
         resources = getResources();
         if (isComment && !isLoggedIn) {
+            layoutManager = new LinearLayoutManager(getContext());
+            binding.rvLikes.setLayoutManager(layoutManager);
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
                 if (!TextUtils.isEmpty(endCursor))
                     graphQLService.fetchCommentLikers(postId, endCursor, acb);

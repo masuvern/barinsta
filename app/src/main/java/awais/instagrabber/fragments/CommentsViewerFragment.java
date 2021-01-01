@@ -97,6 +97,13 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             binding.swipeRefreshLayout.setRefreshing(false);
             stopCurrentExecutor();
         }
+
+        @Override
+        public void onFailure(Throwable t) {
+            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            binding.swipeRefreshLayout.setRefreshing(false);
+            stopCurrentExecutor();
+        }
     };
 
     private final CommentsAdapter.CommentCallback commentCallback = new CommentsAdapter.CommentCallback() {

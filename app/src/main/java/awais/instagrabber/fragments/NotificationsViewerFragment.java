@@ -36,6 +36,7 @@ import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
+import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.NotificationModel;
@@ -267,9 +268,18 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         binding.swipeRefreshLayout.setRefreshing(true);
         switch (type) {
             case "notif":
-                new NotificationsFetcher(true, notificationModels -> {
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    notificationViewModel.getList().postValue(notificationModels);
+                new NotificationsFetcher(true, new FetchListener<List<NotificationModel>>() {
+                    @Override
+                    public void onResult(final List<NotificationModel> notificationModels) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        notificationViewModel.getList().postValue(notificationModels);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case "ayml":
@@ -284,7 +294,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                     @Override
                     public void onFailure(final Throwable t) {
                         binding.swipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
                 break;

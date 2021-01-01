@@ -54,6 +54,7 @@ import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
+import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
@@ -363,19 +364,27 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchHashtagModel() {
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
-        currentlyExecuting = new HashtagFetcher(hashtag.substring(1), result -> {
-            hashtagModel = result;
-            binding.swipeRefreshLayout.setRefreshing(false);
-            final Context context = getContext();
-            if (context == null) return;
-            if (hashtagModel == null) {
-                Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
-                return;
+        currentlyExecuting = new HashtagFetcher(hashtag.substring(1), new FetchListener<HashtagModel>() {
+            @Override
+            public void onResult(final HashtagModel result) {
+                hashtagModel = result;
+                binding.swipeRefreshLayout.setRefreshing(false);
+                final Context context = getContext();
+                if (context == null) return;
+                if (hashtagModel == null) {
+                    Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                setTitle();
+                setHashtagDetails();
+                setupPosts();
+                fetchStories();
             }
-            setTitle();
-            setHashtagDetails();
-            setupPosts();
-            fetchStories();
+
+            @Override
+            public void onFailure(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -524,7 +533,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             public void onSuccess(final Void result) {
                                 hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
                                 hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
+                                showSnackbar(getString(R.string.added_to_favs_short));
                             }
 
                             @Override

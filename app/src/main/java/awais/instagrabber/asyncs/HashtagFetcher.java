@@ -89,6 +89,7 @@ public final class HashtagFetcher extends AsyncTask<Void, Void, HashtagModel> {
             if (logCollector != null)
                 logCollector.appendException(e, LogCollector.LogFile.ASYNC_HASHTAG_FETCHER, "doInBackground");
             if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+            if (fetchListener != null) fetchListener.onFailure(e);
         }
 
         return result;
