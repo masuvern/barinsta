@@ -63,7 +63,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         @Override
         public void onFeedStoryClick(final FeedStoryModel model, final int position) {
             if (model == null) return;
-            final NavDirections action = StoryListViewerFragmentDirections.actionStoryListFragmentToStoryViewerFragment(position, null, false, false, null, null, false);
+            final NavDirections action = StoryListViewerFragmentDirections.actionStoryListFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
         }
 
@@ -78,7 +78,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         public void onHighlightClick(final HighlightModel model, final int position) {
             if (model == null) return;
             final NavDirections action = StoryListViewerFragmentDirections.actionStoryListFragmentToStoryViewerFragment(
-                    position, getString(R.string.action_archive), false, false, null, null, true);
+                    position, getString(R.string.action_archive), false, false, null, null, true, false);
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
         }
 
@@ -136,6 +136,13 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         if (!shouldRefresh) return;
         init();
         shouldRefresh = false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) actionBar.setTitle(type == "feed" ? R.string.feed_stories : R.string.action_archive);
     }
 
     @Override

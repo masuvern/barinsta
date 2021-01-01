@@ -554,7 +554,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!hasStories) return;
             // show stories
             final NavDirections action = HashTagFragmentDirections
-                    .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName(), false);
+                    .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName(), false, false);
             NavHostFragment.findNavController(this).navigate(action);
         });
     }

@@ -133,14 +133,13 @@ public class StoryViewerFragment extends Fragment {
     private SimpleExoPlayer player;
     private boolean isHashtag, isLoc;
     private String highlight;
-    private boolean fetching = false, sticking = false;
+    private boolean fetching = false, sticking = false, shouldRefresh = true;
     private int currentFeedStoryIndex;
     private double sliderValue;
     private StoriesViewModel storiesViewModel;
-    private boolean shouldRefresh = true;
     private StoryViewerFragmentArgs fragmentArgs;
     private ViewModel viewModel;
-    private boolean isHighlight, isArchive;
+    private boolean isHighlight, isArchive, isNotification;
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
 
@@ -258,6 +257,7 @@ public class StoryViewerFragment extends Fragment {
         highlight = fragmentArgs.getHighlight();
         isHighlight = !TextUtils.isEmpty(highlight);
         isArchive = fragmentArgs.getIsArchive();
+        isNotification = fragmentArgs.getIsNotification();
         if (currentFeedStoryIndex >= 0) {
             viewModel = isHighlight
                         ? isArchive
@@ -693,7 +693,7 @@ public class StoryViewerFragment extends Fragment {
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (currentStoryMediaId == null) return;
-        else if (currentFeedStoryIndex == -1) {
+        else if (isNotification) {
             storiesService.fetch(currentStoryMediaId, new ServiceCallback<StoryModel>() {
                 @Override
                 public void onSuccess(final StoryModel storyModel) {
@@ -728,7 +728,9 @@ public class StoryViewerFragment extends Fragment {
                         binding.storiesList.setVisibility(View.GONE);
                         return;
                     }
-                    binding.storiesList.setVisibility(View.VISIBLE);
+                    binding.storiesList.setVisibility((storyModels.size() == 1 && currentFeedStoryIndex == -1) ? View.GONE : View.VISIBLE);
+                    binding.btnBackward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
+                    binding.btnForward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
                     storiesViewModel.getList().setValue(storyModels);
                     currentStory = storyModels.get(0);
                     refreshStory();

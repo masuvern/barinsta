@@ -357,7 +357,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             new FeedStoriesAdapter.OnFeedStoryClickListener() {
                 @Override
                 public void onFeedStoryClick(FeedStoryModel model, int position) {
-                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null, false);
+                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
                     NavHostFragment.findNavController(FeedFragment.this).navigate(action);
                 }
 

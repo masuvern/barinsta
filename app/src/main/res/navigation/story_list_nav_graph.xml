@@ -68,5 +68,9 @@
             android:name="isArchive"
             app:argType="boolean"
             app:nullable="false" />
+        <argument
+            android:name="isNotification"
+            app:argType="boolean"
+            app:nullable="false" />
     </fragment>
 </navigation>

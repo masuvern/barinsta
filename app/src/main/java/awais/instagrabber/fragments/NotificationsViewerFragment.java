@@ -77,7 +77,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         public void onPreviewClick(final NotificationModel model) {
             if (model.getType() == NotificationType.RESPONDED_STORY) {
                 final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
-                        -1, null, false, false, model.getPostId(), model.getUsername(), false);
+                        -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
             }
             else {
@@ -155,7 +155,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             }
                             else if (model.getType() == NotificationType.RESPONDED_STORY) {
                                 final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
-                                        -1, null, false, false, model.getPostId(), model.getUsername(), false);
+                                        -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
                                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
                                 return;
                             }
