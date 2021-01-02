@@ -25,8 +25,6 @@ import java.util.concurrent.CyclicBarrier;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.FavoritesAdapter;
-import awais.instagrabber.asyncs.LocationFetcher;
-import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.databinding.FragmentFavoritesBinding;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
