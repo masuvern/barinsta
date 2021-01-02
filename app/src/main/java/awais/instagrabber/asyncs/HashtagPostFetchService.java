@@ -6,12 +6,14 @@ import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
+import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.TagsService;
-import awais.instagrabber.webservices.TagsService.TagPostsFetchResponse;
 
 public class HashtagPostFetchService implements PostFetcher.PostFetchService {
     private final TagsService tagsService;
+    private final GraphQLService graphQLService;
     private final HashtagModel hashtagModel;
     private String nextMaxId;
     private boolean moreAvailable;
@@ -20,19 +22,20 @@ public class HashtagPostFetchService implements PostFetcher.PostFetchService {
     public HashtagPostFetchService(final HashtagModel hashtagModel, final boolean isLoggedIn) {
         this.hashtagModel = hashtagModel;
         this.isLoggedIn = isLoggedIn;
-        tagsService = TagsService.getInstance();
+        tagsService = isLoggedIn ? TagsService.getInstance() : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
     }
 
     @Override
     public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        final ServiceCallback cb = new ServiceCallback<TagPostsFetchResponse>() {
+        final ServiceCallback cb = new ServiceCallback<PostsFetchResponse>() {
             @Override
-            public void onSuccess(final TagPostsFetchResponse result) {
+            public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;
-                nextMaxId = result.getNextMaxId();
-                moreAvailable = result.isMoreAvailable();
+                nextMaxId = result.getNextCursor();
+                moreAvailable = result.hasNextPage();
                 if (fetchListener != null) {
-                    fetchListener.onResult(result.getItems());
+                    fetchListener.onResult(result.getFeedModels());
                 }
             }
 
@@ -45,7 +48,7 @@ public class HashtagPostFetchService implements PostFetcher.PostFetchService {
             }
         };
         if (isLoggedIn) tagsService.fetchPosts(hashtagModel.getName().toLowerCase(), nextMaxId, cb);
-        else tagsService.fetchGraphQLPosts(hashtagModel.getName().toLowerCase(), nextMaxId, cb);
+        else graphQLService.fetchHashtagPosts(hashtagModel.getName().toLowerCase(), nextMaxId, cb);
     }
 
     @Override

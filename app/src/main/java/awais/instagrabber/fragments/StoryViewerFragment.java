@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -54,6 +58,9 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -62,10 +69,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
-import awais.instagrabber.asyncs.QuizAction;
-import awais.instagrabber.asyncs.RespondAction;
 import awais.instagrabber.asyncs.SeenAction;
-import awais.instagrabber.asyncs.VoteAction;
 import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
@@ -78,16 +82,27 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SliderModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
+import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
+import awais.instagrabber.repositories.responses.StoryStickerResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
+import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
@@ -100,8 +115,7 @@ public class StoryViewerFragment extends Fragment {
 
     private AppCompatActivity fragmentActivity;
     private View root;
-    private @NonNull
-    FragmentStoryViewerBinding binding;
+    private FragmentStoryViewerBinding binding;
     private String currentStoryUsername;
     private StoriesAdapter storiesAdapter;
     private SwipeEvent swipeEvent;
@@ -115,26 +129,32 @@ public class StoryViewerFragment extends Fragment {
     private QuestionModel question;
     private String[] mentions;
     private QuizModel quiz;
+    private SliderModel slider;
     private MenuItem menuDownload;
     private MenuItem menuDm;
     private SimpleExoPlayer player;
     private boolean isHashtag, isLoc;
     private String highlight;
-    private boolean fetching = false;
+    private boolean fetching = false, sticking = false, shouldRefresh = true;
     private int currentFeedStoryIndex;
+    private double sliderValue;
     private StoriesViewModel storiesViewModel;
-    private boolean shouldRefresh = true;
     private StoryViewerFragmentArgs fragmentArgs;
     private ViewModel viewModel;
-    private boolean isHighlight;
+    private boolean isHighlight, isArchive, isNotification;
+    private DirectMessagesService directMessagesService;
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
+    private final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+    private final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+    private final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesService = StoriesService.getInstance();
+        directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         setHasOptionsMenu(true);
     }
 
@@ -188,24 +208,33 @@ public class StoryViewerFragment extends Fragment {
             new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
-                    .setPositiveButton(R.string.ok, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
-                        // try {
-                        // final StoryReplyBroadcastOptions options = new StoryReplyBroadcastOptions(
-                        //         threadId,
-                        //         input.getText().toString(),
-                        //         currentStory.getStoryMediaId(),
-                        //         currentStory.getUserId()
-                        // );
-                        // final DirectThreadBroadcaster broadcast = new DirectThreadBroadcaster(threadId);
-                        // broadcast.setOnTaskCompleteListener(result -> Toast.makeText(
-                        //         context,
-                        //         result != null ? R.string.answered_story : R.string.downloader_unknown_error,
-                        //         Toast.LENGTH_SHORT
-                        // ).show());
-                        // broadcast.execute(options);
-                        // } catch (UnsupportedEncodingException e) {
-                        //     Log.e(TAG, "Error", e);
-                        // }
+                    .setPositiveButton(R.string.confirm, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
+                        try {
+                            final Call<DirectThreadBroadcastResponse> request = directMessagesService
+                                    .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(threadId),
+                                                         input.getText().toString(),
+                                                         currentStory.getStoryMediaId(),
+                                                         currentStory.getUserId());
+                            request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
+                                @Override
+                                public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
+                                                       @NonNull final Response<DirectThreadBroadcastResponse> response) {
+                                    if (!response.isSuccessful()) {
+                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                        return;
+                                    }
+                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
+                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                    Log.e(TAG, "onFailure: ", t);
+                                }
+                            });
+                        } catch (UnsupportedEncodingException e) {
+                            Log.e(TAG, "Error", e);
+                        }
                     }).execute())
                     .setNegativeButton(R.string.cancel, null)
                     .show();
@@ -244,9 +273,13 @@ public class StoryViewerFragment extends Fragment {
         currentFeedStoryIndex = fragmentArgs.getFeedStoryIndex();
         highlight = fragmentArgs.getHighlight();
         isHighlight = !TextUtils.isEmpty(highlight);
+        isArchive = fragmentArgs.getIsArchive();
+        isNotification = fragmentArgs.getIsNotification();
         if (currentFeedStoryIndex >= 0) {
             viewModel = isHighlight
-                        ? new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
+                        ? isArchive
+                          ? new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class)
+                          : new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
                         : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         }
         // feedStoryModels = feedStoriesViewModel.getList().getValue();
@@ -275,7 +308,10 @@ public class StoryViewerFragment extends Fragment {
         final boolean hasFeedStories;
         List<?> models = null;
         if (currentFeedStoryIndex >= 0) {
-            if (isHighlight) {
+            if (isArchive) {
+                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                models = archivesViewModel.getList().getValue();
+            } else if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 models = highlightsViewModel.getList().getValue();
                 // final HighlightModel model = models.get(currentFeedStoryIndex);
@@ -296,15 +332,16 @@ public class StoryViewerFragment extends Fragment {
         swipeEvent = isRightSwipe -> {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             final int storiesLen = storyModels == null ? 0 : storyModels.size();
+            if (sticking) {
+                Toast.makeText(context, R.string.follower_wait_to_load, Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (storiesLen <= 0) return;
             final boolean isLeftSwipe = !isRightSwipe;
             final boolean endOfCurrentStories = slidePos + 1 >= storiesLen;
             final boolean swipingBeyondCurrentStories = (endOfCurrentStories && isLeftSwipe) || (slidePos == 0 && isRightSwipe);
             if (swipingBeyondCurrentStories && hasFeedStories) {
                 final int index = currentFeedStoryIndex;
-                if (settingsHelper.getBoolean(MARK_AS_SEEN)) {
-                    new SeenAction(cookie, currentStory).execute();
-                }
                 if ((isRightSwipe && index == 0) || (isLeftSwipe && index == finalModels.size() - 1)) {
                     Toast.makeText(context, R.string.no_more_stories, Toast.LENGTH_SHORT).show();
                     return;
@@ -312,7 +349,7 @@ public class StoryViewerFragment extends Fragment {
                 final Object feedStoryModel = isRightSwipe
                                               ? finalModels.get(index - 1)
                                               : finalModels.size() == index + 1 ? null : finalModels.get(index + 1);
-                paginateStories(feedStoryModel, context, isRightSwipe, currentFeedStoryIndex == finalModels.size() - 2);
+                paginateStories(feedStoryModel, finalModels.get(index), context, isRightSwipe, currentFeedStoryIndex == finalModels.size() - 2);
                 return;
             }
             if (isRightSwipe) {
@@ -351,13 +388,25 @@ public class StoryViewerFragment extends Fragment {
         if (hasFeedStories) {
             binding.btnBackward.setVisibility(currentFeedStoryIndex == 0 ? View.INVISIBLE : View.VISIBLE);
             binding.btnForward.setVisibility(currentFeedStoryIndex == finalModels.size() - 1 ? View.INVISIBLE : View.VISIBLE);
-            binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1), context, true, false));
-            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1), context, false,
+            binding.btnBackward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex - 1),
+                                                                        finalModels.get(currentFeedStoryIndex),
+                                                                        context, true, false));
+            binding.btnForward.setOnClickListener(v -> paginateStories(finalModels.get(currentFeedStoryIndex + 1),
+                                                                       finalModels.get(currentFeedStoryIndex),
+                                                                       context, false,
                                                                        currentFeedStoryIndex == finalModels.size() - 2));
         }
 
         binding.imageViewer.setTapListener(simpleOnGestureListener);
         binding.spotify.setOnClickListener(v -> {
+            final Object tag = v.getTag();
+            if (tag instanceof CharSequence) {
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(tag.toString()));
+                startActivity(intent);
+            }
+        });
+        binding.swipeUp.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
                 final Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -406,15 +455,30 @@ public class StoryViewerFragment extends Fragment {
                                     poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
-                                if (!TextUtils.isEmpty(cookie))
-                                    new VoteAction(currentStory, poll, cookie, choice -> {
-                                        if (choice > -1) {
-                                            poll.setMyChoice(choice);
-                                            Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
-                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                    }).execute(w);
+                                if (!TextUtils.isEmpty(cookie)) {
+                                    sticking = true;
+                                    storiesService.respondToPoll(
+                                            currentStory.getStoryMediaId().split("_")[0],
+                                            poll.getId(),
+                                            w,
+                                            userIdFromCookie,
+                                            csrfToken,
+                                            new ServiceCallback<StoryStickerResponse>() {
+                                                @Override
+                                                public void onSuccess(final StoryStickerResponse result) {
+                                                    sticking = false;
+                                                    poll.setMyChoice(w);
+                                                    Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                                }
+
+                                                @Override
+                                                public void onFailure(final Throwable t) {
+                                                    sticking = false;
+                                                    Log.e(TAG, "Error responding", t);
+                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                }
                             })
                             .setPositiveButton(R.string.cancel, null)
                             .show();
@@ -426,21 +490,36 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(question.getQuestion())
                         .setView(input)
-                        .setPositiveButton(R.string.ok, (d, w) -> new RespondAction(currentStory, question, cookie, result -> {
-                            if (result) {
-                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                            } else
-                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        }).execute(input.getText().toString()))
+                        .setPositiveButton(R.string.confirm, (d, w) -> {
+                            sticking = true;
+                            storiesService.respondToQuestion(
+                                    currentStory.getStoryMediaId().split("_")[0],
+                                    question.getId(),
+                                    input.getText().toString(),
+                                    userIdFromCookie,
+                                    csrfToken,
+                                    new ServiceCallback<StoryStickerResponse>() {
+                                        @Override
+                                        public void onSuccess(final StoryStickerResponse result) {
+                                            sticking = false;
+                                            Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(final Throwable t) {
+                                            sticking = false;
+                                            Log.e(TAG, "Error responding", t);
+                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (tag instanceof String[]) {
                 mentions = (String[]) tag;
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.story_mentions)
-                        .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mentions), (d, w) -> {
-                            openProfile(mentions[w]);
-                        })
+                        .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, mentions), (d, w) -> openProfile(mentions[w]))
                         .setPositiveButton(R.string.cancel, null)
                         .show();
             } else if (tag instanceof QuizModel) {
@@ -451,27 +530,122 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
-                            if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie))
-                                new QuizAction(currentStory, quiz, cookie, choice -> {
-                                    if (choice > -1) {
-                                        quiz.setMyChoice(choice);
-                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                }).execute(w);
+                            if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie)) {
+                                sticking = true;
+                                storiesService.respondToQuiz(
+                                        currentStory.getStoryMediaId().split("_")[0],
+                                        quiz.getId(),
+                                        w,
+                                        userIdFromCookie,
+                                        csrfToken,
+                                        new ServiceCallback<StoryStickerResponse>() {
+                                            @Override
+                                            public void onSuccess(final StoryStickerResponse result) {
+                                                sticking = false;
+                                                quiz.setMyChoice(w);
+                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            }
+
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                sticking = false;
+                                                Log.e(TAG, "Error responding", t);
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
                         })
                         .setPositiveButton(R.string.cancel, null)
                         .show();
+            } else if (tag instanceof SliderModel) {
+                slider = (SliderModel) tag;
+                NumberFormat percentage = NumberFormat.getPercentInstance();
+                percentage.setMaximumFractionDigits(2);
+                LinearLayout sliderView = new LinearLayout(context);
+                sliderView.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+                sliderView.setOrientation(LinearLayout.VERTICAL);
+                TextView tv = new TextView(context);
+                tv.setGravity(Gravity.CENTER_HORIZONTAL);
+                final SeekBar input = new SeekBar(context);
+                double avg = slider.getAverage() * 100;
+                input.setProgress((int) avg);
+                sliderView.addView(input);
+                sliderView.addView(tv);
+                if (slider.getMyChoice().isNaN() && slider.canVote()) {
+                    input.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            sliderValue = progress / 100.0;
+                            tv.setText(percentage.format(sliderValue));
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+                    new AlertDialog.Builder(context)
+                            .setTitle(TextUtils.isEmpty(slider.getQuestion()) ? slider.getEmoji() : slider.getQuestion())
+                            .setMessage(getResources().getQuantityString(R.plurals.slider_info,
+                                                                         slider.getVoteCount(),
+                                                                         slider.getVoteCount(),
+                                                                         percentage.format(slider.getAverage())))
+                            .setView(sliderView)
+                            .setPositiveButton(R.string.confirm, (d, w) -> {
+                                sticking = true;
+                                storiesService.respondToSlider(
+                                        currentStory.getStoryMediaId().split("_")[0],
+                                        slider.getId(),
+                                        sliderValue,
+                                        userIdFromCookie,
+                                        csrfToken,
+                                        new ServiceCallback<StoryStickerResponse>() {
+                                            @Override
+                                            public void onSuccess(final StoryStickerResponse result) {
+                                                sticking = false;
+                                                slider.setMyChoice(sliderValue);
+                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            }
+
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                sticking = false;
+                                                Log.e(TAG, "Error responding", t);
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
+                } else {
+                    input.setEnabled(false);
+                    tv.setText(getString(R.string.slider_answer, percentage.format(slider.getMyChoice())));
+                    new AlertDialog.Builder(context)
+                            .setTitle(TextUtils.isEmpty(slider.getQuestion()) ? slider.getEmoji() : slider.getQuestion())
+                            .setMessage(getResources().getQuantityString(R.plurals.slider_info,
+                                                                         slider.getVoteCount(),
+                                                                         slider.getVoteCount(),
+                                                                         percentage.format(slider.getAverage())))
+                            .setView(sliderView)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
+                }
             }
         };
         binding.poll.setOnClickListener(storyActionListener);
         binding.answer.setOnClickListener(storyActionListener);
         binding.mention.setOnClickListener(storyActionListener);
         binding.quiz.setOnClickListener(storyActionListener);
+        binding.slider.setOnClickListener(storyActionListener);
     }
 
     private void resetView() {
+        final Context context = getContext();
         slidePos = 0;
         lastSlidePos = 0;
         if (menuDownload != null) menuDownload.setVisible(false);
@@ -480,10 +654,23 @@ public class StoryViewerFragment extends Fragment {
         releasePlayer();
         String currentStoryMediaId = null;
         if (currentFeedStoryIndex >= 0) {
-            if (isHighlight) {
+            if (isArchive) {
+                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                final List<HighlightModel> models = archivesViewModel.getList().getValue();
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                final HighlightModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getId();
+                currentStoryUsername = model.getTitle();
+            } else if (isHighlight) {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
                 final List<HighlightModel> models = highlightsViewModel.getList().getValue();
-                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) return;
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 currentStoryUsername = model.getTitle();
@@ -502,7 +689,12 @@ public class StoryViewerFragment extends Fragment {
         isHashtag = fragmentArgs.getIsHashtag();
         isLoc = fragmentArgs.getIsLoc();
         final boolean hasUsername = !TextUtils.isEmpty(currentStoryUsername);
-        if (hasUsername) {
+        if (isHighlight) {
+            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(highlight);
+            }
+        } else if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
@@ -511,6 +703,31 @@ public class StoryViewerFragment extends Fragment {
         }
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (currentStoryMediaId == null) return;
+        if (isNotification) {
+            storiesService.fetch(currentStoryMediaId, new ServiceCallback<StoryModel>() {
+                @Override
+                public void onSuccess(final StoryModel storyModel) {
+                    fetching = false;
+                    binding.storiesList.setVisibility(View.GONE);
+                    if (storyModel == null) {
+                        storiesViewModel.getList().setValue(Collections.emptyList());
+                        currentStory = null;
+                        return;
+                    }
+                    storiesViewModel.getList().setValue(Collections.singletonList(storyModel));
+                    currentStory = storyModel;
+                    refreshStory();
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    final Context context = getContext();
+                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error", t);
+                }
+            });
+            return;
+        }
         final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
             @Override
             public void onSuccess(final List<StoryModel> storyModels) {
@@ -521,7 +738,9 @@ public class StoryViewerFragment extends Fragment {
                     binding.storiesList.setVisibility(View.GONE);
                     return;
                 }
-                binding.storiesList.setVisibility(View.VISIBLE);
+                binding.storiesList.setVisibility((storyModels.size() == 1 && currentFeedStoryIndex == -1) ? View.GONE : View.VISIBLE);
+                binding.btnBackward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
+                binding.btnForward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
                 storiesViewModel.getList().setValue(storyModels);
                 currentStory = storyModels.get(0);
                 refreshStory();
@@ -529,6 +748,8 @@ public class StoryViewerFragment extends Fragment {
 
             @Override
             public void onFailure(final Throwable t) {
+                final Context context = getContext();
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Error", t);
             }
         };
@@ -543,7 +764,7 @@ public class StoryViewerFragment extends Fragment {
     private void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
-            if (storyModels != null) {
+            if (storyModels != null && storyModels.size() > 0) {
                 StoryModel item = storyModels.get(lastSlidePos);
                 if (item != null) {
                     item.setCurrentSlide(false);
@@ -586,6 +807,17 @@ public class StoryViewerFragment extends Fragment {
         quiz = currentStory.getQuiz();
         binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
         binding.quiz.setTag(quiz);
+
+        slider = currentStory.getSlider();
+        binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
+        binding.slider.setTag(slider);
+
+        final SwipeUpModel swipeUp = currentStory.getSwipeUp();
+        if (swipeUp != null) {
+            binding.swipeUp.setVisibility(View.VISIBLE);
+            binding.swipeUp.setText(swipeUp.getText());
+            binding.swipeUp.setTag(swipeUp.getUrl());
+        }
 
         releasePlayer();
         if (isHashtag || isLoc) {
@@ -670,8 +902,8 @@ public class StoryViewerFragment extends Fragment {
             @Override
             public void onLoadCompleted(final int windowIndex,
                                         @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
-                                        final LoadEventInfo loadEventInfo,
-                                        final MediaLoadData mediaLoadData) {
+                                        @NonNull final LoadEventInfo loadEventInfo,
+                                        @NonNull final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
                 if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie))
                     menuDm.setVisible(true);
@@ -681,8 +913,8 @@ public class StoryViewerFragment extends Fragment {
             @Override
             public void onLoadStarted(final int windowIndex,
                                       @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
-                                      final LoadEventInfo loadEventInfo,
-                                      final MediaLoadData mediaLoadData) {
+                                      @NonNull final LoadEventInfo loadEventInfo,
+                                      @NonNull final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
                 if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie))
                     menuDm.setVisible(true);
@@ -692,17 +924,17 @@ public class StoryViewerFragment extends Fragment {
             @Override
             public void onLoadCanceled(final int windowIndex,
                                        @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
-                                       final LoadEventInfo loadEventInfo,
-                                       final MediaLoadData mediaLoadData) {
+                                       @NonNull final LoadEventInfo loadEventInfo,
+                                       @NonNull final MediaLoadData mediaLoadData) {
                 binding.progressView.setVisibility(View.GONE);
             }
 
             @Override
             public void onLoadError(final int windowIndex,
                                     @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
-                                    final LoadEventInfo loadEventInfo,
-                                    final MediaLoadData mediaLoadData,
-                                    final IOException error,
+                                    @NonNull final LoadEventInfo loadEventInfo,
+                                    @NonNull final MediaLoadData mediaLoadData,
+                                    @NonNull final IOException error,
                                     final boolean wasCanceled) {
                 if (menuDownload != null) menuDownload.setVisible(false);
                 if (menuDm != null) menuDm.setVisible(false);
@@ -745,11 +977,24 @@ public class StoryViewerFragment extends Fragment {
         player = null;
     }
 
-    private void paginateStories(Object feedStory, Context context, boolean backward, boolean last) {
-        if (feedStory != null) {
+    private void paginateStories(Object newFeedStory, Object oldFeedStory, Context context, boolean backward, boolean last) {
+        if (newFeedStory != null) {
             if (fetching) {
                 Toast.makeText(context, R.string.be_patient, Toast.LENGTH_SHORT).show();
                 return;
+            }
+            if (settingsHelper.getBoolean(MARK_AS_SEEN)
+                    && oldFeedStory instanceof FeedStoryModel
+                    && viewModel instanceof FeedStoriesViewModel) {
+                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                final FeedStoryModel oldFeedStoryModel = (FeedStoryModel) oldFeedStory;
+                if (!oldFeedStoryModel.isFullyRead()) {
+                    oldFeedStoryModel.setFullyRead(true);
+                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+                    final List<FeedStoryModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+                    modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
+                    feedStoriesViewModel.getList().postValue(models);
+                }
             }
             fetching = true;
             binding.btnBackward.setVisibility(currentFeedStoryIndex == 1 && backward ? View.INVISIBLE : View.VISIBLE);

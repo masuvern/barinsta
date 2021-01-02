@@ -21,7 +21,7 @@ public interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE query_text = :query and type = :type")
     Favorite findFavoriteByQueryAndType(String query, FavoriteType type);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     List<Long> insertFavorites(Favorite... favorites);
 
     @Update

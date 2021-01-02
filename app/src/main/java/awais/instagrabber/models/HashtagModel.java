@@ -29,7 +29,7 @@ public final class HashtagModel implements Serializable {
         return sdProfilePic;
     }
 
-    public long getPostCount() { return postCount; }
+    public Long getPostCount() { return postCount; }
 
     public boolean getFollowing() { return following; }
 }

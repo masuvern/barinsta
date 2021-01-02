@@ -99,11 +99,11 @@ public class DirectUser {
                 profileModel.getSdProfilePic(),
                 null,
                 new DirectUserFriendshipStatus(
-                        profileModel.getFollowing(),
-                        profileModel.getBlocked(),
+                        profileModel.isFollowing(),
+                        profileModel.isBlocked(),
                         profileModel.isPrivate(),
                         false,
-                        profileModel.getRequested(),
+                        profileModel.isRequested(),
                         false
                 ),
                 profileModel.isVerified(),

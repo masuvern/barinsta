@@ -153,13 +153,12 @@ public class FriendshipService extends BaseService {
         });
     }
 
-    // log in required
     public void getList(final boolean follower,
                         final String targetUserId,
                         final String maxId,
                         final ServiceCallback<FriendshipRepoListFetchResponse> callback) {
         final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("max_id", maxId == null ? "" : maxId);
+        if (maxId != null) queryMap.put("max_id", maxId);
         final Call<String> request = repository.getList(Constants.I_USER_AGENT,
                                                         targetUserId,
                                                         follower ? "followers" : "following",
@@ -173,7 +172,6 @@ public class FriendshipService extends BaseService {
                     }
                     final String body = response.body();
                     if (TextUtils.isEmpty(body)) {
-
                         callback.onSuccess(null);
                         return;
                     }

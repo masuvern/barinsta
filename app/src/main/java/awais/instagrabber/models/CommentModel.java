@@ -11,11 +11,10 @@ public class CommentModel {
     private final ProfileModel profileModel;
     private final String id;
     private final String text;
-    private final long likes;
+    private long likes;
     private final long timestamp;
     private List<CommentModel> childCommentModels;
-    private final boolean liked;
-    private boolean hasNextPage;
+    private boolean liked, hasNextPage;
     private String endCursor;
 
     public CommentModel(final String id,
@@ -51,6 +50,11 @@ public class CommentModel {
 
     public boolean getLiked() {
         return liked;
+    }
+
+    public void setLiked(boolean liked) {
+        this.likes = liked ? likes + 1 : likes - 1;
+        this.liked = liked;
     }
 
     public ProfileModel getProfileModel() {

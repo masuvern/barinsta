@@ -23,7 +23,7 @@
     <string name="title_favorites">Preferits</string>
     <string name="title_discover">Descobrir</string>
     <string name="title_comments">Comentaris</string>
-    <string name="title_notifications">Notificacions</string>
+    <string name="title_notifications">Activitat</string>
     <string name="title_highlight">Destaca: %s</string>
     <string name="update_check">Cerca actualitzacions a l\'inici</string>
     <string name="download_user_folder">Descarrega les publicacions a carpetes de nom d\'usuari</string>
@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">Marca els missatges com a vists després de visualitzar-los</string>
     <string name="dm_mark_as_seen_setting_summary">Altres membres sabran que l\'has vist</string>
     <string name="activity_setting">Habilitar les notificacions d\'activitat</string>
+    <string name="story_sort_setting">Ordre de les històries</string>
     <string name="error_loading_profile">S\'ha produït un error en carregar el perfil!\nTorna a iniciar sessió i torna a cercar.</string>
     <string name="error_creating_folders">S\'ha produït un error en crear la(es) carpeta(es) de descàrrega.</string>
     <string name="save_to_folder">Desa a una carpeta personalitzada</string>
@@ -42,10 +43,15 @@
     <string name="instadp_settings">Utilitza Instadp per a les imatges del perfil d\'alta definició</string>
     <string name="import_export">Importar/Exportar</string>
     <string name="select_language">Llengua</string>
-    <string name="main_posts_count">%s\nPublicacions</string>
-    <string name="main_posts_count_inline">%s Publicacions</string>
-    <string name="main_posts_followers">%s\n Seguidors</string>
-    <string name="main_posts_following">%s\n Seguint</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Publicació</item>
+        <item quantity="other">%s Publicacions</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Seguidor</item>
+        <item quantity="other">%s Seguidors</item>
+    </plurals>
+    <string name="main_posts_following">%s Seguint</string>
     <string name="post_viewer_autoplay_video">Reproduir vídeos automàticament</string>
     <string name="post_viewer_muted_autoplay">Silenciar sempre els vídeos</string>
     <string name="post_viewer_download_dialog_title">Seleccionar el que s\'ha de descarregar</string>
@@ -63,9 +69,15 @@
     <string name="respond_story">Contestar</string>
     <string name="answer_hint">Resposta…</string>
     <string name="answered_story">Has contestat amb èxit!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d mitjana de resposta %s</item>
+        <item quantity="other">%d mitjana de respostes %s</item>
+    </plurals>
+    <string name="slider_answer">La teva resposta: %s</string>
     <string name="reply_story">Respon a la història</string>
     <string name="reply_hint">Resposta…</string>
     <string name="story_quiz">Qüestionari</string>
+    <string name="story_slider">Desplaçador</string>
     <string name="story_quizzed">Ja has contestat!</string>
     <string name="story_mentions">Mencions</string>
     <string name="priv_acc">Aquest compte és privat</string>
@@ -98,6 +110,11 @@
     <string name="unblock">Desbloquejar</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Deixar de restringir</string>
+    <string name="bio_copy">Copiar bio</string>
+    <string name="bio_translate">Traduir bio</string>
+    <string name="status_mutual">Mutu</string>
+    <string name="status_following">Seguint</string>
+    <string name="status_follower">Seguidor</string>
     <string name="map">Mapa</string>
     <string name="dialog_export_btn_export">Exportar</string>
     <string name="dialog_export_btn_import">Importar</string>
@@ -126,6 +143,7 @@
     <string name="quick_access_cannot_delete_curr">No es pot eliminar el compte actualment en ús</string>
     <string name="quick_access_confirm_delete">Esteu segur que vols suprimir \"%s\"?</string>
     <string name="open_profile">Obre el perfil</string>
+    <string name="view_story">Veure història</string>
     <string name="view_pfp">Mostra la imatge del perfil</string>
     <string name="direct_messages_you">Tú</string>
     <string name="direct_messages_sent_link">Has compartit un enllaç</string>
@@ -175,9 +193,11 @@
     <string name="downloader_too_many">Només pots descarregar 100 publicacions alhora. No siguis massa cobdiciós!</string>
     <string name="comment_viewer_copy_user">Copiar el nom d\'usuari</string>
     <string name="comment_viewer_copy_comment">Copiar el comentari</string>
+    <string name="comment_viewer_see_likers">Veure m\'agrades del comentari</string>
     <string name="comment_viewer_reply_comment">Respondre al comentari</string>
     <string name="comment_viewer_like_comment">Donar \"m\'agrada\" al comentari</string>
     <string name="comment_viewer_unlike_comment">Treure \"m\'agrada\" al comentari</string>
+    <string name="comment_viewer_translate_comment">Traduir comentari</string>
     <string name="comment_viewer_delete_comment">Esborrar comentari</string>
     <string name="comment_send_empty_comment">No als comentaris buits!</string>
     <string name="comment_view_mention_user_search">Vols cercar el nom d\'usuari?</string>
@@ -208,6 +228,8 @@
     <string name="crash_title">L\'aplicació ha fallat</string>
     <string name="crash_descr">Vaja... L\'aplicació ha fallat, però no et preocupis, pots enviar un informe d\'error al desenvolupador per ajudar-lo a solucionar el problema. (:</string>
     <string name="action_notif">Activitat</string>
+    <string name="action_archive">Arxiu de històries</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">Seleccionar imatge</string>
     <string name="uploading">S\'està pujant…</string>
     <string name="activity_count_prefix">Tens:</string>
@@ -239,7 +261,7 @@
     <string name="about_documentation">Visita la nostra pàgina web</string>
     <string name="about_documentation_summary">Obtén suport, parla, trobat amb altres i diverteix-te!</string>
     <string name="about_repository">Veure el nostre codi font a GitHub</string>
-    <string name="about_repository_summary">Informa d\'errors, contribueix i diverteix-te (una altra vegada)!</string>
+    <string name="about_repository_summary">Inspecta, segueix, informa d\'errors, contribueix i diverteix-te (una altra vegada)!</string>
     <string name="about_feedback">Enviar comentaris per correu electrònic</string>
     <string name="about_category_3pt">Reconeixements de tercers</string>
     <string name="about_category_3pt_summary">S\'utilitzen les següents biblioteques de codi obert:</string>
@@ -252,21 +274,26 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">S\'ha afegit als preferits</string>
-    <string name="add_to_favorites">Afegir als preferits</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">S\'ha agregat als favorits</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorit</string>
     <string name="accounts">Comptes</string>
     <string name="hashtags">Etiquetes</string>
     <string name="locations">Ubicacions</string>
     <string name="unknown">Desconegut</string>
     <string name="removed_from_favs">Eliminat dels preferits</string>
-    <string name="backup_and_restore">Còpia de seguretat &amp; Restauració</string>
-    <string name="create_backup">Crear</string>
-    <string name="restore_backup">Restaurar</string>
+    <string name="backup_and_restore">Còpia de seguretat &amp; Restaurar els paràmetres de l\'usuari</string>
+    <string name="backup_summary">Fer una còpia de seguretat de la configuració de l\'aplicació, la informació d\'inici de sessió del compte, i/o dades preferides a un text net o arxiu de còpia de seguretat xifrat per a la restauració posterior.</string>
+    <string name="backup_warning">Si estàs fent una còpia de seguretat de la informació d\'inici de sessió, tracta l\'arxiu com a confidencial: Mantén-lo en algun lloc segur!</string>
+    <string name="create_backup">Crear un nou fitxer de còpia de seguretat</string>
+    <string name="restore_backup">Restaurar des d\'un fitxer de còpia de seguretat existent</string>
     <string name="file_chosen_label">Arxiu:</string>
     <string name="enter_password">Introduir la contrasenya</string>
     <string name="select_backup_file">Selecciona un fitxer de còpia de seguretat (.zaai/.backup)</string>
     <string name="apply">Aplicar</string>
     <string name="save">Desar</string>
     <string name="caption">Llegenda</string>
+    <string name="edit_caption">Editar llegenda...</string>
+    <string name="translate_caption">Traduir la llegenda...</string>
     <string name="player_timeline_desc">Línia de temps del reproductor de vídeo</string>
     <string name="liking">Donant m\'agrada…</string>
     <string name="like_unsuccessful">El \"m\'agrada\" ha fallat</string>
@@ -282,6 +309,7 @@
     <string name="delete">Eliminar</string>
     <string name="comment">Comentar</string>
     <string name="layout">Disposició</string>
+    <string name="feed_stories">Fil d\'històries</string>
     <string name="opening_post">Obrint publicació...</string>
     <string name="share">Compartir</string>
     <string name="layout_style">Estil de disposició</string>
@@ -295,7 +323,9 @@
     <string name="show_grid_gap">Mostrar la separació de la graella</string>
     <string name="disable_animation">Desactivar l\'animació</string>
     <string name="follower_wait_to_load">Espera primer que la tasca actual s\'hagi completat!</string>
-    <string name="post_not_found">Post not found!</string>
+    <string name="follower_start_compare">Depenent del nombre d\'usuaris, això pot trigar una estona a carregar-se. Si us plau, tingues paciència.</string>
+    <string name="post_not_found">Publicació no trobada!</string>
+    <string name="no_external_app_url">No s\'ha trobat cap aplicació que obri l\'enllaç</string>
     <plurals name="likes_count">
         <item quantity="one">%d m\'agrada</item>
         <item quantity="other">%d m\'agrades</item>
@@ -304,4 +334,9 @@
         <item quantity="one">%d comentari</item>
         <item quantity="other">%d comentaris</item>
     </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s història</item>
+        <item quantity="other">%s històries</item>
+    </plurals>
+    <string name="download_permission">No s\'ha concedit el permís d\'emmagatzematge!</string>
 </resources>

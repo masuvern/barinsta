@@ -23,7 +23,7 @@
     <string name="title_favorites">Favoris</string>
     <string name="title_discover">Découvrir</string>
     <string name="title_comments">Commentaires</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_notifications">Activité</string>
     <string name="title_highlight">Temps forts: %s</string>
     <string name="update_check">Rechercher les mises à jours au démarrage</string>
     <string name="download_user_folder">Télécharger les messages dans les dossiers des noms d\'utilisateurs</string>
@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">Marquer les messages privés comme vus après consultation</string>
     <string name="dm_mark_as_seen_setting_summary">Les autres utilisateurs saurons que vous l\'avez vu</string>
     <string name="activity_setting">Activer les notifications d\'activités</string>
+    <string name="story_sort_setting">Tri du flux de stories</string>
     <string name="error_loading_profile">Erreur de chargement du profil!\nVeuillez vous reconnecter et réessayez.</string>
     <string name="error_creating_folders">Erreur de création de dossier(s) de téléchargement.</string>
     <string name="save_to_folder">Enregistrer dans un dossier personnalisé</string>
@@ -42,10 +43,15 @@
     <string name="instadp_settings">Utiliser Instadp pour les photos de profil haute définition</string>
     <string name="import_export">Importer/Exporter</string>
     <string name="select_language">Langues</string>
-    <string name="main_posts_count">%s\nPosts</string>
-    <string name="main_posts_count_inline">%s Publications</string>
-    <string name="main_posts_followers">%s\nAbonnés</string>
-    <string name="main_posts_following">%s\nAbonnements</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Publication</item>
+        <item quantity="other">%s Publications</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Abonné</item>
+        <item quantity="other">%s Abonnés</item>
+    </plurals>
+    <string name="main_posts_following">%s Abonnements </string>
     <string name="post_viewer_autoplay_video">Lecture automatique des vidéos</string>
     <string name="post_viewer_muted_autoplay">Toujours couper le son des vidéos</string>
     <string name="post_viewer_download_dialog_title">Sélectionnez ce que vous souhaitez télécharger</string>
@@ -63,9 +69,15 @@
     <string name="respond_story">Répondre</string>
     <string name="answer_hint">Réponse…</string>
     <string name="answered_story">Réponse envoyée !</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d réponse en moyenne %s</item>
+        <item quantity="other">%d réponses en moyenne %s</item>
+    </plurals>
+    <string name="slider_answer">Votre réponse : %s</string>
     <string name="reply_story">Répondre à la story</string>
     <string name="reply_hint">Réponse…</string>
     <string name="story_quiz">Quiz</string>
+    <string name="story_slider">Curseur</string>
     <string name="story_quizzed">Vous avez déjà répondu !</string>
     <string name="story_mentions">Mentions</string>
     <string name="priv_acc">Compte privé</string>
@@ -98,6 +110,11 @@
     <string name="unblock">Débloquer</string>
     <string name="restrict">Restreindre</string>
     <string name="unrestrict">Retirer des restrictions</string>
+    <string name="bio_copy">Copier la bio</string>
+    <string name="bio_translate">Traduire la bio</string>
+    <string name="status_mutual">Mutuel</string>
+    <string name="status_following">Abonnements</string>
+    <string name="status_follower">Abonné</string>
     <string name="map">Carte</string>
     <string name="dialog_export_btn_export">Exporter</string>
     <string name="dialog_export_btn_import">Importer</string>
@@ -126,6 +143,7 @@
     <string name="quick_access_cannot_delete_curr">Impossible de supprimer le compte actuellement utilisé</string>
     <string name="quick_access_confirm_delete">Êtes-vous sûr de vouloir supprimer \'%s\' ?</string>
     <string name="open_profile">Ouvrir le profil</string>
+    <string name="view_story">Voir la story</string>
     <string name="view_pfp">Voir la photo de profil</string>
     <string name="direct_messages_you">Vous</string>
     <string name="direct_messages_sent_link">A partagé un lien</string>
@@ -175,9 +193,11 @@
     <string name="downloader_too_many">Vous ne pouvez télécharger que 100 publications à la fois. Ne soyez pas trop gourmands !</string>
     <string name="comment_viewer_copy_user">Copier le nom d\'utilisateur</string>
     <string name="comment_viewer_copy_comment">Copier le commentaire</string>
+    <string name="comment_viewer_see_likers">Voir les \"j\'aime\" du commentaire</string>
     <string name="comment_viewer_reply_comment">Répondre au commentaire</string>
     <string name="comment_viewer_like_comment">Aimer le commentaire</string>
     <string name="comment_viewer_unlike_comment">Retirer le j\'aime du commentaire</string>
+    <string name="comment_viewer_translate_comment">Traduire le commentaire</string>
     <string name="comment_viewer_delete_comment">Supprimer le commentaire</string>
     <string name="comment_send_empty_comment">Aucun commentaire vide !</string>
     <string name="comment_view_mention_user_search">Souhaitez-vous faire une recherche sur le nom d\'utilisateur ?</string>
@@ -208,6 +228,8 @@
     <string name="crash_title">L\'application a planté</string>
     <string name="crash_descr">Oups.. l\'application a planté, mais ne vous inquiétez pas, vous pouvez envoyer un rapport d\'erreur au développeur pour l\'aider à résoudre le problème :)</string>
     <string name="action_notif">Activité</string>
+    <string name="action_archive">Archive du story</string>
+    <string name="action_ayml">Utilisateurs suggérés</string>
     <string name="select_picture">Sélectionnez une image</string>
     <string name="uploading">Envoi en cours…</string>
     <string name="activity_count_prefix">Vous avez :</string>
@@ -252,21 +274,26 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">Ajouté aux favoris</string>
-    <string name="add_to_favorites">Ajouter aux favoris</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Ajouté aux favoris</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Ajouter aux favoris</string>
     <string name="accounts">Comptes</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Lieux</string>
     <string name="unknown">Inconnu</string>
     <string name="removed_from_favs">Supprimé des favoris</string>
-    <string name="backup_and_restore">Sauvegarder &amp; Rétablir</string>
-    <string name="create_backup">Créer</string>
-    <string name="restore_backup">Rétablir</string>
+    <string name="backup_and_restore">Paramètres de sauvegarde et de restauration</string>
+    <string name="backup_summary">Sauvegardez les paramètres de l\'application, les informations de connexion du compte et/ou les données favorites sur un fichier de sauvegarde en texte brut ou chiffré pour une restauration ultérieure.</string>
+    <string name="backup_warning">Si vous sauvegardez vos informations de connexion, traitez le fichier comme confidentiel : Gardez-les quelque part en sécurité !</string>
+    <string name="create_backup">Créer un nouveau fichier de sauvegarde</string>
+    <string name="restore_backup">Restaurer à partir du fichier de sauvegarde existant</string>
     <string name="file_chosen_label">Fichier :</string>
     <string name="enter_password">Saisissez le mot de passe</string>
     <string name="select_backup_file">Sélectionnez un fichier de sauvegarde (.zaai/.backup)</string>
     <string name="apply">Appliquer</string>
     <string name="save">Sauvegarder</string>
     <string name="caption">Légende</string>
+    <string name="edit_caption">Modifier la légende...</string>
+    <string name="translate_caption">Traduire la légende...</string>
     <string name="player_timeline_desc">Chronologie du lecteur vidéo</string>
     <string name="liking">Entrain d\'aimer…</string>
     <string name="like_unsuccessful">Erreur lors du \"j\'aime\"</string>
@@ -282,6 +309,7 @@
     <string name="delete">Effacer</string>
     <string name="comment">Commentaire</string>
     <string name="layout">Disposition</string>
+    <string name="feed_stories">Flux de stories</string>
     <string name="opening_post">Entrain d\'ouvrir la publication...</string>
     <string name="share">Partager</string>
     <string name="layout_style">Style du modèle</string>
@@ -295,7 +323,9 @@
     <string name="show_grid_gap">Afficher les lacunes de la grille</string>
     <string name="disable_animation">Désactiver les animations</string>
     <string name="follower_wait_to_load">Veuillez d\'abord attendre que la tâche en cours soit terminée !</string>
-    <string name="post_not_found">Post not found!</string>
+    <string name="follower_start_compare">Selon le nombre d\'utilisateurs, cela peut prendre un certain temps à charger. Veuillez patienter.</string>
+    <string name="post_not_found">Publication non trouvée!</string>
+    <string name="no_external_app_url">Aucune application trouvée qui ouvre les urls</string>
     <plurals name="likes_count">
         <item quantity="one">%d j\'aime</item>
         <item quantity="other">%d j\'aimes</item>
@@ -304,4 +334,9 @@
         <item quantity="one">%d commentaire</item>
         <item quantity="other">%d commentaires</item>
     </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
+    </plurals>
+    <string name="download_permission">L\'autorisation d\'accès au stockage a été refusée !</string>
 </resources>

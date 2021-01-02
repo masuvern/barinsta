@@ -94,12 +94,9 @@ public final class Utils {
         if (signed == null) {
             return null;
         }
-        final String[] parts = signed.split("&");
         final Map<String, String> map = new HashMap<>();
-        for (final String part : parts) {
-            final String[] partSplit = part.split("=");
-            map.put(partSplit[0], partSplit[1]);
-        }
+        map.put("ig_sig_key_version", Constants.SIGNATURE_VERSION);
+        map.put("signed_body", signed.split("&signed_body=")[1]);
         return map;
     }
 

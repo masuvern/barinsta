@@ -41,6 +41,7 @@ import static awais.instagrabber.utils.Constants.PREF_TOPIC_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
 import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
+import static awais.instagrabber.utils.Constants.STORY_SORT;
 import static awais.instagrabber.utils.Constants.SWAP_DATE_TIME_FORMAT_ENABLED;
 
 public final class SettingsHelper {
@@ -123,7 +124,7 @@ public final class SettingsHelper {
             {APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT,
                     DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME, PREF_POSTS_LAYOUT,
                     PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT, PREF_LOCATION_POSTS_LAYOUT,
-                    PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT, PREF_EMOJI_VARIANTS})
+                    PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT, STORY_SORT, PREF_EMOJI_VARIANTS})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,

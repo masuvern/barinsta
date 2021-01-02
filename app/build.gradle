@@ -10,8 +10,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
 
-        versionCode 54
-        versionName '19.0.2'
+        versionCode 56
+        versionName '19.0.4'
 
         multiDexEnabled true
 
@@ -98,6 +98,9 @@ dependencies {
     implementation "androidx.emoji:emoji:$emoji_compat_version"
     implementation "androidx.emoji:emoji-appcompat:$emoji_compat_version"
 
+    // implementation 'com.github.hendrawd:StorageUtil:1.1.0'
+    implementation 'me.austinhuang:AutoLinkTextViewV2:-SNAPSHOT'
+
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'
     implementation 'com.facebook.fresco:animated-webp:2.3.0'
@@ -109,7 +112,6 @@ dependencies {
 
     implementation 'org.apache.commons:commons-imaging:1.0-alpha2'
     implementation 'com.ibm.icu:icu4j:68.1'
-    implementation 'com.github.ammargitham:AutoLinkTextViewV2:master-SNAPSHOT'
     implementation 'com.github.ammargitham:uCrop:2.3-native-beta-2'
     implementation 'com.github.ammargitham:android-gpuimage:2.1.1-beta4'
 

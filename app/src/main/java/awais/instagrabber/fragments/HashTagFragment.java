@@ -54,6 +54,7 @@ import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
+import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
@@ -363,19 +364,27 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchHashtagModel() {
         stopCurrentExecutor();
         binding.swipeRefreshLayout.setRefreshing(true);
-        currentlyExecuting = new HashtagFetcher(hashtag.substring(1), result -> {
-            hashtagModel = result;
-            binding.swipeRefreshLayout.setRefreshing(false);
-            final Context context = getContext();
-            if (context == null) return;
-            if (hashtagModel == null) {
-                Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
-                return;
+        currentlyExecuting = new HashtagFetcher(hashtag.substring(1), new FetchListener<HashtagModel>() {
+            @Override
+            public void onResult(final HashtagModel result) {
+                hashtagModel = result;
+                binding.swipeRefreshLayout.setRefreshing(false);
+                final Context context = getContext();
+                if (context == null) return;
+                if (hashtagModel == null) {
+                    Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                setTitle();
+                setHashtagDetails();
+                setupPosts();
+                fetchStories();
             }
-            setTitle();
-            setHashtagDetails();
-            setupPosts();
-            fetchStories();
+
+            @Override
+            public void onFailure(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -410,9 +419,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 hashtagDetailsBinding.btnFollowTag.setClickable(true);
                                 if (!result) {
                                     Log.e(TAG, "onSuccess: result is false");
+                                    Snackbar.make(root, R.string.downloader_unknown_error, BaseTransientBottomBar.LENGTH_LONG)
+                                            .show();
                                     return;
                                 }
-                                onRefresh();
+                                hashtagDetailsBinding.btnFollowTag.setText(R.string.unfollow);
+                                hashtagDetailsBinding.btnFollowTag.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
                             }
 
                             @Override
@@ -435,9 +447,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             hashtagDetailsBinding.btnFollowTag.setClickable(true);
                             if (!result) {
                                 Log.e(TAG, "onSuccess: result is false");
+                                Snackbar.make(root, R.string.downloader_unknown_error, BaseTransientBottomBar.LENGTH_LONG)
+                                        .show();
                                 return;
                             }
-                            onRefresh();
+                            hashtagDetailsBinding.btnFollowTag.setText(R.string.follow);
+                            hashtagDetailsBinding.btnFollowTag.setChipIconResource(R.drawable.ic_outline_person_add_24);
                         }
 
                         @Override
@@ -462,8 +477,23 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         favoriteRepository.getFavorite(hashtag.substring(1), FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
             @Override
             public void onSuccess(final Favorite result) {
-                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                favoriteRepository.insertOrUpdateFavorite(new Favorite(
+                        result.getId(),
+                        hashtag.substring(1),
+                        FavoriteType.HASHTAG,
+                        hashtagModel.getName(),
+                        hashtagModel.getSdProfilePic(),
+                        result.getDateAdded()
+                ), new RepositoryCallback<Void>() {
+                    @Override
+                    public void onSuccess(final Void result) {
+                        hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                        hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {}
+                });
             }
 
             @Override
@@ -492,18 +522,18 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     @Override
                     public void onDataNotAvailable() {
                         favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                                -1,
+                                0,
                                 hashtag.substring(1),
                                 FavoriteType.HASHTAG,
                                 hashtagModel.getName(),
-                                null,
+                                hashtagModel.getSdProfilePic(),
                                 new Date()
                         ), new RepositoryCallback<Void>() {
                             @Override
                             public void onSuccess(final Void result) {
                                 hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
                                 hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
+                                showSnackbar(getString(R.string.added_to_favs_short));
                             }
 
                             @Override
@@ -513,7 +543,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 }));
         hashtagDetailsBinding.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
         final String postCount = String.valueOf(hashtagModel.getPostCount());
-        final SpannableStringBuilder span = new SpannableStringBuilder(getString(R.string.main_posts_count_inline, postCount));
+        final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
+                hashtagModel.getPostCount() > 2000000000L ? 2000000000 : hashtagModel.getPostCount().intValue(),
+                postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         hashtagDetailsBinding.mainTagPostCount.setText(span);
@@ -522,7 +554,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!hasStories) return;
             // show stories
             final NavDirections action = HashTagFragmentDirections
-                    .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName());
+                    .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName(), false, false);
             NavHostFragment.findNavController(this).navigate(action);
         });
     }

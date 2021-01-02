@@ -8,7 +8,9 @@
     <include app:graph="@navigation/hashtag_nav_graph" />
     <include app:graph="@navigation/location_nav_graph" />
     <include app:graph="@navigation/comments_nav_graph" />
+    <include app:graph="@navigation/likes_nav_graph" />
     <include app:graph="@navigation/notification_viewer_nav_graph" />
+    <include app:graph="@navigation/story_list_nav_graph" />
 
     <action
         android:id="@+id/action_global_profileFragment"
@@ -38,8 +40,22 @@
     </action>
 
     <action
+        android:id="@+id/action_global_storyListViewerFragment"
+        app:destination="@id/story_list_nav_graph">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <action
         android:id="@+id/action_global_notificationsViewerFragment"
-        app:destination="@id/notification_viewer_nav_graph" />
+        app:destination="@id/notification_viewer_nav_graph">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
 
     <fragment
         android:id="@+id/morePreferencesFragment"

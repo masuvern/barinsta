@@ -26,7 +26,7 @@
     <string name="title_favorites">Favorites</string>
     <string name="title_discover">Discover</string>
     <string name="title_comments">Comments</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_notifications">Activity</string>
     <string name="title_highlight">Highlight: %s</string>
     <string name="update_check">Check for updates at startup</string>
     <string name="download_user_folder">Download posts to username folders</string>
@@ -35,6 +35,7 @@
     <string name="dm_mark_as_seen_setting">Mark DM as seen after viewing</string>
     <string name="dm_mark_as_seen_setting_summary">Other members will know you viewed it</string>
     <string name="activity_setting">Enable activity notifications</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">Error loading profile!\nTry logging in and search again.</string>
     <string name="error_creating_folders">Error creating Download folder(s).</string>
     <string name="save_to_folder">Save to custom folder</string>
@@ -45,10 +46,15 @@
     <string name="instadp_settings">Use Instadp for high definition profile pictures</string>
     <string name="import_export">Import/Export</string>
     <string name="select_language">Language</string>
-    <string name="main_posts_count">%s\nPosts</string>
-    <string name="main_posts_count_inline">%s Posts</string>
-    <string name="main_posts_followers">%s\nFollowers</string>
-    <string name="main_posts_following">%s\nFollowing</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="other">%s Followers</item>
+    </plurals>
+    <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">Autoplay videos</string>
     <string name="post_viewer_muted_autoplay">Always mute videos</string>
     <string name="post_viewer_download_dialog_title">Select what to download</string>
@@ -66,9 +72,15 @@
     <string name="respond_story">Respond</string>
     <string name="answer_hint">Answer…</string>
     <string name="answered_story">Answer successful!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d response averaging %s</item>
+        <item quantity="other">%d responses averaging %s</item>
+    </plurals>
+    <string name="slider_answer">Your answer: %s</string>
     <string name="reply_story">Reply to story</string>
     <string name="reply_hint">Reply…</string>
     <string name="story_quiz">Quiz</string>
+    <string name="story_slider">Slider</string>
     <string name="story_quizzed">You have already answered!</string>
     <string name="story_mentions">Mentions</string>
     <string name="priv_acc">This Account is Private</string>
@@ -101,6 +113,11 @@
     <string name="unblock">Unblock</string>
     <string name="restrict">Restrict</string>
     <string name="unrestrict">Unrestrict</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
+    <string name="status_mutual">Mutual</string>
+    <string name="status_following">Following</string>
+    <string name="status_follower">Follower</string>
     <string name="map">Map</string>
     <string name="dialog_export_btn_export">Export</string>
     <string name="dialog_export_btn_import">Import</string>
@@ -129,6 +146,7 @@
     <string name="quick_access_cannot_delete_curr">Cannot delete currently in use account</string>
     <string name="quick_access_confirm_delete">Are you sure you want to delete \'%s\'?</string>
     <string name="open_profile">Open profile</string>
+    <string name="view_story">View story</string>
     <string name="view_pfp">View profile picture</string>
     <string name="direct_messages_you">You</string>
     <string name="direct_messages_sent_link">Shared a link</string>
@@ -178,9 +196,11 @@
     <string name="downloader_too_many">You can only download 100 posts at a time. Don\'t be too greedy!</string>
     <string name="comment_viewer_copy_user">Copy username</string>
     <string name="comment_viewer_copy_comment">Copy comment</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">Reply to comment</string>
     <string name="comment_viewer_like_comment">Like comment</string>
     <string name="comment_viewer_unlike_comment">Unlike comment</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">No empty comments!</string>
     <string name="comment_view_mention_user_search">Do you want to search the username?</string>
@@ -211,7 +231,9 @@
     <string name="crash_title">App crashed</string>
     <string name="crash_descr">Oops.. the app crashed, but don\'t worry you can send error report to the developer to help him fix the issue. (:</string>
     <string name="action_notif">Activity</string>
-    <string name="license" translatable="false">Copyright (C) 2019  AWAiS\nCopyright (C) 2020  Austin Huang, Ammar Githam\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/.</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
+    <string name="license" translatable="false">Copyright (C) 2019-2020 AWAiS\nCopyright (C) 2020-2021 Austin Huang &amp; Ammar Githam\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See https://www.gnu.org/licenses/.</string>
     <string name="liability" translatable="false">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</string>
     <string name="select_picture">Select Picture</string>
     <string name="uploading">Uploading…</string>
@@ -259,21 +281,26 @@
     <string name="light_bibliogram_theme" translatable="false">Bibliogram</string>
     <string name="dark_material_dark_theme">Material Dark</string>
     <string name="added_to_favs">Added to Favorites</string>
-    <string name="add_to_favorites">Add to favorites</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
     <string name="accounts">Accounts</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Locations</string>
     <string name="unknown">Unknown</string>
     <string name="removed_from_favs">Removed from Favourites</string>
-    <string name="backup_and_restore">Backup &amp; Restore</string>
-    <string name="create_backup">Create</string>
-    <string name="restore_backup">Restore</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">File:</string>
     <string name="enter_password">Enter password</string>
     <string name="select_backup_file">Select a backup file (.zaai/.backup)</string>
     <string name="apply">Apply</string>
     <string name="save">Save</string>
     <string name="caption">Caption</string>
+    <string name="edit_caption">Edit caption...</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="one_x" translatable="false">1x</string>
     <string name="two_x" translatable="false">2x</string>
@@ -296,6 +323,7 @@
     <string name="delete">Delete</string>
     <string name="comment">Comment</string>
     <string name="layout">Layout</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">Opening post...</string>
     <string name="share">Share</string>
     <string name="layout_style">Layout style</string>
@@ -309,6 +337,7 @@
     <string name="show_grid_gap">Show grid gap</string>
     <string name="disable_animation">Disable animation</string>
     <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Post not found!</string>
     <string name="no_external_app_url">No app found which opens urls</string>
     <string name="gallery">Gallery</string>
@@ -344,4 +373,9 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
+    </plurals>
+    <string name="download_permission">Storage permission not granted!</string>
 </resources>

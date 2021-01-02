@@ -3,10 +3,12 @@ package awais.instagrabber.repositories;
 import java.util.Map;
 
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.QueryMap;
+import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.POST;
 
 public interface FeedRepository {
-    @GET("/graphql/query/")
-    Call<String> fetch(@QueryMap(encoded = true) Map<String, String> queryParams);
+    @FormUrlEncoded
+    @POST("/api/v1/feed/timeline/")
+    Call<String> fetch(@FieldMap final Map<String, String> signedForm);
 }

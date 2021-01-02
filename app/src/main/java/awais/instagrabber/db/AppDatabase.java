@@ -161,7 +161,7 @@ public abstract class AppDatabase extends RoomDatabase {
                         final FavoriteType type = favoriteTypeQueryPair.first;
                         final String query = favoriteTypeQueryPair.second;
                         oldModels.add(new Favorite(
-                                -1,
+                                0,
                                 query,
                                 type,
                                 queryDisplayExists ? cursor.getString(cursor.getColumnIndex("query_display"))

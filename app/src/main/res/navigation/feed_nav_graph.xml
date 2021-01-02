@@ -57,11 +57,42 @@
             app:nullable="false" />
     </action>
 
+    <include app:graph="@navigation/likes_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_likesViewerFragment"
+        app:destination="@id/likes_nav_graph">
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
+            app:nullable="false" />
+    </action>
+
     <include app:graph="@navigation/notification_viewer_nav_graph" />
 
     <action
         android:id="@+id/action_global_notificationsViewerFragment"
-        app:destination="@id/notification_viewer_nav_graph" />
+        app:destination="@id/notification_viewer_nav_graph">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/story_list_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_storyListViewerFragment"
+        app:destination="@id/story_list_nav_graph">
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="false" />
+    </action>
 
     <fragment
         android:id="@+id/feedFragment"
@@ -99,5 +130,13 @@
             android:name="username"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="isArchive"
+            app:argType="boolean"
+            app:nullable="false" />
+        <argument
+            android:name="isNotification"
+            app:argType="boolean"
+            app:nullable="false" />
     </fragment>
 </navigation>

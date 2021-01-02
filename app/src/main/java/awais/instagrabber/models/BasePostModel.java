@@ -11,16 +11,12 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Utils;
 
 public abstract class BasePostModel implements Serializable, Selectable {
-    protected String postId;
-    protected String displayUrl;
-    protected String shortCode;
+    protected String postId, displayUrl, shortCode, captionId;
     protected CharSequence postCaption;
     protected MediaItemType itemType;
-    protected boolean isSelected;
-    protected boolean isDownloaded;
+    protected boolean isSelected, isDownloaded;
     protected long timestamp;
-    boolean liked;
-    boolean saved;
+    boolean liked, saved;
 
     public boolean getLike() {
         return liked;
@@ -44,6 +40,10 @@ public abstract class BasePostModel implements Serializable, Selectable {
 
     public final CharSequence getPostCaption() {
         return postCaption;
+    }
+
+    public final String getCaptionId() {
+        return captionId;
     }
 
     public final String getShortCode() {

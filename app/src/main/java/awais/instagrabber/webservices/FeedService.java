@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
@@ -36,7 +38,6 @@ import retrofit2.Retrofit;
 
 public class FeedService extends BaseService {
     private static final String TAG = "FeedService";
-    private static final boolean loadFromMock = false;
 
     private final FeedRepository repository;
 
@@ -44,7 +45,7 @@ public class FeedService extends BaseService {
 
     private FeedService() {
         final Retrofit retrofit = getRetrofitBuilder()
-                .baseUrl("https://www.instagram.com")
+                .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(FeedRepository.class);
     }
@@ -56,41 +57,26 @@ public class FeedService extends BaseService {
         return instance;
     }
 
-    public void fetch(final int maxItemsToLoad,
+    public void fetch(final String csrfToken,
                       final String cursor,
                       final ServiceCallback<PostsFetchResponse> callback) {
-        if (loadFromMock) {
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> {
-                final ClassLoader classLoader = getClass().getClassLoader();
-                if (classLoader == null) {
-                    Log.e(TAG, "fetch: classLoader is null!");
-                    return;
-                }
-                try (InputStream resourceAsStream = classLoader.getResourceAsStream("feed_response.json");
-                     Reader in = new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8)) {
-                    final int bufferSize = 1024;
-                    final char[] buffer = new char[bufferSize];
-                    final StringBuilder out = new StringBuilder();
-                    int charsRead;
-                    while ((charsRead = in.read(buffer, 0, buffer.length)) > 0) {
-                        out.append(buffer, 0, charsRead);
-                    }
-                    callback.onSuccess(parseResponseBody(out.toString()));
-                } catch (IOException | JSONException e) {
-                    Log.e(TAG, "fetch: ", e);
-                }
-            }, 1000);
-            return;
+        final Map<String, String> form = new HashMap<>();
+        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_csrftoken", csrfToken);
+        form.put("phone_id", UUID.randomUUID().toString());
+        form.put("device_id", UUID.randomUUID().toString());
+        form.put("client_session_id", UUID.randomUUID().toString());
+        form.put("is_prefetch", "0");
+        form.put("timezone_offset", String.valueOf(TimeZone.getDefault().getRawOffset() / 1000));
+        if (!TextUtils.isEmpty(cursor)) {
+            form.put("max_id", cursor);
+            form.put("reason", "pagination");
         }
-        final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("query_hash", "c699b185975935ae2a457f24075de8c7");
-        queryMap.put("variables", "{" +
-                "\"fetch_media_item_count\":" + maxItemsToLoad + "," +
-                "\"fetch_like\":3,\"has_stories\":false,\"has_stories\":false,\"has_threaded_comments\":true," +
-                "\"fetch_media_item_cursor\":\"" + (cursor == null ? "" : cursor) + "\"" +
-                "}");
-        final Call<String> request = repository.fetch(queryMap);
+        else {
+            form.put("is_pull_to_refresh", "1");
+            form.put("reason", "pull_to_refresh");
+        }
+        final Call<String> request = repository.fetch(form);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -130,35 +116,45 @@ public class FeedService extends BaseService {
     @NonNull
     private PostsFetchResponse parseResponseBody(@NonNull final String body)
             throws JSONException {
+        final JSONObject root = new JSONObject(body);
+        final boolean moreAvailable = root.optBoolean("more_available");
+        String nextMaxId = root.optString("next_max_id");
+        final boolean needNewMaxId = nextMaxId.equals("feed_recs_head_load");
+        final JSONArray feedItems = root.optJSONArray("items");
         final List<FeedModel> feedModels = new ArrayList<>();
-        final JSONObject timelineFeed = new JSONObject(body)
-                .getJSONObject("data")
-                .getJSONObject(Constants.EXTRAS_USER)
-                .getJSONObject("edge_web_feed_timeline");
-        final String endCursor;
-        final boolean hasNextPage;
-
-        final JSONObject pageInfo = timelineFeed.getJSONObject("page_info");
-        if (pageInfo.has("has_next_page")) {
-            hasNextPage = pageInfo.getBoolean("has_next_page");
-            endCursor = hasNextPage ? pageInfo.getString("end_cursor") : null;
-        } else {
-            hasNextPage = false;
-            endCursor = null;
-        }
-
-        final JSONArray feedItems = timelineFeed.getJSONArray("edges");
-
         for (int i = 0; i < feedItems.length(); ++i) {
             final JSONObject itemJson = feedItems.optJSONObject(i);
-            if (itemJson == null) {
+            if (itemJson == null || itemJson.has("injected")) {
                 continue;
             }
-            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
-            if (feedModel != null) {
-                feedModels.add(feedModel);
+            else if (itemJson.has("end_of_feed_demarcator") && needNewMaxId) {
+                final JSONArray groups = itemJson.getJSONObject("end_of_feed_demarcator").getJSONObject("group_set").getJSONArray("groups");
+                for (int j = 0; j < groups.length(); ++j) {
+                    final JSONObject groupJson = groups.optJSONObject(j);
+                    if (groupJson.getString("id").equals("past_posts")) {
+                        nextMaxId = groupJson.optString("next_max_id");
+                        final JSONArray miniFeedItems = groupJson.optJSONArray("feed_items");
+                        for (int k = 0; k < miniFeedItems.length(); ++k) {
+                            final JSONObject miniItemJson = miniFeedItems.optJSONObject(k);
+                            if (miniItemJson == null || miniItemJson.has("injected")) {
+                                continue;
+                            }
+                            final FeedModel feedModel = ResponseBodyUtils.parseItem(miniItemJson);
+                            if (feedModel != null) {
+                                feedModels.add(feedModel);
+                            }
+                        }
+                    }
+                    else continue;
+                }
+            }
+            else {
+                final FeedModel feedModel = ResponseBodyUtils.parseItem(itemJson);
+                if (feedModel != null) {
+                    feedModels.add(feedModel);
+                }
             }
         }
-        return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
+        return new PostsFetchResponse(feedModels, moreAvailable, nextMaxId);
     }
 }

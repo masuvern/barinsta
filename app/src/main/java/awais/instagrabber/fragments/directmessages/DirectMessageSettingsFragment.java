@@ -18,7 +18,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
@@ -42,6 +44,7 @@ import awais.instagrabber.utils.Utils;
 public class DirectMessageSettingsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "DirectMsgsSettingsFrag";
 
+    private AppCompatActivity fragmentActivity;
     private RecyclerView userList;
     private RecyclerView leftUserList;
     private EditText titleText;
@@ -82,6 +85,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fragmentActivity = (AppCompatActivity) requireActivity();
         basicClickListener = v -> {
             final Object tag = v.getTag();
             if (tag instanceof ProfileModel) {
@@ -147,6 +151,11 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
         threadTitle = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getTitle();
         binding.swipeRefreshLayout.setEnabled(false);
 
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(threadTitle);
+        }
+
         userList = binding.userList;
         userList.setHasFixedSize(true);
         userList.setLayoutManager(layoutManager);
@@ -209,7 +218,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     class ChangeSettings extends AsyncTask<String, Void, Void> {
         String action, argument;
         boolean ok = false;
-        private String text;
+        private final String text;
 
         public ChangeSettings(final String text) {
             this.text = text;

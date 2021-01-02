@@ -122,4 +122,131 @@
 //     public interface OnBroadcastCompleteListener {
 //         void onTaskComplete(DirectThreadBroadcastResponse response);
 //     }
+//
+//     public enum ItemType {
+//         TEXT("text"),
+//         REACTION("reaction"),
+//         REELSHARE("reel_share"),
+//         IMAGE("configure_photo");
+//
+//         private final String value;
+//
+//         ItemType(final String value) {
+//             this.value = value;
+//         }
+//
+//         public String getValue() {
+//             return value;
+//         }
+//     }
+//
+//     public static abstract class BroadcastOptions {
+//         private final ItemType itemType;
+//
+//         public BroadcastOptions(final ItemType itemType) {
+//             this.itemType = itemType;
+//         }
+//
+//         public ItemType getItemType() {
+//             return itemType;
+//         }
+//
+//         abstract Map<String, String> getFormMap();
+//     }
+//
+//     public static class TextBroadcastOptions extends BroadcastOptions {
+//         private final String text;
+//
+//         public TextBroadcastOptions(String text) throws UnsupportedEncodingException {
+//             super(ItemType.TEXT);
+//             this.text = URLEncoder.encode(text, "UTF-8")
+//                     .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'").replaceAll("%22", "\\\"")
+//                     .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~").replaceAll("%0A", "\n");
+//         }
+//
+//         @Override
+//         Map<String, String> getFormMap() {
+//             return Collections.singletonMap("text", text);
+//         }
+//     }
+//
+//     public static class ReactionBroadcastOptions extends BroadcastOptions {
+//         private final String itemId;
+//         private final boolean delete;
+//
+//         public ReactionBroadcastOptions(String itemId, boolean delete) {
+//             super(ItemType.REACTION);
+//             this.itemId = itemId;
+//             this.delete = delete;
+//         }
+//
+//         @Override
+//         Map<String, String> getFormMap() {
+//             final Map<String, String> form = new HashMap<>();
+//             form.put("item_id", itemId);
+//             form.put("reaction_status", delete ? "deleted" : "created");
+//             form.put("reaction_type", "like");
+//             return form;
+//         }
+//     }
+//
+//     public static class StoryReplyBroadcastOptions extends BroadcastOptions {
+//         private final String text, mediaId, reelId;
+//
+//         public StoryReplyBroadcastOptions(String text, String mediaId, String reelId) throws UnsupportedEncodingException {
+//             super(ItemType.REELSHARE);
+//             this.text = URLEncoder.encode(text, "UTF-8")
+//                     .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
+//                     .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~").replaceAll("%0A", "\n");
+//             this.mediaId = mediaId;
+//             this.reelId = reelId; // or user id, usually same
+//         }
+//
+//         @Override
+//         Map<String, String> getFormMap() {
+//             final Map<String, String> form = new HashMap<>();
+//             form.put("text", text);
+//             form.put("media_id", mediaId);
+//             form.put("reel_id", reelId);
+//             form.put("entry", "reel");
+//             return form;
+//         }
+//     }
+//
+//     public static class ImageBroadcastOptions extends BroadcastOptions {
+//         final boolean allowFullAspectRatio;
+//         final String uploadId;
+//
+//         public ImageBroadcastOptions(final boolean allowFullAspectRatio, final String uploadId) {
+//             super(ItemType.IMAGE);
+//             this.allowFullAspectRatio = allowFullAspectRatio;
+//             this.uploadId = uploadId;
+//         }
+//
+//         @Override
+//         Map<String, String> getFormMap() {
+//             final Map<String, String> form = new HashMap<>();
+//             form.put("allow_full_aspect_ratio", String.valueOf(allowFullAspectRatio));
+//             form.put("upload_id", uploadId);
+//             return form;
+//         }
+//     }
+//
+//     public static class DirectThreadBroadcastResponse {
+//         private final int responseCode;
+//         private final JSONObject response;
+//
+//         public DirectThreadBroadcastResponse(int responseCode, JSONObject response) {
+//             this.responseCode = responseCode;
+//             this.response = response;
+//         }
+//
+//         public int getResponseCode() {
+//             return responseCode;
+//         }
+//
+//         public JSONObject getResponse() {
+//             return response;
+//         }
+//     }
 // }

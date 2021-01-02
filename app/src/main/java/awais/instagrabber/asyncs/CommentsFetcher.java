@@ -28,11 +28,12 @@ import static awais.instagrabber.utils.Utils.logCollector;
 public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentModel>> {
     private static final String TAG = "CommentsFetcher";
 
-    private final String shortCode;
+    private final String shortCode, endCursor;
     private final FetchListener<List<CommentModel>> fetchListener;
 
-    public CommentsFetcher(final String shortCode, final FetchListener<List<CommentModel>> fetchListener) {
+    public CommentsFetcher(final String shortCode, final String endCursor, final FetchListener<List<CommentModel>> fetchListener) {
         this.shortCode = shortCode;
+        this.endCursor = endCursor;
         this.fetchListener = fetchListener;
     }
 
@@ -48,15 +49,17 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
         https://www.instagram.com/graphql/query/?query_hash=51fdd02b67508306ad4484ff574a0b62&variables={"comment_id":"18100041898085322","first":50,"after":""}
          */
         final List<CommentModel> commentModels = getParentComments();
-        for (final CommentModel commentModel : commentModels) {
-            final List<CommentModel> childCommentModels = commentModel.getChildCommentModels();
-            if (childCommentModels != null) {
-                final int childCommentsLen = childCommentModels.size();
-                final CommentModel lastChild = childCommentModels.get(childCommentsLen - 1);
-                if (lastChild != null && lastChild.hasNextPage() && !TextUtils.isEmpty(lastChild.getEndCursor())) {
-                    final List<CommentModel> remoteChildComments = getChildComments(commentModel.getId());
-                    commentModel.setChildCommentModels(remoteChildComments);
-                    lastChild.setPageCursor(false, null);
+        if (commentModels != null) {
+            for (final CommentModel commentModel : commentModels) {
+                final List<CommentModel> childCommentModels = commentModel.getChildCommentModels();
+                if (childCommentModels != null) {
+                    final int childCommentsLen = childCommentModels.size();
+                    final CommentModel lastChild = childCommentModels.get(childCommentsLen - 1);
+                    if (lastChild != null && lastChild.hasNextPage() && !TextUtils.isEmpty(lastChild.getEndCursor())) {
+                        final List<CommentModel> remoteChildComments = getChildComments(commentModel.getId());
+                        commentModel.setChildCommentModels(remoteChildComments);
+                        lastChild.setPageCursor(false, null);
+                    }
                 }
             }
         }
@@ -76,11 +79,10 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
     @NonNull
     private synchronized List<CommentModel> getChildComments(final String commentId) {
         final List<CommentModel> commentModels = new ArrayList<>();
-        String endCursor = "";
-        while (endCursor != null) {
+        String childEndCursor = "";
+        while (childEndCursor != null) {
             final String url = "https://www.instagram.com/graphql/query/?query_hash=51fdd02b67508306ad4484ff574a0b62&variables=" +
-                    "{\"comment_id\":\"" + commentId + "\",\"first\":50,\"after\":\"" + endCursor + "\"}";
-
+                    "{\"comment_id\":\"" + commentId + "\",\"first\":50,\"after\":\"" + childEndCursor + "\"}";
             try {
                 final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                 conn.setUseCaches(false);
@@ -93,8 +95,8 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                                                  .getJSONObject("edge_threaded_comments");
 
                     final JSONObject pageInfo = data.getJSONObject("page_info");
-                    endCursor = pageInfo.getString("end_cursor");
-                    if (TextUtils.isEmpty(endCursor)) endCursor = null;
+                    childEndCursor = pageInfo.getString("end_cursor");
+                    if (TextUtils.isEmpty(childEndCursor)) childEndCursor = null;
 
                     final JSONArray childComments = data.optJSONArray("edges");
                     if (childComments != null) {
@@ -120,6 +122,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                                    false,
                                                                                    false,
                                                                                    false,
+                                                                                   false,
                                                                                    false);
 
                                 final JSONObject likedBy = childComment.optJSONObject("edge_liked_by");
@@ -142,6 +145,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                  "getChildComments",
                                                  new Pair<>("commentModels.size", commentModels.size()));
                 if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                if (fetchListener != null) fetchListener.onFailure(e);
                 break;
             }
         }
@@ -152,17 +156,14 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
     @NonNull
     private synchronized List<CommentModel> getParentComments() {
         final List<CommentModel> commentModels = new ArrayList<>();
-        String endCursor = "";
-        while (endCursor != null) {
             final String url = "https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables=" +
-                    "{\"shortcode\":\"" + shortCode + "\",\"first\":50,\"after\":\"" + endCursor + "\"}";
-
-            try {
+                    "{\"shortcode\":\"" + shortCode + "\",\"first\":50,\"after\":\"" + endCursor.replace("\"", "\\\"") + "\"}";
+        try {
                 final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                 conn.setUseCaches(false);
                 conn.connect();
 
-                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) break;
+                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) return null;
                 else {
                     final JSONObject parentComments = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("data")
                                                                                                            .getJSONObject("shortcode_media")
@@ -170,8 +171,8 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                                                                    "edge_media_to_parent_comment");
 
                     final JSONObject pageInfo = parentComments.getJSONObject("page_info");
-                    endCursor = pageInfo.optString("end_cursor");
-                    if (TextUtils.isEmpty(endCursor)) endCursor = null;
+                    final String foundEndCursor = pageInfo.optString("end_cursor");
+                    final boolean hasNextPage = pageInfo.optBoolean("has_next_page", !TextUtils.isEmpty(foundEndCursor));
 
                     // final boolean containsToken = endCursor.contains("bifilter_token");
                     // if (!Utils.isEmpty(endCursor) && (containsToken || endCursor.contains("cached_comments_cursor"))) {
@@ -209,6 +210,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                            false,
                                                                            false,
                                                                            false,
+                                                                           false,
                                                                            false);
 
                         final JSONObject likedBy = comment.optJSONObject("edge_liked_by");
@@ -219,6 +221,8 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                            likedBy != null ? likedBy.optLong("count", 0) : 0,
                                                                            comment.getBoolean("viewer_has_liked"),
                                                                            profileModel);
+                        if (i == 0 && !foundEndCursor.contains("tao_cursor"))
+                            commentModel.setPageCursor(hasNextPage, TextUtils.isEmpty(foundEndCursor) ? null : foundEndCursor);
                         JSONObject tempJsonObject;
                         final JSONArray childCommentsArray;
                         final int childCommentsLen;
@@ -227,13 +231,13 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                 && (childCommentsLen = childCommentsArray.length()) > 0) {
 
                             final String childEndCursor;
-                            final boolean hasNextPage;
+                            final boolean childHasNextPage;
                             if ((tempJsonObject = tempJsonObject.optJSONObject("page_info")) != null) {
                                 childEndCursor = tempJsonObject.optString("end_cursor");
-                                hasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
+                                childHasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
                             } else {
                                 childEndCursor = null;
-                                hasNextPage = false;
+                                childHasNextPage = false;
                             }
 
                             final List<CommentModel> childCommentModels = new ArrayList<>();
@@ -257,6 +261,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                                         false,
                                                                                         false,
                                                                                         false,
+                                                                                        false,
                                                                                         false);
 
                                 tempJsonObject = childComment.optJSONObject("edge_liked_by");
@@ -267,7 +272,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                                                         childComment.getBoolean("viewer_has_liked"),
                                                                         childProfileModel));
                             }
-                            childCommentModels.get(childCommentsLen - 1).setPageCursor(hasNextPage, childEndCursor);
+                            childCommentModels.get(childCommentsLen - 1).setPageCursor(childHasNextPage, childEndCursor);
                             commentModel.setChildCommentModels(childCommentModels);
                         }
                         commentModels.add(commentModel);
@@ -280,9 +285,9 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                     logCollector.appendException(e, LogCollector.LogFile.ASYNC_COMMENTS_FETCHER, "getParentComments",
                                                  new Pair<>("commentModelsList.size", commentModels.size()));
                 if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-                break;
+                if (fetchListener != null) fetchListener.onFailure(e);
+                return null;
             }
-        }
         return commentModels;
     }
 }

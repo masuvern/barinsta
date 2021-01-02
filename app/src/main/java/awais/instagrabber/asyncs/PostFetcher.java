@@ -65,6 +65,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, FeedModel> {
                             owner.optInt("edge_followed_by"),
                             -1,
                             owner.optBoolean("followed_by_viewer"),
+                            false,
                             owner.optBoolean("restricted_by_viewer"),
                             owner.optBoolean("blocked_by_viewer"),
                             owner.optBoolean("requested_by_viewer")

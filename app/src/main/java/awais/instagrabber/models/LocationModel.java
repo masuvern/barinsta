@@ -59,5 +59,5 @@ public final class LocationModel implements Serializable {
         return sdProfilePic;
     }
 
-    public long getPostCount() { return postCount; }
+    public Long getPostCount() { return postCount; }
 }

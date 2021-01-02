@@ -79,6 +79,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             screen.addPreference(loggedInUsersPreferenceCategory);
             loggedInUsersPreferenceCategory.setIconSpaceReserved(false);
             loggedInUsersPreferenceCategory.setTitle(R.string.login_settings);
+            loggedInUsersPreferenceCategory.addPreference(getStorySortPreference());
             loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
@@ -201,6 +202,25 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setKey(Constants.MUTED_VIDEOS);
         preference.setTitle(R.string.post_viewer_muted_autoplay);
         preference.setIconSpaceReserved(false);
+        return preference;
+    }
+
+    private Preference getStorySortPreference() {
+        final Context context = getContext();
+        if (context == null) return null;
+        final ListPreference preference = new ListPreference(context);
+        preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
+        final int length = getResources().getStringArray(R.array.story_sorts).length;
+        final String[] values = new String[length];
+        for (int i = 0; i < length; i++) {
+            values[i] = String.valueOf(i);
+        }
+        preference.setKey(Constants.STORY_SORT);
+        preference.setTitle(R.string.story_sort_setting);
+        preference.setDialogTitle(R.string.story_sort_setting);
+        preference.setEntries(R.array.story_sorts);
+        preference.setIconSpaceReserved(false);
+        preference.setEntryValues(values);
         return preference;
     }
 

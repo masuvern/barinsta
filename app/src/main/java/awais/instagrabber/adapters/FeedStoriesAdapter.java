@@ -4,12 +4,19 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import awais.instagrabber.adapters.viewholder.FeedStoryViewHolder;
 import awais.instagrabber.databinding.ItemHighlightBinding;
 import awais.instagrabber.models.FeedStoryModel;
+import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.Utils;
 
 public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedStoryViewHolder> {
     private final OnFeedStoryClickListener listener;
@@ -22,7 +29,7 @@ public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedSt
 
         @Override
         public boolean areContentsTheSame(@NonNull final FeedStoryModel oldItem, @NonNull final FeedStoryModel newItem) {
-            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId());
+            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId()) && oldItem.isFullyRead().equals(newItem.isFullyRead());
         }
     };
 
@@ -47,5 +54,7 @@ public final class FeedStoriesAdapter extends ListAdapter<FeedStoryModel, FeedSt
 
     public interface OnFeedStoryClickListener {
         void onFeedStoryClick(FeedStoryModel model, int position);
+
+        void onFeedStoryLongClick(FeedStoryModel model, int position);
     }
 }

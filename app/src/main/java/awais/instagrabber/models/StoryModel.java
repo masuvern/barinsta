@@ -6,11 +6,13 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SliderModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
 
 public final class StoryModel implements Serializable {
     private final String storyMediaId;
     private final String storyUrl;
+    private String thumbnail;
     private final String username;
     private final String userId;
     private final MediaItemType itemType;
@@ -21,6 +23,7 @@ public final class StoryModel implements Serializable {
     private String spotify;
     private PollModel poll;
     private QuestionModel question;
+    private SliderModel slider;
     private QuizModel quiz;
     private SwipeUpModel swipeUp;
     private String[] mentions;
@@ -28,10 +31,11 @@ public final class StoryModel implements Serializable {
     private boolean isCurrentSlide = false;
     private final boolean canReply;
 
-    public StoryModel(final String storyMediaId, final String storyUrl, final MediaItemType itemType,
+    public StoryModel(final String storyMediaId, final String storyUrl, final String thumbnail, final MediaItemType itemType,
                       final long timestamp, final String username, final String userId, final boolean canReply) {
         this.storyMediaId = storyMediaId;
         this.storyUrl = storyUrl;
+        this.thumbnail = thumbnail;
         this.itemType = itemType;
         this.timestamp = timestamp;
         this.username = username;
@@ -41,6 +45,10 @@ public final class StoryModel implements Serializable {
 
     public String getStoryUrl() {
         return storyUrl;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 
     public String getStoryMediaId() {
@@ -71,6 +79,10 @@ public final class StoryModel implements Serializable {
         return question;
     }
 
+    public SliderModel getSlider() {
+        return slider;
+    }
+
     public QuizModel getQuiz() {
         return quiz;
     }
@@ -83,6 +95,10 @@ public final class StoryModel implements Serializable {
 
     public int getPosition() {
         return position;
+    }
+
+    public void setThumbnail(final String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public void setVideoUrl(final String videoUrl) {
@@ -107,6 +123,10 @@ public final class StoryModel implements Serializable {
 
     public void setQuestion(final QuestionModel question) {
         this.question = question;
+    }
+
+    public void setSlider(final SliderModel slider) {
+        this.slider = slider;
     }
 
     public void setQuiz(final QuizModel quiz) {

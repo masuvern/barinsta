@@ -23,15 +23,16 @@
     <string name="title_favorites">Favoritos</string>
     <string name="title_discover">Explorar</string>
     <string name="title_comments">Comentarios</string>
-    <string name="title_notifications">Notificaciones</string>
+    <string name="title_notifications">Actividad</string>
     <string name="title_highlight">Resaltar: %s</string>
     <string name="update_check">Buscar actualizaciones al inicio</string>
-    <string name="download_user_folder">Descargar publicaciones en carpetas por nombre de usuario</string>
+    <string name="download_user_folder">Usar carpetas con el nombre de usuario</string>
     <string name="mark_as_seen_setting">Marcar historias como vistas después de verlas</string>
     <string name="mark_as_seen_setting_summary">El autor de la historia sabrá que lo has visto</string>
     <string name="dm_mark_as_seen_setting">Marcar Mensaje Directo como visto después de verlo</string>
     <string name="dm_mark_as_seen_setting_summary">Otros miembros sabrán que lo has visto</string>
     <string name="activity_setting">Activar notificaciones de actividad</string>
+    <string name="story_sort_setting">Orden de las historias</string>
     <string name="error_loading_profile">¡Error al cargar el perfil!\nPrueba iniciando sesión y buscando de nuevo.</string>
     <string name="error_creating_folders">Error creando carpeta(s) de descarga.</string>
     <string name="save_to_folder">Guardar en carpeta personalizada</string>
@@ -42,10 +43,15 @@
     <string name="instadp_settings">Usar Instadp para imágenes de perfil de alta definición</string>
     <string name="import_export">Importar/Exportar</string>
     <string name="select_language">Idioma</string>
-    <string name="main_posts_count">%s\nPublicaciones</string>
-    <string name="main_posts_count_inline">%s Publicaciones</string>
-    <string name="main_posts_followers">%s\nSeguidores</string>
-    <string name="main_posts_following">%s\nSiguiendo</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s publicación</item>
+        <item quantity="other">%s publicaciones</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s seguidor</item>
+        <item quantity="other">%s seguidores</item>
+    </plurals>
+    <string name="main_posts_following">%s seguidos </string>
     <string name="post_viewer_autoplay_video">Autorreproducir vídeos</string>
     <string name="post_viewer_muted_autoplay">Siempre silenciar vídeos</string>
     <string name="post_viewer_download_dialog_title">Seleccionar qué descargar</string>
@@ -63,9 +69,15 @@
     <string name="respond_story">Comentar</string>
     <string name="answer_hint">Responder…</string>
     <string name="answered_story">¡Has respondido con éxito!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d respuesta promediando un %s</item>
+        <item quantity="other">%d respuestas promediando un %s</item>
+    </plurals>
+    <string name="slider_answer">Tu respuesta: %s</string>
     <string name="reply_story">Responder a la historia</string>
     <string name="reply_hint">Responder…</string>
     <string name="story_quiz">Cuestionario</string>
+    <string name="story_slider">Deslizador</string>
     <string name="story_quizzed">¡Ya has respondido!</string>
     <string name="story_mentions">Menciones</string>
     <string name="priv_acc">Esta cuenta es privada</string>
@@ -98,6 +110,11 @@
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Desrestringir</string>
+    <string name="bio_copy">Copiar biografía</string>
+    <string name="bio_translate">Traducir biografía</string>
+    <string name="status_mutual">Mutuo</string>
+    <string name="status_following">Siguiendo</string>
+    <string name="status_follower">Seguidor</string>
     <string name="map">Mapa</string>
     <string name="dialog_export_btn_export">Exportar</string>
     <string name="dialog_export_btn_import">Importar</string>
@@ -126,6 +143,7 @@
     <string name="quick_access_cannot_delete_curr">No se puede borrar la cuenta actualmente en uso</string>
     <string name="quick_access_confirm_delete">¿Estás seguro de que quieres borrar \'%s\'?</string>
     <string name="open_profile">Abrir perfil</string>
+    <string name="view_story">Ver historia</string>
     <string name="view_pfp">Ver foto de perfil</string>
     <string name="direct_messages_you">Tú</string>
     <string name="direct_messages_sent_link">Compartió un enlace</string>
@@ -175,16 +193,18 @@
     <string name="downloader_too_many">Sólo puedes descargar 100 publicaciones a la vez. ¡No seas abaricioso!</string>
     <string name="comment_viewer_copy_user">Copiar nombre de usuario</string>
     <string name="comment_viewer_copy_comment">Copiar comentario</string>
+    <string name="comment_viewer_see_likers">Ver me gustas del comentario</string>
     <string name="comment_viewer_reply_comment">Responder a comentario</string>
     <string name="comment_viewer_like_comment">Dar me gusta a comentario</string>
     <string name="comment_viewer_unlike_comment">Quitar me gusta a comentario</string>
+    <string name="comment_viewer_translate_comment">Traducir comentario</string>
     <string name="comment_viewer_delete_comment">Eliminar comentario</string>
     <string name="comment_send_empty_comment">¡No hay comentarios vacíos!</string>
     <string name="comment_view_mention_user_search">¿Quieres buscar el nombre de usuario?</string>
     <string name="comment_view_mention_hash_search">¿Quieres buscar el hashtag?</string>
     <string name="followers_type_followers">Seguidores</string>
     <string name="followers_type_following">Siguiendo</string>
-    <string name="followers_compare">Comparando seguidores &amp; siguiendo</string>
+    <string name="followers_compare">Comparando seguidores &amp; seguidos</string>
     <string name="followers_both_following">Ambos se siguen mutuamente</string>
     <string name="followers_not_following">no está siguiendo %s</string>
     <string name="followers_not_follower">%s no está siguiendo</string>
@@ -208,6 +228,8 @@
     <string name="crash_title">La aplicación se ha bloqueado</string>
     <string name="crash_descr">Vaya.. La aplicación dejó de funcionar, pero no te preocupes, puedes enviar un reporte de error al desarrollador para ayudarle a arreglar el problema. (:</string>
     <string name="action_notif">Actividad</string>
+    <string name="action_archive">Archivo de historias</string>
+    <string name="action_ayml">Usuarios sugeridos</string>
     <string name="select_picture">Seleccionar imagen</string>
     <string name="uploading">Subiendo…</string>
     <string name="activity_count_prefix">Tienes:</string>
@@ -251,22 +273,27 @@
     <string name="dark_theme_settings">Tema oscuro</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material oscuro</string>
-    <string name="added_to_favs">Añadido a favoritos</string>
-    <string name="add_to_favorites">Agregar a favoritos</string>
+    <string name="added_to_favs">En favoritos</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">En favoritos</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Agregar a favoritos</string>
     <string name="accounts">Cuentas</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Ubicaciones</string>
     <string name="unknown">Desconocido</string>
     <string name="removed_from_favs">Eliminado de favoritos</string>
-    <string name="backup_and_restore">Respaldar &amp; Restaurar</string>
-    <string name="create_backup">Crear</string>
-    <string name="restore_backup">Restaurar</string>
+    <string name="backup_and_restore">Respaldar &amp; restaurar ajustes del usuario</string>
+    <string name="backup_summary">Respalda los ajustes de la aplicación, inicio de sesión de cuentas y/o cuentas favoritas a un archivo de texto plano o un archivo cifrado para su posterior restauración.</string>
+    <string name="backup_warning">Si está haciendo un respaldo de los inicios de sesión de cuentas, trate el archivo como confidencial: ¡Manténgalos en algún lugar seguro!</string>
+    <string name="create_backup">Crear un nuevo archivo del respaldo</string>
+    <string name="restore_backup">Restaurar desde un archivo de respaldo existente</string>
     <string name="file_chosen_label">Archivo:</string>
     <string name="enter_password">Introduzca contraseña</string>
     <string name="select_backup_file">Seleccione un archivo de respaldo (.zaai/.backup)</string>
     <string name="apply">Aplicar</string>
     <string name="save">Guardar</string>
     <string name="caption">Leyenda</string>
+    <string name="edit_caption">Editar leyenda...</string>
+    <string name="translate_caption">Traducir leyenda...</string>
     <string name="player_timeline_desc">Línea de tiempo del reproductor de vídeo</string>
     <string name="liking">Gustando…</string>
     <string name="like_unsuccessful">Me gusta fallido</string>
@@ -282,6 +309,7 @@
     <string name="delete">Borrar</string>
     <string name="comment">Comentario</string>
     <string name="layout">Disposición</string>
+    <string name="feed_stories">Muro de historias</string>
     <string name="opening_post">Abriendo publicación...</string>
     <string name="share">Compartir</string>
     <string name="layout_style">Estilo de disposición</string>
@@ -295,7 +323,9 @@
     <string name="show_grid_gap">Mostrar espaciado de cuadrícula</string>
     <string name="disable_animation">Desactivar animaciones</string>
     <string name="follower_wait_to_load">¡Por favor, espera a que la tarea actual se complete primero!</string>
-    <string name="post_not_found">Post not found!</string>
+    <string name="follower_start_compare">Dependiendo de la cuenta de usuario, esto puede tardar un tiempo. Por favor, sea paciente.</string>
+    <string name="post_not_found">¡Publicación no encontrada!</string>
+    <string name="no_external_app_url">No se encontró ninguna aplicación que abra los enlaces</string>
     <plurals name="likes_count">
         <item quantity="one">%d me gusta</item>
         <item quantity="other">%d me gustas</item>
@@ -304,4 +334,9 @@
         <item quantity="one">%d comentario</item>
         <item quantity="other">%d comentarios</item>
     </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s historia</item>
+        <item quantity="other">%s historias</item>
+    </plurals>
+    <string name="download_permission">¡Permiso de almacenamiento no concecido!</string>
 </resources>

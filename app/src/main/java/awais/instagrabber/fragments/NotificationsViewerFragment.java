@@ -18,11 +18,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
@@ -30,8 +34,12 @@ import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListe
 import awais.instagrabber.asyncs.NotificationsFetcher;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
+import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
+import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
+import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
 import awais.instagrabber.utils.Constants;
@@ -40,6 +48,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
 import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
 
@@ -53,96 +62,146 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private boolean shouldRefresh = true;
     private NotificationViewModel notificationViewModel;
     private FriendshipService friendshipService;
-    private String userId;
-    private String csrfToken;
+    private MediaService mediaService;
     private NewsService newsService;
+    private String userId, csrfToken, type;
+    private Context context;
 
-    private final OnNotificationClickListener clickListener = model -> {
-        if (model == null) return;
-        final String username = model.getUsername();
-        final SpannableString title = new SpannableString(username + (TextUtils.isEmpty(model.getText()) ? "" : (":\n" + model.getText())));
-        title.setSpan(new RelativeSizeSpan(1.23f), 0, username.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
-        String[] commentDialogList;
-        if (model.getShortCode() != null) {
-            commentDialogList = new String[]{
-                    getString(R.string.open_profile),
-                    getString(R.string.view_post)
-            };
-        } else if (model.getType() == NotificationType.REQUEST) {
-            commentDialogList = new String[]{
-                    getString(R.string.open_profile),
-                    getString(R.string.request_approve),
-                    getString(R.string.request_reject)
-            };
-        } else {
-            commentDialogList = new String[]{getString(R.string.open_profile)};
+    private final OnNotificationClickListener clickListener = new OnNotificationClickListener() {
+        @Override
+        public void onProfileClick(final String username) {
+            openProfile(username);
         }
-        final Context context = getContext();
-        if (context == null) return;
-        final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
-            switch (which) {
-                case 0:
-                    openProfile(model.getUsername());
-                    break;
-                case 1:
-                    if (model.getType() == NotificationType.REQUEST) {
-                        friendshipService.approve(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                            @Override
-                            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                                // Log.d(TAG, "onSuccess: " + result);
-                                if (result.getStatus().equals("ok")) {
-                                    onRefresh();
-                                    return;
-                                }
-                                Log.e(TAG, "approve: status was not ok!");
-                            }
 
-                            @Override
-                            public void onFailure(final Throwable t) {
-                                Log.e(TAG, "approve: onFailure: ", t);
-                            }
-                        });
-                        return;
-                    }
-                    final AlertDialog alertDialog = new AlertDialog.Builder(context)
-                            .setCancelable(false)
-                            .setView(R.layout.dialog_opening_post)
-                            .create();
-                    alertDialog.show();
-                    new PostFetcher(model.getShortCode(), feedModel -> {
+        @Override
+        public void onPreviewClick(final NotificationModel model) {
+            if (model.getType() == NotificationType.RESPONDED_STORY) {
+                final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
+                        -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
+                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
+            }
+            else {
+                mediaService.fetch(model.getPostId(), new ServiceCallback<FeedModel>() {
+                    @Override
+                    public void onSuccess(final FeedModel feedModel) {
                         final PostViewV2Fragment fragment = PostViewV2Fragment
                                 .builder(feedModel)
                                 .build();
-                        fragment.setOnShowListener(dialog1 -> alertDialog.dismiss());
                         fragment.show(getChildFragmentManager(), "post_view");
-                    }).execute();
-                    break;
-                case 2:
-                    friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipRepoChangeRootResponse result) {
-                            // Log.d(TAG, "onSuccess: " + result);
-                            if (result.getStatus().equals("ok")) {
-                                onRefresh();
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onNotificationClick(final NotificationModel model) {
+            if (model == null) return;
+            final String username = model.getUsername();
+            if (model.getType() == NotificationType.FOLLOW || model.getType() == NotificationType.AYML) {
+                openProfile(username);
+            }
+            else {
+                final SpannableString title = new SpannableString(username + (TextUtils.isEmpty(model.getText()) ? "" : (":\n" + model.getText())));
+                title.setSpan(new RelativeSizeSpan(1.23f), 0, username.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+                String[] commentDialogList;
+                if (model.getType() == NotificationType.RESPONDED_STORY) {
+                    commentDialogList = new String[]{
+                            getString(R.string.open_profile),
+                            getString(R.string.view_story)
+                    };
+                }
+                else if (model.getPostId() != null) {
+                    commentDialogList = new String[]{
+                            getString(R.string.open_profile),
+                            getString(R.string.view_post)
+                    };
+                }
+                else if (model.getType() == NotificationType.REQUEST) {
+                    commentDialogList = new String[]{
+                            getString(R.string.open_profile),
+                            getString(R.string.request_approve),
+                            getString(R.string.request_reject)
+                    };
+                }
+                else commentDialogList = null; // shouldn't happen
+                final Context context = getContext();
+                if (context == null) return;
+                final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            openProfile(username);
+                            break;
+                        case 1:
+                            if (model.getType() == NotificationType.REQUEST) {
+                                friendshipService.approve(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                                    @Override
+                                    public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                        onRefresh();
+                                        Log.e(TAG, "approve: status was not ok!");
+                                    }
+
+                                    @Override
+                                    public void onFailure(final Throwable t) {
+                                        Log.e(TAG, "approve: onFailure: ", t);
+                                    }
+                                });
                                 return;
                             }
-                            Log.e(TAG, "ignore: status was not ok!");
-                        }
+                            else if (model.getType() == NotificationType.RESPONDED_STORY) {
+                                final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
+                                        -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
+                                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
+                                return;
+                            }
+                            final AlertDialog alertDialog = new AlertDialog.Builder(context)
+                                    .setCancelable(false)
+                                    .setView(R.layout.dialog_opening_post)
+                                    .create();
+                            alertDialog.show();
+                            mediaService.fetch(model.getPostId(), new ServiceCallback<FeedModel>() {
+                                @Override
+                                public void onSuccess(final FeedModel feedModel) {
+                                    final PostViewV2Fragment fragment = PostViewV2Fragment
+                                            .builder(feedModel)
+                                            .build();
+                                    fragment.setOnShowListener(dialog1 -> alertDialog.dismiss());
+                                    fragment.show(getChildFragmentManager(), "post_view");
+                                }
 
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "ignore: onFailure: ", t);
-                        }
-                    });
-                    break;
+                                @Override
+                                public void onFailure(final Throwable t) {
+                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            break;
+                        case 2:
+                            friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                                @Override
+                                public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                    onRefresh();
+                                }
+
+                                @Override
+                                public void onFailure(final Throwable t) {
+                                    Log.e(TAG, "ignore: onFailure: ", t);
+                                }
+                            });
+                            break;
+                    }
+                };
+                new AlertDialog.Builder(context)
+                        .setTitle(title)
+                        .setItems(commentDialogList, profileDialogListener)
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
             }
-        };
-        new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setItems(commentDialogList, profileDialogListener)
-                .setNegativeButton(R.string.cancel, null)
-                .show();
+        }
     };
     private final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
         if (getContext() == null) return;
@@ -158,7 +217,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final Context context = getContext();
+        context = getContext();
         if (context == null) return;
         NotificationManagerCompat.from(context.getApplicationContext()).cancel(Constants.ACTIVITY_NOTIFICATION_ID);
         final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
@@ -166,7 +225,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
         friendshipService = FriendshipService.getInstance();
-        newsService = NewsService.getInstance();
+        mediaService = MediaService.getInstance();
         userId = CookieUtils.getUserIdFromCookie(cookie);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
     }
@@ -191,6 +250,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     }
 
     private void init() {
+        final NotificationsViewerFragmentArgs fragmentArgs = NotificationsViewerFragmentArgs.fromBundle(getArguments());
+        type = fragmentArgs.getType();
         final Context context = getContext();
         CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
         binding.swipeRefreshLayout.setOnRefreshListener(this);
@@ -205,23 +266,39 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     @Override
     public void onRefresh() {
         binding.swipeRefreshLayout.setRefreshing(true);
-        new NotificationsFetcher(notificationModels -> {
-            binding.swipeRefreshLayout.setRefreshing(false);
-            notificationViewModel.getList().postValue(notificationModels);
-            final String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-            newsService.markChecked(timestamp, csrfToken, new ServiceCallback<Boolean>() {
-                @Override
-                public void onSuccess(@NonNull final Boolean result) {
-                    // Log.d(TAG, "onResponse: body: " + result);
-                    if (!result) Log.e(TAG, "onSuccess: Error marking activity checked, response is false");
-                }
+        switch (type) {
+            case "notif":
+                new NotificationsFetcher(true, new FetchListener<List<NotificationModel>>() {
+                    @Override
+                    public void onResult(final List<NotificationModel> notificationModels) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        notificationViewModel.getList().postValue(notificationModels);
+                    }
 
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "onFailure: Error marking activity checked", t);
-                }
-            });
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    @Override
+                    public void onFailure(Throwable t) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                break;
+            case "ayml":
+                newsService = NewsService.getInstance();
+                newsService.fetchSuggestions(csrfToken, new ServiceCallback<List<NotificationModel>>() {
+                    @Override
+                    public void onSuccess(final List<NotificationModel> notificationModels) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        notificationViewModel.getList().postValue(notificationModels);
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                break;
+        }
     }
 
     private void openProfile(final String username) {

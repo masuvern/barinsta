@@ -25,6 +25,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,11 +33,18 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.CommentsAdapter;
 import awais.instagrabber.asyncs.CommentsFetcher;
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentCommentsBinding;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
+import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.CommentModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.Constants;
@@ -56,16 +64,47 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
     private CommentsAdapter commentsAdapter;
     private FragmentCommentsBinding binding;
-    private String shortCode;
-    private String userId;
+    private LinearLayoutManager layoutManager;
+    private RecyclerLazyLoader lazyLoader;
+    private String shortCode, userId, endCursor = null;
     private Resources resources;
     private InputMethodManager imm;
     private AppCompatActivity fragmentActivity;
     private LinearLayoutCompat root;
-    private boolean shouldRefresh = true;
+    private boolean shouldRefresh = true, hasNextPage = false;
     private MediaService mediaService;
     private String postId;
+    private AsyncTask<Void, Void, List<CommentModel>> currentlyRunning;
     private CommentsViewModel commentsViewModel;
+
+    private final FetchListener<List<CommentModel>> fetchListener = new FetchListener<List<CommentModel>>() {
+        @Override
+        public void doBefore() {
+            binding.swipeRefreshLayout.setRefreshing(true);
+        }
+
+        @Override
+        public void onResult(final List<CommentModel> commentModels) {
+            if (commentModels != null && commentModels.size() > 0) {
+                endCursor = commentModels.get(0).getEndCursor();
+                hasNextPage = commentModels.get(0).hasNextPage();
+                List<CommentModel> list = commentsViewModel.getList().getValue();
+                list = list != null ? new LinkedList<>(list) : new LinkedList<>();
+                // final int oldSize = list != null ? list.size() : 0;
+                list.addAll(commentModels);
+                commentsViewModel.getList().postValue(list);
+            }
+            binding.swipeRefreshLayout.setRefreshing(false);
+            stopCurrentExecutor();
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            binding.swipeRefreshLayout.setRefreshing(false);
+            stopCurrentExecutor();
+        }
+    };
 
     private final CommentsAdapter.CommentCallback commentCallback = new CommentsAdapter.CommentCallback() {
         @Override
@@ -181,11 +220,11 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
     @Override
     public void onRefresh() {
-        binding.swipeRefreshLayout.setRefreshing(true);
-        new CommentsFetcher(shortCode, commentModels -> {
-            commentsViewModel.getList().postValue(commentModels);
-            binding.swipeRefreshLayout.setRefreshing(false);
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        endCursor = null;
+        lazyLoader.resetState();
+        commentsViewModel.getList().postValue(Collections.emptyList());
+        stopCurrentExecutor();
+        currentlyRunning = new CommentsFetcher(shortCode, "", fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void init() {
@@ -198,7 +237,8 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         binding.swipeRefreshLayout.setRefreshing(true);
         commentsViewModel = new ViewModelProvider(this).get(CommentsViewModel.class);
-        binding.rvComments.setLayoutManager(new LinearLayoutManager(getContext()));
+        layoutManager = new LinearLayoutManager(getContext());
+        binding.rvComments.setLayoutManager(layoutManager);
         commentsAdapter = new CommentsAdapter(commentCallback);
         binding.rvComments.setAdapter(commentsAdapter);
         commentsViewModel.getList().observe(getViewLifecycleOwner(), commentsAdapter::submitList);
@@ -226,6 +266,13 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             });
             binding.commentField.setEndIconOnClickListener(newCommentListener);
         }
+        lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+            if (hasNextPage && !TextUtils.isEmpty(endCursor))
+                currentlyRunning = new CommentsFetcher(shortCode, endCursor, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            endCursor = null;
+        });
+        binding.rvComments.addOnScrollListener(lazyLoader);
+        stopCurrentExecutor();
         onRefresh();
     }
 
@@ -249,30 +296,29 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 && (userIdFromCookie.equals(commentModel.getProfileModel().getId()) || userIdFromCookie.equals(userId))) {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.view_pfp),
-//                    resources.getString(R.string.comment_viewer_copy_user),
                     resources.getString(R.string.comment_viewer_copy_comment),
+                    resources.getString(R.string.comment_viewer_see_likers),
                     resources.getString(R.string.comment_viewer_reply_comment),
                     commentModel.getLiked() ? resources.getString(R.string.comment_viewer_unlike_comment)
                                             : resources.getString(R.string.comment_viewer_like_comment),
+                    resources.getString(R.string.comment_viewer_translate_comment),
                     resources.getString(R.string.comment_viewer_delete_comment)
             };
         } else if (!TextUtils.isEmpty(cookie)) {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.view_pfp),
-//                    resources.getString(R.string.comment_viewer_copy_user),
                     resources.getString(R.string.comment_viewer_copy_comment),
+                    resources.getString(R.string.comment_viewer_see_likers),
                     resources.getString(R.string.comment_viewer_reply_comment),
                     commentModel.getLiked() ? resources.getString(R.string.comment_viewer_unlike_comment)
                                             : resources.getString(R.string.comment_viewer_like_comment),
+                    resources.getString(R.string.comment_viewer_translate_comment)
             };
         } else {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
-                    resources.getString(R.string.view_pfp),
-//                    resources.getString(R.string.comment_viewer_copy_user),
-                    resources.getString(R.string.comment_viewer_copy_comment)
+                    resources.getString(R.string.comment_viewer_copy_comment),
+                    resources.getString(R.string.comment_viewer_see_likers)
             };
         }
         final Context context = getContext();
@@ -284,25 +330,20 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 case 0: // open profile
                     openProfile("@" + profileModel.getUsername());
                     break;
-                case 1: // view profile pic
-                    final FragmentManager fragmentManager = getParentFragmentManager();
-                    final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getId(),
-                                                                                           profileModel.getUsername(),
-                                                                                           profileModel.getHdProfilePic());
-                    final FragmentTransaction ft = fragmentManager.beginTransaction();
-                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                      .add(fragment, "profilePicDialog")
-                      .commit();
-                    break;
-//              case 2: // copy username
-//                  Utils.copyText(context, profileModel.getUsername());
-//                  break;
-                case 2: // copy comment
+                case 1: // copy comment
                     Utils.copyText(context, "@" + profileModel.getUsername() + ": " + commentModel.getText());
                     break;
+                case 2: // see comment likers, this is surprisingly available to anons
+                    final NavController navController = getNavController();
+                    if (navController != null) {
+                        final Bundle bundle = new Bundle();
+                        bundle.putString("postId", commentModel.getId());
+                        bundle.putBoolean("isComment", true);
+                        navController.navigate(R.id.action_global_likesViewerFragment, bundle);
+                    }
+                    else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    break;
                 case 3: // reply to comment
-                    // final View focus = binding.rvComments.findViewWithTag(commentModel);
-                    // focus.setBackgroundColor(0x80888888);
                     commentsAdapter.setSelected(commentModel);
                     String mention = "@" + profileModel.getUsername() + " ";
                     binding.commentText.setText(mention);
@@ -326,7 +367,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                     return;
                                 }
-                                onRefresh();
+                                commentsAdapter.setLiked(commentModel, true);
                             }
 
                             @Override
@@ -344,7 +385,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                                 Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                            onRefresh();
+                            commentsAdapter.setLiked(commentModel, false);
                         }
 
                         @Override
@@ -354,7 +395,29 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         }
                     });
                     break;
-                case 5: // delete comment
+                case 5: // translate comment
+                    mediaService.translate(commentModel.getId(), "2", new ServiceCallback<String>() {
+                        @Override
+                        public void onSuccess(final String result) {
+                            if (TextUtils.isEmpty(result)) {
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            new AlertDialog.Builder(context)
+                                    .setTitle(username)
+                                    .setMessage(result)
+                                    .setPositiveButton(R.string.ok, null)
+                                    .show();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error translating comment", t);
+                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    break;
+                case 6: // delete comment
                     final String userId = CookieUtils.getUserIdFromCookie(cookie);
                     if (userId == null) return;
                     mediaService.deleteComment(
@@ -388,5 +451,26 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     private void openProfile(final String username) {
         final NavDirections action = CommentsViewerFragmentDirections.actionGlobalProfileFragment(username);
         NavHostFragment.findNavController(this).navigate(action);
+    }
+
+    private void stopCurrentExecutor() {
+        if (currentlyRunning != null) {
+            try {
+                currentlyRunning.cancel(true);
+            } catch (final Exception e) {
+                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+            }
+        }
+    }
+
+    @Nullable
+    private NavController getNavController() {
+        NavController navController = null;
+        try {
+            navController = NavHostFragment.findNavController(this);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "navigateToProfile", e);
+        }
+        return navController;
     }
 }

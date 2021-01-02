@@ -6,16 +6,19 @@ import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import awais.instagrabber.repositories.DirectMessagesRepository;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.requests.directmessages.LinkBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.PhotoBroadcastOptions;
+import awais.instagrabber.repositories.requests.directmessages.StoryReplyBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.TextBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.VideoBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.VoiceBroadcastOptions;
@@ -144,6 +147,12 @@ public class DirectMessagesService extends BaseService {
                                                               final List<Float> waveform,
                                                               final int samplingFreq) {
         return broadcast(new VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq));
+    }
+
+    public Call<DirectThreadBroadcastResponse> broadcastStoryReply(final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                   final String text,
+                                                                   final String mediaId, final String reelId) throws UnsupportedEncodingException {
+        return broadcast(new StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId));
     }
 
     private Call<DirectThreadBroadcastResponse> broadcast(@NonNull final BroadcastOptions broadcastOptions) {

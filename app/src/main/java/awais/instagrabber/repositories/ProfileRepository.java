@@ -9,11 +9,11 @@ import retrofit2.http.QueryMap;
 
 public interface ProfileRepository {
 
-    @GET("api/v1/users/{uid}/info/")
+    @GET("/api/v1/users/{uid}/info/")
     Call<String> getUserInfo(@Path("uid") final String uid);
 
-    @GET("/graphql/query/")
-    Call<String> fetch(@QueryMap Map<String, String> queryMap);
+    @GET("/api/v1/feed/user/{uid}/")
+    Call<String> fetch(@Path("uid") final String uid, @QueryMap Map<String, String> queryParams);
 
     @GET("/api/v1/feed/saved/")
     Call<String> fetchSaved(@QueryMap Map<String, String> queryParams);

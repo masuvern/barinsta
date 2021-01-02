@@ -400,8 +400,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         // binding.swipeRefreshLayout.setRefreshing(true);
         locationDetailsBinding.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
         final String postCount = String.valueOf(locationModel.getPostCount());
-        final SpannableStringBuilder span = new SpannableStringBuilder(getString(R.string.main_posts_count_inline,
-                                                                                 postCount));
+        final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
+                locationModel.getPostCount() > 2000000000L ? 2000000000 : locationModel.getPostCount().intValue(),
+                postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         locationDetailsBinding.mainLocPostCount.setText(span);
@@ -455,6 +456,20 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
                 locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                favoriteRepository.insertOrUpdateFavorite(new Favorite(
+                        result.getId(),
+                        locationId,
+                        FavoriteType.LOCATION,
+                        locationModel.getName(),
+                        locationModel.getSdProfilePic(),
+                        result.getDateAdded()
+                ), new RepositoryCallback<Void>() {
+                    @Override
+                    public void onSuccess(final Void result) {}
+
+                    @Override
+                    public void onDataNotAvailable() {}
+                });
             }
 
             @Override
@@ -484,7 +499,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 @Override
                 public void onDataNotAvailable() {
                     favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                            -1,
+                            0,
                             locationId,
                             FavoriteType.LOCATION,
                             locationModel.getName(),
@@ -495,7 +510,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                         public void onSuccess(final Void result) {
                             locationDetailsBinding.favChip.setText(R.string.favorite_short);
                             locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                            showSnackbar(getString(R.string.added_to_favs));
+                            showSnackbar(getString(R.string.added_to_favs_short));
                         }
 
                         @Override
@@ -508,7 +523,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (hasStories) {
                 // show stories
                 final NavDirections action = LocationFragmentDirections
-                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName());
+                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName(), false, false);
                 NavHostFragment.findNavController(this).navigate(action);
             }
         });

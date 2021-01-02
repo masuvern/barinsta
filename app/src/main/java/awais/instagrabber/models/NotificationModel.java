@@ -13,7 +13,7 @@ public final class NotificationModel {
     private final String userId;
     private final String username;
     private final String profilePicUrl;
-    private final String shortCode;
+    private final String postId;
     private final String previewUrl;
     private final NotificationType type;
     private final CharSequence text;
@@ -25,7 +25,7 @@ public final class NotificationModel {
                              final String userId,
                              final String username,
                              final String profilePicUrl,
-                             final String shortCode,
+                             final String postId,
                              final String previewUrl,
                              final NotificationType type) {
         this.id = id;
@@ -34,7 +34,7 @@ public final class NotificationModel {
         this.userId = userId;
         this.username = username;
         this.profilePicUrl = profilePicUrl;
-        this.shortCode = shortCode;
+        this.postId = postId;
         this.previewUrl = previewUrl;
         this.type = type;
     }
@@ -45,6 +45,10 @@ public final class NotificationModel {
 
     public CharSequence getText() {
         return text;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     @NonNull
@@ -64,8 +68,8 @@ public final class NotificationModel {
         return profilePicUrl;
     }
 
-    public String getShortCode() {
-        return shortCode;
+    public String getPostId() {
+        return postId;
     }
 
     public String getPreviewPic() {

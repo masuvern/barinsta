@@ -23,7 +23,7 @@
     <string name="title_favorites">علاقه مندی ها</string>
     <string name="title_discover">کاوش</string>
     <string name="title_comments">دیدگاه‌ها</string>
-    <string name="title_notifications">آگهداد</string>
+    <string name="title_notifications">فعالیت</string>
     <string name="title_highlight">درخشندگی: %s</string>
     <string name="update_check">بررسی بروزرسانی هنگام آغاز برنامه</string>
     <string name="download_user_folder">بارگیری پست ها در پوشه های به نام کاربر</string>
@@ -32,6 +32,7 @@
     <string name="dm_mark_as_seen_setting">نشان کردن پیام خصوصی بعنوان دیده شده بعد از دیدن</string>
     <string name="dm_mark_as_seen_setting_summary">کاربران دیگر خواهند فهمید شما این را دیده اید</string>
     <string name="activity_setting">روشن کردن آگهداد فعالیت ها</string>
+    <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">خطا در نمایش نمایه!\n دوباره وارد شوید و جستجو کنید.</string>
     <string name="error_creating_folders">خطا در ساخت پوشه(ها).</string>
     <string name="save_to_folder">ذخیره در پوشه سفارشی</string>
@@ -42,10 +43,15 @@
     <string name="instadp_settings">استفاده از Instadp برای بالا بردن وضوح عکس‌های نمایه</string>
     <string name="import_export">وارد کردن/خروجی گرفتن</string>
     <string name="select_language">زبان</string>
-    <string name="main_posts_count">%s\n پست‌ها</string>
-    <string name="main_posts_count_inline">%s پست ها</string>
-    <string name="main_posts_followers">%s\nدنبال کننده ها</string>
-    <string name="main_posts_following">%s\nدنبال کننده ها</string>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
+    </plurals>
+    <plurals name="main_posts_followers">
+        <item quantity="one">%s Follower</item>
+        <item quantity="other">%s Followers</item>
+    </plurals>
+    <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">پخش خودکار فیلم ها</string>
     <string name="post_viewer_muted_autoplay">همیشه فیلم هارو بی صدا کن</string>
     <string name="post_viewer_download_dialog_title">انتخاب کن چی دانلود کنی</string>
@@ -63,9 +69,15 @@
     <string name="respond_story">پاسخ</string>
     <string name="answer_hint">پاسخ…</string>
     <string name="answered_story">جواب درست است!</string>
+    <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
+        <item quantity="one">%d response averaging %s</item>
+        <item quantity="other">%d responses averaging %s</item>
+    </plurals>
+    <string name="slider_answer">Your answer: %s</string>
     <string name="reply_story">پاسخ به استوری</string>
     <string name="reply_hint">پاسخ…</string>
     <string name="story_quiz">نظرسنجی</string>
+    <string name="story_slider">Slider</string>
     <string name="story_quizzed">در حال حاظر شما رای داده اید!</string>
     <string name="story_mentions">یادآوری ها</string>
     <string name="priv_acc">این اکانت شخصی است</string>
@@ -99,6 +111,11 @@
     <string name="unblock">رفع مسدودیت</string>
     <string name="restrict">محدود کردن</string>
     <string name="unrestrict">حذف محدودیت</string>
+    <string name="bio_copy">Copy bio</string>
+    <string name="bio_translate">Translate bio</string>
+    <string name="status_mutual">Mutual</string>
+    <string name="status_following">Following</string>
+    <string name="status_follower">Follower</string>
     <string name="map">نقشه</string>
     <string name="dialog_export_btn_export">صادر کردن</string>
     <string name="dialog_export_btn_import">وارد کردن</string>
@@ -127,6 +144,7 @@
     <string name="quick_access_cannot_delete_curr">نمیتواند حذف شود این اکانت در حال استفاده است</string>
     <string name="quick_access_confirm_delete">آیا مطمن هستید میخواهید حذف کنید \'%s\'؟</string>
     <string name="open_profile">باز کردن پروفایل</string>
+    <string name="view_story">View story</string>
     <string name="view_pfp">دیدن عکس پروفایل</string>
     <string name="direct_messages_you">شما</string>
     <string name="direct_messages_sent_link">یک لینک به اشتراک گذاشته شد</string>
@@ -176,9 +194,11 @@
     <string name="downloader_too_many">شما فقط 100 پست در یک زمان میتوانید دانلود کنید. خیلی حریص نباشید!</string>
     <string name="comment_viewer_copy_user">کپی نام کاربری</string>
     <string name="comment_viewer_copy_comment">کپی دیدگاه</string>
+    <string name="comment_viewer_see_likers">View comment likers</string>
     <string name="comment_viewer_reply_comment">پاسخ به دیدگاه</string>
     <string name="comment_viewer_like_comment">پسندیدن دیدگاه</string>
     <string name="comment_viewer_unlike_comment">نپسندیدن دیدگاه</string>
+    <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">هذف دیدگاه</string>
     <string name="comment_send_empty_comment">بدون دیدگاه تهی!</string>
     <string name="comment_view_mention_user_search">ایا میخواهید نام کاربری جستوجو کنید ؟</string>
@@ -209,6 +229,8 @@
     <string name="crash_title">برنامه خراب شد</string>
     <string name="crash_descr">اوپسس.. برنامه خراب است، اما نگران نباشید شما میتوانید گزارش خطا را برای توسعه دهنده بفرستید برای کمک به او در درست کردن مشکل. (:</string>
     <string name="action_notif">فعالیت</string>
+    <string name="action_archive">Story archive</string>
+    <string name="action_ayml">Suggested users</string>
     <string name="select_picture">انتخاب تصویر</string>
     <string name="uploading">Uploading…</string>
     <string name="activity_count_prefix">شما باید:</string>
@@ -253,21 +275,26 @@
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">باریستا</string>
     <string name="dark_material_dark_theme">متریال تیره</string>
     <string name="added_to_favs">به علاقه مندی ها افزوده شد</string>
-    <string name="add_to_favorites">افزودن به علاقه ‌مندی ‌ها</string>
+    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
+    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
     <string name="accounts">هساب‌ها</string>
     <string name="hashtags">هشتگ ها</string>
     <string name="locations">جاها</string>
     <string name="unknown">ناشناخته</string>
     <string name="removed_from_favs">از علاقه مندی ها حذف شده</string>
-    <string name="backup_and_restore">پشتیبان گیری &amp; بازیابی</string>
-    <string name="create_backup">ساخت</string>
-    <string name="restore_backup">بازیابی</string>
+    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
+    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="create_backup">Create new backup file</string>
+    <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">پرونده:</string>
     <string name="enter_password">رمز عبور را وارد کنید</string>
     <string name="select_backup_file">یک فایل پشتیبان گیری انتخاب کنید (.zaai/.backup)</string>
     <string name="apply">گماشتن</string>
     <string name="save">Save</string>
     <string name="caption">Caption</string>
+    <string name="edit_caption">Edit caption...</string>
+    <string name="translate_caption">Translate caption...</string>
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="liking">پسندیدن…</string>
     <string name="like_unsuccessful">Like unsuccessful</string>
@@ -283,6 +310,7 @@
     <string name="delete">هذف</string>
     <string name="comment">دیدگاه</string>
     <string name="layout">Layout</string>
+    <string name="feed_stories">Feed stories</string>
     <string name="opening_post">باز کردن پیک...</string>
     <string name="share">همرسانی</string>
     <string name="layout_style">Layout style</string>
@@ -296,7 +324,9 @@
     <string name="show_grid_gap">Show grid gap</string>
     <string name="disable_animation">Disable animation</string>
     <string name="follower_wait_to_load">Please wait for the current task to complete first!</string>
+    <string name="follower_start_compare">Depending on user counts, this can take a while to load. Please be patient.</string>
     <string name="post_not_found">Post not found!</string>
+    <string name="no_external_app_url">No app found which opens urls</string>
     <plurals name="likes_count">
         <item quantity="one">%d پسند</item>
         <item quantity="other">%d پسند</item>
@@ -305,4 +335,9 @@
         <item quantity="one">%d دیدگاه</item>
         <item quantity="other">%d دیدگاه</item>
     </plurals>
+    <plurals name="stories_count">
+        <item quantity="one">%s story</item>
+        <item quantity="other">%s stories</item>
+    </plurals>
+    <string name="download_permission">Storage permission not granted!</string>
 </resources>

@@ -152,7 +152,7 @@ public final class ExportImportUtils {
                 continue;
             }
             final Favorite favorite = new Favorite(
-                    -1,
+                    0,
                     query,
                     favoriteType,
                     favsObject.optString("s"),

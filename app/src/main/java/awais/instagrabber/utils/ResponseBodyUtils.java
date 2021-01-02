@@ -20,11 +20,17 @@ import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.repositories.responses.directmessages.MediaCandidate;
+import awais.instagrabber.models.stickers.PollModel;
+import awais.instagrabber.models.stickers.QuestionModel;
+import awais.instagrabber.models.stickers.QuizModel;
+import awais.instagrabber.models.stickers.SliderModel;
+import awais.instagrabber.models.stickers.SwipeUpModel;
 import awaisomereport.LogCollector;
 
 public final class ResponseBodyUtils {
@@ -186,8 +192,8 @@ public final class ResponseBodyUtils {
         return null;
     }
 
-    // public static DirectItemMediaModel getDirectMediaModel(final JSONObject mediaObj) throws Exception {
-    //     final DirectItemMediaModel mediaModel;
+    // public static DirectItemModel.DirectItemMediaModel getDirectMediaModel(final JSONObject mediaObj) throws Exception {
+    //     final DirectItemModel.DirectItemMediaModel mediaModel;
     //     if (mediaObj == null) mediaModel = null;
     //     else {
     //         final JSONObject userObj = mediaObj.optJSONObject("user");
@@ -203,7 +209,7 @@ public final class ResponseBodyUtils {
     //                     userObj.getString("full_name"),
     //                     null, null,
     //                     userObj.getString("profile_pic_url"),
-    //                     null, 0, 0, 0, false, false, false, false);
+    //                     null, 0, 0, 0, false, false, false, false, false);
     //         }
     //
     //         final MediaItemType mediaType = getMediaItemType(mediaObj.optInt("media_type", -1));
@@ -212,7 +218,7 @@ public final class ResponseBodyUtils {
     //         if (TextUtils.isEmpty(id)) id = null;
     //
     //         final ThumbnailDetails thumbnailDetails = getThumbnailUrl(mediaObj, mediaType);
-    //         mediaModel = new DirectItemMediaModel(
+    //         mediaModel = new DirectItemModel.DirectItemMediaModel(
     //                 mediaType,
     //                 mediaObj.optLong("expiring_at"),
     //                 mediaObj.optLong("pk"),
@@ -226,7 +232,7 @@ public final class ResponseBodyUtils {
     //     }
     //     return mediaModel;
     // }
-
+    //
     // private static DirectItemType getDirectItemType(final String itemType) {
     //     if ("placeholder".equals(itemType)) return DirectItemType.PLACEHOLDER;
     //     if ("media".equals(itemType)) return DirectItemType.MEDIA;
@@ -245,81 +251,99 @@ public final class ResponseBodyUtils {
     //     if ("felix_share".equals(itemType)) return DirectItemType.FELIX_SHARE;
     //     return DirectItemType.TEXT;
     // }
-
+    //
     // @NonNull
     // public static InboxThreadModel createInboxThreadModel(@NonNull final JSONObject data, final boolean inThreadView) throws Exception {
     //     final InboxReadState readState = data.getInt("read_state") == 0 ? InboxReadState.STATE_READ : InboxReadState.STATE_UNREAD;
+    //     final String threadType = data.getString("thread_type"); // they're all "private", group is identified by boolean "is_group"
     //
-    //     final JSONArray leftUsersJsonArray = data.optJSONArray("left_users");
+    //     final String threadId = data.getString("thread_id");
+    //     final String threadV2Id = data.getString("thread_v2_id");
+    //     final String threadTitle = data.getString("thread_title");
     //
-    //     final JSONArray usersJsonArray = data.getJSONArray("users");
-    //     final List<ProfileModel> users = new ArrayList<>();
-    //     for (int j = 0; j < usersJsonArray.length(); ++j) {
-    //         final JSONObject userObject = usersJsonArray.getJSONObject(j);
-    //         users.add(new ProfileModel(userObject.optBoolean("is_private"),
-    //                                    false,
-    //                                    userObject.optBoolean("is_verified"),
-    //                                    String.valueOf(userObject.get("pk")),
-    //                                    userObject.optString("username"), // optional cuz fb users
-    //                                    userObject.getString("full_name"),
-    //                                    null,
-    //                                    null,
-    //                                    userObject.getString("profile_pic_url"),
-    //                                    null,
-    //                                    0,
-    //                                    0,
-    //                                    0,
-    //                                    false,
-    //                                    false,
-    //                                    false,
-    //                                    false));
-    //     }
+    //     final String threadNewestCursor = data.optString("newest_cursor");
+    //     final String threadOldestCursor = data.optString("oldest_cursor");
+    //     final String threadNextCursor = data.has("next_cursor") ? data.getString("next_cursor") : null;
+    //     final String threadPrevCursor = data.has("prev_cursor") ? data.getString("prev_cursor") : null;
     //
-    //     final List<ProfileModel> leftUsers = new ArrayList<>();
-    //     for (int j = 0; j < leftUsersJsonArray.length(); ++j) {
-    //         final JSONObject userObject = leftUsersJsonArray.getJSONObject(j);
-    //         leftUsers.add(new ProfileModel(userObject.getBoolean("is_private"),
-    //                                        false,
-    //                                        userObject.optBoolean("is_verified"),
-    //                                        String.valueOf(userObject.get("pk")),
-    //                                        userObject.getString("username"),
-    //                                        userObject.getString("full_name"),
-    //                                        null,
-    //                                        null,
-    //                                        userObject.getString("profile_pic_url"),
-    //                                        null,
-    //                                        0,
-    //                                        0,
-    //                                        0,
-    //                                        false,
-    //                                        false,
-    //                                        false,
-    //                                        false));
-    //     }
+    //     final boolean threadHasOlder = data.getBoolean("has_older");
+    //     final long unreadCount = data.optLong("read_state", 0);
     //
+    //     final long lastActivityAt = data.optLong("last_activity_at");
+    //     final boolean named = data.optBoolean("named");
+    //     final boolean muted = data.optBoolean("muted");
+    //     final boolean isPin = data.optBoolean("is_pin");
+    //     final boolean isSpam = data.optBoolean("is_spam");
+    //     final boolean isGroup = data.optBoolean("is_group");
+    //     final boolean pending = data.optBoolean("pending");
+    //     final boolean archived = data.optBoolean("archived");
+    //     final boolean canonical = data.optBoolean("canonical");
+    //
+    //     final JSONArray users = data.getJSONArray("users");
+    //     final int usersLen = users.length();
+    //     final JSONArray leftusers = data.optJSONArray("left_users");
+    //     final int leftusersLen = leftusers == null ? 0 : leftusers.length();
     //     final JSONArray admins = data.getJSONArray("admin_user_ids");
-    //     final List<Long> adminIDs = new ArrayList<>();
-    //     for (int j = 0; j < admins.length(); ++j) {
-    //         adminIDs.add(admins.getLong(j));
+    //     final int adminsLen = admins.length();
+    //
+    //     final ProfileModel[] userModels = new ProfileModel[usersLen];
+    //     for (int j = 0; j < usersLen; ++j) {
+    //         final JSONObject userObject = users.getJSONObject(j);
+    //         userModels[j] = new ProfileModel(userObject.optBoolean("is_private"),
+    //                                          false,
+    //                                          userObject.optBoolean("is_verified"),
+    //                                          String.valueOf(userObject.get("pk")),
+    //                                          userObject.optString("username"), // optional cuz fb users
+    //                                          userObject.getString("full_name"),
+    //                                          null, null,
+    //                                          userObject.getString("profile_pic_url"),
+    //                                          null, 0, 0, 0, false, false, false, false, false);
+    //     }
+    //
+    //     final ProfileModel[] leftuserModels = new ProfileModel[leftusersLen];
+    //     for (int j = 0; j < leftusersLen; ++j) {
+    //         final JSONObject userObject = leftusers.getJSONObject(j);
+    //         leftuserModels[j] = new ProfileModel(userObject.getBoolean("is_private"),
+    //                                              false,
+    //                                              userObject.optBoolean("is_verified"),
+    //                                              String.valueOf(userObject.get("pk")),
+    //                                              userObject.getString("username"),
+    //                                              userObject.getString("full_name"),
+    //                                              null, null,
+    //                                              userObject.getString("profile_pic_url"),
+    //                                              null, 0, 0, 0, false, false, false, false, false);
+    //     }
+    //
+    //     final Long[] adminIDs = new Long[adminsLen];
+    //     for (int j = 0; j < adminsLen; ++j) {
+    //         adminIDs[j] = admins.getLong(j);
     //     }
     //
     //     final JSONArray items = data.getJSONArray("items");
     //     final int itemsLen = items.length();
     //
-    //     final List<DirectItemModel> itemModels = new ArrayList<>(itemsLen);
+    //     final ArrayList<DirectItemModel> itemModels = new ArrayList<>(itemsLen);
     //     for (int i = 0; i < itemsLen; ++i) {
     //         final JSONObject itemObject = items.getJSONObject(i);
     //
     //         CharSequence text = null;
     //         ProfileModel profileModel = null;
-    //         DMItemMediaModel mediaModel = null;
+    //         DirectItemModel.DirectItemLinkModel linkModel = null;
+    //         DirectItemModel.DirectItemMediaModel directMedia = null;
+    //         DirectItemModel.DirectItemReelShareModel reelShareModel = null;
+    //         DirectItemModel.DirectItemActionLogModel actionLogModel = null;
+    //         DirectItemModel.DirectItemAnimatedMediaModel animatedMediaModel = null;
+    //         DirectItemModel.DirectItemVoiceMediaModel voiceMediaModel = null;
+    //         DirectItemModel.DirectItemRavenMediaModel ravenMediaModel = null;
+    //         DirectItemModel.DirectItemVideoCallEventModel videoCallEventModel = null;
     //
     //         final DirectItemType itemType = getDirectItemType(itemObject.getString("item_type"));
     //         switch (itemType) {
     //             case ANIMATED_MEDIA: {
     //                 final JSONObject animatedMedia = itemObject.getJSONObject("animated_media");
     //                 final JSONObject stickerImage = animatedMedia.getJSONObject("images").getJSONObject("fixed_height");
-    //                 mediaModel = new DirectItemAnimatedMediaModel(
+    //
+    //                 animatedMediaModel = new DirectItemModel.DirectItemAnimatedMediaModel(
     //                         animatedMedia.getBoolean("is_random"),
     //                         animatedMedia.getBoolean("is_sticker"),
     //                         animatedMedia.getString("id"),
@@ -330,9 +354,11 @@ public final class ResponseBodyUtils {
     //                         stickerImage.getInt("width"));
     //             }
     //             break;
+    //
     //             case VOICE_MEDIA: {
     //                 final JSONObject voiceMedia = itemObject.getJSONObject("voice_media").getJSONObject("media");
     //                 final JSONObject audio = voiceMedia.getJSONObject("audio");
+    //
     //                 int[] waveformData = null;
     //                 final JSONArray waveformDataArray = audio.optJSONArray("waveform_data");
     //                 if (waveformDataArray != null) {
@@ -343,35 +369,40 @@ public final class ResponseBodyUtils {
     //                         waveformData[j] = (int) (waveformDataArray.optDouble(j) * 10);
     //                     }
     //                 }
-    //                 mediaModel = new DirectItemVoiceMediaModel(
+    //
+    //                 voiceMediaModel = new DirectItemModel.DirectItemVoiceMediaModel(
     //                         voiceMedia.getString("id"),
     //                         audio.getString("audio_src"),
     //                         audio.getLong("duration"),
     //                         waveformData);
     //             }
     //             break;
+    //
     //             case LINK: {
     //                 final JSONObject linkObj = itemObject.getJSONObject("link");
-    //                 DirectItemLinkContext itemLinkContext = null;
+    //
+    //                 DirectItemModel.DirectItemLinkContext itemLinkContext = null;
     //                 final JSONObject linkContext = linkObj.optJSONObject("link_context");
     //                 if (linkContext != null) {
-    //                     itemLinkContext = new DirectItemLinkContext(
+    //                     itemLinkContext = new DirectItemModel.DirectItemLinkContext(
     //                             linkContext.getString("link_url"),
     //                             linkContext.optString("link_title"),
     //                             linkContext.optString("link_summary"),
     //                             linkContext.optString("link_image_url")
     //                     );
     //                 }
-    //                 mediaModel = new DirectItemLinkModel(
+    //
+    //                 linkModel = new DirectItemModel.DirectItemLinkModel(
     //                         linkObj.getString("text"),
     //                         linkObj.getString("client_context"),
     //                         linkObj.optString("mutation_token"),
     //                         itemLinkContext);
     //             }
     //             break;
+    //
     //             case REEL_SHARE: {
     //                 final JSONObject reelShare = itemObject.getJSONObject("reel_share");
-    //                 mediaModel = new DirectItemReelShareModel(
+    //                 reelShareModel = new DirectItemModel.DirectItemReelShareModel(
     //                         reelShare.optBoolean("is_reel_persisted"),
     //                         reelShare.getLong("reel_owner_id"),
     //                         reelShare.getJSONObject("media").getJSONObject("user").getString("username"),
@@ -383,34 +414,39 @@ public final class ResponseBodyUtils {
     //                         getDirectMediaModel(reelShare.optJSONObject("media")));
     //             }
     //             break;
+    //
     //             case RAVEN_MEDIA: {
     //                 final JSONObject visualMedia = itemObject.getJSONObject("visual_media");
+    //
     //                 final JSONArray seenUserIdsArray = visualMedia.getJSONArray("seen_user_ids");
     //                 final int seenUsersLen = seenUserIdsArray.length();
     //                 final String[] seenUserIds = new String[seenUsersLen];
     //                 for (int j = 0; j < seenUsersLen; j++)
     //                     seenUserIds[j] = seenUserIdsArray.getString(j);
-    //                 RavenExpiringMediaActionSummary expiringSummaryModel = null;
+    //
+    //                 DirectItemModel.RavenExpiringMediaActionSummaryModel expiringSummaryModel = null;
     //                 final JSONObject actionSummary = visualMedia.optJSONObject("expiring_media_action_summary");
     //                 if (actionSummary != null)
-    //                     expiringSummaryModel = new RavenExpiringMediaActionSummary(
+    //                     expiringSummaryModel = new DirectItemModel.RavenExpiringMediaActionSummaryModel(
     //                             actionSummary.getLong("timestamp"), actionSummary.getInt("count"),
     //                             getExpiringMediaType(actionSummary.getString("type")));
-    //                 final RavenMediaViewMode viewType;
+    //
+    //                 final RavenMediaViewType viewType;
     //                 final String viewMode = visualMedia.getString("view_mode");
     //                 switch (viewMode) {
     //                     case "replayable":
-    //                         viewType = RavenMediaViewMode.REPLAYABLE;
+    //                         viewType = RavenMediaViewType.REPLAYABLE;
     //                         break;
     //                     case "permanent":
-    //                         viewType = RavenMediaViewMode.PERMANENT;
+    //                         viewType = RavenMediaViewType.PERMANENT;
     //                         break;
     //                     case "once":
     //                     default:
-    //                         viewType = RavenMediaViewMode.ONCE;
+    //                         viewType = RavenMediaViewType.ONCE;
     //                 }
-    //                 mediaModel = new DirectItemRavenMediaModel(
-    //                         visualMedia.optLong(viewType == RavenMediaViewMode.PERMANENT ? "url_expire_at_secs" : "replay_expiring_at_us"),
+    //
+    //                 ravenMediaModel = new DirectItemModel.DirectItemRavenMediaModel(
+    //                         visualMedia.optLong(viewType == RavenMediaViewType.PERMANENT ? "url_expire_at_secs" : "replay_expiring_at_us"),
     //                         visualMedia.optInt("playback_duration_secs"),
     //                         visualMedia.getInt("seen_count"),
     //                         seenUserIds,
@@ -420,14 +456,16 @@ public final class ResponseBodyUtils {
     //
     //             }
     //             break;
+    //
     //             case VIDEO_CALL_EVENT: {
     //                 final JSONObject videoCallEvent = itemObject.getJSONObject("video_call_event");
-    //                 mediaModel = new DirectItemVideoCallEventModel(videoCallEvent.getLong("vc_id"),
-    //                                                                videoCallEvent.optBoolean("thread_has_audio_only_call"),
-    //                                                                videoCallEvent.getString("action"),
-    //                                                                videoCallEvent.getString("description"));
+    //                 videoCallEventModel = new DirectItemModel.DirectItemVideoCallEventModel(videoCallEvent.optLong("vc_id"),
+    //                                                                                         videoCallEvent.optBoolean("thread_has_audio_only_call"),
+    //                                                                                         videoCallEvent.getString("action"),
+    //                                                                                         videoCallEvent.getString("description"));
     //             }
     //             break;
+    //
     //             case PROFILE: {
     //                 final JSONObject profile = itemObject.getJSONObject("profile");
     //                 profileModel = new ProfileModel(profile.getBoolean("is_private"),
@@ -438,13 +476,15 @@ public final class ResponseBodyUtils {
     //                                                 profile.getString("full_name"),
     //                                                 null, null,
     //                                                 profile.getString("profile_pic_url"),
-    //                                                 null, 0, 0, 0, false, false, false, false);
+    //                                                 null, 0, 0, 0, false, false, false, false, false);
     //             }
     //             break;
+    //
     //             case PLACEHOLDER:
     //                 final JSONObject placeholder = itemObject.getJSONObject("placeholder");
     //                 text = placeholder.getString("title") + "<br><small>" + placeholder.getString("message") + "</small>";
     //                 break;
+    //
     //             case ACTION_LOG:
     //                 if (inThreadView && itemObject.optInt("hide_in_thread", 0) != 0)
     //                     continue;
@@ -457,29 +497,35 @@ public final class ResponseBodyUtils {
     //                             + desc.substring(boldItem.getInt("start") + q * 7, boldItem.getInt("end") + q * 7)
     //                             + "</b>" + desc.substring(boldItem.getInt("end") + q * 7);
     //                 }
-    //                 mediaModel = new DirectItemActionLogModel(desc);
+    //                 actionLogModel = new DirectItemModel.DirectItemActionLogModel(desc);
     //                 break;
+    //
     //             case MEDIA_SHARE:
-    //                 mediaModel = getDirectMediaModel(itemObject.getJSONObject("media_share"));
+    //                 directMedia = getDirectMediaModel(itemObject.getJSONObject("media_share"));
     //                 break;
+    //
     //             case CLIP:
-    //                 mediaModel = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
+    //                 directMedia = getDirectMediaModel(itemObject.getJSONObject("clip").getJSONObject("clip"));
     //                 break;
+    //
     //             case FELIX_SHARE:
-    //                 mediaModel = getDirectMediaModel(itemObject.getJSONObject("felix_share").getJSONObject("video"));
+    //                 directMedia = getDirectMediaModel(itemObject.getJSONObject("felix_share").getJSONObject("video"));
     //                 break;
+    //
     //             case MEDIA:
-    //                 mediaModel = getDirectMediaModel(itemObject.optJSONObject("media"));
+    //                 directMedia = getDirectMediaModel(itemObject.optJSONObject("media"));
     //                 break;
+    //
     //             case LIKE:
     //                 text = itemObject.getString("like");
     //                 break;
+    //
     //             case STORY_SHARE:
     //                 final JSONObject storyShare = itemObject.getJSONObject("story_share");
     //                 if (!storyShare.has("media"))
     //                     text = "<small>" + storyShare.optString("message") + "</small>";
     //                 else {
-    //                     mediaModel = new DirectItemReelShareModel(
+    //                     reelShareModel = new DirectItemModel.DirectItemReelShareModel(
     //                             storyShare.optBoolean("is_reel_persisted"),
     //                             storyShare.getJSONObject("media").getJSONObject("user").getLong("pk"),
     //                             storyShare.getJSONObject("media").getJSONObject("user").getString("username"),
@@ -491,6 +537,7 @@ public final class ResponseBodyUtils {
     //                             getDirectMediaModel(storyShare.optJSONObject("media")));
     //                 }
     //                 break;
+    //
     //             case TEXT:
     //                 if (!itemObject.has("text"))
     //                     Log.d("AWAISKING_APP", "itemObject: " + itemObject); // todo
@@ -514,49 +561,40 @@ public final class ResponseBodyUtils {
     //                 liked,
     //                 itemType,
     //                 text,
+    //                 linkModel,
     //                 profileModel,
-    //                 mediaModel));
+    //                 reelShareModel,
+    //                 directMedia,
+    //                 actionLogModel,
+    //                 voiceMediaModel,
+    //                 ravenMediaModel,
+    //                 videoCallEventModel,
+    //                 animatedMediaModel));
     //     }
     //
-    //     return new InboxThreadModel(readState,
-    //                                 data.getString("thread_id"),
-    //                                 data.getString("thread_v2_id"),
-    //                                 data.getString("thread_type"),
-    //                                 data.getString("thread_title"),
-    //                                 data.optString("newest_cursor"),
-    //                                 data.optString("oldest_cursor"),
-    //                                 data.has("next_cursor") ? data.getString("next_cursor") : null,
-    //                                 data.has("prev_cursor") ? data.getString("prev_cursor") : null,
+    //     itemModels.trimToSize();
+    //
+    //     return new InboxThreadModel(readState, threadId, threadV2Id, threadType, threadTitle,
+    //                                 threadNewestCursor, threadOldestCursor, threadNextCursor, threadPrevCursor,
     //                                 null, // todo
-    //                                 users,
-    //                                 leftUsers,
-    //                                 adminIDs,
-    //                                 itemModels,
-    //                                 data.optBoolean("muted"),
-    //                                 data.optBoolean("is_pin"),
-    //                                 data.optBoolean("named"),
-    //                                 data.optBoolean("canonical"),
-    //                                 data.optBoolean("pending"),
-    //                                 data.getBoolean("has_older"),
-    //                                 data.optLong("read_state", 0),
-    //                                 data.optBoolean("is_spam"),
-    //                                 data.optBoolean("is_group"),
-    //                                 data.optBoolean("archived"),
-    //                                 data.optLong("last_activity_at"));
+    //                                 userModels, leftuserModels, adminIDs,
+    //                                 itemModels.toArray(new DirectItemModel[0]),
+    //                                 muted, isPin, named, canonical,
+    //                                 pending, threadHasOlder, unreadCount, isSpam, isGroup, archived, lastActivityAt);
     // }
-
-    // private static ActionType getExpiringMediaType(final String type) {
-    //     if ("raven_sent".equals(type)) return ActionType.SENT;
-    //     if ("raven_opened".equals(type)) return ActionType.OPENED;
-    //     if ("raven_blocked".equals(type)) return ActionType.BLOCKED;
-    //     if ("raven_sending".equals(type)) return ActionType.SENDING;
-    //     if ("raven_replayed".equals(type)) return ActionType.REPLAYED;
-    //     if ("raven_delivered".equals(type)) return ActionType.DELIVERED;
-    //     if ("raven_suggested".equals(type)) return ActionType.SUGGESTED;
-    //     if ("raven_screenshot".equals(type)) return ActionType.SCREENSHOT;
-    //     if ("raven_cannot_deliver".equals(type)) return ActionType.CANNOT_DELIVER;
+    //
+    // private static RavenExpiringMediaType getExpiringMediaType(final String type) {
+    //     if ("raven_sent".equals(type)) return RavenExpiringMediaType.RAVEN_SENT;
+    //     if ("raven_opened".equals(type)) return RavenExpiringMediaType.RAVEN_OPENED;
+    //     if ("raven_blocked".equals(type)) return RavenExpiringMediaType.RAVEN_BLOCKED;
+    //     if ("raven_sending".equals(type)) return RavenExpiringMediaType.RAVEN_SENDING;
+    //     if ("raven_replayed".equals(type)) return RavenExpiringMediaType.RAVEN_REPLAYED;
+    //     if ("raven_delivered".equals(type)) return RavenExpiringMediaType.RAVEN_DELIVERED;
+    //     if ("raven_suggested".equals(type)) return RavenExpiringMediaType.RAVEN_SUGGESTED;
+    //     if ("raven_screenshot".equals(type)) return RavenExpiringMediaType.RAVEN_SCREENSHOT;
+    //     if ("raven_cannot_deliver".equals(type)) return RavenExpiringMediaType.RAVEN_CANNOT_DELIVER;
     //     //if ("raven_unknown".equals(type)) [default?]
-    //     return ActionType.UNKNOWN;
+    //     return RavenExpiringMediaType.RAVEN_UNKNOWN;
     // }
 
     public static FeedModel parseItem(final JSONObject itemJson) throws JSONException {
@@ -590,6 +628,7 @@ public final class ResponseBodyUtils {
                     0,
                     0,
                     following,
+                    false,
                     restricted,
                     false,
                     requested);
@@ -606,7 +645,8 @@ public final class ResponseBodyUtils {
                 .setPostId(itemJson.getString(Constants.EXTRAS_ID))
                 .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(itemJson) : null)
                 .setShortCode(itemJson.getString("code"))
-                .setPostCaption(captionJson != null ? captionJson.optString("text") : null)
+                .setPostCaption(captionJson != null ? captionJson.optString("text") : "")
+                .setCaptionId(captionJson != null ? captionJson.optString("pk") : null)
                 .setCommentsCount(itemJson.optInt("comment_count"))
                 .setTimestamp(itemJson.optLong("taken_at", -1))
                 .setLiked(itemJson.optBoolean("has_liked"))
@@ -627,7 +667,9 @@ public final class ResponseBodyUtils {
                 break;
             case MEDIA_TYPE_SLIDER:
                 final List<PostChild> childPosts = getChildPosts(itemJson);
-                feedModelBuilder.setSliderItems(childPosts);
+                feedModelBuilder.setSliderItems(childPosts)
+                                .setImageHeight(childPosts.get(0).getHeight())
+                                .setImageWidth(childPosts.get(0).getWidth());
                 break;
         }
         return feedModelBuilder.build();
@@ -670,6 +712,7 @@ public final class ResponseBodyUtils {
                     0,
                     0,
                     0,
+                    false,
                     false,
                     false,
                     false,
@@ -743,7 +786,9 @@ public final class ResponseBodyUtils {
                 final JSONArray children = sidecar.optJSONArray("edges");
                 if (children != null) {
                     final List<PostChild> sliderItems = getSliderItems(children);
-                    feedModelBuilder.setSliderItems(sliderItems);
+                    feedModelBuilder.setSliderItems(sliderItems)
+                            .setImageHeight(sliderItems.get(0).getHeight())
+                            .setImageWidth(sliderItems.get(0).getWidth());
                 }
             }
         }
@@ -830,6 +875,134 @@ public final class ResponseBodyUtils {
             sliderItems.add(sliderItem);
         }
         return sliderItems;
+    }
+
+    public static StoryModel parseStoryItem(final JSONObject data,
+                                            final boolean isLoc,
+                                            final boolean isHashtag,
+                                            final String localUsername) throws JSONException {
+        final boolean isVideo = data.has("video_duration");
+        final StoryModel model = new StoryModel(data.getString("id"),
+                data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
+                        .getString("url"), null,
+                isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                data.optLong("taken_at", 0),
+                (isLoc || isHashtag)
+                        ? data.getJSONObject("user").getString("username")
+                        : localUsername,
+                data.getJSONObject("user").getString("pk"),
+                data.optBoolean("can_reply"));
+
+        if (data.getJSONObject("image_versions2").getJSONArray("candidates").length() > 1) {
+            model.setThumbnail(data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(1)
+                    .getString("url"));
+        }
+
+        final JSONArray videoResources = data.optJSONArray("video_versions");
+        if (isVideo && videoResources != null)
+            model.setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
+
+        if (data.has("story_feed_media")) {
+            model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_code"));
+        }
+
+        // TODO: this may not be limited to spotify
+        if (!data.isNull("story_app_attribution"))
+            model.setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
+
+        if (data.has("story_polls")) {
+            final JSONArray storyPolls = data.optJSONArray("story_polls");
+            JSONObject tappableObject = null;
+            if (storyPolls != null) {
+                tappableObject = storyPolls.getJSONObject(0).optJSONObject("poll_sticker");
+            }
+            if (tappableObject != null) model.setPoll(new PollModel(
+                    String.valueOf(tappableObject.getLong("poll_id")),
+                    tappableObject.getString("question"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
+                    tappableObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
+                    tappableObject.optInt("viewer_vote", -1)
+            ));
+        }
+        if (data.has("story_questions")) {
+            final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0)
+                    .optJSONObject("question_sticker");
+            if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
+                model.setQuestion(new QuestionModel(
+                        String.valueOf(tappableObject.getLong("question_id")),
+                        tappableObject.getString("question")
+                ));
+        }
+        if (data.has("story_quizs")) {
+            JSONObject tappableObject = data.getJSONArray("story_quizs").getJSONObject(0).optJSONObject("quiz_sticker");
+            if (tappableObject != null) {
+                String[] choices = new String[tappableObject.getJSONArray("tallies").length()];
+                Long[] counts = new Long[choices.length];
+                for (int q = 0; q < choices.length; ++q) {
+                    JSONObject tempchoice = tappableObject.getJSONArray("tallies").getJSONObject(q);
+                    choices[q] = (q == tappableObject.getInt("correct_answer") ? "*** " : "")
+                            + tempchoice.getString("text");
+                    counts[q] = tempchoice.getLong("count");
+                }
+                model.setQuiz(new QuizModel(
+                        String.valueOf(tappableObject.getLong("quiz_id")),
+                        tappableObject.getString("question"),
+                        choices,
+                        counts,
+                        tappableObject.optInt("viewer_answer", -1)
+                ));
+            }
+        }
+        if (data.has("story_cta") && data.has("link_text")) {
+            JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
+            String swipeUpUrl = tappableObject.getString("webUri");
+            if (swipeUpUrl.startsWith("http")) {
+                model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+            }
+        }
+        if (data.has("story_sliders")) {
+            final JSONObject tappableObject = data.getJSONArray("story_sliders").getJSONObject(0)
+                    .optJSONObject("slider_sticker");
+            if (tappableObject != null)
+                model.setSlider(new SliderModel(
+                        String.valueOf(tappableObject.getLong("slider_id")),
+                        tappableObject.getString("question"),
+                        tappableObject.getString("emoji"),
+                        tappableObject.getBoolean("viewer_can_vote"),
+                        tappableObject.getDouble("slider_vote_average"),
+                        tappableObject.getInt("slider_vote_count"),
+                        tappableObject.optDouble("viewer_vote")
+                ));
+        }
+        JSONArray hashtags = data.optJSONArray("story_hashtags");
+        JSONArray locations = data.optJSONArray("story_locations");
+        JSONArray atmarks = data.optJSONArray("reel_mentions");
+        String[] mentions = new String[(hashtags == null ? 0 : hashtags.length())
+                + (atmarks == null ? 0 : atmarks.length())
+                + (locations == null ? 0 : locations.length())];
+        if (hashtags != null) {
+            for (int h = 0; h < hashtags.length(); ++h) {
+                mentions[h] = "#" + hashtags.getJSONObject(h).getJSONObject("hashtag").getString("name");
+            }
+        }
+        if (atmarks != null) {
+            for (int h = 0; h < atmarks.length(); ++h) {
+                mentions[h + (hashtags == null ? 0 : hashtags.length())] =
+                        "@" + atmarks.getJSONObject(h).getJSONObject("user").getString("username");
+            }
+        }
+        if (locations != null) {
+            for (int h = 0; h < locations.length(); ++h) {
+                mentions[h + (hashtags == null ? 0 : hashtags.length()) + (atmarks == null ? 0 : atmarks.length())] =
+                        locations.getJSONObject(h).getJSONObject("location").getString("short_name")
+                                + " (" + locations.getJSONObject(h).getJSONObject("location").getLong("pk") + ")";
+            }
+        }
+        if (mentions.length != 0) model.setMentions(mentions);
+
+        return model;
     }
 
     public static String getThumbUrl(final ImageVersions2 imageVersions2) {

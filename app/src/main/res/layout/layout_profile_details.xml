@@ -14,49 +14,100 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:transitionName="profile_pic"
+        android:visibility="invisible"
         app:actualImageScaleType="centerCrop"
         app:layout_constraintEnd_toStartOf="@id/mainPostCount"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/fav_chip"
         tools:background="@mipmap/ic_launcher" />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <com.google.android.material.chip.Chip
         android:id="@+id/mainPostCount"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/profile_chip_size"
+        android:layout_marginStart="4dp"
+        android:clickable="false"
         android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        app:layout_constraintBottom_toBottomOf="@id/mainProfileImage"
-        app:layout_constraintEnd_toStartOf="@id/mainFollowers"
+        android:visibility="gone"
+        app:chipBackgroundColor="@null"
         app:layout_constraintStart_toEndOf="@id/mainProfileImage"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="35\nPosts" />
+        tools:text="35 Posts"
+        tools:visibility="visible" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/mainFollowers"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="?selectableItemBackgroundBorderless"
-        android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        app:layout_constraintBottom_toBottomOf="@id/mainProfileImage"
-        app:layout_constraintEnd_toStartOf="@id/mainFollowing"
-        app:layout_constraintStart_toEndOf="@id/mainPostCount"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="68\nFollowers" />
-
-    <androidx.appcompat.widget.AppCompatTextView
+    <com.google.android.material.chip.Chip
         android:id="@+id/mainFollowing"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="?selectableItemBackgroundBorderless"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/profile_chip_size"
+        android:layout_marginStart="4dp"
+        android:clickable="false"
         android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        app:layout_constraintBottom_toBottomOf="@id/mainProfileImage"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        app:chipBackgroundColor="@null"
+        app:layout_constraintStart_toEndOf="@id/mainPostCount"
+        app:layout_constraintTop_toTopOf="@id/mainPostCount"
+        app:rippleColor="@color/grey_400"
+        tools:text="10 Following"
+        tools:visibility="visible" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/mainFollowers"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/profile_chip_size"
+        android:layout_marginStart="4dp"
+        android:clickable="false"
+        android:gravity="center"
+        android:visibility="gone"
+        app:chipBackgroundColor="@null"
+        app:layout_constraintStart_toEndOf="@id/mainProfileImage"
+        app:layout_constraintTop_toBottomOf="@id/mainPostCount"
+        app:rippleColor="@color/grey_400"
+        tools:text="10 Followers"
+        tools:visibility="visible" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/mainStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/profile_chip_size"
+        android:layout_marginStart="4dp"
+        android:clickable="false"
+        android:gravity="center"
+        android:visibility="gone"
+        app:chipBackgroundColor="@null"
         app:layout_constraintStart_toEndOf="@id/mainFollowers"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="64\nFollowing" />
+        app:layout_constraintTop_toTopOf="@id/mainFollowers"
+        tools:text="omg what do u expect"
+        tools:visibility="visible" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/fav_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/profile_chip_size"
+        android:layout_marginStart="4dp"
+        android:text="@string/add_to_favorites"
+        android:visibility="gone"
+        app:chipBackgroundColor="@null"
+        app:chipIcon="@drawable/ic_outline_star_plus_24"
+        app:chipIconTint="@color/yellow_800"
+        app:layout_constraintStart_toEndOf="@id/mainProfileImage"
+        app:layout_constraintTop_toBottomOf="@id/mainFollowers"
+        app:rippleColor="@color/yellow_400"
+        tools:visibility="visible" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/btnTagged"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/profile_chip_size"
+        android:layout_marginStart="4dp"
+        android:text="@string/tagged"
+        android:visibility="gone"
+        app:chipBackgroundColor="@null"
+        app:chipIcon="@drawable/ic_outline_person_pin_24"
+        app:chipIconTint="@color/deep_orange_800"
+        app:layout_constraintStart_toEndOf="@id/fav_chip"
+        app:layout_constraintTop_toTopOf="@id/fav_chip"
+        app:rippleColor="@color/deep_orange_400"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/mainFullName"
@@ -70,7 +121,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mainProfileImage"
+        app:layout_constraintTop_toBottomOf="@id/fav_chip"
         tools:text="Austin Huang" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -84,7 +135,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/mainFullName"
         app:layout_constraintStart_toEndOf="@id/mainFullName"
-        app:layout_constraintTop_toBottomOf="@id/mainProfileImage"
+        app:layout_constraintTop_toBottomOf="@id/fav_chip"
         app:srcCompat="@drawable/verified"
         tools:visibility="visible" />
 
@@ -114,7 +165,7 @@
         android:id="@+id/mainBiography"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:padding="8dp"
         android:background="?android:selectableItemBackground"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintBottom_toTopOf="@id/mainUrl"
@@ -151,27 +202,10 @@
         app:iconGravity="top"
         app:iconTint="@color/deep_purple_200"
         app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
-        app:layout_constraintEnd_toStartOf="@id/btnTagged"
+        app:layout_constraintEnd_toStartOf="@id/btnSaved"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/mainUrl"
         app:rippleColor="@color/purple_200"
-        tools:visibility="visible" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnTagged"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/tagged"
-        android:textColor="@color/deep_orange_600"
-        android:visibility="gone"
-        app:icon="@drawable/ic_outline_person_pin_24"
-        app:iconGravity="top"
-        app:iconTint="@color/deep_orange_600"
-        app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
-        app:layout_constraintEnd_toStartOf="@id/btnSaved"
-        app:layout_constraintStart_toEndOf="@id/btnFollow"
-        app:layout_constraintTop_toBottomOf="@id/mainUrl"
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
@@ -187,7 +221,7 @@
         app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
         app:layout_constraintEnd_toStartOf="@id/btnLiked"
-        app:layout_constraintStart_toEndOf="@id/btnTagged"
+        app:layout_constraintStart_toEndOf="@id/btnFollow"
         app:layout_constraintTop_toBottomOf="@id/mainUrl"
         app:rippleColor="@color/blue_A400"
         tools:visibility="visible" />
@@ -204,7 +238,6 @@
         app:iconGravity="top"
         app:iconTint="@color/red_600"
         app:layout_constraintBottom_toTopOf="@id/highlights_barrier"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnDM"
         app:layout_constraintStart_toEndOf="@id/btnSaved"
         app:layout_constraintTop_toBottomOf="@id/mainUrl"
@@ -234,7 +267,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="btnTagged, btnSaved, btnLiked, btnFollow, btnDM" />
+        app:constraint_referenced_ids="btnSaved, btnLiked, btnFollow, btnDM" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/highlightsList"

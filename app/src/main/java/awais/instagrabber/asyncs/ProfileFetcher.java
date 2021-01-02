@@ -72,6 +72,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, ProfileModel> {
                         user.getJSONObject("edge_followed_by").getLong("count"),
                         user.getJSONObject("edge_follow").getLong("count"),
                         user.optBoolean("followed_by_viewer"),
+                        user.optBoolean("follows_viewer"),
                         user.optBoolean("restricted_by_viewer"),
                         user.optBoolean("blocked_by_viewer"),
                         user.optBoolean("requested_by_viewer"));

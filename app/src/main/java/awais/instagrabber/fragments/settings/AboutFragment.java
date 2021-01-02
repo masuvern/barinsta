@@ -88,9 +88,10 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setSummary(R.string.about_feedback_summary);
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(p -> {
-            final Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse(getString(R.string.about_feedback_summary)
-             + "?body=Please%20note%20that%20your%20email%20address%20and%20the%20entire%20content%20will%20be%20published%20onto%20GitHub%20issues.%20If%20you%20do%20not%20wish%20to%20do%20that%2C%20use%20other%20contact%20methods%20instead."));
+            final Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("message/rfc822")
+                    .putExtra(Intent.EXTRA_EMAIL, getString(R.string.about_feedback_summary))
+                    .putExtra(Intent.EXTRA_TEXT, "Please note that your email address and the entire content will be published onto GitHub issues. If you do not wish to do that, use other contact methods instead.");
             if (intent.resolveActivity(context.getPackageManager()) != null) startActivity(intent);
             return true;
         });

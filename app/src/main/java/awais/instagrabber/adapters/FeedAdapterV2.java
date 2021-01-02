@@ -46,7 +46,7 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
 
         @Override
         public boolean areContentsTheSame(@NonNull final FeedModel oldItem, @NonNull final FeedModel newItem) {
-            return oldItem.getPostId().equals(newItem.getPostId());
+            return oldItem.getPostId().equals(newItem.getPostId()) && oldItem.getPostCaption().equals(newItem.getPostCaption());
         }
     };
     private final AdapterSelectionCallback adapterSelectionCallback = new AdapterSelectionCallback() {

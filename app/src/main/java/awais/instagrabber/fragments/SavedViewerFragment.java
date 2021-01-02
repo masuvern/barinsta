@@ -40,24 +40,26 @@ import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class SavedViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private FragmentSavedBinding binding;
-    private String username;
+    private String username, cookie, profileId;
     private ActionMode actionMode;
     private SwipeRefreshLayout root;
     private AppCompatActivity fragmentActivity;
-    private boolean shouldRefresh = true;
+    private boolean isLoggedIn, shouldRefresh = true;
     private PostItemType type;
-    private String profileId;
     private Set<FeedModel> selectedFeedModels;
     private FeedModel downloadFeedModel;
     private int downloadChildPosition = -1;
@@ -225,6 +227,8 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+        cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
         if (root != null) {
             shouldRefresh = false;
             return root;
@@ -281,7 +285,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     private void setupPosts() {
         binding.posts.setViewModelStoreOwner(this)
                      .setLifeCycleOwner(this)
-                     .setPostFetchService(new SavedPostFetchService(profileId, type))
+                     .setPostFetchService(new SavedPostFetchService(profileId, type, isLoggedIn))
                      .setLayoutPreferences(layoutPreferences)
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)

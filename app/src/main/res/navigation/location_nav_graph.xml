@@ -24,6 +24,21 @@
             app:nullable="false" />
     </action>
 
+    <include app:graph="@navigation/likes_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_likesViewerFragment"
+        app:destination="@id/likes_nav_graph">
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
+            app:nullable="false" />
+    </action>
+
     <action
         android:id="@+id/action_global_profileFragment"
         app:destination="@id/profile_nav_graph">
@@ -90,5 +105,13 @@
             android:name="username"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="isArchive"
+            app:argType="boolean"
+            app:nullable="false" />
+        <argument
+            android:name="isNotification"
+            app:argType="boolean"
+            app:nullable="false" />
     </fragment>
 </navigation>

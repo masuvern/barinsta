@@ -1,6 +1,5 @@
 package awais.instagrabber.webservices;
 
-import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,26 +8,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
+import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.models.stickers.PollModel;
-import awais.instagrabber.models.stickers.QuestionModel;
-import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.repositories.StoriesRepository;
+import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,7 +41,7 @@ public class StoriesService extends BaseService {
 
     private StoriesService() {
         final Retrofit retrofit = getRetrofitBuilder()
-                .baseUrl("https://www.instagram.com")
+                .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(StoriesRepository.class);
     }
@@ -56,35 +53,39 @@ public class StoriesService extends BaseService {
         return instance;
     }
 
-    public void getFeedStories(final ServiceCallback<List<FeedStoryModel>> callback) {
-        if (loadFromMock) {
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> {
-                final ClassLoader classLoader = getClass().getClassLoader();
-                if (classLoader == null) {
-                    Log.e(TAG, "getFeedStories: classLoader is null!");
+    public void fetch(final String mediaId,
+                      final ServiceCallback<StoryModel> callback) {
+        final Call<String> request = repository.fetch(mediaId);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call,
+                                   @NonNull final Response<String> response) {
+                if (callback == null) return;
+                final String body = response.body();
+                if (body == null) {
+                    callback.onSuccess(null);
                     return;
                 }
-                try (InputStream resourceAsStream = classLoader.getResourceAsStream("stories_response.json");
-                     Reader in = new InputStreamReader(resourceAsStream, StandardCharsets.UTF_8)) {
-                    final int bufferSize = 1024;
-                    final char[] buffer = new char[bufferSize];
-                    final StringBuilder out = new StringBuilder();
-                    int charsRead;
-                    while ((charsRead = in.read(buffer, 0, buffer.length)) > 0) {
-                        out.append(buffer, 0, charsRead);
-                    }
-                    parseStoriesBody(out.toString(), callback);
-                } catch (IOException e) {
-                    Log.e(TAG, "getFeedStories: ", e);
+                try {
+                    final JSONObject itemJson = new JSONObject(body).getJSONArray("items").getJSONObject(0);
+                    callback.onSuccess(ResponseBodyUtils.parseStoryItem(itemJson, false, false, null));
+                } catch (JSONException e) {
+                    callback.onFailure(e);
                 }
-            }, 1000);
-            return;
-        }
-        final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("query_hash", "b7b84d884400bc5aa7cfe12ae843a091");
-        queryMap.put("variables", "{\"only_stories\":true,\"stories_prefetch\":false,\"stories_video_dash_manifest\":false}");
-        final Call<String> response = repository.getStories(queryMap);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call,
+                                  @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    public void getFeedStories(final String csrfToken, final ServiceCallback<List<FeedStoryModel>> callback) {
+        final Call<String> response = repository.getFeedStories();
         response.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -106,29 +107,136 @@ public class StoriesService extends BaseService {
     private void parseStoriesBody(final String body, final ServiceCallback<List<FeedStoryModel>> callback) {
         try {
             final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
-            final JSONArray feedStoriesReel = new JSONObject(body)
-                    .getJSONObject("data")
-                    .getJSONObject(Constants.EXTRAS_USER)
-                    .getJSONObject("feed_reels_tray")
-                    .getJSONObject("edge_reels_tray_to_reel")
-                    .getJSONArray("edges");
+            final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
-                final JSONObject node = feedStoriesReel.getJSONObject(i).getJSONObject("node");
+                final JSONObject node = feedStoriesReel.getJSONObject(i);
                 final JSONObject user = node.getJSONObject(node.has("user") ? "user" : "owner");
                 final ProfileModel profileModel = new ProfileModel(false, false, false,
-                                                                   user.getString("id"),
+                                                                   user.getString("pk"),
                                                                    user.getString("username"),
                                                                    null, null, null,
                                                                    user.getString("profile_pic_url"),
-                                                                   null, 0, 0, 0, false, false, false, false);
+                                                                   null, 0, 0, 0, false, false, false, false, false);
                 final String id = node.getString("id");
-                final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == node.getLong("latest_reel_media");
-                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead));
+                final long timestamp = node.getLong("latest_reel_media");
+                final int mediaCount = node.getInt("media_count");
+                final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
+                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                StoryModel firstStoryModel = null;
+                if (itemJson != null) {
+                    firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
+                }
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel, mediaCount));
             }
-            callback.onSuccess(feedStoryModels);
+            callback.onSuccess(sort(feedStoryModels));
         } catch (JSONException e) {
             Log.e(TAG, "Error parsing json", e);
         }
+    }
+
+    public void fetchHighlights(final String profileId,
+                                final ServiceCallback<List<HighlightModel>> callback) {
+        final Call<String> request = repository.fetchHighlights(profileId);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                try {
+                    if (callback == null) {
+                        return;
+                    }
+                    final String body = response.body();
+                    if (TextUtils.isEmpty(body)) {
+                        callback.onSuccess(null);
+                        return;
+                    }
+                    final JSONArray highlightsReel = new JSONObject(body).getJSONArray("tray");
+
+                    final int length = highlightsReel.length();
+                    final List<HighlightModel> highlightModels = new ArrayList<>();
+
+                    for (int i = 0; i < length; ++i) {
+                        final JSONObject highlightNode = highlightsReel.getJSONObject(i);
+                        highlightModels.add(new HighlightModel(
+                                highlightNode.getString("title"),
+                                highlightNode.getString(Constants.EXTRAS_ID),
+                                highlightNode.getJSONObject("cover_media")
+                                        .getJSONObject("cropped_image_version")
+                                        .getString("url"),
+                                highlightNode.getLong("latest_reel_media"),
+                                highlightNode.getInt("media_count")
+                        ));
+                    }
+                    callback.onSuccess(highlightModels);
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    public void fetchArchive(final String maxId,
+                             final ServiceCallback<ArchiveFetchResponse> callback) {
+        final Map<String, String> form = new HashMap<>();
+        form.put("include_suggested_highlights", "false");
+        form.put("is_in_archive_home", "true");
+        form.put("include_cover", "1");
+        form.put("timezone_offset", String.valueOf(TimeZone.getDefault().getRawOffset() / 1000));
+        if (!TextUtils.isEmpty(maxId)) {
+            form.put("max_id", maxId); // NOT TESTED
+        }
+        final Call<String> request = repository.fetchArchive(form);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                try {
+                    if (callback == null) {
+                        return;
+                    }
+                    final String body = response.body();
+                    if (TextUtils.isEmpty(body)) {
+                        callback.onSuccess(null);
+                        return;
+                    }
+                    final JSONObject data = new JSONObject(body);
+                    final JSONArray highlightsReel = data.getJSONArray("items");
+
+                    final int length = highlightsReel.length();
+                    final List<HighlightModel> highlightModels = new ArrayList<>();
+
+                    for (int i = 0; i < length; ++i) {
+                        final JSONObject highlightNode = highlightsReel.getJSONObject(i);
+                        highlightModels.add(new HighlightModel(
+                                null,
+                                highlightNode.getString(Constants.EXTRAS_ID),
+                                highlightNode.getJSONObject("cover_image_version").getString("url"),
+                                highlightNode.getLong("latest_reel_media"),
+                                highlightNode.getInt("media_count")
+                        ));
+                    }
+                    callback.onSuccess(new ArchiveFetchResponse(highlightModels,
+                                                                data.getBoolean("more_available"),
+                                                                data.getString("max_id")));
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    callback.onFailure(e);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
     }
 
     public void getUserStory(final String id,
@@ -138,6 +246,7 @@ public class StoriesService extends BaseService {
                              final boolean highlight,
                              final ServiceCallback<List<StoryModel>> callback) {
         final String url = buildUrl(id, isLoc, isHashtag, highlight);
+        Log.d("austin_debug", url);
         final Call<String> userStoryCall = repository.getUserStory(Constants.I_USER_AGENT, url);
         userStoryCall.enqueue(new Callback<String>() {
             @Override
@@ -171,101 +280,7 @@ public class StoriesService extends BaseService {
                         final List<StoryModel> models = new ArrayList<>();
                         for (int i = 0; i < mediaLen; ++i) {
                             data = media.getJSONObject(i);
-                            final boolean isVideo = data.has("video_duration");
-                            final StoryModel model = new StoryModel(data.getString("id"),
-                                                                    data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
-                                                                        .getString("url"),
-                                                                    isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
-                                                                    data.optLong("taken_at", 0),
-                                                                    (isLoc || isHashtag)
-                                                                    ? data.getJSONObject("user").getString("username")
-                                                                    : localUsername,
-                                                                    data.getJSONObject("user").getString("pk"),
-                                                                    data.getBoolean("can_reply"));
-
-                            final JSONArray videoResources = data.optJSONArray("video_versions");
-                            if (isVideo && videoResources != null)
-                                model.setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
-
-                            if (data.has("story_feed_media")) {
-                                model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_code"));
-                            }
-
-                            // TODO: this may not be limited to spotify
-                            if (!data.isNull("story_app_attribution"))
-                                model.setSpotify(data.getJSONObject("story_app_attribution").optString("content_url").split("\\?")[0]);
-
-                            if (data.has("story_polls")) {
-                                final JSONArray storyPolls = data.optJSONArray("story_polls");
-                                JSONObject tappableObject = null;
-                                if (storyPolls != null) {
-                                    tappableObject = storyPolls.getJSONObject(0).optJSONObject("poll_sticker");
-                                }
-                                if (tappableObject != null) model.setPoll(new PollModel(
-                                        String.valueOf(tappableObject.getLong("poll_id")),
-                                        tappableObject.getString("question"),
-                                        tappableObject.getJSONArray("tallies").getJSONObject(0).getString("text"),
-                                        tappableObject.getJSONArray("tallies").getJSONObject(0).getInt("count"),
-                                        tappableObject.getJSONArray("tallies").getJSONObject(1).getString("text"),
-                                        tappableObject.getJSONArray("tallies").getJSONObject(1).getInt("count"),
-                                        tappableObject.optInt("viewer_vote", -1)
-                                ));
-                            }
-                            if (data.has("story_questions")) {
-                                final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0)
-                                                                      .optJSONObject("question_sticker");
-                                if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
-                                    model.setQuestion(new QuestionModel(
-                                            String.valueOf(tappableObject.getLong("question_id")),
-                                            tappableObject.getString("question")
-                                    ));
-                            }
-                            if (data.has("story_quizs")) {
-                                JSONObject tappableObject = data.getJSONArray("story_quizs").getJSONObject(0).optJSONObject("quiz_sticker");
-                                if (tappableObject != null) {
-                                    String[] choices = new String[tappableObject.getJSONArray("tallies").length()];
-                                    Long[] counts = new Long[choices.length];
-                                    for (int q = 0; q < choices.length; ++q) {
-                                        JSONObject tempchoice = tappableObject.getJSONArray("tallies").getJSONObject(q);
-                                        choices[q] = (q == tappableObject.getInt("correct_answer") ? "*** " : "")
-                                                + tempchoice.getString("text");
-                                        counts[q] = tempchoice.getLong("count");
-                                    }
-                                    model.setQuiz(new QuizModel(
-                                            String.valueOf(tappableObject.getLong("quiz_id")),
-                                            tappableObject.getString("question"),
-                                            choices,
-                                            counts,
-                                            tappableObject.optInt("viewer_answer", -1)
-                                    ));
-                                }
-                            }
-                            JSONArray hashtags = data.optJSONArray("story_hashtags");
-                            JSONArray locations = data.optJSONArray("story_locations");
-                            JSONArray atmarks = data.optJSONArray("reel_mentions");
-                            String[] mentions = new String[(hashtags == null ? 0 : hashtags.length())
-                                    + (atmarks == null ? 0 : atmarks.length())
-                                    + (locations == null ? 0 : locations.length())];
-                            if (hashtags != null) {
-                                for (int h = 0; h < hashtags.length(); ++h) {
-                                    mentions[h] = "#" + hashtags.getJSONObject(h).getJSONObject("hashtag").getString("name");
-                                }
-                            }
-                            if (atmarks != null) {
-                                for (int h = 0; h < atmarks.length(); ++h) {
-                                    mentions[h + (hashtags == null ? 0 : hashtags.length())] =
-                                            "@" + atmarks.getJSONObject(h).getJSONObject("user").getString("username");
-                                }
-                            }
-                            if (locations != null) {
-                                for (int h = 0; h < locations.length(); ++h) {
-                                    mentions[h + (hashtags == null ? 0 : hashtags.length()) + (atmarks == null ? 0 : atmarks.length())] =
-                                            locations.getJSONObject(h).getJSONObject("location").getString("short_name")
-                                                    + " (" + locations.getJSONObject(h).getJSONObject("location").getLong("pk") + ")";
-                                }
-                            }
-                            if (mentions.length != 0) model.setMentions(mentions);
-                            models.add(model);
+                            models.add(ResponseBodyUtils.parseStoryItem(data, isLoc, isHashtag, localUsername));
                         }
                         callback.onSuccess(models);
                     } else {
@@ -281,6 +296,83 @@ public class StoriesService extends BaseService {
                 callback.onFailure(t);
             }
         });
+    }
+
+    private void respondToSticker(final String storyId,
+                                  final String stickerId,
+                                  final String action,
+                                  final String arg1,
+                                  final String arg2,
+                                  final String userId,
+                                  final String csrfToken,
+                                  final ServiceCallback<StoryStickerResponse> callback) {
+        final Map<String, Object> form = new HashMap<>();
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("mutation_token", UUID.randomUUID().toString());
+        form.put("client_context", UUID.randomUUID().toString());
+        form.put("radio_type", "wifi-none");
+        form.put(arg1, arg2);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<StoryStickerResponse> request =
+                repository.respondToSticker(Constants.I_USER_AGENT, storyId, stickerId, action, signedForm);
+        request.enqueue(new Callback<StoryStickerResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<StoryStickerResponse> call,
+                                   @NonNull final Response<StoryStickerResponse> response) {
+                if (callback != null) {
+                    callback.onSuccess(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<StoryStickerResponse> call,
+                                  @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    // RespondAction.java
+    public void respondToQuestion(final String storyId,
+                                   final String stickerId,
+                                   final String answer,
+                                   final String userId,
+                                   final String csrfToken,
+                                   final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_question_response", "response", answer, userId, csrfToken, callback);
+    }
+
+    // QuizAction.java
+    public void respondToQuiz(final String storyId,
+                               final String stickerId,
+                               final int answer,
+                               final String userId,
+                               final String csrfToken,
+                               final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), userId, csrfToken, callback);
+    }
+
+    // VoteAction.java
+    public void respondToPoll(final String storyId,
+                               final String stickerId,
+                               final int answer,
+                               final String userId,
+                               final String csrfToken,
+                               final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
+    }
+
+    public void respondToSlider(final String storyId,
+                              final String stickerId,
+                              final double answer,
+                              final String userId,
+                              final String csrfToken,
+                              final ServiceCallback<StoryStickerResponse> callback) {
+        respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
     }
 
     private String buildUrl(final String id, final boolean isLoc, final boolean isHashtag, final boolean highlight) {
@@ -301,5 +393,48 @@ public class StoriesService extends BaseService {
             builder.append("/story/");
         }
         return builder.toString();
+    }
+
+    private List<FeedStoryModel> sort(final List<FeedStoryModel> list) {
+        final List<FeedStoryModel> listCopy = new ArrayList<>(list);
+        Collections.sort(listCopy, (o1, o2) -> {
+            int result;
+            switch (Utils.settingsHelper.getString(Constants.STORY_SORT)) {
+                case "1":
+                    result = o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
+                    break;
+                case "2":
+                    result = o1.getTimestamp() > o2.getTimestamp() ? 1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : -1);
+                    break;
+                default:
+                    result = 0;
+            }
+            return result;
+        });
+        return listCopy;
+    }
+
+    public class ArchiveFetchResponse {
+        private final List<HighlightModel> archives;
+        private final boolean hasNextPage;
+        private final String nextCursor;
+
+        public ArchiveFetchResponse(final List<HighlightModel> archives, final boolean hasNextPage, final String nextCursor) {
+            this.archives = archives;
+            this.hasNextPage = hasNextPage;
+            this.nextCursor = nextCursor;
+        }
+
+        public List<HighlightModel> getResult() {
+            return archives;
+        }
+
+        public boolean hasNextPage() {
+            return hasNextPage;
+        }
+
+        public String getNextCursor() {
+            return nextCursor;
+        }
     }
 }

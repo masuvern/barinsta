@@ -123,8 +123,8 @@
     <style name="AppTheme.Dark.MaterialDark" parent="AppTheme.Dark">
         <item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_600</item>
-        <item name="colorSecondary">@color/green_200</item>
-        <item name="colorSecondaryVariant">@color/green_500</item>
+        <item name="colorSecondary">@color/green_500</item>
+        <item name="colorSecondaryVariant">@color/green_200</item>
         <item name="android:windowBackground">@color/grey_600_a20</item>
         <item name="android:colorBackground">@color/grey_600_a20</item>
         <item name="colorSurface">@color/grey_900</item>

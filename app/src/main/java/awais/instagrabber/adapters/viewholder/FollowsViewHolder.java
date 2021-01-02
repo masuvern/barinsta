@@ -1,5 +1,6 @@
 package awais.instagrabber.adapters.viewholder;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
