@@ -1,0 +1,180 @@
+package awais.instagrabber.adapters.viewholder.directmessages;
+
+import android.view.Gravity;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
+import com.facebook.drawee.generic.RoundingParams;
+
+import awais.instagrabber.R;
+import awais.instagrabber.databinding.LayoutDmBaseBinding;
+import awais.instagrabber.databinding.LayoutDmReelShareBinding;
+import awais.instagrabber.interfaces.MentionClickListener;
+import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemReelShare;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.DirectUser;
+import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
+import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
+
+public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
+
+    private final LayoutDmReelShareBinding binding;
+    // private final int maxHeight;
+    // private final int maxWidth;
+    private final int dmRadiusSmall;
+    private final int messageMargin;
+
+    public DirectItemReelShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
+                                         @NonNull final LayoutDmReelShareBinding binding,
+                                         final ProfileModel currentUser,
+                                         final DirectThread thread,
+                                         final MentionClickListener mentionClickListener,
+                                         final View.OnClickListener onClickListener) {
+        super(baseBinding, currentUser, thread, onClickListener);
+        this.binding = binding;
+        dmRadiusSmall = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
+        // binding.tvMessage.setMentionClickListener(mentionClickListener);
+        messageMargin = Utils.convertDpToPx(4);
+        setItemView(binding.getRoot());
+    }
+
+    @Override
+    public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
+        removeBg();
+        final DirectItemReelShare reelShare = item.getReelShare();
+        final String type = reelShare.getType();
+        if (type == null) return;
+        final boolean isSelf = isSelf(item);
+        final DirectItemMedia media = reelShare.getMedia();
+        if (media == null) return;
+        final DirectUser user = media.getUser();
+        if (user == null) return;
+        final boolean expired = media.getMediaType() == null;
+        if (expired) {
+            binding.preview.setVisibility(View.GONE);
+            binding.typeIcon.setVisibility(View.GONE);
+            binding.quoteLine.setVisibility(View.GONE);
+            binding.reaction.setVisibility(View.GONE);
+        } else {
+            binding.preview.setVisibility(View.VISIBLE);
+            binding.typeIcon.setVisibility(View.VISIBLE);
+            binding.quoteLine.setVisibility(View.VISIBLE);
+            binding.reaction.setVisibility(View.VISIBLE);
+        }
+        setGravity(messageDirection, expired);
+        if (type.equals("reply")) {
+            setReply(messageDirection, reelShare, isSelf);
+        }
+        if (type.equals("reaction")) {
+            setReaction(messageDirection, reelShare, isSelf, expired);
+        }
+        if (type.equals("mention")) {
+            setMention(isSelf);
+        }
+        if (!expired) {
+            setPreview(media);
+        }
+    }
+
+    private void setGravity(final MessageDirection messageDirection, final boolean expired) {
+        final boolean isIncoming = messageDirection == MessageDirection.INCOMING;
+        binding.shareInfo.setGravity(isIncoming ? Gravity.START : Gravity.END);
+        if (!expired) {
+            binding.quoteLine.setVisibility(isIncoming ? View.VISIBLE : View.GONE);
+            binding.quoteLineEnd.setVisibility(isIncoming ? View.GONE : View.VISIBLE);
+        }
+        final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) binding.quoteLine.getLayoutParams();
+        layoutParams.horizontalBias = isIncoming ? 0 : 1;
+        final ConstraintLayout.LayoutParams messageLayoutParams = (ConstraintLayout.LayoutParams) binding.message.getLayoutParams();
+        messageLayoutParams.startToStart = isIncoming ? ConstraintLayout.LayoutParams.PARENT_ID : ConstraintLayout.LayoutParams.UNSET;
+        messageLayoutParams.endToEnd = isIncoming ? ConstraintLayout.LayoutParams.UNSET : ConstraintLayout.LayoutParams.PARENT_ID;
+        messageLayoutParams.setMarginStart(isIncoming ? messageMargin : 0);
+        messageLayoutParams.setMarginEnd(isIncoming ? 0 : messageMargin);
+        final ConstraintLayout.LayoutParams reactionLayoutParams = (ConstraintLayout.LayoutParams) binding.reaction.getLayoutParams();
+        final int previewId = binding.preview.getId();
+        if (isIncoming) {
+            reactionLayoutParams.startToEnd = previewId;
+            reactionLayoutParams.endToEnd = previewId;
+            reactionLayoutParams.startToStart = ConstraintLayout.LayoutParams.UNSET;
+            reactionLayoutParams.endToStart = ConstraintLayout.LayoutParams.UNSET;
+        } else {
+            reactionLayoutParams.startToStart = previewId;
+            reactionLayoutParams.endToStart = previewId;
+            reactionLayoutParams.startToEnd = ConstraintLayout.LayoutParams.UNSET;
+            reactionLayoutParams.endToEnd = ConstraintLayout.LayoutParams.UNSET;
+        }
+    }
+
+    private void setReply(final MessageDirection messageDirection,
+                          final DirectItemReelShare reelShare,
+                          final boolean isSelf) {
+        final String info = isSelf ? "You replied to their story" : "They replied to your story";
+        binding.shareInfo.setText(info);
+        binding.reaction.setVisibility(View.GONE);
+        final String text = reelShare.getText();
+        if (TextUtils.isEmpty(text)) {
+            binding.message.setVisibility(View.GONE);
+            return;
+        }
+        setMessage(messageDirection, text);
+    }
+
+    private void setReaction(final MessageDirection messageDirection,
+                             final DirectItemReelShare reelShare,
+                             final boolean isSelf,
+                             final boolean expired) {
+        final String info = isSelf ? "You reacted to their story" : "They reacted to your story";
+        binding.shareInfo.setText(info);
+        binding.message.setVisibility(View.GONE);
+        final String text = reelShare.getText();
+        if (TextUtils.isEmpty(text)) {
+            binding.reaction.setVisibility(View.GONE);
+            return;
+        }
+        if (expired) {
+            setMessage(messageDirection, text);
+            return;
+        }
+        binding.reaction.setVisibility(View.VISIBLE);
+        binding.reaction.setText(text);
+    }
+
+    private void setMention(final boolean isSelf) {
+        final String info = isSelf ? "You mentioned them in your story" : "Mentioned you in their story";
+        binding.shareInfo.setText(info);
+        binding.message.setVisibility(View.GONE);
+        binding.reaction.setVisibility(View.GONE);
+    }
+
+    private void setMessage(final MessageDirection messageDirection, final String text) {
+        binding.message.setVisibility(View.VISIBLE);
+        binding.message.setBackgroundResource(messageDirection == MessageDirection.INCOMING
+                                              ? R.drawable.bg_speech_bubble_incoming
+                                              : R.drawable.bg_speech_bubble_outgoing);
+        binding.message.setText(text);
+    }
+
+    private void setPreview(final DirectItemMedia media) {
+        final MediaItemType mediaType = media.getMediaType();
+        if (mediaType == null) return;
+        binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO || mediaType == MediaItemType.MEDIA_TYPE_SLIDER
+                                       ? View.VISIBLE : View.GONE);
+        final RoundingParams roundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadiusSmall, dmRadiusSmall, dmRadiusSmall);
+        binding.preview.setHierarchy(new GenericDraweeHierarchyBuilder(itemView.getResources())
+                                             .setRoundingParams(roundingParams)
+                                             .build());
+        final ImageVersions2 imageVersions2 = media.getImageVersions2();
+        if (imageVersions2 == null) return;
+        final String thumbUrl = ResponseBodyUtils.getThumbUrl(imageVersions2);
+        binding.preview.setImageURI(thumbUrl);
+    }
+}

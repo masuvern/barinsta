@@ -3,125 +3,131 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="72dp"
     android:background="?android:selectableItemBackground"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
     <FrameLayout
         android:id="@+id/profile_pic_container"
-        android:layout_width="@dimen/simple_item_picture_size"
-        android:layout_height="@dimen/simple_item_picture_size"
-        android:gravity="center"
-        android:padding="4dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/ivProfilePic"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:id="@+id/profile_pic"
+            android:layout_width="@dimen/dm_inbox_avatar_size"
+            android:layout_height="@dimen/dm_inbox_avatar_size"
             app:actualImageScaleType="centerCrop"
-            app:roundAsCircle="true" />
+            app:roundAsCircle="true"
+            tools:background="@mipmap/ic_launcher"
+            tools:visibility="gone" />
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/multi_pic_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:layout_width="@dimen/dm_inbox_avatar_size"
+            android:layout_height="@dimen/dm_inbox_avatar_size"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <com.facebook.drawee.view.SimpleDraweeView
-                android:layout_width="@dimen/simple_item_picture_size_half"
-                android:layout_height="match_parent"
-                app:roundAsCircle="true" />
+                android:id="@+id/multi_pic_1"
+                android:layout_width="@dimen/dm_inbox_avatar_size_tiny"
+                android:layout_height="@dimen/dm_inbox_avatar_size_tiny"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:roundAsCircle="true"
+                tools:background="@mipmap/ic_launcher" />
 
-            <LinearLayout
-                android:layout_width="@dimen/simple_item_picture_size_half"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/multi_pic_2"
+                android:layout_width="@dimen/dm_inbox_avatar_size_tiny"
+                android:layout_height="@dimen/dm_inbox_avatar_size_tiny"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:roundAsCircle="true"
+                tools:background="@mipmap/ic_launcher" />
 
-                <com.facebook.drawee.view.SimpleDraweeView
-                    android:layout_width="@dimen/simple_item_picture_size_half"
-                    android:layout_height="@dimen/simple_item_picture_size_half"
-                    app:roundAsCircle="true" />
-
-                <com.facebook.drawee.view.SimpleDraweeView
-                    android:layout_width="@dimen/simple_item_picture_size_half"
-                    android:layout_height="@dimen/simple_item_picture_size_half"
-                    app:roundAsCircle="true" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/unread"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:layout_gravity="right"
-            app:srcCompat="@drawable/circle" />
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/multi_pic_3"
+                android:layout_width="@dimen/dm_inbox_avatar_size_tiny"
+                android:layout_height="@dimen/dm_inbox_avatar_size_tiny"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:roundAsCircle="true"
+                tools:background="@mipmap/ic_launcher" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvUsername"
+        android:id="@+id/thread_title"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:ellipsize="marquee"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
         android:gravity="bottom"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="?android:textColorPrimary"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        app:layout_constraintBottom_toTopOf="@id/subtitle"
         app:layout_constraintEnd_toStartOf="@id/tvDate"
         app:layout_constraintStart_toEndOf="@id/profile_pic_container"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="username" />
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="username, username, username" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvDate"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:ellipsize="marquee"
-        android:gravity="bottom|end"
+        android:gravity="bottom"
+        android:paddingStart="4dp"
+        android:paddingEnd="0dp"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        app:layout_constraintBaseline_toBaselineOf="@id/thread_title"
+        app:layout_constraintBottom_toTopOf="@id/subtitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/tvUsername"
+        app:layout_constraintStart_toEndOf="@id/thread_title"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="long date................................" />
+        tools:text="long date..............." />
 
-    <!--<androidx.appcompat.widget.AppCompatImageView-->
-    <!--    android:id="@+id/notTextType"-->
-    <!--    android:layout_width="4dp"-->
-    <!--    android:layout_height="4dp"-->
-    <!--    android:layout_gravity="center_vertical"-->
-    <!--    android:layout_marginEnd="4dp"-->
-    <!--    android:layout_marginRight="4dp"-->
-    <!--    android:visibility="gone"-->
-    <!--    app:tint="@color/feed_text_primary_color" />-->
-    <!--<FrameLayout-->
-    <!--    android:id="@+id/comment_container"-->
-    <!--    android:layout_width="0dp"-->
-    <!--    android:layout_height="wrap_content"-->
-    <!--    android:orientation="horizontal">-->
-
-    <!--    -->
-    <!--</FrameLayout>-->
-    <awais.instagrabber.customviews.RamboTextView
-        android:id="@+id/tvComment"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/subtitle"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_gravity="center_vertical"
-        android:autoLink="web|email"
+        android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:linksClickable="true"
+        android:maxLines="1"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/unread"
+        app:layout_constraintStart_toStartOf="@id/thread_title"
+        app:layout_constraintTop_toBottomOf="@id/thread_title"
+        tools:text="comment comment comment comment comment comment comment comment comment comment comment comment comment " />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/unread"
+        android:layout_width="8dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/subtitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/profile_pic_container"
-        app:layout_constraintTop_toBottomOf="@id/tvUsername"
-        tools:text="comment" />
+        app:layout_constraintStart_toEndOf="@id/subtitle"
+        app:layout_constraintTop_toTopOf="@id/subtitle"
+        app:srcCompat="@drawable/ic_unread_indicator_24"
+        tools:visibility="visible" />
+
+    <include
+        layout="@layout/item_pref_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/thread_title" />
 </androidx.constraintlayout.widget.ConstraintLayout>

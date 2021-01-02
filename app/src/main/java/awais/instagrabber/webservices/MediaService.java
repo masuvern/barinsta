@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +17,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import awais.instagrabber.repositories.MediaRepository;
+import awais.instagrabber.repositories.requests.UploadFinishOptions;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DateUtils;
+import awais.instagrabber.utils.MediaUploadHelper;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -128,7 +133,7 @@ public class MediaService extends BaseService {
         form.put("_uuid", UUID.randomUUID().toString());
         form.put("comment_text", comment);
         form.put("containermodule", module);
-        if (!awais.instagrabber.utils.TextUtils.isEmpty(replyToCommentId)) {
+        if (!TextUtils.isEmpty(replyToCommentId)) {
             form.put("replied_to_comment_id", replyToCommentId);
         }
         final Map<String, String> signedForm = Utils.sign(form);
@@ -276,5 +281,34 @@ public class MediaService extends BaseService {
                 callback.onFailure(t);
             }
         });
+    }
+
+    public Call<String> uploadFinish(final long userId,
+                                     @NonNull final String csrfToken,
+                                     @NonNull final UploadFinishOptions options) {
+        if (options.getVideoOptions() != null) {
+            final UploadFinishOptions.VideoOptions videoOptions = options.getVideoOptions();
+            if (videoOptions.getClips() == null) {
+                videoOptions.setClips(Collections.singletonList(
+                        new UploadFinishOptions.Clip()
+                                .setLength(videoOptions.getLength())
+                                .setSourceType(options.getSourceType())
+                ));
+            }
+        }
+        final String timezoneOffset = String.valueOf(DateUtils.getTimezoneOffset());
+        final ImmutableMap.Builder<String, Object> formBuilder = ImmutableMap.<String, Object>builder()
+                .put("timezone_offset", timezoneOffset)
+                .put("_csrftoken", csrfToken)
+                .put("source_type", options.getSourceType())
+                .put("_uid", String.valueOf(userId))
+                .put("_uuid", UUID.randomUUID().toString())
+                .put("upload_id", options.getUploadId());
+        if (options.getVideoOptions() != null) {
+            formBuilder.putAll(options.getVideoOptions().getMap());
+        }
+        final Map<String, String> queryMap = options.getVideoOptions() != null ? ImmutableMap.of("video", "1") : Collections.emptyMap();
+        final Map<String, String> signedForm = Utils.sign(formBuilder.build());
+        return repository.uploadFinish(MediaUploadHelper.getRetryContextString(), queryMap, signedForm);
     }
 }

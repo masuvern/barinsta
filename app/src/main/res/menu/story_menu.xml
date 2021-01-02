@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_dms"
-        android:icon="@drawable/ic_send_24"
+        android:icon="@drawable/ic_round_send_24"
         android:title="@string/action_dms"
         android:titleCondensed="@string/action_dms"
         app:showAsAction="always" />

@@ -28,7 +28,7 @@ import java.util.List;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.PostFetcher;
-import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtBottom;
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
@@ -51,7 +51,7 @@ public class PostsRecyclerView extends RecyclerView {
     private FeedViewModel feedViewModel;
     private boolean initCalled = false;
     private GridSpacingItemDecoration gridSpacingItemDecoration;
-    private RecyclerLazyLoaderAtBottom lazyLoader;
+    private RecyclerLazyLoaderAtEdge lazyLoader;
     private FeedAdapterV2.FeedItemCallback feedItemCallback;
     private boolean shouldScrollToTop;
     private FeedAdapterV2.SelectionModeCallback selectionModeCallback;
@@ -194,7 +194,7 @@ public class PostsRecyclerView extends RecyclerView {
         }
         setHasFixedSize(true);
         setNestedScrollingEnabled(true);
-        lazyLoader = new RecyclerLazyLoaderAtBottom(layoutManager, (page) -> {
+        lazyLoader = new RecyclerLazyLoaderAtEdge(layoutManager, (page) -> {
             if (postFetcher.hasMore()) {
                 postFetcher.fetch();
                 dispatchFetchStatus();

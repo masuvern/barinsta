@@ -4,72 +4,143 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:clipToPadding="false">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
-        android:layout_width="match_parent"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chats"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        app:layout_constraintBottom_toTopOf="@id/comment_container"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toTopOf="@id/input"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/layout_dm_base" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/messageList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/layout_dm_base" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <View
+        android:id="@+id/input_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/bg_input"
+        app:layout_constraintBottom_toBottomOf="@id/input"
+        app:layout_constraintEnd_toStartOf="@id/send"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/input" />
 
-    <LinearLayout
-        android:id="@+id/comment_container"
-        android:layout_width="match_parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/emoji_toggle"
+        style="@style/Widget.MaterialComponents.Button.Icon.NoInsets"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="2dp"
+        android:background="@android:color/transparent"
+        android:scrollbars="none"
+        app:icon="@drawable/ic_face_24"
+        app:iconGravity="textStart"
+        app:iconSize="24dp"
+        app:iconTint="@color/grey_700"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toStartOf="@id/input"
+        app:layout_constraintStart_toStartOf="@id/input_bg"
+        app:layout_constraintTop_toTopOf="@id/input"
+        app:rippleColor="@color/grey_500"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Button.Circle"
+        app:strokeColor="@color/black"
+        app:strokeWidth="1dp" />
+
+    <awais.instagrabber.customviews.KeyNotifyingEmojiEditText
+        android:id="@+id/input"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:background="@android:color/transparent"
+        android:hint="Message"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/grey_500"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/camera"
+        app:layout_constraintStart_toEndOf="@id/emoji_toggle"
+        app:layout_constraintTop_toBottomOf="@id/chats"
+        app:layout_goneMarginBottom="4dp"
+        app:layout_goneMarginEnd="24dp" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/camera"
+        android:layout_width="32dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toStartOf="@id/gallery"
+        app:layout_constraintStart_toEndOf="@id/input"
+        app:layout_constraintTop_toTopOf="@id/input"
+        app:srcCompat="@drawable/ic_camera_24"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/gallery"
+        android:layout_width="32dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_image_24"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toStartOf="@id/send"
+        app:layout_constraintStart_toEndOf="@id/camera"
+        app:layout_constraintTop_toTopOf="@id/input"
+        tools:visibility="visible" />
+
+    <awais.instagrabber.customviews.RecordView
+        android:id="@+id/record_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:counter_time_color="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toEndOf="@id/input_bg"
+        app:layout_constraintStart_toStartOf="@id/input"
+        app:layout_constraintTop_toBottomOf="@id/chats"
+        app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
+        app:slide_to_cancel_arrow_color="@color/white"
+        app:slide_to_cancel_bounds="0dp"
+        app:slide_to_cancel_margin_right="16dp"
+        app:slide_to_cancel_text="Slide To Cancel"
+        app:slide_to_cancel_text_color="@color/white"
+        tools:visibility="gone" />
+
+    <awais.instagrabber.customviews.RecordButton
+        android:id="@+id/send"
+        style="@style/Widget.MaterialComponents.Button.Icon.NoInsets"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:backgroundTint="@color/blue_900"
+        app:elevation="4dp"
+        app:icon="@drawable/avd_mic_to_send_anim"
+        app:iconGravity="textStart"
+        app:iconSize="24dp"
+        app:iconTint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/input_bg"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Button.Circle" />
+
+    <awais.instagrabber.customviews.emoji.EmojiPicker
+        android:id="@+id/emoji_picker"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
+        android:translationY="250dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/swipeRefreshLayout">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="4dp"
-            app:srcCompat="@drawable/ic_image_24" />
-
-        <EditText
-            android:id="@+id/commentText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="bottom"
-            android:hint="@string/dm_hint"
-            android:importantForAutofill="no"
-            android:inputType="textMultiLine"
-            android:maxLength="2200"
-            android:maxLines="10"
-            android:paddingStart="8dp"
-            android:paddingEnd="4dp"
-            android:scrollHorizontally="false" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/commentSend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingStart="4dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="4dp"
-            app:srcCompat="@drawable/ic_send_24" />
-    </LinearLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

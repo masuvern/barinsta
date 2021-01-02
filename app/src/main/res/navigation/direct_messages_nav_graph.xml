@@ -69,13 +69,12 @@
         android:label="@string/action_dms"
         tools:layout="@layout/fragment_direct_messages_inbox">
         <action
-            android:id="@+id/action_dMInboxFragment_to_dMThreadFragment"
+            android:id="@+id/action_inbox_to_thread"
             app:destination="@id/directMessagesThreadFragment" />
     </fragment>
     <fragment
         android:id="@+id/directMessagesThreadFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageThreadFragment"
-        android:label="DirectMessagesThreadFragment"
         tools:layout="@layout/fragment_direct_messages_thread">
         <argument
             android:name="threadId"
@@ -86,11 +85,14 @@
         <action
             android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"
             app:destination="@id/directMessagesSettingsFragment" />
+        <action
+            android:id="@+id/action_thread_to_imageEdit"
+            app:destination="@id/imageEditFragment" />
     </fragment>
     <fragment
         android:id="@+id/directMessagesSettingsFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"
-        android:label="DirectMessagesSettingsFragment"
+        android:label="@string/action_settings"
         tools:layout="@layout/fragment_direct_messages_settings">
         <argument
             android:name="threadId"
@@ -98,5 +100,15 @@
         <argument
             android:name="title"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageEditFragment"
+        android:name="awais.instagrabber.fragments.imageedit.ImageEditFragment"
+        tools:layout="@layout/fragment_image_edit"
+        android:label="Edit Photo">
+        <argument
+            android:name="uri"
+            app:argType="android.net.Uri"
+            app:nullable="false" />
     </fragment>
 </navigation>

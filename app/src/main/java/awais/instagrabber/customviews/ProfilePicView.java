@@ -47,6 +47,7 @@ public final class ProfilePicView extends CircularImageView {
                           final int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         parseAttrs(context, attrs);
+        updateLayout();
     }
 
     private void parseAttrs(final Context context, final AttributeSet attrs) {
@@ -90,6 +91,11 @@ public final class ProfilePicView extends CircularImageView {
 
         // invalidate();
         // requestLayout();
+    }
+
+    public void setSize(final Size size) {
+        this.size = size;
+        updateLayout();
     }
 
     public void setStoriesBorder() {

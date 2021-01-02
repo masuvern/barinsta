@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
 
     <application
         android:name=".InstaGrabberApplication"
@@ -21,7 +28,7 @@
             android:name=".activities.MainActivity"
             android:launchMode="singleTop"
             android:taskAffinity=".Main"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -114,6 +121,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
         </activity>
+        <activity
+            android:name=".activities.CameraActivity"
+            android:label="Camera"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.Light.White">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MainActivity" />
+        </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -131,5 +147,13 @@
         <service
             android:name=".services.DeleteImageIntentService"
             android:exported="false" />
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <meta-data
+            android:name="fontProviderRequests"
+            android:value="Noto Color Emoji Compat" />
     </application>
 </manifest>

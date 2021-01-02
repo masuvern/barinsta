@@ -140,8 +140,19 @@ public final class DownloadUtils {
 
     @NonNull
     public static File getTempFile() {
+        return getTempFile(null, null);
+    }
+
+    public static File getTempFile(final String fileName, final String extension) {
         final File dir = getDownloadDir();
-        return new File(dir, UUID.randomUUID().toString());
+        String name = fileName;
+        if (TextUtils.isEmpty(name)) {
+            name = UUID.randomUUID().toString();
+        }
+        if (!TextUtils.isEmpty(extension)) {
+            name += "." + extension;
+        }
+        return new File(dir, name);
     }
 
     /**

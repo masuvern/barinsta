@@ -61,7 +61,6 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
         // Log.d(TAG, "Binding post: " + feedModel.getPostId());
         this.feedModel = feedModel;
         binding.itemFeedBottom.tvVideoViews.setText(String.valueOf(feedModel.getViewCount()));
-        // showOrHideDetails(false);
         final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
 
@@ -72,21 +71,14 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
 
             @Override
             public void onPlayerViewLoaded() {
-                // binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
                 final ViewGroup.LayoutParams layoutParams = binding.videoPost.playerView.getLayoutParams();
                 final int requiredWidth = Utils.displayMetrics.widthPixels;
                 final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
                 layoutParams.width = requiredWidth;
                 layoutParams.height = resultingHeight;
                 binding.videoPost.playerView.requestLayout();
-                setMuteIcon(vol == 0f && Utils.sessionVolumeFull ? 1f : vol);
             }
         };
-        // final DataSource.Factory factory = cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory;
-        // final ProgressiveMediaSource.Factory sourceFactory = new ProgressiveMediaSource.Factory(factory);
-        // final Uri uri = Uri.parse(feedModel.getDisplayUrl());
-        // final MediaItem mediaItem = MediaItem.fromUri(uri);
-        // final ProgressiveMediaSource mediaSource = sourceFactory.createMediaSource(mediaItem);
         final float aspectRatio = (float) feedModel.getImageWidth() / feedModel.getImageHeight();
         final VideoPlayerViewHelper videoPlayerViewHelper = new VideoPlayerViewHelper(binding.getRoot().getContext(),
                                                                                       binding.videoPost,
@@ -104,17 +96,6 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
                 binding.videoPost.thumbnail.requestLayout();
             }
         });
-        // binding.itemFeedBottom.btnMute.setOnClickListener(v -> {
-        //     final float newVol = videoPlayerViewHelper.toggleMute();
-        //     setMuteIcon(newVol);
-        //     Utils.sessionVolumeFull = newVol == 1f;
-        // });
-        // binding.videoPost.playerView.setOnClickListener(v -> videoPlayerViewHelper.togglePlayback());
-    }
-
-
-    private void setMuteIcon(final float vol) {
-        // binding.itemFeedBottom.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
     }
 
     public FeedModel getCurrentFeedModel() {

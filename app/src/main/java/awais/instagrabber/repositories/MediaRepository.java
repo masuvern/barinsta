@@ -8,6 +8,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.QueryMap;
 
 public interface MediaRepository {
 
@@ -41,4 +42,11 @@ public interface MediaRepository {
     Call<String> commentUnlike(@Header("User-Agent") final String userAgent,
                                @Path("commentId") final String commentId,
                                @FieldMap final Map<String, String> signedForm);
+
+    @FormUrlEncoded
+    @POST("/api/v1/media/upload_finish/")
+    Call<String> uploadFinish(// @Header("User-Agent") final String userAgent,
+                              @Header("retry_context") final String retryContext,
+                              @QueryMap Map<String, String> queryParams,
+                              @FieldMap final Map<String, String> signedForm);
 }

@@ -3,7 +3,6 @@ package awais.instagrabber.utils;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.view.ContextThemeWrapper;
 
 import androidx.annotation.Nullable;
@@ -23,17 +22,15 @@ public final class LocaleUtils {
         final String lang = LocaleUtils.getCorrespondingLanguageCode(baseContext);
 
         currentLocale = TextUtils.isEmpty(lang) ? defaultLocale :
-                (lang.contains("_") ? new Locale(lang.split("_")[0], lang.split("_")[1]) : new Locale(lang));
+                        (lang.contains("_") ? new Locale(lang.split("_")[0], lang.split("_")[1]) : new Locale(lang));
         Locale.setDefault(currentLocale);
 
         final Resources res = baseContext.getResources();
         final Configuration config = res.getConfiguration();
 
         config.locale = currentLocale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            config.setLocale(currentLocale);
-            config.setLayoutDirection(currentLocale);
-        }
+        config.setLocale(currentLocale);
+        config.setLayoutDirection(currentLocale);
 
         res.updateConfiguration(config, res.getDisplayMetrics());
     }
@@ -43,7 +40,7 @@ public final class LocaleUtils {
     }
 
     public static void updateConfig(final ContextThemeWrapper wrapper) {
-        if (currentLocale != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (currentLocale != null) {
             final Configuration configuration = new Configuration();
             configuration.locale = currentLocale;
             configuration.setLocale(currentLocale);

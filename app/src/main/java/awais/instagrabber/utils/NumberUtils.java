@@ -6,26 +6,26 @@ import androidx.core.util.Pair;
 import java.util.Random;
 
 public final class NumberUtils {
-    @NonNull
-    public static String millisToString(final long timeMs) {
-        final long totalSeconds = timeMs / 1000;
-
-        final long seconds = totalSeconds % 60;
-        final long minutes = totalSeconds / 60 % 60;
-        final long hours = totalSeconds / 3600;
-
-        final String strSec = Long.toString(seconds);
-        final String strMin = Long.toString(minutes);
-
-        final String strRetSec = strSec.length() > 1 ? strSec : "0" + seconds;
-        final String strRetMin = strMin.length() > 1 ? strMin : "0" + minutes;
-
-        final String retMinSec = strRetMin + ':' + strRetSec;
-
-        if (hours > 0)
-            return Long.toString(hours) + ':' + retMinSec;
-        return retMinSec;
-    }
+    // @NonNull
+    // public static String millisToString(final long timeMs) {
+    //     final long totalSeconds = timeMs / 1000;
+    //
+    //     final long seconds = totalSeconds % 60;
+    //     final long minutes = totalSeconds / 60 % 60;
+    //     final long hours = totalSeconds / 3600;
+    //
+    //     final String strSec = Long.toString(seconds);
+    //     final String strMin = Long.toString(minutes);
+    //
+    //     final String strRetSec = strSec.length() > 1 ? strSec : "0" + seconds;
+    //     final String strRetMin = strMin.length() > 1 ? strMin : "0" + minutes;
+    //
+    //     final String retMinSec = strRetMin + ':' + strRetSec;
+    //
+    //     if (hours > 0)
+    //         return Long.toString(hours) + ':' + retMinSec;
+    //     return retMinSec;
+    // }
 
     public static int getResultingHeight(final int requiredWidth, final int height, final int width) {
         return requiredWidth * height / width;

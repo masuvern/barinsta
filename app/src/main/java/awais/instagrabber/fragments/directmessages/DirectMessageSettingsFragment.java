@@ -2,6 +2,7 @@ package awais.instagrabber.fragments.directmessages;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -30,19 +31,12 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
 
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.adapters.DirectMessageMembersAdapter;
-import awais.instagrabber.asyncs.direct_messages.DirectMessageInboxThreadFetcher;
+import awais.instagrabber.broadcasts.DMRefreshBroadcastReceiver;
 import awais.instagrabber.databinding.FragmentDirectMessagesSettingsBinding;
-import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.direct_messages.InboxThreadModel;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.Utils;
 
 public class DirectMessageSettingsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -56,34 +50,34 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
     private String threadId;
     private String threadTitle;
     private final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-    private AsyncTask<Void, Void, InboxThreadModel> currentlyRunning;
+    // private AsyncTask<Void, Void, InboxThreadModel> currentlyRunning;
     private View.OnClickListener clickListener;
     private View.OnClickListener basicClickListener;
 
-    private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
-        @Override
-        public void doBefore() {}
-
-        @Override
-        public void onResult(final InboxThreadModel threadModel) {
-            if (threadModel == null) return;
-            final List<Long> adminList = Arrays.asList(threadModel.getAdmins());
-            final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-            if (userIdFromCookie == null) return;
-            final boolean amAdmin = adminList.contains(Long.parseLong(userIdFromCookie));
-            final DirectMessageMembersAdapter memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(),
-                                                                                              adminList,
-                                                                                              amAdmin ? clickListener : basicClickListener);
-            userList.setAdapter(memberAdapter);
-            if (threadModel.getLeftUsers() != null && threadModel.getLeftUsers().length > 0) {
-                leftTitle.setVisibility(View.VISIBLE);
-                final DirectMessageMembersAdapter leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(),
-                                                                                                null,
-                                                                                                basicClickListener);
-                leftUserList.setAdapter(leftAdapter);
-            }
-        }
-    };
+    // private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
+    //     @Override
+    //     public void doBefore() {}
+    //
+    //     @Override
+    //     public void onResult(final InboxThreadModel threadModel) {
+    //         if (threadModel == null) return;
+    //         final List<Long> adminList = threadModel.getAdmins();
+    //         final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+    //         if (userIdFromCookie == null) return;
+    //         final boolean amAdmin = adminList.contains(Long.parseLong(userIdFromCookie));
+    //         final DirectMessageMembersAdapter memberAdapter = new DirectMessageMembersAdapter(threadModel.getUsers(),
+    //                                                                                           adminList,
+    //                                                                                           amAdmin ? clickListener : basicClickListener);
+    //         userList.setAdapter(memberAdapter);
+    //         if (threadModel.getLeftUsers() != null && threadModel.getLeftUsers().size() > 0) {
+    //             leftTitle.setVisibility(View.VISIBLE);
+    //             final DirectMessageMembersAdapter leftAdapter = new DirectMessageMembersAdapter(threadModel.getLeftUsers(),
+    //                                                                                             null,
+    //                                                                                             basicClickListener);
+    //             leftUserList.setAdapter(leftAdapter);
+    //         }
+    //     }
+    // };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -190,26 +184,26 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                 .setNegativeButton(R.string.no, null)
                 .show());
 
-        currentlyRunning = new DirectMessageInboxThreadFetcher(threadId, null, null, fetchListener).execute();
+        // currentlyRunning = new DirectMessageInboxThreadFetcher(threadId, null, null, fetchListener).execute();
         return root;
     }
 
     @Override
     public void onRefresh() {
         stopCurrentExecutor();
-        currentlyRunning = new DirectMessageInboxThreadFetcher(threadId, null, null, fetchListener).execute();
+        // currentlyRunning = new DirectMessageInboxThreadFetcher(threadId, null, null, fetchListener).execute();
     }
 
     private void stopCurrentExecutor() {
-        if (currentlyRunning != null) {
-            try {
-                currentlyRunning.cancel(true);
-            } catch (final Exception e) {
-                if (BuildConfig.DEBUG) {
-                    Log.e(TAG, "", e);
-                }
-            }
-        }
+        // if (currentlyRunning != null) {
+        //     try {
+        //         currentlyRunning.cancel(true);
+        //     } catch (final Exception e) {
+        //         if (BuildConfig.DEBUG) {
+        //             Log.e(TAG, "", e);
+        //         }
+        //     }
+        // }
     }
 
     class ChangeSettings extends AsyncTask<String, Void, Void> {
@@ -268,7 +262,7 @@ public class DirectMessageSettingsFragment extends Fragment implements SwipeRefr
                     titleText.clearFocus();
                     DirectMessageThreadFragment.hasSentSomething = true;
                 } else if (action.equals("leave")) {
-                    DirectMessageInboxFragment.refreshPlease = true;
+                    context.sendBroadcast(new Intent(DMRefreshBroadcastReceiver.ACTION_REFRESH_DM));
                     NavHostFragment.findNavController(DirectMessageSettingsFragment.this).popBackStack(R.id.directMessagesInboxFragment, false);
                 } else {
                     DirectMessageThreadFragment.hasSentSomething = true;

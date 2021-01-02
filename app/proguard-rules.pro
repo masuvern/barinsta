@@ -23,6 +23,7 @@
 #noinspection ShrinkerUnresolvedReference
 #-keep class !com.google.android.exoplayer2.**, ** { *; }
 
-#-keep class !awais.instagrabber.** { *; }
-
 -dontobfuscate
+
+# prevent shrinking retrofit response entities
+-keep class awais.instagrabber.repositories.responses.** { *; }

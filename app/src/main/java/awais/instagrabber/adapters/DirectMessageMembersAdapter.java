@@ -14,11 +14,11 @@ import awais.instagrabber.databinding.ItemFollowBinding;
 import awais.instagrabber.models.ProfileModel;
 
 public final class DirectMessageMembersAdapter extends RecyclerView.Adapter<FollowsViewHolder> {
-    private final ProfileModel[] profileModels;
+    private final List<ProfileModel> profileModels;
     private final List<Long> admins;
     private final View.OnClickListener onClickListener;
 
-    public DirectMessageMembersAdapter(final ProfileModel[] profileModels,
+    public DirectMessageMembersAdapter(final List<ProfileModel> profileModels,
                                        final List<Long> admins,
                                        final View.OnClickListener onClickListener) {
         this.profileModels = profileModels;
@@ -36,12 +36,12 @@ public final class DirectMessageMembersAdapter extends RecyclerView.Adapter<Foll
 
     @Override
     public void onBindViewHolder(@NonNull final FollowsViewHolder holder, final int position) {
-        final ProfileModel model = profileModels[position];
+        final ProfileModel model = profileModels.get(position);
         holder.bind(model, admins, onClickListener);
     }
 
     @Override
     public int getItemCount() {
-        return profileModels.length;
+        return profileModels.size();
     }
 }

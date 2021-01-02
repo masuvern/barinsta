@@ -219,7 +219,7 @@
         android:text="@string/dm_person"
         android:textColor="@color/green"
         android:visibility="gone"
-        app:icon="@drawable/ic_send_24"
+        app:icon="@drawable/ic_round_send_24"
         app:iconGravity="top"
         app:iconTint="@color/green"
         app:layout_constraintBottom_toTopOf="@id/highlights_barrier"

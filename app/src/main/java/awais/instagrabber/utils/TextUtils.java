@@ -1,17 +1,32 @@
 package awais.instagrabber.utils;
 
+import android.content.Context;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.text.style.URLSpan;
+import android.util.Patterns;
 
 import androidx.annotation.NonNull;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 
 public final class TextUtils {
+    private static final Pattern URL_PATTERN = Pattern.compile(
+            "(^|[\\s.:;?\\-\\]<\\(])((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])");
+
     @NonNull
     public static CharSequence getMentionText(@NonNull final CharSequence text) {
         final int commentLength = text.length();
@@ -128,5 +143,41 @@ public final class TextUtils {
             return String.format(Locale.ENGLISH, "%02d:%02d:%02d", 0, min, sec);
         }
         return String.format(Locale.ENGLISH, "%02d:%02d", min, sec);
+    }
+
+    public static String getRelativeDateTimeString(final Context context, final long from) {
+        final Date now = new Date();
+        final Date then = new Date(from);
+        int days = daysBetween(from, now.getTime());
+        if (days == 0) {
+            return DateFormat.getTimeFormat(context).format(then);
+        }
+        return DateFormat.getDateFormat(context).format(then);
+    }
+
+    private static int daysBetween(long d1, long d2) {
+        return (int) ((d2 - d1) / DateUtils.DAY_IN_MILLIS);
+    }
+
+    @NonNull
+    public static String encode(final String text) throws UnsupportedEncodingException {
+        return URLEncoder.encode(text, "UTF-8")
+                         .replaceAll("\\+", "%20")
+                         .replaceAll("%21", "!")
+                         .replaceAll("%27", "'")
+                         .replaceAll("%28", "(")
+                         .replaceAll("%29", ")")
+                         .replaceAll("%7E", "~")
+                         .replaceAll("%0A", "\n");
+    }
+
+    public static List<String> extractUrls(final String text) {
+        if (isEmpty(text)) return Collections.emptyList();
+        final Matcher matcher = Patterns.WEB_URL.matcher(text);
+        final List<String> urls = new ArrayList<>();
+        while (matcher.find()) {
+            urls.add(matcher.group());
+        }
+        return urls;
     }
 }

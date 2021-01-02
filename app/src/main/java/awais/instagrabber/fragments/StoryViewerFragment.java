@@ -54,7 +54,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,7 +67,6 @@ import awais.instagrabber.asyncs.RespondAction;
 import awais.instagrabber.asyncs.SeenAction;
 import awais.instagrabber.asyncs.VoteAction;
 import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
-import awais.instagrabber.asyncs.direct_messages.DirectThreadBroadcaster;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
@@ -177,40 +175,41 @@ public class StoryViewerFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         final Context context = getContext();
         if (context == null) return false;
-        switch (item.getItemId()) {
-            case R.id.action_download:
-                if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-                    downloadStory();
-                else
-                    ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
-                return true;
-            case R.id.action_dms:
-                final EditText input = new EditText(context);
-                input.setHint(R.string.reply_hint);
-                new AlertDialog.Builder(context)
-                        .setTitle(R.string.reply_story)
-                        .setView(input)
-                        .setPositiveButton(R.string.ok, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
-                            try {
-                                final DirectThreadBroadcaster.StoryReplyBroadcastOptions options = new DirectThreadBroadcaster.StoryReplyBroadcastOptions(
-                                        input.getText().toString(),
-                                        currentStory.getStoryMediaId(),
-                                        currentStory.getUserId()
-                                );
-                                final DirectThreadBroadcaster broadcast = new DirectThreadBroadcaster(threadId);
-                                broadcast.setOnTaskCompleteListener(result -> Toast.makeText(
-                                        context,
-                                        result != null ? R.string.answered_story : R.string.downloader_unknown_error,
-                                        Toast.LENGTH_SHORT
-                                ).show());
-                                broadcast.execute(options);
-                            } catch (UnsupportedEncodingException e) {
-                                Log.e(TAG, "Error", e);
-                            }
-                        }).execute())
-                        .setNegativeButton(R.string.cancel, null)
-                        .show();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_download) {
+            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
+                downloadStory();
+            else
+                ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
+            return true;
+        } else if (itemId == R.id.action_dms) {
+            final EditText input = new EditText(context);
+            input.setHint(R.string.reply_hint);
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.reply_story)
+                    .setView(input)
+                    .setPositiveButton(R.string.ok, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
+                        // try {
+                        // final StoryReplyBroadcastOptions options = new StoryReplyBroadcastOptions(
+                        //         threadId,
+                        //         input.getText().toString(),
+                        //         currentStory.getStoryMediaId(),
+                        //         currentStory.getUserId()
+                        // );
+                        // final DirectThreadBroadcaster broadcast = new DirectThreadBroadcaster(threadId);
+                        // broadcast.setOnTaskCompleteListener(result -> Toast.makeText(
+                        //         context,
+                        //         result != null ? R.string.answered_story : R.string.downloader_unknown_error,
+                        //         Toast.LENGTH_SHORT
+                        // ).show());
+                        // broadcast.execute(options);
+                        // } catch (UnsupportedEncodingException e) {
+                        //     Log.e(TAG, "Error", e);
+                        // }
+                    }).execute())
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+            return true;
         }
         return false;
     }
