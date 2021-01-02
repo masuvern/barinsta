@@ -91,7 +91,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             binding.ivProfilePic.setVisibility(View.GONE);
             binding.tvUsername.setVisibility(View.GONE);
             containerLayoutParams.gravity = Gravity.CENTER;
-            if (itemType == DirectItemType.ACTION_LOG) {
+            if (itemType == DirectItemType.ACTION_LOG || itemType == DirectItemType.VIDEO_CALL_EVENT) {
                 binding.messageInfo.setVisibility(View.GONE);
             }
         }

@@ -215,6 +215,9 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         if (itemOrHeader.isHeader()) {
             return itemOrHeader.date.hashCode();
         }
+        if (itemOrHeader.item.getClientContext() == null) {
+            return itemOrHeader.item.getItemId().hashCode();
+        }
         return itemOrHeader.item.getClientContext().hashCode();
     }
 
