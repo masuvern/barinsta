@@ -70,7 +70,15 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
                 return oldItem.date.equals(newItem.date);
             }
             if (oldItem.item != null && newItem.item != null) {
-                return oldItem.item.getClientContext().equals(newItem.item.getClientContext());
+                String oldClientContext = oldItem.item.getClientContext();
+                if (oldClientContext == null) {
+                    oldClientContext = oldItem.item.getItemId();
+                }
+                String newClientContext = newItem.item.getClientContext();
+                if (newClientContext == null) {
+                    newClientContext = newItem.item.getItemId();
+                }
+                return oldClientContext.equals(newClientContext);
             }
             return false;
         }
