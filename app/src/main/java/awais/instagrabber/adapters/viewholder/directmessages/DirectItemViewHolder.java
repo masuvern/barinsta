@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.text.format.DateFormat;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -42,6 +43,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     private final int dmRadius;
     private final int messageInfoPaddingSmall;
     private final int dmRadiusSmall;
+    private final int groupMessageWidth;
     private final List<Long> userIds;
 
     public DirectItemViewHolder(@NonNull final LayoutDmBaseBinding binding,
@@ -60,10 +62,14 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         binding.ivProfilePic.setOnClickListener(thread.isGroup() ? onClickListener : null);
         // binding.messageCard.setOnClickListener(onClickListener);
         margin = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_item_margin);
+        final int avatarSize = Utils.convertDpToPx(48);
         final Resources resources = itemView.getResources();
         dmRadius = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
         dmRadiusSmall = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
         messageInfoPaddingSmall = Utils.convertDpToPx(4);
+        DisplayMetrics displayMetrics = itemView.getResources().getDisplayMetrics();
+        // messageInfoPaddingSmall is used cuz it's also 4dp, 1 avatar margin + 2 paddings = 3
+        groupMessageWidth = displayMetrics.widthPixels - margin - avatarSize - messageInfoPaddingSmall * 3;
     }
 
     public void bind(final DirectItem item) {
@@ -86,6 +92,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                     binding.tvUsername.setText(user.getUsername());
                     binding.ivProfilePic.setImageURI(user.getProfilePicUrl());
                 }
+                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) binding.chatMessageLayout.getLayoutParams();
+                layoutParams.matchConstraintMaxWidth = groupMessageWidth;
+                binding.chatMessageLayout.setLayoutParams(layoutParams);
             }
         } else {
             binding.ivProfilePic.setVisibility(View.GONE);
