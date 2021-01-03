@@ -4,7 +4,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.text.format.DateFormat;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -31,7 +30,6 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemReacti
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.ResponseBodyUtils;
-import awais.instagrabber.utils.Utils;
 
 public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = DirectItemViewHolder.class.getSimpleName();
@@ -39,12 +37,15 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     private final LayoutDmBaseBinding binding;
     private final DirectUser currentUser;
     private final DirectThread thread;
-    private final int margin;
-    private final int dmRadius;
-    private final int messageInfoPaddingSmall;
-    private final int dmRadiusSmall;
+    protected final int margin;
+    protected final int dmRadius;
+    protected final int dmRadiusSmall;
+    protected final int messageInfoPaddingSmall;
     private final int groupMessageWidth;
     private final List<Long> userIds;
+    protected final int mediaImageMaxHeight;
+    protected final int windowWidth;
+    protected final int mediaImageMaxWidth;
 
     public DirectItemViewHolder(@NonNull final LayoutDmBaseBinding binding,
                                 @NonNull final ProfileModel currentUser,
@@ -61,15 +62,17 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         binding.ivProfilePic.setVisibility(thread.isGroup() ? View.VISIBLE : View.GONE);
         binding.ivProfilePic.setOnClickListener(thread.isGroup() ? onClickListener : null);
         // binding.messageCard.setOnClickListener(onClickListener);
-        margin = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        final int avatarSize = Utils.convertDpToPx(48);
         final Resources resources = itemView.getResources();
+        margin = resources.getDimensionPixelSize(R.dimen.dm_message_item_margin);
+        final int avatarSize = resources.getDimensionPixelSize(R.dimen.dm_message_item_avatar_size);
         dmRadius = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
         dmRadiusSmall = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
-        messageInfoPaddingSmall = Utils.convertDpToPx(4);
-        DisplayMetrics displayMetrics = itemView.getResources().getDisplayMetrics();
+        messageInfoPaddingSmall = resources.getDimensionPixelSize(R.dimen.dm_message_info_padding_small);
+        windowWidth = resources.getDisplayMetrics().widthPixels;
+        mediaImageMaxHeight = resources.getDimensionPixelSize(R.dimen.dm_media_img_max_height);
+        mediaImageMaxWidth = windowWidth - margin;
         // messageInfoPaddingSmall is used cuz it's also 4dp, 1 avatar margin + 2 paddings = 3
-        groupMessageWidth = displayMetrics.widthPixels - margin - avatarSize - messageInfoPaddingSmall * 3;
+        groupMessageWidth = windowWidth - margin - avatarSize - messageInfoPaddingSmall * 3;
     }
 
     public void bind(final DirectItem item) {

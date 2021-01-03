@@ -49,7 +49,6 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
                 binding.preview6
         );
         final Resources resources = itemView.getResources();
-        final int dmRadius = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
         binding.preview4.setHierarchy(new GenericDraweeHierarchyBuilder(resources)
                                               .setRoundingParams(RoundingParams.fromCornersRadii(0, 0, 0, dmRadius))
                                               .build());

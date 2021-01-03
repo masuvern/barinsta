@@ -29,7 +29,9 @@
     <dimen name="dm_link_image_size">150dp</dimen>
     <dimen name="dm_message_card_radius">16dp</dimen>
     <dimen name="dm_message_card_radius_small">8dp</dimen>
-    <dimen name="dm_message_item_margin">120dp</dimen>
+    <dimen name="dm_message_item_margin">80dp</dimen>
+    <dimen name="dm_message_item_avatar_size">48dp</dimen>
+    <dimen name="dm_message_info_padding_small">4dp</dimen>
 
     <dimen name="feed_item_bottom_icon_size">32dp</dimen>
     <dimen name="keyboard_height">200dp</dimen>

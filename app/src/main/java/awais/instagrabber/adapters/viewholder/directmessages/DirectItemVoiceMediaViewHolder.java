@@ -1,7 +1,6 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
@@ -52,8 +51,7 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
         this.binding = binding;
         this.dataSourceFactory = new DefaultDataSourceFactory(binding.getRoot().getContext(), "instagram");
         setItemView(binding.getRoot());
-        final int margin = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        binding.waveformSeekBar.getLayoutParams().width = Utils.displayMetrics.widthPixels - margin - Utils.convertDpToPx(56);
+        binding.waveformSeekBar.getLayoutParams().width = windowWidth - margin - Utils.convertDpToPx(56);
     }
 
     @Override

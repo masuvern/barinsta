@@ -5,7 +5,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmLinkBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -15,7 +14,6 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemLink;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemLinkContext;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 
 public class DirectItemLinkViewHolder extends DirectItemViewHolder {
 
@@ -29,8 +27,7 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
                                     final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        final int margin = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        final int width = Utils.displayMetrics.widthPixels - margin - Utils.convertDpToPx(8);
+        final int width = windowWidth - margin - dmRadiusSmall;
         final ViewGroup.LayoutParams layoutParams = binding.preview.getLayoutParams();
         layoutParams.width = width;
         binding.preview.requestLayout();

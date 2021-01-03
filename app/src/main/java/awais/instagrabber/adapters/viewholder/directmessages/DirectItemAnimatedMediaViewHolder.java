@@ -8,7 +8,6 @@ import androidx.core.util.Pair;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -19,13 +18,10 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.NumberUtils;
-import awais.instagrabber.utils.Utils;
 
 public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmAnimatedMediaBinding binding;
-    private final int maxHeight;
-    private final int maxWidth;
 
     public DirectItemAnimatedMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                              @NonNull final LayoutDmAnimatedMediaBinding binding,
@@ -35,9 +31,6 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
                                              final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        maxHeight = itemView.getResources().getDimensionPixelSize(R.dimen.dm_media_img_max_height);
-        final int margin = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        maxWidth = Utils.displayMetrics.widthPixels - margin;
         setItemView(binding.getRoot());
     }
 
@@ -53,8 +46,8 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 fixedHeight.getHeight(),
                 fixedHeight.getWidth(),
-                maxHeight,
-                maxWidth
+                mediaImageMaxHeight,
+                mediaImageMaxWidth
         );
         binding.ivAnimatedMessage.setVisibility(View.VISIBLE);
         final ViewGroup.LayoutParams layoutParams = binding.ivAnimatedMessage.getLayoutParams();

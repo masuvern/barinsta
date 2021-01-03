@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
-import android.content.res.Resources;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,16 +28,11 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
-import awais.instagrabber.utils.Utils;
 
 public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmMediaShareBinding binding;
-    private final int maxHeight;
     private final int maxWidth;
-    private final int dmRadius;
-    private final int dmRadiusSmall;
-    // private final RoundingParams roundingParams;
 
     public DirectItemMediaShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmMediaShareBinding binding,
@@ -48,12 +42,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
                                           final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        final Resources resources = itemView.getResources();
-        maxHeight = resources.getDimensionPixelSize(R.dimen.dm_media_img_max_height);
-        final int margin = resources.getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        maxWidth = Utils.displayMetrics.widthPixels - margin - Utils.convertDpToPx(8);
-        dmRadius = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
-        dmRadiusSmall = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
+        maxWidth = windowWidth - margin - dmRadiusSmall;
         setItemView(binding.getRoot());
     }
 
@@ -117,7 +106,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
-                maxHeight,
+                mediaImageMaxHeight,
                 maxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.mediaPreview.getLayoutParams();

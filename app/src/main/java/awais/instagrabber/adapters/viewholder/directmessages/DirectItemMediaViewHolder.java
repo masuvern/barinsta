@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
-import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,7 +10,6 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmMediaBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -23,12 +21,10 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
-import awais.instagrabber.utils.Utils;
 
 public class DirectItemMediaViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmMediaBinding binding;
-    private final int maxHeight;
     private final int maxWidth;
     private final RoundingParams incomingRoundingParams;
     private final RoundingParams outgoingRoundingParams;
@@ -41,12 +37,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                                      final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        final Resources resources = itemView.getResources();
-        maxHeight = resources.getDimensionPixelSize(R.dimen.dm_media_img_max_height);
-        final int margin = resources.getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        maxWidth = Utils.displayMetrics.widthPixels - margin - Utils.convertDpToPx(8);
-        final int dmRadius = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
-        final int dmRadiusSmall = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
+        maxWidth = windowWidth - margin - dmRadiusSmall;
         incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
         outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
         setItemView(binding.getRoot());
@@ -67,7 +58,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
-                maxHeight,
+                mediaImageMaxHeight,
                 maxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.mediaPreview.getLayoutParams();

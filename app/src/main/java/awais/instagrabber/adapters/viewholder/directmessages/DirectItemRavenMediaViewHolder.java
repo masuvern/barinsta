@@ -11,7 +11,6 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
@@ -25,15 +24,11 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
-import awais.instagrabber.utils.Utils;
 
 public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmRavenMediaBinding binding;
-    private final int maxHeight;
     private final int maxWidth;
-    private final int dmRadius;
-    private final int dmRadiusSmall;
 
     public DirectItemRavenMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmRavenMediaBinding binding,
@@ -44,11 +39,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
         final Resources resources = itemView.getResources();
-        maxHeight = resources.getDimensionPixelSize(R.dimen.dm_media_img_max_height);
-        final int margin = resources.getDimensionPixelSize(R.dimen.dm_message_item_margin);
-        maxWidth = Utils.displayMetrics.widthPixels - margin - Utils.convertDpToPx(8);
-        dmRadius = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
-        dmRadiusSmall = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
+        maxWidth = windowWidth - margin - dmRadiusSmall;
         setItemView(binding.getRoot());
     }
 
@@ -182,7 +173,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
-                maxHeight,
+                mediaImageMaxHeight,
                 maxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.preview.getLayoutParams();

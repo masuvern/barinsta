@@ -23,15 +23,10 @@ import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 
 public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmReelShareBinding binding;
-    // private final int maxHeight;
-    // private final int maxWidth;
-    private final int dmRadiusSmall;
-    private final int messageMargin;
 
     public DirectItemReelShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                          @NonNull final LayoutDmReelShareBinding binding,
@@ -41,9 +36,6 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
                                          final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        dmRadiusSmall = itemView.getResources().getDimensionPixelSize(R.dimen.dm_message_card_radius_small);
-        // binding.tvMessage.setMentionClickListener(mentionClickListener);
-        messageMargin = Utils.convertDpToPx(4);
         setItemView(binding.getRoot());
     }
 
@@ -97,8 +89,8 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
         final ConstraintLayout.LayoutParams messageLayoutParams = (ConstraintLayout.LayoutParams) binding.message.getLayoutParams();
         messageLayoutParams.startToStart = isIncoming ? ConstraintLayout.LayoutParams.PARENT_ID : ConstraintLayout.LayoutParams.UNSET;
         messageLayoutParams.endToEnd = isIncoming ? ConstraintLayout.LayoutParams.UNSET : ConstraintLayout.LayoutParams.PARENT_ID;
-        messageLayoutParams.setMarginStart(isIncoming ? messageMargin : 0);
-        messageLayoutParams.setMarginEnd(isIncoming ? 0 : messageMargin);
+        messageLayoutParams.setMarginStart(isIncoming ? messageInfoPaddingSmall : 0);
+        messageLayoutParams.setMarginEnd(isIncoming ? 0 : messageInfoPaddingSmall);
         final ConstraintLayout.LayoutParams reactionLayoutParams = (ConstraintLayout.LayoutParams) binding.reaction.getLayoutParams();
         final int previewId = binding.preview.getId();
         if (isIncoming) {
