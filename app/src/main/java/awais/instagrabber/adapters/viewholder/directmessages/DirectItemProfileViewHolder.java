@@ -25,6 +25,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectItemProfileViewHolder extends DirectItemViewHolder {
 
@@ -60,7 +61,6 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
     @Override
     public void bindItem(@NonNull final DirectItem item,
                          final MessageDirection messageDirection) {
-        removeBg();
         binding.getRoot().setBackgroundResource(messageDirection == MessageDirection.INCOMING
                                                 ? R.drawable.bg_speech_bubble_incoming
                                                 : R.drawable.bg_speech_bubble_outgoing);
@@ -108,7 +108,13 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
         if (location == null) return;
         binding.profilePic.setVisibility(View.GONE);
         binding.username.setText(location.getName());
-        binding.fullName.setText(location.getAddress());
+        final String address = location.getAddress();
+        if (!TextUtils.isEmpty(address)) {
+            binding.fullName.setText(address);
+            binding.fullName.setVisibility(View.VISIBLE);
+        } else {
+            binding.fullName.setVisibility(View.GONE);
+        }
         binding.isVerified.setVisibility(View.GONE);
     }
 }

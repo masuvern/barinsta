@@ -70,9 +70,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         messageInfoPaddingSmall = resources.getDimensionPixelSize(R.dimen.dm_message_info_padding_small);
         windowWidth = resources.getDisplayMetrics().widthPixels;
         mediaImageMaxHeight = resources.getDimensionPixelSize(R.dimen.dm_media_img_max_height);
-        mediaImageMaxWidth = windowWidth - margin;
+        final int groupWidthCorrection = avatarSize + messageInfoPaddingSmall * 3;
+        mediaImageMaxWidth = windowWidth - margin - (thread.isGroup() ? groupWidthCorrection : 0);
         // messageInfoPaddingSmall is used cuz it's also 4dp, 1 avatar margin + 2 paddings = 3
-        groupMessageWidth = windowWidth - margin - avatarSize - messageInfoPaddingSmall * 3;
+        groupMessageWidth = windowWidth - margin - groupWidthCorrection;
     }
 
     public void bind(final DirectItem item) {
@@ -120,7 +121,8 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                                            messageInfoPaddingSmall,
                                            dmRadiusSmall);
         }
-        if (itemType == DirectItemType.MEDIA) {
+        if (itemType == DirectItemType.MEDIA || itemType == DirectItemType.MEDIA_SHARE || itemType == DirectItemType.CLIP || itemType == DirectItemType.STORY_SHARE
+                || itemType == DirectItemType.LOCATION || itemType == DirectItemType.FELIX_SHARE) {
             // no background for media items
             binding.background.setBackgroundResource(0);
         }

@@ -27,7 +27,7 @@ import awais.instagrabber.utils.TextUtils;
 public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmStoryShareBinding binding;
-    private final int maxWidth;
+    // private final int maxWidth;
 
     public DirectItemStoryShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmStoryShareBinding binding,
@@ -37,13 +37,12 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
                                           final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        maxWidth = windowWidth - margin - dmRadiusSmall;
+        // maxWidth = windowWidth - margin - dmRadiusSmall;
         setItemView(binding.getRoot());
     }
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        removeBg();
         String format = "@%s's story";
         final String reelType = item.getStoryShare().getReelType();
         if (reelType == null || item.getStoryShare().getMedia() == null) {
@@ -79,7 +78,7 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
                 storyShareMedia.getOriginalHeight(),
                 storyShareMedia.getOriginalWidth(),
                 mediaImageMaxHeight,
-                maxWidth
+                mediaImageMaxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.ivMediaPreview.getLayoutParams();
         layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;

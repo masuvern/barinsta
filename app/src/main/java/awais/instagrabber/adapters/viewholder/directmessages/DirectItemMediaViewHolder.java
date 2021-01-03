@@ -25,7 +25,6 @@ import awais.instagrabber.utils.ResponseBodyUtils;
 public class DirectItemMediaViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmMediaBinding binding;
-    private final int maxWidth;
     private final RoundingParams incomingRoundingParams;
     private final RoundingParams outgoingRoundingParams;
 
@@ -37,7 +36,6 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                                      final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        maxWidth = windowWidth - margin - dmRadiusSmall;
         incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
         outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
         setItemView(binding.getRoot());
@@ -59,7 +57,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
                 mediaImageMaxHeight,
-                maxWidth
+                mediaImageMaxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.mediaPreview.getLayoutParams();
         final int width = widthHeight.first != null ? widthHeight.first : 0;

@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
 import com.facebook.drawee.drawable.ScalingUtils;
-import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
@@ -33,6 +32,8 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmMediaShareBinding binding;
     private final int maxWidth;
+    private final RoundingParams incomingRoundingParams;
+    private final RoundingParams outgoingRoundingParams;
 
     public DirectItemMediaShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmMediaShareBinding binding,
@@ -43,20 +44,18 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
         maxWidth = windowWidth - margin - dmRadiusSmall;
+        incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
+        outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
         setItemView(binding.getRoot());
     }
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        removeBg();
-        final RoundingParams roundingParams = messageDirection == MessageDirection.INCOMING
-                                              ? RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius)
-                                              : RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
-        final GenericDraweeHierarchy hierarchy = new GenericDraweeHierarchyBuilder(itemView.getResources())
-                .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
-                .setRoundingParams(roundingParams)
-                .build();
-        binding.mediaPreview.setHierarchy(hierarchy);
+        final RoundingParams roundingParams = messageDirection == MessageDirection.INCOMING ? incomingRoundingParams : outgoingRoundingParams;
+        binding.mediaPreview.setHierarchy(new GenericDraweeHierarchyBuilder(itemView.getResources())
+                                                  .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
+                                                  .setRoundingParams(roundingParams)
+                                                  .build());
         binding.topBg.setBackgroundResource(messageDirection == MessageDirection.INCOMING
                                             ? R.drawable.bg_media_share_top_incoming
                                             : R.drawable.bg_media_share_top_outgoing);
@@ -107,7 +106,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
                 mediaImageMaxHeight,
-                maxWidth
+                mediaImageMaxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.mediaPreview.getLayoutParams();
         layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
