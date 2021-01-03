@@ -21,7 +21,7 @@ public final class Constants {
     public static final String SWAP_DATE_TIME_FORMAT_ENABLED = "swap_date_time_enabled";
     public static final String MARK_AS_SEEN = "mark_as_seen";
     public static final String DM_MARK_AS_SEEN = "dm_mark_as_seen";
-    public static final String INSTADP = "instadp";
+    // deprecated: public static final String INSTADP = "instadp";
     // deprecated: public static final String STORIESIG = "storiesig";
     // deprecated: public static final String STORY_VIEWER = "story_viewer";
     // deprecated: public static final String AMOLED_THEME = "amoled_theme";
