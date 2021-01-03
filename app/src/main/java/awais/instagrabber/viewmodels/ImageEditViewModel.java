@@ -148,7 +148,7 @@ public class ImageEditViewModel extends AndroidViewModel {
                 gpuImage.setFilter(new GPUImageFilterGroup(list));
                 final Uri uri = cropDestinationUri != null ? cropDestinationUri : originalUri;
                 gpuImage.setImage(uri);
-                gpuImage.saveToPictures(new File(destinationUri.toString()), false, uri1 -> setResultUri(uri));
+                gpuImage.saveToPictures(new File(destinationUri.toString()), false, uri1 -> setResultUri(destinationUri));
             });
             return;
         }

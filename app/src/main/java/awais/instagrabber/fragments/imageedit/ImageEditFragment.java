@@ -34,12 +34,14 @@ import com.yalantis.ucrop.UCropActivity;
 import com.yalantis.ucrop.UCropFragment;
 import com.yalantis.ucrop.UCropFragmentCallback;
 
+import java.io.File;
 import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.FragmentImageEditBinding;
 import awais.instagrabber.fragments.imageedit.filters.filters.Filter;
 import awais.instagrabber.models.SavedImageEditState;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.ImageEditViewModel;
 
@@ -173,18 +175,27 @@ public class ImageEditFragment extends Fragment {
         binding.cancel.setOnClickListener(v -> {
             viewModel.cancel();
             final NavController navController = NavHostFragment.findNavController(this);
+            setNavControllerResult(navController, null);
             navController.navigateUp();
         });
         binding.done.setOnClickListener(v -> {
             final Context context = getContext();
             if (context == null) return;
-            Utils.mediaScanFile(context, viewModel.getDestinationFile(), (path, uri) -> {
-                final NavBackStackEntry navBackStackEntry = NavHostFragment.findNavController(this).getPreviousBackStackEntry();
-                if (navBackStackEntry == null) return;
-                final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
-                savedStateHandle.set("result", uri);
-            });
+            final Uri resultUri = viewModel.getResultUri().getValue();
+            if (resultUri == null) return;
+            Utils.mediaScanFile(context, new File(resultUri.toString()), (path, uri) -> AppExecutors.getInstance().mainThread().execute(() -> {
+                final NavController navController = NavHostFragment.findNavController(this);
+                setNavControllerResult(navController, resultUri);
+                navController.navigateUp();
+            }));
         });
+    }
+
+    private void setNavControllerResult(@NonNull final NavController navController, final Uri resultUri) {
+        final NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
+        if (navBackStackEntry == null) return;
+        final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        savedStateHandle.set("result", resultUri);
     }
 
     private void setupCropFragment() {
