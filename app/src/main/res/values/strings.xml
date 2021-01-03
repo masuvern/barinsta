@@ -176,7 +176,7 @@
     <string name="dms_inbox_raven_media_screenshot">Screenshotted</string>
     <string name="dms_inbox_raven_media_cant_deliver">Cannot deliver</string>
     <string name="dms_action_success">Great success!</string>
-    <string name="dms_action_leave">Leave</string>
+    <string name="dms_action_leave">Leave chat</string>
     <string name="dms_action_leave_question">Leave this chat?</string>
     <string name="dms_action_kick">Kick</string>
     <string name="dms_left_users">Left users</string>
@@ -378,4 +378,16 @@
         <item quantity="other">%s stories</item>
     </plurals>
     <string name="download_permission">Storage permission not granted!</string>
+    <string name="details">Details</string>
+    <string name="title">Title</string>
+    <string name="members">Members</string>
+    <string name="admin">Admin</string>
+    <string name="inviter">Inviter</string>
+    <string name="mute_messages">Mute messages</string>
+    <string name="mute_mentions">Mute mentions</string>
+    <string name="add_members">Add members</string>
+    <string name="search">Search</string>
+    <string name="done">Done</string>
+    <string name="dms_action_make_admin">Make Admin</string>
+    <string name="dms_action_remove_admin">Remove as Admin</string>
 </resources>

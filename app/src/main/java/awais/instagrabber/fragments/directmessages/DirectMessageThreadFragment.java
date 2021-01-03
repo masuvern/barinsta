@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -249,8 +250,8 @@ public class DirectMessageThreadFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         final int itemId = item.getItemId();
         if (itemId == R.id.info) {
-            // final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(threadId, threadTitle);
-            // NavHostFragment.findNavController(this).navigate(action);
+            final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(viewModel.getThreadId());
+            NavHostFragment.findNavController(this).navigate(action);
             return true;
         }
         if (itemId == R.id.mark_as_seen) {
@@ -372,7 +373,9 @@ public class DirectMessageThreadFragment extends Fragment {
     }
 
     private void getInitialData() {
-        final DirectInboxViewModel threadListViewModel = new ViewModelProvider(fragmentActivity).get(DirectInboxViewModel.class);
+        final NavController navController = NavHostFragment.findNavController(this);
+        final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
+        final DirectInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
         final List<DirectThread> threads = threadListViewModel.getThreads().getValue();
         final Optional<DirectThread> first = threads != null
                                              ? threads.stream()

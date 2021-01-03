@@ -73,6 +73,7 @@ import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
@@ -477,6 +478,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             binding.bottomNavView.setVisibility(SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId) ? View.VISIBLE : View.GONE);
+
+            // explicitly hide keyboard when we navigate
+            final View view = getCurrentFocus();
+            Utils.hideKeyboard(view);
         });
     }
 

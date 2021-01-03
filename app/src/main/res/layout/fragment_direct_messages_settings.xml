@@ -1,94 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:focusableInTouchMode="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:id="@+id/titleText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="bottom"
-            android:importantForAutofill="no"
-            android:inputType="textMultiLine"
-            android:maxLength="2200"
-            android:maxLines="10"
-            android:paddingStart="8dp"
-            android:paddingLeft="8dp"
-            android:paddingEnd="4dp"
-            android:paddingRight="4dp"
-            android:scrollHorizontally="false" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/titleSend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingStart="4dp"
-            android:paddingLeft="4dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="8dp"
-            android:paddingRight="8dp"
-            android:paddingBottom="4dp"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_submit" />
-    </LinearLayout>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnLeave"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="6dp"
-        android:layout_marginRight="8dp"
-        android:text="@string/dms_action_leave"
-        android:textColor="@color/btn_red_text_color"
-        android:textSize="18sp"
-        app:backgroundTint="@color/btn_red_background" />
+        android:background="@null"
+        android:elevation="0dp"
+        app:elevation="0dp">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.core.widget.NestedScrollView
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <LinearLayout
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/settings_parent"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/userList"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:nestedScrollingEnabled="false"/>
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/leftTitle"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/title_edit_input_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:hint="@string/title"
                     android:visibility="gone"
+                    app:boxBackgroundColor="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:suffixText="@string/save"
+                    app:suffixTextColor="@color/blue_600"
+                    tools:visibility="visible">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/title_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="no"
+                        android:inputType="text"
+                        android:maxLength="2200"
+                        android:scrollHorizontally="false"
+                        tools:text="test" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/mute_messages_label"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:gravity="center_vertical"
-                    android:padding="5dp"
-                    android:text="@string/dms_left_users"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/mute_messages"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                     android:textColor="?android:textColorPrimary"
-                    android:textSize="24sp"/>
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/leftUserList"
+                    app:layout_constraintBottom_toBottomOf="@id/mute_messages"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/mute_messages" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/mute_messages"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    app:layout_constraintBottom_toTopOf="@id/mute_mentions"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/title_edit_input_layout" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/mute_mentions_label"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/mute_mentions"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="?android:textColorPrimary"
+                    app:layout_constraintBottom_toBottomOf="@id/mute_mentions"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/mute_mentions" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/mute_mentions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="8dp"
+                    app:layout_constraintBottom_toTopOf="@id/leave"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/mute_messages" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/leave"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:nestedScrollingEnabled="false"/>
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-</LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/dms_action_leave"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="@color/red_600"
+                    app:layout_constraintBottom_toTopOf="@id/add_members"
+                    app:layout_constraintTop_toBottomOf="@id/mute_mentions" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_members"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/add_members"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="?android:textColorPrimary"
+                    app:icon="@drawable/ic_add"
+                    app:iconTint="?android:textColorPrimary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/leave" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/group_settings"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:constraint_referenced_ids="title_edit_input_layout, mute_mentions_label, mute_mentions, leave, add_members" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/users"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

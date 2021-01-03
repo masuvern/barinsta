@@ -5,10 +5,14 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.util.Pair;
 
 public final class ViewUtils {
 
@@ -52,5 +56,17 @@ public final class ViewUtils {
 
     private static int getSize(float size) {
         return (int) (size < 0 ? size : Utils.convertDpToPx(size));
+    }
+
+    public static Pair<Integer, Integer> measure(@NonNull final View view, @NonNull final View parent) {
+        view.measure(
+                View.MeasureSpec.makeMeasureSpec(parent.getWidth(), View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(parent.getHeight(), View.MeasureSpec.UNSPECIFIED)
+        );
+        return new Pair<>(view.getMeasuredHeight(), view.getMeasuredWidth());
+    }
+
+    public static float getTextViewValueWidth(final TextView textView, final String text) {
+        return textView.getPaint().measureText(text);
     }
 }

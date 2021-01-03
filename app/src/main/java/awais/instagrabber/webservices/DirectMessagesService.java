@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import org.json.JSONArray;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import awais.instagrabber.repositories.requests.directmessages.VoiceBroadcastOpt
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -174,5 +176,55 @@ public class DirectMessagesService extends BaseService {
         form.put("action", "send_item");
         final Map<String, String> signedForm = Utils.sign(form);
         return repository.broadcast(broadcastOptions.getItemType().getValue(), signedForm);
+    }
+
+    public Call<DirectThreadDetailsChangeResponse> addUsers(final String threadId,
+                                                            final Collection<Long> userIds) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "user_ids", new JSONArray(userIds).toString()
+        );
+        return repository.addUsers(threadId, form);
+    }
+
+    public Call<String> removeUsers(final String threadId,
+                                    final Collection<Long> userIds) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "user_ids", new JSONArray(userIds).toString()
+        );
+        return repository.removeUsers(threadId, form);
+    }
+
+    public Call<DirectThreadDetailsChangeResponse> updateTitle(final String threadId,
+                                                               final String title) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "title", title
+        );
+        return repository.updateTitle(threadId, form);
+    }
+
+    public Call<String> addAdmins(final String threadId,
+                                  final Collection<Long> userIds) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "user_ids", new JSONArray(userIds).toString()
+        );
+        return repository.addAdmins(threadId, form);
+    }
+
+    public Call<String> removeAdmins(final String threadId,
+                                     final Collection<Long> userIds) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "user_ids", new JSONArray(userIds).toString()
+        );
+        return repository.removeAdmins(threadId, form);
     }
 }

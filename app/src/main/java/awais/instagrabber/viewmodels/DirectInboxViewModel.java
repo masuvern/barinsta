@@ -14,6 +14,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount
 import awais.instagrabber.repositories.responses.directmessages.DirectInbox;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -38,6 +39,7 @@ public class DirectInboxViewModel extends ViewModel {
     private long seqId;
     private String cursor;
     private boolean hasOlder = true;
+    private DirectUser viewer;
 
     public DirectInboxViewModel() {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
@@ -76,6 +78,10 @@ public class DirectInboxViewModel extends ViewModel {
         return fetchingInbox;
     }
 
+    public DirectUser getViewer() {
+        return viewer;
+    }
+
     public void fetchInbox() {
         if ((fetchingInbox.getValue() != null && fetchingInbox.getValue()) || !hasOlder) return;
         stopCurrentInboxRequest();
@@ -108,6 +114,9 @@ public class DirectInboxViewModel extends ViewModel {
             return;
         }
         seqId = response.getSeqId();
+        if (viewer == null) {
+            viewer = response.getViewer();
+        }
         final DirectInbox inbox = response.getInbox();
         final List<DirectThread> threads = inbox.getThreads();
         if (!TextUtils.isEmpty(cursor)) {

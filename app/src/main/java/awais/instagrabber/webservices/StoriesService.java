@@ -160,8 +160,8 @@ public class StoriesService extends BaseService {
                                 highlightNode.getString("title"),
                                 highlightNode.getString(Constants.EXTRAS_ID),
                                 highlightNode.getJSONObject("cover_media")
-                                        .getJSONObject("cropped_image_version")
-                                        .getString("url"),
+                                             .getJSONObject("cropped_image_version")
+                                             .getString("url"),
                                 highlightNode.getLong("latest_reel_media"),
                                 highlightNode.getInt("media_count")
                         ));
@@ -188,7 +188,7 @@ public class StoriesService extends BaseService {
         form.put("include_suggested_highlights", "false");
         form.put("is_in_archive_home", "true");
         form.put("include_cover", "1");
-        form.put("timezone_offset", String.valueOf(TimeZone.getDefault().getRawOffset() / 1000));
+        form.put("timezone_offset", String.valueOf((float) TimeZone.getDefault().getRawOffset() / 1000));
         if (!TextUtils.isEmpty(maxId)) {
             form.put("max_id", maxId); // NOT TESTED
         }
@@ -338,40 +338,40 @@ public class StoriesService extends BaseService {
 
     // RespondAction.java
     public void respondToQuestion(final String storyId,
-                                   final String stickerId,
-                                   final String answer,
-                                   final String userId,
-                                   final String csrfToken,
-                                   final ServiceCallback<StoryStickerResponse> callback) {
+                                  final String stickerId,
+                                  final String answer,
+                                  final String userId,
+                                  final String csrfToken,
+                                  final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_question_response", "response", answer, userId, csrfToken, callback);
     }
 
     // QuizAction.java
     public void respondToQuiz(final String storyId,
-                               final String stickerId,
-                               final int answer,
-                               final String userId,
-                               final String csrfToken,
-                               final ServiceCallback<StoryStickerResponse> callback) {
+                              final String stickerId,
+                              final int answer,
+                              final String userId,
+                              final String csrfToken,
+                              final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), userId, csrfToken, callback);
     }
 
     // VoteAction.java
     public void respondToPoll(final String storyId,
-                               final String stickerId,
-                               final int answer,
-                               final String userId,
-                               final String csrfToken,
-                               final ServiceCallback<StoryStickerResponse> callback) {
+                              final String stickerId,
+                              final int answer,
+                              final String userId,
+                              final String csrfToken,
+                              final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
     }
 
     public void respondToSlider(final String storyId,
-                              final String stickerId,
-                              final double answer,
-                              final String userId,
-                              final String csrfToken,
-                              final ServiceCallback<StoryStickerResponse> callback) {
+                                final String stickerId,
+                                final double answer,
+                                final String userId,
+                                final String csrfToken,
+                                final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
     }
 

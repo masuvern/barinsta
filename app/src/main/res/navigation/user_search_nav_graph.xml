@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/user_search_nav_graph"
+    app:startDestination="@id/user_search">
+
+    <fragment
+        android:id="@+id/user_search"
+        android:name="awais.instagrabber.fragments.UserSearchFragment"
+        android:label="@string/search">
+        <argument
+            android:name="multiple"
+            app:argType="boolean" />
+
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="action_label"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="hideUserIds"
+            app:argType="long[]" />
+
+
+    </fragment>
+
+    <!--<action
+        android:id="@+id/action_global_user_search"
+        app:destination="@id/user_search">
+        <argument
+            android:name="multiple"
+            app:argType="boolean" />
+
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="action_label"
+            app:argType="string"
+            app:nullable="true" />
+    </action>-->
+</navigation>

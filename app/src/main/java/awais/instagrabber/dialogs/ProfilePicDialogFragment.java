@@ -9,7 +9,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
@@ -32,17 +30,14 @@ import java.io.File;
 import awais.instagrabber.R;
 import awais.instagrabber.asyncs.ProfilePictureFetcher;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
-import awais.instagrabber.db.entities.Account;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.repositories.responses.UserInfo;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.UserService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -128,8 +123,8 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void fetchAvatar() {
         if (isLoggedIn) {
-            final ProfileService profileService = ProfileService.getInstance();
-            profileService.getUserInfo(id, new ServiceCallback<UserInfo>() {
+            final UserService userService = UserService.getInstance();
+            userService.getUserInfo(id, new ServiceCallback<UserInfo>() {
                 @Override
                 public void onSuccess(final UserInfo result) {
                     if (result != null) {
@@ -144,8 +139,9 @@ public class ProfilePicDialogFragment extends DialogFragment {
                     getDialog().dismiss();
                 }
             });
+            return;
         }
-        else new ProfilePictureFetcher(name, id, fetchListener, fallbackUrl, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new ProfilePictureFetcher(name, id, fetchListener, fallbackUrl, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void setupPhoto() {

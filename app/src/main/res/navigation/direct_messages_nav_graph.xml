@@ -73,14 +73,38 @@
     <action
         android:id="@+id/action_global_likesViewerFragment"
         app:destination="@id/likes_nav_graph">
-    <argument
-        android:name="postId"
-        app:argType="string"
-        app:nullable="false" />
-    <argument
-        android:name="isComment"
-        app:argType="boolean"
-        app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/user_search_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_user_search"
+        app:destination="@id/user_search_nav_graph">
+        <argument
+            android:name="multiple"
+            app:argType="boolean" />
+
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="action_label"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="hideUserIds"
+            app:argType="long[]" />
     </action>
 
     <fragment
@@ -112,20 +136,23 @@
     <fragment
         android:id="@+id/directMessagesSettingsFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"
-        android:label="@string/action_settings"
+        android:label="@string/details"
         tools:layout="@layout/fragment_direct_messages_settings">
         <argument
             android:name="threadId"
             app:argType="string" />
-        <argument
-            android:name="title"
-            app:argType="string" />
+        <action
+            android:id="@+id/action_settings_to_inbox"
+            app:destination="@id/directMessagesInboxFragment"
+            app:popUpTo="@+id/directMessagesInboxFragment"
+            app:popUpToInclusive="true" />
+
     </fragment>
     <fragment
         android:id="@+id/imageEditFragment"
         android:name="awais.instagrabber.fragments.imageedit.ImageEditFragment"
-        tools:layout="@layout/fragment_image_edit"
-        android:label="Edit Photo">
+        android:label="Edit Photo"
+        tools:layout="@layout/fragment_image_edit">
         <argument
             android:name="uri"
             app:argType="android.net.Uri"

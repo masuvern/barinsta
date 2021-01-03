@@ -10,8 +10,8 @@ public class DirectThread {
     private final String threadId;
     private final String threadV2Id;
     private final List<DirectUser> users;
-    private final List<String> leftUsers;
-    private final List<String> adminUserIds;
+    private final List<DirectUser> leftUsers;
+    private final List<Long> adminUserIds;
     private final List<DirectItem> items;
     private final long lastActivityAt;
     private final boolean muted;
@@ -42,8 +42,8 @@ public class DirectThread {
     public DirectThread(final String threadId,
                         final String threadV2Id,
                         final List<DirectUser> users,
-                        final List<String> leftUsers,
-                        final List<String> adminUserIds,
+                        final List<DirectUser> leftUsers,
+                        final List<Long> adminUserIds,
                         final List<DirectItem> items,
                         final long lastActivityAt,
                         final boolean muted,
@@ -115,11 +115,11 @@ public class DirectThread {
         return users;
     }
 
-    public List<String> getLeftUsers() {
+    public List<DirectUser> getLeftUsers() {
         return leftUsers;
     }
 
-    public List<String> getAdminUserIds() {
+    public List<Long> getAdminUserIds() {
         return adminUserIds;
     }
 

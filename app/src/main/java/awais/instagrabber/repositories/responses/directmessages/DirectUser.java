@@ -1,8 +1,11 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import awais.instagrabber.models.ProfileModel;
 
-public class DirectUser {
+public class DirectUser implements Serializable {
     private final long pk;
     private final String username;
     private final String fullName;
@@ -104,13 +107,27 @@ public class DirectUser {
                         profileModel.isPrivate(),
                         false,
                         profileModel.isRequested(),
-                        false
-                ),
+                        false,
+                        profileModel.isRestricted()),
                 profileModel.isVerified(),
                 false,
                 false,
                 null,
                 null
         );
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectUser that = (DirectUser) o;
+        return pk == that.pk &&
+                Objects.equals(username, that.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, username);
     }
 }

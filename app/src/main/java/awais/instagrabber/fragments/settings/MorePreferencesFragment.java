@@ -37,8 +37,8 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.UserService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -199,8 +199,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
             // adds cookies to database for quick access
             final String uid = CookieUtils.getUserIdFromCookie(cookie);
-            final ProfileService profileService = ProfileService.getInstance();
-            profileService.getUserInfo(uid, new ServiceCallback<UserInfo>() {
+            final UserService userService = UserService.getInstance();
+            userService.getUserInfo(uid, new ServiceCallback<UserInfo>() {
                 @Override
                 public void onSuccess(final UserInfo result) {
                     // Log.d(TAG, "adding userInfo: " + result);

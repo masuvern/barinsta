@@ -24,6 +24,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -339,5 +340,18 @@ public final class Utils {
                 new String[]{mimeType},
                 callback
         );
+    }
+
+    public static void hideKeyboard(final View view) {
+        if (view == null) return;
+        final Context context = view.getContext();
+        if (context == null) return;
+        try {
+            final InputMethodManager manager = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            if (manager == null) return;
+            manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        } catch (Exception e) {
+            Log.e(TAG, "hideKeyboard: ", e);
+        }
     }
 }
