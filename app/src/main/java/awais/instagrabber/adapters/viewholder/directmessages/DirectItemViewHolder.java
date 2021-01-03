@@ -100,9 +100,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             binding.ivProfilePic.setVisibility(View.GONE);
             binding.tvUsername.setVisibility(View.GONE);
             containerLayoutParams.gravity = Gravity.CENTER;
-            if (itemType == DirectItemType.ACTION_LOG || itemType == DirectItemType.VIDEO_CALL_EVENT) {
-                binding.messageInfo.setVisibility(View.GONE);
-            }
+            binding.messageInfo.setVisibility(View.GONE);
         }
         if (itemType == DirectItemType.REEL_SHARE) {
             containerLayoutParams.setMarginStart(0);
@@ -118,6 +116,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                                            0,
                                            messageInfoPaddingSmall,
                                            dmRadiusSmall);
+        }
+        if (itemType == DirectItemType.MEDIA) {
+            // no background for media items
+            binding.background.setBackgroundResource(0);
         }
         binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
         if (messageDirection == MessageDirection.OUTGOING) {

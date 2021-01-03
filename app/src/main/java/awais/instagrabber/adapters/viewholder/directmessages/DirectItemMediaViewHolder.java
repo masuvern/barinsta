@@ -50,7 +50,6 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
         incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
         outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
         setItemView(binding.getRoot());
-        removeBg();
     }
 
     @Override
