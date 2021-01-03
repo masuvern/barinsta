@@ -560,8 +560,22 @@ public class DirectMessageThreadFragment extends Fragment {
         appStateViewModel.getCurrentUser().observe(getViewLifecycleOwner(), currentUser -> {
             viewModel.setCurrentUser(currentUser);
             setupItemsAdapter(currentUser);
-            viewModel.getItems().observe(getViewLifecycleOwner(),
-                                         list -> itemsAdapter.submitList(list, () -> itemOrHeaders = itemsAdapter.getList()));
+            viewModel.getItems().observe(
+                    getViewLifecycleOwner(),
+                    list -> itemsAdapter.submitList(list, () -> {
+                        itemOrHeaders = itemsAdapter.getList();
+                        binding.chats.post(() -> {
+                            final RecyclerView.LayoutManager layoutManager = binding.chats.getLayoutManager();
+                            if (layoutManager instanceof LinearLayoutManager) {
+                                final int position = ((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition();
+                                if (position < 0) return;
+                                if (position == itemsAdapter.getItemCount() - 1) {
+                                    viewModel.fetchChats();
+                                }
+                            }
+                        });
+                    })
+            );
         });
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
