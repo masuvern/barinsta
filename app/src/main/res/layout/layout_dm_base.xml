@@ -123,6 +123,7 @@
             app:layout_constraintStart_toEndOf="@id/ivProfilePic"
             app:layout_constraintTop_toBottomOf="@id/tvUsername"
             app:layout_constraintWidth_min="wrap"
+            app:layout_constraintWidth_max="230dp"
             app:viewPartInfo="@id/message_info"
             app:viewPartMain="@id/message">
 

@@ -69,7 +69,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             if (bothHeaders) {
                 return oldItem.date.equals(newItem.date);
             }
-            if (oldItem.item != null && newItem.item != null) {
+            if (oldItem.item != null && oldItem.item.getClientContext() != null && newItem.item != null) {
                 return oldItem.item.getClientContext().equals(newItem.item.getClientContext());
             }
             return false;
