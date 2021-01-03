@@ -18,8 +18,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -72,7 +74,6 @@ import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
 import awais.instagrabber.databinding.DialogPostViewBinding;
-import awais.instagrabber.fragments.main.ProfileFragment;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.ProfileModel;
@@ -544,8 +545,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 bundle.putString("postId", feedModel.getPostId());
                 bundle.putBoolean("isComment", false);
                 navController.navigate(R.id.action_global_likesViewerFragment, bundle);
-            }
-            else {
+            } else {
                 Utils.displayToastAboveView(context, v, getString(R.string.like_without_count));
             }
             return true;
@@ -744,8 +744,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                                             if (result) {
                                                 feedModel.setPostCaption(input.getText().toString());
                                                 binding.caption.setText(input.getText().toString());
-                                            }
-                                            else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            } else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                         }
 
                                         @Override
@@ -927,12 +926,19 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 })
                 .build();
         binding.postImage.setController(controller);
-        binding.postImage.setOnClickListener(v -> toggleDetails());
+        // binding.postImage.setOnClickListener(v -> toggleDetails());
         final AnimatedZoomableController zoomableController = AnimatedZoomableController.newInstance();
         zoomableController.setMaxScaleFactor(3f);
         binding.postImage.setZoomableController(zoomableController);
+        binding.postImage.setTapListener(new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(final MotionEvent e) {
+                toggleDetails();
+                return true;
+            }
+        });
         binding.postImage.setAllowTouchInterceptionWhileZoomed(true);
-        binding.postImage.setOnVerticalDragListener(onVerticalDragListener);
+        // binding.postImage.setOnVerticalDragListener(onVerticalDragListener);
     }
 
     private void setupSlider() {

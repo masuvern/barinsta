@@ -2,6 +2,8 @@ package awais.instagrabber.adapters.viewholder;
 
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
@@ -59,9 +61,19 @@ public class SliderPhotoViewHolder extends SliderItemViewHolder {
                                     })
                                     .setLowResImageRequest(ImageRequest.fromUri(model.getThumbnailUrl()))
                                     .build());
-        binding.getRoot().setOnClickListener(v -> {
-            if (sliderCallback != null) {
-                sliderCallback.onItemClicked(position);
+        // binding.getRoot().setOnClickListener(v -> {
+        //     if (sliderCallback != null) {
+        //         sliderCallback.onItemClicked(position);
+        //     }
+        // });
+        binding.getRoot().setTapListener(new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(final MotionEvent e) {
+                if (sliderCallback != null) {
+                    sliderCallback.onItemClicked(position);
+                    return true;
+                }
+                return false;
             }
         });
         final AnimatedZoomableController zoomableController = AnimatedZoomableController.newInstance();
