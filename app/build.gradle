@@ -92,16 +92,13 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
     implementation "androidx.camera:camera-view:1.0.0-alpha20"
 
-
     // EmojiCompat
     def emoji_compat_version = "1.1.0"
     implementation "androidx.emoji:emoji:$emoji_compat_version"
     implementation "androidx.emoji:emoji-appcompat:$emoji_compat_version"
 
-    // implementation 'com.github.hendrawd:StorageUtil:1.1.0'
     implementation 'me.austinhuang:AutoLinkTextViewV2:-SNAPSHOT'
 
-    implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.facebook.fresco:fresco:2.3.0'
     implementation 'com.facebook.fresco:animated-webp:2.3.0'
     implementation 'com.facebook.fresco:webpsupport:2.3.0'

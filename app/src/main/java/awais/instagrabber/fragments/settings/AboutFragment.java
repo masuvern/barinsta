@@ -43,7 +43,6 @@ public class AboutFragment extends BasePreferencesFragment {
         thirdPartyCategory.addPreference(getAutolinkPreference());
         thirdPartyCategory.addPreference(getExoPlayerPreference());
         thirdPartyCategory.addPreference(getFrescoPreference());
-        thirdPartyCategory.addPreference(getJsoupPreference());
         thirdPartyCategory.addPreference(getMDIPreference());
         thirdPartyCategory.addPreference(getRetrofitPreference());
     }
@@ -108,22 +107,6 @@ public class AboutFragment extends BasePreferencesFragment {
         preference.setOnPreferenceClickListener(p -> {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("https://square.github.io/retrofit/"));
-            startActivity(intent);
-            return true;
-        });
-        return preference;
-    }
-
-    private Preference getJsoupPreference() {
-        final Context context = getContext();
-        if (context == null) return null;
-        final Preference preference = new Preference(context);
-        preference.setTitle("jsoup");
-        preference.setSummary("Copyright (c) 2009-2020 Jonathan Hedley. MIT License.");
-        preference.setIconSpaceReserved(false);
-        preference.setOnPreferenceClickListener(p -> {
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://jsoup.org/"));
             startActivity(intent);
             return true;
         });

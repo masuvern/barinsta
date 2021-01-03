@@ -83,14 +83,13 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             loggedInUsersPreferenceCategory.addPreference(getMarkStoriesSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
-        } else {
-            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
-            screen.addPreference(anonUsersPreferenceCategory);
-            anonUsersPreferenceCategory.setIconSpaceReserved(false);
-            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
-            anonUsersPreferenceCategory.addPreference(getUseInstaDpPreference());
         }
-
+//        else {
+//            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
+//            screen.addPreference(anonUsersPreferenceCategory);
+//            anonUsersPreferenceCategory.setIconSpaceReserved(false);
+//            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
+//        }
     }
 
     private Preference getLanguagePreference() {
@@ -257,16 +256,6 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             shouldRecreate();
             return true;
         });
-        return preference;
-    }
-
-    private Preference getUseInstaDpPreference() {
-        final Context context = getContext();
-        if (context == null) return null;
-        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.INSTADP);
-        preference.setTitle(R.string.instadp_settings);
-        preference.setIconSpaceReserved(false);
         return preference;
     }
 

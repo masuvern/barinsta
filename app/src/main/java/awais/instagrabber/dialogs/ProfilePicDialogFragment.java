@@ -6,10 +6,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.BaseControllerListener;
@@ -30,12 +27,7 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import java.io.File;
 
 import awais.instagrabber.R;
-import awais.instagrabber.asyncs.ProfilePictureFetcher;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
-import awais.instagrabber.db.entities.Account;
-import awais.instagrabber.db.repositories.RepositoryCallback;
-import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.repositories.responses.UserInfo;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -56,11 +48,6 @@ public class ProfilePicDialogFragment extends DialogFragment {
     private boolean isLoggedIn;
     private DialogProfilepicBinding binding;
     private String url;
-
-    private final FetchListener<String> fetchListener = profileUrl -> {
-        url = profileUrl;
-        setupPhoto();
-    };
 
     public ProfilePicDialogFragment(final String id, final String name, final String fallbackUrl) {
         this.id = id;
@@ -133,7 +120,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 @Override
                 public void onSuccess(final UserInfo result) {
                     if (result != null) {
-                        fetchListener.onResult(result.getHDProfilePicUrl());
+                        setupPhoto(result.getHDProfilePicUrl());
                     }
                 }
 
@@ -145,13 +132,12 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 }
             });
         }
-        else new ProfilePictureFetcher(name, id, fetchListener, fallbackUrl, false).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else setupPhoto(fallbackUrl);
     }
 
-    private void setupPhoto() {
-        if (TextUtils.isEmpty(url)) {
-            url = fallbackUrl;
-        }
+    private void setupPhoto(final String result) {
+        if (TextUtils.isEmpty(result)) url = fallbackUrl;
+        else url = result;
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setUri(url)
