@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +31,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
@@ -313,10 +316,8 @@ public class DirectMessageThreadFragment extends Fragment {
         super.onResume();
         fragmentActivity.getWindow().setSoftInputMode(SOFT_INPUT_ADJUST_NOTHING | SOFT_INPUT_STATE_HIDDEN);
         if (wasKbShowing) {
-            appExecutors.mainThread().execute(() -> {
-                binding.input.requestFocus();
-                binding.input.post(this::showKeyboard);
-            });
+            binding.input.requestFocus();
+            binding.input.post(this::showKeyboard);
             wasKbShowing = false;
         }
         setObservers();
@@ -329,12 +330,6 @@ public class DirectMessageThreadFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        cleanup();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
         cleanup();
     }
 
@@ -363,13 +358,14 @@ public class DirectMessageThreadFragment extends Fragment {
         if (context == null) return;
         if (getArguments() == null) return;
         actionBar = fragmentActivity.getSupportActionBar();
-        setObservers();
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(getArguments());
         viewModel.getThreadTitle().postValue(fragmentArgs.getTitle());
         final String threadId = fragmentArgs.getThreadId();
         viewModel.setThreadId(threadId);
         setupList();
         root.post(this::setupInput);
+        root.post(this::getInitialData);
+        setObservers();
     }
 
     private void getInitialData() {
@@ -386,9 +382,6 @@ public class DirectMessageThreadFragment extends Fragment {
             // setTitle(UPDATING_TITLE);
             final DirectThread thread = first.get();
             viewModel.setThread(thread);
-            if (itemsAdapter != null) {
-                itemsAdapter.setThread(thread);
-            }
             return;
         }
         viewModel.fetchChats();
@@ -554,29 +547,12 @@ public class DirectMessageThreadFragment extends Fragment {
             }
             setTitle(viewModel.getThreadTitle().getValue());
         });
-        viewModel.getThread().observe(getViewLifecycleOwner(), thread -> {
-            if (thread != null && itemsAdapter != null) itemsAdapter.setThread(thread);
+        final ItemsAdapterDataMerger itemsAdapterDataMerger = new ItemsAdapterDataMerger(appStateViewModel.getCurrentUser(), viewModel.getThread());
+        itemsAdapterDataMerger.observe(getViewLifecycleOwner(), userThreadPair -> {
+            viewModel.setCurrentUser(userThreadPair.first);
+            setupItemsAdapter(userThreadPair.first, userThreadPair.second);
         });
-        appStateViewModel.getCurrentUser().observe(getViewLifecycleOwner(), currentUser -> {
-            viewModel.setCurrentUser(currentUser);
-            setupItemsAdapter(currentUser);
-            viewModel.getItems().observe(
-                    getViewLifecycleOwner(),
-                    list -> itemsAdapter.submitList(list, () -> {
-                        itemOrHeaders = itemsAdapter.getList();
-                        binding.chats.post(() -> {
-                            final RecyclerView.LayoutManager layoutManager = binding.chats.getLayoutManager();
-                            if (layoutManager instanceof LinearLayoutManager) {
-                                final int position = ((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition();
-                                if (position < 0) return;
-                                if (position == itemsAdapter.getItemCount() - 1) {
-                                    viewModel.fetchChats();
-                                }
-                            }
-                        });
-                    })
-            );
-        });
+        viewModel.getItems().observe(getViewLifecycleOwner(), this::submitItemsToAdapter);
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
@@ -585,15 +561,47 @@ public class DirectMessageThreadFragment extends Fragment {
                 if (!(result instanceof Uri)) return;
                 final Uri uri = (Uri) result;
                 viewModel.sendUri(uri);
+                // clear result
+                resultLiveData.postValue(null);
             });
         }
     }
 
-    private void setupItemsAdapter(final ProfileModel currentUser) {
-        if (itemsAdapter != null) return;
-        itemsAdapter = new DirectItemsAdapter(currentUser);
+    private void submitItemsToAdapter(final List<DirectItem> items) {
+        if (itemsAdapter == null) return;
+        itemsAdapter.submitList(items, () -> {
+            itemOrHeaders = itemsAdapter.getList();
+            binding.chats.post(() -> {
+                final RecyclerView.LayoutManager layoutManager = binding.chats.getLayoutManager();
+                if (layoutManager instanceof LinearLayoutManager) {
+                    final int position = ((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition();
+                    if (position < 0) return;
+                    if (position == itemsAdapter.getItemCount() - 1) {
+                        viewModel.fetchChats();
+                    }
+                }
+            });
+        });
+    }
+
+    private void setupItemsAdapter(final ProfileModel currentUser, final DirectThread thread) {
+        if (itemsAdapter != null) {
+            if (itemsAdapter.getThread() == thread) return;
+            itemsAdapter.setThread(thread);
+            return;
+        }
+        itemsAdapter = new DirectItemsAdapter(currentUser, thread);
         itemsAdapter.setHasStableIds(true);
+        itemsAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         binding.chats.setAdapter(itemsAdapter);
+        registerDataObserver();
+        final List<DirectItem> items = viewModel.getItems().getValue();
+        if (items != null && itemsAdapter.getItems() != items) {
+            submitItemsToAdapter(items);
+        }
+    }
+
+    private void registerDataObserver() {
         itemsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
 
             @Override
@@ -607,7 +615,6 @@ public class DirectMessageThreadFragment extends Fragment {
                 }
             }
         });
-        root.post(this::getInitialData);
     }
 
     private void setupInput() {
@@ -1096,5 +1103,27 @@ public class DirectMessageThreadFragment extends Fragment {
             }
         });
         animatorSet.start();
+    }
+
+    public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<ProfileModel, DirectThread>> {
+        private ProfileModel user;
+        private DirectThread thread;
+
+        public ItemsAdapterDataMerger(final LiveData<ProfileModel> userLiveData,
+                                      final LiveData<DirectThread> threadLiveData) {
+            addSource(userLiveData, user -> {
+                this.user = user;
+                combine();
+            });
+            addSource(threadLiveData, thread -> {
+                this.thread = thread;
+                combine();
+            });
+        }
+
+        private void combine() {
+            if (user == null || thread == null) return;
+            setValue(new Pair<>(user, thread));
+        }
     }
 }

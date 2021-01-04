@@ -58,6 +58,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     private final ProfileModel currentUser;
     private DirectThread thread;
     private final AsyncListDiffer<DirectItemOrHeader> differ;
+    private List<DirectItem> items;
 
     private static final DiffUtil.ItemCallback<DirectItemOrHeader> diffCallback = new DiffUtil.ItemCallback<DirectItemOrHeader>() {
         @Override
@@ -97,8 +98,10 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     };
 
-    public DirectItemsAdapter(@NonNull final ProfileModel currentUser) {
+    public DirectItemsAdapter(@NonNull final ProfileModel currentUser,
+                              @NonNull final DirectThread thread) {
         this.currentUser = currentUser;
+        this.thread = thread;
         differ = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
                                        new AsyncDifferConfig.Builder<>(diffCallback).build());
         // this.onClickListener = onClickListener;
@@ -118,9 +121,10 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         return getItemViewHolder(layoutInflater, baseBinding, directItemType);
     }
 
+    @NonNull
     private DirectItemViewHolder getItemViewHolder(final LayoutInflater layoutInflater,
                                                    final LayoutDmBaseBinding baseBinding,
-                                                   final DirectItemType directItemType) {
+                                                   @NonNull final DirectItemType directItemType) {
         switch (directItemType) {
             case TEXT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
@@ -232,6 +236,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     public void setThread(final DirectThread thread) {
         if (thread == null) return;
         this.thread = thread;
+        notifyDataSetChanged();
     }
 
     public void submitList(@Nullable final List<DirectItem> list) {
@@ -240,6 +245,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             return;
         }
         differ.submitList(sectionAndSort(list));
+        this.items = list;
     }
 
     public void submitList(@Nullable final List<DirectItem> list, @Nullable final Runnable commitCallback) {
@@ -248,6 +254,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             return;
         }
         differ.submitList(sectionAndSort(list), commitCallback);
+        this.items = list;
     }
 
     private List<DirectItemOrHeader> sectionAndSort(final List<DirectItem> list) {
@@ -289,6 +296,10 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         return differ.getCurrentList();
     }
 
+    public List<DirectItem> getItems() {
+        return items;
+    }
+
     @Override
     public void onViewRecycled(@NonNull final RecyclerView.ViewHolder holder) {
         if (holder instanceof DirectItemViewHolder) {
@@ -301,6 +312,10 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         if (holder instanceof DirectItemViewHolder) {
             ((DirectItemViewHolder) holder).cleanup();
         }
+    }
+
+    public DirectThread getThread() {
+        return thread;
     }
 
     public static class DirectItemOrHeader {

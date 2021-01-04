@@ -49,7 +49,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
 
     public DirectItemViewHolder(@NonNull final LayoutDmBaseBinding binding,
                                 @NonNull final ProfileModel currentUser,
-                                final DirectThread thread,
+                                @NonNull final DirectThread thread,
                                 @NonNull final View.OnClickListener onClickListener) {
         super(binding.getRoot());
         this.binding = binding;
