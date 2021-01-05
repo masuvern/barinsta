@@ -434,7 +434,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             locationDetailsBinding.locationBiography
                     .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
             locationDetailsBinding.locationBiography.setOnLongClickListener(v -> {
-                Utils.copyText(context, biography);
+                Utils.copyText(getContext(), biography);
                 return true;
             });
         }
