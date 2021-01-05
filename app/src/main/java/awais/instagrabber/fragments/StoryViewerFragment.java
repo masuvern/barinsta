@@ -735,6 +735,15 @@ public class StoryViewerFragment extends Fragment {
                     currentStory = storyModels.get(0);
                     refreshStory();
                 }
+                binding.storiesList.setVisibility((storyModels.size() == 1 && currentFeedStoryIndex == -1) ? View.GONE : View.VISIBLE);
+                if (currentFeedStoryIndex == -1) {
+                    binding.btnBackward.setVisibility(View.GONE);
+                    binding.btnForward.setVisibility(View.GONE);
+                }
+                storiesViewModel.getList().setValue(storyModels);
+                currentStory = storyModels.get(0);
+                refreshStory();
+            }
 
                 @Override
                 public void onFailure(final Throwable t) {

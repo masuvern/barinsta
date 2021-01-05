@@ -246,7 +246,6 @@ public class StoriesService extends BaseService {
                              final boolean highlight,
                              final ServiceCallback<List<StoryModel>> callback) {
         final String url = buildUrl(id, isLoc, isHashtag, highlight);
-        Log.d("austin_debug", url);
         final Call<String> userStoryCall = repository.getUserStory(Constants.I_USER_AGENT, url);
         userStoryCall.enqueue(new Callback<String>() {
             @Override
