@@ -132,7 +132,7 @@ public class StoryViewerFragment extends Fragment {
     private MenuItem menuDm;
     private SimpleExoPlayer player;
     private boolean isHashtag, isLoc;
-    private String highlight;
+    private String highlight, actionBarTitle;
     private boolean fetching = false, sticking = false, shouldRefresh = true;
     private int currentFeedStoryIndex;
     private double sliderValue;
@@ -237,6 +237,15 @@ public class StoryViewerFragment extends Fragment {
     public void onPause() {
         super.onPause();
         releasePlayer();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(actionBarTitle);
+        }
     }
 
     @Override
@@ -681,6 +690,7 @@ public class StoryViewerFragment extends Fragment {
         if (isHighlight) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = highlight;
                 actionBar.setTitle(highlight);
             }
         }
@@ -688,6 +698,7 @@ public class StoryViewerFragment extends Fragment {
             currentStoryUsername = currentStoryUsername.replace("@", "");
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = currentStoryUsername;
                 actionBar.setTitle(currentStoryUsername);
             }
         }
@@ -729,21 +740,14 @@ public class StoryViewerFragment extends Fragment {
                         return;
                     }
                     binding.storiesList.setVisibility((storyModels.size() == 1 && currentFeedStoryIndex == -1) ? View.GONE : View.VISIBLE);
-                    binding.btnBackward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
-                    binding.btnForward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
+                    if (currentFeedStoryIndex == -1) {
+                        binding.btnBackward.setVisibility(View.GONE);
+                        binding.btnForward.setVisibility(View.GONE);
+                    }
                     storiesViewModel.getList().setValue(storyModels);
                     currentStory = storyModels.get(0);
                     refreshStory();
                 }
-                binding.storiesList.setVisibility((storyModels.size() == 1 && currentFeedStoryIndex == -1) ? View.GONE : View.VISIBLE);
-                if (currentFeedStoryIndex == -1) {
-                    binding.btnBackward.setVisibility(View.GONE);
-                    binding.btnForward.setVisibility(View.GONE);
-                }
-                storiesViewModel.getList().setValue(storyModels);
-                currentStory = storyModels.get(0);
-                refreshStory();
-            }
 
                 @Override
                 public void onFailure(final Throwable t) {
@@ -823,6 +827,7 @@ public class StoryViewerFragment extends Fragment {
         if (isHashtag || isLoc) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = currentStory.getUsername();
                 actionBar.setTitle(currentStory.getUsername());
             }
         }
