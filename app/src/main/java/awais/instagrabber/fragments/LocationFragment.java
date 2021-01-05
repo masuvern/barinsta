@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -72,6 +71,7 @@ import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
+import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -414,15 +414,29 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         if (TextUtils.isEmpty(biography)) {
             locationDetailsBinding.locationBiography.setVisibility(View.GONE);
-        } else if (TextUtils.hasMentions(biography)) {
-            locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
-            biography = TextUtils.getMentionText(biography);
-            locationDetailsBinding.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
-            // binding.locationBiography.setMentionClickListener(mentionClickListener);
         } else {
             locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
             locationDetailsBinding.locationBiography.setText(biography);
-            locationDetailsBinding.locationBiography.setMentionClickListener(null);
+            locationDetailsBinding.locationBiography.addOnHashtagListener(autoLinkItem -> {
+                final NavController navController = NavHostFragment.findNavController(this);
+                final Bundle bundle = new Bundle();
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                bundle.putString(ARG_HASHTAG, originalText);
+                navController.navigate(R.id.action_global_hashTagFragment, bundle);
+            });
+            locationDetailsBinding.locationBiography.addOnMentionClickListener(autoLinkItem -> {
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                navigateToProfile(originalText);
+            });
+            locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
+                    autoLinkItem.getOriginalText()
+                            .trim()));
+            locationDetailsBinding.locationBiography
+                    .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+            locationDetailsBinding.locationBiography.setOnLongClickListener(v -> {
+                Utils.copyText(context, biography);
+                return true;
+            });
         }
 
         if (!locationModel.getGeo().startsWith("geo:0.0,0.0?z=17")) {

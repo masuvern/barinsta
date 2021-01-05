@@ -29,7 +29,7 @@ public final class NotificationModel {
                              final String previewUrl,
                              final NotificationType type) {
         this.id = id;
-        this.text = TextUtils.hasMentions(text) ? TextUtils.getMentionText(text) : text;
+        this.text = text;
         this.timestamp = timestamp;
         this.userId = userId;
         this.username = username;
