@@ -18,8 +18,8 @@ assignees: 'austinhuang0131'
 ## Answer honestly. Check accordingly to your situation.
 
 - [ ] I had prior rule violations on Instagram, specifically:
-- [ ] I have admitted the use of InstaGrabber on Instagram.
-- [ ] I have admitted the use of InstaGrabber to a friend who uses Instagram.
+- [ ] I have admitted the use of Barinsta on Instagram.
+- [ ] I have admitted the use of Barinsta to a friend who uses Instagram.
 - [ ] I have modified the source code of the app that I use, other than what is present in this repo. Specifically:
 
 ## Describe your case, including your usage pattern, but without private information.
