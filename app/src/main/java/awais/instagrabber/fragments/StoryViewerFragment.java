@@ -769,14 +769,13 @@ public class StoryViewerFragment extends Fragment {
                 Log.e(TAG, "Error", t);
             }
         };
-          if (live != null) storyCallback.onSuccess(Collections.singletonList(live));
-          else storiesService.getUserStory(currentStoryMediaId,
-                  currentStoryUsername,
-                  isLoc,
-                  isHashtag,
-                  isHighlight,
-                  storyCallback);
-      }
+        if (live != null) storyCallback.onSuccess(Collections.singletonList(live));
+        else storiesService.getUserStory(currentStoryMediaId,
+              currentStoryUsername,
+              isLoc,
+              isHashtag,
+              isHighlight,
+              storyCallback);
     }
 
     private void refreshStory() {
