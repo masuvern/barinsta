@@ -50,6 +50,7 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.LoadEventInfo;
 import com.google.android.exoplayer2.source.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -134,7 +135,7 @@ public class StoryViewerFragment extends Fragment {
     private MenuItem menuDm;
     private SimpleExoPlayer player;
     private boolean isHashtag, isLoc;
-    private String highlight;
+    private String highlight, actionBarTitle;
     private boolean fetching = false, sticking = false, shouldRefresh = true;
     private int currentFeedStoryIndex;
     private double sliderValue;
@@ -254,6 +255,15 @@ public class StoryViewerFragment extends Fragment {
     public void onPause() {
         super.onPause();
         releasePlayer();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(actionBarTitle);
+        }
     }
 
     @Override
@@ -646,6 +656,7 @@ public class StoryViewerFragment extends Fragment {
 
     private void resetView() {
         final Context context = getContext();
+        StoryModel live = null;
         slidePos = 0;
         lastSlidePos = 0;
         if (menuDownload != null) menuDownload.setVisible(false);
@@ -681,6 +692,7 @@ public class StoryViewerFragment extends Fragment {
                 final FeedStoryModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getStoryMediaId();
                 currentStoryUsername = model.getProfileModel().getUsername();
+                if (model.isLive()) live = model.getFirstStoryModel();
             }
         } else if (!TextUtils.isEmpty(fragmentArgs.getProfileId()) && !TextUtils.isEmpty(fragmentArgs.getUsername())) {
             currentStoryMediaId = fragmentArgs.getProfileId();
@@ -692,12 +704,14 @@ public class StoryViewerFragment extends Fragment {
         if (isHighlight) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = highlight;
                 actionBar.setTitle(highlight);
             }
         } else if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = currentStoryUsername;
                 actionBar.setTitle(currentStoryUsername);
             }
         }
@@ -755,12 +769,14 @@ public class StoryViewerFragment extends Fragment {
                 Log.e(TAG, "Error", t);
             }
         };
-        storiesService.getUserStory(currentStoryMediaId,
-                                    currentStoryUsername,
-                                    isLoc,
-                                    isHashtag,
-                                    isHighlight,
-                                    storyCallback);
+          if (live != null) storyCallback.onSuccess(Collections.singletonList(live));
+          else storiesService.getUserStory(currentStoryMediaId,
+                  currentStoryUsername,
+                  isLoc,
+                  isHashtag,
+                  isHighlight,
+                  storyCallback);
+      }
     }
 
     private void refreshStory() {
@@ -784,51 +800,55 @@ public class StoryViewerFragment extends Fragment {
         final MediaItemType itemType = currentStory.getItemType();
 
         if (menuDownload != null) menuDownload.setVisible(false);
-        url = itemType == MediaItemType.MEDIA_TYPE_VIDEO ? currentStory.getVideoUrl() : currentStory.getStoryUrl();
+        url = itemType == MediaItemType.MEDIA_TYPE_IMAGE ? currentStory.getStoryUrl() : currentStory.getVideoUrl();
 
-        final String shortCode = currentStory.getTappableShortCode();
-        binding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
-        binding.viewStoryPost.setTag(shortCode);
+        if (itemType != MediaItemType.MEDIA_TYPE_LIVE) {
+            final String shortCode = currentStory.getTappableShortCode();
+            binding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
+            binding.viewStoryPost.setTag(shortCode);
 
-        final String spotify = currentStory.getSpotify();
-        binding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
-        binding.spotify.setTag(spotify);
+            final String spotify = currentStory.getSpotify();
+            binding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
+            binding.spotify.setTag(spotify);
 
-        poll = currentStory.getPoll();
-        binding.poll.setVisibility(poll != null ? View.VISIBLE : View.GONE);
-        binding.poll.setTag(poll);
+            poll = currentStory.getPoll();
+            binding.poll.setVisibility(poll != null ? View.VISIBLE : View.GONE);
+            binding.poll.setTag(poll);
 
-        question = currentStory.getQuestion();
-        binding.answer.setVisibility((question != null && !TextUtils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
-        binding.answer.setTag(question);
+            question = currentStory.getQuestion();
+            binding.answer.setVisibility((question != null && !TextUtils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
+            binding.answer.setTag(question);
 
-        mentions = currentStory.getMentions();
-        binding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
-        binding.mention.setTag(mentions);
+            mentions = currentStory.getMentions();
+            binding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
+            binding.mention.setTag(mentions);
 
-        quiz = currentStory.getQuiz();
-        binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
-        binding.quiz.setTag(quiz);
+            quiz = currentStory.getQuiz();
+            binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
+            binding.quiz.setTag(quiz);
 
-        slider = currentStory.getSlider();
-        binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
-        binding.slider.setTag(slider);
+            slider = currentStory.getSlider();
+            binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
+            binding.slider.setTag(slider);
 
-        final SwipeUpModel swipeUp = currentStory.getSwipeUp();
-        if (swipeUp != null) {
-            binding.swipeUp.setVisibility(View.VISIBLE);
-            binding.swipeUp.setText(swipeUp.getText());
-            binding.swipeUp.setTag(swipeUp.getUrl());
+            final SwipeUpModel swipeUp = currentStory.getSwipeUp();
+            if (swipeUp != null) {
+                binding.swipeUp.setVisibility(View.VISIBLE);
+                binding.swipeUp.setText(swipeUp.getText());
+                binding.swipeUp.setTag(swipeUp.getUrl());
+            } else binding.swipeUp.setVisibility(View.GONE);
         }
 
         releasePlayer();
         if (isHashtag || isLoc) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = currentStory.getUsername();
                 actionBar.setTitle(currentStory.getUsername());
             }
         }
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
+        else if (itemType == MediaItemType.MEDIA_TYPE_LIVE) setupLive();
         else setupImage();
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -953,6 +973,72 @@ public class StoryViewerFragment extends Fragment {
             }
         });
     }
+
+    private void setupLive() {
+        binding.playerView.setVisibility(View.VISIBLE);
+        binding.progressView.setVisibility(View.GONE);
+        binding.imageViewer.setVisibility(View.GONE);
+        binding.imageViewer.setController(null);
+
+        if (menuDownload != null) menuDownload.setVisible(false);
+        if (menuDm != null) menuDm.setVisible(false);
+
+        final Context context = getContext();
+        if (context == null) return;
+        player = new SimpleExoPlayer.Builder(context).build();
+        binding.playerView.setPlayer(player);
+        player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
+
+        final Uri uri = Uri.parse(url);
+        final MediaItem mediaItem = MediaItem.fromUri(uri);
+        final DashMediaSource mediaSource = new DashMediaSource.Factory(new DefaultDataSourceFactory(context, "instagram"))
+                .createMediaSource(mediaItem);
+        mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
+            @Override
+            public void onLoadCompleted(final int windowIndex,
+                                        @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                        final LoadEventInfo loadEventInfo,
+                                        final MediaLoadData mediaLoadData) {
+                binding.progressView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onLoadStarted(final int windowIndex,
+                                      @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                      final LoadEventInfo loadEventInfo,
+                                      final MediaLoadData mediaLoadData) {
+                binding.progressView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onLoadCanceled(final int windowIndex,
+                                       @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                       final LoadEventInfo loadEventInfo,
+                                       final MediaLoadData mediaLoadData) {
+                binding.progressView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onLoadError(final int windowIndex,
+                                    @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                    final LoadEventInfo loadEventInfo,
+                                    final MediaLoadData mediaLoadData,
+                                    final IOException error,
+                                    final boolean wasCanceled) {
+                binding.progressView.setVisibility(View.GONE);
+            }
+        });
+        player.setMediaSource(mediaSource);
+        player.prepare();
+
+        binding.playerView.setOnClickListener(v -> {
+            if (player != null) {
+                if (player.getPlaybackState() == Player.STATE_ENDED) player.seekTo(0);
+                player.setPlayWhenReady(player.getPlaybackState() == Player.STATE_ENDED || !player.isPlaying());
+            }
+        });
+    }
+
 
     private void openProfile(final String username) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();

@@ -197,6 +197,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                 @Override
                 public void onSuccess(final List<FeedStoryModel> result) {
                     feedStoriesViewModel.getList().postValue(result);
+                    adapter.submitList(result);
                     binding.swipeRefreshLayout.setRefreshing(false);
                 }
 

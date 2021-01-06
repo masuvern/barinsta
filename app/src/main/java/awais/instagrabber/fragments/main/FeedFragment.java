@@ -79,6 +79,21 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private RecyclerView storiesRecyclerView;
     private MenuItem storyListMenu;
 
+    private final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(
+            new FeedStoriesAdapter.OnFeedStoryClickListener() {
+                @Override
+                public void onFeedStoryClick(FeedStoryModel model, int position) {
+                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
+                    NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+                }
+
+                @Override
+                public void onFeedStoryLongClick(FeedStoryModel model, int position) {
+                    navigateToProfile("@" + model.getProfileModel().getUsername());
+                }
+            }
+    );
+
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
         public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
@@ -353,20 +368,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private void setupFeedStories() {
         if (storyListMenu != null) storyListMenu.setVisible(false);
         feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
-        final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(
-            new FeedStoriesAdapter.OnFeedStoryClickListener() {
-                @Override
-                public void onFeedStoryClick(FeedStoryModel model, int position) {
-                    final NavDirections action = FeedFragmentDirections.actionFeedFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
-                    NavHostFragment.findNavController(FeedFragment.this).navigate(action);
-                }
-
-                @Override
-                public void onFeedStoryLongClick(FeedStoryModel model, int position) {
-                    navigateToProfile("@" + model.getProfileModel().getUsername());
-                }
-            }
-        );
         final Context context = getContext();
         if (context == null) return;
         storiesRecyclerView = new RecyclerView(context);
@@ -390,6 +391,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
                 feedStoriesViewModel.getList().postValue(result);
+                feedStoriesAdapter.submitList(result);
                 storiesFetching = false;
                 if (storyListMenu != null) storyListMenu.setVisible(true);
                 updateSwipeRefreshState();

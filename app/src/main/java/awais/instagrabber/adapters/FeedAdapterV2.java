@@ -25,6 +25,7 @@ import awais.instagrabber.databinding.ItemFeedVideoBinding;
 import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.utils.TextUtils;
 
 public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.ViewHolder> {
     private static final String TAG = "FeedAdapterV2";
@@ -46,7 +47,13 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
 
         @Override
         public boolean areContentsTheSame(@NonNull final FeedModel oldItem, @NonNull final FeedModel newItem) {
-            return oldItem.getPostId().equals(newItem.getPostId()) && oldItem.getPostCaption().equals(newItem.getPostCaption());
+            boolean result = oldItem.getPostId().equals(newItem.getPostId());
+            if (TextUtils.isEmpty(oldItem.getPostCaption())) {
+                return result ? TextUtils.isEmpty(newItem.getPostCaption()) : false;
+            }
+            else {
+                return result ? oldItem.getPostCaption().equals(newItem.getPostCaption()) : false;
+            }
         }
     };
     private final AdapterSelectionCallback adapterSelectionCallback = new AdapterSelectionCallback() {

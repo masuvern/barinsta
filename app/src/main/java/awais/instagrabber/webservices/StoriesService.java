@@ -121,12 +121,32 @@ public class StoriesService extends BaseService {
                 final long timestamp = node.getLong("latest_reel_media");
                 final int mediaCount = node.getInt("media_count");
                 final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
-                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").optJSONObject(0) : null;
+                final boolean isBestie = node.optBoolean("has_besties_media", false);
                 StoryModel firstStoryModel = null;
                 if (itemJson != null) {
                     firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
                 }
-                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel, mediaCount));
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel, mediaCount, false, isBestie));
+            }
+            final JSONArray broadcasts = new JSONObject(body).getJSONArray("broadcasts");
+            for (int i = 0; i < broadcasts.length(); ++i) {
+                final JSONObject node = broadcasts.getJSONObject(i);
+                final JSONObject user = node.getJSONObject("broadcast_owner");
+                final ProfileModel profileModel = new ProfileModel(false, false, false,
+                        user.getString("pk"),
+                        user.getString("username"),
+                        null, null, null,
+                        user.getString("profile_pic_url"),
+                        null, 0, 0, 0, false, false, false, false, false);
+                final String id = node.getString("id");
+                final long timestamp = node.getLong("published_time");
+                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                StoryModel firstStoryModel = null;
+                if (itemJson != null) {
+                    firstStoryModel = ResponseBodyUtils.parseBroadcastItem(itemJson);
+                }
+                feedStoryModels.add(new FeedStoryModel(id, profileModel, false, timestamp, firstStoryModel, 1, true, false));
             }
             callback.onSuccess(sort(feedStoryModels));
         } catch (JSONException e) {
