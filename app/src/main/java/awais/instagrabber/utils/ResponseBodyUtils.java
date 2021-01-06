@@ -965,7 +965,7 @@ public final class ResponseBodyUtils {
             JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
             String swipeUpUrl = tappableObject.optString("webUri");
             final String backupSwipeUpUrl = swipeUpUrl;
-            if (swipeUpUrl != null && swipeUpUrl.startsWith("https://l.instagram.com/") {
+            if (swipeUpUrl != null && swipeUpUrl.startsWith("https://l.instagram.com/")) {
                 swipeUpUrl = Uri.parse(swipeUpUrl).getQueryParameter("u");
             }
             if (swipeUpUrl != null && swipeUpUrl.startsWith("http"))
