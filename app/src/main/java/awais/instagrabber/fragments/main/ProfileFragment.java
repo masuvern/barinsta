@@ -869,7 +869,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         @Override
                                         public void onSuccess(final List<StoryModel> storyModels) {
                                             if (storyModels != null && !storyModels.isEmpty()) {
-                                                profileDetailsBinding.mainProfileImage.setStoriesBorder();
+                                                profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
                                                 hasStories = true;
                                             }
                                         }

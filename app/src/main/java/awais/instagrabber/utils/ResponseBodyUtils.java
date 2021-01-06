@@ -1009,4 +1009,17 @@ public final class ResponseBodyUtils {
 
         return model;
     }
+
+    public static StoryModel parseBroadcastItem(final JSONObject data) throws JSONException {
+        final StoryModel model = new StoryModel(data.getString("id"),
+                data.getString("cover_frame_url"),
+                data.getString("cover_frame_url"),
+                MediaItemType.MEDIA_TYPE_LIVE,
+                data.optLong("published_time", 0),
+                data.getJSONObject("user").getString("username"),
+                data.getJSONObject("user").getString("pk"),
+                false);
+        model.setVideoUrl(data.getString("dash_playback_url"));
+        return model;
+    }
 }
