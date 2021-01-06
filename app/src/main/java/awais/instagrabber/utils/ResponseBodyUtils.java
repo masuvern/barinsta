@@ -1,5 +1,6 @@
 package awais.instagrabber.utils;
 
+import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
 
@@ -957,10 +958,15 @@ public final class ResponseBodyUtils {
         }
         if (data.has("story_cta") && data.has("link_text")) {
             JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
-            String swipeUpUrl = tappableObject.getString("webUri");
-            if (swipeUpUrl.startsWith("http")) {
-                model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+            String swipeUpUrl = tappableObject.optString("webUri");
+            final String backupSwipeUpUrl = swipeUpUrl;
+            if (swipeUpUrl != null && swipeUpUrl.startsWith("https://l.instagram.com/")) {
+                swipeUpUrl = Uri.parse(swipeUpUrl).getQueryParameter("u");
             }
+            if (swipeUpUrl != null && swipeUpUrl.startsWith("http"))
+                model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+            else if (backupSwipeUpUrl != null && backupSwipeUpUrl.startsWith("http"))
+                model.setSwipeUp(new SwipeUpModel(backupSwipeUpUrl, data.getString("link_text")));
         }
         if (data.has("story_sliders")) {
             final JSONObject tappableObject = data.getJSONArray("story_sliders").getJSONObject(0)
