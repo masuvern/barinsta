@@ -14,7 +14,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmActionLogBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemActionLog;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVideoCallEvent;
@@ -27,7 +27,7 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
 
     public DirectItemVideoCallEventViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                               final LayoutDmActionLogBinding binding,
-                                              final ProfileModel currentUser,
+                                              final User currentUser,
                                               final DirectThread thread,
                                               final MentionClickListener mentionClickListener,
                                               final View.OnClickListener onClickListener) {

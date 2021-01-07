@@ -15,7 +15,7 @@ import awais.instagrabber.adapters.DirectUsersAdapter.OnDirectUserClickListener;
 import awais.instagrabber.adapters.DirectUsersAdapter.OnDirectUserLongClickListener;
 import awais.instagrabber.customviews.VerticalImageSpan;
 import awais.instagrabber.databinding.LayoutDmUserItemBinding;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Utils;
 
 public class DirectUserViewHolder extends RecyclerView.ViewHolder {
@@ -39,7 +39,7 @@ public class DirectUserViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(final int position,
-                     final DirectUser user,
+                     final User user,
                      final boolean isAdmin,
                      final boolean isInviter,
                      final boolean showSelection,
@@ -60,7 +60,7 @@ public class DirectUserViewHolder extends RecyclerView.ViewHolder {
         setSelection(showSelection, isSelected);
     }
 
-    private void setFullName(final DirectUser user) {
+    private void setFullName(final User user) {
         final SpannableStringBuilder sb = new SpannableStringBuilder(user.getFullName());
         if (user.isVerified()) {
             if (verifiedSpan == null) {

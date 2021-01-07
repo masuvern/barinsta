@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import awais.instagrabber.repositories.responses.Media;
+
 public class DirectItemReelShare {
     private final String text;
     private final String type;
@@ -7,7 +9,7 @@ public class DirectItemReelShare {
     private final long mentionedUserId;
     private final boolean isReelPersisted;
     private final String reelType;
-    private final DirectItemMedia media;
+    private final Media media;
     private final DirectItemReelShareReactionInfo reactionInfo;
 
     public DirectItemReelShare(final String text,
@@ -16,7 +18,7 @@ public class DirectItemReelShare {
                                final long mentionedUserId,
                                final boolean isReelPersisted,
                                final String reelType,
-                               final DirectItemMedia media,
+                               final Media media,
                                final DirectItemReelShareReactionInfo reactionInfo) {
         this.text = text;
         this.type = type;
@@ -48,7 +50,7 @@ public class DirectItemReelShare {
         return reelType;
     }
 
-    public DirectItemMedia getMedia() {
+    public Media getMedia() {
         return media;
     }
 

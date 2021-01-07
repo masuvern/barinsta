@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import awais.instagrabber.repositories.responses.User;
+
 public class DirectThread {
     private final String threadId;
     private final String threadV2Id;
-    private final List<DirectUser> users;
-    private final List<DirectUser> leftUsers;
+    private final List<User> users;
+    private final List<User> leftUsers;
     private final List<Long> adminUserIds;
     private final List<DirectItem> items;
     private final long lastActivityAt;
@@ -29,7 +31,7 @@ public class DirectThread {
     private final boolean vcMuted;
     private final boolean isGroup;
     private final boolean mentionsMuted;
-    private final DirectUser inviter;
+    private final User inviter;
     private final boolean hasOlder;
     private final boolean hasNewer;
     private final Map<Long, DirectThreadLastSeenAt> lastSeenAt;
@@ -41,8 +43,8 @@ public class DirectThread {
 
     public DirectThread(final String threadId,
                         final String threadV2Id,
-                        final List<DirectUser> users,
-                        final List<DirectUser> leftUsers,
+                        final List<User> users,
+                        final List<User> leftUsers,
                         final List<Long> adminUserIds,
                         final List<DirectItem> items,
                         final long lastActivityAt,
@@ -61,7 +63,7 @@ public class DirectThread {
                         final boolean vcMuted,
                         final boolean isGroup,
                         final boolean mentionsMuted,
-                        final DirectUser inviter,
+                        final User inviter,
                         final boolean hasOlder,
                         final boolean hasNewer,
                         final Map<Long, DirectThreadLastSeenAt> lastSeenAt,
@@ -111,11 +113,11 @@ public class DirectThread {
         return threadV2Id;
     }
 
-    public List<DirectUser> getUsers() {
+    public List<User> getUsers() {
         return users;
     }
 
-    public List<DirectUser> getLeftUsers() {
+    public List<User> getLeftUsers() {
         return leftUsers;
     }
 
@@ -191,7 +193,7 @@ public class DirectThread {
         return mentionsMuted;
     }
 
-    public DirectUser getInviter() {
+    public User getInviter() {
         return inviter;
     }
 

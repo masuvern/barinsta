@@ -14,18 +14,18 @@ import java.util.Set;
 import awais.instagrabber.adapters.DirectUsersAdapter.OnDirectUserClickListener;
 import awais.instagrabber.adapters.viewholder.DirectUserViewHolder;
 import awais.instagrabber.databinding.LayoutDmUserItemBinding;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
+import awais.instagrabber.repositories.responses.User;
 
-public final class UserSearchResultsAdapter extends ListAdapter<DirectUser, DirectUserViewHolder> {
+public final class UserSearchResultsAdapter extends ListAdapter<User, DirectUserViewHolder> {
 
-    private static final DiffUtil.ItemCallback<DirectUser> DIFF_CALLBACK = new DiffUtil.ItemCallback<DirectUser>() {
+    private static final DiffUtil.ItemCallback<User> DIFF_CALLBACK = new DiffUtil.ItemCallback<User>() {
         @Override
-        public boolean areItemsTheSame(@NonNull final DirectUser oldItem, @NonNull final DirectUser newItem) {
+        public boolean areItemsTheSame(@NonNull final User oldItem, @NonNull final User newItem) {
             return oldItem.getPk() == newItem.getPk();
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull final DirectUser oldItem, @NonNull final DirectUser newItem) {
+        public boolean areContentsTheSame(@NonNull final User oldItem, @NonNull final User newItem) {
             return oldItem.getUsername().equals(newItem.getUsername()) &&
                     oldItem.getFullName().equals(newItem.getFullName());
         }
@@ -54,7 +54,7 @@ public final class UserSearchResultsAdapter extends ListAdapter<DirectUser, Dire
 
     @Override
     public void onBindViewHolder(@NonNull final DirectUserViewHolder holder, final int position) {
-        final DirectUser user = getItem(position);
+        final User user = getItem(position);
         boolean isSelected = selectedUserIds != null && selectedUserIds.contains(user.getPk());
         holder.bind(position, user, false, false, showSelection, isSelected);
     }
@@ -67,7 +67,7 @@ public final class UserSearchResultsAdapter extends ListAdapter<DirectUser, Dire
     public void setSelectedUser(final long userId, final boolean selected) {
         if (selectedUserIds == null) return;
         int position = -1;
-        final List<DirectUser> currentList = getCurrentList();
+        final List<User> currentList = getCurrentList();
         for (int i = 0; i < currentList.size(); i++) {
             if (currentList.get(i).getPk() == userId) {
                 position = i;

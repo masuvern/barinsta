@@ -13,14 +13,13 @@ import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmReelShareBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReelShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
 
@@ -30,7 +29,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
 
     public DirectItemReelShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                          @NonNull final LayoutDmReelShareBinding binding,
-                                         final ProfileModel currentUser,
+                                         final User currentUser,
                                          final DirectThread thread,
                                          final MentionClickListener mentionClickListener,
                                          final View.OnClickListener onClickListener) {
@@ -46,9 +45,9 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
         final String type = reelShare.getType();
         if (type == null) return;
         final boolean isSelf = isSelf(item);
-        final DirectItemMedia media = reelShare.getMedia();
+        final Media media = reelShare.getMedia();
         if (media == null) return;
-        final DirectUser user = media.getUser();
+        final User user = media.getUser();
         if (user == null) return;
         final boolean expired = media.getMediaType() == null;
         if (expired) {
@@ -155,7 +154,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
         binding.message.setText(text);
     }
 
-    private void setPreview(final DirectItemMedia media) {
+    private void setPreview(final Media media) {
         final MediaItemType mediaType = media.getMediaType();
         if (mediaType == null) return;
         binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO || mediaType == MediaItemType.MEDIA_TYPE_SLIDER

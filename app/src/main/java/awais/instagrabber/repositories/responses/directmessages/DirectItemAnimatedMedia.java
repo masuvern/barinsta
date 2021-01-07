@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import awais.instagrabber.repositories.responses.AnimatedMediaImages;
+
 public final class DirectItemAnimatedMedia {
     private final String id;
     private final AnimatedMediaImages images;

@@ -11,9 +11,9 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.repositories.responses.directmessages.AnimatedMediaFixedHeight;
-import awais.instagrabber.repositories.responses.directmessages.AnimatedMediaImages;
+import awais.instagrabber.repositories.responses.AnimatedMediaFixedHeight;
+import awais.instagrabber.repositories.responses.AnimatedMediaImages;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
@@ -25,7 +25,7 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
 
     public DirectItemAnimatedMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                              @NonNull final LayoutDmAnimatedMediaBinding binding,
-                                             final ProfileModel currentUser,
+                                             final User currentUser,
                                              final DirectThread thread,
                                              final MentionClickListener mentionClickListener,
                                              final View.OnClickListener onClickListener) {

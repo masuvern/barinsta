@@ -4,8 +4,8 @@ import java.util.List;
 
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -27,8 +27,8 @@ public class HashtagPostFetchService implements PostFetcher.PostFetchService {
     }
 
     @Override
-    public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        final ServiceCallback cb = new ServiceCallback<PostsFetchResponse>() {
+    public void fetch(final FetchListener<List<Media>> fetchListener) {
+        final ServiceCallback<PostsFetchResponse> cb = new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;

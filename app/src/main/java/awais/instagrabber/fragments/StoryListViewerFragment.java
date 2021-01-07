@@ -29,20 +29,15 @@ import awais.instagrabber.adapters.HighlightStoriesListAdapter;
 import awais.instagrabber.adapters.HighlightStoriesListAdapter.OnHighlightStoryClickListener;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentStoryListViewerBinding;
-import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.ArchivesViewModel;
+import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.StoriesService.ArchiveFetchResponse;
-
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class StoryListViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "StoryListViewerFragment";
@@ -56,14 +51,14 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     private StoriesService storiesService;
     private Context context;
     private String type, endCursor = null;
-    private RecyclerLazyLoader lazyLoader;
     private FeedStoriesListAdapter adapter;
 
     private final OnFeedStoryClickListener clickListener = new OnFeedStoryClickListener() {
         @Override
         public void onFeedStoryClick(final FeedStoryModel model, final int position) {
             if (model == null) return;
-            final NavDirections action = StoryListViewerFragmentDirections.actionStoryListFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
+            final NavDirections action = StoryListViewerFragmentDirections
+                    .actionStoryListFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
         }
 
@@ -105,8 +100,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
             try {
                 final Context context = getContext();
                 Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-            catch (Exception e) {}
+            } catch (Exception ignored) {}
         }
     };
 
@@ -142,7 +136,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     public void onResume() {
         super.onResume();
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (actionBar != null) actionBar.setTitle(type == "feed" ? R.string.feed_stories : R.string.action_archive);
+        if (actionBar != null) actionBar.setTitle(type.equals("feed") ? R.string.feed_stories : R.string.action_archive);
     }
 
     @Override
@@ -159,17 +153,16 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (type == "feed") {
+        if (type.equals("feed")) {
             if (actionBar != null) actionBar.setTitle(R.string.feed_stories);
             feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
             adapter = new FeedStoriesListAdapter(clickListener);
             binding.rvStories.setLayoutManager(layoutManager);
             binding.rvStories.setAdapter(adapter);
             feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
-        }
-        else {
+        } else {
             if (actionBar != null) actionBar.setTitle(R.string.action_archive);
-            lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+            final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
                 if (!TextUtils.isEmpty(endCursor)) onRefresh();
                 endCursor = null;
             });
@@ -186,14 +179,12 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     @Override
     public void onRefresh() {
         binding.swipeRefreshLayout.setRefreshing(true);
-        if (type == "feed" && firstRefresh) {
+        if (type.equals("feed") && firstRefresh) {
             binding.swipeRefreshLayout.setRefreshing(false);
             adapter.submitList(feedStoriesViewModel.getList().getValue());
             firstRefresh = false;
-        }
-        else if (type == "feed") {
-            final String cookie = settingsHelper.getString(Constants.COOKIE);
-            storiesService.getFeedStories(CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<List<FeedStoryModel>>() {
+        } else if (type.equals("feed")) {
+            storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
                 @Override
                 public void onSuccess(final List<FeedStoryModel> result) {
                     feedStoriesViewModel.getList().postValue(result);
@@ -206,8 +197,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                     Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
-        }
-        else if (type == "archive") {
+        } else if (type.equals("archive")) {
             storiesService.fetchArchive(endCursor, cb);
         }
     }

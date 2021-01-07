@@ -68,8 +68,8 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.AppExecutors;
@@ -584,7 +584,7 @@ public class DirectMessageThreadFragment extends Fragment {
         });
     }
 
-    private void setupItemsAdapter(final ProfileModel currentUser, final DirectThread thread) {
+    private void setupItemsAdapter(final User currentUser, final DirectThread thread) {
         if (itemsAdapter != null) {
             if (itemsAdapter.getThread() == thread) return;
             itemsAdapter.setThread(thread);
@@ -1105,11 +1105,11 @@ public class DirectMessageThreadFragment extends Fragment {
         animatorSet.start();
     }
 
-    public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<ProfileModel, DirectThread>> {
-        private ProfileModel user;
+    public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<User, DirectThread>> {
+        private User user;
         private DirectThread thread;
 
-        public ItemsAdapterDataMerger(final LiveData<ProfileModel> userLiveData,
+        public ItemsAdapterDataMerger(final LiveData<User> userLiveData,
                                       final LiveData<DirectThread> threadLiveData) {
             addSource(userLiveData, user -> {
                 this.user = user;

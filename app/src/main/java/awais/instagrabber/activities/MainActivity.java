@@ -388,7 +388,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             final int selectedItemId = binding.bottomNavView.getSelectedItemId();

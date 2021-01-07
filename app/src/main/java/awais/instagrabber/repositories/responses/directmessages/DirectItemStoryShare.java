@@ -1,11 +1,13 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import awais.instagrabber.repositories.responses.Media;
+
 public class DirectItemStoryShare {
     private final String reelId;
     private final String reelType;
     private final String text;
     private final boolean isReelPersisted;
-    private final DirectItemMedia media;
+    private final Media media;
     private final String title;
     private final String message;
 
@@ -13,7 +15,7 @@ public class DirectItemStoryShare {
                                 final String reelType,
                                 final String text,
                                 final boolean isReelPersisted,
-                                final DirectItemMedia media,
+                                final Media media,
                                 final String title,
                                 final String message) {
         this.reelId = reelId;
@@ -41,7 +43,7 @@ public class DirectItemStoryShare {
         return isReelPersisted;
     }
 
-    public DirectItemMedia getMedia() {
+    public Media getMedia() {
         return media;
     }
 

@@ -18,8 +18,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -32,16 +30,14 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
 import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListener;
 import awais.instagrabber.asyncs.NotificationsFetcher;
-import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
-import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
-import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
+import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -63,8 +59,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private NotificationViewModel notificationViewModel;
     private FriendshipService friendshipService;
     private MediaService mediaService;
-    private NewsService newsService;
-    private String userId, csrfToken, type;
+    private long userId;
+    private String csrfToken;
+    private String type;
     private Context context;
 
     private final OnNotificationClickListener clickListener = new OnNotificationClickListener() {
@@ -79,11 +76,10 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                 final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
                         -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
-            }
-            else {
-                mediaService.fetch(model.getPostId(), new ServiceCallback<FeedModel>() {
+            } else {
+                mediaService.fetch(model.getPostId(), new ServiceCallback<Media>() {
                     @Override
-                    public void onSuccess(final FeedModel feedModel) {
+                    public void onSuccess(final Media feedModel) {
                         final PostViewV2Fragment fragment = PostViewV2Fragment
                                 .builder(feedModel)
                                 .build();
@@ -104,8 +100,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             final String username = model.getUsername();
             if (model.getType() == NotificationType.FOLLOW || model.getType() == NotificationType.AYML) {
                 openProfile(username);
-            }
-            else {
+            } else {
                 final SpannableString title = new SpannableString(username + (TextUtils.isEmpty(model.getText()) ? "" : (":\n" + model.getText())));
                 title.setSpan(new RelativeSizeSpan(1.23f), 0, username.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
@@ -115,21 +110,18 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             getString(R.string.open_profile),
                             getString(R.string.view_story)
                     };
-                }
-                else if (model.getPostId() != null) {
+                } else if (model.getPostId() != null) {
                     commentDialogList = new String[]{
                             getString(R.string.open_profile),
                             getString(R.string.view_post)
                     };
-                }
-                else if (model.getType() == NotificationType.REQUEST) {
+                } else if (model.getType() == NotificationType.REQUEST) {
                     commentDialogList = new String[]{
                             getString(R.string.open_profile),
                             getString(R.string.request_approve),
                             getString(R.string.request_reject)
                     };
-                }
-                else commentDialogList = null; // shouldn't happen
+                } else commentDialogList = null; // shouldn't happen
                 final Context context = getContext();
                 if (context == null) return;
                 final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
@@ -139,9 +131,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                                friendshipService.approve(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
                                     @Override
-                                    public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                    public void onSuccess(final FriendshipChangeResponse result) {
                                         onRefresh();
                                         Log.e(TAG, "approve: status was not ok!");
                                     }
@@ -152,10 +144,10 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                                     }
                                 });
                                 return;
-                            }
-                            else if (model.getType() == NotificationType.RESPONDED_STORY) {
-                                final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
-                                        -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
+                            } else if (model.getType() == NotificationType.RESPONDED_STORY) {
+                                final NavDirections action = NotificationsViewerFragmentDirections
+                                        .actionNotificationsViewerFragmentToStoryViewerFragment(
+                                                -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
                                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
                                 return;
                             }
@@ -164,9 +156,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                                     .setView(R.layout.dialog_opening_post)
                                     .create();
                             alertDialog.show();
-                            mediaService.fetch(model.getPostId(), new ServiceCallback<FeedModel>() {
+                            mediaService.fetch(model.getPostId(), new ServiceCallback<Media>() {
                                 @Override
-                                public void onSuccess(final FeedModel feedModel) {
+                                public void onSuccess(final Media feedModel) {
                                     final PostViewV2Fragment fragment = PostViewV2Fragment
                                             .builder(feedModel)
                                             .build();
@@ -181,9 +173,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             });
                             break;
                         case 2:
-                            friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+                            friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
                                 @Override
-                                public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+                                public void onSuccess(final FriendshipChangeResponse result) {
                                     onRefresh();
                                 }
 
@@ -283,7 +275,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case "ayml":
-                newsService = NewsService.getInstance();
+                final NewsService newsService = NewsService.getInstance();
                 newsService.fetchSuggestions(csrfToken, new ServiceCallback<List<NotificationModel>>() {
                     @Override
                     public void onSuccess(final List<NotificationModel> notificationModels) {

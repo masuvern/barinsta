@@ -1,13 +1,15 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
-public class DirectItemClip {
-    private final DirectItemMedia clip;
+import awais.instagrabber.repositories.responses.Media;
 
-    public DirectItemClip(final DirectItemMedia clip) {
+public class DirectItemClip {
+    private final Media clip;
+
+    public DirectItemClip(final Media clip) {
         this.clip = clip;
     }
 
-    public DirectItemMedia getClip() {
+    public Media getClip() {
         return clip;
     }
 }

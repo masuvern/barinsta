@@ -10,11 +10,11 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
 import awais.instagrabber.repositories.responses.directmessages.DirectInbox;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -39,14 +39,14 @@ public class DirectInboxViewModel extends ViewModel {
     private long seqId;
     private String cursor;
     private boolean hasOlder = true;
-    private DirectUser viewer;
+    private User viewer;
 
     public DirectInboxViewModel() {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final String userId = CookieUtils.getUserIdFromCookie(cookie);
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || TextUtils.isEmpty(userId) || TextUtils.isEmpty(deviceUuid)) {
+        if (TextUtils.isEmpty(csrfToken) || userId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
         service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
@@ -78,7 +78,7 @@ public class DirectInboxViewModel extends ViewModel {
         return fetchingInbox;
     }
 
-    public DirectUser getViewer() {
+    public User getViewer() {
         return viewer;
     }
 

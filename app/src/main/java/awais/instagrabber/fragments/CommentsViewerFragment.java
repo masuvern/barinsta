@@ -22,8 +22,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -43,10 +41,9 @@ import awais.instagrabber.adapters.CommentsAdapter;
 import awais.instagrabber.asyncs.CommentsFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentCommentsBinding;
-import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.CommentModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -66,7 +63,9 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     private FragmentCommentsBinding binding;
     private LinearLayoutManager layoutManager;
     private RecyclerLazyLoader lazyLoader;
-    private String shortCode, userId, endCursor = null;
+    private String shortCode;
+    private long userId;
+    private String endCursor = null;
     private Resources resources;
     private InputMethodManager imm;
     private AppCompatActivity fragmentActivity;
@@ -141,8 +140,8 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             Toast.makeText(context, R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
             return;
         }
-        final String userId = CookieUtils.getUserIdFromCookie(cookie);
-        if (userId == null) return;
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        if (userId == 0) return;
         String replyToId = null;
         final CommentModel commentModel = commentsAdapter.getSelected();
         if (commentModel != null) {
@@ -280,7 +279,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     //     final ActionBar actionBar = fragmentActivity.getSupportActionBar();
     //     if (actionBar == null) return;
     //     actionBar.setTitle(R.string.title_comments);
-        // actionBar.setSubtitle(shortCode);
+    // actionBar.setSubtitle(shortCode);
     // }
 
     private void onCommentClick(final CommentModel commentModel) {
@@ -290,10 +289,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
         String[] commentDialogList;
 
-        final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+        final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         if (!TextUtils.isEmpty(cookie)
-                && userIdFromCookie != null
-                && (userIdFromCookie.equals(commentModel.getProfileModel().getId()) || userIdFromCookie.equals(userId))) {
+                && userIdFromCookie != 0
+                && (userIdFromCookie == commentModel.getProfileModel().getPk() || userIdFromCookie == userId)) {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
                     resources.getString(R.string.comment_viewer_copy_comment),
@@ -324,7 +323,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         final Context context = getContext();
         if (context == null) return;
         final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
-            final ProfileModel profileModel = commentModel.getProfileModel();
+            final User profileModel = commentModel.getProfileModel();
             final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
             switch (which) {
                 case 0: // open profile
@@ -340,8 +339,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         bundle.putString("postId", commentModel.getId());
                         bundle.putBoolean("isComment", true);
                         navController.navigate(R.id.action_global_likesViewerFragment, bundle);
-                    }
-                    else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    } else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     break;
                 case 3: // reply to comment
                     commentsAdapter.setSelected(commentModel);
@@ -418,8 +416,8 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                     });
                     break;
                 case 6: // delete comment
-                    final String userId = CookieUtils.getUserIdFromCookie(cookie);
-                    if (userId == null) return;
+                    final long userId = CookieUtils.getUserIdFromCookie(cookie);
+                    if (userId == 0) return;
                     mediaService.deleteComment(
                             postId, userId, commentModel.getId(), csrfToken,
                             new ServiceCallback<Boolean>() {

@@ -23,8 +23,7 @@
         app:destination="@id/location_nav_graph">
         <argument
             android:name="locationId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/hashtag_nav_graph" />
@@ -64,8 +63,7 @@
             app:nullable="false" />
         <argument
             android:name="postUserId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/likes_nav_graph" />
@@ -140,7 +138,9 @@
         tools:layout="@layout/fragment_direct_messages_settings">
         <argument
             android:name="threadId"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="false" />
+
         <action
             android:id="@+id/action_settings_to_inbox"
             app:destination="@id/directMessagesInboxFragment"

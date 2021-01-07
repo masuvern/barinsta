@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,13 @@ import java.util.List;
 
 import awais.instagrabber.adapters.viewholder.FollowsViewHolder;
 import awais.instagrabber.databinding.ItemFollowBinding;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 
 public final class LikesAdapter extends RecyclerView.Adapter<FollowsViewHolder> {
-    private final List<ProfileModel> profileModels;
+    private final List<User> profileModels;
     private final View.OnClickListener onClickListener;
 
-    public LikesAdapter(final List<ProfileModel> profileModels,
+    public LikesAdapter(final List<User> profileModels,
                         final View.OnClickListener onClickListener) {
         this.profileModels = profileModels;
         this.onClickListener = onClickListener;
@@ -34,7 +33,7 @@ public final class LikesAdapter extends RecyclerView.Adapter<FollowsViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull final FollowsViewHolder holder, final int position) {
-        final ProfileModel model = profileModels.get(position);
+        final User model = profileModels.get(position);
         holder.bind(model, null, onClickListener);
     }
 

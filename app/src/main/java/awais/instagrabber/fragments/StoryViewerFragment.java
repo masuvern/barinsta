@@ -146,7 +146,7 @@ public class StoryViewerFragment extends Fragment {
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
     private final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-    private final String userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+    private final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
     private final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
 
     @Override
@@ -214,7 +214,7 @@ public class StoryViewerFragment extends Fragment {
                                     .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(threadId),
                                                          input.getText().toString(),
                                                          currentStory.getStoryMediaId(),
-                                                         currentStory.getUserId());
+                                                         String.valueOf(currentStory.getUserId()));
                             request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
                                 @Override
                                 public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
@@ -682,8 +682,8 @@ public class StoryViewerFragment extends Fragment {
                 currentStoryMediaId = model.getStoryMediaId();
                 currentStoryUsername = model.getProfileModel().getUsername();
             }
-        } else if (!TextUtils.isEmpty(fragmentArgs.getProfileId()) && !TextUtils.isEmpty(fragmentArgs.getUsername())) {
-            currentStoryMediaId = fragmentArgs.getProfileId();
+        } else if (fragmentArgs.getProfileId() > 0 && !TextUtils.isEmpty(fragmentArgs.getUsername())) {
+            currentStoryMediaId = String.valueOf(fragmentArgs.getProfileId());
             currentStoryUsername = fragmentArgs.getUsername();
         }
         isHashtag = fragmentArgs.getIsHashtag();
@@ -965,7 +965,8 @@ public class StoryViewerFragment extends Fragment {
             final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(username.substring(1));
             NavHostFragment.findNavController(this).navigate(action);
         } else {
-            final NavDirections action = ProfileFragmentDirections.actionGlobalLocationFragment(username.split(" \\(")[1].replace(")", ""));
+            final NavDirections action = ProfileFragmentDirections
+                    .actionGlobalLocationFragment(Long.parseLong(username.split(" \\(")[1].replace(")", "")));
             NavHostFragment.findNavController(this).navigate(action);
         }
     }

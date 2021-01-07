@@ -26,11 +26,11 @@ import java.util.stream.Collectors;
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment.Option;
 import awais.instagrabber.models.Resource;
-import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
-import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
+import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
+import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -55,19 +55,19 @@ public class DirectSettingsViewModel extends AndroidViewModel {
     private static final String ACTION_RESTRICT = "restrict";
     private static final String ACTION_UNRESTRICT = "unrestrict";
 
-    private final MutableLiveData<Pair<List<DirectUser>, List<DirectUser>>> users = new MutableLiveData<>(
+    private final MutableLiveData<Pair<List<User>, List<User>>> users = new MutableLiveData<>(
             new Pair<>(Collections.emptyList(), Collections.emptyList()));
     private final MutableLiveData<String> title = new MutableLiveData<>("");
     private final MutableLiveData<List<Long>> adminUserIds = new MutableLiveData<>(Collections.emptyList());
     private final DirectMessagesService directMessagesService;
 
     private DirectThread thread;
-    private final String userId;
+    private final long userId;
     private boolean viewerIsAdmin;
     private final Resources resources;
     private final FriendshipService friendshipService;
     private final String csrfToken;
-    private DirectUser viewer;
+    private User viewer;
 
     public DirectSettingsViewModel(final Application application) {
         super(application);
@@ -75,7 +75,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         userId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || TextUtils.isEmpty(userId) || TextUtils.isEmpty(deviceUuid)) {
+        if (TextUtils.isEmpty(csrfToken) || userId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
@@ -90,9 +90,9 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     public void setThread(@NonNull final DirectThread thread) {
         this.thread = thread;
-        List<DirectUser> users = thread.getUsers();
+        List<User> users = thread.getUsers();
         if (viewer != null) {
-            final ImmutableList.Builder<DirectUser> builder = ImmutableList.<DirectUser>builder().add(viewer);
+            final ImmutableList.Builder<User> builder = ImmutableList.<User>builder().add(viewer);
             if (users != null) {
                 builder.addAll(users);
             }
@@ -102,7 +102,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         setTitle(thread.getThreadTitle());
         final List<Long> adminUserIds = thread.getAdminUserIds();
         this.adminUserIds.postValue(adminUserIds);
-        viewerIsAdmin = adminUserIds.contains(Long.parseLong(userId));
+        viewerIsAdmin = adminUserIds.contains(userId);
     }
 
     public boolean isGroup() {
@@ -112,7 +112,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return false;
     }
 
-    public LiveData<Pair<List<DirectUser>, List<DirectUser>>> getUsers() {
+    public LiveData<Pair<List<User>, List<User>>> getUsers() {
         return users;
     }
 
@@ -140,15 +140,15 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    public LiveData<Resource<Object>> addMembers(final Set<DirectUser> users) {
+    public LiveData<Resource<Object>> addMembers(final Set<User> users) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final Call<DirectThreadDetailsChangeResponse> addUsersRequest = directMessagesService
-                .addUsers(thread.getThreadId(), users.stream().map(DirectUser::getPk).collect(Collectors.toList()));
+                .addUsers(thread.getThreadId(), users.stream().map(User::getPk).collect(Collectors.toList()));
         handleDetailsChangeRequest(data, addUsersRequest);
         return data;
     }
 
-    public LiveData<Resource<Object>> removeMember(final DirectUser user) {
+    public LiveData<Resource<Object>> removeMember(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final Call<String> request = directMessagesService
                 .removeUsers(thread.getThreadId(), Collections.singleton(user.getPk()));
@@ -159,22 +159,22 @@ public class DirectSettingsViewModel extends AndroidViewModel {
                     handleAdminChangeResponseError(response, data);
                     return;
                 }
-                Pair<List<DirectUser>, List<DirectUser>> usersValue = users.getValue();
+                Pair<List<User>, List<User>> usersValue = users.getValue();
                 if (usersValue == null) {
                     usersValue = new Pair<>(Collections.emptyList(), Collections.emptyList());
                 }
-                List<DirectUser> activeUsers = usersValue.first;
+                List<User> activeUsers = usersValue.first;
                 if (activeUsers == null) {
                     activeUsers = Collections.emptyList();
                 }
-                final List<DirectUser> updatedActiveUsers = activeUsers.stream()
-                                                                       .filter(user1 -> user1.getPk() != user.getPk())
-                                                                       .collect(Collectors.toList());
-                List<DirectUser> leftUsers = usersValue.second;
+                final List<User> updatedActiveUsers = activeUsers.stream()
+                                                                 .filter(user1 -> user1.getPk() != user.getPk())
+                                                                 .collect(Collectors.toList());
+                List<User> leftUsers = usersValue.second;
                 if (leftUsers == null) {
                     leftUsers = Collections.emptyList();
                 }
-                final ImmutableList<DirectUser> updateLeftUsers = ImmutableList.<DirectUser>builder()
+                final ImmutableList<User> updateLeftUsers = ImmutableList.<User>builder()
                         .addAll(leftUsers)
                         .add(user)
                         .build();
@@ -190,7 +190,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private LiveData<Resource<Object>> makeAdmin(final DirectUser user) {
+    private LiveData<Resource<Object>> makeAdmin(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         if (isAdmin(user)) return data;
         final Call<String> request = directMessagesService.addAdmins(thread.getThreadId(), Collections.singleton(user.getPk()));
@@ -217,7 +217,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private LiveData<Resource<Object>> removeAdmin(final DirectUser user) {
+    private LiveData<Resource<Object>> removeAdmin(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         if (!isAdmin(user)) return data;
         final Call<String> request = directMessagesService.removeAdmins(thread.getThreadId(), Collections.singleton(user.getPk()));
@@ -262,11 +262,11 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         }
     }
 
-    private LiveData<Resource<Object>> blockUser(final DirectUser user) {
+    private LiveData<Resource<Object>> blockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.block(userId, String.valueOf(user.getPk()), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+        friendshipService.block(userId, user.getPk(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
             @Override
-            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+            public void onSuccess(final FriendshipChangeResponse result) {
                 // refresh thread
             }
 
@@ -279,11 +279,11 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private LiveData<Resource<Object>> unblockUser(final DirectUser user) {
+    private LiveData<Resource<Object>> unblockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.unblock(userId, String.valueOf(user.getPk()), csrfToken, new ServiceCallback<FriendshipRepoChangeRootResponse>() {
+        friendshipService.unblock(userId, user.getPk(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
             @Override
-            public void onSuccess(final FriendshipRepoChangeRootResponse result) {
+            public void onSuccess(final FriendshipChangeResponse result) {
                 // refresh thread
             }
 
@@ -296,11 +296,11 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private LiveData<Resource<Object>> restrictUser(final DirectUser user) {
+    private LiveData<Resource<Object>> restrictUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.toggleRestrict(String.valueOf(user.getPk()), true, csrfToken, new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
+        friendshipService.toggleRestrict(user.getPk(), true, csrfToken, new ServiceCallback<FriendshipRestrictResponse>() {
             @Override
-            public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
+            public void onSuccess(final FriendshipRestrictResponse result) {
                 // refresh thread
             }
 
@@ -313,11 +313,11 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private LiveData<Resource<Object>> unRestrictUser(final DirectUser user) {
+    private LiveData<Resource<Object>> unRestrictUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.toggleRestrict(String.valueOf(user.getPk()), false, csrfToken, new ServiceCallback<FriendshipRepoRestrictRootResponse>() {
+        friendshipService.toggleRestrict(user.getPk(), false, csrfToken, new ServiceCallback<FriendshipRestrictResponse>() {
             @Override
-            public void onSuccess(final FriendshipRepoRestrictRootResponse result) {
+            public void onSuccess(final FriendshipRestrictResponse result) {
                 // refresh thread
             }
 
@@ -375,7 +375,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         }
     }
 
-    public ArrayList<Option<String>> createUserOptions(final DirectUser user) {
+    public ArrayList<Option<String>> createUserOptions(final User user) {
         final ArrayList<Option<String>> options = new ArrayList<>();
         if (user == null || isSelf(user) || hasLeft(user)) {
             return options;
@@ -408,26 +408,26 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return options;
     }
 
-    private boolean hasLeft(final DirectUser user) {
-        final Pair<List<DirectUser>, List<DirectUser>> users = this.users.getValue();
+    private boolean hasLeft(final User user) {
+        final Pair<List<User>, List<User>> users = this.users.getValue();
         if (users == null || users.second == null) return false;
         return users.second.contains(user);
     }
 
-    private boolean isAdmin(final DirectUser user) {
+    private boolean isAdmin(final User user) {
         final List<Long> adminUserIdsValue = adminUserIds.getValue();
         return adminUserIdsValue != null && adminUserIdsValue.contains(user.getPk());
     }
 
-    private boolean isSelf(final DirectUser user) {
-        return user.getPk() == Long.parseLong(userId);
+    private boolean isSelf(final User user) {
+        return user.getPk() == userId;
     }
 
     private String getString(@StringRes final int resId) {
         return resources.getString(resId);
     }
 
-    public LiveData<Resource<Object>> doAction(final DirectUser user, final String action) {
+    public LiveData<Resource<Object>> doAction(final User user, final String action) {
         if (user == null || action == null) return null;
         switch (action) {
             case ACTION_KICK:
@@ -451,7 +451,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         }
     }
 
-    public void setViewer(final DirectUser viewer) {
+    public void setViewer(final User viewer) {
         this.viewer = viewer;
     }
 }

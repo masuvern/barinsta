@@ -24,9 +24,9 @@ import androidx.appcompat.widget.AppCompatTextView;
 
 import awais.instagrabber.R;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.utils.TextUtils;
 
+@Deprecated
 public final class RamboTextView extends AppCompatTextView {
     private static final String TAG = "RamboTextView";
     private static final int highlightBackgroundSpanKey = R.id.tvComment;
@@ -90,8 +90,8 @@ public final class RamboTextView extends AppCompatTextView {
             // if (isExpandable && !touchStartedOverAClickableSpan)
             //     return !isExpanded | super.onTouchEvent(event); // short operator, because we want two shits to work
 
-            final Object tag = getTag();
-            final FeedModel feedModel = tag instanceof FeedModel ? (FeedModel) tag : null;
+            // final Object tag = getTag();
+            // final FeedModel feedModel = tag instanceof FeedModel ? (FeedModel) tag : null;
 
             switch (action) {
                 case MotionEvent.ACTION_DOWN:

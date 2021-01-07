@@ -32,7 +32,7 @@ import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
-import awais.instagrabber.repositories.responses.UserInfo;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
@@ -54,7 +54,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
         if (context == null) return;
@@ -198,11 +198,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             // Toast.makeText(getContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
 
             // adds cookies to database for quick access
-            final String uid = CookieUtils.getUserIdFromCookie(cookie);
+            final long uid = CookieUtils.getUserIdFromCookie(cookie);
             final UserService userService = UserService.getInstance();
-            userService.getUserInfo(uid, new ServiceCallback<UserInfo>() {
+            userService.getUserInfo(uid, new ServiceCallback<User>() {
                 @Override
-                public void onSuccess(final UserInfo result) {
+                public void onSuccess(final User result) {
                     // Log.d(TAG, "adding userInfo: " + result);
                     if (result != null) {
                         accountRepository.insertOrUpdateAccount(
@@ -321,8 +321,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             final View root = holder.itemView;
             if (onClickListener != null) root.setOnClickListener(onClickListener);
             final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
-            final String uid = CookieUtils.getUserIdFromCookie(cookie);
-            if (uid == null) return;
+            final long uid = CookieUtils.getUserIdFromCookie(cookie);
+            if (uid <= 0) return;
             accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
                 @Override
                 public void onSuccess(final Account account) {

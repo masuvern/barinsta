@@ -57,11 +57,11 @@ import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -87,15 +87,15 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
     private boolean opening = false;
-    private String locationId;
+    private long locationId;
     private LocationModel locationModel;
     private ActionMode actionMode;
     private StoriesService storiesService;
     private AsyncTask<?, ?, ?> currentlyExecuting;
     private boolean isLoggedIn;
     private boolean storiesFetching;
-    private Set<FeedModel> selectedFeedModels;
-    private FeedModel downloadFeedModel;
+    private Set<Media> selectedFeedModels;
+    private Media downloadFeedModel;
     private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_LOCATION_POSTS_LAYOUT);
     private LayoutLocationDetailsBinding locationDetailsBinding;
@@ -132,27 +132,27 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
             openPostDialog(feedModel, profilePicView, mainPostImage, -1);
         }
 
         @Override
-        public void onSliderClick(final FeedModel feedModel, final int position) {
+        public void onSliderClick(final Media feedModel, final int position) {
             openPostDialog(feedModel, null, null, position);
         }
 
         @Override
-        public void onCommentsClick(final FeedModel feedModel) {
+        public void onCommentsClick(final Media feedModel) {
             final NavDirections commentsAction = LocationFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getShortCode(),
-                    feedModel.getPostId(),
-                    feedModel.getProfileModel().getId()
+                    feedModel.getCode(),
+                    feedModel.getPk(),
+                    feedModel.getUser().getPk()
             );
             NavHostFragment.findNavController(LocationFragment.this).navigate(commentsAction);
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
+        public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
@@ -171,8 +171,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onLocationClick(final FeedModel feedModel) {
-            final NavDirections action = LocationFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
+        public void onLocationClick(final Media feedModel) {
+            final NavDirections action = LocationFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
             NavHostFragment.findNavController(LocationFragment.this).navigate(action);
         }
 
@@ -182,13 +182,13 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onNameClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onNameClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
@@ -201,14 +201,14 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(@NonNull final FeedModel feedModel,
+        private void openPostDialog(@NonNull final Media feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
             if (opening) return;
-            if (TextUtils.isEmpty(feedModel.getProfileModel().getUsername())) {
+            if (TextUtils.isEmpty(feedModel.getUser().getUsername())) {
                 opening = true;
-                new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
+                new PostFetcher(feedModel.getCode(), newFeedModel -> {
                     opening = false;
                     if (newFeedModel == null) return;
                     openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
@@ -244,7 +244,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+        public void onSelectionChange(final Set<Media> selectedFeedModels) {
             final String title = getString(R.string.number_selected, selectedFeedModels.size());
             if (actionMode != null) {
                 actionMode.setTitle(title);
@@ -354,7 +354,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void init() {
         if (getArguments() == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         final LocationFragmentArgs fragmentArgs = LocationFragmentArgs.fromBundle(getArguments());
         locationId = fragmentArgs.getLocationId();
         locationDetailsBinding.favChip.setVisibility(View.GONE);
@@ -401,8 +401,10 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         locationDetailsBinding.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
         final String postCount = String.valueOf(locationModel.getPostCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
-                locationModel.getPostCount() > 2000000000L ? 2000000000 : locationModel.getPostCount().intValue(),
-                postCount));
+                                                                                                        locationModel.getPostCount() > 2000000000L
+                                                                                                        ? 2000000000
+                                                                                                        : locationModel.getPostCount().intValue(),
+                                                                                                        postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         locationDetailsBinding.mainLocPostCount.setText(span);
@@ -540,7 +542,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchStories() {
         if (isLoggedIn) {
             storiesFetching = true;
-            storiesService.getUserStory(locationId,
+            storiesService.getUserStory(String.valueOf(locationId),
                                         null,
                                         true,
                                         false,

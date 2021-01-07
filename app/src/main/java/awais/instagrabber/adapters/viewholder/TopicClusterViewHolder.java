@@ -27,6 +27,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.DiscoverTopicsAdapter;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
 import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
     private final ItemDiscoverTopicBinding binding;
@@ -57,43 +58,48 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
         }
         // binding.title.setTransitionName("title-" + topicCluster.getId());
         binding.cover.setTransitionName("cover-" + topicCluster.getId());
-        final ImageRequest imageRequest = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(topicCluster.getCoverMedia().getDisplayUrl()))
-                .build();
-        final ImagePipeline imagePipeline = Fresco.getImagePipeline();
-        final DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline
-                .fetchDecodedImage(imageRequest, CallerThreadExecutor.getInstance());
-        dataSource.subscribe(new BaseBitmapDataSubscriber() {
-            @Override
-            public void onNewResultImpl(@Nullable Bitmap bitmap) {
-                if (dataSource.isFinished()) {
+        final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMedia());
+        if (thumbUrl == null) {
+            binding.cover.setImageURI((String) null);
+        } else {
+            final ImageRequest imageRequest = ImageRequestBuilder
+                    .newBuilderWithSource(Uri.parse(thumbUrl))
+                    .build();
+            final ImagePipeline imagePipeline = Fresco.getImagePipeline();
+            final DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline
+                    .fetchDecodedImage(imageRequest, CallerThreadExecutor.getInstance());
+            dataSource.subscribe(new BaseBitmapDataSubscriber() {
+                @Override
+                public void onNewResultImpl(@Nullable Bitmap bitmap) {
+                    if (dataSource.isFinished()) {
+                        dataSource.close();
+                    }
+                    if (bitmap != null) {
+                        Palette.from(bitmap).generate(p -> {
+                            final Palette.Swatch swatch = p.getDominantSwatch();
+                            final Resources resources = itemView.getResources();
+                            int titleTextColor = resources.getColor(R.color.white);
+                            if (swatch != null) {
+                                backgroundColor.set(swatch.getRgb());
+                                GradientDrawable gd = new GradientDrawable(
+                                        GradientDrawable.Orientation.TOP_BOTTOM,
+                                        new int[]{Color.TRANSPARENT, backgroundColor.get()});
+                                titleTextColor = swatch.getTitleTextColor();
+                                binding.background.setBackground(gd);
+                            }
+                            titleColor.set(titleTextColor);
+                            binding.title.setTextColor(titleTextColor);
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailureImpl(@NonNull DataSource dataSource) {
                     dataSource.close();
                 }
-                if (bitmap != null) {
-                    Palette.from(bitmap).generate(p -> {
-                        final Palette.Swatch swatch = p.getDominantSwatch();
-                        final Resources resources = itemView.getResources();
-                        int titleTextColor = resources.getColor(R.color.white);
-                        if (swatch != null) {
-                            backgroundColor.set(swatch.getRgb());
-                            GradientDrawable gd = new GradientDrawable(
-                                    GradientDrawable.Orientation.TOP_BOTTOM,
-                                    new int[]{Color.TRANSPARENT, backgroundColor.get()});
-                            titleTextColor = swatch.getTitleTextColor();
-                            binding.background.setBackground(gd);
-                        }
-                        titleColor.set(titleTextColor);
-                        binding.title.setTextColor(titleTextColor);
-                    });
-                }
-            }
-
-            @Override
-            public void onFailureImpl(@NonNull DataSource dataSource) {
-                dataSource.close();
-            }
-        }, CallerThreadExecutor.getInstance());
-        binding.cover.setImageRequest(imageRequest);
+            }, CallerThreadExecutor.getInstance());
+            binding.cover.setImageRequest(imageRequest);
+        }
         binding.title.setText(topicCluster.getTitle());
     }
 }

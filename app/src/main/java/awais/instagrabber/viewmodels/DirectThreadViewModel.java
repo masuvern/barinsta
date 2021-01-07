@@ -30,18 +30,17 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.UploadVideoOptions;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.BitmapUtils;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -74,7 +73,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final MutableLiveData<List<DirectItem>> items = new MutableLiveData<>(new LinkedList<>());
     private final MutableLiveData<String> threadTitle = new MutableLiveData<>("");
     private final MutableLiveData<Boolean> fetching = new MutableLiveData<>(false);
-    private final MutableLiveData<List<DirectUser>> users = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<User>> users = new MutableLiveData<>(new ArrayList<>());
     private final DirectMessagesService service;
     private final ContentResolver contentResolver;
     private final MediaService mediaService;
@@ -86,17 +85,17 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private String threadId;
     private boolean hasOlder = true;
     private ThreadIdOrUserIds threadIdOrUserIds;
-    private ProfileModel currentUser;
+    private User currentUser;
     private Call<DirectThreadFeedResponse> chatsRequest;
     private VoiceRecorder voiceRecorder;
 
     public DirectThreadViewModel(@NonNull final Application application) {
         super(application);
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final String userId = CookieUtils.getUserIdFromCookie(cookie);
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || TextUtils.isEmpty(userId) || TextUtils.isEmpty(deviceUuid)) {
+        if (TextUtils.isEmpty(csrfToken) || userId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
         service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
@@ -184,7 +183,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         return fetching;
     }
 
-    public LiveData<List<DirectUser>> getUsers() {
+    public LiveData<List<User>> getUsers() {
         return users;
     }
 
@@ -552,7 +551,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         });
     }
 
-    public void setCurrentUser(final ProfileModel currentUser) {
+    public void setCurrentUser(final User currentUser) {
         this.currentUser = currentUser;
     }
 
@@ -607,18 +606,11 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     @Nullable
     private Long handleCurrentUser(final MutableLiveData<Resource<DirectItem>> data) {
-        if (currentUser == null || currentUser.getId() == null) {
+        if (currentUser == null || currentUser.getPk() <= 0) {
             data.postValue(Resource.error(ERROR_INVALID_USER, null));
             return null;
         }
-        final long userId;
-        try {
-            userId = Long.parseLong(currentUser.getId());
-        } catch (NumberFormatException e) {
-            data.postValue(Resource.error(ERROR_INVALID_USER, null));
-            Log.e(TAG, "sendUri: ", e);
-            return null;
-        }
+        final long userId = currentUser.getPk();
         if (threadIdOrUserIds == null) {
             data.postValue(Resource.error(ERROR_INVALID_THREAD, null));
             return null;

@@ -16,14 +16,13 @@ import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmProfileBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.DirectItemType;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Location;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemLocation;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
 
@@ -34,7 +33,7 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
 
     public DirectItemProfileViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                        @NonNull final LayoutDmProfileBinding binding,
-                                       final ProfileModel currentUser,
+                                       final User currentUser,
                                        final DirectThread thread,
                                        final MentionClickListener mentionClickListener,
                                        final View.OnClickListener onClickListener) {
@@ -74,7 +73,7 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
         for (final SimpleDraweeView previewView : previewViews) {
             previewView.setImageURI((String) null);
         }
-        final List<DirectItemMedia> previewMedias = item.getPreviewMedias();
+        final List<Media> previewMedias = item.getPreviewMedias();
         if (previewMedias.size() <= 0) {
             binding.firstRow.setVisibility(View.GONE);
             binding.secondRow.setVisibility(View.GONE);
@@ -85,7 +84,7 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
             binding.secondRow.setVisibility(View.GONE);
         }
         for (int i = 0; i < previewMedias.size(); i++) {
-            final DirectItemMedia previewMedia = previewMedias.get(i);
+            final Media previewMedia = previewMedias.get(i);
             if (previewMedia == null) continue;
             final ImageVersions2 imageVersions2 = previewMedia.getImageVersions2();
             final String url = ResponseBodyUtils.getThumbUrl(imageVersions2);
@@ -95,7 +94,7 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
     }
 
     private void setProfile(@NonNull final DirectItem item) {
-        final DirectUser profile = item.getProfile();
+        final User profile = item.getProfile();
         if (profile == null) return;
         binding.profilePic.setImageURI(profile.getProfilePicUrl());
         binding.username.setText(profile.getUsername());
@@ -104,7 +103,7 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
     }
 
     private void setLocation(@NonNull final DirectItem item) {
-        final DirectItemLocation location = item.getLocation();
+        final Location location = item.getLocation();
         if (location == null) return;
         binding.profilePic.setVisibility(View.GONE);
         binding.username.setText(location.getName());

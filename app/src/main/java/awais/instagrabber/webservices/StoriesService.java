@@ -18,10 +18,11 @@ import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.repositories.StoriesRepository;
+import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -84,7 +85,7 @@ public class StoriesService extends BaseService {
         });
     }
 
-    public void getFeedStories(final String csrfToken, final ServiceCallback<List<FeedStoryModel>> callback) {
+    public void getFeedStories(final ServiceCallback<List<FeedStoryModel>> callback) {
         final Call<String> response = repository.getFeedStories();
         response.enqueue(new Callback<String>() {
             @Override
@@ -110,13 +111,47 @@ public class StoriesService extends BaseService {
             final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
                 final JSONObject node = feedStoriesReel.getJSONObject(i);
-                final JSONObject user = node.getJSONObject(node.has("user") ? "user" : "owner");
-                final ProfileModel profileModel = new ProfileModel(false, false, false,
-                                                                   user.getString("pk"),
-                                                                   user.getString("username"),
-                                                                   null, null, null,
-                                                                   user.getString("profile_pic_url"),
-                                                                   null, 0, 0, 0, false, false, false, false, false);
+                final JSONObject userJson = node.getJSONObject(node.has("user") ? "user" : "owner");
+                // final ProfileModel profileModel = new ProfileModel(false, false, false,
+                //                                                    user.getString("pk"),
+                //                                                    user.getString("username"),
+                //                                                    null, null, null,
+                //                                                    user.getString("profile_pic_url"),
+                //                                                    null, 0, 0, 0, false, false, false, false, false);
+                final User user = new User(userJson.getLong("pk"),
+                                           userJson.getString("username"),
+                                           userJson.optString("full_name"),
+                                           userJson.optBoolean("is_private"),
+                                           userJson.getString("profile_pic_url"),
+                                           null,
+                                           new FriendshipStatus(
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false
+                                           ),
+                                           userJson.optBoolean("is_verified"),
+                                           false,
+                                           false,
+                                           false,
+                                           false,
+                                           null,
+                                           null,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           null,
+                                           null,
+                                           0,
+                                           null
+                );
                 final String id = node.getString("id");
                 final long timestamp = node.getLong("latest_reel_media");
                 final int mediaCount = node.getInt("media_count");
@@ -126,7 +161,7 @@ public class StoriesService extends BaseService {
                 if (itemJson != null) {
                     firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
                 }
-                feedStoryModels.add(new FeedStoryModel(id, profileModel, fullyRead, timestamp, firstStoryModel, mediaCount));
+                feedStoryModels.add(new FeedStoryModel(id, user, fullyRead, timestamp, firstStoryModel, mediaCount));
             }
             callback.onSuccess(sort(feedStoryModels));
         } catch (JSONException e) {
@@ -134,7 +169,7 @@ public class StoriesService extends BaseService {
         }
     }
 
-    public void fetchHighlights(final String profileId,
+    public void fetchHighlights(final long profileId,
                                 final ServiceCallback<List<HighlightModel>> callback) {
         final Call<String> request = repository.fetchHighlights(profileId);
         request.enqueue(new Callback<String>() {
@@ -303,7 +338,7 @@ public class StoriesService extends BaseService {
                                   final String action,
                                   final String arg1,
                                   final String arg2,
-                                  final String userId,
+                                  final long userId,
                                   final String csrfToken,
                                   final ServiceCallback<StoryStickerResponse> callback) {
         final Map<String, Object> form = new HashMap<>();
@@ -340,7 +375,7 @@ public class StoriesService extends BaseService {
     public void respondToQuestion(final String storyId,
                                   final String stickerId,
                                   final String answer,
-                                  final String userId,
+                                  final long userId,
                                   final String csrfToken,
                                   final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_question_response", "response", answer, userId, csrfToken, callback);
@@ -350,7 +385,7 @@ public class StoriesService extends BaseService {
     public void respondToQuiz(final String storyId,
                               final String stickerId,
                               final int answer,
-                              final String userId,
+                              final long userId,
                               final String csrfToken,
                               final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), userId, csrfToken, callback);
@@ -360,7 +395,7 @@ public class StoriesService extends BaseService {
     public void respondToPoll(final String storyId,
                               final String stickerId,
                               final int answer,
-                              final String userId,
+                              final long userId,
                               final String csrfToken,
                               final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
@@ -369,7 +404,7 @@ public class StoriesService extends BaseService {
     public void respondToSlider(final String storyId,
                                 final String stickerId,
                                 final double answer,
-                                final String userId,
+                                final long userId,
                                 final String csrfToken,
                                 final ServiceCallback<StoryStickerResponse> callback) {
         respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
@@ -401,10 +436,10 @@ public class StoriesService extends BaseService {
             int result;
             switch (Utils.settingsHelper.getString(Constants.STORY_SORT)) {
                 case "1":
-                    result = o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
+                    result = Long.compare(o2.getTimestamp(), o1.getTimestamp());
                     break;
                 case "2":
-                    result = o1.getTimestamp() > o2.getTimestamp() ? 1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : -1);
+                    result = Long.compare(o1.getTimestamp(), o2.getTimestamp());
                     break;
                 default:
                     result = 0;
@@ -414,7 +449,7 @@ public class StoriesService extends BaseService {
         return listCopy;
     }
 
-    public class ArchiveFetchResponse {
+    public static class ArchiveFetchResponse {
         private final List<HighlightModel> archives;
         private final boolean hasNextPage;
         private final String nextCursor;

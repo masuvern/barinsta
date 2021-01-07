@@ -43,8 +43,7 @@
             app:nullable="false" />
         <argument
             android:name="postUserId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/likes_nav_graph" />

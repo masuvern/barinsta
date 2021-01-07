@@ -17,7 +17,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.DirectUserViewHolder;
 import awais.instagrabber.databinding.ItemFavSectionHeaderBinding;
 import awais.instagrabber.databinding.LayoutDmUserItemBinding;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
+import awais.instagrabber.repositories.responses.User;
 
 public final class DirectUsersAdapter extends ListAdapter<DirectUsersAdapter.DirectUserOrHeader, RecyclerView.ViewHolder> {
 
@@ -71,13 +71,13 @@ public final class DirectUsersAdapter extends ListAdapter<DirectUsersAdapter.Dir
         setHasStableIds(true);
     }
 
-    public void submitUsers(final List<DirectUser> users, final List<DirectUser> leftUsers) {
+    public void submitUsers(final List<User> users, final List<User> leftUsers) {
         if (users == null && leftUsers == null) return;
         final List<DirectUserOrHeader> userOrHeaders = combineLists(users, leftUsers);
         submitList(userOrHeaders);
     }
 
-    private List<DirectUserOrHeader> combineLists(final List<DirectUser> users, final List<DirectUser> leftUsers) {
+    private List<DirectUserOrHeader> combineLists(final List<User> users, final List<User> leftUsers) {
         final ImmutableList.Builder<DirectUserOrHeader> listBuilder = ImmutableList.builder();
         if (users != null && !users.isEmpty()) {
             listBuilder.add(new DirectUserOrHeader(R.string.members));
@@ -116,7 +116,7 @@ public final class DirectUsersAdapter extends ListAdapter<DirectUsersAdapter.Dir
             return;
         }
         if (holder instanceof DirectUserViewHolder) {
-            final DirectUser user = getItem(position).user;
+            final User user = getItem(position).user;
             ((DirectUserViewHolder) holder).bind(position,
                                                  user,
                                                  user != null && adminUserIds != null && adminUserIds.contains(user.getPk()),
@@ -145,13 +145,13 @@ public final class DirectUsersAdapter extends ListAdapter<DirectUsersAdapter.Dir
 
     public static class DirectUserOrHeader {
         int headerTitle;
-        DirectUser user;
+        User user;
 
         public DirectUserOrHeader(final int headerTitle) {
             this.headerTitle = headerTitle;
         }
 
-        public DirectUserOrHeader(final DirectUser user) {
+        public DirectUserOrHeader(final User user) {
             this.user = user;
         }
 
@@ -174,10 +174,10 @@ public final class DirectUsersAdapter extends ListAdapter<DirectUsersAdapter.Dir
     }
 
     public interface OnDirectUserClickListener {
-        void onClick(int position, DirectUser user, boolean selected);
+        void onClick(int position, User user, boolean selected);
     }
 
     public interface OnDirectUserLongClickListener {
-        boolean onLongClick(int position, DirectUser user);
+        boolean onLongClick(int position, User user);
     }
 }

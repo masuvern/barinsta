@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.List;
 
 import awais.instagrabber.models.enums.DirectItemType;
+import awais.instagrabber.repositories.responses.Location;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 
 public class DirectItem implements Cloneable {
     private final String itemId;
@@ -18,11 +21,11 @@ public class DirectItem implements Cloneable {
     private final String clientContext;
     private final DirectItemReelShare reelShare;
     private final DirectItemStoryShare storyShare;
-    private final DirectItemMedia mediaShare;
-    private final DirectUser profile;
+    private final Media mediaShare;
+    private final User profile;
     private final DirectItemPlaceholder placeholder;
-    private final DirectItemMedia media;
-    private final List<DirectItemMedia> previewMedias;
+    private final Media media;
+    private final List<Media> previewMedias;
     private final DirectItemActionLog actionLog;
     private final DirectItemVideoCallEvent videoCallEvent;
     private final DirectItemClip clip;
@@ -32,7 +35,7 @@ public class DirectItem implements Cloneable {
     private final DirectItemReactions reactions;
     private final DirectItem repliedToMessage;
     private final DirectItemVoiceMedia voiceMedia;
-    private final DirectItemLocation location;
+    private final Location location;
     private final int hideInThread;
     private Date date;
     private boolean isPending;
@@ -47,11 +50,11 @@ public class DirectItem implements Cloneable {
                       final String clientContext,
                       final DirectItemReelShare reelShare,
                       final DirectItemStoryShare storyShare,
-                      final DirectItemMedia mediaShare,
-                      final DirectUser profile,
+                      final Media mediaShare,
+                      final User profile,
                       final DirectItemPlaceholder placeholder,
-                      final DirectItemMedia media,
-                      final List<DirectItemMedia> previewMedias,
+                      final Media media,
+                      final List<Media> previewMedias,
                       final DirectItemActionLog actionLog,
                       final DirectItemVideoCallEvent videoCallEvent,
                       final DirectItemClip clip,
@@ -61,7 +64,7 @@ public class DirectItem implements Cloneable {
                       final DirectItemReactions reactions,
                       final DirectItem repliedToMessage,
                       final DirectItemVoiceMedia voiceMedia,
-                      final DirectItemLocation location,
+                      final Location location,
                       final int hideInThread) {
         this.itemId = itemId;
         this.userId = userId;
@@ -128,7 +131,7 @@ public class DirectItem implements Cloneable {
         return reelShare;
     }
 
-    public DirectUser getProfile() {
+    public User getProfile() {
         return profile;
     }
 
@@ -136,7 +139,7 @@ public class DirectItem implements Cloneable {
         return placeholder;
     }
 
-    public DirectItemMedia getMediaShare() {
+    public Media getMediaShare() {
         return mediaShare;
     }
 
@@ -144,11 +147,11 @@ public class DirectItem implements Cloneable {
         return like;
     }
 
-    public DirectItemMedia getMedia() {
+    public Media getMedia() {
         return media;
     }
 
-    public List<DirectItemMedia> getPreviewMedias() {
+    public List<Media> getPreviewMedias() {
         return previewMedias;
     }
 
@@ -192,7 +195,7 @@ public class DirectItem implements Cloneable {
         return voiceMedia;
     }
 
-    public DirectItemLocation getLocation() {
+    public Location getLocation() {
         return location;
     }
 

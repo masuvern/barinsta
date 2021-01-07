@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 
 import awais.instagrabber.BuildConfig;
+import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.utils.Utils;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -33,6 +34,7 @@ public abstract class BaseService {
             }
             final Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                    .registerTypeAdapter(Caption.class, new Caption.CaptionDeserializer())
                     .create();
             builder = new Retrofit.Builder()
                     .addConverterFactory(ScalarsConverterFactory.create())

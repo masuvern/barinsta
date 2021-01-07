@@ -14,14 +14,14 @@ import com.facebook.drawee.generic.RoundingParams;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenMediaViewMode;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVisualMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
@@ -32,7 +32,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
 
     public DirectItemRavenMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmRavenMediaBinding binding,
-                                          final ProfileModel currentUser,
+                                          final User currentUser,
                                           final DirectThread thread,
                                           final MentionClickListener mentionClickListener,
                                           final View.OnClickListener onClickListener) {
@@ -47,7 +47,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
     public void bindItem(final DirectItem directItemModel, final MessageDirection messageDirection) {
         removeBg();
         final DirectItemVisualMedia visualMedia = directItemModel.getVisualMedia();
-        final DirectItemMedia media = visualMedia.getMedia();
+        final Media media = visualMedia.getMedia();
         if (media == null) return;
         setExpiryInfo(visualMedia);
         setPreview(visualMedia, messageDirection);
@@ -114,7 +114,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
     }
 
     private void setExpiryInfo(final DirectItemVisualMedia visualMedia) {
-        final DirectItemMedia media = visualMedia.getMedia();
+        final Media media = visualMedia.getMedia();
         final RavenMediaViewMode viewMode = visualMedia.getViewMode();
         if (viewMode != RavenMediaViewMode.PERMANENT) {
             final MediaItemType mediaType = media.getMediaType();
@@ -152,7 +152,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
 
     private void setPreview(final DirectItemVisualMedia visualMedia,
                             final MessageDirection messageDirection) {
-        final DirectItemMedia media = visualMedia.getMedia();
+        final Media media = visualMedia.getMedia();
         final boolean expired = media.getPk() == null;
         if (expired) {
             binding.preview.setVisibility(View.GONE);

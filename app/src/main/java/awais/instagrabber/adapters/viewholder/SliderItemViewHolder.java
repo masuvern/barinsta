@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.adapters.SliderItemsAdapter;
-import awais.instagrabber.models.PostChild;
+import awais.instagrabber.repositories.responses.Media;
 
 public abstract class SliderItemViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = "FeedSliderItemViewHolder";
@@ -15,7 +15,7 @@ public abstract class SliderItemViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
     }
 
-    public abstract void bind(final PostChild model,
+    public abstract void bind(final Media media,
                               final int position,
                               final SliderItemsAdapter.SliderCallback sliderCallback);
 }

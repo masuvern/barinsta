@@ -40,11 +40,11 @@ public class DirectMessagesService extends BaseService {
 
     private final DirectMessagesRepository repository;
     private final String csrfToken;
-    private final String userId;
+    private final long userId;
     private final String deviceUuid;
 
     private DirectMessagesService(@NonNull final String csrfToken,
-                                  @NonNull final String userId,
+                                  final long userId,
                                   @NonNull final String deviceUuid) {
         this.csrfToken = csrfToken;
         this.userId = userId;
@@ -59,7 +59,7 @@ public class DirectMessagesService extends BaseService {
         return csrfToken;
     }
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -68,7 +68,7 @@ public class DirectMessagesService extends BaseService {
     }
 
     public static DirectMessagesService getInstance(@NonNull final String csrfToken,
-                                                    @NonNull final String userId,
+                                                    final long userId,
                                                     @NonNull final String deviceUuid) {
         if (instance == null
                 || !Objects.equals(instance.getCsrfToken(), csrfToken)
@@ -153,7 +153,8 @@ public class DirectMessagesService extends BaseService {
 
     public Call<DirectThreadBroadcastResponse> broadcastStoryReply(final ThreadIdOrUserIds threadIdOrUserIds,
                                                                    final String text,
-                                                                   final String mediaId, final String reelId) throws UnsupportedEncodingException {
+                                                                   final String mediaId,
+                                                                   final String reelId) throws UnsupportedEncodingException {
         return broadcast(new StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId));
     }
 

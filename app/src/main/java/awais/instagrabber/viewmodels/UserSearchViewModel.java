@@ -16,8 +16,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserSearchResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.Debouncer;
 import awais.instagrabber.webservices.UserService;
 import okhttp3.ResponseBody;
@@ -33,10 +33,10 @@ public class UserSearchViewModel extends ViewModel {
     private String currentQuery;
     private Call<UserSearchResponse> searchRequest;
 
-    private final MutableLiveData<Resource<List<DirectUser>>> users = new MutableLiveData<>();
+    private final MutableLiveData<Resource<List<User>>> users = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showAction = new MutableLiveData<>(false);
     private final Debouncer<String> searchDebouncer;
-    private final Set<DirectUser> selectedUsers = new HashSet<>();
+    private final Set<User> selectedUsers = new HashSet<>();
     private final UserService userService;
     private long[] hideUserIds;
 
@@ -59,7 +59,7 @@ public class UserSearchViewModel extends ViewModel {
         searchDebouncer = new Debouncer<>(searchCallback, 1000);
     }
 
-    public LiveData<Resource<List<DirectUser>>> getUsers() {
+    public LiveData<Resource<List<User>>> getUsers() {
         return users;
     }
 
@@ -119,7 +119,7 @@ public class UserSearchViewModel extends ViewModel {
         users.postValue(Resource.error(errorString, Collections.emptyList()));
     }
 
-    public void setSelectedUser(final DirectUser user, final boolean selected) {
+    public void setSelectedUser(final User user, final boolean selected) {
         if (selected) {
             selectedUsers.add(user);
         } else {
@@ -128,7 +128,7 @@ public class UserSearchViewModel extends ViewModel {
         showAction.postValue(!selectedUsers.isEmpty());
     }
 
-    public Set<DirectUser> getSelectedUsers() {
+    public Set<User> getSelectedUsers() {
         return selectedUsers;
     }
 

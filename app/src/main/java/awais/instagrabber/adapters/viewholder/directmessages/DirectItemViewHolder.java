@@ -20,22 +20,21 @@ import java.util.stream.Collectors;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = DirectItemViewHolder.class.getSimpleName();
 
     private final LayoutDmBaseBinding binding;
-    private final DirectUser currentUser;
+    private final User currentUser;
     private final DirectThread thread;
     protected final int margin;
     protected final int dmRadius;
@@ -48,16 +47,16 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     protected final int mediaImageMaxWidth;
 
     public DirectItemViewHolder(@NonNull final LayoutDmBaseBinding binding,
-                                @NonNull final ProfileModel currentUser,
+                                @NonNull final User currentUser,
                                 @NonNull final DirectThread thread,
                                 @NonNull final View.OnClickListener onClickListener) {
         super(binding.getRoot());
         this.binding = binding;
-        this.currentUser = DirectUser.fromProfileModel(currentUser);
+        this.currentUser = currentUser;
         this.thread = thread;
         userIds = thread.getUsers()
                         .stream()
-                        .map(DirectUser::getPk)
+                        .map(User::getPk)
                         .collect(Collectors.toList());
         binding.ivProfilePic.setVisibility(thread.isGroup() ? View.VISIBLE : View.GONE);
         binding.ivProfilePic.setOnClickListener(thread.isGroup() ? onClickListener : null);
@@ -91,7 +90,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             binding.ivProfilePic.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             binding.tvUsername.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             if (messageDirection == MessageDirection.INCOMING && thread.isGroup()) {
-                final DirectUser user = getUser(item.getUserId(), thread.getUsers());
+                final User user = getUser(item.getUserId(), thread.getUsers());
                 if (user != null) {
                     binding.tvUsername.setText(user.getUsername());
                     binding.ivProfilePic.setImageURI(user.getProfilePicUrl());
@@ -152,7 +151,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
 
     private void setReply(final DirectItem item,
                           final MessageDirection messageDirection,
-                          final List<DirectUser> users) {
+                          final List<User> users) {
         final DirectItem replied = item.getRepliedToMessage();
         final DirectItemType itemType = replied.getItemType();
         String text = null;
@@ -177,7 +176,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                 text = "Voice message";
                 break;
             case MEDIA_SHARE:
-                DirectItemMedia mediaShare = replied.getMediaShare();
+                Media mediaShare = replied.getMediaShare();
                 if (mediaShare.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
                     mediaShare = mediaShare.getCarouselMedia().get(0);
                 }
@@ -236,7 +235,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
 
     private String setReplyInfo(final DirectItem item,
                                 final DirectItem replied,
-                                final List<DirectUser> users) {
+                                final List<User> users) {
         final long repliedToUserId = replied.getUserId();
         if (repliedToUserId == item.getUserId() && item.getUserId() == currentUser.getPk()) {
             // User replied to own message
@@ -246,7 +245,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             // opposite user replied to their own message
             return "Replied to themself";
         }
-        final DirectUser user = getUser(repliedToUserId, users);
+        final User user = getUser(repliedToUserId, users);
         final String repliedToUsername = user != null ? user.getUsername() : "";
         if (item.getUserId() == currentUser.getPk()) {
             return !thread.isGroup() ? "You replied" : String.format("You replied to %s", repliedToUsername);
@@ -275,7 +274,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         replyInfoLayoutParams.endToStart = isIncoming ? ConstraintLayout.LayoutParams.UNSET : quoteLineId;
     }
 
-    private void setReactions(final DirectItem item, final List<DirectUser> users) {
+    private void setReactions(final DirectItem item, final List<User> users) {
         final DirectItemReactions reactions = item.getReactions();
         final List<DirectItemEmojiReaction> emojis = reactions != null ? reactions.getEmojis() : null;
         if (emojis == null || emojis.isEmpty()) {
@@ -313,12 +312,12 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     public abstract void bindItem(final DirectItem directItemModel, final MessageDirection messageDirection);
 
     @Nullable
-    protected DirectUser getUser(final long userId, final List<DirectUser> users) {
+    protected User getUser(final long userId, final List<User> users) {
         if (userId == currentUser.getPk()) {
             return currentUser;
         }
         if (users == null) return null;
-        for (final DirectUser user : users) {
+        for (final User user : users) {
             if (userId != user.getPk()) continue;
             return user;
         }

@@ -3,6 +3,8 @@ package awais.instagrabber.asyncs;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
@@ -35,7 +37,7 @@ public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsy
         if (cookiesArray == null) return null;
         final String cookie = cookiesArray[0];
         if (TextUtils.isEmpty(cookie)) return null;
-        final String uid = CookieUtils.getUserIdFromCookie(cookie);
+        final long uid = CookieUtils.getUserIdFromCookie(cookie);
         final String url = "https://www.instagram.com/graphql/query/?query_hash=0f318e8cfff9cc9ef09f88479ff571fb"
                 + "&variables={\"id\":\"" + uid + "\"}";
         HttpURLConnection urlConnection = null;
@@ -117,6 +119,7 @@ public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsy
             return likesCount;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "NotificationCounts{" +

@@ -8,13 +8,13 @@ import java.util.UUID;
 
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.repositories.responses.directmessages.Audio;
+import awais.instagrabber.repositories.responses.Audio;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.MediaCandidate;
+import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVoiceMedia;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
-import awais.instagrabber.repositories.responses.directmessages.MediaCandidate;
-import awais.instagrabber.repositories.responses.directmessages.VideoVersion;
 
 public class DirectItemFactory {
 
@@ -69,23 +69,38 @@ public class DirectItemFactory {
             );
             videoVersions = Collections.singletonList(videoVersion);
         }
-        final DirectItemMedia media = new DirectItemMedia(
+        final Media media = new Media(
                 null,
                 UUID.randomUUID().toString(),
                 null,
+                -1,
                 null,
+                false,
                 imageVersions2,
                 width,
                 height,
                 isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                 false,
+                -1,
+                -1,
+                -1,
+                false,
+                false,
                 videoVersions,
+                false,
+                0f,
+                0,
+                null,
                 false,
                 null,
                 null,
                 null,
-                null
-        );
+                null,
+                null,
+                false,
+                false,
+                null,
+                null);
         return new DirectItem(
                 UUID.randomUUID().toString(),
                 userId,
@@ -120,7 +135,8 @@ public class DirectItemFactory {
                                          final String clientContext,
                                          final Uri uri,
                                          final long duration,
-                                         final List<Float> waveform, final int samplingFreq) {
+                                         final List<Float> waveform,
+                                         final int samplingFreq) {
         final Audio audio = new Audio(
                 uri.toString(),
                 duration,
@@ -128,23 +144,38 @@ public class DirectItemFactory {
                 samplingFreq,
                 0
         );
-        final DirectItemMedia media = new DirectItemMedia(
+        final Media media = new Media(
                 null,
                 UUID.randomUUID().toString(),
                 null,
+                -1,
                 null,
+                false,
                 null,
                 0,
                 0,
                 MediaItemType.MEDIA_TYPE_VOICE,
                 false,
-                null,
+                -1,
+                0,
+                0,
+                false,
                 false,
                 null,
+                false,
+                0f,
+                0,
+                null,
+                false,
                 audio,
                 null,
-                null
-        );
+                null,
+                null,
+                null,
+                false,
+                false,
+                null,
+                null);
         final DirectItemVoiceMedia voiceMedia = new DirectItemVoiceMedia(
                 media,
                 0,

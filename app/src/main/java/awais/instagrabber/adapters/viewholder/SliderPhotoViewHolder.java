@@ -17,7 +17,8 @@ import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
 import awais.instagrabber.databinding.ItemSliderPhotoBinding;
-import awais.instagrabber.models.PostChild;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class SliderPhotoViewHolder extends SliderItemViewHolder {
     private static final String TAG = "FeedSliderPhotoViewHolder";
@@ -32,11 +33,11 @@ public class SliderPhotoViewHolder extends SliderItemViewHolder {
         this.onVerticalDragListener = onVerticalDragListener;
     }
 
-    public void bind(@NonNull final PostChild model,
+    public void bind(@NonNull final Media model,
                      final int position,
                      final SliderItemsAdapter.SliderCallback sliderCallback) {
         final ImageRequest requestBuilder = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(model.getDisplayUrl()))
+                .newBuilderWithSource(Uri.parse(ResponseBodyUtils.getImageUrl(model)))
                 .setLocalThumbnailPreviewsEnabled(true)
                 .build();
         binding.getRoot()
@@ -59,7 +60,7 @@ public class SliderPhotoViewHolder extends SliderItemViewHolder {
                                             }
                                         }
                                     })
-                                    .setLowResImageRequest(ImageRequest.fromUri(model.getThumbnailUrl()))
+                                    .setLowResImageRequest(ImageRequest.fromUri(ResponseBodyUtils.getThumbUrl(model)))
                                     .build());
         // binding.getRoot().setOnClickListener(v -> {
         //     if (sliderCallback != null) {

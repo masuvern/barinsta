@@ -27,7 +27,7 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.UserSearchResultsAdapter;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentUserSearchBinding;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.ViewUtils;
@@ -193,7 +193,7 @@ public class UserSearchFragment extends Fragment {
         viewModel.showAction().observe(getViewLifecycleOwner(), showAction -> binding.done.setVisibility(showAction ? View.VISIBLE : View.GONE));
     }
 
-    private void createUserChip(final DirectUser user) {
+    private void createUserChip(final User user) {
         final Context context = getContext();
         if (context == null) return;
         final Chip chip = new Chip(context);
@@ -210,7 +210,7 @@ public class UserSearchFragment extends Fragment {
     }
 
     private void removeSelectedUser(final View chip) {
-        final DirectUser user = (DirectUser) chip.getTag();
+        final User user = (User) chip.getTag();
         if (user == null) return;
         viewModel.setSelectedUser(user, false);
         resultsAdapter.setSelectedUser(user.getPk(), false);
@@ -225,7 +225,7 @@ public class UserSearchFragment extends Fragment {
         for (int i = childCount - 1; i >= 0; i--) {
             final View child = binding.group.getChildAt(i);
             if (child == null) continue;
-            final DirectUser user = (DirectUser) child.getTag();
+            final User user = (User) child.getTag();
             if (user != null && user.getPk() == userId) {
                 return child;
             }

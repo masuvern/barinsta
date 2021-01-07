@@ -7,25 +7,23 @@ import androidx.annotation.NonNull;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.MediaRepository;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
-import awais.instagrabber.utils.Constants;
+import awais.instagrabber.repositories.responses.LikersResponse;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.MediaInfoResponse;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.DateUtils;
 import awais.instagrabber.utils.MediaUploadHelper;
-import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,28 +52,23 @@ public class MediaService extends BaseService {
     }
 
     public void fetch(final String mediaId,
-                      final ServiceCallback<FeedModel> callback) {
-        final Call<String> request = repository.fetch(mediaId);
-        request.enqueue(new Callback<String>() {
+                      final ServiceCallback<Media> callback) {
+        final Call<MediaInfoResponse> request = repository.fetch(mediaId);
+        request.enqueue(new Callback<MediaInfoResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call,
-                                   @NonNull final Response<String> response) {
+            public void onResponse(@NonNull final Call<MediaInfoResponse> call,
+                                   @NonNull final Response<MediaInfoResponse> response) {
                 if (callback == null) return;
-                final String body = response.body();
-                if (body == null) {
+                final MediaInfoResponse mediaInfoResponse = response.body();
+                if (mediaInfoResponse == null || mediaInfoResponse.getItems() == null || mediaInfoResponse.getItems().isEmpty()) {
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final JSONObject itemJson = new JSONObject(body).getJSONArray("items").getJSONObject(0);
-                    callback.onSuccess(ResponseBodyUtils.parseItem(itemJson));
-                } catch (JSONException e) {
-                    callback.onFailure(e);
-                }
+                callback.onSuccess(mediaInfoResponse.getItems().get(0));
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call,
+            public void onFailure(@NonNull final Call<MediaInfoResponse> call,
                                   @NonNull final Throwable t) {
                 if (callback != null) {
                     callback.onFailure(t);
@@ -85,35 +78,35 @@ public class MediaService extends BaseService {
     }
 
     public void like(final String mediaId,
-                     final String userId,
+                     final long userId,
                      final String csrfToken,
                      final ServiceCallback<Boolean> callback) {
         action(mediaId, userId, "like", csrfToken, callback);
     }
 
     public void unlike(final String mediaId,
-                       final String userId,
+                       final long userId,
                        final String csrfToken,
                        final ServiceCallback<Boolean> callback) {
         action(mediaId, userId, "unlike", csrfToken, callback);
     }
 
     public void save(final String mediaId,
-                     final String userId,
+                     final long userId,
                      final String csrfToken,
                      final ServiceCallback<Boolean> callback) {
         action(mediaId, userId, "save", csrfToken, callback);
     }
 
     public void unsave(final String mediaId,
-                       final String userId,
+                       final long userId,
                        final String csrfToken,
                        final ServiceCallback<Boolean> callback) {
         action(mediaId, userId, "unsave", csrfToken, callback);
     }
 
     private void action(final String mediaId,
-                        final String userId,
+                        final long userId,
                         final String action,
                         final String csrfToken,
                         final ServiceCallback<Boolean> callback) {
@@ -156,7 +149,7 @@ public class MediaService extends BaseService {
 
     public void comment(@NonNull final String mediaId,
                         @NonNull final String comment,
-                        @NonNull final String userId,
+                        final long userId,
                         final String replyToCommentId,
                         final String csrfToken,
                         @NonNull final ServiceCallback<Boolean> callback) {
@@ -201,7 +194,7 @@ public class MediaService extends BaseService {
     }
 
     public void deleteComment(final String mediaId,
-                              final String userId,
+                              final long userId,
                               final String commentId,
                               final String csrfToken,
                               @NonNull final ServiceCallback<Boolean> callback) {
@@ -209,7 +202,7 @@ public class MediaService extends BaseService {
     }
 
     public void deleteComments(final String mediaId,
-                               final String userId,
+                               final long userId,
                                final List<String> commentIds,
                                final String csrfToken,
                                @NonNull final ServiceCallback<Boolean> callback) {
@@ -320,7 +313,7 @@ public class MediaService extends BaseService {
     }
 
     public void editCaption(final String postId,
-                            final String userId,
+                            final long userId,
                             final String newCaption,
                             @NonNull final String csrfToken,
                             @NonNull final ServiceCallback<Boolean> callback) {
@@ -362,43 +355,22 @@ public class MediaService extends BaseService {
 
     public void fetchLikes(final String mediaId,
                            final boolean isComment,
-                           @NonNull final ServiceCallback<List<ProfileModel>> callback) {
-        final Call<String> likesRequest = repository.fetchLikes(mediaId, isComment ? "comment_likers" : "likers");
-        likesRequest.enqueue(new Callback<String>() {
+                           @NonNull final ServiceCallback<List<User>> callback) {
+        final Call<LikersResponse> likesRequest = repository.fetchLikes(mediaId, isComment ? "comment_likers" : "likers");
+        likesRequest.enqueue(new Callback<LikersResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String body = response.body();
-                if (body == null) {
-                    Log.e(TAG, "Error occurred while fetching likes of "+mediaId);
+            public void onResponse(@NonNull final Call<LikersResponse> call, @NonNull final Response<LikersResponse> response) {
+                final LikersResponse likersResponse = response.body();
+                if (likersResponse == null) {
+                    Log.e(TAG, "Error occurred while fetching likes of " + mediaId);
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final JSONObject data = new JSONObject(body);
-                    final JSONArray users = data.getJSONArray("users");
-                    final int usersLen = users.length();
-                    final List<ProfileModel> userModels = new ArrayList<>();
-                    for (int j = 0; j < usersLen; ++j) {
-                        final JSONObject userObject = users.getJSONObject(j);
-                        userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
-                                false,
-                                userObject.optBoolean("is_verified"),
-                                String.valueOf(userObject.get("pk")),
-                                userObject.getString("username"),
-                                userObject.optString("full_name"),
-                                null, null,
-                                userObject.getString("profile_pic_url"),
-                                null, 0, 0, 0, false, false, false, false, false));
-                    }
-                    callback.onSuccess(userModels);
-                } catch (JSONException e) {
-                    // Log.e(TAG, "Error parsing body", e);
-                    callback.onFailure(e);
-                }
+                callback.onSuccess(likersResponse.getUsers());
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull final Call<LikersResponse> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error getting likes", t);
                 callback.onFailure(t);
             }
@@ -409,7 +381,7 @@ public class MediaService extends BaseService {
                           final String type, // 1 caption 2 comment 3 bio
                           @NonNull final ServiceCallback<String> callback) {
         final Map<String, String> form = new HashMap<>();
-        form.put("id", id);
+        form.put("id", String.valueOf(id));
         form.put("type", type);
         final Call<String> request = repository.translate(form);
         request.enqueue(new Callback<String>() {

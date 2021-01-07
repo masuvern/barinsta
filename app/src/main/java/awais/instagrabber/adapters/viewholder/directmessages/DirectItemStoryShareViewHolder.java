@@ -13,13 +13,13 @@ import com.facebook.drawee.generic.RoundingParams;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -31,7 +31,7 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
 
     public DirectItemStoryShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmStoryShareBinding binding,
-                                          final ProfileModel currentUser,
+                                          final User currentUser,
                                           final DirectThread thread,
                                           final MentionClickListener mentionClickListener,
                                           final View.OnClickListener onClickListener) {
@@ -64,7 +64,7 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
             binding.text.setVisibility(View.VISIBLE);
             return;
         }
-        final DirectItemMedia storyShareMedia = storyShare.getMedia();
+        final Media storyShareMedia = storyShare.getMedia();
         final MediaItemType mediaType = storyShareMedia.getMediaType();
         binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? View.VISIBLE : View.GONE);
         final RoundingParams roundingParams = messageDirection == MessageDirection.INCOMING

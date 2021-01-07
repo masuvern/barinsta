@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters.viewholder;
 
-import android.text.TextUtils;
 import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,7 +33,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
         binding.tvDate.setText(model.getDateTime());
 
         binding.tvUsername.setText(model.getProfileModel().getUsername());
-        binding.ivProfilePic.setImageURI(model.getProfileModel().getSdProfilePic());
+        binding.ivProfilePic.setImageURI(model.getProfileModel().getProfilePicUrl());
         binding.ivProfilePic.setOnClickListener(v -> {
             if (notificationClickListener == null) return;
             notificationClickListener.onProfileClick(model.getProfileModel().getUsername());
@@ -43,8 +42,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
         if (model.getFirstStoryModel() != null) {
             binding.ivPreviewPic.setVisibility(View.VISIBLE);
             binding.ivPreviewPic.setImageURI(model.getFirstStoryModel().getThumbnail());
-        }
-        else binding.ivPreviewPic.setVisibility(View.INVISIBLE);
+        } else binding.ivPreviewPic.setVisibility(View.INVISIBLE);
 
         float alpha = model.isFullyRead() ? 0.5F : 1.0F;
         binding.ivProfilePic.setAlpha(alpha);

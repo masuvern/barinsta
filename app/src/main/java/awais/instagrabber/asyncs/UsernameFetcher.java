@@ -17,9 +17,9 @@ import awais.instagrabber.utils.NetworkUtils;
 
 public final class UsernameFetcher extends AsyncTask<Void, Void, String> {
     private final FetchListener<String> fetchListener;
-    private final String uid;
+    private final long uid;
 
-    public UsernameFetcher(final String uid, final FetchListener<String> fetchListener) {
+    public UsernameFetcher(final long uid, final FetchListener<String> fetchListener) {
         this.uid = uid;
         this.fetchListener = fetchListener;
     }

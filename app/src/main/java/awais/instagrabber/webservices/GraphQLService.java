@@ -1,6 +1,5 @@
 package awais.instagrabber.webservices;
 
-import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,22 +8,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.repositories.GraphQLRepository;
+import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.GraphQLUserListFetchResponse;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -35,7 +30,7 @@ import retrofit2.Retrofit;
 
 public class GraphQLService extends BaseService {
     private static final String TAG = "GraphQLService";
-    private static final boolean loadFromMock = false;
+    // private static final boolean loadFromMock = false;
 
     private final GraphQLRepository repository;
 
@@ -94,54 +89,55 @@ public class GraphQLService extends BaseService {
                                    final String maxId,
                                    final ServiceCallback<PostsFetchResponse> callback) {
         fetch("36bd0f2bf5911908de389b8ceaa3be6d",
-                "{\"id\":\"" + locationId + "\"," +
-                        "\"first\":25," +
-                        "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
-                Constants.EXTRAS_LOCATION,
-                "edge_location_to_media",
-                callback);
+              "{\"id\":\"" + locationId + "\"," +
+                      "\"first\":25," +
+                      "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
+              Constants.EXTRAS_LOCATION,
+              "edge_location_to_media",
+              callback);
     }
 
     public void fetchHashtagPosts(@NonNull final String tag,
                                   final String maxId,
                                   final ServiceCallback<PostsFetchResponse> callback) {
         fetch("9b498c08113f1e09617a1703c22b2f32",
-                "{\"tag_name\":\"" + tag + "\"," +
-                        "\"first\":25," +
-                        "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
-                Constants.EXTRAS_HASHTAG,
-                "edge_hashtag_to_media",
-                callback);
+              "{\"tag_name\":\"" + tag + "\"," +
+                      "\"first\":25," +
+                      "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
+              Constants.EXTRAS_HASHTAG,
+              "edge_hashtag_to_media",
+              callback);
     }
 
-    public void fetchProfilePosts(@NonNull final String profileId,
+    public void fetchProfilePosts(final long profileId,
                                   final int postsPerPage,
                                   final String maxId,
                                   final ServiceCallback<PostsFetchResponse> callback) {
         fetch("18a7b935ab438c4514b1f742d8fa07a7",
-                "{\"id\":\"" + profileId + "\"," +
-                        "\"first\":" + postsPerPage + "," +
-                        "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
-                Constants.EXTRAS_USER,
-                "edge_owner_to_timeline_media",
-                callback);
+              "{\"id\":\"" + profileId + "\"," +
+                      "\"first\":" + postsPerPage + "," +
+                      "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
+              Constants.EXTRAS_USER,
+              "edge_owner_to_timeline_media",
+              callback);
     }
 
-    public void fetchTaggedPosts(@NonNull final String profileId,
+    public void fetchTaggedPosts(final long profileId,
                                  final int postsPerPage,
                                  final String maxId,
                                  final ServiceCallback<PostsFetchResponse> callback) {
         fetch("31fe64d9463cbbe58319dced405c6206",
-                "{\"id\":\"" + profileId + "\"," +
-                        "\"first\":" + postsPerPage + "," +
-                        "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
-                Constants.EXTRAS_USER,
-                "edge_user_to_photos_of_you",
-                callback);
+              "{\"id\":\"" + profileId + "\"," +
+                      "\"first\":" + postsPerPage + "," +
+                      "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
+              Constants.EXTRAS_USER,
+              "edge_user_to_photos_of_you",
+              callback);
     }
 
     @NonNull
-    private PostsFetchResponse parsePostResponse(@NonNull final Response<String> response, @NonNull final String arg1, @NonNull final String arg2) throws JSONException {
+    private PostsFetchResponse parsePostResponse(@NonNull final Response<String> response, @NonNull final String arg1, @NonNull final String arg2)
+            throws JSONException {
         if (TextUtils.isEmpty(response.body())) {
             Log.e(TAG, "parseResponse: feed response body is empty with status code: " + response.code());
             return new PostsFetchResponse(Collections.emptyList(), false, null);
@@ -152,7 +148,7 @@ public class GraphQLService extends BaseService {
     @NonNull
     private PostsFetchResponse parseResponseBody(@NonNull final String body, @NonNull final String arg1, @NonNull final String arg2)
             throws JSONException {
-        final List<FeedModel> feedModels = new ArrayList<>();
+        final List<Media> items = new ArrayList<>();
         final JSONObject timelineFeed = new JSONObject(body)
                 .getJSONObject("data")
                 .getJSONObject(arg1)
@@ -176,17 +172,17 @@ public class GraphQLService extends BaseService {
             if (itemJson == null) {
                 continue;
             }
-            final FeedModel feedModel = ResponseBodyUtils.parseGraphQLItem(itemJson);
-            if (feedModel != null) {
-                feedModels.add(feedModel);
+            final Media media = ResponseBodyUtils.parseGraphQLItem(itemJson);
+            if (media != null) {
+                items.add(media);
             }
         }
-        return new PostsFetchResponse(feedModels, hasNextPage, endCursor);
+        return new PostsFetchResponse(items, hasNextPage, endCursor);
     }
 
     public void fetchCommentLikers(final String commentId,
-                                    final String endCursor,
-                                    final ServiceCallback<GraphQLUserListFetchResponse> callback) {
+                                   final String endCursor,
+                                   final ServiceCallback<GraphQLUserListFetchResponse> callback) {
         final Map<String, String> queryMap = new HashMap<>();
         queryMap.put("query_hash", "5f0b1f6281e72053cbc07909c8d154ae");
         queryMap.put("variables", "{\"comment_id\":\"" + commentId + "\"," +
@@ -198,7 +194,7 @@ public class GraphQLService extends BaseService {
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 final String rawBody = response.body();
                 if (rawBody == null) {
-                    Log.e(TAG, "Error occurred while fetching gql comment likes of "+commentId);
+                    Log.e(TAG, "Error occurred while fetching gql comment likes of " + commentId);
                     callback.onSuccess(null);
                     return;
                 }
@@ -210,18 +206,53 @@ public class GraphQLService extends BaseService {
                     final String endCursor = pageInfo.getBoolean("has_next_page") ? pageInfo.getString("end_cursor") : null;
                     final JSONArray users = data.getJSONArray("edges");
                     final int usersLen = users.length();
-                    final List<ProfileModel> userModels = new ArrayList<>();
+                    final List<User> userModels = new ArrayList<>();
                     for (int j = 0; j < usersLen; ++j) {
                         final JSONObject userObject = users.getJSONObject(j).getJSONObject("node");
-                        userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
-                                false,
-                                userObject.optBoolean("is_verified"),
-                                userObject.getString("id"),
+                        userModels.add(new User(
+                                userObject.getLong("id"),
                                 userObject.getString("username"),
                                 userObject.optString("full_name"),
-                                null, null,
+                                userObject.optBoolean("is_private"),
                                 userObject.getString("profile_pic_url"),
-                                null, 0, 0, 0, false, false, false, false, false));
+                                null,
+                                new FriendshipStatus(
+                                        false,
+                                        false,
+                                        false,
+                                        false,
+                                        false,
+                                        false,
+                                        false,
+                                        false,
+                                        false,
+                                        false
+                                ),
+                                userObject.optBoolean("is_verified"),
+                                false,
+                                false,
+                                false,
+                                false,
+                                null,
+                                null,
+                                0,
+                                0,
+                                0,
+                                0,
+                                null,
+                                null,
+                                0,
+                                null
+                        ));
+                        // userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
+                        //                                 false,
+                        //                                 userObject.optBoolean("is_verified"),
+                        //                                 userObject.getString("id"),
+                        //                                 userObject.getString("username"),
+                        //                                 userObject.optString("full_name"),
+                        //                                 null, null,
+                        //                                 userObject.getString("profile_pic_url"),
+                        //                                 null, 0, 0, 0, false, false, false, false, false));
                     }
                     callback.onSuccess(new GraphQLUserListFetchResponse(endCursor, status, userModels));
                 } catch (JSONException e) {

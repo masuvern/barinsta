@@ -1,10 +1,10 @@
 package awais.instagrabber.repositories.responses;
 
 public class UserInfo {
-    private final String pk;
+    private final long pk;
     private final String username, fullName, profilePicUrl, hdProfilePicUrl;
 
-    public UserInfo(final String pk,
+    public UserInfo(final long pk,
                     final String username,
                     final String fullName,
                     final String profilePicUrl,
@@ -16,7 +16,7 @@ public class UserInfo {
         this.hdProfilePicUrl = hdProfilePicUrl;
     }
 
-    public String getPk() {
+    public long getPk() {
         return pk;
     }
 

@@ -20,10 +20,10 @@ import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmVoiceMediaBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.repositories.responses.directmessages.Audio;
+import awais.instagrabber.repositories.responses.Audio;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVoiceMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.TextUtils;
@@ -43,7 +43,7 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
 
     public DirectItemVoiceMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmVoiceMediaBinding binding,
-                                          final ProfileModel currentUser,
+                                          final User currentUser,
                                           final DirectThread thread,
                                           final MentionClickListener mentionClickListener,
                                           final View.OnClickListener onClickListener) {
@@ -59,7 +59,7 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
         removeBg();
         final DirectItemVoiceMedia voiceMedia = directItemModel.getVoiceMedia();
         if (voiceMedia == null) return;
-        final DirectItemMedia media = voiceMedia.getMedia();
+        final Media media = voiceMedia.getMedia();
         if (media == null) return;
         final Audio audio = media.getAudio();
         if (audio == null) return;

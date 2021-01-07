@@ -2,14 +2,16 @@ package awais.instagrabber.models;
 
 import java.io.Serializable;
 
+import awais.instagrabber.repositories.responses.Media;
+
 public class TopicCluster implements Serializable {
-    private String id;
-    private String title;
-    private String type;
-    private boolean canMute;
-    private boolean isMuted;
-    private int rankedPosition;
-    private FeedModel coverMedia;
+    private final String id;
+    private final String title;
+    private final String type;
+    private final boolean canMute;
+    private final boolean isMuted;
+    private final int rankedPosition;
+    private final Media coverMedia;
 
     public TopicCluster(final String id,
                         final String title,
@@ -17,7 +19,7 @@ public class TopicCluster implements Serializable {
                         final boolean canMute,
                         final boolean isMuted,
                         final int rankedPosition,
-                        final FeedModel coverMedia) {
+                        final Media coverMedia) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -51,7 +53,7 @@ public class TopicCluster implements Serializable {
         return rankedPosition;
     }
 
-    public FeedModel getCoverMedia() {
+    public Media getCoverMedia() {
         return coverMedia;
     }
 }

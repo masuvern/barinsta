@@ -3,7 +3,6 @@ package awais.instagrabber.utils;
 import android.util.Log;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
@@ -16,21 +15,24 @@ import java.util.List;
 import java.util.Map;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostChild;
-import awais.instagrabber.models.ProfileModel;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
-import awais.instagrabber.repositories.responses.directmessages.MediaCandidate;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
 import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.stickers.SliderModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
+import awais.instagrabber.repositories.responses.Caption;
+import awais.instagrabber.repositories.responses.FriendshipStatus;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Location;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.MediaCandidate;
+import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.VideoVersion;
+import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awaisomereport.LogCollector;
 
 public final class ResponseBodyUtils {
@@ -102,95 +104,95 @@ public final class ResponseBodyUtils {
         return src;
     }
 
-    public static String getLowQualityImage(final JSONObject resources) {
-        String src = null;
-        try {
-            src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, true);
-        } catch (final Exception e) {
-            if (Utils.logCollector != null)
-                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getLowQualityImage",
-                                                   new Pair<>("resourcesNull", resources == null));
-            if (BuildConfig.DEBUG) Log.e(TAG, "Error in getLowQualityImage", e);
-        }
-        return src;
-    }
+    // public static String getLowQualityImage(final JSONObject resources) {
+    //     String src = null;
+    //     try {
+    //         src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, true);
+    //     } catch (final Exception e) {
+    //         if (Utils.logCollector != null)
+    //             Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getLowQualityImage",
+    //                                                new Pair<>("resourcesNull", resources == null));
+    //         if (BuildConfig.DEBUG) Log.e(TAG, "Error in getLowQualityImage", e);
+    //     }
+    //     return src;
+    // }
 
-    public static ThumbnailDetails getItemThumbnail(@NonNull final JSONArray jsonArray) {
-        final ThumbnailDetails thumbnailDetails = new ThumbnailDetails();
-        final int imageResLen = jsonArray.length();
-        for (int i = 0; i < imageResLen; ++i) {
-            final JSONObject imageResource = jsonArray.optJSONObject(i);
-            try {
-                // final float ratio = (float) height / width;
-                // if (ratio >= 0.95f && ratio <= 1.0f) {
-                thumbnailDetails.height = imageResource.getInt("height");
-                thumbnailDetails.width = imageResource.getInt("width");
-                thumbnailDetails.url = imageResource.getString("url");
-                break;
-                // }
-            } catch (final Exception e) {
-                if (Utils.logCollector != null)
-                    Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getItemThumbnail");
-                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-            }
-        }
-        // if (TextUtils.isEmpty(thumbnail)) thumbnail = jsonArray.optJSONObject(0).optString("url");
-        return thumbnailDetails;
-    }
+    // public static ThumbnailDetails getItemThumbnail(@NonNull final JSONArray jsonArray) {
+    //     final ThumbnailDetails thumbnailDetails = new ThumbnailDetails();
+    //     final int imageResLen = jsonArray.length();
+    //     for (int i = 0; i < imageResLen; ++i) {
+    //         final JSONObject imageResource = jsonArray.optJSONObject(i);
+    //         try {
+    //             // final float ratio = (float) height / width;
+    //             // if (ratio >= 0.95f && ratio <= 1.0f) {
+    //             thumbnailDetails.height = imageResource.getInt("height");
+    //             thumbnailDetails.width = imageResource.getInt("width");
+    //             thumbnailDetails.url = imageResource.getString("url");
+    //             break;
+    //             // }
+    //         } catch (final Exception e) {
+    //             if (Utils.logCollector != null)
+    //                 Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getItemThumbnail");
+    //             if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+    //         }
+    //     }
+    //     // if (TextUtils.isEmpty(thumbnail)) thumbnail = jsonArray.optJSONObject(0).optString("url");
+    //     return thumbnailDetails;
+    // }
 
-    public static class ThumbnailDetails {
-        int width;
-        int height;
-        public String url;
-    }
+    // public static class ThumbnailDetails {
+    //     int width;
+    //     int height;
+    //     public String url;
+    // }
 
-    @Nullable
-    public static ThumbnailDetails getThumbnailUrl(@NonNull final JSONObject mediaObj, final MediaItemType mediaType) throws Exception {
-        ThumbnailDetails thumbnail = null;
-        if (mediaType == MediaItemType.MEDIA_TYPE_IMAGE || mediaType == MediaItemType.MEDIA_TYPE_VIDEO) {
-            final JSONObject imageVersions = mediaObj.optJSONObject("image_versions2");
-            if (imageVersions != null)
-                thumbnail = getItemThumbnail(imageVersions.getJSONArray("candidates"));
+    // @Nullable
+    // public static ThumbnailDetails getThumbnailUrl(@NonNull final JSONObject mediaObj, final MediaItemType mediaType) throws Exception {
+    //     ThumbnailDetails thumbnail = null;
+    //     if (mediaType == MediaItemType.MEDIA_TYPE_IMAGE || mediaType == MediaItemType.MEDIA_TYPE_VIDEO) {
+    //         final JSONObject imageVersions = mediaObj.optJSONObject("image_versions2");
+    //         if (imageVersions != null)
+    //             thumbnail = getItemThumbnail(imageVersions.getJSONArray("candidates"));
+    //
+    //     } else if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
+    //         final JSONArray carouselMedia = mediaObj.optJSONArray("carousel_media");
+    //         if (carouselMedia != null)
+    //             thumbnail = getItemThumbnail(carouselMedia.getJSONObject(0)
+    //                                                       .getJSONObject("image_versions2")
+    //                                                       .getJSONArray("candidates"));
+    //     }
+    //     return thumbnail;
+    // }
 
-        } else if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
-            final JSONArray carouselMedia = mediaObj.optJSONArray("carousel_media");
-            if (carouselMedia != null)
-                thumbnail = getItemThumbnail(carouselMedia.getJSONObject(0)
-                                                          .getJSONObject("image_versions2")
-                                                          .getJSONArray("candidates"));
-        }
-        return thumbnail;
-    }
+    // public static String getVideoUrl(@NonNull final JSONObject mediaObj) {
+    //     String url = null;
+    //     final JSONArray videoVersions = mediaObj.optJSONArray("video_versions");
+    //     if (videoVersions == null) {
+    //         return null;
+    //     }
+    //     int largestWidth = 0;
+    //     for (int i = 0; i < videoVersions.length(); i++) {
+    //         final JSONObject videoVersionJson = videoVersions.optJSONObject(i);
+    //         if (videoVersionJson == null) {
+    //             continue;
+    //         }
+    //         final int width = videoVersionJson.optInt("width");
+    //         if (largestWidth == 0 || width > largestWidth) {
+    //             largestWidth = width;
+    //             url = videoVersionJson.optString("url");
+    //         }
+    //     }
+    //     return url;
+    // }
 
-    public static String getVideoUrl(@NonNull final JSONObject mediaObj) {
-        String url = null;
-        final JSONArray videoVersions = mediaObj.optJSONArray("video_versions");
-        if (videoVersions == null) {
-            return null;
-        }
-        int largestWidth = 0;
-        for (int i = 0; i < videoVersions.length(); i++) {
-            final JSONObject videoVersionJson = videoVersions.optJSONObject(i);
-            if (videoVersionJson == null) {
-                continue;
-            }
-            final int width = videoVersionJson.optInt("width");
-            if (largestWidth == 0 || width > largestWidth) {
-                largestWidth = width;
-                url = videoVersionJson.optString("url");
-            }
-        }
-        return url;
-    }
-
-    @Nullable
-    public static MediaItemType getMediaItemType(final int mediaType) {
-        if (mediaType == 1) return MediaItemType.MEDIA_TYPE_IMAGE;
-        if (mediaType == 2) return MediaItemType.MEDIA_TYPE_VIDEO;
-        if (mediaType == 8) return MediaItemType.MEDIA_TYPE_SLIDER;
-        if (mediaType == 11) return MediaItemType.MEDIA_TYPE_VOICE;
-        return null;
-    }
+    // @Nullable
+    // public static MediaItemType getMediaItemType(final int mediaType) {
+    //     if (mediaType == 1) return MediaItemType.MEDIA_TYPE_IMAGE;
+    //     if (mediaType == 2) return MediaItemType.MEDIA_TYPE_VIDEO;
+    //     if (mediaType == 8) return MediaItemType.MEDIA_TYPE_SLIDER;
+    //     if (mediaType == 11) return MediaItemType.MEDIA_TYPE_VOICE;
+    //     return null;
+    // }
 
     // public static DirectItemModel.DirectItemMediaModel getDirectMediaModel(final JSONObject mediaObj) throws Exception {
     //     final DirectItemModel.DirectItemMediaModel mediaModel;
@@ -597,89 +599,89 @@ public final class ResponseBodyUtils {
     //     return RavenExpiringMediaType.RAVEN_UNKNOWN;
     // }
 
-    public static FeedModel parseItem(final JSONObject itemJson) throws JSONException {
-        if (itemJson == null) {
-            return null;
-        }
-        ProfileModel profileModel = null;
-        if (itemJson.has("user")) {
-            final JSONObject user = itemJson.getJSONObject("user");
-            final JSONObject friendshipStatus = user.optJSONObject("friendship_status");
-            boolean following = false;
-            boolean restricted = false;
-            boolean requested = false;
-            if (friendshipStatus != null) {
-                following = friendshipStatus.optBoolean("following");
-                requested = friendshipStatus.optBoolean("outgoing_request");
-                restricted = friendshipStatus.optBoolean("is_restricted");
-            }
-            profileModel = new ProfileModel(
-                    user.optBoolean("is_private"),
-                    false, // if you can see it then you def follow
-                    user.optBoolean("is_verified"),
-                    user.getString("pk"),
-                    user.getString(Constants.EXTRAS_USERNAME),
-                    user.optString("full_name"),
-                    null,
-                    null,
-                    user.getString("profile_pic_url"),
-                    null,
-                    0,
-                    0,
-                    0,
-                    following,
-                    false,
-                    restricted,
-                    false,
-                    requested);
-        }
-        final JSONObject captionJson = itemJson.optJSONObject("caption");
-        final JSONObject locationJson = itemJson.optJSONObject("location");
-        final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(itemJson.optInt("media_type"));
-        if (mediaType == null) {
-            return null;
-        }
-        final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
-                .setItemType(mediaType)
-                .setProfileModel(profileModel)
-                .setPostId(itemJson.getString(Constants.EXTRAS_ID))
-                .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(itemJson) : null)
-                .setShortCode(itemJson.getString("code"))
-                .setPostCaption(captionJson != null ? captionJson.optString("text") : "")
-                .setCaptionId(captionJson != null ? captionJson.optString("pk") : null)
-                .setCommentsCount(itemJson.optInt("comment_count"))
-                .setTimestamp(itemJson.optLong("taken_at", -1))
-                .setLiked(itemJson.optBoolean("has_liked"))
-                .setBookmarked(itemJson.optBoolean("has_viewer_saved"))
-                .setLikesCount(itemJson.optInt("like_count"))
-                .setLocationName(locationJson != null ? locationJson.optString("name") : null)
-                .setLocationId(locationJson != null ? String.valueOf(locationJson.optLong("pk")) : null)
-                .setImageHeight(itemJson.optInt("original_height"))
-                .setImageWidth(itemJson.optInt("original_width"));
-        switch (mediaType) {
-            case MEDIA_TYPE_VIDEO:
-                final long videoViews = itemJson.optLong("view_count", 0);
-                feedModelBuilder.setViewCount(videoViews)
-                                .setDisplayUrl(ResponseBodyUtils.getVideoUrl(itemJson));
-                break;
-            case MEDIA_TYPE_IMAGE:
-                feedModelBuilder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(itemJson));
-                break;
-            case MEDIA_TYPE_SLIDER:
-                final List<PostChild> childPosts = getChildPosts(itemJson);
-                feedModelBuilder.setSliderItems(childPosts)
-                                .setImageHeight(childPosts.get(0).getHeight())
-                                .setImageWidth(childPosts.get(0).getWidth());
-                break;
-        }
-        return feedModelBuilder.build();
-    }
+    // public static FeedModel parseItem(final JSONObject itemJson) throws JSONException {
+    //     if (itemJson == null) {
+    //         return null;
+    //     }
+    //     ProfileModel profileModel = null;
+    //     if (itemJson.has("user")) {
+    //         final JSONObject user = itemJson.getJSONObject("user");
+    //         final JSONObject friendshipStatus = user.optJSONObject("friendship_status");
+    //         boolean following = false;
+    //         boolean restricted = false;
+    //         boolean requested = false;
+    //         if (friendshipStatus != null) {
+    //             following = friendshipStatus.optBoolean("following");
+    //             requested = friendshipStatus.optBoolean("outgoing_request");
+    //             restricted = friendshipStatus.optBoolean("is_restricted");
+    //         }
+    //         profileModel = new ProfileModel(
+    //                 user.optBoolean("is_private"),
+    //                 false, // if you can see it then you def follow
+    //                 user.optBoolean("is_verified"),
+    //                 user.getString("pk"),
+    //                 user.getString(Constants.EXTRAS_USERNAME),
+    //                 user.optString("full_name"),
+    //                 null,
+    //                 null,
+    //                 user.getString("profile_pic_url"),
+    //                 null,
+    //                 0,
+    //                 0,
+    //                 0,
+    //                 following,
+    //                 false,
+    //                 restricted,
+    //                 false,
+    //                 requested);
+    //     }
+    //     final JSONObject captionJson = itemJson.optJSONObject("caption");
+    //     final JSONObject locationJson = itemJson.optJSONObject("location");
+    //     final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(itemJson.optInt("media_type"));
+    //     if (mediaType == null) {
+    //         return null;
+    //     }
+    //     final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
+    //             .setItemType(mediaType)
+    //             .setProfileModel(profileModel)
+    //             .setPostId(itemJson.getString(Constants.EXTRAS_ID))
+    //             .setThumbnailUrl(mediaType != MediaItemType.MEDIA_TYPE_SLIDER ? ResponseBodyUtils.getLowQualityImage(itemJson) : null)
+    //             .setShortCode(itemJson.getString("code"))
+    //             .setPostCaption(captionJson != null ? captionJson.optString("text") : "")
+    //             .setCaptionId(captionJson != null ? captionJson.optString("pk") : null)
+    //             .setCommentsCount(itemJson.optInt("comment_count"))
+    //             .setTimestamp(itemJson.optLong("taken_at", -1))
+    //             .setLiked(itemJson.optBoolean("has_liked"))
+    //             .setBookmarked(itemJson.optBoolean("has_viewer_saved"))
+    //             .setLikesCount(itemJson.optInt("like_count"))
+    //             .setLocationName(locationJson != null ? locationJson.optString("name") : null)
+    //             .setLocationId(locationJson != null ? String.valueOf(locationJson.optLong("pk")) : null)
+    //             .setImageHeight(itemJson.optInt("original_height"))
+    //             .setImageWidth(itemJson.optInt("original_width"));
+    //     switch (mediaType) {
+    //         case MEDIA_TYPE_VIDEO:
+    //             final long videoViews = itemJson.optLong("view_count", 0);
+    //             feedModelBuilder.setViewCount(videoViews)
+    //                             .setDisplayUrl(ResponseBodyUtils.getVideoUrl(itemJson));
+    //             break;
+    //         case MEDIA_TYPE_IMAGE:
+    //             feedModelBuilder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(itemJson));
+    //             break;
+    //         case MEDIA_TYPE_SLIDER:
+    //             final List<PostChild> childPosts = getChildPosts(itemJson);
+    //             feedModelBuilder.setSliderItems(childPosts)
+    //                             .setImageHeight(childPosts.get(0).getHeight())
+    //                             .setImageWidth(childPosts.get(0).getWidth());
+    //             break;
+    //     }
+    //     return feedModelBuilder.build();
+    // }
 
-    public static FeedModel parseGraphQLItem(final JSONObject itemJson) throws JSONException {
+    public static Media parseGraphQLItem(final JSONObject itemJson) throws JSONException {
         if (itemJson == null) {
             return null;
         }
-        final JSONObject feedItem = itemJson.getJSONObject("node");
+        final JSONObject feedItem = itemJson.has("node") ? itemJson.getJSONObject("node") : itemJson;
         final String mediaType = feedItem.optString("__typename");
         if ("GraphSuggestedUserFeedUnit".equals(mediaType)) return null;
 
@@ -694,30 +696,6 @@ public final class ResponseBodyUtils {
         } else {
             resourceUrl = feedItem.has("display_resources") ? ResponseBodyUtils.getHighQualityImage(feedItem) : displayUrl;
         }
-
-        ProfileModel profileModel = null;
-        if (feedItem.has("owner")) {
-            final JSONObject owner = feedItem.getJSONObject("owner");
-            profileModel = new ProfileModel(
-                    owner.optBoolean("is_private"),
-                    false, // if you can see it then you def follow
-                    owner.optBoolean("is_verified"),
-                    owner.getString(Constants.EXTRAS_ID),
-                    owner.optString(Constants.EXTRAS_USERNAME),
-                    owner.optString("full_name"),
-                    null,
-                    null,
-                    owner.optString("profile_pic_url"),
-                    null,
-                    0,
-                    0,
-                    0,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false);
-        }
         JSONObject tempJsonObject = feedItem.optJSONObject("edge_media_preview_comment");
         final long commentsCount = tempJsonObject != null ? tempJsonObject.optLong("count") : 0;
         tempJsonObject = feedItem.optJSONObject("edge_media_preview_like");
@@ -731,16 +709,16 @@ public final class ResponseBodyUtils {
                 captionText = tempJsonObject.getString("text");
             }
         }
-        final JSONObject location = feedItem.optJSONObject("location");
+        final JSONObject locationJson = feedItem.optJSONObject("location");
         // Log.d(TAG, "location: " + (location == null ? null : location.toString()));
-        String locationId = null;
+        long locationId = 0;
         String locationName = null;
-        if (location != null) {
-            locationName = location.optString("name");
-            if (location.has("id")) {
-                locationId = location.getString("id");
-            } else if (location.has("pk")) {
-                locationId = location.getString("pk");
+        if (locationJson != null) {
+            locationName = locationJson.optString("name");
+            if (locationJson.has("id")) {
+                locationId = locationJson.optLong("id");
+            } else if (locationJson.has("pk")) {
+                locationId = locationJson.optLong("pk");
             }
             // Log.d(TAG, "locationId: " + locationId);
         }
@@ -757,125 +735,231 @@ public final class ResponseBodyUtils {
                                    .getJSONObject(0)
                                    .getString("src");
         } catch (JSONException ignored) {}
-        final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
-                .setProfileModel(profileModel)
-                .setItemType(isVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                                     : MediaItemType.MEDIA_TYPE_IMAGE)
-                .setViewCount(videoViews)
-                .setPostId(feedItem.getString(Constants.EXTRAS_ID))
-                .setDisplayUrl(resourceUrl)
-                .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl : displayUrl)
-                .setShortCode(feedItem.getString(Constants.EXTRAS_SHORTCODE))
-                .setPostCaption(captionText)
-                .setCommentsCount(commentsCount)
-                .setTimestamp(feedItem.optLong("taken_at_timestamp", -1))
-                .setLiked(feedItem.optBoolean("viewer_has_liked"))
-                .setBookmarked(feedItem.optBoolean("viewer_has_saved"))
-                .setLikesCount(likesCount)
-                .setLocationName(locationName)
-                .setLocationId(locationId)
-                .setImageHeight(height)
-                .setImageWidth(width);
+        // final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
+        //         .setProfileModel(profileModel)
+        //         .setItemType(isVideo ? MediaItemType.MEDIA_TYPE_VIDEO
+        //                              : MediaItemType.MEDIA_TYPE_IMAGE)
+        //         .setViewCount(videoViews)
+        //         .setPostId(feedItem.getString(Constants.EXTRAS_ID))
+        //         .setDisplayUrl(resourceUrl)
+        //         .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl : displayUrl)
+        //         .setShortCode(feedItem.getString(Constants.EXTRAS_SHORTCODE))
+        //         .setPostCaption(captionText)
+        //         .setCommentsCount(commentsCount)
+        //         .setTimestamp(feedItem.optLong("taken_at_timestamp", -1))
+        //         .setLiked(feedItem.optBoolean("viewer_has_liked"))
+        //         .setBookmarked(feedItem.optBoolean("viewer_has_saved"))
+        //         .setLikesCount(likesCount)
+        //         .setLocationName(locationName)
+        //         .setLocationId(String.valueOf(locationId))
+        //         .setImageHeight(height)
+        //         .setImageWidth(width);
+
+        User user = null;
+        long userId = -1;
+        if (feedItem.has("owner")) {
+            final JSONObject owner = feedItem.getJSONObject("owner");
+            final FriendshipStatus friendshipStatus = new FriendshipStatus(
+                    false,
+                    false,
+                    false,
+                    false,
+                    owner.optBoolean("is_private"),
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+            );
+            userId = owner.optLong(Constants.EXTRAS_ID, -1);
+            user = new User(
+                    userId,
+                    owner.optString(Constants.EXTRAS_USERNAME),
+                    owner.optString("full_name"),
+                    owner.optBoolean("is_private"),
+                    owner.optString("profile_pic_url"),
+                    null,
+                    friendshipStatus,
+                    owner.optBoolean("is_verified"),
+                    false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null);
+        }
+        final String id = feedItem.getString(Constants.EXTRAS_ID);
+        final ImageVersions2 imageVersions2 = new ImageVersions2(
+                Collections.singletonList(new MediaCandidate(
+                        width,
+                        height,
+                        isVideo ? thumbnailUrl : resourceUrl
+                ))
+        );
+        VideoVersion videoVersion = null;
+        if (isVideo) {
+            videoVersion = new VideoVersion(
+                    null,
+                    null,
+                    width,
+                    height,
+                    resourceUrl
+            );
+        }
+        final Caption caption = new Caption(
+                userId,
+                captionText
+        );
 
         final boolean isSlider = "GraphSidecar".equals(mediaType) && feedItem.has("edge_sidecar_to_children");
-
+        List<Media> childItems = null;
         if (isSlider) {
-            feedModelBuilder.setItemType(MediaItemType.MEDIA_TYPE_SLIDER);
+            childItems = new ArrayList<>();
+            // feedModelBuilder.setItemType(MediaItemType.MEDIA_TYPE_SLIDER);
             final JSONObject sidecar = feedItem.optJSONObject("edge_sidecar_to_children");
             if (sidecar != null) {
                 final JSONArray children = sidecar.optJSONArray("edges");
                 if (children != null) {
-                    final List<PostChild> sliderItems = getSliderItems(children);
-                    feedModelBuilder.setSliderItems(sliderItems)
-                            .setImageHeight(sliderItems.get(0).getHeight())
-                            .setImageWidth(sliderItems.get(0).getWidth());
+                    // final List<PostChild> sliderItems = getSliderItems(children);
+                    // feedModelBuilder.setSliderItems(sliderItems)
+                    //                 .setImageHeight(sliderItems.get(0).getHeight())
+                    //                 .setImageWidth(sliderItems.get(0).getWidth());
+                    for (int i = 0; i < children.length(); i++) {
+                        final JSONObject child = children.optJSONObject(i);
+                        if (child == null) continue;
+                        final Media media = parseGraphQLItem(child);
+                        media.setIsSidecarChild(true);
+                        childItems.add(media);
+                    }
                 }
             }
         }
-        return feedModelBuilder.build();
+        MediaItemType mediaItemType = MediaItemType.MEDIA_TYPE_IMAGE;
+        if (isSlider) {
+            mediaItemType = MediaItemType.MEDIA_TYPE_SLIDER;
+        } else if (isVideo) {
+            mediaItemType = MediaItemType.MEDIA_TYPE_VIDEO;
+        }
+        final Location location = new Location(
+                locationId,
+                locationName,
+                locationName,
+                null,
+                null,
+                -1,
+                -1
+        );
+        return new Media(
+                id,
+                id,
+                feedItem.optString(Constants.EXTRAS_SHORTCODE),
+                feedItem.optLong("taken_at_timestamp", -1),
+                user,
+                false,
+                imageVersions2,
+                width,
+                height,
+                mediaItemType,
+                false,
+                -1,
+                commentsCount,
+                likesCount,
+                false,
+                false,
+                isVideo ? Collections.singletonList(videoVersion) : null,
+                feedItem.optBoolean("has_audio"),
+                feedItem.optDouble("video_duration"),
+                videoViews,
+                caption,
+                false,
+                null,
+                null,
+                childItems,
+                location,
+                null,
+                false,
+                false,
+                null,
+                null
+        );
     }
 
-    private static List<PostChild> getChildPosts(final JSONObject mediaJson) throws JSONException {
-        if (mediaJson == null) {
-            return Collections.emptyList();
-        }
-        final JSONArray carouselMedia = mediaJson.optJSONArray("carousel_media");
-        if (carouselMedia == null) {
-            return Collections.emptyList();
-        }
-        final List<PostChild> children = new ArrayList<>();
-        for (int i = 0; i < carouselMedia.length(); i++) {
-            final JSONObject childJson = carouselMedia.optJSONObject(i);
-            final PostChild childPost = getChildPost(childJson);
-            if (childPost != null) {
-                children.add(childPost);
-            }
-        }
-        return children;
-    }
+    // private static List<PostChild> getChildPosts(final JSONObject mediaJson) throws JSONException {
+    //     if (mediaJson == null) {
+    //         return Collections.emptyList();
+    //     }
+    //     final JSONArray carouselMedia = mediaJson.optJSONArray("carousel_media");
+    //     if (carouselMedia == null) {
+    //         return Collections.emptyList();
+    //     }
+    //     final List<PostChild> children = new ArrayList<>();
+    //     for (int i = 0; i < carouselMedia.length(); i++) {
+    //         final JSONObject childJson = carouselMedia.optJSONObject(i);
+    //         final PostChild childPost = getChildPost(childJson);
+    //         if (childPost != null) {
+    //             children.add(childPost);
+    //         }
+    //     }
+    //     return children;
+    // }
 
-    private static PostChild getChildPost(final JSONObject childJson) throws JSONException {
-        if (childJson == null) {
-            return null;
-        }
-        final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(childJson.optInt("media_type"));
-        if (mediaType == null) {
-            return null;
-        }
-        final PostChild.Builder builder = new PostChild.Builder();
-        switch (mediaType) {
-            case MEDIA_TYPE_VIDEO:
-                builder.setDisplayUrl(ResponseBodyUtils.getVideoUrl(childJson));
-                break;
-            case MEDIA_TYPE_IMAGE:
-                builder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(childJson));
-                break;
-        }
-        return builder.setItemType(mediaType)
-                      .setPostId(childJson.getString("id"))
-                      .setThumbnailUrl(ResponseBodyUtils.getLowQualityImage(childJson))
-                      .setHeight(childJson.optInt("original_height"))
-                      .setWidth(childJson.optInt("original_width"))
-                      .build();
-    }
+    // private static PostChild getChildPost(final JSONObject childJson) throws JSONException {
+    //     if (childJson == null) {
+    //         return null;
+    //     }
+    //     final MediaItemType mediaType = ResponseBodyUtils.getMediaItemType(childJson.optInt("media_type"));
+    //     if (mediaType == null) {
+    //         return null;
+    //     }
+    //     final PostChild.Builder builder = new PostChild.Builder();
+    //     switch (mediaType) {
+    //         case MEDIA_TYPE_VIDEO:
+    //             builder.setDisplayUrl(ResponseBodyUtils.getVideoUrl(childJson));
+    //             break;
+    //         case MEDIA_TYPE_IMAGE:
+    //             builder.setDisplayUrl(ResponseBodyUtils.getHighQualityImage(childJson));
+    //             break;
+    //     }
+    //     return builder.setItemType(mediaType)
+    //                   .setPostId(childJson.getString("id"))
+    //                   .setThumbnailUrl(ResponseBodyUtils.getLowQualityImage(childJson))
+    //                   .setHeight(childJson.optInt("original_height"))
+    //                   .setWidth(childJson.optInt("original_width"))
+    //                   .build();
+    // }
 
     // this is for graphql
-    @NonNull
-    private static List<PostChild> getSliderItems(final JSONArray children) throws JSONException {
-        final List<PostChild> sliderItems = new ArrayList<>();
-        for (int j = 0; j < children.length(); ++j) {
-            final JSONObject childNode = children.optJSONObject(j).getJSONObject("node");
-            final boolean isChildVideo = childNode.optBoolean("is_video");
-            int height = 0;
-            int width = 0;
-            final JSONObject dimensions = childNode.optJSONObject("dimensions");
-            if (dimensions != null) {
-                height = dimensions.optInt("height");
-                width = dimensions.optInt("width");
-            }
-            String thumbnailUrl = null;
-            try {
-                thumbnailUrl = childNode.getJSONArray("display_resources")
-                                        .getJSONObject(0)
-                                        .getString("src");
-            } catch (JSONException ignored) {}
-            final PostChild sliderItem = new PostChild.Builder()
-                    .setItemType(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-                                              : MediaItemType.MEDIA_TYPE_IMAGE)
-                    .setPostId(childNode.getString(Constants.EXTRAS_ID))
-                    .setDisplayUrl(isChildVideo ? childNode.getString("video_url")
-                                                : childNode.getString("display_url"))
-                    .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl
-                                                          : childNode.getString("display_url"))
-                    .setVideoViews(childNode.optLong("video_view_count", 0))
-                    .setHeight(height)
-                    .setWidth(width)
-                    .build();
-            // Log.d(TAG, "getSliderItems: sliderItem: " + sliderItem);
-            sliderItems.add(sliderItem);
-        }
-        return sliderItems;
-    }
+    // @NonNull
+    // private static List<PostChild> getSliderItems(final JSONArray children) throws JSONException {
+    //     final List<PostChild> sliderItems = new ArrayList<>();
+    //     for (int j = 0; j < children.length(); ++j) {
+    //         final JSONObject childNode = children.optJSONObject(j).getJSONObject("node");
+    //         final boolean isChildVideo = childNode.optBoolean("is_video");
+    //         int height = 0;
+    //         int width = 0;
+    //         final JSONObject dimensions = childNode.optJSONObject("dimensions");
+    //         if (dimensions != null) {
+    //             height = dimensions.optInt("height");
+    //             width = dimensions.optInt("width");
+    //         }
+    //         String thumbnailUrl = null;
+    //         try {
+    //             thumbnailUrl = childNode.getJSONArray("display_resources")
+    //                                     .getJSONObject(0)
+    //                                     .getString("src");
+    //         } catch (JSONException ignored) {}
+    //         final PostChild sliderItem = new PostChild.Builder()
+    //                 .setItemType(isChildVideo ? MediaItemType.MEDIA_TYPE_VIDEO
+    //                                           : MediaItemType.MEDIA_TYPE_IMAGE)
+    //                 .setPostId(childNode.getString(Constants.EXTRAS_ID))
+    //                 .setDisplayUrl(isChildVideo ? childNode.getString("video_url")
+    //                                             : childNode.getString("display_url"))
+    //                 .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl
+    //                                                       : childNode.getString("display_url"))
+    //                 .setVideoViews(childNode.optLong("video_view_count", 0))
+    //                 .setHeight(height)
+    //                 .setWidth(width)
+    //                 .build();
+    //         // Log.d(TAG, "getSliderItems: sliderItem: " + sliderItem);
+    //         sliderItems.add(sliderItem);
+    //     }
+    //     return sliderItems;
+    // }
 
     public static StoryModel parseStoryItem(final JSONObject data,
                                             final boolean isLoc,
@@ -883,19 +967,19 @@ public final class ResponseBodyUtils {
                                             final String localUsername) throws JSONException {
         final boolean isVideo = data.has("video_duration");
         final StoryModel model = new StoryModel(data.getString("id"),
-                data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
-                        .getString("url"), null,
-                isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
-                data.optLong("taken_at", 0),
-                (isLoc || isHashtag)
-                        ? data.getJSONObject("user").getString("username")
-                        : localUsername,
-                data.getJSONObject("user").getString("pk"),
-                data.optBoolean("can_reply"));
+                                                data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
+                                                    .getString("url"), null,
+                                                isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
+                                                data.optLong("taken_at", 0),
+                                                (isLoc || isHashtag)
+                                                ? data.getJSONObject("user").getString("username")
+                                                : localUsername,
+                                                data.getJSONObject("user").getLong("pk"),
+                                                data.optBoolean("can_reply"));
 
         if (data.getJSONObject("image_versions2").getJSONArray("candidates").length() > 1) {
             model.setThumbnail(data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(1)
-                    .getString("url"));
+                                   .getString("url"));
         }
 
         final JSONArray videoResources = data.optJSONArray("video_versions");
@@ -928,7 +1012,7 @@ public final class ResponseBodyUtils {
         }
         if (data.has("story_questions")) {
             final JSONObject tappableObject = data.getJSONArray("story_questions").getJSONObject(0)
-                    .optJSONObject("question_sticker");
+                                                  .optJSONObject("question_sticker");
             if (tappableObject != null && !tappableObject.getString("question_type").equals("music"))
                 model.setQuestion(new QuestionModel(
                         String.valueOf(tappableObject.getLong("question_id")),
@@ -964,7 +1048,7 @@ public final class ResponseBodyUtils {
         }
         if (data.has("story_sliders")) {
             final JSONObject tappableObject = data.getJSONArray("story_sliders").getJSONObject(0)
-                    .optJSONObject("slider_sticker");
+                                                  .optJSONObject("slider_sticker");
             if (tappableObject != null)
                 model.setSlider(new SliderModel(
                         String.valueOf(tappableObject.getLong("slider_id")),
@@ -1005,6 +1089,14 @@ public final class ResponseBodyUtils {
         return model;
     }
 
+    public static String getThumbUrl(final Media media) {
+        if (media == null) {
+            return null;
+        }
+        final ImageVersions2 imageVersions2 = media.getImageVersions2();
+        return getThumbUrl(imageVersions2);
+    }
+
     public static String getThumbUrl(final ImageVersions2 imageVersions2) {
         if (imageVersions2 == null) return null;
         final List<MediaCandidate> candidates = imageVersions2.getCandidates();
@@ -1012,6 +1104,17 @@ public final class ResponseBodyUtils {
         final MediaCandidate mediaCandidate = candidates.get(candidates.size() - 1);
         if (mediaCandidate == null) return null;
         return mediaCandidate.getUrl();
+    }
+
+    public static String getImageUrl(final Media media) {
+        if (media == null) return null;
+        final ImageVersions2 imageVersions2 = media.getImageVersions2();
+        if (imageVersions2 == null) return null;
+        final List<MediaCandidate> candidates = imageVersions2.getCandidates();
+        if (candidates == null || candidates.isEmpty()) return null;
+        final MediaCandidate candidate = candidates.get(0);
+        if (candidate == null) return null;
+        return candidate.getUrl();
     }
 
     public static boolean isRead(final DirectItem item,

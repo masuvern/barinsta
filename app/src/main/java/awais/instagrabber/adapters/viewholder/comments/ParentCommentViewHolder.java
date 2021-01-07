@@ -9,7 +9,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.CommentsAdapter.CommentCallback;
 import awais.instagrabber.databinding.ItemCommentBinding;
 import awais.instagrabber.models.CommentModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Utils;
 
 public final class ParentCommentViewHolder extends RecyclerView.ViewHolder {
@@ -75,10 +75,10 @@ public final class ParentCommentViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setUser(final CommentModel comment) {
-        final ProfileModel profileModel = comment.getProfileModel();
+        final User profileModel = comment.getProfileModel();
         if (profileModel == null) return;
         binding.tvUsername.setText(profileModel.getUsername());
-        binding.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
+        binding.ivProfilePic.setImageURI(profileModel.getProfilePicUrl());
         binding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
     }
 

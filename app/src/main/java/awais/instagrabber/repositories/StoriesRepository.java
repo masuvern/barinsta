@@ -8,8 +8,8 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Path;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
 import retrofit2.http.Url;
 
@@ -22,7 +22,7 @@ public interface StoriesRepository {
     Call<String> getFeedStories();
 
     @GET("/api/v1/highlights/{uid}/highlights_tray/")
-    Call<String> fetchHighlights(@Path("uid") final String uid);
+    Call<String> fetchHighlights(@Path("uid") final long uid);
 
     @GET("/api/v1/archive/reel/day_shells/")
     Call<String> fetchArchive(@QueryMap Map<String, String> queryParams);

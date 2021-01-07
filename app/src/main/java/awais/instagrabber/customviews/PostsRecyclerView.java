@@ -30,11 +30,11 @@ import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.PostsLayoutPreferences;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.viewmodels.FeedViewModel;
+import awais.instagrabber.viewmodels.MediaViewModel;
 import awais.instagrabber.workers.DownloadWorker;
 
 public class PostsRecyclerView extends RecyclerView {
@@ -48,7 +48,7 @@ public class PostsRecyclerView extends RecyclerView {
     private ViewModelStoreOwner viewModelStoreOwner;
     private FeedAdapterV2 feedAdapter;
     private LifecycleOwner lifeCycleOwner;
-    private FeedViewModel feedViewModel;
+    private MediaViewModel mediaViewModel;
     private boolean initCalled = false;
     private GridSpacingItemDecoration gridSpacingItemDecoration;
     private RecyclerLazyLoaderAtEdge lazyLoader;
@@ -58,20 +58,20 @@ public class PostsRecyclerView extends RecyclerView {
 
     private final List<FetchStatusChangeListener> fetchStatusChangeListeners = new ArrayList<>();
 
-    private final FetchListener<List<FeedModel>> fetchListener = new FetchListener<List<FeedModel>>() {
+    private final FetchListener<List<Media>> fetchListener = new FetchListener<List<Media>>() {
         @Override
-        public void onResult(final List<FeedModel> result) {
+        public void onResult(final List<Media> result) {
             final int currentPage = lazyLoader.getCurrentPage();
             if (currentPage == 0) {
-                feedViewModel.getList().postValue(result);
+                mediaViewModel.getList().postValue(result);
                 shouldScrollToTop = true;
                 dispatchFetchStatus();
                 return;
             }
-            final List<FeedModel> models = feedViewModel.getList().getValue();
-            final List<FeedModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+            final List<Media> models = mediaViewModel.getList().getValue();
+            final List<Media> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
             modelsCopy.addAll(result);
-            feedViewModel.getList().postValue(modelsCopy);
+            mediaViewModel.getList().postValue(modelsCopy);
             dispatchFetchStatus();
         }
 
@@ -182,8 +182,8 @@ public class PostsRecyclerView extends RecyclerView {
     }
 
     private void initSelf() {
-        feedViewModel = new ViewModelProvider(viewModelStoreOwner).get(FeedViewModel.class);
-        feedViewModel.getList().observe(lifeCycleOwner, list -> {
+        mediaViewModel = new ViewModelProvider(viewModelStoreOwner).get(MediaViewModel.class);
+        mediaViewModel.getList().observe(lifeCycleOwner, list -> {
             if (list.size() > 0) feedAdapter.submitList(list, () -> {
                 if (!shouldScrollToTop) return;
                 smoothScrollToPosition(0);
@@ -217,10 +217,10 @@ public class PostsRecyclerView extends RecyclerView {
                            final float progressPercent = progress.getFloat(DownloadWorker.PROGRESS, 0);
                            if (progressPercent != 100) continue;
                            final String url = progress.getString(DownloadWorker.URL);
-                           final List<FeedModel> feedModels = feedViewModel.getList().getValue();
+                           final List<Media> feedModels = mediaViewModel.getList().getValue();
                            if (feedModels == null) continue;
                            for (int i = 0; i < feedModels.size(); i++) {
-                               final FeedModel feedModel = feedModels.get(i);
+                               final Media feedModel = feedModels.get(i);
                                final List<String> displayUrls = getDisplayUrl(feedModel);
                                if (displayUrls.contains(url)) {
                                    feedAdapter.notifyItemChanged(i);
@@ -231,19 +231,19 @@ public class PostsRecyclerView extends RecyclerView {
                    });
     }
 
-    private List<String> getDisplayUrl(final FeedModel feedModel) {
+    private List<String> getDisplayUrl(final Media feedModel) {
         List<String> urls = Collections.emptyList();
-        switch (feedModel.getItemType()) {
+        switch (feedModel.getMediaType()) {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO:
-                urls = Collections.singletonList(feedModel.getDisplayUrl());
+                urls = Collections.singletonList(ResponseBodyUtils.getImageUrl(feedModel));
                 break;
             case MEDIA_TYPE_SLIDER:
-                final List<PostChild> sliderItems = feedModel.getSliderItems();
+                final List<Media> sliderItems = feedModel.getCarouselMedia();
                 if (sliderItems != null) {
                     final ImmutableList.Builder<String> builder = ImmutableList.builder();
-                    for (final PostChild child : sliderItems) {
-                        builder.add(child.getDisplayUrl());
+                    for (final Media child : sliderItems) {
+                        builder.add(ResponseBodyUtils.getImageUrl(child));
                     }
                     urls = builder.build();
                 }

@@ -3,6 +3,7 @@ package awais.instagrabber.repositories.responses.directmessages;
 import java.util.List;
 
 import awais.instagrabber.models.enums.RavenMediaViewMode;
+import awais.instagrabber.repositories.responses.Media;
 
 public class DirectItemVisualMedia {
     private final long urlExpireAtSecs;
@@ -12,7 +13,7 @@ public class DirectItemVisualMedia {
     private final int seenCount;
     private final long replayExpiringAtUs;
     private final RavenExpiringMediaActionSummary expiringMediaActionSummary;
-    private final DirectItemMedia media;
+    private final Media media;
 
     public DirectItemVisualMedia(final long urlExpireAtSecs,
                                  final int playbackDurationSecs,
@@ -21,7 +22,7 @@ public class DirectItemVisualMedia {
                                  final int seenCount,
                                  final long replayExpiringAtUs,
                                  final RavenExpiringMediaActionSummary expiringMediaActionSummary,
-                                 final DirectItemMedia media) {
+                                 final Media media) {
         this.urlExpireAtSecs = urlExpireAtSecs;
         this.playbackDurationSecs = playbackDurationSecs;
         this.seenUserIds = seenUserIds;
@@ -60,7 +61,7 @@ public class DirectItemVisualMedia {
         return expiringMediaActionSummary;
     }
 
-    public DirectItemMedia getMedia() {
+    public Media getMedia() {
         return media;
     }
 }

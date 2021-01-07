@@ -15,35 +15,32 @@ import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmMediaShareBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.repositories.responses.directmessages.Caption;
+import awais.instagrabber.repositories.responses.Caption;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemClip;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemFelixShare;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmMediaShareBinding binding;
-    private final int maxWidth;
     private final RoundingParams incomingRoundingParams;
     private final RoundingParams outgoingRoundingParams;
 
     public DirectItemMediaShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmMediaShareBinding binding,
-                                          final ProfileModel currentUser,
+                                          final User currentUser,
                                           final DirectThread thread,
                                           final MentionClickListener mentionClickListener,
                                           final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        maxWidth = windowWidth - margin - dmRadiusSmall;
         incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
         outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
         setItemView(binding.getRoot());
@@ -59,7 +56,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         binding.topBg.setBackgroundResource(messageDirection == MessageDirection.INCOMING
                                             ? R.drawable.bg_media_share_top_incoming
                                             : R.drawable.bg_media_share_top_outgoing);
-        DirectItemMedia media = null;
+        Media media = null;
         if (item.getItemType() == DirectItemType.MEDIA_SHARE) {
             media = item.getMediaShare();
         } else if (item.getItemType() == DirectItemType.CLIP) {
@@ -72,7 +69,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
             media = felixShare.getVideo();
         }
         if (media == null) return;
-        final DirectUser user = media.getUser();
+        final User user = media.getUser();
         if (user != null) {
             binding.username.setVisibility(View.VISIBLE);
             binding.profilePic.setVisibility(View.VISIBLE);

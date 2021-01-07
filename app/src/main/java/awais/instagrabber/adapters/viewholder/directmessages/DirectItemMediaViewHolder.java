@@ -13,12 +13,12 @@ import com.facebook.drawee.generic.RoundingParams;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmMediaBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.ImageVersions2;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.ImageVersions2;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
@@ -30,7 +30,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
 
     public DirectItemMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                      @NonNull final LayoutDmMediaBinding binding,
-                                     final ProfileModel currentUser,
+                                     final User currentUser,
                                      final DirectThread thread,
                                      final MentionClickListener mentionClickListener,
                                      final View.OnClickListener onClickListener) {
@@ -48,7 +48,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                                                   .setRoundingParams(roundingParams)
                                                   .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
                                                   .build());
-        final DirectItemMedia media = directItemModel.getMedia();
+        final Media media = directItemModel.getMedia();
         final MediaItemType modelMediaType = media.getMediaType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER
                                        ? View.VISIBLE

@@ -9,7 +9,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmTextBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 
@@ -19,7 +19,7 @@ public class DirectItemDefaultViewHolder extends DirectItemViewHolder {
 
     public DirectItemDefaultViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                        @NonNull final LayoutDmTextBinding binding,
-                                       final ProfileModel currentUser,
+                                       final User currentUser,
                                        final DirectThread thread,
                                        final MentionClickListener mentionClickListener,
                                        final View.OnClickListener onClickListener) {

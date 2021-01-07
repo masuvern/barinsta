@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters.viewholder;
 
-import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,7 +8,7 @@ import java.util.List;
 
 import awais.instagrabber.databinding.ItemFollowBinding;
 import awais.instagrabber.models.FollowModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 
 public final class FollowsViewHolder extends RecyclerView.ViewHolder {
 
@@ -20,18 +19,18 @@ public final class FollowsViewHolder extends RecyclerView.ViewHolder {
         this.binding = binding;
     }
 
-    public void bind(final ProfileModel model,
+    public void bind(final User model,
                      final List<Long> admins,
                      final View.OnClickListener onClickListener) {
         if (model == null) return;
         itemView.setTag(model);
         itemView.setOnClickListener(onClickListener);
         binding.tvUsername.setText(model.getUsername());
-        binding.tvFullName.setText(model.getName());
-        if (admins != null && admins.contains(Long.parseLong(model.getId()))) {
+        binding.tvFullName.setText(model.getFullName());
+        if (admins != null && admins.contains(model.getPk())) {
             binding.isAdmin.setVisibility(View.VISIBLE);
         }
-        binding.ivProfilePic.setImageURI(model.getSdProfilePic());
+        binding.ivProfilePic.setImageURI(model.getProfilePicUrl());
     }
 
     public void bind(final FollowModel model,

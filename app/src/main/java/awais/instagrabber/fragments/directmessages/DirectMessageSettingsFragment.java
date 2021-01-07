@@ -39,8 +39,8 @@ import awais.instagrabber.databinding.FragmentDirectMessagesSettingsBinding;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment.Option;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
 import awais.instagrabber.viewmodels.DirectSettingsViewModel;
 
@@ -50,7 +50,7 @@ public class DirectMessageSettingsFragment extends Fragment {
     private FragmentDirectMessagesSettingsBinding binding;
     private DirectSettingsViewModel viewModel;
     private DirectUsersAdapter usersAdapter;
-    private List<Option<String>> options;
+    // private List<Option<String>> options;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -171,14 +171,14 @@ public class DirectMessageSettingsFragment extends Fragment {
             final MutableLiveData<Object> resultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
             resultLiveData.observe(getViewLifecycleOwner(), result -> {
                 LiveData<Resource<Object>> detailsChangeResourceLiveData = null;
-                if ((result instanceof DirectUser)) {
+                if ((result instanceof User)) {
                     // Log.d(TAG, "result: " + result);
-                    detailsChangeResourceLiveData = viewModel.addMembers(Collections.singleton((DirectUser) result));
+                    detailsChangeResourceLiveData = viewModel.addMembers(Collections.singleton((User) result));
                 } else if ((result instanceof Set)) {
                     try {
                         // Log.d(TAG, "result: " + result);
                         //noinspection unchecked
-                        detailsChangeResourceLiveData = viewModel.addMembers((Set<DirectUser>) result);
+                        detailsChangeResourceLiveData = viewModel.addMembers((Set<User>) result);
                     } catch (Exception e) {
                         Log.e(TAG, "search users result: ", e);
                     }
@@ -221,12 +221,12 @@ public class DirectMessageSettingsFragment extends Fragment {
             final NavDestination currentDestination = navController.getCurrentDestination();
             if (currentDestination == null) return;
             if (currentDestination.getId() != R.id.directMessagesSettingsFragment) return;
-            final Pair<List<DirectUser>, List<DirectUser>> users = viewModel.getUsers().getValue();
+            final Pair<List<User>, List<User>> users = viewModel.getUsers().getValue();
             final long[] currentUserIds;
             if (users != null && users.first != null) {
-                final List<DirectUser> currentMembers = users.first;
+                final List<User> currentMembers = users.first;
                 currentUserIds = currentMembers.stream()
-                                               .mapToLong(DirectUser::getPk)
+                                               .mapToLong(User::getPk)
                                                .sorted()
                                                .toArray();
             } else {
@@ -246,7 +246,7 @@ public class DirectMessageSettingsFragment extends Fragment {
         final Context context = getContext();
         if (context == null) return;
         binding.users.setLayoutManager(new LinearLayoutManager(context));
-        final DirectUser inviter = viewModel.getThread().getInviter();
+        final User inviter = viewModel.getThread().getInviter();
         usersAdapter = new DirectUsersAdapter(
                 inviter != null ? inviter.getPk() : -1,
                 (position, user, selected) -> {

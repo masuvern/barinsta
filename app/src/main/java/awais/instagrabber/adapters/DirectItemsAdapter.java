@@ -46,8 +46,8 @@ import awais.instagrabber.databinding.LayoutDmReelShareBinding;
 import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
 import awais.instagrabber.databinding.LayoutDmTextBinding;
 import awais.instagrabber.databinding.LayoutDmVoiceMediaBinding;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.DirectItemType;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.DateUtils;
@@ -55,7 +55,7 @@ import awais.instagrabber.utils.DateUtils;
 public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = DirectItemsAdapter.class.getSimpleName();
 
-    private final ProfileModel currentUser;
+    private final User currentUser;
     private DirectThread thread;
     private final AsyncListDiffer<DirectItemOrHeader> differ;
     private List<DirectItem> items;
@@ -98,7 +98,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     };
 
-    public DirectItemsAdapter(@NonNull final ProfileModel currentUser,
+    public DirectItemsAdapter(@NonNull final User currentUser,
                               @NonNull final DirectThread thread) {
         this.currentUser = currentUser;
         this.thread = thread;

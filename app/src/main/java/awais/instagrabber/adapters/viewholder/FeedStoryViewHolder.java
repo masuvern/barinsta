@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import awais.instagrabber.adapters.FeedStoriesAdapter;
 import awais.instagrabber.databinding.ItemHighlightBinding;
 import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 
 public final class FeedStoryViewHolder extends RecyclerView.ViewHolder {
 
@@ -28,10 +28,10 @@ public final class FeedStoryViewHolder extends RecyclerView.ViewHolder {
             if (listener != null) listener.onFeedStoryLongClick(model, position);
             return true;
         });
-        final ProfileModel profileModel = model.getProfileModel();
+        final User profileModel = model.getProfileModel();
         binding.title.setText(profileModel.getUsername());
         binding.title.setAlpha(model.isFullyRead() ? 0.5F : 1.0F);
-        binding.icon.setImageURI(profileModel.getSdProfilePic());
+        binding.icon.setImageURI(profileModel.getProfilePicUrl());
         binding.icon.setAlpha(model.isFullyRead() ? 0.5F : 1.0F);
     }
 }

@@ -10,7 +10,7 @@ import awais.instagrabber.utils.Utils;
 
 public final class NotificationModel {
     private final String id;
-    private final String userId;
+    private final long userId;
     private final String username;
     private final String profilePicUrl;
     private final String postId;
@@ -22,7 +22,7 @@ public final class NotificationModel {
     public NotificationModel(final String id,
                              final String text,
                              final long timestamp,
-                             final String userId,
+                             final long userId,
                              final String username,
                              final String profilePicUrl,
                              final String postId,
@@ -56,7 +56,7 @@ public final class NotificationModel {
         return Utils.datetimeParser.format(new Date(timestamp * 1000L));
     }
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 

@@ -16,7 +16,7 @@ import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -26,7 +26,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class AppStateViewModel extends AndroidViewModel {
     private static final String TAG = AppStateViewModel.class.getSimpleName();
 
-    private final MutableLiveData<ProfileModel> currentUser = new MutableLiveData<>();
+    private final MutableLiveData<User> currentUser = new MutableLiveData<>();
     private final String cookie;
     private final boolean isLoggedIn;
 
@@ -37,7 +37,7 @@ public class AppStateViewModel extends AndroidViewModel {
         super(application);
         Log.d(TAG, "AppStateViewModel: constructor");
         cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         if (!isLoggedIn) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(application));
         setCurrentUser();
@@ -53,7 +53,7 @@ public class AppStateViewModel extends AndroidViewModel {
         fetchUsername(usernameListener);
     }
 
-    public LiveData<ProfileModel> getCurrentUser() {
+    public LiveData<User> getCurrentUser() {
         return currentUser;
     }
 
@@ -62,8 +62,8 @@ public class AppStateViewModel extends AndroidViewModel {
             usernameListener.onResult(username);
             return;
         }
-        final String uid = CookieUtils.getUserIdFromCookie(cookie);
-        if (uid == null) return;
+        final long uid = CookieUtils.getUserIdFromCookie(cookie);
+        if (uid <= 0) return;
         accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
             @Override
             public void onSuccess(@NonNull final Account account) {
@@ -84,11 +84,7 @@ public class AppStateViewModel extends AndroidViewModel {
         if (TextUtils.isEmpty(username)) return;
         new ProfileFetcher(
                 username.trim().substring(1),
-                profileModel -> currentUser.postValue(profileModel)
+                currentUser::postValue
         ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    public void refreshCurrentUser() {
-
     }
 }

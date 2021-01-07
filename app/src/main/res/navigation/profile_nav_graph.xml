@@ -20,8 +20,7 @@
             app:nullable="false" />
         <argument
             android:name="postUserId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/likes_nav_graph" />
@@ -69,8 +68,7 @@
         app:destination="@id/location_nav_graph">
         <argument
             android:name="locationId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/notification_viewer_nav_graph" />
@@ -118,8 +116,7 @@
             app:nullable="false" />
         <argument
             android:name="profileId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
         <argument
             android:name="type"
             app:argType="awais.instagrabber.models.enums.PostItemType"
@@ -132,8 +129,7 @@
         tools:layout="@layout/fragment_followers_viewer">
         <argument
             android:name="profileId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
         <argument
             android:name="isFollowersList"
             app:argType="boolean"
@@ -173,8 +169,7 @@
             app:argType="boolean" />
         <argument
             android:name="profileId"
-            app:argType="string"
-            app:nullable="true" />
+            app:argType="long" />
         <argument
             android:name="username"
             app:argType="string"

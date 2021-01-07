@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmLinkBinding;
 import awais.instagrabber.interfaces.MentionClickListener;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemLink;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemLinkContext;
@@ -21,7 +21,7 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
 
     public DirectItemLinkViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                     final LayoutDmLinkBinding binding,
-                                    final ProfileModel currentUser,
+                                    final User currentUser,
                                     final DirectThread thread,
                                     final MentionClickListener mentionClickListener,
                                     final View.OnClickListener onClickListener) {

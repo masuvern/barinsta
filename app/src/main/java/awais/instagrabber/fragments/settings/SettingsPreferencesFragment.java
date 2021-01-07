@@ -40,7 +40,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         final Context context = getContext();
         if (context == null) return;
         final PreferenceCategory generalCategory = new PreferenceCategory(context);
@@ -84,12 +84,12 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
         }
-//        else {
-//            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
-//            screen.addPreference(anonUsersPreferenceCategory);
-//            anonUsersPreferenceCategory.setIconSpaceReserved(false);
-//            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
-//        }
+        //        else {
+        //            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
+        //            screen.addPreference(anonUsersPreferenceCategory);
+        //            anonUsersPreferenceCategory.setIconSpaceReserved(false);
+        //            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
+        //        }
     }
 
     private Preference getLanguagePreference() {

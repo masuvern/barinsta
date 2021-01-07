@@ -5,9 +5,13 @@ import androidx.annotation.Nullable;
 import java.io.Serializable;
 
 public final class FollowModel implements Serializable {
-    private final String id, username, fullName, profilePicUrl;
+    private final String id;
+    private final String username;
+    private final String fullName;
+    private final String profilePicUrl;
     private String endCursor;
-    private boolean hasNextPage, isShown = true;
+    private boolean hasNextPage;
+    private boolean isShown = true;
 
     public FollowModel(final String id, final String username, final String fullName, final String profilePicUrl) {
         this.id = id;

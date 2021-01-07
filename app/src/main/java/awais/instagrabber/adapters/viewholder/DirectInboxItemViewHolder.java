@@ -22,13 +22,13 @@ import awais.instagrabber.adapters.DirectMessageInboxAdapter.OnItemClickListener
 import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReelShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVisualMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
-import awais.instagrabber.repositories.responses.directmessages.DirectUser;
 import awais.instagrabber.repositories.responses.directmessages.RavenExpiringMediaActionSummary;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -72,12 +72,12 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setProfilePics(@NonNull final DirectThread thread) {
-        final List<DirectUser> users = thread.getUsers();
+        final List<User> users = thread.getUsers();
         if (users.size() > 1) {
             binding.profilePic.setVisibility(View.GONE);
             binding.multiPicContainer.setVisibility(View.VISIBLE);
             for (int i = 0; i < Math.min(3, users.size()); ++i) {
-                final DirectUser user = users.get(i);
+                final User user = users.get(i);
                 final SimpleDraweeView view = multipleProfilePics.get(i);
                 view.setVisibility(user == null ? View.GONE : View.VISIBLE);
                 if (user == null) return;
@@ -323,17 +323,17 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
         return subtitle;
     }
 
-    private String getUsername(final List<DirectUser> users,
+    private String getUsername(final List<User> users,
                                final long userId,
                                final long viewerId) {
         if (userId == viewerId) {
             return "You";
         }
-        final Optional<DirectUser> senderOptional = users.stream()
-                                                         .filter(Objects::nonNull)
-                                                         .filter(user -> user.getPk() == userId)
-                                                         .findFirst();
-        return senderOptional.map(DirectUser::getUsername).orElse(null);
+        final Optional<User> senderOptional = users.stream()
+                                                   .filter(Objects::nonNull)
+                                                   .filter(user -> user.getPk() == userId)
+                                                   .findFirst();
+        return senderOptional.map(User::getUsername).orElse(null);
     }
 
     private void setDateTime(@NonNull final DirectItem item) {

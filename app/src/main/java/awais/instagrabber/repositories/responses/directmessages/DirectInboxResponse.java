@@ -1,20 +1,22 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import awais.instagrabber.repositories.responses.User;
+
 public class DirectInboxResponse {
-    private final DirectUser viewer;
+    private final User viewer;
     private final DirectInbox inbox;
     private final long seqId;
     private final long snapshotAtMs;
     private final int pendingRequestsTotal;
-    private final DirectUser mostRecentInviter;
+    private final User mostRecentInviter;
     private final String status;
 
-    public DirectInboxResponse(final DirectUser viewer,
+    public DirectInboxResponse(final User viewer,
                                final DirectInbox inbox,
                                final long seqId,
                                final long snapshotAtMs,
                                final int pendingRequestsTotal,
-                               final DirectUser mostRecentInviter,
+                               final User mostRecentInviter,
                                final String status) {
         this.viewer = viewer;
         this.inbox = inbox;
@@ -25,7 +27,7 @@ public class DirectInboxResponse {
         this.status = status;
     }
 
-    public DirectUser getViewer() {
+    public User getViewer() {
         return viewer;
     }
 
@@ -45,7 +47,7 @@ public class DirectInboxResponse {
         return pendingRequestsTotal;
     }
 
-    public DirectUser getMostRecentInviter() {
+    public User getMostRecentInviter() {
         return mostRecentInviter;
     }
 

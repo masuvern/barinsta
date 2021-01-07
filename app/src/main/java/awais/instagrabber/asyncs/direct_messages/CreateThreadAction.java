@@ -20,10 +20,10 @@ public class CreateThreadAction extends AsyncTask<Void, Void, String> {
     private static final String TAG = "CommentAction";
 
     private final String cookie;
-    private final String userId;
+    private final long userId;
     private final OnTaskCompleteListener onTaskCompleteListener;
 
-    public CreateThreadAction(final String cookie, final String userId, final OnTaskCompleteListener onTaskCompleteListener) {
+    public CreateThreadAction(final String cookie, final long userId, final OnTaskCompleteListener onTaskCompleteListener) {
         this.cookie = cookie;
         this.userId = userId;
         this.onTaskCompleteListener = onTaskCompleteListener;

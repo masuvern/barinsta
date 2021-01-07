@@ -1,13 +1,15 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
-public class DirectItemFelixShare {
-    private final DirectItemMedia video;
+import awais.instagrabber.repositories.responses.Media;
 
-    public DirectItemFelixShare(final DirectItemMedia video) {
+public class DirectItemFelixShare {
+    private final Media video;
+
+    public DirectItemFelixShare(final Media video) {
         this.video = video;
     }
 
-    public DirectItemMedia getVideo() {
+    public Media getVideo() {
         return video;
     }
 }
