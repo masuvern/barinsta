@@ -64,7 +64,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import awais.instagrabber.R;
-import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.SliderCallbackAdapter;
 import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.adapters.viewholder.SliderVideoViewHolder;
@@ -228,7 +227,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.PostViewV2Style);
-        final MainActivity fragmentActivity = (MainActivity) getActivity();
         mediaService = MediaService.getInstance();
         final Bundle arguments = getArguments();
         if (arguments == null) return;
@@ -241,7 +239,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             return;
         }
         feedModel = (Media) feedModelSerializable;
-        if (feedModel == null) return;
         if (feedModel.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
         }
@@ -700,8 +697,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         binding.title.setOnClickListener(v -> navigateToProfile("@" + profileModel.getUsername()));
         binding.righttitle.setOnClickListener(v -> navigateToProfile("@" + profileModel.getUsername()));
         final Location location = feedModel.getLocation();
-        final String locationName = location != null ? location.getName() : "";
-        if (!TextUtils.isEmpty(locationName)) {
+        if (location != null) {
+            final String locationName = location.getName();
+            if (TextUtils.isEmpty(locationName)) return;
             binding.subtitle.setText(locationName);
             binding.subtitle.setVisibility(View.VISIBLE);
             binding.subtitle.setOnClickListener(v -> {
@@ -737,28 +735,31 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                         .setView(input)
                         .setPositiveButton(R.string.confirm, (d, w) -> {
                             binding.editCaption.setVisibility(View.GONE);
-                            mediaService.editCaption(
-                                    feedModel.getPk(),
-                                    userId,
-                                    input.getText().toString(),
-                                    CookieUtils.getCsrfTokenFromCookie(COOKIE),
-                                    new ServiceCallback<Boolean>() {
-                                        @Override
-                                        public void onSuccess(final Boolean result) {
-                                            binding.editCaption.setVisibility(View.VISIBLE);
-                                            if (result) {
-                                                feedModel.setPostCaption(input.getText().toString());
-                                                binding.caption.setText(input.getText().toString());
-                                            } else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                        }
+                            final String csrfToken = CookieUtils.getCsrfTokenFromCookie(COOKIE);
+                            if (csrfToken != null) {
+                                mediaService.editCaption(
+                                        feedModel.getPk(),
+                                        userId,
+                                        input.getText().toString(),
+                                        csrfToken,
+                                        new ServiceCallback<Boolean>() {
+                                            @Override
+                                            public void onSuccess(final Boolean result) {
+                                                binding.editCaption.setVisibility(View.VISIBLE);
+                                                if (result) {
+                                                    feedModel.setPostCaption(input.getText().toString());
+                                                    binding.caption.setText(input.getText().toString());
+                                                } else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
 
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            Log.e(TAG, "Error editing caption", t);
-                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                            binding.editCaption.setVisibility(View.VISIBLE);
-                                        }
-                                    });
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                Log.e(TAG, "Error editing caption", t);
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                binding.editCaption.setVisibility(View.VISIBLE);
+                                            }
+                                        });
+                            }
                         })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
@@ -798,28 +799,32 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) return;
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
-        if (caption.getPk() <= 0)
-            binding.translateTitle.setVisibility(View.GONE);
-        else binding.translateTitle.setOnClickListener(v -> {
-            mediaService.translate(String.valueOf(caption.getPk()), "1", new ServiceCallback<String>() {
-                @Override
-                public void onSuccess(final String result) {
-                    if (TextUtils.isEmpty(result)) {
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    binding.translateTitle.setOnClickListener(null);
-                    binding.translatedCaption.setVisibility(View.VISIBLE);
-                    binding.translatedCaption.setText(result);
-                }
+        if (caption != null) {
+            if (caption.getPk() <= 0) {
+                binding.translateTitle.setVisibility(View.GONE);
+            } else {
+                binding.translateTitle.setOnClickListener(v -> {
+                    mediaService.translate(String.valueOf(caption.getPk()), "1", new ServiceCallback<String>() {
+                        @Override
+                        public void onSuccess(final String result) {
+                            if (TextUtils.isEmpty(result)) {
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            binding.translateTitle.setOnClickListener(null);
+                            binding.translatedCaption.setVisibility(View.VISIBLE);
+                            binding.translatedCaption.setText(result);
+                        }
 
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error translating comment", t);
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error translating comment", t);
+                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                });
+            }
+        }
         binding.captionToggle.setOnClickListener(v -> {
             if (bottomSheetBehavior == null) return;
             switch (bottomSheetBehavior.getState()) {
@@ -1136,16 +1141,18 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 videoUrl = videoVersion.getUrl();
             }
         }
-        videoPlayerViewHelper = new VideoPlayerViewHelper(
-                binding.getRoot().getContext(),
-                binding.videoPost,
-                videoUrl,
-                vol,
-                aspectRatio,
-                ResponseBodyUtils.getThumbUrl(feedModel),
-                true,
-                binding.playerControls,
-                videoPlayerCallback);
+        if (videoUrl != null) {
+            videoPlayerViewHelper = new VideoPlayerViewHelper(
+                    binding.getRoot().getContext(),
+                    binding.videoPost,
+                    videoUrl,
+                    vol,
+                    aspectRatio,
+                    ResponseBodyUtils.getThumbUrl(feedModel),
+                    true,
+                    binding.playerControls,
+                    videoPlayerCallback);
+        }
     }
 
     private void enablePlayerControls(final boolean enable) {
@@ -1175,7 +1182,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         hideCaption();
         // previously invisible view
         View view = binding.playerControls.getRoot();
-        if (view != null && view.getVisibility() == View.VISIBLE) {
+        if (view.getVisibility() == View.VISIBLE) {
             return;
         }
         if (!ViewCompat.isAttachedToWindow(view)) {
@@ -1202,7 +1209,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
     private void hidePlayerControls() {
         // previously visible view
         final View view = binding.playerControls.getRoot();
-        if (view != null && view.getVisibility() == View.GONE) {
+        if (view.getVisibility() == View.GONE) {
             return;
         }
         if (!ViewCompat.isAttachedToWindow(view)) {
