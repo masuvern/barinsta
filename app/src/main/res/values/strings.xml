@@ -319,7 +319,7 @@
     <string name="save_unsuccessful">Save unsuccessful</string>
     <string name="save_remove_unsuccessful">Remove unsuccessful</string>
     <string name="downloading">Downloading…</string>
-    <string name="downloader_downloading_child">Download item %d of %d</string>
+    <string name="downloader_downloading_child">Download item %1$d of %2$d</string>
     <string name="delete">Delete</string>
     <string name="comment">Comment</string>
     <string name="layout">Layout</string>

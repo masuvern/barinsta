@@ -141,6 +141,10 @@
             app:argType="string"
             app:nullable="false" />
 
+        <argument
+            android:name="title"
+            app:argType="string" />
+
         <action
             android:id="@+id/action_settings_to_inbox"
             app:destination="@id/directMessagesInboxFragment"

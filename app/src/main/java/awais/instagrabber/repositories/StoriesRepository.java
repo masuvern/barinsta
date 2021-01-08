@@ -15,7 +15,7 @@ import retrofit2.http.Url;
 
 public interface StoriesRepository {
     @GET("/api/v1/media/{mediaId}/info/")
-    Call<String> fetch(@Path("mediaId") final String mediaId);
+    Call<String> fetch(@Path("mediaId") final long mediaId);
     // this one is the same as MediaRepository.fetch BUT you need to make sure it's a story
 
     @GET("/api/v1/feed/reels_tray/")

@@ -74,35 +74,8 @@
         android:label="StoryViewerFragment"
         tools:layout="@layout/fragment_story_viewer">
         <argument
-            android:name="feedStoryIndex"
-            app:argType="integer"
-            app:nullable="false" />
-        <argument
-            android:name="highlight"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isHashtag"
-            app:argType="boolean" />
-        <argument
-            android:name="isLoc"
-            app:argType="boolean" />
-        <argument
-            android:name="profileId"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="username"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isArchive"
-            app:argType="boolean"
-            app:nullable="false" />
-        <argument
-            android:name="isNotification"
-            app:argType="boolean"
-            app:nullable="false" />
+            android:name="options"
+            app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
     <action
         android:id="@+id/action_global_hashTagFragment"

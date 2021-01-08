@@ -34,7 +34,7 @@ public class LocationService extends BaseService {
         return instance;
     }
 
-    public void fetchPosts(@NonNull final String locationId,
+    public void fetchPosts(final long locationId,
                            final String maxId,
                            final ServiceCallback<PostsFetchResponse> callback) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();

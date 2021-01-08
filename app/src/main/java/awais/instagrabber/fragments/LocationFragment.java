@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -61,6 +60,7 @@ import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -72,6 +72,7 @@ import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
+import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -396,7 +397,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     private void setupLocationDetails() {
-        final String locationId = locationModel.getId();
+        final long locationId = locationModel.getId();
         // binding.swipeRefreshLayout.setRefreshing(true);
         locationDetailsBinding.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
         final String postCount = String.valueOf(locationModel.getPostCount());
@@ -416,15 +417,29 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         if (TextUtils.isEmpty(biography)) {
             locationDetailsBinding.locationBiography.setVisibility(View.GONE);
-        } else if (TextUtils.hasMentions(biography)) {
-            locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
-            biography = TextUtils.getMentionText(biography);
-            locationDetailsBinding.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
-            // binding.locationBiography.setMentionClickListener(mentionClickListener);
         } else {
             locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
             locationDetailsBinding.locationBiography.setText(biography);
-            locationDetailsBinding.locationBiography.setMentionClickListener(null);
+            locationDetailsBinding.locationBiography.addOnHashtagListener(autoLinkItem -> {
+                final NavController navController = NavHostFragment.findNavController(this);
+                final Bundle bundle = new Bundle();
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                bundle.putString(ARG_HASHTAG, originalText);
+                navController.navigate(R.id.action_global_hashTagFragment, bundle);
+            });
+            locationDetailsBinding.locationBiography.addOnMentionClickListener(autoLinkItem -> {
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                navigateToProfile(originalText);
+            });
+            locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
+                                                                                                                    autoLinkItem.getOriginalText()
+                                                                                                                                .trim()));
+            locationDetailsBinding.locationBiography
+                    .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+            locationDetailsBinding.locationBiography.setOnLongClickListener(v -> {
+                Utils.copyText(getContext(), biography);
+                return true;
+            });
         }
 
         if (!locationModel.getGeo().startsWith("geo:0.0,0.0?z=17")) {
@@ -452,7 +467,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(getContext());
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
+        favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
             @Override
             public void onSuccess(final Favorite result) {
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
@@ -460,7 +475,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 locationDetailsBinding.favChip.setText(R.string.favorite_short);
                 favoriteRepository.insertOrUpdateFavorite(new Favorite(
                         result.getId(),
-                        locationId,
+                        String.valueOf(locationId),
                         FavoriteType.LOCATION,
                         locationModel.getName(),
                         locationModel.getSdProfilePic(),
@@ -482,10 +497,10 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
         });
         locationDetailsBinding.favChip.setOnClickListener(v -> {
-            favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
+            favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
                 @Override
                 public void onSuccess(final Favorite result) {
-                    favoriteRepository.deleteFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Void>() {
+                    favoriteRepository.deleteFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
                             locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
@@ -502,7 +517,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 public void onDataNotAvailable() {
                     favoriteRepository.insertOrUpdateFavorite(new Favorite(
                             0,
-                            locationId,
+                            String.valueOf(locationId),
                             FavoriteType.LOCATION,
                             locationModel.getName(),
                             locationModel.getSdProfilePic(),
@@ -525,7 +540,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (hasStories) {
                 // show stories
                 final NavDirections action = LocationFragmentDirections
-                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName(), false, false);
+                        .actionLocationFragmentToStoryViewerFragment(StoryViewerOptions.forLocation(locationId, locationModel.getName()));
                 NavHostFragment.findNavController(this).navigate(action);
             }
         });
@@ -542,27 +557,24 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchStories() {
         if (isLoggedIn) {
             storiesFetching = true;
-            storiesService.getUserStory(String.valueOf(locationId),
-                                        null,
-                                        true,
-                                        false,
-                                        false,
-                                        new ServiceCallback<List<StoryModel>>() {
-                                            @Override
-                                            public void onSuccess(final List<StoryModel> storyModels) {
-                                                if (storyModels != null && !storyModels.isEmpty()) {
-                                                    locationDetailsBinding.mainLocationImage.setStoriesBorder();
-                                                    hasStories = true;
-                                                }
-                                                storiesFetching = false;
-                                            }
+            storiesService.getUserStory(
+                    StoryViewerOptions.forLocation(locationId, locationModel.getName()),
+                    new ServiceCallback<List<StoryModel>>() {
+                        @Override
+                        public void onSuccess(final List<StoryModel> storyModels) {
+                            if (storyModels != null && !storyModels.isEmpty()) {
+                                locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
+                                hasStories = true;
+                            }
+                            storiesFetching = false;
+                        }
 
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                Log.e(TAG, "Error", t);
-                                                storiesFetching = false;
-                                            }
-                                        });
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error", t);
+                            storiesFetching = false;
+                        }
+                    });
         }
     }
 

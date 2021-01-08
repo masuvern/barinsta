@@ -6,10 +6,10 @@ labels: bug
 assignees: ''
 ---
 
-<!-- FOLLOW THIS FORMAT -->
+<!-- If you choose not to follow this format, you should erase the entire body. -->
 
 - [ ] My app is on the latest version. I understand that any other version is not supported.
-- [ ] I have read [the FAQ](https://instagrabber.austinhuang.me/faq).
+- [ ] I have read [the FAQ](https://barinsta.austinhuang.me/en/latest/faq).
 
 <!--
 Describe the bug here. Don't stress too much, but do include the key points.
@@ -18,11 +18,9 @@ Describe the bug here. Don't stress too much, but do include the key points.
 ## Steps
 
 <!--
-DETAILED Steps to reproduce the behaviour.
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. ...
+2. ...
+3. See error...
 -->
 
 ## Environment

@@ -62,7 +62,7 @@ public class NewsService extends BaseService {
                 try {
                     final JSONObject jsonObject = new JSONObject(body);
                     final JSONArray oldStories = jsonObject.getJSONArray("old_stories"),
-                                    newStories = jsonObject.getJSONArray("new_stories");
+                            newStories = jsonObject.getJSONArray("new_stories");
 
                     for (int j = 0; j < newStories.length(); ++j) {
                         final NotificationModel newsItem = parseNewsItem(newStories.getJSONObject(j));
@@ -105,7 +105,7 @@ public class NewsService extends BaseService {
                             .getJSONObject("graphql")
                             .getJSONObject("user");
                     final JSONObject ewaf = page.getJSONObject("activity_feed")
-                            .optJSONObject("edge_web_activity_feed");
+                                                .optJSONObject("edge_web_activity_feed");
                     final JSONObject efr = page.optJSONObject("edge_follow_requests");
                     JSONObject data;
                     JSONArray media;
@@ -127,8 +127,9 @@ public class NewsService extends BaseService {
                                     user.getLong("id"),
                                     user.getString("username"),
                                     user.getString("profile_pic_url"),
-                                    !data.isNull("media") ? data.getJSONObject("media").getString("id") : null,
-                                    !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null, notificationType));
+                                    data.has("media") ? data.getJSONObject("media").getLong("id") : 0,
+                                    data.has("media") ? data.getJSONObject("media").getString("thumbnail_src") : null,
+                                    notificationType));
                         }
                     }
 
@@ -146,7 +147,7 @@ public class NewsService extends BaseService {
                                     data.getLong(Constants.EXTRAS_ID),
                                     data.getString("username"),
                                     data.getString("profile_pic_url"),
-                                    null,
+                                    0,
                                     null, NotificationType.REQUEST));
                         }
                     }
@@ -169,7 +170,7 @@ public class NewsService extends BaseService {
         final String type = itemJson.getString("story_type");
         final NotificationType notificationType = NotificationType.valueOfType(type);
         if (notificationType == null) {
-            if (BuildConfig.DEBUG) Log.d("austin_debug", "unhandled news type: "+itemJson);
+            if (BuildConfig.DEBUG) Log.d("austin_debug", "unhandled news type: " + itemJson);
             return null;
         }
         final JSONObject data = itemJson.getJSONObject("args");
@@ -180,7 +181,7 @@ public class NewsService extends BaseService {
                 data.getLong("profile_id"),
                 data.getString("profile_name"),
                 data.getString("profile_image"),
-                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("id") : null,
+                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getLong("id") : 0,
                 !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("image") : null,
                 notificationType);
     }
@@ -254,8 +255,8 @@ public class NewsService extends BaseService {
                 data.getLong("pk"),
                 data.getString("username"),
                 data.getString("profile_pic_url"),
+                0,
                 data.getString("full_name"), // just borrowing this field
-                null,
                 NotificationType.AYML);
     }
 }

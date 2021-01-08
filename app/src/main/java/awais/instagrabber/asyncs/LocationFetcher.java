@@ -52,8 +52,7 @@ public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> 
                 //     final JSONArray edges = timelineMedia.getJSONArray("edges");
                 // }
                 result = new LocationModel(
-                        location.getString(Constants.EXTRAS_ID),
-                        location.getString("slug"),
+                        location.getLong(Constants.EXTRAS_ID),
                         location.getString("name"),
                         location.getString("blurb"),
                         location.getString("website"),

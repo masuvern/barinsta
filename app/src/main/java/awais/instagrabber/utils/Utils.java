@@ -140,11 +140,6 @@ public final class Utils {
         return mimeType.toLowerCase();
     }
 
-    public static void errorFinish(@NonNull final Activity activity) {
-        Toast.makeText(activity, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-        activity.finish();
-    }
-
     public static SimpleCache getSimpleCacheInstance(final Context context) {
         if (context == null) {
             return null;

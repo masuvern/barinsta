@@ -1,9 +1,7 @@
 package awais.instagrabber.adapters.viewholder;
 
-import android.text.Spannable;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -54,7 +52,7 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
                 subtext = model.getText();
                 break;
             case AYML:
-                subtext = model.getPostId();
+                subtext = model.getPreviewPic();
                 break;
         }
         binding.tvSubComment.setText(model.getType() == NotificationType.AYML ? model.getText() : subtext);
@@ -62,8 +60,7 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
             binding.tvComment.setText(subtext);
             binding.tvComment.setVisibility(TextUtils.isEmpty(subtext) ? View.GONE : View.VISIBLE);
             binding.tvSubComment.setVisibility(model.getType() == NotificationType.AYML ? View.VISIBLE : View.GONE);
-        }
-        else if (text != -1) {
+        } else if (text != -1) {
             binding.tvComment.setText(text);
             binding.tvSubComment.setVisibility(subtext == null ? View.GONE : View.VISIBLE);
         }
@@ -81,8 +78,7 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
 
         if (model.getType() == NotificationType.AYML) {
             binding.ivPreviewPic.setVisibility(View.GONE);
-        }
-        else if (TextUtils.isEmpty(model.getPreviewPic())) {
+        } else if (TextUtils.isEmpty(model.getPreviewPic())) {
             binding.ivPreviewPic.setVisibility(View.INVISIBLE);
         } else {
             binding.ivPreviewPic.setVisibility(View.VISIBLE);

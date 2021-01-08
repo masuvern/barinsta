@@ -15,7 +15,7 @@ import retrofit2.http.QueryMap;
 
 public interface MediaRepository {
     @GET("/api/v1/media/{mediaId}/info/")
-    Call<MediaInfoResponse> fetch(@Path("mediaId") final String mediaId);
+    Call<MediaInfoResponse> fetch(@Path("mediaId") final long mediaId);
 
     @GET("/api/v1/media/{mediaId}/{action}/")
     Call<LikersResponse> fetchLikes(@Path("mediaId") final String mediaId,

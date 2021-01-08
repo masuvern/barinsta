@@ -51,7 +51,7 @@ public class MediaService extends BaseService {
         return instance;
     }
 
-    public void fetch(final String mediaId,
+    public void fetch(final long mediaId,
                       final ServiceCallback<Media> callback) {
         final Call<MediaInfoResponse> request = repository.fetch(mediaId);
         request.enqueue(new Callback<MediaInfoResponse>() {

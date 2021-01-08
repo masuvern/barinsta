@@ -24,56 +24,6 @@ import java.util.regex.Pattern;
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 
 public final class TextUtils {
-    private static final Pattern URL_PATTERN = Pattern.compile(
-            "(^|[\\s.:;?\\-\\]<\\(])((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])");
-
-    @NonNull
-    public static CharSequence getMentionText(@NonNull final CharSequence text) {
-        final int commentLength = text.length();
-        final SpannableStringBuilder stringBuilder = new SpannableStringBuilder(text, 0, commentLength);
-
-        for (int i = 0; i < commentLength; ++i) {
-            char currChar = text.charAt(i);
-
-            if (currChar == '@' || currChar == '#') {
-                final int startLen = i;
-
-                do {
-                    if (++i == commentLength) break;
-                    currChar = text.charAt(i);
-
-                    if (currChar == '.' && i + 1 < commentLength) {
-                        final char nextChar = text.charAt(i + 1);
-                        if (nextChar == '.' || nextChar == ' ' || nextChar == '#' || nextChar == '@' || nextChar == '/'
-                                || nextChar == '\r' || nextChar == '\n') {
-                            break;
-                        }
-                    } else if (currChar == '.')
-                        break;
-
-                    // for merged hashtags
-                    if (currChar == '#') {
-                        --i;
-                        break;
-                    }
-                } while (currChar != ' ' && currChar != '\r' && currChar != '\n' && currChar != '>' && currChar != '<'
-                        && currChar != ':' && currChar != ';' && currChar != '\'' && currChar != '"' && currChar != '['
-                        && currChar != ']' && currChar != '\\' && currChar != '=' && currChar != '-' && currChar != '!'
-                        && currChar != '$' && currChar != '%' && currChar != '^' && currChar != '&' && currChar != '*'
-                        && currChar != '(' && currChar != ')' && currChar != '{' && currChar != '}' && currChar != '/'
-                        && currChar != '|' && currChar != '?' && currChar != '`' && currChar != '~'
-                );
-
-                final int endLen = currChar != '#' ? i : i + 1; // for merged hashtags
-                stringBuilder.setSpan(new CommentMentionClickSpan(), startLen,
-                                      Math.min(commentLength, endLen), // fixed - crash when end index is greater than comment length ( @kernoeb )
-                                      Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-        }
-
-        return stringBuilder;
-    }
-
     // extracted from String class
     public static int indexOfChar(@NonNull final CharSequence sequence, final int ch, final int startIndex) {
         final int max = sequence.length();
@@ -88,11 +38,6 @@ public final class TextUtils {
             }
         }
         return -1;
-    }
-
-    public static boolean hasMentions(final CharSequence text) {
-        if (isEmpty(text)) return false;
-        return indexOfChar(text, '@', 0) != -1 || indexOfChar(text, '#', 0) != -1;
     }
 
     public static CharSequence getSpannableUrl(final String url) {

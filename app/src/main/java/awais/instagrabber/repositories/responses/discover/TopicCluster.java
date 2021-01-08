@@ -1,4 +1,4 @@
-package awais.instagrabber.models;
+package awais.instagrabber.repositories.responses.discover;
 
 import java.io.Serializable;
 

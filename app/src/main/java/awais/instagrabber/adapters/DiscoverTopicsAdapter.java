@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.ListAdapter;
 
 import awais.instagrabber.adapters.viewholder.TopicClusterViewHolder;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
-import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class DiscoverTopicsAdapter extends ListAdapter<TopicCluster, TopicClusterViewHolder> {

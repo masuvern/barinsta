@@ -51,7 +51,7 @@ import awais.instagrabber.databinding.FragmentTopicPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.main.DiscoverFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;

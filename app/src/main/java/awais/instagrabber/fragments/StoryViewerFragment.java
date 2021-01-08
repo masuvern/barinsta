@@ -55,6 +55,7 @@ import com.google.android.exoplayer2.source.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
@@ -68,9 +69,9 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
+import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.SeenAction;
-import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
@@ -84,6 +85,8 @@ import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.stickers.SliderModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
@@ -133,27 +136,32 @@ public class StoryViewerFragment extends Fragment {
     private MenuItem menuDownload;
     private MenuItem menuDm;
     private SimpleExoPlayer player;
-    private boolean isHashtag, isLoc;
-    private String highlight;
+    // private boolean isHashtag;
+    // private boolean isLoc;
+    // private String highlight;
+    private String actionBarTitle;
     private boolean fetching = false, sticking = false, shouldRefresh = true;
     private int currentFeedStoryIndex;
     private double sliderValue;
     private StoriesViewModel storiesViewModel;
-    private StoryViewerFragmentArgs fragmentArgs;
     private ViewModel viewModel;
-    private boolean isHighlight, isArchive, isNotification;
+    // private boolean isHighlight;
+    // private boolean isArchive;
+    // private boolean isNotification;
     private DirectMessagesService directMessagesService;
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
     private final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
     private final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
     private final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
+    private StoryViewerOptions options;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesService = StoriesService.getInstance();
+        if (csrfToken == null) return;
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         setHasOptionsMenu(true);
     }
@@ -257,6 +265,15 @@ public class StoryViewerFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(actionBarTitle);
+        }
+    }
+
+    @Override
     public void onDestroy() {
         releasePlayer();
         // reset subtitle
@@ -269,21 +286,21 @@ public class StoryViewerFragment extends Fragment {
 
     private void init() {
         if (getArguments() == null) return;
-        fragmentArgs = StoryViewerFragmentArgs.fromBundle(getArguments());
-        currentFeedStoryIndex = fragmentArgs.getFeedStoryIndex();
-        highlight = fragmentArgs.getHighlight();
-        isHighlight = !TextUtils.isEmpty(highlight);
-        isArchive = fragmentArgs.getIsArchive();
-        isNotification = fragmentArgs.getIsNotification();
+        final StoryViewerFragmentArgs fragmentArgs = StoryViewerFragmentArgs.fromBundle(getArguments());
+        options = fragmentArgs.getOptions();
+        currentFeedStoryIndex = options.getCurrentFeedStoryIndex();
+        // highlight = fragmentArgs.getHighlight();
+        // isHighlight = !TextUtils.isEmpty(highlight);
+        // isArchive = fragmentArgs.getIsArchive();
+        // isNotification = fragmentArgs.getIsNotification();
+        final Type type = options.getType();
         if (currentFeedStoryIndex >= 0) {
-            viewModel = isHighlight
-                        ? isArchive
+            viewModel = type == Type.HIGHLIGHT
+                        ? type == Type.STORY_ARCHIVE
                           ? new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class)
                           : new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
                         : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         }
-        // feedStoryModels = feedStoriesViewModel.getList().getValue();
-        // feedStoryModels == null || feedStoryModels.isEmpty() ||
         setupStories();
     }
 
@@ -308,21 +325,20 @@ public class StoryViewerFragment extends Fragment {
         final boolean hasFeedStories;
         List<?> models = null;
         if (currentFeedStoryIndex >= 0) {
-            if (isArchive) {
-                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
-                models = archivesViewModel.getList().getValue();
-            } else if (isHighlight) {
-                final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
-                models = highlightsViewModel.getList().getValue();
-                // final HighlightModel model = models.get(currentFeedStoryIndex);
-                // currentStoryMediaId = model.getId();
-                // currentStoryUsername = model.getTitle();
-            } else {
-                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-                models = feedStoriesViewModel.getList().getValue();
-                // final FeedStoryModel model = models.get(currentFeedStoryIndex);
-                // currentStoryMediaId = model.getStoryMediaId();
-                // currentStoryUsername = model.getProfileModel().getUsername();
+            final Type type = options.getType();
+            switch (type) {
+                case HIGHLIGHT:
+                    final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
+                    models = highlightsViewModel.getList().getValue();
+                    break;
+                case FEED_STORY_POSITION:
+                    final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                    models = feedStoriesViewModel.getList().getValue();
+                    break;
+                case STORY_ARCHIVE:
+                    final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                    models = archivesViewModel.getList().getValue();
+                    break;
             }
         }
         hasFeedStories = models != null && !models.isEmpty();
@@ -646,6 +662,7 @@ public class StoryViewerFragment extends Fragment {
 
     private void resetView() {
         final Context context = getContext();
+        StoryModel live = null;
         slidePos = 0;
         lastSlidePos = 0;
         if (menuDownload != null) menuDownload.setVisible(false);
@@ -653,58 +670,60 @@ public class StoryViewerFragment extends Fragment {
         binding.imageViewer.setController(null);
         releasePlayer();
         String currentStoryMediaId = null;
+        final Type type = options.getType();
+        StoryViewerOptions fetchOptions = null;
         if (currentFeedStoryIndex >= 0) {
-            if (isArchive) {
-                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
-                final List<HighlightModel> models = archivesViewModel.getList().getValue();
-                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    return;
+            switch (type) {
+                case HIGHLIGHT: {
+                    final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
+                    final List<HighlightModel> models = highlightsViewModel.getList().getValue();
+                    if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    final HighlightModel model = models.get(currentFeedStoryIndex);
+                    currentStoryMediaId = model.getId();
+                    fetchOptions = StoryViewerOptions.forHighlight(model.getId());
+                    currentStoryUsername = model.getTitle();
+                    break;
                 }
-                final HighlightModel model = models.get(currentFeedStoryIndex);
-                currentStoryMediaId = model.getId();
-                currentStoryUsername = model.getTitle();
-            } else if (isHighlight) {
-                final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
-                final List<HighlightModel> models = highlightsViewModel.getList().getValue();
-                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    return;
+                case FEED_STORY_POSITION: {
+                    final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+                    if (models == null) return;
+                    final FeedStoryModel model = models.get(currentFeedStoryIndex);
+                    currentStoryMediaId = model.getStoryMediaId();
+                    currentStoryUsername = model.getProfileModel().getUsername();
+                    fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
+                    if (model.isLive()) {
+                        live = model.getFirstStoryModel();
+                    }
+                    break;
                 }
-                final HighlightModel model = models.get(currentFeedStoryIndex);
-                currentStoryMediaId = model.getId();
-                currentStoryUsername = model.getTitle();
-            } else {
-                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-                final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
-                if (models == null) return;
-                final FeedStoryModel model = models.get(currentFeedStoryIndex);
-                currentStoryMediaId = model.getStoryMediaId();
-                currentStoryUsername = model.getProfileModel().getUsername();
-            }
-        } else if (fragmentArgs.getProfileId() > 0 && !TextUtils.isEmpty(fragmentArgs.getUsername())) {
-            currentStoryMediaId = String.valueOf(fragmentArgs.getProfileId());
-            currentStoryUsername = fragmentArgs.getUsername();
-        }
-        isHashtag = fragmentArgs.getIsHashtag();
-        isLoc = fragmentArgs.getIsLoc();
-        final boolean hasUsername = !TextUtils.isEmpty(currentStoryUsername);
-        if (isHighlight) {
-            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setTitle(highlight);
-            }
-        } else if (hasUsername) {
-            currentStoryUsername = currentStoryUsername.replace("@", "");
-            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setTitle(currentStoryUsername);
+                case STORY_ARCHIVE: {
+                    final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                    final List<HighlightModel> models = archivesViewModel.getList().getValue();
+                    if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    final HighlightModel model = models.get(currentFeedStoryIndex);
+                    currentStoryMediaId = model.getId();
+                    currentStoryUsername = model.getTitle();
+                    fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
+                    break;
+                }
             }
         }
+        if (type == Type.USER) {
+            currentStoryMediaId = String.valueOf(options.getId());
+            currentStoryUsername = options.getName();
+            fetchOptions = StoryViewerOptions.forUser(options.getId(), currentStoryUsername);
+        }
+        setTitle(type);
         storiesViewModel.getList().setValue(Collections.emptyList());
-        if (currentStoryMediaId == null) return;
-        if (isNotification) {
-            storiesService.fetch(currentStoryMediaId, new ServiceCallback<StoryModel>() {
+        if (type == Type.STORY) {
+            storiesService.fetch(options.getId(), new ServiceCallback<StoryModel>() {
                 @Override
                 public void onSuccess(final StoryModel storyModel) {
                     fetching = false;
@@ -728,6 +747,7 @@ public class StoryViewerFragment extends Fragment {
             });
             return;
         }
+        if (currentStoryMediaId == null) return;
         final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
             @Override
             public void onSuccess(final List<StoryModel> storyModels) {
@@ -739,8 +759,10 @@ public class StoryViewerFragment extends Fragment {
                     return;
                 }
                 binding.storiesList.setVisibility((storyModels.size() == 1 && currentFeedStoryIndex == -1) ? View.GONE : View.VISIBLE);
-                binding.btnBackward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
-                binding.btnForward.setVisibility(currentFeedStoryIndex == -1 ? View.GONE : View.VISIBLE);
+                if (currentFeedStoryIndex == -1) {
+                    binding.btnBackward.setVisibility(View.GONE);
+                    binding.btnForward.setVisibility(View.GONE);
+                }
                 storiesViewModel.getList().setValue(storyModels);
                 currentStory = storyModels.get(0);
                 refreshStory();
@@ -753,12 +775,29 @@ public class StoryViewerFragment extends Fragment {
                 Log.e(TAG, "Error", t);
             }
         };
-        storiesService.getUserStory(currentStoryMediaId,
-                                    currentStoryUsername,
-                                    isLoc,
-                                    isHashtag,
-                                    isHighlight,
-                                    storyCallback);
+        if (live != null) {
+            storyCallback.onSuccess(Collections.singletonList(live));
+            return;
+        }
+        storiesService.getUserStory(fetchOptions, storyCallback);
+    }
+
+    private void setTitle(final Type type) {
+        final boolean hasUsername = !TextUtils.isEmpty(currentStoryUsername);
+        if (type == Type.HIGHLIGHT) {
+            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBarTitle = options.getName();
+                actionBar.setTitle(options.getName());
+            }
+        } else if (hasUsername) {
+            currentStoryUsername = currentStoryUsername.replace("@", "");
+            final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBarTitle = currentStoryUsername;
+                actionBar.setTitle(currentStoryUsername);
+            }
+        }
     }
 
     private void refreshStory() {
@@ -782,51 +821,56 @@ public class StoryViewerFragment extends Fragment {
         final MediaItemType itemType = currentStory.getItemType();
 
         if (menuDownload != null) menuDownload.setVisible(false);
-        url = itemType == MediaItemType.MEDIA_TYPE_VIDEO ? currentStory.getVideoUrl() : currentStory.getStoryUrl();
+        url = itemType == MediaItemType.MEDIA_TYPE_IMAGE ? currentStory.getStoryUrl() : currentStory.getVideoUrl();
 
-        final String shortCode = currentStory.getTappableShortCode();
-        binding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
-        binding.viewStoryPost.setTag(shortCode);
+        if (itemType != MediaItemType.MEDIA_TYPE_LIVE) {
+            final String shortCode = currentStory.getTappableShortCode();
+            binding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
+            binding.viewStoryPost.setTag(shortCode);
 
-        final String spotify = currentStory.getSpotify();
-        binding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
-        binding.spotify.setTag(spotify);
+            final String spotify = currentStory.getSpotify();
+            binding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
+            binding.spotify.setTag(spotify);
 
-        poll = currentStory.getPoll();
-        binding.poll.setVisibility(poll != null ? View.VISIBLE : View.GONE);
-        binding.poll.setTag(poll);
+            poll = currentStory.getPoll();
+            binding.poll.setVisibility(poll != null ? View.VISIBLE : View.GONE);
+            binding.poll.setTag(poll);
 
-        question = currentStory.getQuestion();
-        binding.answer.setVisibility((question != null && !TextUtils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
-        binding.answer.setTag(question);
+            question = currentStory.getQuestion();
+            binding.answer.setVisibility((question != null && !TextUtils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
+            binding.answer.setTag(question);
 
-        mentions = currentStory.getMentions();
-        binding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
-        binding.mention.setTag(mentions);
+            mentions = currentStory.getMentions();
+            binding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
+            binding.mention.setTag(mentions);
 
-        quiz = currentStory.getQuiz();
-        binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
-        binding.quiz.setTag(quiz);
+            quiz = currentStory.getQuiz();
+            binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
+            binding.quiz.setTag(quiz);
 
-        slider = currentStory.getSlider();
-        binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
-        binding.slider.setTag(slider);
+            slider = currentStory.getSlider();
+            binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
+            binding.slider.setTag(slider);
 
-        final SwipeUpModel swipeUp = currentStory.getSwipeUp();
-        if (swipeUp != null) {
-            binding.swipeUp.setVisibility(View.VISIBLE);
-            binding.swipeUp.setText(swipeUp.getText());
-            binding.swipeUp.setTag(swipeUp.getUrl());
+            final SwipeUpModel swipeUp = currentStory.getSwipeUp();
+            if (swipeUp != null) {
+                binding.swipeUp.setVisibility(View.VISIBLE);
+                binding.swipeUp.setText(swipeUp.getText());
+                binding.swipeUp.setTag(swipeUp.getUrl());
+            } else binding.swipeUp.setVisibility(View.GONE);
         }
 
         releasePlayer();
-        if (isHashtag || isLoc) {
+        final Type type = options.getType();
+        if (type == Type.HASHTAG || type == Type.LOCATION) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
+                actionBarTitle = currentStory.getUsername();
                 actionBar.setTitle(currentStory.getUsername());
             }
         }
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
+        else if (itemType == MediaItemType.MEDIA_TYPE_LIVE) setupLive();
         else setupImage();
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -951,6 +995,72 @@ public class StoryViewerFragment extends Fragment {
             }
         });
     }
+
+    private void setupLive() {
+        binding.playerView.setVisibility(View.VISIBLE);
+        binding.progressView.setVisibility(View.GONE);
+        binding.imageViewer.setVisibility(View.GONE);
+        binding.imageViewer.setController(null);
+
+        if (menuDownload != null) menuDownload.setVisible(false);
+        if (menuDm != null) menuDm.setVisible(false);
+
+        final Context context = getContext();
+        if (context == null) return;
+        player = new SimpleExoPlayer.Builder(context).build();
+        binding.playerView.setPlayer(player);
+        player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
+
+        final Uri uri = Uri.parse(url);
+        final MediaItem mediaItem = MediaItem.fromUri(uri);
+        final DashMediaSource mediaSource = new DashMediaSource.Factory(new DefaultDataSourceFactory(context, "instagram"))
+                .createMediaSource(mediaItem);
+        mediaSource.addEventListener(new Handler(), new MediaSourceEventListener() {
+            @Override
+            public void onLoadCompleted(final int windowIndex,
+                                        @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                        @NonNull final LoadEventInfo loadEventInfo,
+                                        @NonNull final MediaLoadData mediaLoadData) {
+                binding.progressView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onLoadStarted(final int windowIndex,
+                                      @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                      @NonNull final LoadEventInfo loadEventInfo,
+                                      @NonNull final MediaLoadData mediaLoadData) {
+                binding.progressView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onLoadCanceled(final int windowIndex,
+                                       @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                       @NonNull final LoadEventInfo loadEventInfo,
+                                       @NonNull final MediaLoadData mediaLoadData) {
+                binding.progressView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onLoadError(final int windowIndex,
+                                    @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
+                                    @NonNull final LoadEventInfo loadEventInfo,
+                                    @NonNull final MediaLoadData mediaLoadData,
+                                    @NonNull final IOException error,
+                                    final boolean wasCanceled) {
+                binding.progressView.setVisibility(View.GONE);
+            }
+        });
+        player.setMediaSource(mediaSource);
+        player.prepare();
+
+        binding.playerView.setOnClickListener(v -> {
+            if (player != null) {
+                if (player.getPlaybackState() == Player.STATE_ENDED) player.seekTo(0);
+                player.setPlayWhenReady(player.getPlaybackState() == Player.STATE_ENDED || !player.isPlaying());
+            }
+        });
+    }
+
 
     private void openProfile(final String username) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();

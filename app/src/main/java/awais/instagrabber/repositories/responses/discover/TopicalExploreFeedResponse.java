@@ -2,8 +2,6 @@ package awais.instagrabber.repositories.responses.discover;
 
 import java.util.List;
 
-import awais.instagrabber.models.TopicCluster;
-
 public class TopicalExploreFeedResponse {
     private final boolean moreAvailable;
     private final String nextMaxId;

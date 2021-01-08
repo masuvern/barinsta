@@ -36,6 +36,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
@@ -73,8 +74,9 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         @Override
         public void onPreviewClick(final NotificationModel model) {
             if (model.getType() == NotificationType.RESPONDED_STORY) {
-                final NavDirections action = NotificationsViewerFragmentDirections.actionNotificationsViewerFragmentToStoryViewerFragment(
-                        -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
+                final NavDirections action = NotificationsViewerFragmentDirections
+                        .actionNotificationsViewerFragmentToStoryViewerFragment(StoryViewerOptions.forStory(model.getPostId(),
+                                                                                                            model.getUsername()));
                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
             } else {
                 mediaService.fetch(model.getPostId(), new ServiceCallback<Media>() {
@@ -110,7 +112,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             getString(R.string.open_profile),
                             getString(R.string.view_story)
                     };
-                } else if (model.getPostId() != null) {
+                } else if (model.getPostId() > 0) {
                     commentDialogList = new String[]{
                             getString(R.string.open_profile),
                             getString(R.string.view_post)
@@ -146,8 +148,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                                 return;
                             } else if (model.getType() == NotificationType.RESPONDED_STORY) {
                                 final NavDirections action = NotificationsViewerFragmentDirections
-                                        .actionNotificationsViewerFragmentToStoryViewerFragment(
-                                                -1, null, false, false, model.getPostId(), model.getUsername(), false, true);
+                                        .actionNotificationsViewerFragmentToStoryViewerFragment(StoryViewerOptions.forStory(model.getPostId(),
+                                                                                                                            model.getUsername()));
                                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
                                 return;
                             }

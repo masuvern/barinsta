@@ -3,6 +3,7 @@ package awais.instagrabber.webservices;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +21,7 @@ import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.repositories.StoriesRepository;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.repositories.responses.User;
@@ -34,7 +36,6 @@ import retrofit2.Retrofit;
 
 public class StoriesService extends BaseService {
     private static final String TAG = "StoriesService";
-    private static final boolean loadFromMock = false;
 
     private final StoriesRepository repository;
 
@@ -54,7 +55,7 @@ public class StoriesService extends BaseService {
         return instance;
     }
 
-    public void fetch(final String mediaId,
+    public void fetch(final long mediaId,
                       final ServiceCallback<StoryModel> callback) {
         final Call<String> request = repository.fetch(mediaId);
         request.enqueue(new Callback<String>() {
@@ -156,12 +157,66 @@ public class StoriesService extends BaseService {
                 final long timestamp = node.getLong("latest_reel_media");
                 final int mediaCount = node.getInt("media_count");
                 final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
-                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").optJSONObject(0) : null;
+                final boolean isBestie = node.optBoolean("has_besties_media", false);
                 StoryModel firstStoryModel = null;
                 if (itemJson != null) {
                     firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, false, null);
                 }
-                feedStoryModels.add(new FeedStoryModel(id, user, fullyRead, timestamp, firstStoryModel, mediaCount));
+                feedStoryModels.add(new FeedStoryModel(id, user, fullyRead, timestamp, firstStoryModel, mediaCount, false, isBestie));
+            }
+            final JSONArray broadcasts = new JSONObject(body).getJSONArray("broadcasts");
+            for (int i = 0; i < broadcasts.length(); ++i) {
+                final JSONObject node = broadcasts.getJSONObject(i);
+                final JSONObject userJson = node.getJSONObject("broadcast_owner");
+                // final ProfileModel profileModel = new ProfileModel(false, false, false,
+                //         userJson.getString("pk"),
+                //         userJson.getString("username"),
+                //         null, null, null,
+                //         userJson.getString("profile_pic_url"),
+                //         null, 0, 0, 0, false, false, false, false, false);
+                final User user = new User(userJson.getLong("pk"),
+                                           userJson.getString("username"),
+                                           userJson.optString("full_name"),
+                                           userJson.optBoolean("is_private"),
+                                           userJson.getString("profile_pic_url"),
+                                           null,
+                                           new FriendshipStatus(
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false
+                                           ),
+                                           userJson.optBoolean("is_verified"),
+                                           false,
+                                           false,
+                                           false,
+                                           false,
+                                           null,
+                                           null,
+                                           0,
+                                           0,
+                                           0,
+                                           0,
+                                           null,
+                                           null,
+                                           0,
+                                           null
+                );
+                final String id = node.getString("id");
+                final long timestamp = node.getLong("published_time");
+                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                StoryModel firstStoryModel = null;
+                if (itemJson != null) {
+                    firstStoryModel = ResponseBodyUtils.parseBroadcastItem(itemJson);
+                }
+                feedStoryModels.add(new FeedStoryModel(id, user, false, timestamp, firstStoryModel, 1, true, false));
             }
             callback.onSuccess(sort(feedStoryModels));
         } catch (JSONException e) {
@@ -274,20 +329,17 @@ public class StoriesService extends BaseService {
         });
     }
 
-    public void getUserStory(final String id,
-                             final String username,
-                             final boolean isLoc,
-                             final boolean isHashtag,
-                             final boolean highlight,
+    public void getUserStory(final StoryViewerOptions options,
                              final ServiceCallback<List<StoryModel>> callback) {
-        final String url = buildUrl(id, isLoc, isHashtag, highlight);
-        Log.d("austin_debug", url);
+        final String url = buildUrl(options);
         final Call<String> userStoryCall = repository.getUserStory(Constants.I_USER_AGENT, url);
+        final boolean isLoc = options.getType() == StoryViewerOptions.Type.LOCATION;
+        final boolean isHashtag = options.getType() == StoryViewerOptions.Type.HASHTAG;
+        final boolean isHighlight = options.getType() == StoryViewerOptions.Type.HIGHLIGHT;
         userStoryCall.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 JSONObject data;
-                String localUsername = username;
                 try {
                     final String body = response.body();
                     if (body == null) {
@@ -296,15 +348,19 @@ public class StoriesService extends BaseService {
                     }
                     data = new JSONObject(body);
 
-                    if (!highlight)
+                    if (!isHighlight) {
                         data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
-                    else if (highlight) data = data.getJSONObject("reels").optJSONObject(id);
+                    } else if (isHighlight) {
+                        data = data.getJSONObject("reels").optJSONObject(options.getName());
+                    }
 
+                    String username = null;
                     if (data != null
-                            && localUsername == null
+                            // && localUsername == null
                             && !isLoc
-                            && !isHashtag)
-                        localUsername = data.getJSONObject("user").getString("username");
+                            && !isHashtag) {
+                        username = data.getJSONObject("user").getString("username");
+                    }
 
                     JSONArray media;
                     if (data != null
@@ -315,7 +371,7 @@ public class StoriesService extends BaseService {
                         final List<StoryModel> models = new ArrayList<>();
                         for (int i = 0; i < mediaLen; ++i) {
                             data = media.getJSONObject(i);
-                            models.add(ResponseBodyUtils.parseStoryItem(data, isLoc, isHashtag, localUsername));
+                            models.add(ResponseBodyUtils.parseStoryItem(data, isLoc, isHashtag, username));
                         }
                         callback.onSuccess(models);
                     } else {
@@ -410,21 +466,42 @@ public class StoriesService extends BaseService {
         respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
     }
 
-    private String buildUrl(final String id, final boolean isLoc, final boolean isHashtag, final boolean highlight) {
-        final String userId = id.replace(":", "%3A");
+    @Nullable
+    private String buildUrl(@NonNull final StoryViewerOptions options) {
         final StringBuilder builder = new StringBuilder();
         builder.append("https://i.instagram.com/api/v1/");
-        if (isLoc) {
-            builder.append("locations/");
-        } else if (isHashtag) {
-            builder.append("tags/");
-        } else if (highlight) {
-            builder.append("feed/reels_media/?user_ids=");
-        } else {
-            builder.append("feed/user/");
+        final StoryViewerOptions.Type type = options.getType();
+        String id = null;
+        switch (type) {
+            case HASHTAG:
+                builder.append("tags/");
+                id = options.getName();
+                break;
+            case LOCATION:
+                builder.append("locations/");
+                id = String.valueOf(options.getId());
+                break;
+            case USER:
+                builder.append("feed/user/");
+                id = String.valueOf(options.getId());
+                break;
+            case HIGHLIGHT:
+                builder.append("feed/reels_media/?user_ids=");
+                id = options.getName();
+                break;
+            case STORY:
+                break;
+            // case FEED_STORY_POSITION:
+            //     break;
+            // case STORY_ARCHIVE:
+            //     break;
         }
+        if (id == null) {
+            return null;
+        }
+        final String userId = id.replace(":", "%3A");
         builder.append(userId);
-        if (!highlight) {
+        if (type != StoryViewerOptions.Type.HIGHLIGHT) {
             builder.append("/story/");
         }
         return builder.toString();

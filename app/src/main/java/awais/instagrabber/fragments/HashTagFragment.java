@@ -59,6 +59,7 @@ import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
@@ -559,7 +560,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!hasStories) return;
             // show stories
             final NavDirections action = HashTagFragmentDirections
-                    .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName(), false, false);
+                    .actionHashtagFragmentToStoryViewerFragment(StoryViewerOptions.forHashtag(hashtagModel.getName()));
             NavHostFragment.findNavController(this).navigate(action);
         });
     }
@@ -576,16 +577,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (!isLoggedIn) return;
         storiesFetching = true;
         storiesService.getUserStory(
-                hashtagModel.getName(),
-                null,
-                false,
-                true,
-                false,
+                StoryViewerOptions.forHashtag(hashtagModel.getName()),
                 new ServiceCallback<List<StoryModel>>() {
                     @Override
                     public void onSuccess(final List<StoryModel> storyModels) {
                         if (storyModels != null && !storyModels.isEmpty()) {
-                            hashtagDetailsBinding.mainHashtagImage.setStoriesBorder();
+                            hashtagDetailsBinding.mainHashtagImage.setStoriesBorder(1);
                             hasStories = true;
                         } else {
                             hasStories = false;

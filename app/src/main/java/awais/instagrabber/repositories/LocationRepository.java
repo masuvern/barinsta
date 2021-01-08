@@ -11,6 +11,6 @@ import retrofit2.http.QueryMap;
 public interface LocationRepository {
 
     @GET("/api/v1/feed/location/{location}/")
-    Call<LocationFeedResponse> fetchPosts(@Path("location") final String locationId,
+    Call<LocationFeedResponse> fetchPosts(@Path("location") final long locationId,
                                           @QueryMap Map<String, String> queryParams);
 }

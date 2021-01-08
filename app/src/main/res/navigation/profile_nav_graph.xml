@@ -153,61 +153,37 @@
         android:name="awais.instagrabber.fragments.StoryViewerFragment"
         android:label="StoryViewerFragment"
         tools:layout="@layout/fragment_story_viewer">
+
         <argument
-            android:name="feedStoryIndex"
-            app:argType="integer"
-            app:nullable="false" />
-        <argument
-            android:name="highlight"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isHashtag"
-            app:argType="boolean" />
-        <argument
-            android:name="isLoc"
-            app:argType="boolean" />
-        <argument
-            android:name="profileId"
-            app:argType="long" />
-        <argument
-            android:name="username"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isArchive"
-            app:argType="boolean"
-            app:nullable="false" />
-        <argument
-            android:name="isNotification"
-            app:argType="boolean"
-            app:nullable="false" />
+            android:name="options"
+            app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
-    <fragment
-        android:id="@+id/directMessagesThreadFragment"
-        android:name="awais.instagrabber.fragments.directmessages.DirectMessageThreadFragment"
-        android:label="DirectMessagesThreadFragment"
-        tools:layout="@layout/fragment_direct_messages_thread">
-        <argument
-            android:name="threadId"
-            app:argType="string" />
-        <argument
-            android:name="title"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"
-            app:destination="@id/directMessagesSettingsFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/directMessagesSettingsFragment"
-        android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"
-        android:label="DirectMessagesSettingsFragment"
-        tools:layout="@layout/fragment_direct_messages_settings">
-        <argument
-            android:name="threadId"
-            app:argType="string" />
-        <argument
-            android:name="title"
-            app:argType="string" />
-    </fragment>
+    <!--<fragment-->
+    <!--    android:id="@+id/directMessagesThreadFragment"-->
+    <!--    android:name="awais.instagrabber.fragments.directmessages.DirectMessageThreadFragment"-->
+    <!--    android:label="DirectMessagesThreadFragment"-->
+    <!--    tools:layout="@layout/fragment_direct_messages_thread">-->
+    <!--    <argument-->
+    <!--        android:name="threadId"-->
+    <!--        app:argType="string" />-->
+    <!--    <argument-->
+    <!--        android:name="title"-->
+    <!--        app:argType="string" />-->
+    <!--    <action-->
+    <!--        android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"-->
+    <!--        app:destination="@id/directMessagesSettingsFragment" />-->
+    <!--</fragment>-->
+    <!--<fragment-->
+    <!--    android:id="@+id/directMessagesSettingsFragment"-->
+    <!--    android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"-->
+    <!--    android:label="@string/details"-->
+    <!--    tools:layout="@layout/fragment_direct_messages_settings">-->
+    <!--    <argument-->
+    <!--        android:name="threadId"-->
+    <!--        app:argType="string"-->
+    <!--        app:nullable="false"/>-->
+    <!--    <argument-->
+    <!--        android:name="title"-->
+    <!--        app:argType="string" />-->
+    <!--</fragment>-->
 </navigation>

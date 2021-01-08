@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DiscoverTopicsAdapter;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
-import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class TopicClusterViewHolder extends RecyclerView.ViewHolder {

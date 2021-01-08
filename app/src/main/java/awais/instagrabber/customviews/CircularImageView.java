@@ -49,14 +49,15 @@ public class CircularImageView extends SimpleDraweeView {
         setBackgroundResource(R.drawable.shape_oval_light);
     }
 
-    public void setStoriesBorder() {
+    /* types: 0 clear, 1 green (feed bestie / has story), 2 red (live) */
+    public void setStoriesBorder(final int type) {
         // private final int borderSize = 8;
-        final int color = Color.GREEN;
+        final int color = type == 2 ? Color.RED : Color.GREEN;
         RoundingParams roundingParams = getHierarchy().getRoundingParams();
         if (roundingParams == null) {
             roundingParams = RoundingParams.asCircle().setRoundingMethod(RoundingParams.RoundingMethod.BITMAP_ONLY);
         }
-        roundingParams.setBorder(color, 5.0f);
+        roundingParams.setBorder(color, type == 0 ? 0f : 5.0f);
         getHierarchy().setRoundingParams(roundingParams);
     }
 }

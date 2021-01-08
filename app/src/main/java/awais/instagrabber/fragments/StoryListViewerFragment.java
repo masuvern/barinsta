@@ -32,6 +32,7 @@ import awais.instagrabber.databinding.FragmentStoryListViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
@@ -58,7 +59,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         public void onFeedStoryClick(final FeedStoryModel model, final int position) {
             if (model == null) return;
             final NavDirections action = StoryListViewerFragmentDirections
-                    .actionStoryListFragmentToStoryViewerFragment(position, null, false, false, null, null, false, false);
+                    .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forFeedStoryPosition(position));
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
         }
 
@@ -72,8 +73,8 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         @Override
         public void onHighlightClick(final HighlightModel model, final int position) {
             if (model == null) return;
-            final NavDirections action = StoryListViewerFragmentDirections.actionStoryListFragmentToStoryViewerFragment(
-                    position, getString(R.string.action_archive), false, false, null, null, true, false);
+            final NavDirections action = StoryListViewerFragmentDirections
+                    .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forStoryArchive(position));
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
         }
 
@@ -188,6 +189,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                 @Override
                 public void onSuccess(final List<FeedStoryModel> result) {
                     feedStoriesViewModel.getList().postValue(result);
+                    adapter.submitList(result);
                     binding.swipeRefreshLayout.setRefreshing(false);
                 }
 

@@ -1,4 +1,4 @@
-package awais.instagrabber.asyncs.direct_messages;
+package awais.instagrabber.asyncs;
 
 import android.os.AsyncTask;
 import android.util.Log;

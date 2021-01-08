@@ -1,5 +1,6 @@
 package awais.instagrabber.utils;
 
+import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
 
@@ -964,7 +965,7 @@ public final class ResponseBodyUtils {
     public static StoryModel parseStoryItem(final JSONObject data,
                                             final boolean isLoc,
                                             final boolean isHashtag,
-                                            final String localUsername) throws JSONException {
+                                            final String username) throws JSONException {
         final boolean isVideo = data.has("video_duration");
         final StoryModel model = new StoryModel(data.getString("id"),
                                                 data.getJSONObject("image_versions2").getJSONArray("candidates").getJSONObject(0)
@@ -973,7 +974,7 @@ public final class ResponseBodyUtils {
                                                 data.optLong("taken_at", 0),
                                                 (isLoc || isHashtag)
                                                 ? data.getJSONObject("user").getString("username")
-                                                : localUsername,
+                                                : username,
                                                 data.getJSONObject("user").getLong("pk"),
                                                 data.optBoolean("can_reply"));
 
@@ -1041,10 +1042,15 @@ public final class ResponseBodyUtils {
         }
         if (data.has("story_cta") && data.has("link_text")) {
             JSONObject tappableObject = data.getJSONArray("story_cta").getJSONObject(0).getJSONArray("links").getJSONObject(0);
-            String swipeUpUrl = tappableObject.getString("webUri");
-            if (swipeUpUrl.startsWith("http")) {
-                model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+            String swipeUpUrl = tappableObject.optString("webUri");
+            final String backupSwipeUpUrl = swipeUpUrl;
+            if (swipeUpUrl != null && swipeUpUrl.startsWith("https://l.instagram.com/")) {
+                swipeUpUrl = Uri.parse(swipeUpUrl).getQueryParameter("u");
             }
+            if (swipeUpUrl != null && swipeUpUrl.startsWith("http"))
+                model.setSwipeUp(new SwipeUpModel(swipeUpUrl, data.getString("link_text")));
+            else if (backupSwipeUpUrl != null && backupSwipeUpUrl.startsWith("http"))
+                model.setSwipeUp(new SwipeUpModel(backupSwipeUpUrl, data.getString("link_text")));
         }
         if (data.has("story_sliders")) {
             final JSONObject tappableObject = data.getJSONArray("story_sliders").getJSONObject(0)
@@ -1136,5 +1142,18 @@ public final class ResponseBodyUtils {
             read = false;
         }
         return read;
+    }
+  
+    public static StoryModel parseBroadcastItem(final JSONObject data) throws JSONException {
+        final StoryModel model = new StoryModel(data.getString("id"),
+                data.getString("cover_frame_url"),
+                data.getString("cover_frame_url"),
+                MediaItemType.MEDIA_TYPE_LIVE,
+                data.optLong("published_time", 0),
+                data.getJSONObject("user").getString("username"),
+                data.getJSONObject("user").getLong("pk"),
+                false);
+        model.setVideoUrl(data.getString("dash_playback_url"));
+        return model;
     }
 }

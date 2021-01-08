@@ -253,7 +253,7 @@ public class DirectMessageThreadFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         final int itemId = item.getItemId();
         if (itemId == R.id.info) {
-            final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(viewModel.getThreadId());
+            final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(viewModel.getThreadId(), null);
             NavHostFragment.findNavController(this).navigate(action);
             return true;
         }

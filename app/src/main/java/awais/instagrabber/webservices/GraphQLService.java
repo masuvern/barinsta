@@ -85,7 +85,7 @@ public class GraphQLService extends BaseService {
         });
     }
 
-    public void fetchLocationPosts(@NonNull final String locationId,
+    public void fetchLocationPosts(final long locationId,
                                    final String maxId,
                                    final ServiceCallback<PostsFetchResponse> callback) {
         fetch("36bd0f2bf5911908de389b8ceaa3be6d",

@@ -14,7 +14,10 @@ public enum MediaItemType implements Serializable {
     @SerializedName("8")
     MEDIA_TYPE_SLIDER(8),
     @SerializedName("11")
-    MEDIA_TYPE_VOICE(11);
+    MEDIA_TYPE_VOICE(11),
+    // 5 is arbitrary
+    @SerializedName("5")
+    MEDIA_TYPE_LIVE(5);
 
     private final int id;
     private static final Map<Integer, MediaItemType> map = new HashMap<>();

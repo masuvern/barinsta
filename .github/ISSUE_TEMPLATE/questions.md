@@ -7,7 +7,13 @@ assignees: ''
 ---
 
 <!--
+
+STOP!!!
+
 General questions & feedback should be submitted to
 * one of our chatrooms (see README.md), or
 * r/barinsta on reddit.
+
+STOP!!!
+
 -->

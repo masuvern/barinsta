@@ -96,7 +96,7 @@
         tools:layout="@layout/fragment_topic_posts">
         <argument
             android:name="topicCluster"
-            app:argType="awais.instagrabber.models.TopicCluster" />
+            app:argType="awais.instagrabber.repositories.responses.discover.TopicCluster" />
 
         <argument
             android:name="titleColor"
