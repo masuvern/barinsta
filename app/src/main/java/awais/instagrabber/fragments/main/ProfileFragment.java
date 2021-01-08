@@ -59,7 +59,6 @@ import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
 import awais.instagrabber.asyncs.UsernameFetcher;
-import awais.instagrabber.asyncs.direct_messages.CreateThreadAction;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.databinding.FragmentProfileBinding;
@@ -80,6 +79,7 @@ import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
@@ -865,25 +865,22 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void fetchStoryAndHighlights(final long profileId) {
-        storiesService.getUserStory(String.valueOf(profileId),
-                                    profileModel.getUsername(),
-                                    false,
-                                    false,
-                                    false,
-                                    new ServiceCallback<List<StoryModel>>() {
-                                        @Override
-                                        public void onSuccess(final List<StoryModel> storyModels) {
-                                            if (storyModels != null && !storyModels.isEmpty()) {
-                                                profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
-                                                hasStories = true;
-                                            }
-                                        }
+        storiesService.getUserStory(
+                StoryViewerOptions.forUser(profileId, profileModel.getFullName()),
+                new ServiceCallback<List<StoryModel>>() {
+                    @Override
+                    public void onSuccess(final List<StoryModel> storyModels) {
+                        if (storyModels != null && !storyModels.isEmpty()) {
+                            profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
+                            hasStories = true;
+                        }
+                    }
 
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            Log.e(TAG, "Error", t);
-                                        }
-                                    });
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        Log.e(TAG, "Error", t);
+                    }
+                });
         storiesService.fetchHighlights(profileId,
                                        new ServiceCallback<List<HighlightModel>>() {
                                            @Override
@@ -986,14 +983,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         });
         profileDetailsBinding.btnDM.setOnClickListener(v -> {
             profileDetailsBinding.btnDM.setEnabled(false);
-            new CreateThreadAction(cookie, profileModel.getPk(), threadId -> {
-                if (isAdded()) {
-                    final NavDirections action = ProfileFragmentDirections
-                            .actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
-                    NavHostFragment.findNavController(this).navigate(action);
-                }
-                profileDetailsBinding.btnDM.setEnabled(true);
-            }).execute();
+            // new CreateThreadAction(cookie, profileModel.getPk(), threadId -> {
+            //     if (isAdded()) {
+            //         final NavDirections action = ProfileFragmentDirections
+            //                 .actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
+            //         NavHostFragment.findNavController(this).navigate(action);
+            //     }
+            //     profileDetailsBinding.btnDM.setEnabled(true);
+            // }).execute();
         });
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
@@ -1011,7 +1008,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 if (which == 1) {
                     // show stories
                     final NavDirections action = ProfileFragmentDirections
-                            .actionProfileFragmentToStoryViewerFragment(-1, null, false, false, profileModel.getPk(), username, false, false);
+                            .actionProfileFragmentToStoryViewerFragment(StoryViewerOptions.forUser(profileModel.getPk(),
+                                                                                                   profileModel.getFullName()));
                     NavHostFragment.findNavController(this).navigate(action);
                     return;
                 }
@@ -1071,8 +1069,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void setupHighlights() {
         highlightsViewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
         highlightsAdapter = new HighlightsAdapter((model, position) -> {
-            final NavDirections action = ProfileFragmentDirections
-                    .actionProfileFragmentToStoryViewerFragment(position, model.getTitle(), false, false, 0, null, false, false);
+            final StoryViewerOptions options = StoryViewerOptions.forHighlight(model.getTitle());
+            options.setCurrentFeedStoryIndex(position);
+            final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToStoryViewerFragment(options);
             NavHostFragment.findNavController(this).navigate(action);
         });
         final Context context = getContext();
