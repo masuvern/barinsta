@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
-import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -13,7 +12,6 @@ import com.facebook.drawee.generic.RoundingParams;
 
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenMediaViewMode;
 import awais.instagrabber.repositories.responses.ImageVersions2;
@@ -34,18 +32,15 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
                                           @NonNull final LayoutDmRavenMediaBinding binding,
                                           final User currentUser,
                                           final DirectThread thread,
-                                          final MentionClickListener mentionClickListener,
                                           final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
-        final Resources resources = itemView.getResources();
         maxWidth = windowWidth - margin - dmRadiusSmall;
         setItemView(binding.getRoot());
     }
 
     @Override
     public void bindItem(final DirectItem directItemModel, final MessageDirection messageDirection) {
-        removeBg();
         final DirectItemVisualMedia visualMedia = directItemModel.getVisualMedia();
         final Media media = visualMedia.getMedia();
         if (media == null) return;

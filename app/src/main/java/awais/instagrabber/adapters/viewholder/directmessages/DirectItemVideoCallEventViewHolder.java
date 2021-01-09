@@ -62,4 +62,14 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
         binding.tvMessage.setMaxLines(1);
         binding.tvMessage.setText(sb);
     }
+
+    @Override
+    protected boolean allowMessageDirectionGravity() {
+        return false;
+    }
+
+    @Override
+    protected boolean showMessageInfo() {
+        return false;
+    }
 }

@@ -77,16 +77,41 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(final DirectItem item) {
         final MessageDirection messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
+        itemView.post(() -> bindBase(item, messageDirection));
+        itemView.post(() -> bindItem(item, messageDirection));
+    }
+
+    private void bindBase(final DirectItem item, final MessageDirection messageDirection) {
         final FrameLayout.LayoutParams containerLayoutParams = (FrameLayout.LayoutParams) binding.container.getLayoutParams();
         final DirectItemType itemType = item.getItemType();
-        binding.messageInfo.setVisibility(View.VISIBLE);
-        binding.deliveryStatus.setVisibility(messageDirection == MessageDirection.OUTGOING ? View.VISIBLE : View.GONE);
-        if (itemType != DirectItemType.ACTION_LOG && itemType != DirectItemType.VIDEO_CALL_EVENT) {
-            containerLayoutParams.setMarginStart(messageDirection == MessageDirection.OUTGOING ? margin : 0);
-            containerLayoutParams.setMarginEnd(messageDirection == MessageDirection.INCOMING ? margin : 0);
-            containerLayoutParams.gravity = messageDirection == MessageDirection.INCOMING ? Gravity.START : Gravity.END;
+        setMessageDirectionGravity(messageDirection, containerLayoutParams);
+        setGroupUserDetails(item, messageDirection);
+        setBackground(messageDirection);
+        setMessageInfo(item, messageDirection);
+        if (itemType == DirectItemType.REEL_SHARE) {
+            containerLayoutParams.setMarginStart(0);
+            containerLayoutParams.setMarginEnd(0);
+        }
+        if (itemType == DirectItemType.TEXT || itemType == DirectItemType.LINK) {
+            binding.messageInfo.setPadding(0, 0, dmRadius, dmRadiusSmall);
+        } else {
+            binding.messageInfo.setPadding(0, 0, messageInfoPaddingSmall, dmRadiusSmall);
+        }
+        setupReply(item, messageDirection);
+        setReactions(item, thread.getUsers());
+    }
+
+    private void setBackground(final MessageDirection messageDirection) {
+        if (showBackground()) {
             binding.background.setBackgroundResource(messageDirection == MessageDirection.INCOMING ? R.drawable.bg_speech_bubble_incoming
                                                                                                    : R.drawable.bg_speech_bubble_outgoing);
+            return;
+        }
+        binding.background.setBackgroundResource(0);
+    }
+
+    private void setGroupUserDetails(final DirectItem item, final MessageDirection messageDirection) {
+        if (showUserDetailsInGroup()) {
             binding.ivProfilePic.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             binding.tvUsername.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             if (messageDirection == MessageDirection.INCOMING && thread.isGroup()) {
@@ -99,45 +124,46 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                 layoutParams.matchConstraintMaxWidth = groupMessageWidth;
                 binding.chatMessageLayout.setLayoutParams(layoutParams);
             }
-        } else {
-            binding.ivProfilePic.setVisibility(View.GONE);
-            binding.tvUsername.setVisibility(View.GONE);
-            containerLayoutParams.gravity = Gravity.CENTER;
-            binding.messageInfo.setVisibility(View.GONE);
+            return;
         }
-        if (itemType == DirectItemType.REEL_SHARE) {
-            containerLayoutParams.setMarginStart(0);
-            containerLayoutParams.setMarginEnd(0);
+        binding.ivProfilePic.setVisibility(View.GONE);
+        binding.tvUsername.setVisibility(View.GONE);
+    }
+
+    private void setMessageDirectionGravity(final MessageDirection messageDirection,
+                                            final FrameLayout.LayoutParams containerLayoutParams) {
+        if (allowMessageDirectionGravity()) {
+            containerLayoutParams.setMarginStart(messageDirection == MessageDirection.OUTGOING ? margin : 0);
+            containerLayoutParams.setMarginEnd(messageDirection == MessageDirection.INCOMING ? margin : 0);
+            containerLayoutParams.gravity = messageDirection == MessageDirection.INCOMING ? Gravity.START : Gravity.END;
+            return;
         }
-        if (itemType == DirectItemType.TEXT || itemType == DirectItemType.LINK) {
-            binding.messageInfo.setPadding(0,
-                                           0,
-                                           dmRadius,
-                                           dmRadiusSmall);
-        } else {
-            binding.messageInfo.setPadding(0,
-                                           0,
-                                           messageInfoPaddingSmall,
-                                           dmRadiusSmall);
-        }
-        if (itemType == DirectItemType.MEDIA || itemType == DirectItemType.MEDIA_SHARE || itemType == DirectItemType.CLIP || itemType == DirectItemType.STORY_SHARE
-                || itemType == DirectItemType.LOCATION || itemType == DirectItemType.FELIX_SHARE) {
-            // no background for media items
-            binding.background.setBackgroundResource(0);
-        }
-        binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
-        if (messageDirection == MessageDirection.OUTGOING) {
-            if (item.isPending()) {
-                binding.deliveryStatus.setImageResource(R.drawable.ic_check_24);
-            } else {
-                final boolean read = ResponseBodyUtils.isRead(item, thread.getLastSeenAt(), userIds, null);
-                binding.deliveryStatus.setImageResource(R.drawable.ic_check_all_24);
-                ImageViewCompat.setImageTintList(
-                        binding.deliveryStatus,
-                        ColorStateList.valueOf(itemView.getResources().getColor(read ? R.color.blue_500 : R.color.grey_500))
-                );
+        containerLayoutParams.gravity = Gravity.CENTER;
+    }
+
+    private void setMessageInfo(final DirectItem item, final MessageDirection messageDirection) {
+        if (showMessageInfo()) {
+            binding.messageInfo.setVisibility(View.VISIBLE);
+            binding.deliveryStatus.setVisibility(messageDirection == MessageDirection.OUTGOING ? View.VISIBLE : View.GONE);
+            binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
+            if (messageDirection == MessageDirection.OUTGOING) {
+                if (item.isPending()) {
+                    binding.deliveryStatus.setImageResource(R.drawable.ic_check_24);
+                } else {
+                    final boolean read = ResponseBodyUtils.isRead(item, thread.getLastSeenAt(), userIds, null);
+                    binding.deliveryStatus.setImageResource(R.drawable.ic_check_all_24);
+                    ImageViewCompat.setImageTintList(
+                            binding.deliveryStatus,
+                            ColorStateList.valueOf(itemView.getResources().getColor(read ? R.color.blue_500 : R.color.grey_500))
+                    );
+                }
             }
+            return;
         }
+        binding.messageInfo.setVisibility(View.GONE);
+    }
+
+    private void setupReply(final DirectItem item, final MessageDirection messageDirection) {
         if (item.getRepliedToMessage() != null) {
             setReply(item, messageDirection, thread.getUsers());
         } else {
@@ -145,8 +171,6 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             binding.replyContainer.setVisibility(View.GONE);
             binding.replyInfo.setVisibility(View.GONE);
         }
-        setReactions(item, thread.getUsers());
-        bindItem(item, messageDirection);
     }
 
     private void setReply(final DirectItem item,
@@ -324,8 +348,20 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         return null;
     }
 
-    protected void removeBg() {
-        binding.background.setBackground(null);
+    protected boolean allowMessageDirectionGravity() {
+        return true;
+    }
+
+    protected boolean showUserDetailsInGroup() {
+        return true;
+    }
+
+    protected boolean showBackground() {
+        return false;
+    }
+
+    protected boolean showMessageInfo() {
+        return true;
     }
 
     public void cleanup() {}

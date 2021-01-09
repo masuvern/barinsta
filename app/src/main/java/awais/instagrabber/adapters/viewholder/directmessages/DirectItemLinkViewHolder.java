@@ -65,4 +65,9 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
         }
         binding.text.setText(link.getText());
     }
+
+    @Override
+    protected boolean showBackground() {
+        return true;
+    }
 }

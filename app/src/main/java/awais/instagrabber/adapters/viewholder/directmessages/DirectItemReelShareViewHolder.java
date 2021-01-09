@@ -40,7 +40,6 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        removeBg();
         final DirectItemReelShare reelShare = item.getReelShare();
         final String type = reelShare.getType();
         if (type == null) return;

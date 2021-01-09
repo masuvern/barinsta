@@ -36,7 +36,6 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        removeBg();
         final DirectItemAnimatedMedia animatedMediaModel = item.getAnimatedMedia();
         final AnimatedMediaImages images = animatedMediaModel.getImages();
         if (images == null) return;

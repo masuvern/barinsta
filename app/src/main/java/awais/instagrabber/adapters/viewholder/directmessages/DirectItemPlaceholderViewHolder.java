@@ -31,4 +31,9 @@ public class DirectItemPlaceholderViewHolder extends DirectItemViewHolder {
         final String text = String.format("%s: %s", directItemModel.getPlaceholder().getTitle(), directItemModel.getPlaceholder().getMessage());
         binding.tvMessage.setText(text);
     }
+
+    @Override
+    protected boolean showBackground() {
+        return true;
+    }
 }

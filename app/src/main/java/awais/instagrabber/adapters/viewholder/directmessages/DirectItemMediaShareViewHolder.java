@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 
 import com.facebook.drawee.drawable.ScalingUtils;
@@ -56,18 +57,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         binding.topBg.setBackgroundResource(messageDirection == MessageDirection.INCOMING
                                             ? R.drawable.bg_media_share_top_incoming
                                             : R.drawable.bg_media_share_top_outgoing);
-        Media media = null;
-        if (item.getItemType() == DirectItemType.MEDIA_SHARE) {
-            media = item.getMediaShare();
-        } else if (item.getItemType() == DirectItemType.CLIP) {
-            final DirectItemClip clip = item.getClip();
-            if (clip == null) return;
-            media = clip.getClip();
-        } else if (item.getItemType() == DirectItemType.FELIX_SHARE) {
-            final DirectItemFelixShare felixShare = item.getFelixShare();
-            if (felixShare == null) return;
-            media = felixShare.getVideo();
-        }
+        Media media = getMedia(item);
         if (media == null) return;
         final User user = media.getUser();
         if (user != null) {
@@ -120,5 +110,22 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         binding.typeIcon.setImageResource(mediaType == MediaItemType.MEDIA_TYPE_VIDEO
                                           ? R.drawable.ic_video_24
                                           : R.drawable.ic_checkbox_multiple_blank_stroke);
+    }
+
+    @Nullable
+    private Media getMedia(@NonNull final DirectItem item) {
+        Media media = null;
+        if (item.getItemType() == DirectItemType.MEDIA_SHARE) {
+            media = item.getMediaShare();
+        } else if (item.getItemType() == DirectItemType.CLIP) {
+            final DirectItemClip clip = item.getClip();
+            if (clip == null) return null;
+            media = clip.getClip();
+        } else if (item.getItemType() == DirectItemType.FELIX_SHARE) {
+            final DirectItemFelixShare felixShare = item.getFelixShare();
+            if (felixShare == null) return null;
+            media = felixShare.getVideo();
+        }
+        return media;
     }
 }

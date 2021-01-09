@@ -15,7 +15,6 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmProfileBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Location;
@@ -35,7 +34,6 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
                                        @NonNull final LayoutDmProfileBinding binding,
                                        final User currentUser,
                                        final DirectThread thread,
-                                       final MentionClickListener mentionClickListener,
                                        final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;

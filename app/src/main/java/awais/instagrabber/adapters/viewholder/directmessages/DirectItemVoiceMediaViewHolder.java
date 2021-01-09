@@ -19,7 +19,6 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmVoiceMediaBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.repositories.responses.Audio;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
@@ -27,7 +26,6 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVoiceMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 
 import static com.google.android.exoplayer2.C.TIME_UNSET;
 
@@ -45,18 +43,16 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
                                           @NonNull final LayoutDmVoiceMediaBinding binding,
                                           final User currentUser,
                                           final DirectThread thread,
-                                          final MentionClickListener mentionClickListener,
                                           final View.OnClickListener onClickListener) {
         super(baseBinding, currentUser, thread, onClickListener);
         this.binding = binding;
         this.dataSourceFactory = new DefaultDataSourceFactory(binding.getRoot().getContext(), "instagram");
         setItemView(binding.getRoot());
-        binding.waveformSeekBar.getLayoutParams().width = windowWidth - margin - Utils.convertDpToPx(56);
+        binding.voiceMedia.getLayoutParams().width = mediaImageMaxWidth;
     }
 
     @Override
     public void bindItem(final DirectItem directItemModel, final MessageDirection messageDirection) {
-        removeBg();
         final DirectItemVoiceMedia voiceMedia = directItemModel.getVoiceMedia();
         if (voiceMedia == null) return;
         final Media media = voiceMedia.getMedia();

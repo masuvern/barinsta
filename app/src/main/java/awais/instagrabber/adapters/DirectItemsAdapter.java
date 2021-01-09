@@ -128,11 +128,11 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         switch (directItemType) {
             case TEXT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemTextViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemTextViewHolder(baseBinding, binding, currentUser, thread, null);
             }
             case LIKE: {
                 final LayoutDmLikeBinding binding = LayoutDmLikeBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemLikeViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemLikeViewHolder(baseBinding, binding, currentUser, thread, null);
             }
             case LINK: {
                 final LayoutDmLinkBinding binding = LayoutDmLinkBinding.inflate(layoutInflater, baseBinding.message, false);
@@ -156,12 +156,12 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             }
             case VOICE_MEDIA: {
                 final LayoutDmVoiceMediaBinding binding = LayoutDmVoiceMediaBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemVoiceMediaViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemVoiceMediaViewHolder(baseBinding, binding, currentUser, thread, null);
             }
             case LOCATION:
             case PROFILE: {
                 final LayoutDmProfileBinding binding = LayoutDmProfileBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemProfileViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemProfileViewHolder(baseBinding, binding, currentUser, thread, null);
             }
             case MEDIA: {
                 final LayoutDmMediaBinding binding = LayoutDmMediaBinding.inflate(layoutInflater, baseBinding.message, false);
@@ -183,7 +183,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             }
             case RAVEN_MEDIA: {
                 final LayoutDmRavenMediaBinding binding = LayoutDmRavenMediaBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemRavenMediaViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemRavenMediaViewHolder(baseBinding, binding, currentUser, thread, null);
             }
             default: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);

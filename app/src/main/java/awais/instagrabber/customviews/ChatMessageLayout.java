@@ -92,7 +92,8 @@ public class ChatMessageLayout extends FrameLayout {
         if (firstChildId == R.id.media_container) {
             widthSize += viewPartMainWidth;
             heightSize += viewPartMainHeight;
-        } else if (firstChildId == R.id.raven_media_container || firstChildId == R.id.profile_container || firstChildId == R.id.voice_media || firstChildId == R.id.story_container) {
+        } else if (firstChildId == R.id.raven_media_container || firstChildId == R.id.profile_container || firstChildId == R.id.voice_media
+                || firstChildId == R.id.story_container || firstChildId == R.id.media_share_container) {
             widthSize += viewPartMainWidth;
             heightSize += viewPartMainHeight + viewPartInfoHeight;
         } else {

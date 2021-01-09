@@ -69,4 +69,14 @@ public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
         }
         binding.tvMessage.setText(sb);
     }
+
+    @Override
+    protected boolean allowMessageDirectionGravity() {
+        return false;
+    }
+
+    @Override
+    protected boolean showMessageInfo() {
+        return false;
+    }
 }
