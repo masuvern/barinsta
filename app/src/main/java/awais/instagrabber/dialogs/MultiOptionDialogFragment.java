@@ -11,6 +11,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.common.primitives.Booleans;
 
 import java.io.Serializable;
@@ -72,7 +73,7 @@ public class MultiOptionDialogFragment<T extends Serializable> extends DialogFra
             title = arguments.getInt("title");
             type = (Type) arguments.getSerializable("type");
         }
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        final MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
         if (title > 0) {
             builder.setTitle(title);
         }

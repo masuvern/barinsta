@@ -41,11 +41,11 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 hasNextPage = result.hasNextPage();
                 feedModels.addAll(result.getFeedModels());
                 if (fetchListener != null) {
-                    if (feedModels.size() < 15 && hasNextPage) {
-                        feedService.fetch(csrfToken, nextCursor, this);
-                    } else {
-                        fetchListener.onResult(feedModels);
-                    }
+                    // if (feedModels.size() < 15 && hasNextPage) {
+                    //     feedService.fetch(csrfToken, nextCursor, this);
+                    // } else {
+                    fetchListener.onResult(feedModels);
+                    // }
                 }
             }
 

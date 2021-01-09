@@ -299,8 +299,8 @@
     <string name="apply">Apply</string>
     <string name="save">Save</string>
     <string name="caption">Caption</string>
-    <string name="edit_caption">Edit caption...</string>
-    <string name="translate_caption">Translate caption...</string>
+    <string name="edit_caption">Edit caption</string>
+    <string name="translate_caption">Translate caption</string>
     <string name="player_timeline_desc">Video player timeline</string>
     <string name="one_x" translatable="false">1x</string>
     <string name="two_x" translatable="false">2x</string>
@@ -390,4 +390,5 @@
     <string name="done">Done</string>
     <string name="dms_action_make_admin">Make Admin</string>
     <string name="dms_action_remove_admin">Remove as Admin</string>
+    <string name="edit_unsuccessful">Edit was unsuccessful</string>
 </resources>

@@ -116,7 +116,7 @@ public final class ProfilePicView extends CircularImageView {
         LARGE(3);
 
         private final int value;
-        private static Map<Integer, Size> map = new HashMap<>();
+        private static final Map<Integer, Size> map = new HashMap<>();
 
         static {
             for (Size size : Size.values()) {
