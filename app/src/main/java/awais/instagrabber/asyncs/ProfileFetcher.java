@@ -46,7 +46,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, User> {
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 final String json = NetworkUtils.readFromConnection(conn);
-                Log.d(TAG, "doInBackground: " + json);
+                // Log.d(TAG, "doInBackground: " + json);
                 final JSONObject userJson = new JSONObject(json).getJSONObject("graphql")
                                                                 .getJSONObject(Constants.EXTRAS_USER);
 

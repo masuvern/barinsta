@@ -3,6 +3,8 @@ package awais.instagrabber.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,8 +16,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import awais.instagrabber.R;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 
 public class EditTextDialogFragment extends DialogFragment {
+
+    private final int margin;
+    private final int topMargin;
 
     private Context context;
     private EditTextDialogFragmentCallback callback;
@@ -34,7 +40,10 @@ public class EditTextDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    public EditTextDialogFragment() {}
+    public EditTextDialogFragment() {
+        margin = Utils.convertDpToPx(20);
+        topMargin = Utils.convertDpToPx(8);
+    }
 
     @Override
     public void onAttach(@NonNull final Context context) {
@@ -65,8 +74,16 @@ public class EditTextDialogFragment extends DialogFragment {
         if (!TextUtils.isEmpty(initialText)) {
             input.setText(initialText);
         }
+        final FrameLayout container = new FrameLayout(context);
+        final FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                                   ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.leftMargin = margin;
+        layoutParams.rightMargin = margin;
+        layoutParams.topMargin = topMargin;
+        input.setLayoutParams(layoutParams);
+        container.addView(input);
         final MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
-                .setView(input)
+                .setView(container)
                 .setPositiveButton(positiveButtonText, (d, w) -> {
                     final String string = input.getText() != null ? input.getText().toString() : "";
                     if (callback != null) {
