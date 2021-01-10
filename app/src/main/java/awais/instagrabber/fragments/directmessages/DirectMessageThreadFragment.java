@@ -70,9 +70,11 @@ import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.PermissionUtils;
@@ -169,6 +171,22 @@ public class DirectMessageThreadFragment extends Fragment {
         public void onMediaClick(final Media media) {
             final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(media);
             builder.build().show(getChildFragmentManager(), "post_view");
+        }
+
+        @Override
+        public void onStoryClick(final DirectItemStoryShare storyShare) {
+            final String pk = storyShare.getReelId();
+            try {
+                final long mediaId = Long.parseLong(pk);
+                final User user = storyShare.getMedia().getUser();
+                if (user == null) return;
+                final String username = user.getUsername();
+                final NavDirections action = DirectMessageThreadFragmentDirections
+                        .actionThreadToStory(StoryViewerOptions.forUser(mediaId, username));
+                NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "onStoryClick: ", e);
+            }
         }
     };
 

@@ -29,6 +29,7 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.DeepLinkParser;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -392,6 +393,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
 
     protected void openMedia(final Media media) {
         callback.onMediaClick(media);
+    }
+
+    protected void openStory(final DirectItemStoryShare storyShare) {
+        callback.onStoryClick(storyShare);
     }
 
     protected void handleDeepLink(final String deepLinkText) {

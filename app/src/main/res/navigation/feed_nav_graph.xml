@@ -101,6 +101,7 @@
             android:id="@+id/action_feedFragment_to_storyViewerFragment"
             app:destination="@id/storyViewerFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/storyViewerFragment"
         android:name="awais.instagrabber.fragments.StoryViewerFragment"

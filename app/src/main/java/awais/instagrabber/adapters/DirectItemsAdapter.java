@@ -50,6 +50,7 @@ import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.DateUtils;
 
@@ -369,5 +370,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         void onEmailClick(String email);
 
         void onMediaClick(Media media);
+
+        void onStoryClick(DirectItemStoryShare storyShare);
     }
 }

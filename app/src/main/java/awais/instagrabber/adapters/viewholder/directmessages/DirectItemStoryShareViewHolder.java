@@ -49,7 +49,8 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
         if (reelType.equals("highlight_reel")) {
             format = "@%s's story highlight";
         }
-        final String info = String.format(format, item.getStoryShare().getMedia().getUser().getUsername());
+        final User user = item.getStoryShare().getMedia().getUser();
+        final String info = String.format(format, user != null ? user.getUsername() : "");
         binding.shareInfo.setText(info);
         binding.text.setVisibility(View.GONE);
         binding.ivMediaPreview.setController(null);
@@ -58,7 +59,7 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
         setText(storyShare);
         final Media media = storyShare.getMedia();
         setupPreview(messageDirection, media);
-        itemView.setOnClickListener(v -> openMedia(media));
+        itemView.setOnClickListener(v -> openStory(storyShare));
     }
 
     private void setupPreview(final MessageDirection messageDirection, final Media storyShareMedia) {

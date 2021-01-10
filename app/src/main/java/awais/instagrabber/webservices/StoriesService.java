@@ -113,12 +113,6 @@ public class StoriesService extends BaseService {
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
                 final JSONObject node = feedStoriesReel.getJSONObject(i);
                 final JSONObject userJson = node.getJSONObject(node.has("user") ? "user" : "owner");
-                // final ProfileModel profileModel = new ProfileModel(false, false, false,
-                //                                                    user.getString("pk"),
-                //                                                    user.getString("username"),
-                //                                                    null, null, null,
-                //                                                    user.getString("profile_pic_url"),
-                //                                                    null, 0, 0, 0, false, false, false, false, false);
                 final User user = new User(userJson.getLong("pk"),
                                            userJson.getString("username"),
                                            userJson.optString("full_name"),
@@ -350,7 +344,7 @@ public class StoriesService extends BaseService {
 
                     if (!isHighlight) {
                         data = data.optJSONObject((isLoc || isHashtag) ? "story" : "reel");
-                    } else if (isHighlight) {
+                    } else {
                         data = data.getJSONObject("reels").optJSONObject(options.getName());
                     }
 

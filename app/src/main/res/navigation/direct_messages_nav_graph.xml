@@ -130,6 +130,9 @@
         <action
             android:id="@+id/action_thread_to_image_edit"
             app:destination="@id/imageEditFragment" />
+        <action
+            android:id="@+id/action_thread_to_story"
+            app:destination="@id/storyViewerFragment" />
     </fragment>
     <fragment
         android:id="@+id/directMessagesSettingsFragment"
@@ -162,5 +165,14 @@
             android:name="uri"
             app:argType="android.net.Uri"
             app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/storyViewerFragment"
+        android:name="awais.instagrabber.fragments.StoryViewerFragment"
+        android:label="StoryViewerFragment"
+        tools:layout="@layout/fragment_story_viewer">
+        <argument
+            android:name="options"
+            app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
 </navigation>
