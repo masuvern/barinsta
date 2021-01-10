@@ -686,7 +686,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 R.array.com_google_android_gms_fonts_certs);
         final EmojiCompat.Config config = new FontRequestEmojiCompatConfig(getApplicationContext(), fontRequest);
         config.setReplaceAll(true)
-              .setUseEmojiAsDefaultStyle(true)
+              // .setUseEmojiAsDefaultStyle(true)
               .registerInitCallback(new EmojiCompat.InitCallback() {
                   @Override
                   public void onInitialized() {

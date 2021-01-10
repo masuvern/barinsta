@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses;
 
+import androidx.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -123,6 +125,7 @@ public class Media implements Serializable {
         return takenAt;
     }
 
+    @Nullable
     public User getUser() {
         return user;
     }
@@ -231,7 +234,11 @@ public class Media implements Serializable {
         return injected != null;
     }
 
+    @Nullable
     public String getDate() {
+        if (takenAt <= 0) {
+            return null;
+        }
         if (dateString == null) {
             dateString = Utils.datetimeParser.format(new Date(takenAt * 1000L));
         }

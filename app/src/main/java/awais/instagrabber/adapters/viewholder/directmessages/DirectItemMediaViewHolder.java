@@ -10,9 +10,9 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmMediaBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
@@ -32,9 +32,8 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                                      @NonNull final LayoutDmMediaBinding binding,
                                      final User currentUser,
                                      final DirectThread thread,
-                                     final MentionClickListener mentionClickListener,
-                                     final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                     final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
         outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
@@ -49,6 +48,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                                                   .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
                                                   .build());
         final Media media = directItemModel.getMedia();
+        itemView.setOnClickListener(v -> openMedia(media));
         final MediaItemType modelMediaType = media.getMediaType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER
                                        ? View.VISIBLE
@@ -71,4 +71,5 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(imageVersions2);
         binding.mediaPreview.setImageURI(thumbUrl);
     }
+
 }

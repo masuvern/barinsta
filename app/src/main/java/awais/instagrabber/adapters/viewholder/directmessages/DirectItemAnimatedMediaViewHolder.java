@@ -8,9 +8,9 @@ import androidx.core.util.Pair;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.repositories.responses.AnimatedMediaFixedHeight;
 import awais.instagrabber.repositories.responses.AnimatedMediaImages;
 import awais.instagrabber.repositories.responses.User;
@@ -27,9 +27,8 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
                                              @NonNull final LayoutDmAnimatedMediaBinding binding,
                                              final User currentUser,
                                              final DirectThread thread,
-                                             final MentionClickListener mentionClickListener,
-                                             final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                             final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
     }

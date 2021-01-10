@@ -73,18 +73,6 @@
         app:layout_constraintTop_toTopOf="@id/profile_pic"
         tools:text="Username Username Username" />
 
-    <!--<androidx.appcompat.widget.AppCompatImageView-->
-    <!--    android:id="@+id/isVerified"-->
-    <!--    android:layout_width="20dp"-->
-    <!--    android:layout_height="0dp"-->
-    <!--    android:scaleType="fitCenter"-->
-    <!--    android:visibility="gone"-->
-    <!--    app:layout_constraintBottom_toBottomOf="@id/title"-->
-    <!--    app:layout_constraintStart_toEndOf="@id/title"-->
-    <!--    app:layout_constraintTop_toTopOf="@id/title"-->
-    <!--    app:srcCompat="@drawable/verified"-->
-    <!--    tools:visibility="visible" />-->
-
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/subtitle"
         android:layout_width="0dp"
@@ -110,6 +98,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/top_bg"
         app:srcCompat="@drawable/ic_more_vert_24"
+        app:tint="@color/white"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/user_details_group"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="top_bg, profile_pic,title,subtitle,options"
         tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -278,10 +274,11 @@
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_bg_barrier"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="bottom_bg,likes_count,comments_count" />
+        app:constraint_referenced_ids="likes_count,comments_count,views_count" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/likes_count"
@@ -289,13 +286,13 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/date"
+        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
         app:layout_constraintEnd_toStartOf="@id/comments_count"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bg_barrier"
         tools:text="9999999999 likes"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/comments_count"
@@ -303,13 +300,13 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/date"
+        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
         app:layout_constraintEnd_toStartOf="@id/views_count"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toEndOf="@id/likes_count"
-        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bg_barrier"
         tools:text="9999999 comments"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/views_count"
@@ -317,12 +314,20 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/date"
+        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/comments_count"
-        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bg_barrier"
         tools:text="9999999999 views"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/counts_barrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="date" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/date"
@@ -331,15 +336,17 @@
         android:padding="8dp"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/buttons_barrier"
-        app:layout_constraintTop_toBottomOf="@id/likes_count"
-        tools:text="2020-11-07 11:18:55" />
+        app:layout_constraintTop_toBottomOf="@id/counts_barrier"
+        tools:text="2020-11-07 11:18:55"
+        tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/buttons_barrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="likes_count,comments_count,views_count" />
+        app:constraint_referenced_ids="date" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/caption_toggle"

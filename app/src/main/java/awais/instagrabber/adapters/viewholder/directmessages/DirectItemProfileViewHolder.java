@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmProfileBinding;
 import awais.instagrabber.models.enums.DirectItemType;
@@ -34,8 +35,8 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
                                        @NonNull final LayoutDmProfileBinding binding,
                                        final User currentUser,
                                        final DirectThread thread,
-                                       final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                       final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
         previewViews = ImmutableList.of(
@@ -98,6 +99,7 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
         binding.username.setText(profile.getUsername());
         binding.fullName.setText(profile.getFullName());
         binding.isVerified.setVisibility(profile.isVerified() ? View.VISIBLE : View.GONE);
+        itemView.setOnClickListener(v -> openProfile(profile.getUsername()));
     }
 
     private void setLocation(@NonNull final DirectItem item) {
@@ -113,5 +115,6 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
             binding.fullName.setVisibility(View.GONE);
         }
         binding.isVerified.setVisibility(View.GONE);
+        itemView.setOnClickListener(v -> openLocation(location.getPk()));
     }
 }

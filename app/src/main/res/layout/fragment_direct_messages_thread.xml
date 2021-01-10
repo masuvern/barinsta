@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:background="@android:color/transparent"
-        android:hint="Message"
+        android:hint="@string/message"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
         android:textColor="@color/white"

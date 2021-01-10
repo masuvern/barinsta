@@ -1,9 +1,8 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
-import android.view.View;
-
 import androidx.annotation.NonNull;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmLikeBinding;
 import awais.instagrabber.repositories.responses.User;
@@ -16,8 +15,8 @@ public class DirectItemLikeViewHolder extends DirectItemViewHolder {
                                     @NonNull final LayoutDmLikeBinding binding,
                                     final User currentUser,
                                     final DirectThread thread,
-                                    final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                    final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         setItemView(binding.getRoot());
     }
 

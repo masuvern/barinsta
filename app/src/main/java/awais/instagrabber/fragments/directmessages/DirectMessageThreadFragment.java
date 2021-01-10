@@ -68,7 +68,9 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
+import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
@@ -96,11 +98,9 @@ public class DirectMessageThreadFragment extends Fragment {
     private DirectItemsAdapter itemsAdapter;
     private MainActivity fragmentActivity;
     private DirectThreadViewModel viewModel;
-    public static boolean hasSentSomething;
     private ConstraintLayout root;
     private boolean shouldRefresh = true;
     private List<DirectItemOrHeader> itemOrHeaders;
-    private MenuItem markAsSeenMenuItem;
     private FragmentDirectMessagesThreadBinding binding;
     private Tooltip tooltip;
     private float initialSendX;
@@ -116,75 +116,6 @@ public class DirectMessageThreadFragment extends Fragment {
     private boolean wasKbShowing;
     private int keyboardHeight = Utils.convertDpToPx(250);
 
-    // private final View.OnClickListener clickListener = v -> {
-    //     if (v == binding.commentSend) {
-    //         final String text = binding.commentText.getText().toString();
-    //         if (TextUtils.isEmpty(text)) {
-    //             final Context context = getContext();
-    //             if (context == null) return;
-    //             Toast.makeText(context, R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
-    //             return;
-    //         }
-    //         sendText(text, null, false);
-    //         return;
-    //     }
-    //     if (v == binding.image) {
-    //         final Intent intent = new Intent();
-    //         intent.setType("image/*");
-    //         intent.setAction(Intent.ACTION_GET_CONTENT);
-    //         startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), PICK_IMAGE);
-    //     }
-    // };
-    // private final FetchListener<InboxThreadModel> fetchListener = new FetchListener<InboxThreadModel>() {
-    //     @Override
-    //     public void doBefore() {
-    //         setTitle(true);g
-    //     }
-    //
-    //     @Override
-    //     public void onResult(final InboxThreadModel result) {
-    //         if (result == null && ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor) || TextUtils.isEmpty(cursor))) {
-    //             final Context context = getContext();
-    //             if (context == null) return;
-    //             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-    //         }
-    //
-    //         if (result != null) {
-    //             cursor = result.getOldestCursor();
-    //             hasOlder = result.hasOlder();
-    //             if ("MINCURSOR".equals(cursor) || "MAXCURSOR".equals(cursor)) {
-    //                 cursor = null;
-    //             }
-    //             users.clear();
-    //             users.addAll(result.getUsers());
-    //             leftUsers.clear();
-    //             leftUsers.addAll(result.getLeftUsers());
-    //
-    //             List<DirectItemModel> list = listViewModel.getList().getValue();
-    //             final List<DirectItemModel> newList = result.getItems();
-    //             list = list != null ? new LinkedList<>(list) : new LinkedList<>();
-    //             if (hasSentSomething || hasDeletedSomething) {
-    //                 list = newList;
-    //                 final Handler handler = new Handler();
-    //                 if (hasSentSomething) handler.postDelayed(() -> {
-    //                     binding.messageList.smoothScrollToPosition(0);
-    //                 }, 200);
-    //                 hasSentSomething = false;
-    //                 hasDeletedSomething = false;
-    //             } else {
-    //                 list.addAll(newList);
-    //             }
-    //             listViewModel.getList().postValue(list);
-    //             lastMessage = result.getNewestCursor();
-    //
-    //             // if (Utils.settingsHelper.getBoolean(Constants.DM_MARK_AS_SEEN)) new ThreadAction().execute("seen", lastMessage);
-    //         }
-    //         setTitle(false);
-    //     }
-    // };
-    // private DirectItemMediaModel downloadMediaItem;
-    // private int prevSizeChangeHeight;
-    // private ArrayAdapter<String> dialogAdapter;
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
         @Override
@@ -200,7 +131,46 @@ public class DirectMessageThreadFragment extends Fragment {
             setMicToSendIcon();
         }
     };
+    private final DirectItemsAdapter.DirectItemCallback directItemCallback = new DirectItemsAdapter.DirectItemCallback() {
+        @Override
+        public void onHashtagClick(final String hashtag) {
+            final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalHashTagFragment(hashtag);
+            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+        }
 
+        @Override
+        public void onMentionClick(final String mention) {
+            final Bundle bundle = new Bundle();
+            bundle.putString("username", "@" + mention);
+            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(R.id.action_global_profileFragment, bundle);
+        }
+
+        @Override
+        public void onLocationClick(final long locationId) {
+            final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalLocationFragment(locationId);
+            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+        }
+
+        @Override
+        public void onURLClick(final String url) {
+            final Context context = getContext();
+            if (context == null) return;
+            Utils.openURL(context, url);
+        }
+
+        @Override
+        public void onEmailClick(final String email) {
+            final Context context = getContext();
+            if (context == null) return;
+            Utils.openEmailAddress(context, email);
+        }
+
+        @Override
+        public void onMediaClick(final Media media) {
+            final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(media);
+            builder.build().show(getChildFragmentManager(), "post_view");
+        }
+    };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -243,7 +213,7 @@ public class DirectMessageThreadFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.dm_thread_menu, menu);
-        markAsSeenMenuItem = menu.findItem(R.id.mark_as_seen);
+        final MenuItem markAsSeenMenuItem = menu.findItem(R.id.mark_as_seen);
         if (markAsSeenMenuItem != null) {
             markAsSeenMenuItem.setVisible(false);
         }
@@ -253,7 +223,8 @@ public class DirectMessageThreadFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         final int itemId = item.getItemId();
         if (itemId == R.id.info) {
-            final NavDirections action = DirectMessageThreadFragmentDirections.actionDMThreadFragmentToDMSettingsFragment(viewModel.getThreadId(), null);
+            final NavDirections action = DirectMessageThreadFragmentDirections
+                    .actionDMThreadFragmentToDMSettingsFragment(viewModel.getThreadId(), null);
             NavHostFragment.findNavController(this).navigate(action);
             return true;
         }
@@ -379,7 +350,6 @@ public class DirectMessageThreadFragment extends Fragment {
                                                       .findFirst()
                                              : Optional.empty();
         if (first.isPresent()) {
-            // setTitle(UPDATING_TITLE);
             final DirectThread thread = first.get();
             viewModel.setThread(thread);
             return;
@@ -590,7 +560,7 @@ public class DirectMessageThreadFragment extends Fragment {
             itemsAdapter.setThread(thread);
             return;
         }
-        itemsAdapter = new DirectItemsAdapter(currentUser, thread);
+        itemsAdapter = new DirectItemsAdapter(currentUser, thread, directItemCallback);
         itemsAdapter.setHasStableIds(true);
         itemsAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         binding.chats.setAdapter(itemsAdapter);

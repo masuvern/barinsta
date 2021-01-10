@@ -17,6 +17,7 @@ import com.google.common.primitives.Floats;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmVoiceMediaBinding;
 import awais.instagrabber.repositories.responses.Audio;
@@ -43,8 +44,8 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
                                           @NonNull final LayoutDmVoiceMediaBinding binding,
                                           final User currentUser,
                                           final DirectThread thread,
-                                          final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                          final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         this.dataSourceFactory = new DefaultDataSourceFactory(binding.getRoot().getContext(), "instagram");
         setItemView(binding.getRoot());

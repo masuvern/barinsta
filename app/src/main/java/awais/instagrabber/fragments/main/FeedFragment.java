@@ -169,8 +169,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
+            final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(feedModel);
             if (position >= 0) {
                 builder.setPosition(position);
             }

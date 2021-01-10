@@ -3,6 +3,7 @@ package awais.instagrabber.adapters.viewholder.directmessages;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -13,9 +14,9 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmActionLogBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemActionLog;
@@ -23,6 +24,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.TextUtils;
 
 public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
+    private static final String TAG = DirectItemActionLogViewHolder.class.getSimpleName();
 
     private final LayoutDmActionLogBinding binding;
 
@@ -30,11 +32,11 @@ public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
                                          final LayoutDmActionLogBinding binding,
                                          final User currentUser,
                                          final DirectThread thread,
-                                         final MentionClickListener mentionClickListener,
-                                         final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                         final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
+        binding.tvMessage.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     @Override
@@ -60,7 +62,7 @@ public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
                     final ClickableSpan clickableSpan = new ClickableSpan() {
                         @Override
                         public void onClick(@NonNull final View widget) {
-
+                            handleDeepLink(textAttribute.getIntent());
                         }
                     };
                     sb.setSpan(clickableSpan, textAttribute.getStart(), textAttribute.getEnd(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);

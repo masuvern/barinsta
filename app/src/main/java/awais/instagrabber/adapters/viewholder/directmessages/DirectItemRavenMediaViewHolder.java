@@ -10,6 +10,7 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -32,8 +33,8 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
                                           @NonNull final LayoutDmRavenMediaBinding binding,
                                           final User currentUser,
                                           final DirectThread thread,
-                                          final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                          final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         maxWidth = windowWidth - margin - dmRadiusSmall;
         setItemView(binding.getRoot());
@@ -46,6 +47,9 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         if (media == null) return;
         setExpiryInfo(visualMedia);
         setPreview(visualMedia, messageDirection);
+        final boolean expired = media.getPk() == null;
+        if (expired) return;
+        itemView.setOnClickListener(v -> openMedia(media));
         /*final boolean isExpired = visualMedia == null || (mediaModel = visualMedia.getMedia()) == null ||
                 TextUtils.isEmpty(mediaModel.getThumbUrl()) && mediaModel.getPk() < 1;
 

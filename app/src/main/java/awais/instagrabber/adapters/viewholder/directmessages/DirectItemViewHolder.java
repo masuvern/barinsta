@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
+import awais.instagrabber.customviews.RamboTextViewV2;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -28,6 +30,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.DeepLinkParser;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
@@ -36,12 +39,14 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     private final LayoutDmBaseBinding binding;
     private final User currentUser;
     private final DirectThread thread;
+    private final int groupMessageWidth;
+    private final List<Long> userIds;
+    private final DirectItemCallback callback;
+
     protected final int margin;
     protected final int dmRadius;
     protected final int dmRadiusSmall;
     protected final int messageInfoPaddingSmall;
-    private final int groupMessageWidth;
-    private final List<Long> userIds;
     protected final int mediaImageMaxHeight;
     protected final int windowWidth;
     protected final int mediaImageMaxWidth;
@@ -49,18 +54,18 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     public DirectItemViewHolder(@NonNull final LayoutDmBaseBinding binding,
                                 @NonNull final User currentUser,
                                 @NonNull final DirectThread thread,
-                                @NonNull final View.OnClickListener onClickListener) {
+                                @NonNull final DirectItemCallback callback) {
         super(binding.getRoot());
         this.binding = binding;
         this.currentUser = currentUser;
         this.thread = thread;
+        this.callback = callback;
         userIds = thread.getUsers()
                         .stream()
                         .map(User::getPk)
                         .collect(Collectors.toList());
         binding.ivProfilePic.setVisibility(thread.isGroup() ? View.VISIBLE : View.GONE);
-        binding.ivProfilePic.setOnClickListener(thread.isGroup() ? onClickListener : null);
-        // binding.messageCard.setOnClickListener(onClickListener);
+        binding.ivProfilePic.setOnClickListener(null);
         final Resources resources = itemView.getResources();
         margin = resources.getDimensionPixelSize(R.dimen.dm_message_item_margin);
         final int avatarSize = resources.getDimensionPixelSize(R.dimen.dm_message_item_avatar_size);
@@ -365,6 +370,40 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void cleanup() {}
+
+    protected void setupRamboTextListeners(@NonNull final RamboTextViewV2 textView) {
+        textView.addOnHashtagListener(autoLinkItem -> callback.onHashtagClick(autoLinkItem.getOriginalText().trim()));
+        textView.addOnMentionClickListener(autoLinkItem -> openProfile(autoLinkItem.getOriginalText().trim()));
+        textView.addOnEmailClickListener(autoLinkItem -> callback.onEmailClick(autoLinkItem.getOriginalText().trim()));
+        textView.addOnURLClickListener(autoLinkItem -> openURL(autoLinkItem.getOriginalText().trim()));
+    }
+
+    protected void openProfile(final String username) {
+        callback.onMentionClick(username);
+    }
+
+    protected void openLocation(final long locationId) {
+        callback.onLocationClick(locationId);
+    }
+
+    protected void openURL(final String url) {
+        callback.onURLClick(url);
+    }
+
+    protected void openMedia(final Media media) {
+        callback.onMediaClick(media);
+    }
+
+    protected void handleDeepLink(final String deepLinkText) {
+        if (deepLinkText == null) return;
+        final DeepLinkParser.DeepLink deepLink = DeepLinkParser.parse(deepLinkText);
+        if (deepLink == null) return;
+        switch (deepLink.getType()) {
+            case USER:
+                callback.onMentionClick(deepLink.getValue());
+                break;
+        }
+    }
 
     public enum MessageDirection {
         INCOMING,

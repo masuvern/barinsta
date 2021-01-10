@@ -11,9 +11,9 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmActionLogBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemActionLog;
@@ -29,9 +29,8 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
                                               final LayoutDmActionLogBinding binding,
                                               final User currentUser,
                                               final DirectThread thread,
-                                              final MentionClickListener mentionClickListener,
-                                              final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                              final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
     }

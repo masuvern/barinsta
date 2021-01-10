@@ -442,12 +442,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         setProfilePicSharedElement();
         setupCaptionBottomSheet();
         setupCommonActions();
-        setupShare();
         setObservers();
     }
 
     private void setObservers() {
         viewModel.getUser().observe(getViewLifecycleOwner(), user -> {
+            if (user == null) {
+                binding.userDetailsGroup.setVisibility(View.GONE);
+                return;
+            }
+            binding.userDetailsGroup.setVisibility(View.VISIBLE);
             binding.getRoot().post(() -> setupProfilePic(user));
             binding.getRoot().post(() -> setupTitles(user));
         });
@@ -461,15 +465,27 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             binding.date.setVisibility(View.VISIBLE);
             binding.date.setText(date);
         }));
-        viewModel.getLikeCount().observe(getViewLifecycleOwner(), count -> {
+        if (viewModel.getMedia().isCommentLikesEnabled()) {
+            viewModel.getLikeCount().observe(getViewLifecycleOwner(), count -> {
+                final long safeCount = getSafeCount(count);
+                final String likesString = getResources().getQuantityString(R.plurals.likes_count, (int) safeCount, safeCount);
+                binding.likesCount.setText(likesString);
+            });
+            viewModel.getCommentCount().observe(getViewLifecycleOwner(), count -> {
+                final long safeCount = getSafeCount(count);
+                final String likesString = getResources().getQuantityString(R.plurals.comments_count, (int) safeCount, safeCount);
+                binding.likesCount.setText(likesString);
+            });
+        }
+        viewModel.getViewCount().observe(getViewLifecycleOwner(), count -> {
+            if (count == null) {
+                binding.viewsCount.setVisibility(View.GONE);
+                return;
+            }
+            binding.viewsCount.setVisibility(View.VISIBLE);
             final long safeCount = getSafeCount(count);
-            final String likesString = getResources().getQuantityString(R.plurals.likes_count, (int) safeCount, safeCount);
-            binding.likesCount.setText(likesString);
-        });
-        viewModel.getCommentCount().observe(getViewLifecycleOwner(), count -> {
-            final long safeCount = getSafeCount(count);
-            final String likesString = getResources().getQuantityString(R.plurals.comments_count, (int) safeCount, safeCount);
-            binding.likesCount.setText(likesString);
+            final String viewString = getResources().getQuantityString(R.plurals.views_count, (int) safeCount, safeCount);
+            binding.viewsCount.setText(viewString);
         });
         viewModel.getType().observe(getViewLifecycleOwner(), this::setupPostTypeLayout);
         viewModel.getLiked().observe(getViewLifecycleOwner(), this::setLikedResources);
@@ -518,9 +534,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         setupSave();
         setupDownload();
         setupComment();
+        setupShare();
     }
 
     private void setupComment() {
+        if (!viewModel.hasPk() || !viewModel.getMedia().isCommentLikesEnabled()) {
+            binding.comment.setVisibility(View.GONE);
+            binding.commentsCount.setVisibility(View.GONE);
+            return;
+        }
+        binding.comment.setVisibility(View.VISIBLE);
         binding.comment.setOnClickListener(v -> {
             final Media media = viewModel.getMedia();
             final User user = media.getUser();
@@ -554,6 +577,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupLike() {
+        final boolean likableMedia = viewModel.hasPk() && viewModel.getMedia().isCommentLikesEnabled();
+        if (!likableMedia) {
+            binding.like.setVisibility(View.GONE);
+            binding.likesCount.setVisibility(View.GONE);
+            return;
+        }
         if (!viewModel.isLoggedIn()) {
             binding.like.setVisibility(View.GONE);
             return;
@@ -626,7 +655,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupSave() {
-        if (!viewModel.isLoggedIn()) {
+        if (!viewModel.isLoggedIn() || !viewModel.hasPk() || !viewModel.getMedia().canViewerSave()) {
             binding.save.setVisibility(View.GONE);
             return;
         }
@@ -854,6 +883,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupShare() {
+        if (!viewModel.hasPk()) {
+            binding.share.setVisibility(View.GONE);
+            return;
+        }
+        binding.share.setVisibility(View.VISIBLE);
         binding.share.setOnLongClickListener(v -> {
             Utils.displayToastAboveView(context, v, getString(R.string.share));
             return true;
@@ -1017,7 +1051,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 sliderPosition = position;
                 final String text = (position + 1) + "/" + size;
                 binding.mediaCounter.setText(text);
-                final Media postChild = media.getCarouselMedia().get(position);
+                final Media childMedia = media.getCarouselMedia().get(position);
                 final View view = binding.sliderParent.getChildAt(0);
                 if (prevPosition != -1) {
                     if (view instanceof RecyclerView) {
@@ -1027,7 +1061,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                         }
                     }
                 }
-                if (postChild.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO) {
+                if (childMedia.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO) {
                     if (view instanceof RecyclerView) {
                         final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(position);
                         if (viewHolder instanceof SliderVideoViewHolder) {
@@ -1035,8 +1069,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                         }
                     }
                     enablePlayerControls(true);
+                    viewModel.setViewCount(childMedia.getViewCount());
                     return;
                 }
+                viewModel.setViewCount(null);
                 enablePlayerControls(false);
             }
 
@@ -1325,10 +1361,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             TransitionManager.beginDelayedTransition(binding.getRoot());
             if (detailsVisible) {
                 detailsVisible = false;
-                binding.profilePic.setVisibility(View.GONE);
-                binding.title.setVisibility(View.GONE);
-                binding.subtitle.setVisibility(View.GONE);
-                binding.topBg.setVisibility(View.GONE);
+                if (media.getUser() != null) {
+                    binding.profilePic.setVisibility(View.GONE);
+                    binding.title.setVisibility(View.GONE);
+                    binding.subtitle.setVisibility(View.GONE);
+                    binding.topBg.setVisibility(View.GONE);
+                }
                 if (media.getLocation() != null) {
                     binding.location.setVisibility(View.GONE);
                 }
@@ -1355,10 +1393,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 }
                 return;
             }
-            binding.profilePic.setVisibility(View.VISIBLE);
-            binding.title.setVisibility(View.VISIBLE);
-            binding.subtitle.setVisibility(View.VISIBLE);
-            binding.topBg.setVisibility(View.VISIBLE);
+            if (media.getUser() != null) {
+                binding.profilePic.setVisibility(View.VISIBLE);
+                binding.title.setVisibility(View.VISIBLE);
+                binding.subtitle.setVisibility(View.VISIBLE);
+                binding.topBg.setVisibility(View.VISIBLE);
+            }
             if (media.getLocation() != null) {
                 binding.location.setVisibility(View.VISIBLE);
             }

@@ -10,9 +10,9 @@ import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmReelShareBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
@@ -31,9 +31,8 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
                                          @NonNull final LayoutDmReelShareBinding binding,
                                          final User currentUser,
                                          final DirectThread thread,
-                                         final MentionClickListener mentionClickListener,
-                                         final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                         final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
     }
@@ -72,6 +71,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
         }
         if (!expired) {
             setPreview(media);
+            itemView.setOnClickListener(v -> openMedia(media));
         }
     }
 

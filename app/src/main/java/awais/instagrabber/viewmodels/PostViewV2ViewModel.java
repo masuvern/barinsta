@@ -36,6 +36,7 @@ public class PostViewV2ViewModel extends ViewModel {
     private final MutableLiveData<String> date = new MutableLiveData<>();
     private final MutableLiveData<Long> likeCount = new MutableLiveData<>(0L);
     private final MutableLiveData<Long> commentCount = new MutableLiveData<>(0L);
+    private final MutableLiveData<Long> viewCount = new MutableLiveData<>(0L);
     private final MutableLiveData<MediaItemType> type = new MutableLiveData<>();
     private final MutableLiveData<Boolean> liked = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
@@ -63,6 +64,7 @@ public class PostViewV2ViewModel extends ViewModel {
         date.postValue(media.getDate());
         likeCount.postValue(media.getLikeCount());
         commentCount.postValue(media.getCommentCount());
+        viewCount.postValue(media.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? media.getViewCount() : null);
         type.postValue(media.getMediaType());
         liked.postValue(media.hasLiked());
         saved.postValue(media.hasViewerSaved());
@@ -71,7 +73,7 @@ public class PostViewV2ViewModel extends ViewModel {
 
     private void initOptions() {
         final ImmutableList.Builder<Integer> builder = ImmutableList.builder();
-        if (isLoggedIn && media.getUser().getPk() == viewerId) {
+        if (isLoggedIn && media.getUser() != null && media.getUser().getPk() == viewerId) {
             builder.add(R.id.edit_caption);
         }
         options.postValue(builder.build());
@@ -107,6 +109,10 @@ public class PostViewV2ViewModel extends ViewModel {
 
     public LiveData<Long> getCommentCount() {
         return commentCount;
+    }
+
+    public LiveData<Long> getViewCount() {
+        return viewCount;
     }
 
     public LiveData<MediaItemType> getType() {
@@ -269,5 +275,13 @@ public class PostViewV2ViewModel extends ViewModel {
             }
         });
         return data;
+    }
+
+    public boolean hasPk() {
+        return media.getPk() != null;
+    }
+
+    public void setViewCount(final Long viewCount) {
+        this.viewCount.postValue(viewCount);
     }
 }

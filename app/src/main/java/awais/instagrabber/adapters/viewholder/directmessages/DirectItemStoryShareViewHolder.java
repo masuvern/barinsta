@@ -10,9 +10,9 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
@@ -27,17 +27,14 @@ import awais.instagrabber.utils.TextUtils;
 public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmStoryShareBinding binding;
-    // private final int maxWidth;
 
     public DirectItemStoryShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmStoryShareBinding binding,
                                           final User currentUser,
                                           final DirectThread thread,
-                                          final MentionClickListener mentionClickListener,
-                                          final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                          final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
-        // maxWidth = windowWidth - margin - dmRadiusSmall;
         setItemView(binding.getRoot());
     }
 
@@ -58,13 +55,13 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
         binding.ivMediaPreview.setController(null);
         final DirectItemStoryShare storyShare = item.getStoryShare();
         if (storyShare == null) return;
-        final String text = storyShare.getText();
-        if (!TextUtils.isEmpty(text)) {
-            binding.text.setText(text);
-            binding.text.setVisibility(View.VISIBLE);
-            return;
-        }
-        final Media storyShareMedia = storyShare.getMedia();
+        setText(storyShare);
+        final Media media = storyShare.getMedia();
+        setupPreview(messageDirection, media);
+        itemView.setOnClickListener(v -> openMedia(media));
+    }
+
+    private void setupPreview(final MessageDirection messageDirection, final Media storyShareMedia) {
         final MediaItemType mediaType = storyShareMedia.getMediaType();
         binding.typeIcon.setVisibility(mediaType == MediaItemType.MEDIA_TYPE_VIDEO ? View.VISIBLE : View.GONE);
         final RoundingParams roundingParams = messageDirection == MessageDirection.INCOMING
@@ -88,6 +85,16 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
         if (imageVersions2 == null) return;
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(imageVersions2);
         binding.ivMediaPreview.setImageURI(thumbUrl);
+    }
+
+    private void setText(final DirectItemStoryShare storyShare) {
+        final String text = storyShare.getText();
+        if (!TextUtils.isEmpty(text)) {
+            binding.text.setText(text);
+            binding.text.setVisibility(View.VISIBLE);
+            return;
+        }
+        binding.text.setVisibility(View.GONE);
     }
 
     private void setExpiredStoryInfo(final DirectItem item) {

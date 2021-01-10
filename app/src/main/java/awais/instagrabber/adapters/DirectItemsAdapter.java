@@ -47,6 +47,7 @@ import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
 import awais.instagrabber.databinding.LayoutDmTextBinding;
 import awais.instagrabber.databinding.LayoutDmVoiceMediaBinding;
 import awais.instagrabber.models.enums.DirectItemType;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
@@ -57,6 +58,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
 
     private final User currentUser;
     private DirectThread thread;
+    private final DirectItemCallback callback;
     private final AsyncListDiffer<DirectItemOrHeader> differ;
     private List<DirectItem> items;
 
@@ -99,9 +101,11 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     };
 
     public DirectItemsAdapter(@NonNull final User currentUser,
-                              @NonNull final DirectThread thread) {
+                              @NonNull final DirectThread thread,
+                              @NonNull final DirectItemCallback callback) {
         this.currentUser = currentUser;
         this.thread = thread;
+        this.callback = callback;
         differ = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
                                        new AsyncDifferConfig.Builder<>(diffCallback).build());
         // this.onClickListener = onClickListener;
@@ -128,66 +132,66 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         switch (directItemType) {
             case TEXT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemTextViewHolder(baseBinding, binding, currentUser, thread, null);
+                return new DirectItemTextViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case LIKE: {
                 final LayoutDmLikeBinding binding = LayoutDmLikeBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemLikeViewHolder(baseBinding, binding, currentUser, thread, null);
+                return new DirectItemLikeViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case LINK: {
                 final LayoutDmLinkBinding binding = LayoutDmLinkBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemLinkViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemLinkViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case ACTION_LOG: {
                 final LayoutDmActionLogBinding binding = LayoutDmActionLogBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemActionLogViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemActionLogViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case VIDEO_CALL_EVENT: {
                 final LayoutDmActionLogBinding binding = LayoutDmActionLogBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemVideoCallEventViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemVideoCallEventViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case PLACEHOLDER: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemPlaceholderViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemPlaceholderViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case ANIMATED_MEDIA: {
                 final LayoutDmAnimatedMediaBinding binding = LayoutDmAnimatedMediaBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemAnimatedMediaViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemAnimatedMediaViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case VOICE_MEDIA: {
                 final LayoutDmVoiceMediaBinding binding = LayoutDmVoiceMediaBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemVoiceMediaViewHolder(baseBinding, binding, currentUser, thread, null);
+                return new DirectItemVoiceMediaViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case LOCATION:
             case PROFILE: {
                 final LayoutDmProfileBinding binding = LayoutDmProfileBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemProfileViewHolder(baseBinding, binding, currentUser, thread, null);
+                return new DirectItemProfileViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case MEDIA: {
                 final LayoutDmMediaBinding binding = LayoutDmMediaBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemMediaViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemMediaViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case CLIP:
             case FELIX_SHARE:
             case MEDIA_SHARE: {
                 final LayoutDmMediaShareBinding binding = LayoutDmMediaShareBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemMediaShareViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemMediaShareViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case STORY_SHARE: {
                 final LayoutDmStoryShareBinding binding = LayoutDmStoryShareBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemStoryShareViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemStoryShareViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case REEL_SHARE: {
                 final LayoutDmReelShareBinding binding = LayoutDmReelShareBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemReelShareViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemReelShareViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             case RAVEN_MEDIA: {
                 final LayoutDmRavenMediaBinding binding = LayoutDmRavenMediaBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemRavenMediaViewHolder(baseBinding, binding, currentUser, thread, null);
+                return new DirectItemRavenMediaViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
             default: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
-                return new DirectItemDefaultViewHolder(baseBinding, binding, currentUser, thread, null, null);
+                return new DirectItemDefaultViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
         }
     }
@@ -351,5 +355,19 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             }
             binding.header.setText(DateFormat.getDateFormat(itemView.getContext()).format(date));
         }
+    }
+
+    public interface DirectItemCallback {
+        void onHashtagClick(String hashtag);
+
+        void onMentionClick(String mention);
+
+        void onLocationClick(long locationId);
+
+        void onURLClick(String url);
+
+        void onEmailClick(String email);
+
+        void onMediaClick(Media media);
     }
 }

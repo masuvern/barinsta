@@ -373,6 +373,10 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
+    <plurals name="views_count">
+        <item quantity="one">%d view</item>
+        <item quantity="other">%d views</item>
+    </plurals>
     <plurals name="stories_count">
         <item quantity="one">%s story</item>
         <item quantity="other">%s stories</item>
@@ -391,4 +395,5 @@
     <string name="dms_action_make_admin">Make Admin</string>
     <string name="dms_action_remove_admin">Remove as Admin</string>
     <string name="edit_unsuccessful">Edit was unsuccessful</string>
+    <string name="message">Message</string>
 </resources>

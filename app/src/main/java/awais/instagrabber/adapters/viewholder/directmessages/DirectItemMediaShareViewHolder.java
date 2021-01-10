@@ -13,9 +13,9 @@ import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
 import awais.instagrabber.R;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmMediaShareBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
@@ -38,9 +38,8 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
                                           @NonNull final LayoutDmMediaShareBinding binding,
                                           final User currentUser,
                                           final DirectThread thread,
-                                          final MentionClickListener mentionClickListener,
-                                          final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                          final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         incomingRoundingParams = RoundingParams.fromCornersRadii(dmRadiusSmall, dmRadius, dmRadius, dmRadius);
         outgoingRoundingParams = RoundingParams.fromCornersRadii(dmRadius, dmRadiusSmall, dmRadius, dmRadius);
@@ -59,36 +58,36 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
                                             : R.drawable.bg_media_share_top_outgoing);
         Media media = getMedia(item);
         if (media == null) return;
-        final User user = media.getUser();
-        if (user != null) {
-            binding.username.setVisibility(View.VISIBLE);
-            binding.profilePic.setVisibility(View.VISIBLE);
-            binding.username.setText(user.getUsername());
-            binding.profilePic.setImageURI(user.getProfilePicUrl());
+        itemView.post(() -> {
+            setupUser(media);
+            setupTitle(media);
+            setupCaption(media);
+        });
+        itemView.post(() -> {
+            final MediaItemType mediaType = media.getMediaType();
+            setupTypeIndicator(mediaType);
+            if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
+                setupPreview(media.getCarouselMedia().get(0));
+                return;
+            }
+            setupPreview(media);
+        });
+        itemView.setOnClickListener(v -> openMedia(media));
+    }
+
+    private void setupTypeIndicator(final MediaItemType mediaType) {
+        final boolean showTypeIcon = mediaType == MediaItemType.MEDIA_TYPE_VIDEO || mediaType == MediaItemType.MEDIA_TYPE_SLIDER;
+        if (!showTypeIcon) {
+            binding.typeIcon.setVisibility(View.GONE);
         } else {
-            binding.username.setVisibility(View.GONE);
-            binding.profilePic.setVisibility(View.GONE);
+            binding.typeIcon.setVisibility(View.VISIBLE);
+            binding.typeIcon.setImageResource(mediaType == MediaItemType.MEDIA_TYPE_VIDEO
+                                              ? R.drawable.ic_video_24
+                                              : R.drawable.ic_checkbox_multiple_blank_stroke);
         }
-        final String title = media.getTitle();
-        if (!TextUtils.isEmpty(title)) {
-            binding.title.setVisibility(View.VISIBLE);
-            binding.title.setText(title);
-        } else {
-            binding.title.setVisibility(View.GONE);
-        }
-        final Caption caption = media.getCaption();
-        if (caption != null) {
-            binding.caption.setVisibility(View.VISIBLE);
-            binding.caption.setText(caption.getText());
-            binding.caption.setEllipsize(TextUtils.TruncateAt.END);
-            binding.caption.setMaxLines(2);
-        } else {
-            binding.caption.setVisibility(View.GONE);
-        }
-        final MediaItemType mediaType = media.getMediaType();
-        if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
-            media = media.getCarouselMedia().get(0);
-        }
+    }
+
+    private void setupPreview(@NonNull final Media media) {
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
@@ -101,15 +100,41 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         binding.mediaPreview.requestLayout();
         final String url = ResponseBodyUtils.getThumbUrl(media.getImageVersions2());
         binding.mediaPreview.setImageURI(url);
-        final boolean showTypeIcon = mediaType == MediaItemType.MEDIA_TYPE_VIDEO || mediaType == MediaItemType.MEDIA_TYPE_SLIDER;
-        if (!showTypeIcon) {
-            binding.typeIcon.setVisibility(View.GONE);
-            return;
+    }
+
+    private void setupCaption(@NonNull final Media media) {
+        final Caption caption = media.getCaption();
+        if (caption != null) {
+            binding.caption.setVisibility(View.VISIBLE);
+            binding.caption.setText(caption.getText());
+            binding.caption.setEllipsize(TextUtils.TruncateAt.END);
+            binding.caption.setMaxLines(2);
+        } else {
+            binding.caption.setVisibility(View.GONE);
         }
-        binding.typeIcon.setVisibility(View.VISIBLE);
-        binding.typeIcon.setImageResource(mediaType == MediaItemType.MEDIA_TYPE_VIDEO
-                                          ? R.drawable.ic_video_24
-                                          : R.drawable.ic_checkbox_multiple_blank_stroke);
+    }
+
+    private void setupTitle(@NonNull final Media media) {
+        final String title = media.getTitle();
+        if (!TextUtils.isEmpty(title)) {
+            binding.title.setVisibility(View.VISIBLE);
+            binding.title.setText(title);
+        } else {
+            binding.title.setVisibility(View.GONE);
+        }
+    }
+
+    private void setupUser(@NonNull final Media media) {
+        final User user = media.getUser();
+        if (user != null) {
+            binding.username.setVisibility(View.VISIBLE);
+            binding.profilePic.setVisibility(View.VISIBLE);
+            binding.username.setText(user.getUsername());
+            binding.profilePic.setImageURI(user.getProfilePicUrl());
+        } else {
+            binding.username.setVisibility(View.GONE);
+            binding.profilePic.setVisibility(View.GONE);
+        }
     }
 
     @Nullable

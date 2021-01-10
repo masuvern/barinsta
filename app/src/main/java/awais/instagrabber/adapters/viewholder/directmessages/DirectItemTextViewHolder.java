@@ -1,9 +1,8 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
-import android.view.View;
-
 import androidx.annotation.NonNull;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmTextBinding;
 import awais.instagrabber.repositories.responses.User;
@@ -18,8 +17,8 @@ public class DirectItemTextViewHolder extends DirectItemViewHolder {
                                     @NonNull final LayoutDmTextBinding binding,
                                     final User currentUser,
                                     final DirectThread thread,
-                                    final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                    @NonNull final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
     }
@@ -29,29 +28,11 @@ public class DirectItemTextViewHolder extends DirectItemViewHolder {
         final String text = directItemModel.getText();
         if (text == null) return;
         binding.tvMessage.setText(text);
-        // setupListeners();
+        setupRamboTextListeners(binding.tvMessage);
     }
 
     @Override
     protected boolean showBackground() {
         return true;
     }
-
-    // private void setupListeners() {
-    //     binding.tvMessage.addOnHashtagListener(autoLinkItem -> {
-    //         final String hashtag = autoLinkItem.getOriginalText().trim();
-    //     });
-    //     binding.tvMessage.addOnMentionClickListener(autoLinkItem -> {
-    //         final String mention = autoLinkItem.getOriginalText().trim();
-    //     });
-    //     binding.tvMessage.addOnEmailClickListener(autoLinkItem -> {
-    //         final String email = autoLinkItem.getOriginalText().trim();
-    //     });
-    //     binding.tvMessage.addOnURLClickListener(autoLinkItem -> {
-    //         final String url = autoLinkItem.getOriginalText().trim();
-    //     });
-    //     binding.tvMessage.setOnLongClickListener(v -> {
-    //         return true;
-    //     });
-    // }
 }

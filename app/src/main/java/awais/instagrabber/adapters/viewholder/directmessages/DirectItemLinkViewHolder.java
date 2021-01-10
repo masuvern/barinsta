@@ -5,9 +5,9 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmLinkBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemLink;
@@ -23,9 +23,8 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
                                     final LayoutDmLinkBinding binding,
                                     final User currentUser,
                                     final DirectThread thread,
-                                    final MentionClickListener mentionClickListener,
-                                    final View.OnClickListener onClickListener) {
-        super(baseBinding, currentUser, thread, onClickListener);
+                                    final DirectItemCallback callback) {
+        super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         final int width = windowWidth - margin - dmRadiusSmall;
         final ViewGroup.LayoutParams layoutParams = binding.preview.getLayoutParams();
@@ -35,8 +34,8 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
     }
 
     @Override
-    public void bindItem(final DirectItem directItemModel, final MessageDirection messageDirection) {
-        final DirectItemLink link = directItemModel.getLink();
+    public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
+        final DirectItemLink link = item.getLink();
         final DirectItemLinkContext linkContext = link.getLinkContext();
         final String linkImageUrl = linkContext.getLinkImageUrl();
         if (TextUtils.isEmpty(linkImageUrl)) {
@@ -64,6 +63,16 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
             binding.url.setText(linkContext.getLinkUrl());
         }
         binding.text.setText(link.getText());
+        setupListeners(linkContext);
+    }
+
+    private void setupListeners(final DirectItemLinkContext linkContext) {
+        setupRamboTextListeners(binding.text);
+        final View.OnClickListener onClickListener = v -> openURL(linkContext.getLinkUrl());
+        binding.preview.setOnClickListener(onClickListener);
+        binding.title.setOnClickListener(onClickListener);
+        binding.summary.setOnClickListener(onClickListener);
+        binding.url.setOnClickListener(onClickListener);
     }
 
     @Override
