@@ -72,6 +72,7 @@
                     android:layout_height="wrap_content"
                     android:paddingStart="0dp"
                     android:paddingEnd="8dp"
+                    android:layout_margin="8dp"
                     app:layout_constraintBottom_toTopOf="@id/mute_mentions"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/title_edit_input_layout" />
@@ -98,6 +99,7 @@
                     android:layout_height="wrap_content"
                     android:paddingStart="0dp"
                     android:paddingEnd="8dp"
+                    android:layout_margin="8dp"
                     app:layout_constraintBottom_toTopOf="@id/leave"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/mute_messages" />

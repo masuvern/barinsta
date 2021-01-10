@@ -169,6 +169,21 @@ public class DirectMessageThreadFragment extends Fragment {
 
         @Override
         public void onMediaClick(final Media media) {
+            if (media.isReelMedia()) {
+                final String pk = media.getPk();
+                try {
+                    final long mediaId = Long.parseLong(pk);
+                    final User user = media.getUser();
+                    if (user == null) return;
+                    final String username = user.getUsername();
+                    final NavDirections action = DirectMessageThreadFragmentDirections
+                            .actionThreadToStory(StoryViewerOptions.forStory(mediaId, username));
+                    NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(action);
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "onMediaClick (story): ", e);
+                }
+                return;
+            }
             final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(media);
             builder.build().show(getChildFragmentManager(), "post_view");
         }

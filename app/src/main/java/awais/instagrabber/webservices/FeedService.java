@@ -56,7 +56,6 @@ public class FeedService extends BaseService {
         form.put("device_id", UUID.randomUUID().toString());
         form.put("client_session_id", UUID.randomUUID().toString());
         form.put("is_prefetch", "0");
-        form.put("timezone_offset", String.valueOf(TimeZone.getDefault().getRawOffset() / 1000));
         if (!TextUtils.isEmpty(cursor)) {
             form.put("max_id", cursor);
             form.put("reason", "pagination");
@@ -110,7 +109,6 @@ public class FeedService extends BaseService {
         final List<Media> allPosts = new ArrayList<>();
         final List<Media> items = feedFetchResponse.getItems();
         for (final Media media : items) {
-            if (media.isInjected() || media.getMediaType() == null) continue;
             if (needNewMaxId && media.getEndOfFeedDemarcator() != null) {
                 final EndOfFeedDemarcator endOfFeedDemarcator = media.getEndOfFeedDemarcator();
                 final EndOfFeedGroupSet groupSet = endOfFeedDemarcator.getGroupSet();
@@ -129,6 +127,7 @@ public class FeedService extends BaseService {
                 }
                 continue;
             }
+            if (media.isInjected() || media.getMediaType() == null) continue;
             allPosts.add(media);
         }
         return new PostsFetchResponse(allPosts, moreAvailable, nextMaxId);
