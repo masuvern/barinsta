@@ -912,7 +912,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         }))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
-            } else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
+            }
+            else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
                 friendshipService.unfollow(
                         profileModel.getPk(),
                         new ServiceCallback<FriendshipChangeResponse>() {
@@ -1091,6 +1092,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean isReallyPrivate() {
         final long myId = CookieUtils.getUserIdFromCookie(cookie);
         final FriendshipStatus friendshipStatus = profileModel.getFriendshipStatus();
-        return !friendshipStatus.isFollowedBy() && (profileModel.getPk() != myId) && profileModel.isPrivate();
+        return !friendshipStatus.isFollowing() && (profileModel.getPk() != myId) && profileModel.isPrivate();
     }
 }
