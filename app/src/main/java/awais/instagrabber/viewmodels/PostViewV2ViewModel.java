@@ -43,16 +43,16 @@ public class PostViewV2ViewModel extends ViewModel {
     private final MutableLiveData<List<Integer>> options = new MutableLiveData<>(new ArrayList<>());
     private final MediaService mediaService;
     private final long viewerId;
-    private final String csrfToken;
     private final boolean isLoggedIn;
 
     private Media media;
 
     public PostViewV2ViewModel() {
-        mediaService = MediaService.getInstance();
         final String cookie = settingsHelper.getString(Constants.COOKIE);
+        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         viewerId = CookieUtils.getUserIdFromCookie(cookie);
-        csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
     }
 
@@ -142,14 +142,14 @@ public class PostViewV2ViewModel extends ViewModel {
     public LiveData<Resource<Object>> like() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.like(media.getPk(), viewerId, csrfToken, getLikeUnlikeCallback(data));
+        mediaService.like(media.getPk(), getLikeUnlikeCallback(data));
         return data;
     }
 
     public LiveData<Resource<Object>> unlike() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.unlike(media.getPk(), viewerId, csrfToken, getLikeUnlikeCallback(data));
+        mediaService.unlike(media.getPk(), getLikeUnlikeCallback(data));
         return data;
     }
 
@@ -196,14 +196,14 @@ public class PostViewV2ViewModel extends ViewModel {
     public LiveData<Resource<Object>> save() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.save(media.getPk(), viewerId, csrfToken, getSaveUnsaveCallback(data));
+        mediaService.save(media.getPk(), getSaveUnsaveCallback(data));
         return data;
     }
 
     public LiveData<Resource<Object>> unsave() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.unsave(media.getPk(), viewerId, csrfToken, getSaveUnsaveCallback(data));
+        mediaService.unsave(media.getPk(), getSaveUnsaveCallback(data));
         return data;
     }
 
@@ -232,7 +232,7 @@ public class PostViewV2ViewModel extends ViewModel {
     public LiveData<Resource<Object>> updateCaption(final String caption) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.editCaption(media.getPk(), viewerId, caption, csrfToken, new ServiceCallback<Boolean>() {
+        mediaService.editCaption(media.getPk(), caption, new ServiceCallback<Boolean>() {
             @Override
             public void onSuccess(final Boolean result) {
                 if (result) {

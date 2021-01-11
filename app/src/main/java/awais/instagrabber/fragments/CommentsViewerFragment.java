@@ -64,7 +64,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     private LinearLayoutManager layoutManager;
     private RecyclerLazyLoader lazyLoader;
     private String shortCode;
-    private long userId;
+    private long authorUserId, userIdFromCookie;
     private String endCursor = null;
     private Resources resources;
     private InputMethodManager imm;
@@ -140,14 +140,13 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             Toast.makeText(context, R.string.comment_send_empty_comment, Toast.LENGTH_SHORT).show();
             return;
         }
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
-        if (userId == 0) return;
+        if (userIdFromCookie == 0) return;
         String replyToId = null;
         final CommentModel commentModel = commentsAdapter.getSelected();
         if (commentModel != null) {
             replyToId = commentModel.getId();
         }
-        mediaService.comment(postId, text.toString(), userId, replyToId, CookieUtils.getCsrfTokenFromCookie(cookie), new ServiceCallback<Boolean>() {
+        mediaService.comment(postId, text.toString(), replyToId, new ServiceCallback<Boolean>() {
             @Override
             public void onSuccess(final Boolean result) {
                 commentsAdapter.clearSelection();
@@ -171,7 +170,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (AppCompatActivity) getActivity();
-        mediaService = MediaService.getInstance();
+        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userIdFromCookie);
         // setHasOptionsMenu(true);
     }
 
@@ -231,7 +233,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         final CommentsViewerFragmentArgs fragmentArgs = CommentsViewerFragmentArgs.fromBundle(getArguments());
         shortCode = fragmentArgs.getShortCode();
         postId = fragmentArgs.getPostId();
-        userId = fragmentArgs.getPostUserId();
+        authorUserId = fragmentArgs.getPostUserId();
         // setTitle();
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         binding.swipeRefreshLayout.setRefreshing(true);
@@ -289,10 +291,9 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
         String[] commentDialogList;
 
-        final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         if (!TextUtils.isEmpty(cookie)
                 && userIdFromCookie != 0
-                && (userIdFromCookie == commentModel.getProfileModel().getPk() || userIdFromCookie == userId)) {
+                && (userIdFromCookie == commentModel.getProfileModel().getPk() || userIdFromCookie == authorUserId)) {
             commentDialogList = new String[]{
                     resources.getString(R.string.open_profile),
                     resources.getString(R.string.comment_viewer_copy_comment),
@@ -324,7 +325,6 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         if (context == null) return;
         final DialogInterface.OnClickListener profileDialogListener = (dialog, which) -> {
             final User profileModel = commentModel.getProfileModel();
-            final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
             switch (which) {
                 case 0: // open profile
                     openProfile("@" + profileModel.getUsername());
@@ -354,11 +354,8 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                     }, 200);
                     break;
                 case 4: // like/unlike comment
-                    if (csrfToken == null) {
-                        return;
-                    }
                     if (!commentModel.getLiked()) {
-                        mediaService.commentLike(commentModel.getId(), csrfToken, new ServiceCallback<Boolean>() {
+                        mediaService.commentLike(commentModel.getId(), new ServiceCallback<Boolean>() {
                             @Override
                             public void onSuccess(final Boolean result) {
                                 if (!result) {
@@ -376,7 +373,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         });
                         return;
                     }
-                    mediaService.commentUnlike(commentModel.getId(), csrfToken, new ServiceCallback<Boolean>() {
+                    mediaService.commentUnlike(commentModel.getId(), new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
                             if (!result) {
@@ -416,10 +413,9 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                     });
                     break;
                 case 6: // delete comment
-                    final long userId = CookieUtils.getUserIdFromCookie(cookie);
-                    if (userId == 0) return;
+                    if (userIdFromCookie == 0) return;
                     mediaService.deleteComment(
-                            postId, userId, commentModel.getId(), csrfToken,
+                            postId, commentModel.getId(),
                             new ServiceCallback<Boolean>() {
                                 @Override
                                 public void onSuccess(final Boolean result) {

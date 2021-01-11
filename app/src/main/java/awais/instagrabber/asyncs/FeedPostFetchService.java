@@ -29,8 +29,9 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
         final List<Media> feedModels = new ArrayList<>();
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         feedModels.clear();
-        feedService.fetch(csrfToken, nextCursor, new ServiceCallback<PostsFetchResponse>() {
+        feedService.fetch(csrfToken, deviceUuid, nextCursor, new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null && feedModels.size() > 0) {

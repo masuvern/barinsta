@@ -47,10 +47,11 @@ public class FeedService extends BaseService {
     }
 
     public void fetch(final String csrfToken,
+                      final String deviceUuid,
                       final String cursor,
                       final ServiceCallback<PostsFetchResponse> callback) {
         final Map<String, String> form = new HashMap<>();
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("_csrftoken", csrfToken);
         form.put("phone_id", UUID.randomUUID().toString());
         form.put("device_id", UUID.randomUUID().toString());
