@@ -628,9 +628,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         ), new RepositoryCallback<Void>() {
                             @Override
                             public void onSuccess(final Void result) {
-                                profileDetailsBinding.favChip.setText(R.string.added_to_favs);
+                                profileDetailsBinding.favChip.setText(R.string.added_to_favs_short);
                                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
+                                showSnackbar(getString(R.string.added_to_favs_short));
                             }
 
                             @Override
