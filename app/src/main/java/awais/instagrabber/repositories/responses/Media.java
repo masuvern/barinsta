@@ -19,6 +19,7 @@ public class Media implements Serializable {
     private final MediaItemType mediaType;
     private final boolean canViewerReshare;
     private final boolean commentLikesEnabled;
+    private final boolean commentsDisabled;
     private final long nextMaxId;
     private final long commentCount;
     private final ImageVersions2 imageVersions2;
@@ -56,6 +57,7 @@ public class Media implements Serializable {
                  final int originalHeight,
                  final MediaItemType mediaType,
                  final boolean commentLikesEnabled,
+                 final boolean commentsDisabled,
                  final long nextMaxId,
                  final long commentCount,
                  final long likeCount,
@@ -87,6 +89,7 @@ public class Media implements Serializable {
         this.originalHeight = originalHeight;
         this.mediaType = mediaType;
         this.commentLikesEnabled = commentLikesEnabled;
+        this.commentsDisabled = commentsDisabled;
         this.nextMaxId = nextMaxId;
         this.commentCount = commentCount;
         this.likeCount = likeCount;
@@ -180,6 +183,10 @@ public class Media implements Serializable {
 
     public boolean isCommentLikesEnabled() {
         return commentLikesEnabled;
+    }
+
+    public boolean isCommentsDisabled() {
+        return commentsDisabled;
     }
 
     public long getNextMaxId() {
