@@ -14,14 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import awais.instagrabber.models.FollowModel;
 import awais.instagrabber.repositories.FriendshipRepository;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
@@ -100,7 +98,7 @@ public class FriendshipService extends BaseService {
         form.put("_uuid", deviceUuid);
         form.put("target_user_id", String.valueOf(targetUserId));
         final String action = restrict ? "restrict" : "unrestrict";
-        final Call<FriendshipRestrictResponse> request = repository.toggleRestrict(Constants.I_USER_AGENT, action, form);
+        final Call<FriendshipRestrictResponse> request = repository.toggleRestrict(action, form);
         request.enqueue(new Callback<FriendshipRestrictResponse>() {
             @Override
             public void onResponse(@NonNull final Call<FriendshipRestrictResponse> call,
@@ -140,7 +138,7 @@ public class FriendshipService extends BaseService {
         form.put("radio_type", "wifi-none");
         form.put("user_id", targetUserId);
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<FriendshipChangeResponse> request = repository.change(Constants.I_USER_AGENT, action, targetUserId, signedForm);
+        final Call<FriendshipChangeResponse> request = repository.change(action, targetUserId, signedForm);
         request.enqueue(new Callback<FriendshipChangeResponse>() {
             @Override
             public void onResponse(@NonNull final Call<FriendshipChangeResponse> call,
@@ -166,8 +164,8 @@ public class FriendshipService extends BaseService {
                         final ServiceCallback<FriendshipListFetchResponse> callback) {
         final Map<String, String> queryMap = new HashMap<>();
         if (maxId != null) queryMap.put("max_id", maxId);
-        final Call<String> request = repository.getList(Constants.I_USER_AGENT,
-                                                        targetUserId,
+        final Call<String> request = repository.getList(
+                targetUserId,
                                                         follower ? "followers" : "following",
                                                         queryMap);
         request.enqueue(new Callback<String>() {

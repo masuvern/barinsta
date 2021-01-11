@@ -21,6 +21,7 @@ import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,6 +33,7 @@ public class NewsService extends BaseService {
     private final NewsRepository repository;
 
     private static NewsService instance;
+    private static String browserUa, appUa;
 
     private NewsService() {
         final Retrofit retrofit = getRetrofitBuilder()
@@ -44,13 +46,15 @@ public class NewsService extends BaseService {
         if (instance == null) {
             instance = new NewsService();
         }
+        appUa = Utils.settingsHelper.getString(Constants.APP_UA);
+        browserUa = Utils.settingsHelper.getString(Constants.BROWSER_UA);
         return instance;
     }
 
     public void fetchAppInbox(final boolean markAsSeen,
                               final ServiceCallback<List<NotificationModel>> callback) {
         final List<NotificationModel> result = new ArrayList<>();
-        final Call<String> request = repository.appInbox(markAsSeen);
+        final Call<String> request = repository.appInbox(appUa, markAsSeen);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -90,7 +94,7 @@ public class NewsService extends BaseService {
 
     public void fetchWebInbox(final boolean markAsSeen,
                               final ServiceCallback<List<NotificationModel>> callback) {
-        final Call<String> request = repository.webInbox();
+        final Call<String> request = repository.webInbox(browserUa);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -206,7 +210,7 @@ public class NewsService extends BaseService {
         form.put("device_id", UUID.randomUUID().toString());
         form.put("module", "discover_people");
         form.put("paginate", "false");
-        final Call<String> request = repository.getAyml(form);
+        final Call<String> request = repository.getAyml(appUa, form);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {

@@ -46,12 +46,11 @@ public class TagsService extends BaseService {
         return instance;
     }
 
-    public void follow(@NonNull final String tag,
+    public void follow(@NonNull final String ua,
+                       @NonNull final String tag,
                        @NonNull final String csrfToken,
                        final ServiceCallback<Boolean> callback) {
-        final Call<String> request = webRepository.follow(Constants.USER_AGENT,
-                                                          csrfToken,
-                                                          tag);
+        final Call<String> request = webRepository.follow(ua, csrfToken, tag);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -77,12 +76,11 @@ public class TagsService extends BaseService {
         });
     }
 
-    public void unfollow(@NonNull final String tag,
+    public void unfollow(@NonNull final String ua,
+                         @NonNull final String tag,
                          @NonNull final String csrfToken,
                          final ServiceCallback<Boolean> callback) {
-        final Call<String> request = webRepository.unfollow(Constants.USER_AGENT,
-                                                            csrfToken,
-                                                            tag);
+        final Call<String> request = webRepository.unfollow(ua, csrfToken, tag);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {

@@ -343,6 +343,10 @@ public final class ExportImportUtils {
                 jsonObject.remove(Constants.COOKIE);
                 jsonObject.remove(Constants.DEVICE_UUID);
                 jsonObject.remove(Constants.PREV_INSTALL_VERSION);
+                jsonObject.remove(Constants.BROWSER_UA_CODE);
+                jsonObject.remove(Constants.BROWSER_UA);
+                jsonObject.remove(Constants.APP_UA_CODE);
+                jsonObject.remove(Constants.APP_UA);
                 return jsonObject;
             } catch (Exception e) {
                 Log.e(TAG, "Error exporting settings", e);

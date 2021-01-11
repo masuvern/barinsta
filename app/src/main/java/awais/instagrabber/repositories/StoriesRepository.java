@@ -28,12 +28,11 @@ public interface StoriesRepository {
     Call<String> fetchArchive(@QueryMap Map<String, String> queryParams);
 
     @GET
-    Call<String> getUserStory(@Header("User-Agent") String userAgent, @Url String url);
+    Call<String> getUserStory(@Url String url);
 
     @FormUrlEncoded
     @POST("/api/v1/media/{storyId}/{stickerId}/{action}/")
-    Call<StoryStickerResponse> respondToSticker(@Header("User-Agent") String userAgent,
-                                                @Path("storyId") String storyId,
+    Call<StoryStickerResponse> respondToSticker(@Path("storyId") String storyId,
                                                 @Path("stickerId") String stickerId,
                                                 @Path("action") String action,
                                                 // story_poll_vote, story_question_response, story_slider_vote, story_quiz_answer
