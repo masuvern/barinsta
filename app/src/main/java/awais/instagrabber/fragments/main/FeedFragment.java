@@ -39,6 +39,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.FeedStoriesAdapter;
+import awais.instagrabber.animations.FabAnimation;
 import awais.instagrabber.asyncs.FeedPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentFeedBinding;
@@ -68,6 +69,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private FragmentFeedBinding binding;
     private StoriesService storiesService;
     private boolean shouldRefresh = true;
+    private final boolean isRotate = false;
     private FeedStoriesViewModel feedStoriesViewModel;
     private boolean storiesFetching;
     private ActionMode actionMode;
@@ -282,6 +284,24 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
         binding.feedSwipeRefreshLayout.setOnRefreshListener(this);
+        /*
+        FabAnimation.init(binding.fabCamera);
+        FabAnimation.init(binding.fabStory);
+        binding.fabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRotate = FabAnimation.rotateFab(v, !isRotate);
+                if (isRotate) {
+                    FabAnimation.showIn(binding.fabCamera);
+                    FabAnimation.showIn(binding.fabStory);
+                }
+                else {
+                    FabAnimation.showOut(binding.fabCamera);
+                    FabAnimation.showOut(binding.fabStory);
+                }
+            }
+        });
+         */
         setupFeedStories();
         setupFeed();
         shouldRefresh = false;
