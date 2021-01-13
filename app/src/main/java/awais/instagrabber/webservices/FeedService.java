@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import awais.instagrabber.repositories.FeedRepository;
@@ -47,16 +46,16 @@ public class FeedService extends BaseService {
     }
 
     public void fetch(final String csrfToken,
+                      final String deviceUuid,
                       final String cursor,
                       final ServiceCallback<PostsFetchResponse> callback) {
         final Map<String, String> form = new HashMap<>();
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("_csrftoken", csrfToken);
         form.put("phone_id", UUID.randomUUID().toString());
         form.put("device_id", UUID.randomUUID().toString());
         form.put("client_session_id", UUID.randomUUID().toString());
         form.put("is_prefetch", "0");
-        form.put("timezone_offset", String.valueOf(TimeZone.getDefault().getRawOffset() / 1000));
         if (!TextUtils.isEmpty(cursor)) {
             form.put("max_id", cursor);
             form.put("reason", "pagination");
@@ -110,7 +109,7 @@ public class FeedService extends BaseService {
         final List<Media> allPosts = new ArrayList<>();
         final List<Media> items = feedFetchResponse.getItems();
         for (final Media media : items) {
-            if (media.isInjected() || media.getMediaType() == null) continue;
+            if (media == null || media.isInjected() || (media.getMediaType() == null && media.getEndOfFeedDemarcator() == null)) continue;
             if (needNewMaxId && media.getEndOfFeedDemarcator() != null) {
                 final EndOfFeedDemarcator endOfFeedDemarcator = media.getEndOfFeedDemarcator();
                 final EndOfFeedGroupSet groupSet = endOfFeedDemarcator.getGroupSet();
@@ -123,7 +122,7 @@ public class FeedService extends BaseService {
                     nextMaxId = group.getNextMaxId();
                     final List<Media> feedItems = group.getFeedItems();
                     for (final Media feedItem : feedItems) {
-                        if (feedItem == null || feedItem.isInjected()) continue;
+                        if (feedItem == null || feedItem.isInjected() || feedItem.getMediaType() == null) continue;
                         allPosts.add(feedItem);
                     }
                 }

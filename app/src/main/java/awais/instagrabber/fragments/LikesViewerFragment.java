@@ -104,7 +104,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         // final AppCompatActivity fragmentActivity = (AppCompatActivity) getActivity();
-        mediaService = isLoggedIn ? MediaService.getInstance() : null;
+        mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         // setHasOptionsMenu(true);
     }

@@ -13,14 +13,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Objects;
 
 import awais.instagrabber.models.FollowModel;
 import awais.instagrabber.repositories.FriendshipRepository;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
@@ -32,61 +31,74 @@ public class FriendshipService extends BaseService {
     private static final String TAG = "FriendshipService";
 
     private final FriendshipRepository repository;
+    private final String deviceUuid, csrfToken;
+    private final long userId;
 
     private static FriendshipService instance;
 
-    private FriendshipService() {
+    private FriendshipService(final String deviceUuid,
+                              final String csrfToken,
+                              final long userId) {
+        this.deviceUuid = deviceUuid;
+        this.csrfToken = csrfToken;
+        this.userId = userId;
         final Retrofit retrofit = getRetrofitBuilder()
                 .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(FriendshipRepository.class);
     }
 
-    public static FriendshipService getInstance() {
-        if (instance == null) {
-            instance = new FriendshipService();
+    public String getCsrfToken() {
+        return csrfToken;
+    }
+
+    public String getDeviceUuid() {
+        return deviceUuid;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public static FriendshipService getInstance(final String deviceUuid, final String csrfToken, final long userId) {
+        if (instance == null
+                || !Objects.equals(instance.getCsrfToken(), csrfToken)
+                || !Objects.equals(instance.getDeviceUuid(), deviceUuid)
+                || !Objects.equals(instance.getUserId(), userId)) {
+            instance = new FriendshipService(deviceUuid, csrfToken, userId);
         }
         return instance;
     }
 
-    public void follow(final long userId,
-                       final long targetUserId,
-                       final String csrfToken,
+    public void follow(final long targetUserId,
                        final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("create", userId, targetUserId, csrfToken, callback);
+        change("create", targetUserId, callback);
     }
 
-    public void unfollow(final long userId,
-                         final long targetUserId,
-                         final String csrfToken,
+    public void unfollow(final long targetUserId,
                          final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("destroy", userId, targetUserId, csrfToken, callback);
+        change("destroy", targetUserId, callback);
     }
 
-    public void block(final long userId,
-                      final long targetUserId,
-                      final String csrfToken,
+    public void block(final long targetUserId,
                       final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("block", userId, targetUserId, csrfToken, callback);
+        change("block", targetUserId, callback);
     }
 
-    public void unblock(final long userId,
-                        final long targetUserId,
-                        final String csrfToken,
+    public void unblock(final long targetUserId,
                         final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("unblock", userId, targetUserId, csrfToken, callback);
+        change("unblock", targetUserId, callback);
     }
 
     public void toggleRestrict(final long targetUserId,
                                final boolean restrict,
-                               final String csrfToken,
                                final ServiceCallback<FriendshipRestrictResponse> callback) {
         final Map<String, String> form = new HashMap<>(3);
         form.put("_csrftoken", csrfToken);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("target_user_id", String.valueOf(targetUserId));
         final String action = restrict ? "restrict" : "unrestrict";
-        final Call<FriendshipRestrictResponse> request = repository.toggleRestrict(Constants.I_USER_AGENT, action, form);
+        final Call<FriendshipRestrictResponse> request = repository.toggleRestrict(action, form);
         request.enqueue(new Callback<FriendshipRestrictResponse>() {
             @Override
             public void onResponse(@NonNull final Call<FriendshipRestrictResponse> call,
@@ -106,33 +118,27 @@ public class FriendshipService extends BaseService {
         });
     }
 
-    public void approve(final long userId,
-                        final long targetUserId,
-                        final String csrfToken,
+    public void approve(final long targetUserId,
                         final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("approve", userId, targetUserId, csrfToken, callback);
+        change("approve", targetUserId, callback);
     }
 
-    public void ignore(final long userId,
-                       final long targetUserId,
-                       final String csrfToken,
+    public void ignore(final long targetUserId,
                        final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("ignore", userId, targetUserId, csrfToken, callback);
+        change("ignore", targetUserId, callback);
     }
 
     private void change(final String action,
-                        final long userId,
                         final long targetUserId,
-                        final String csrfToken,
                         final ServiceCallback<FriendshipChangeResponse> callback) {
         final Map<String, Object> form = new HashMap<>(5);
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("radio_type", "wifi-none");
         form.put("user_id", targetUserId);
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<FriendshipChangeResponse> request = repository.change(Constants.I_USER_AGENT, action, targetUserId, signedForm);
+        final Call<FriendshipChangeResponse> request = repository.change(action, targetUserId, signedForm);
         request.enqueue(new Callback<FriendshipChangeResponse>() {
             @Override
             public void onResponse(@NonNull final Call<FriendshipChangeResponse> call,
@@ -158,8 +164,8 @@ public class FriendshipService extends BaseService {
                         final ServiceCallback<FriendshipListFetchResponse> callback) {
         final Map<String, String> queryMap = new HashMap<>();
         if (maxId != null) queryMap.put("max_id", maxId);
-        final Call<String> request = repository.getList(Constants.I_USER_AGENT,
-                                                        targetUserId,
+        final Call<String> request = repository.getList(
+                targetUserId,
                                                         follower ? "followers" : "following",
                                                         queryMap);
         request.enqueue(new Callback<String>() {

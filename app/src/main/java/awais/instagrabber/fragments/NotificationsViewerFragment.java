@@ -60,7 +60,6 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private NotificationViewModel notificationViewModel;
     private FriendshipService friendshipService;
     private MediaService mediaService;
-    private long userId;
     private String csrfToken;
     private String type;
     private Context context;
@@ -133,7 +132,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
+                                friendshipService.approve(model.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
                                     @Override
                                     public void onSuccess(final FriendshipChangeResponse result) {
                                         onRefresh();
@@ -175,7 +174,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             });
                             break;
                         case 2:
-                            friendshipService.ignore(userId, model.getUserId(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
+                            friendshipService.ignore(model.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
                                 @Override
                                 public void onSuccess(final FriendshipChangeResponse result) {
                                     onRefresh();
@@ -218,10 +217,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         if (TextUtils.isEmpty(cookie)) {
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
-        friendshipService = FriendshipService.getInstance();
-        mediaService = MediaService.getInstance();
-        userId = CookieUtils.getUserIdFromCookie(cookie);
+        mediaService = MediaService.getInstance(null, null, 0);
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
     }
 
     @NonNull

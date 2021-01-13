@@ -102,6 +102,14 @@ public final class FlavorTown {
 
     public static void changelogCheck(@NonNull final Context context) {
         if (settingsHelper.getInteger(Constants.PREV_INSTALL_VERSION) < BuildConfig.VERSION_CODE) {
+            final String langCode = settingsHelper.getString(Constants.APP_LANGUAGE);
+            final String lang = LocaleUtils.getCorrespondingLanguageCode(langCode);
+            final int appUaCode = settingsHelper.getInteger(Constants.APP_UA_CODE);
+            final String appUa = UserAgentUtils.generateAppUA(appUaCode, lang);
+            settingsHelper.putString(Constants.APP_UA, appUa);
+            final int browserUaCode = settingsHelper.getInteger(Constants.BROWSER_UA_CODE);
+            final String browserUa = UserAgentUtils.generateBrowserUA(browserUaCode);
+            settingsHelper.putString(Constants.BROWSER_UA, browserUa);
             Toast.makeText(context, R.string.updated, Toast.LENGTH_SHORT).show();
             settingsHelper.putInteger(Constants.PREV_INSTALL_VERSION, BuildConfig.VERSION_CODE);
         }

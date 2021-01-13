@@ -103,7 +103,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
             throw new IllegalArgumentException("User is not logged in!");
         }
         service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
-        mediaService = MediaService.getInstance();
+        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
         contentResolver = application.getContentResolver();
         recordingsDir = DirectoryUtils.getOutputMediaDirectory(application, "Recordings");
         this.application = application;
@@ -467,7 +467,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
                         .setUploadId(uploadDmVideoOptions.getUploadId())
                         .setSourceType("2")
                         .setVideoOptions(new UploadFinishOptions.VideoOptions().setLength(duration / 1000f));
-                final Call<String> uploadFinishRequest = mediaService.uploadFinish(userId, csrfToken, uploadFinishOptions);
+                final Call<String> uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions);
                 uploadFinishRequest.enqueue(new Callback<String>() {
                     @Override
                     public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -584,7 +584,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
                 final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions()
                         .setUploadId(uploadDmVoiceOptions.getUploadId())
                         .setSourceType("4");
-                final Call<String> uploadFinishRequest = mediaService.uploadFinish(userId, csrfToken, uploadFinishOptions);
+                final Call<String> uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions);
                 uploadFinishRequest.enqueue(new Callback<String>() {
                     @Override
                     public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {

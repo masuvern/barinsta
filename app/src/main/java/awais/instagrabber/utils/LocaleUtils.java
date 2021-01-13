@@ -19,7 +19,11 @@ public final class LocaleUtils {
         if (baseContext instanceof ContextThemeWrapper)
             baseContext = ((ContextThemeWrapper) baseContext).getBaseContext();
 
-        final String lang = LocaleUtils.getCorrespondingLanguageCode(baseContext);
+        if (Utils.settingsHelper == null)
+            Utils.settingsHelper = new SettingsHelper(baseContext);
+
+        final String appLanguageSettings = Utils.settingsHelper.getString(Constants.APP_LANGUAGE);
+        final String lang = TextUtils.isEmpty(appLanguageSettings) ? null : LocaleUtils.getCorrespondingLanguageCode(appLanguageSettings);
 
         currentLocale = TextUtils.isEmpty(lang) ? defaultLocale :
                         (lang.contains("_") ? new Locale(lang.split("_")[0], lang.split("_")[1]) : new Locale(lang));
@@ -49,13 +53,7 @@ public final class LocaleUtils {
     }
 
     @Nullable
-    private static String getCorrespondingLanguageCode(final Context baseContext) {
-        if (Utils.settingsHelper == null)
-            Utils.settingsHelper = new SettingsHelper(baseContext);
-
-        final String appLanguageSettings = Utils.settingsHelper.getString(Constants.APP_LANGUAGE);
-        if (TextUtils.isEmpty(appLanguageSettings)) return null;
-
+    public static String getCorrespondingLanguageCode(final String appLanguageSettings) {
         final int appLanguageIndex = Integer.parseInt(appLanguageSettings);
         if (appLanguageIndex == 1) return "en";
         if (appLanguageIndex == 2) return "fr";

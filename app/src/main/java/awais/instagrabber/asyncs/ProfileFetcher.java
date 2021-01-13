@@ -76,8 +76,8 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, User> {
                                 userJson.optBoolean("blocked_by_viewer"),
                                 false,
                                 isPrivate,
-                                false,
-                                userJson.optBoolean("restricted_by_viewer"),
+                                userJson.optBoolean("has_requested_viewer"),
+                                userJson.optBoolean("requested_by_viewer"),
                                 false,
                                 userJson.optBoolean("restricted_by_viewer"),
                                 false

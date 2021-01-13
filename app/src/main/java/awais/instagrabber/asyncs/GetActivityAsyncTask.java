@@ -14,6 +14,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 
 public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsyncTask.NotificationCounts> {
     private static final String TAG = "GetActivityAsyncTask";
@@ -44,7 +45,7 @@ public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsy
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
             urlConnection.setUseCaches(false);
-            urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+            urlConnection.setRequestProperty("User-Agent", Utils.settingsHelper.getString(Constants.BROWSER_UA));
             urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
             urlConnection.connect();
             if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {

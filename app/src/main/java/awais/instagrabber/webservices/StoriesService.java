@@ -325,7 +325,7 @@ public class StoriesService extends BaseService {
     public void getUserStory(final StoryViewerOptions options,
                              final ServiceCallback<List<StoryModel>> callback) {
         final String url = buildUrl(options);
-        final Call<String> userStoryCall = repository.getUserStory(Constants.I_USER_AGENT, url);
+        final Call<String> userStoryCall = repository.getUserStory(url);
         final boolean isLoc = options.getType() == StoryViewerOptions.Type.LOCATION;
         final boolean isHashtag = options.getType() == StoryViewerOptions.Type.HASHTAG;
         final boolean isHighlight = options.getType() == StoryViewerOptions.Type.HIGHLIGHT;
@@ -400,7 +400,7 @@ public class StoriesService extends BaseService {
         form.put(arg1, arg2);
         final Map<String, String> signedForm = Utils.sign(form);
         final Call<StoryStickerResponse> request =
-                repository.respondToSticker(Constants.I_USER_AGENT, storyId, stickerId, action, signedForm);
+                repository.respondToSticker(storyId, stickerId, action, signedForm);
         request.enqueue(new Callback<StoryStickerResponse>() {
             @Override
             public void onResponse(@NonNull final Call<StoryStickerResponse> call,

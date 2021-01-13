@@ -99,7 +99,6 @@ import awais.instagrabber.webservices.StoriesService;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "ProfileFragment";
@@ -300,10 +299,15 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = FriendshipService.getInstance();
+        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
         storiesService = StoriesService.getInstance();
-        mediaService = MediaService.getInstance();
+        mediaService = MediaService.getInstance(null, null, 0);
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         setHasOptionsMenu(true);
@@ -313,8 +317,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
-        cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         if (root != null) {
             if (getArguments() != null) {
                 final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
@@ -380,7 +382,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             friendshipService.toggleRestrict(
                     profileModel.getPk(),
                     !profileModel.getFriendshipStatus().isRestricted(),
-                    CookieUtils.getCsrfTokenFromCookie(cookie),
                     new ServiceCallback<FriendshipRestrictResponse>() {
                         @Override
                         public void onSuccess(final FriendshipRestrictResponse result) {
@@ -396,13 +397,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             return true;
         }
         if (item.getItemId() == R.id.block) {
-            final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
             if (!isLoggedIn) return false;
             if (profileModel.getFriendshipStatus().isBlocking()) {
                 friendshipService.unblock(
-                        userIdFromCookie,
                         profileModel.getPk(),
-                        CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<FriendshipChangeResponse>() {
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
@@ -418,9 +416,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             }
             friendshipService.block(
-                    userIdFromCookie,
                     profileModel.getPk(),
-                    CookieUtils.getCsrfTokenFromCookie(cookie),
                     new ServiceCallback<FriendshipChangeResponse>() {
                         @Override
                         public void onSuccess(final FriendshipChangeResponse result) {
@@ -628,9 +624,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         ), new RepositoryCallback<Void>() {
                             @Override
                             public void onSuccess(final Void result) {
-                                profileDetailsBinding.favChip.setText(R.string.added_to_favs);
+                                profileDetailsBinding.favChip.setText(R.string.added_to_favs_short);
                                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
+                                showSnackbar(getString(R.string.added_to_favs_short));
                             }
 
                             @Override
@@ -894,7 +890,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupCommonListeners() {
         final Context context = getContext();
-        final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         profileDetailsBinding.btnFollow.setOnClickListener(v -> {
             if (profileModel.getFriendshipStatus().isFollowing() && profileModel.isPrivate()) {
                 new AlertDialog.Builder(context)
@@ -902,9 +897,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         .setMessage(R.string.priv_acc_confirm)
                         .setPositiveButton(R.string.confirm, (d, w) ->
                                 friendshipService.unfollow(
-                                        userIdFromCookie,
                                         profileModel.getPk(),
-                                        CookieUtils.getCsrfTokenFromCookie(cookie),
                                         new ServiceCallback<FriendshipChangeResponse>() {
                                             @Override
                                             public void onSuccess(final FriendshipChangeResponse result) {
@@ -919,11 +912,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         }))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
-            } else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
+            }
+            else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
                 friendshipService.unfollow(
-                        userIdFromCookie,
                         profileModel.getPk(),
-                        CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<FriendshipChangeResponse>() {
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
@@ -938,9 +930,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         });
             } else {
                 friendshipService.follow(
-                        userIdFromCookie,
                         profileModel.getPk(),
-                        CookieUtils.getCsrfTokenFromCookie(cookie),
                         new ServiceCallback<FriendshipChangeResponse>() {
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
@@ -1102,6 +1092,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean isReallyPrivate() {
         final long myId = CookieUtils.getUserIdFromCookie(cookie);
         final FriendshipStatus friendshipStatus = profileModel.getFriendshipStatus();
-        return !friendshipStatus.isFollowedBy() && (profileModel.getPk() != myId) && profileModel.isPrivate();
+        return !friendshipStatus.isFollowing() && (profileModel.getPk() != myId) && profileModel.isPrivate();
     }
 }

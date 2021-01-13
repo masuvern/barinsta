@@ -25,7 +25,7 @@ public class AddCookiesInterceptor implements Interceptor {
         }
         final String userAgentHeader = "User-Agent";
         if (request.header(userAgentHeader) == null) {
-            builder.addHeader(userAgentHeader, hasCookie ? Constants.I_USER_AGENT : Constants.USER_AGENT);
+            builder.addHeader(userAgentHeader, Utils.settingsHelper.getString(hasCookie ? Constants.APP_UA : Constants.BROWSER_UA));
         }
         final String languageHeader = "Accept-Language";
         if (request.header(languageHeader) == null) {

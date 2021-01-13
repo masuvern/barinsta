@@ -35,7 +35,7 @@ public class CreateThreadAction extends AsyncTask<Void, Void, String> {
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
             urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
+            urlConnection.setRequestProperty("User-Agent", Utils.settingsHelper.getString(Constants.APP_UA));
             urlConnection.setUseCaches(false);
             final String urlParameters = Utils.sign("{\"_csrftoken\":\"" + cookie.split("csrftoken=")[1].split(";")[0]
                     + "\",\"_uid\":\"" + CookieUtils.getUserIdFromCookie(cookie)

@@ -465,16 +465,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             binding.date.setVisibility(View.VISIBLE);
             binding.date.setText(date);
         }));
-        if (viewModel.getMedia().isCommentLikesEnabled()) {
-            viewModel.getLikeCount().observe(getViewLifecycleOwner(), count -> {
-                final long safeCount = getSafeCount(count);
-                final String likesString = getResources().getQuantityString(R.plurals.likes_count, (int) safeCount, safeCount);
-                binding.likesCount.setText(likesString);
-            });
+        viewModel.getLikeCount().observe(getViewLifecycleOwner(), count -> {
+            final long safeCount = getSafeCount(count);
+            final String likesString = getResources().getQuantityString(R.plurals.likes_count, (int) safeCount, safeCount);
+            binding.likesCount.setText(likesString);
+        });
+        if (!viewModel.getMedia().isCommentsDisabled()) {
             viewModel.getCommentCount().observe(getViewLifecycleOwner(), count -> {
                 final long safeCount = getSafeCount(count);
                 final String likesString = getResources().getQuantityString(R.plurals.comments_count, (int) safeCount, safeCount);
-                binding.likesCount.setText(likesString);
+                binding.commentsCount.setText(likesString);
             });
         }
         viewModel.getViewCount().observe(getViewLifecycleOwner(), count -> {
@@ -538,7 +538,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupComment() {
-        if (!viewModel.hasPk() || !viewModel.getMedia().isCommentLikesEnabled()) {
+        if (!viewModel.hasPk() || viewModel.getMedia().isCommentsDisabled()) {
             binding.comment.setVisibility(View.GONE);
             binding.commentsCount.setVisibility(View.GONE);
             return;
@@ -577,7 +577,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupLike() {
-        final boolean likableMedia = viewModel.hasPk() && viewModel.getMedia().isCommentLikesEnabled();
+        final boolean likableMedia = viewModel.hasPk() /*&& viewModel.getMedia().isCommentLikesEnabled()*/;
         if (!likableMedia) {
             binding.like.setVisibility(View.GONE);
             binding.likesCount.setVisibility(View.GONE);
@@ -1402,20 +1402,24 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             if (media.getLocation() != null) {
                 binding.location.setVisibility(View.VISIBLE);
             }
-            binding.captionParent.setVisibility(View.VISIBLE);
             binding.bottomBg.setVisibility(View.VISIBLE);
-            binding.likesCount.setVisibility(View.VISIBLE);
-            binding.commentsCount.setVisibility(View.VISIBLE);
-            binding.date.setVisibility(View.VISIBLE);
-            binding.captionToggle.setVisibility(View.VISIBLE);
+            if (viewModel.hasPk()) {
+                binding.likesCount.setVisibility(View.VISIBLE);
+                binding.date.setVisibility(View.VISIBLE);
+                binding.captionParent.setVisibility(View.VISIBLE);
+                binding.captionToggle.setVisibility(View.VISIBLE);
+                binding.share.setVisibility(View.VISIBLE);
+            }
+            if (viewModel.hasPk() && !viewModel.getMedia().isCommentsDisabled()) {
+                binding.comment.setVisibility(View.VISIBLE);
+                binding.commentsCount.setVisibility(View.VISIBLE);
+            }
             binding.download.setVisibility(View.VISIBLE);
-            binding.share.setVisibility(View.VISIBLE);
-            binding.comment.setVisibility(View.VISIBLE);
             final List<Integer> options = viewModel.getOptions().getValue();
             if (options != null && !options.isEmpty()) {
                 binding.options.setVisibility(View.VISIBLE);
             }
-            if (viewModel.isLoggedIn()) {
+            if (viewModel.isLoggedIn() && viewModel.hasPk()) {
                 binding.like.setVisibility(View.VISIBLE);
                 binding.save.setVisibility(View.VISIBLE);
             }

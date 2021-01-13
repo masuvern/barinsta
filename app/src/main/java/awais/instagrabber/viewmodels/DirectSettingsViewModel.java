@@ -79,7 +79,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
             throw new IllegalArgumentException("User is not logged in!");
         }
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
-        friendshipService = FriendshipService.getInstance();
+        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
         resources = getApplication().getResources();
     }
 
@@ -264,7 +264,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     private LiveData<Resource<Object>> blockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.block(userId, user.getPk(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
+        friendshipService.block(user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
             @Override
             public void onSuccess(final FriendshipChangeResponse result) {
                 // refresh thread
@@ -281,7 +281,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     private LiveData<Resource<Object>> unblockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.unblock(userId, user.getPk(), csrfToken, new ServiceCallback<FriendshipChangeResponse>() {
+        friendshipService.unblock(user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
             @Override
             public void onSuccess(final FriendshipChangeResponse result) {
                 // refresh thread
@@ -298,7 +298,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     private LiveData<Resource<Object>> restrictUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.toggleRestrict(user.getPk(), true, csrfToken, new ServiceCallback<FriendshipRestrictResponse>() {
+        friendshipService.toggleRestrict(user.getPk(), true, new ServiceCallback<FriendshipRestrictResponse>() {
             @Override
             public void onSuccess(final FriendshipRestrictResponse result) {
                 // refresh thread
@@ -315,7 +315,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     private LiveData<Resource<Object>> unRestrictUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        friendshipService.toggleRestrict(user.getPk(), false, csrfToken, new ServiceCallback<FriendshipRestrictResponse>() {
+        friendshipService.toggleRestrict(user.getPk(), false, new ServiceCallback<FriendshipRestrictResponse>() {
             @Override
             public void onSuccess(final FriendshipRestrictResponse result) {
                 // refresh thread

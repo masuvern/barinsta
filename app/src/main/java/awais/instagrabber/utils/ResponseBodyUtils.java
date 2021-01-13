@@ -857,6 +857,7 @@ public final class ResponseBodyUtils {
                 height,
                 mediaItemType,
                 false,
+                feedItem.optBoolean("comments_disabled"),
                 -1,
                 commentsCount,
                 likesCount,
