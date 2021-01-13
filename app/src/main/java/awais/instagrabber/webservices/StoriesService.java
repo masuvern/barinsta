@@ -205,11 +205,10 @@ public class StoriesService extends BaseService {
                 );
                 final String id = node.getString("id");
                 final long timestamp = node.getLong("published_time");
-                final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
-                StoryModel firstStoryModel = null;
-                if (itemJson != null) {
-                    firstStoryModel = ResponseBodyUtils.parseBroadcastItem(itemJson);
-                }
+                // final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
+                final StoryModel firstStoryModel = ResponseBodyUtils.parseBroadcastItem(node);
+                // if (itemJson != null) {
+                // }
                 feedStoryModels.add(new FeedStoryModel(id, user, false, timestamp, firstStoryModel, 1, true, false));
             }
             callback.onSuccess(sort(feedStoryModels));

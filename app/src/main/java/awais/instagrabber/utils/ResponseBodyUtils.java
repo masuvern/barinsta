@@ -1150,8 +1150,8 @@ public final class ResponseBodyUtils {
                 data.getString("cover_frame_url"),
                 MediaItemType.MEDIA_TYPE_LIVE,
                 data.optLong("published_time", 0),
-                data.getJSONObject("user").getString("username"),
-                data.getJSONObject("user").getLong("pk"),
+                data.getJSONObject("broadcast_owner").getString("username"),
+                data.getJSONObject("broadcast_owner").getLong("pk"),
                 false);
         model.setVideoUrl(data.getString("dash_playback_url"));
         return model;
