@@ -95,4 +95,5 @@ public final class Constants {
     public static final String PREF_TAGGED_POSTS_LAYOUT = "tagged_posts_layout";
     public static final String PREF_SAVED_POSTS_LAYOUT = "saved_posts_layout";
     public static final String PREF_EMOJI_VARIANTS = "emoji_variants";
+    public static final String PREF_REACTIONS = "reactions";
 }

@@ -176,14 +176,20 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                     subtitle = getMediaSpecificSubtitle(username, mediaType);
                     break;
                 }
-                case STORY_SHARE:
-                    String format = "%s shared a story by @%s";
-                    if (item.getStoryShare().getReelType().equals("highlight_reel")) {
-                        format = "%s shared a story highlight by @%s";
+                case STORY_SHARE: {
+                    final String reelType = item.getStoryShare().getReelType();
+                    if (reelType == null) {
+                        subtitle = item.getStoryShare().getTitle();
+                    } else {
+                        String format = "%s shared a story by @%s";
+                        if (reelType.equals("highlight_reel")) {
+                            format = "%s shared a story highlight by @%s";
+                        }
+                        subtitle = String.format(format, username != null ? username : "",
+                                                 item.getStoryShare().getMedia().getUser().getUsername());
                     }
-                    subtitle = String.format(format, username != null ? username : "",
-                                             item.getStoryShare().getMedia().getUser().getUsername());
                     break;
+                }
                 case VOICE_MEDIA:
                     subtitle = String.format("%s sent a voice message", username != null ? username : "");
                     break;

@@ -32,7 +32,17 @@
     <dimen name="dm_message_item_margin">80dp</dimen>
     <dimen name="dm_message_item_avatar_size">48dp</dimen>
     <dimen name="dm_message_info_padding_small">4dp</dimen>
+    <dimen name="dm_reaction_adjust_margin">22dp</dimen>
+    <dimen name="dm_reaction_translation_y_type_1">6dp</dimen>
+    <dimen name="dm_reaction_translation_y_type_2">-12dp</dimen>
 
     <dimen name="feed_item_bottom_icon_size">32dp</dimen>
     <dimen name="keyboard_height">200dp</dimen>
+
+    <dimen name="reaction_picker_emoji_size">40dp</dimen>
+    <dimen name="reaction_picker_emoji_margin">8dp</dimen>
+    <dimen name="reaction_picker_option_height">48dp</dimen>
+    <dimen name="reaction_picker_add_padding_adjustment">4dp</dimen>
+
+    <dimen name="horizontal_divider_height">1dp</dimen>
 </resources>

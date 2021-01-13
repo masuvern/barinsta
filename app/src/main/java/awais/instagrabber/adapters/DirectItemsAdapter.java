@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemActionLogViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemAnimatedMediaViewHolder;
@@ -32,6 +33,7 @@ import awais.instagrabber.adapters.viewholder.directmessages.DirectItemTextViewH
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemVideoCallEventViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemVoiceMediaViewHolder;
+import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.databinding.LayoutDmActionLogBinding;
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
@@ -57,11 +59,14 @@ import awais.instagrabber.utils.DateUtils;
 public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = DirectItemsAdapter.class.getSimpleName();
 
-    private final User currentUser;
+    private List<DirectItem> items;
     private DirectThread thread;
+    private DirectItemViewHolder selectedViewHolder;
+
+    private final User currentUser;
     private final DirectItemCallback callback;
     private final AsyncListDiffer<DirectItemOrHeader> differ;
-    private List<DirectItem> items;
+    private final DirectItemInternalLongClickListener longClickListener;
 
     private static final DiffUtil.ItemCallback<DirectItemOrHeader> diffCallback = new DiffUtil.ItemCallback<DirectItemOrHeader>() {
         @Override
@@ -96,21 +101,30 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             if (bothHeaders) {
                 return oldItem.date.equals(newItem.date);
             }
-            return oldItem.item.getTimestamp() == newItem.item.getTimestamp()
-                    && oldItem.item.isPending() == newItem.item.isPending(); // todo need to be more specific
+            final boolean timestampEqual = oldItem.item.getTimestamp() == newItem.item.getTimestamp();
+            final boolean bothPending = oldItem.item.isPending() == newItem.item.isPending();
+            final boolean reactionSame = Objects.equals(oldItem.item.getReactions(), newItem.item.getReactions());
+            return timestampEqual && bothPending && reactionSame;
         }
     };
 
     public DirectItemsAdapter(@NonNull final User currentUser,
                               @NonNull final DirectThread thread,
-                              @NonNull final DirectItemCallback callback) {
+                              @NonNull final DirectItemCallback callback,
+                              @NonNull final DirectItemLongClickListener itemLongClickListener) {
         this.currentUser = currentUser;
         this.thread = thread;
         this.callback = callback;
         differ = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
                                        new AsyncDifferConfig.Builder<>(diffCallback).build());
-        // this.onClickListener = onClickListener;
-        // this.mentionClickListener = mentionClickListener;
+        longClickListener = (position, viewHolder) -> {
+            if (selectedViewHolder != null) {
+                selectedViewHolder.setSelected(false);
+            }
+            selectedViewHolder = viewHolder;
+            viewHolder.setSelected(true);
+            itemLongClickListener.onLongClick(position);
+        };
     }
 
     @NonNull
@@ -123,7 +137,9 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         }
         final LayoutDmBaseBinding baseBinding = LayoutDmBaseBinding.inflate(layoutInflater, parent, false);
         final DirectItemType directItemType = DirectItemType.valueOf(type);
-        return getItemViewHolder(layoutInflater, baseBinding, directItemType);
+        final DirectItemViewHolder itemViewHolder = getItemViewHolder(layoutInflater, baseBinding, directItemType);
+        itemViewHolder.setLongClickListener(longClickListener);
+        return itemViewHolder;
     }
 
     @NonNull
@@ -205,7 +221,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             return;
         }
         if (thread == null) return;
-        ((DirectItemViewHolder) holder).bind(itemOrHeader.item);
+        ((DirectItemViewHolder) holder).bind(position, itemOrHeader.item);
     }
 
     protected DirectItemOrHeader getItem(int position) {
@@ -372,5 +388,15 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         void onMediaClick(Media media);
 
         void onStoryClick(DirectItemStoryShare storyShare);
+
+        void onReaction(final DirectItem item, Emoji emoji);
+    }
+
+    public interface DirectItemInternalLongClickListener {
+        void onLongClick(int position, DirectItemViewHolder viewHolder);
+    }
+
+    public interface DirectItemLongClickListener {
+        void onLongClick(int position);
     }
 }

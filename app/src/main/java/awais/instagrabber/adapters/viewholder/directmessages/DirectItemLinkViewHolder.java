@@ -70,6 +70,7 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
         setupRamboTextListeners(binding.text);
         final View.OnClickListener onClickListener = v -> openURL(linkContext.getLinkUrl());
         binding.preview.setOnClickListener(onClickListener);
+        // binding.preview.setOnLongClickListener(v -> itemView.performLongClick());
         binding.title.setOnClickListener(onClickListener);
         binding.summary.setOnClickListener(onClickListener);
         binding.url.setOnClickListener(onClickListener);

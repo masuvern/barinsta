@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,6 +52,7 @@ public final class EmojiParser {
     private static final UnicodeSet SKIN_TONE_MODIFIERS = new UnicodeSet("[🏻-🏿]").freeze();
     private static final String SKIN_TONE_PATTERN = SKIN_TONE_MODIFIERS.toPattern(true);
     private static final Map<EmojiCategoryType, EmojiCategory> CATEGORY_MAP = new LinkedHashMap<>();
+    private static final Map<String, Emoji> ALL_EMOJIS = new HashMap<>();
 
     // private final UnicodeMap<String> emojiToMajorCategory = new UnicodeMap<>();
     // private final UnicodeMap<String> emojiToMinorCategory = new UnicodeMap<>();
@@ -201,6 +203,7 @@ public final class EmojiParser {
                 spacePos = comment.indexOf(' ', spacePos + 1); // get second space
                 final String name = comment.substring(spacePos + 1).trim();
                 final Emoji emoji = new Emoji(original, name);
+                ALL_EMOJIS.put(original, emoji);
                 String minimal = original.replace(EMOJI_VARIANT, "");
                 //noinspection deprecation
                 boolean singleton = CharSequences.getSingleCodePoint(minimal) != Integer.MAX_VALUE;
@@ -261,6 +264,10 @@ public final class EmojiParser {
             categories = ImmutableList.copyOf(categoryCollection);
         }
         return categories;
+    }
+
+    public Map<String, Emoji> getAllEmojis() {
+        return ALL_EMOJIS;
     }
 
     // public String getMinorCategory(String emoji) {

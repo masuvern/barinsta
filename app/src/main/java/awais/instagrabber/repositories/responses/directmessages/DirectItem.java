@@ -32,7 +32,7 @@ public class DirectItem implements Cloneable {
     private final DirectItemFelixShare felixShare;
     private final DirectItemVisualMedia visualMedia;
     private final DirectItemAnimatedMedia animatedMedia;
-    private final DirectItemReactions reactions;
+    private DirectItemReactions reactions;
     private final DirectItem repliedToMessage;
     private final DirectItemVoiceMedia voiceMedia;
     private final Location location;
@@ -216,6 +216,10 @@ public class DirectItem implements Cloneable {
 
     public void setPending(final boolean pending) {
         isPending = pending;
+    }
+
+    public void setReactions(final DirectItemReactions reactions) {
+        this.reactions = reactions;
     }
 
     @NonNull

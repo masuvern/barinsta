@@ -154,6 +154,7 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
 
     @Override
     public void cleanup() {
+        super.cleanup();
         if (handler != null && positionChecker != null) {
             handler.removeCallbacks(positionChecker);
             handler = null;

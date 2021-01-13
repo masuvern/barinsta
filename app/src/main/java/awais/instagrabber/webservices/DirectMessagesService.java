@@ -19,6 +19,7 @@ import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.requests.directmessages.LinkBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.PhotoBroadcastOptions;
+import awais.instagrabber.repositories.requests.directmessages.ReactionBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.StoryReplyBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.TextBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.VideoBroadcastOptions;
@@ -157,6 +158,15 @@ public class DirectMessagesService extends BaseService {
                                                                    final String reelId) throws UnsupportedEncodingException {
         return broadcast(new StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId));
     }
+
+    public Call<DirectThreadBroadcastResponse> broadcastReaction(final String clientContext,
+                                                                 final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                 final String itemId,
+                                                                 final String emoji,
+                                                                 final boolean delete) {
+        return broadcast(new ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete));
+    }
+
 
     private Call<DirectThreadBroadcastResponse> broadcast(@NonNull final BroadcastOptions broadcastOptions) {
         if (TextUtils.isEmpty(broadcastOptions.getClientContext())) {

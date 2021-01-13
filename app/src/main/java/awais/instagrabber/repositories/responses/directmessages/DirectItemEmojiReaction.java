@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.util.Objects;
+
 public class DirectItemEmojiReaction {
     private final long senderId;
     private final long timestamp;
@@ -27,5 +29,21 @@ public class DirectItemEmojiReaction {
 
     public String getSuperReactType() {
         return superReactType;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemEmojiReaction that = (DirectItemEmojiReaction) o;
+        return senderId == that.senderId &&
+                timestamp == that.timestamp &&
+                Objects.equals(emoji, that.emoji) &&
+                Objects.equals(superReactType, that.superReactType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(senderId, timestamp, emoji, superReactType);
     }
 }

@@ -12,6 +12,8 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
+import java.util.Objects;
+
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
@@ -29,6 +31,7 @@ import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
+    private static final String TAG = DirectItemMediaShareViewHolder.class.getSimpleName();
 
     private final LayoutDmMediaShareBinding binding;
     private final RoundingParams incomingRoundingParams;
@@ -48,11 +51,6 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        final RoundingParams roundingParams = messageDirection == MessageDirection.INCOMING ? incomingRoundingParams : outgoingRoundingParams;
-        binding.mediaPreview.setHierarchy(new GenericDraweeHierarchyBuilder(itemView.getResources())
-                                                  .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
-                                                  .setRoundingParams(roundingParams)
-                                                  .build());
         binding.topBg.setBackgroundResource(messageDirection == MessageDirection.INCOMING
                                             ? R.drawable.bg_media_share_top_incoming
                                             : R.drawable.bg_media_share_top_outgoing);
@@ -67,10 +65,10 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
             final MediaItemType mediaType = media.getMediaType();
             setupTypeIndicator(mediaType);
             if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
-                setupPreview(media.getCarouselMedia().get(0));
+                setupPreview(media.getCarouselMedia().get(0), messageDirection);
                 return;
             }
-            setupPreview(media);
+            setupPreview(media, messageDirection);
         });
         itemView.setOnClickListener(v -> openMedia(media));
     }
@@ -87,7 +85,17 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         }
     }
 
-    private void setupPreview(@NonNull final Media media) {
+    private void setupPreview(@NonNull final Media media,
+                              final MessageDirection messageDirection) {
+        final String url = ResponseBodyUtils.getThumbUrl(media.getImageVersions2());
+        if (Objects.equals(url, binding.mediaPreview.getTag())) {
+            return;
+        }
+        final RoundingParams roundingParams = messageDirection == MessageDirection.INCOMING ? incomingRoundingParams : outgoingRoundingParams;
+        binding.mediaPreview.setHierarchy(new GenericDraweeHierarchyBuilder(itemView.getResources())
+                                                  .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
+                                                  .setRoundingParams(roundingParams)
+                                                  .build());
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
@@ -98,7 +106,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
         layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
         binding.mediaPreview.requestLayout();
-        final String url = ResponseBodyUtils.getThumbUrl(media.getImageVersions2());
+        binding.mediaPreview.setTag(url);
         binding.mediaPreview.setImageURI(url);
     }
 
@@ -152,5 +160,10 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
             media = felixShare.getVideo();
         }
         return media;
+    }
+
+    @Override
+    protected int getReactionsTranslationY() {
+        return reactionTranslationYType2;
     }
 }

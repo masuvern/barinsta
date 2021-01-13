@@ -1,10 +1,13 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
-import java.util.List;
+import androidx.annotation.NonNull;
 
-public class DirectItemReactions {
-    private final List<DirectItemEmojiReaction> emojis;
-    private final List<DirectItemEmojiReaction> likes;
+import java.util.List;
+import java.util.Objects;
+
+public class DirectItemReactions implements Cloneable {
+    private List<DirectItemEmojiReaction> emojis;
+    private List<DirectItemEmojiReaction> likes;
 
     public DirectItemReactions(final List<DirectItemEmojiReaction> emojis,
                                final List<DirectItemEmojiReaction> likes) {
@@ -18,5 +21,33 @@ public class DirectItemReactions {
 
     public List<DirectItemEmojiReaction> getLikes() {
         return likes;
+    }
+
+    public void setLikes(final List<DirectItemEmojiReaction> likes) {
+        this.likes = likes;
+    }
+
+    public void setEmojis(final List<DirectItemEmojiReaction> emojis) {
+        this.emojis = emojis;
+    }
+
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemReactions that = (DirectItemReactions) o;
+        return Objects.equals(emojis, that.emojis) &&
+                Objects.equals(likes, that.likes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(emojis, likes);
     }
 }

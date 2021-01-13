@@ -57,11 +57,14 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.CameraActivity;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.DirectItemsAdapter;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
+import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemLongClickListener;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemOrHeader;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemViewHolder;
 import awais.instagrabber.animations.CubicBezierInterpolator;
 import awais.instagrabber.customviews.RecordView;
 import awais.instagrabber.customviews.Tooltip;
+import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.customviews.helpers.HeaderItemDecoration;
 import awais.instagrabber.customviews.helpers.HeightProvider;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
@@ -133,7 +136,7 @@ public class DirectMessageThreadFragment extends Fragment {
             setMicToSendIcon();
         }
     };
-    private final DirectItemsAdapter.DirectItemCallback directItemCallback = new DirectItemsAdapter.DirectItemCallback() {
+    private final DirectItemCallback directItemCallback = new DirectItemCallback() {
         @Override
         public void onHashtagClick(final String hashtag) {
             final NavDirections action = DirectMessageThreadFragmentDirections.actionGlobalHashTagFragment(hashtag);
@@ -188,6 +191,18 @@ public class DirectMessageThreadFragment extends Fragment {
                 Log.e(TAG, "onStoryClick: ", e);
             }
         }
+
+        @Override
+        public void onReaction(final DirectItem item, final Emoji emoji) {
+            if (item == null) return;
+            final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendReaction(item, emoji);
+            if (resourceLiveData != null) {
+                resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
+            }
+        }
+    };
+    private final DirectItemLongClickListener directItemLongClickListener = position -> {
+        // viewModel.setSelectedPosition(position);
     };
 
     @Override
@@ -226,6 +241,7 @@ public class DirectMessageThreadFragment extends Fragment {
         init();
         binding.send.post(() -> initialSendX = binding.send.getX());
         shouldRefresh = false;
+        setObservers();
     }
 
     @Override
@@ -309,7 +325,6 @@ public class DirectMessageThreadFragment extends Fragment {
             binding.input.post(this::showKeyboard);
             wasKbShowing = false;
         }
-        setObservers();
         if (initialSendX != 0) {
             binding.send.setX(initialSendX);
         }
@@ -354,7 +369,6 @@ public class DirectMessageThreadFragment extends Fragment {
         setupList();
         root.post(this::setupInput);
         root.post(this::getInitialData);
-        setObservers();
     }
 
     private void getInitialData() {
@@ -578,7 +592,7 @@ public class DirectMessageThreadFragment extends Fragment {
             itemsAdapter.setThread(thread);
             return;
         }
-        itemsAdapter = new DirectItemsAdapter(currentUser, thread, directItemCallback);
+        itemsAdapter = new DirectItemsAdapter(currentUser, thread, directItemCallback, directItemLongClickListener);
         itemsAdapter.setHasStableIds(true);
         itemsAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         binding.chats.setAdapter(itemsAdapter);
@@ -694,7 +708,8 @@ public class DirectMessageThreadFragment extends Fragment {
         binding.send.setOnRecordClickListener(v -> {
             final Editable text = binding.input.getText();
             if (TextUtils.isEmpty(text)) return;
-            viewModel.sendText(text.toString()).observe(getViewLifecycleOwner(), this::handleSentMessage);
+            final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendText(text.toString());
+            resourceLiveData.observe(getViewLifecycleOwner(), resource -> handleSentMessage(resourceLiveData));
             binding.input.setText("");
         });
         binding.send.setOnRecordLongClickListener(v -> {
@@ -754,16 +769,21 @@ public class DirectMessageThreadFragment extends Fragment {
         navController.navigate(navDirections);
     }
 
-    private void handleSentMessage(@NonNull final Resource<DirectItem> resource) {
+    private void handleSentMessage(final LiveData<Resource<DirectItem>> resourceLiveData) {
+        final Resource<DirectItem> resource = resourceLiveData.getValue();
+        if (resource == null) return;
         final Resource.Status status = resource.status;
         switch (status) {
             case SUCCESS:
+                resourceLiveData.removeObservers(getViewLifecycleOwner());
+                break;
             case LOADING:
                 break;
             case ERROR:
                 if (resource.message != null) {
                     Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                 }
+                resourceLiveData.removeObservers(getViewLifecycleOwner());
                 break;
         }
     }
@@ -1091,6 +1111,10 @@ public class DirectMessageThreadFragment extends Fragment {
             }
         });
         animatorSet.start();
+    }
+
+    private void showLongClickOptions(final View itemView) {
+
     }
 
     public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<User, DirectThread>> {

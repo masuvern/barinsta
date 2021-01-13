@@ -30,12 +30,15 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.UploadVideoOptions;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;
@@ -74,6 +77,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final MutableLiveData<String> threadTitle = new MutableLiveData<>("");
     private final MutableLiveData<Boolean> fetching = new MutableLiveData<>(false);
     private final MutableLiveData<List<User>> users = new MutableLiveData<>(new ArrayList<>());
+
     private final DirectMessagesService service;
     private final ContentResolver contentResolver;
     private final MediaService mediaService;
@@ -152,6 +156,74 @@ public class DirectThreadViewModel extends AndroidViewModel {
             list.addAll(items);
         }
         this.items.postValue(list);
+    }
+
+    private void addReaction(final DirectItem item, final Emoji emoji) {
+        if (item == null || emoji == null || currentUser == null) return;
+        final boolean isLike = emoji.getUnicode().equals("❤️");
+        DirectItemReactions reactions = item.getReactions();
+        if (reactions == null) {
+            reactions = new DirectItemReactions(null, null);
+        } else {
+            try {
+                reactions = (DirectItemReactions) reactions.clone();
+            } catch (CloneNotSupportedException e) {
+                Log.e(TAG, "addReaction: ", e);
+                return;
+            }
+        }
+        if (isLike) {
+            final List<DirectItemEmojiReaction> likes = addEmoji(reactions.getLikes(), null, false);
+            reactions.setLikes(likes);
+        }
+        final List<DirectItemEmojiReaction> emojis = addEmoji(reactions.getEmojis(), emoji.getUnicode(), true);
+        reactions.setEmojis(emojis);
+        List<DirectItem> list = this.items.getValue();
+        list = list == null ? new LinkedList<>() : new LinkedList<>(list);
+        int index = -1;
+        for (int i = 0; i < list.size(); i++) {
+            final DirectItem directItem = list.get(i);
+            if (directItem.getItemId().equals(item.getItemId())) {
+                index = i;
+                break;
+            }
+        }
+        if (index >= 0) {
+            try {
+                final DirectItem clone = (DirectItem) list.get(index).clone();
+                clone.setReactions(reactions);
+                list.set(index, clone);
+            } catch (CloneNotSupportedException e) {
+                Log.e(TAG, "addReaction: error cloning", e);
+            }
+        }
+        this.items.postValue(list);
+    }
+
+    private List<DirectItemEmojiReaction> addEmoji(final List<DirectItemEmojiReaction> reactionList,
+                                                   final String emoji,
+                                                   final boolean shouldReplaceIfAlreadyReacted) {
+        final List<DirectItemEmojiReaction> temp = reactionList == null ? new ArrayList<>() : new ArrayList<>(reactionList);
+        int index = -1;
+        for (int i = 0; i < temp.size(); i++) {
+            final DirectItemEmojiReaction directItemEmojiReaction = temp.get(i);
+            if (directItemEmojiReaction.getSenderId() == currentUser.getPk()) {
+                index = i;
+                break;
+            }
+        }
+        final DirectItemEmojiReaction reaction = new DirectItemEmojiReaction(
+                currentUser.getPk(),
+                System.currentTimeMillis() * 1000,
+                emoji,
+                "none"
+        );
+        if (index < 0) {
+            temp.add(reaction);
+        } else if (shouldReplaceIfAlreadyReacted) {
+            temp.set(index, reaction);
+        }
+        return temp;
     }
 
     private void updateItemSent(final String clientContext, final long timestamp) {
@@ -549,6 +621,48 @@ public class DirectThreadViewModel extends AndroidViewModel {
                 Log.e(TAG, "onFailure: ", t);
             }
         });
+    }
+
+    public LiveData<Resource<DirectItem>> sendReaction(final DirectItem item, final Emoji emoji) {
+        final MutableLiveData<Resource<DirectItem>> data = new MutableLiveData<>();
+        final Long userId = handleCurrentUser(data);
+        if (userId == null) return data;
+        final String clientContext = UUID.randomUUID().toString();
+        // Log.d(TAG, "sendText: sending: itemId: " + directItem.getItemId());
+        data.postValue(Resource.loading(item));
+        addReaction(item, emoji);
+        String emojiUnicode = null;
+        if (!emoji.getUnicode().equals("❤️")) {
+            emojiUnicode = emoji.getUnicode();
+        }
+        final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(
+                clientContext, threadIdOrUserIds, item.getItemId(), emojiUnicode, false);
+        request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
+                                   @NonNull final Response<DirectThreadBroadcastResponse> response) {
+                if (!response.isSuccessful()) {
+                    if (response.errorBody() != null) {
+                        handleErrorBody(call, response, data, item);
+                        return;
+                    }
+                    data.postValue(Resource.error("request was not successful and response error body was null", item));
+                    return;
+                }
+                final DirectThreadBroadcastResponse body = response.body();
+                if (body == null) {
+                    data.postValue(Resource.error("Response is null!", item));
+                }
+                // otherwise nothing to do? maybe update the timestamp in the emoji?
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
+                data.postValue(Resource.error(t.getMessage(), item));
+                Log.e(TAG, "enqueueRequest: onFailure: ", t);
+            }
+        });
+        return data;
     }
 
     public void setCurrentUser(final User currentUser) {

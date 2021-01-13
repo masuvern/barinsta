@@ -396,4 +396,5 @@
     <string name="dms_action_remove_admin">Remove as Admin</string>
     <string name="edit_unsuccessful">Edit was unsuccessful</string>
     <string name="message">Message</string>
+    <string name="reply">Reply</string>
 </resources>
