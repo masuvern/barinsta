@@ -109,7 +109,6 @@ public class FeedService extends BaseService {
         final List<Media> allPosts = new ArrayList<>();
         final List<Media> items = feedFetchResponse.getItems();
         for (final Media media : items) {
-            if (media == null || media.isInjected() || (media.getMediaType() == null && media.getEndOfFeedDemarcator() == null)) continue;
             if (needNewMaxId && media.getEndOfFeedDemarcator() != null) {
                 final EndOfFeedDemarcator endOfFeedDemarcator = media.getEndOfFeedDemarcator();
                 final EndOfFeedGroupSet groupSet = endOfFeedDemarcator.getGroupSet();
@@ -128,6 +127,7 @@ public class FeedService extends BaseService {
                 }
                 continue;
             }
+            if (media == null || media.isInjected() || media.getMediaType() == null) continue;
             allPosts.add(media);
         }
         return new PostsFetchResponse(allPosts, moreAvailable, nextMaxId);
