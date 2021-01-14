@@ -222,6 +222,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         public void onReactionClick(final DirectItem item, final int position) {
             showReactionsDialog(item);
         }
+
+        @Override
+        public void onOptionSelect(final DirectItem item, final int itemId) {
+            if (itemId == R.id.unsend) {
+                handleSentMessage(viewModel.unsend(item));
+                return;
+            }
+        }
     };
 
     private final DirectItemLongClickListener directItemLongClickListener = position -> {

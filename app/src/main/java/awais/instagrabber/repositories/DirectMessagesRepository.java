@@ -56,4 +56,10 @@ public interface DirectMessagesRepository {
     @POST("/api/v1/direct_v2/threads/{threadId}/remove_admins/")
     Call<String> removeAdmins(@Path("threadId") String threadId,
                               @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/items/{itemId}/delete/")
+    Call<String> deleteItem(@Path("threadId") String threadId,
+                            @Path("itemId") String itemId,
+                            @FieldMap final Map<String, String> form);
 }

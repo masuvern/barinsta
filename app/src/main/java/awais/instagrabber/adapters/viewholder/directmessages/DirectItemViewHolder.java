@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionManager;
 
 import com.google.android.material.transition.MaterialFade;
+import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -110,7 +111,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         final MessageDirection messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
         itemView.post(() -> bindBase(item, messageDirection, position));
         itemView.post(() -> bindItem(item, messageDirection));
-        itemView.post(() -> setupLongClickListener(position));
+        itemView.post(() -> setupLongClickListener(position, messageDirection));
         // bindBase(item, messageDirection);
         // bindItem(item, messageDirection);
         // setupLongClickListener(position);
@@ -479,7 +480,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void setupLongClickListener(final int position) {
+    private void setupLongClickListener(final int position, final MessageDirection messageDirection) {
         if (!allowLongClick()) return;
         binding.getRoot().setOnItemLongClickListener(new DirectItemFrameLayout.OnItemLongClickListener() {
             @Override
@@ -498,17 +499,24 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                 // longClickListener.onLongClick(position, this);
                 itemView.post(() -> grow());
                 setSelected(true);
-                showLongClickOptions(new Point((int) x, (int) y));
+                showLongClickOptions(new Point((int) x, (int) y), messageDirection);
             }
         });
     }
 
-    private void showLongClickOptions(final Point location) {
-        final DirectItemContextMenu menu = new DirectItemContextMenu(itemView.getContext(), allowReaction(), getLongClickOptions());
+    private void showLongClickOptions(final Point location, final MessageDirection messageDirection) {
+        final List<DirectItemContextMenu.MenuItem> longClickOptions = getLongClickOptions();
+        final ImmutableList.Builder<DirectItemContextMenu.MenuItem> builder = ImmutableList.builder();
+        if (longClickOptions != null) {
+            builder.addAll(longClickOptions);
+        }
+        if (messageDirection == MessageDirection.OUTGOING) {
+            builder.add(new DirectItemContextMenu.MenuItem(R.id.unsend, R.string.dms_inbox_unsend));
+        }
+        final DirectItemContextMenu menu = new DirectItemContextMenu(itemView.getContext(), allowReaction(), builder.build());
         menu.setOnDismissListener(() -> setSelected(false));
-        menu.setOnReactionClickListener(emoji -> {
-            callback.onReaction(item, emoji);
-        });
+        menu.setOnReactionClickListener(emoji -> callback.onReaction(item, emoji));
+        menu.setOnOptionSelectListener(itemId -> callback.onOptionSelect(item, itemId));
         menu.show(itemView, location);
     }
 

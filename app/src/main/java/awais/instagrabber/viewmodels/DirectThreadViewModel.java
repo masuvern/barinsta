@@ -186,14 +186,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         reactions.setEmojis(emojis);
         List<DirectItem> list = this.items.getValue();
         list = list == null ? new LinkedList<>() : new LinkedList<>(list);
-        int index = -1;
-        for (int i = 0; i < list.size(); i++) {
-            final DirectItem directItem = list.get(i);
-            if (directItem.getItemId().equals(item.getItemId())) {
-                index = i;
-                break;
-            }
-        }
+        int index = getItemIndex(item, list);
         if (index >= 0) {
             try {
                 final DirectItem clone = (DirectItem) list.get(index).clone();
@@ -255,14 +248,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
             itemClone.setReactions(reactionsClone);
             List<DirectItem> list = this.items.getValue();
             list = list == null ? new LinkedList<>() : new LinkedList<>(list);
-            int index = -1;
-            for (int i = 0; i < list.size(); i++) {
-                final DirectItem directItem = list.get(i);
-                if (directItem.getItemId().equals(item.getItemId())) {
-                    index = i;
-                    break;
-                }
-            }
+            int index = getItemIndex(item, list);
             if (index >= 0) {
                 list.set(index, itemClone);
             }
@@ -270,6 +256,30 @@ public class DirectThreadViewModel extends AndroidViewModel {
         } catch (Exception e) {
             Log.e(TAG, "removeReaction: ", e);
         }
+    }
+
+    private int removeItem(final DirectItem item) {
+        if (item == null) return 0;
+        List<DirectItem> list = this.items.getValue();
+        list = list == null ? new LinkedList<>() : new LinkedList<>(list);
+        int index = getItemIndex(item, list);
+        if (index >= 0) {
+            list.remove(index);
+            this.items.postValue(list);
+        }
+        return index;
+    }
+
+    private int getItemIndex(final DirectItem item, final List<DirectItem> list) {
+        int index = -1;
+        for (int i = 0; i < list.size(); i++) {
+            final DirectItem directItem = list.get(i);
+            if (directItem.getItemId().equals(item.getItemId())) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 
     private void updateItemSent(final String clientContext, final long timestamp) {
@@ -675,7 +685,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
     public LiveData<Resource<DirectItem>> sendReaction(final DirectItem item, final Emoji emoji) {
         final MutableLiveData<Resource<DirectItem>> data = new MutableLiveData<>();
         final Long userId = handleCurrentUser(data);
-        if (userId == null) return data;
+        if (userId == null) {
+            data.postValue(Resource.error("userId is null", null));
+            return data;
+        }
         final String clientContext = UUID.randomUUID().toString();
         // Log.d(TAG, "sendText: sending: itemId: " + directItem.getItemId());
         data.postValue(Resource.loading(item));
@@ -707,6 +720,39 @@ public class DirectThreadViewModel extends AndroidViewModel {
         final String clientContext = UUID.randomUUID().toString();
         final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(clientContext, threadIdOrUserIds, item.getItemId(), null, true);
         handleBroadcastReactionRequest(data, item, request);
+        return data;
+    }
+
+    public LiveData<Resource<DirectItem>> unsend(final DirectItem item) {
+        final MutableLiveData<Resource<DirectItem>> data = new MutableLiveData<>();
+        if (item == null) {
+            data.postValue(Resource.error("item is null", null));
+            return data;
+        }
+        final int index = removeItem(item);
+        final Call<String> request = service.deleteItem(threadId, item.getItemId());
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                if (response.isSuccessful()) {
+                    // Log.d(TAG, "onResponse: " + response.body());
+                    return;
+                }
+                // add the item back if unsuccessful
+                addItems(index, Collections.singletonList(item));
+                if (response.errorBody() != null) {
+                    handleErrorBody(call, response, data, item);
+                    return;
+                }
+                data.postValue(Resource.error("request was not successful and response error body was null", item));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                data.postValue(Resource.error(t.getMessage(), item));
+                Log.e(TAG, "enqueueRequest: onFailure: ", t);
+            }
+        });
         return data;
     }
 

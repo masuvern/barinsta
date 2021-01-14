@@ -71,4 +71,9 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
     protected boolean showMessageInfo() {
         return false;
     }
+
+    @Override
+    protected boolean allowLongClick() {
+        return false;
+    }
 }

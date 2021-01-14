@@ -4,6 +4,7 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.AdapterListUpdateCallback;
@@ -392,6 +393,8 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         void onReaction(DirectItem item, Emoji emoji);
 
         void onReactionClick(DirectItem item, int position);
+
+        void onOptionSelect(DirectItem item, @IdRes int itemId);
     }
 
     public interface DirectItemInternalLongClickListener {

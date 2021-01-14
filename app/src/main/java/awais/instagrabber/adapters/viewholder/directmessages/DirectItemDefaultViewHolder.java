@@ -30,4 +30,9 @@ public class DirectItemDefaultViewHolder extends DirectItemViewHolder {
         final Context context = itemView.getContext();
         binding.tvMessage.setText(context.getText(R.string.dms_inbox_raven_message_unknown));
     }
+
+    @Override
+    protected boolean allowLongClick() {
+        return false;
+    }
 }

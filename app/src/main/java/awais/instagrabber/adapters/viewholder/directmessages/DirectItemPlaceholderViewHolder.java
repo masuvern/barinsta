@@ -33,4 +33,9 @@ public class DirectItemPlaceholderViewHolder extends DirectItemViewHolder {
     protected boolean showBackground() {
         return true;
     }
+
+    @Override
+    protected boolean allowLongClick() {
+        return false;
+    }
 }

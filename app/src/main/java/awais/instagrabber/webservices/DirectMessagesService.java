@@ -238,4 +238,13 @@ public class DirectMessagesService extends BaseService {
         );
         return repository.removeAdmins(threadId, form);
     }
+
+    public Call<String> deleteItem(final String threadId,
+                                   final String itemId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.deleteItem(threadId, itemId, form);
+    }
 }

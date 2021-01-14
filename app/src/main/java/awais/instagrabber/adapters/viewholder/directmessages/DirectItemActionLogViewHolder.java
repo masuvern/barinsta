@@ -81,4 +81,9 @@ public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
     protected boolean showMessageInfo() {
         return false;
     }
+
+    @Override
+    protected boolean allowLongClick() {
+        return false;
+    }
 }
