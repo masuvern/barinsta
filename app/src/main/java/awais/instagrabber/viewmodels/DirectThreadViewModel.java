@@ -77,6 +77,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final MutableLiveData<String> threadTitle = new MutableLiveData<>("");
     private final MutableLiveData<Boolean> fetching = new MutableLiveData<>(false);
     private final MutableLiveData<List<User>> users = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<User>> leftUsers = new MutableLiveData<>(new ArrayList<>());
 
     private final DirectMessagesService service;
     private final ContentResolver contentResolver;
@@ -92,18 +93,19 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private User currentUser;
     private Call<DirectThreadFeedResponse> chatsRequest;
     private VoiceRecorder voiceRecorder;
+    private final long viewerId;
 
     public DirectThreadViewModel(@NonNull final Application application) {
         super(application);
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        viewerId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || userId <= 0 || TextUtils.isEmpty(deviceUuid)) {
+        if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
-        service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
+        service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
+        mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId);
         contentResolver = application.getContentResolver();
         recordingsDir = DirectoryUtils.getOutputMediaDirectory(application, "Recordings");
         this.application = application;
@@ -136,6 +138,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     public LiveData<List<DirectItem>> getItems() {
         return items;
+    }
+
+    public long getViewerId() {
+        return viewerId;
     }
 
     public void setItems(final List<DirectItem> items) {
@@ -219,11 +225,51 @@ public class DirectThreadViewModel extends AndroidViewModel {
                 "none"
         );
         if (index < 0) {
-            temp.add(reaction);
+            temp.add(0, reaction);
         } else if (shouldReplaceIfAlreadyReacted) {
-            temp.set(index, reaction);
+            temp.add(0, reaction);
+            temp.remove(index);
         }
         return temp;
+    }
+
+    private void removeReaction(final DirectItem item) {
+        try {
+            final DirectItem itemClone = (DirectItem) item.clone();
+            final DirectItemReactions reactions = itemClone.getReactions();
+            final DirectItemReactions reactionsClone = (DirectItemReactions) reactions.clone();
+            final List<DirectItemEmojiReaction> likes = reactionsClone.getLikes();
+            if (likes != null) {
+                final List<DirectItemEmojiReaction> updatedLikes = likes.stream()
+                                                                        .filter(like -> like.getSenderId() != viewerId)
+                                                                        .collect(Collectors.toList());
+                reactionsClone.setLikes(updatedLikes);
+            }
+            final List<DirectItemEmojiReaction> emojis = reactionsClone.getEmojis();
+            if (emojis != null) {
+                final List<DirectItemEmojiReaction> updatedEmojis = emojis.stream()
+                                                                          .filter(emoji -> emoji.getSenderId() != viewerId)
+                                                                          .collect(Collectors.toList());
+                reactionsClone.setEmojis(updatedEmojis);
+            }
+            itemClone.setReactions(reactionsClone);
+            List<DirectItem> list = this.items.getValue();
+            list = list == null ? new LinkedList<>() : new LinkedList<>(list);
+            int index = -1;
+            for (int i = 0; i < list.size(); i++) {
+                final DirectItem directItem = list.get(i);
+                if (directItem.getItemId().equals(item.getItemId())) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index >= 0) {
+                list.set(index, itemClone);
+            }
+            this.items.postValue(list);
+        } catch (Exception e) {
+            Log.e(TAG, "removeReaction: ", e);
+        }
     }
 
     private void updateItemSent(final String clientContext, final long timestamp) {
@@ -257,6 +303,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     public LiveData<List<User>> getUsers() {
         return users;
+    }
+
+    public LiveData<List<User>> getLeftUsers() {
+        return leftUsers;
     }
 
     public void fetchChats() {
@@ -319,9 +369,8 @@ public class DirectThreadViewModel extends AndroidViewModel {
         threadTitle.postValue(thread.getThreadTitle());
         cursor = thread.getOldestCursor();
         hasOlder = thread.hasOlder();
-        if (users.getValue() == null || users.getValue().isEmpty()) {
-            users.postValue(thread.getUsers());
-        }
+        users.postValue(thread.getUsers());
+        leftUsers.postValue(thread.getLeftUsers());
         fetching.postValue(false);
     }
 
@@ -637,6 +686,33 @@ public class DirectThreadViewModel extends AndroidViewModel {
         }
         final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(
                 clientContext, threadIdOrUserIds, item.getItemId(), emojiUnicode, false);
+        handleBroadcastReactionRequest(data, item, request);
+        return data;
+    }
+
+    public LiveData<Resource<DirectItem>> sendDeleteReaction(final String itemId) {
+        final MutableLiveData<Resource<DirectItem>> data = new MutableLiveData<>();
+        final DirectItem item = getItem(itemId);
+        if (item == null) {
+            data.postValue(Resource.error("Invalid item", null));
+            return data;
+        }
+        final DirectItemReactions reactions = item.getReactions();
+        if (reactions == null) {
+            // already removed?
+            data.postValue(Resource.success(item));
+            return data;
+        }
+        removeReaction(item);
+        final String clientContext = UUID.randomUUID().toString();
+        final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(clientContext, threadIdOrUserIds, item.getItemId(), null, true);
+        handleBroadcastReactionRequest(data, item, request);
+        return data;
+    }
+
+    private void handleBroadcastReactionRequest(final MutableLiveData<Resource<DirectItem>> data,
+                                                final DirectItem item,
+                                                @NonNull final Call<DirectThreadBroadcastResponse> request) {
         request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
             @Override
             public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
@@ -662,11 +738,49 @@ public class DirectThreadViewModel extends AndroidViewModel {
                 Log.e(TAG, "enqueueRequest: onFailure: ", t);
             }
         });
-        return data;
+    }
+
+    @Nullable
+    private DirectItem getItem(final String itemId) {
+        if (itemId == null) return null;
+        final List<DirectItem> items = this.items.getValue();
+        if (items == null) return null;
+        return items.stream()
+                    .filter(directItem -> directItem.getItemId().equals(itemId))
+                    .findFirst()
+                    .orElse(null);
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
     }
 
     public void setCurrentUser(final User currentUser) {
         this.currentUser = currentUser;
+    }
+
+    @Nullable
+    public User getUser(final long userId) {
+        final LiveData<List<User>> users = getUsers();
+        User match = null;
+        if (users != null && users.getValue() != null) {
+            final List<User> userList = users.getValue();
+            match = userList.stream()
+                            .filter(user -> user.getPk() == userId)
+                            .findFirst()
+                            .orElse(null);
+        }
+        if (match == null) {
+            final LiveData<List<User>> leftUsers = getLeftUsers();
+            if (leftUsers != null && leftUsers.getValue() != null) {
+                final List<User> userList = leftUsers.getValue();
+                match = userList.stream()
+                                .filter(user -> user.getPk() == userId)
+                                .findFirst()
+                                .orElse(null);
+            }
+        }
+        return match;
     }
 
     private void enqueueRequest(@NonNull final Call<DirectThreadBroadcastResponse> request,

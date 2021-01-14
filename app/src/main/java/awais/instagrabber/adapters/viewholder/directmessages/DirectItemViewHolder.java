@@ -24,7 +24,6 @@ import androidx.transition.TransitionManager;
 import com.google.android.material.transition.MaterialFade;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.R;
@@ -109,7 +108,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     public void bind(final int position, final DirectItem item) {
         this.item = item;
         final MessageDirection messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
-        itemView.post(() -> bindBase(item, messageDirection));
+        itemView.post(() -> bindBase(item, messageDirection, position));
         itemView.post(() -> bindItem(item, messageDirection));
         itemView.post(() -> setupLongClickListener(position));
         // bindBase(item, messageDirection);
@@ -117,7 +116,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         // setupLongClickListener(position);
     }
 
-    private void bindBase(final DirectItem item, final MessageDirection messageDirection) {
+    private void bindBase(final DirectItem item, final MessageDirection messageDirection, final int position) {
         final FrameLayout.LayoutParams containerLayoutParams = (FrameLayout.LayoutParams) binding.container.getLayoutParams();
         final DirectItemType itemType = item.getItemType();
         setMessageDirectionGravity(messageDirection, containerLayoutParams);
@@ -134,7 +133,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             binding.messageInfo.setPadding(0, 0, messageInfoPaddingSmall, dmRadiusSmall);
         }
         setupReply(item, messageDirection);
-        setReactions(item);
+        setReactions(item, position);
     }
 
     private void setBackground(final MessageDirection messageDirection) {
@@ -334,7 +333,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         replyInfoLayoutParams.endToStart = isIncoming ? ConstraintLayout.LayoutParams.UNSET : quoteLineId;
     }
 
-    private void setReactions(final DirectItem item) {
+    private void setReactions(final DirectItem item, final int position) {
         binding.getRoot().post(() -> {
             MaterialFade materialFade = new MaterialFade();
             materialFade.addTarget(binding.emojis);
@@ -343,17 +342,27 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             final List<DirectItemEmojiReaction> emojis = reactions != null ? reactions.getEmojis() : null;
             if (emojis == null || emojis.isEmpty()) {
                 binding.container.setPadding(messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall);
-                binding.emojis.setVisibility(View.GONE);
+                binding.reactionsWrapper.setVisibility(View.GONE);
                 return;
             }
-            binding.emojis.setVisibility(View.VISIBLE);
-            binding.emojis.setTranslationY(getReactionsTranslationY());
+            binding.reactionsWrapper.setVisibility(View.VISIBLE);
+            binding.reactionsWrapper.setTranslationY(getReactionsTranslationY());
             binding.container.setPadding(messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall, reactionAdjustMargin);
-            final String emojisJoined = emojis.stream()
-                                              .map(DirectItemEmojiReaction::getEmoji)
-                                              .collect(Collectors.joining());
-            final String text = String.format(Locale.ENGLISH, "%s %d", emojisJoined, emojis.size());
-            binding.emojis.setText(text);
+            binding.emojis.setEmojis(emojis.stream()
+                                           .map(DirectItemEmojiReaction::getEmoji)
+                                           .collect(Collectors.toList()));
+            // binding.emojis.setEmojis(ImmutableList.of("😣",
+            //                                           "😖",
+            //                                           "😫",
+            //                                           "😩",
+            //                                           "🥺",
+            //                                           "😢",
+            //                                           "😭",
+            //                                           "😤",
+            //                                           "😠",
+            //                                           "😡",
+            //                                           "🤬"));
+            binding.emojis.setOnClickListener(v -> callback.onReactionClick(item, position));
             // final List<DirectUser> reactedUsers = emojis.stream()
             //                                             .map(DirectItemEmojiReaction::getSenderId)
             //                                             .distinct()

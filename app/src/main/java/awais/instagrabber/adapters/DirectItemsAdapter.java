@@ -389,7 +389,9 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
 
         void onStoryClick(DirectItemStoryShare storyShare);
 
-        void onReaction(final DirectItem item, Emoji emoji);
+        void onReaction(DirectItem item, Emoji emoji);
+
+        void onReactionClick(DirectItem item, int position);
     }
 
     public interface DirectItemInternalLongClickListener {

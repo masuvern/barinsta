@@ -1,4 +1,4 @@
-package awais.instagrabber.adapters.viewholder;
+package awais.instagrabber.adapters.viewholder.directmessages;
 
 import android.graphics.Typeface;
 import android.view.View;

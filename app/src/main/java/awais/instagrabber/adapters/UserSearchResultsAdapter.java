@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import awais.instagrabber.adapters.DirectUsersAdapter.OnDirectUserClickListener;
-import awais.instagrabber.adapters.viewholder.DirectUserViewHolder;
+import awais.instagrabber.adapters.viewholder.directmessages.DirectUserViewHolder;
 import awais.instagrabber.databinding.LayoutDmUserItemBinding;
 import awais.instagrabber.repositories.responses.User;
 

@@ -173,28 +173,34 @@
 
         </awais.instagrabber.customviews.ChatMessageLayout>
 
-        <androidx.emoji.widget.EmojiAppCompatTextView
-            android:id="@+id/emojis"
+        <FrameLayout
+            android:id="@+id/reactions_wrapper"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginBottom="4dp"
-            android:background="@drawable/bg_rounded_corner"
-            android:elevation="1dp"
-            android:maxLines="1"
-            android:padding="4dp"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="18sp"
+            android:paddingBottom="2dp"
             android:translationY="@dimen/dm_reaction_translation_y_type_1"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="@id/chat_message_layout"
             app:layout_constraintTop_toBottomOf="parent"
-            app:layout_constraintWidth_max="wrap"
-            tools:text="😀"
-            tools:visibility="visible" />
+            tools:visibility="visible">
+
+            <awais.instagrabber.customviews.ReactionEmojiTextView
+                android:id="@+id/emojis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_rounded_corner"
+                android:elevation="1dp"
+                android:ellipsize="end"
+                android:padding="4dp"
+                android:singleLine="true"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="18sp"
+                tools:text="😀😀😀😀😀😀😀" />
+        </FrameLayout>
 
         <!--<FrameLayout-->
         <!--    android:id="@+id/reactions"-->

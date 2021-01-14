@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.ListAdapter;
 
 import java.util.List;
 
-import awais.instagrabber.adapters.viewholder.DirectInboxItemViewHolder;
+import awais.instagrabber.adapters.viewholder.directmessages.DirectInboxItemViewHolder;
 import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;

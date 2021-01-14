@@ -50,6 +50,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +61,7 @@ import awais.instagrabber.adapters.DirectItemsAdapter;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemLongClickListener;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemOrHeader;
+import awais.instagrabber.adapters.DirectReactionsAdapter;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemViewHolder;
 import awais.instagrabber.animations.CubicBezierInterpolator;
 import awais.instagrabber.customviews.RecordView;
@@ -70,6 +72,7 @@ import awais.instagrabber.customviews.helpers.HeightProvider;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
+import awais.instagrabber.dialogs.DirectItemReactionDialogFragment;
 import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.models.Resource;
@@ -77,6 +80,7 @@ import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.AppExecutors;
@@ -90,7 +94,7 @@ import awais.instagrabber.viewmodels.DirectThreadViewModel;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 
-public class DirectMessageThreadFragment extends Fragment {
+public class DirectMessageThreadFragment extends Fragment implements DirectReactionsAdapter.OnReactionClickListener {
     private static final String TAG = DirectMessageThreadFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int AUDIO_RECORD_PERM_REQUEST_CODE = 1000;
@@ -145,9 +149,7 @@ public class DirectMessageThreadFragment extends Fragment {
 
         @Override
         public void onMentionClick(final String mention) {
-            final Bundle bundle = new Bundle();
-            bundle.putString("username", "@" + mention);
-            NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(R.id.action_global_profileFragment, bundle);
+            navigateToUser(mention);
         }
 
         @Override
@@ -215,10 +217,17 @@ public class DirectMessageThreadFragment extends Fragment {
                 resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
             }
         }
+
+        @Override
+        public void onReactionClick(final DirectItem item, final int position) {
+            showReactionsDialog(item);
+        }
     };
+
     private final DirectItemLongClickListener directItemLongClickListener = position -> {
         // viewModel.setSelectedPosition(position);
     };
+    private DirectItemReactionDialogFragment reactionDialogFragment;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -1130,6 +1139,50 @@ public class DirectMessageThreadFragment extends Fragment {
 
     private void showLongClickOptions(final View itemView) {
 
+    }
+
+    private void showReactionsDialog(final DirectItem item) {
+        final LiveData<List<User>> users = viewModel.getUsers();
+        final LiveData<List<User>> leftUsers = viewModel.getLeftUsers();
+        final ArrayList<User> allUsers = new ArrayList<>();
+        allUsers.add(viewModel.getCurrentUser());
+        if (users != null && users.getValue() != null) {
+            allUsers.addAll(users.getValue());
+        }
+        if (leftUsers != null && leftUsers.getValue() != null) {
+            allUsers.addAll(leftUsers.getValue());
+        }
+        reactionDialogFragment = DirectItemReactionDialogFragment
+                .newInstance(viewModel.getViewerId(),
+                             allUsers,
+                             item.getItemId(),
+                             item.getReactions());
+        reactionDialogFragment.show(getChildFragmentManager(), "reactions_dialog");
+    }
+
+    @Override
+    public void onReactionClick(final String itemId, final DirectItemEmojiReaction reaction) {
+        if (reactionDialogFragment != null) {
+            reactionDialogFragment.dismiss();
+        }
+        if (reaction == null) return;
+        if (reaction.getSenderId() == viewModel.getViewerId()) {
+            final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendDeleteReaction(itemId);
+            if (resourceLiveData != null) {
+                resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
+            }
+            return;
+        }
+        // navigate to user
+        final User user = viewModel.getUser(reaction.getSenderId());
+        if (user == null) return;
+        navigateToUser(user.getUsername());
+    }
+
+    private void navigateToUser(@NonNull final String username) {
+        final Bundle bundle = new Bundle();
+        bundle.putString("username", "@" + username);
+        NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(R.id.action_global_profileFragment, bundle);
     }
 
     public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<User, DirectThread>> {

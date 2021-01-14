@@ -1,4 +1,4 @@
-package awais.instagrabber.adapters.viewholder;
+package awais.instagrabber.adapters.viewholder.directmessages;
 
 import android.graphics.drawable.Drawable;
 import android.text.SpannableStringBuilder;

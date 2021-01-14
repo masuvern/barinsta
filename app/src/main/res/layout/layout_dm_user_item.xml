@@ -78,12 +78,26 @@
         android:duplicateParentState="true"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/profile_pic"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/secondary_image"
         app:layout_constraintStart_toEndOf="@id/info"
         app:layout_constraintTop_toTopOf="@id/profile_pic"
         app:srcCompat="@drawable/ic_circle_check"
         app:tint="@color/ic_circle_check_tint"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/secondary_image"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="4dp"
+        android:duplicateParentState="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/profile_pic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/select"
+        app:layout_constraintTop_toTopOf="@id/profile_pic"
+        tools:srcCompat="@mipmap/ic_launcher"
+        tools:visibility="gone" />
 
     <include
         layout="@layout/item_pref_divider"

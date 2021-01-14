@@ -2,10 +2,11 @@ package awais.instagrabber.repositories.responses.directmessages;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class DirectItemReactions implements Cloneable {
+public class DirectItemReactions implements Cloneable, Serializable {
     private List<DirectItemEmojiReaction> emojis;
     private List<DirectItemEmojiReaction> likes;
 

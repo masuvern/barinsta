@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 import awais.instagrabber.R;
-import awais.instagrabber.adapters.viewholder.DirectUserViewHolder;
+import awais.instagrabber.adapters.viewholder.directmessages.DirectUserViewHolder;
 import awais.instagrabber.databinding.ItemFavSectionHeaderBinding;
 import awais.instagrabber.databinding.LayoutDmUserItemBinding;
 import awais.instagrabber.repositories.responses.User;

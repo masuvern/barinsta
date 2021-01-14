@@ -270,6 +270,13 @@ public final class EmojiParser {
         return ALL_EMOJIS;
     }
 
+    public Emoji getEmoji(final String emoji) {
+        if (emoji == null) {
+            return null;
+        }
+        return ALL_EMOJIS.get(emoji);
+    }
+
     // public String getMinorCategory(String emoji) {
     //     String minorCat = emojiToMinorCategory.get(emoji);
     //     if (minorCat == null) {
