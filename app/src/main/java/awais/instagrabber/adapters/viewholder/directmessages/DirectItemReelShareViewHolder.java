@@ -167,4 +167,9 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(imageVersions2);
         binding.preview.setImageURI(thumbUrl);
     }
+
+    @Override
+    protected boolean canForward() {
+        return false;
+    }
 }

@@ -23,11 +23,14 @@ import androidx.transition.TransitionManager;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.Objects;
+import java.util.Set;
+
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.UserSearchResultsAdapter;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentUserSearchBinding;
-import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.ViewUtils;
@@ -46,7 +49,6 @@ public class UserSearchFragment extends Fragment {
     private String actionLabel;
     private String title;
     private boolean multiple;
-    private long[] hideUserIds;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -81,12 +83,17 @@ public class UserSearchFragment extends Fragment {
             actionLabel = fragmentArgs.getActionLabel();
             title = fragmentArgs.getTitle();
             multiple = fragmentArgs.getMultiple();
+            viewModel.setHideThreadIds(fragmentArgs.getHideThreadIds());
             viewModel.setHideUserIds(fragmentArgs.getHideUserIds());
+            viewModel.setSearchMode(fragmentArgs.getSearchMode());
+            viewModel.setShowGroups(fragmentArgs.getShowGroups());
         }
         setupTitles();
         setupInput();
         setupResults();
         setupObservers();
+        // show cached results
+        viewModel.showCachedResults();
     }
 
     private void setupTitles() {
@@ -108,54 +115,64 @@ public class UserSearchFragment extends Fragment {
         final Context context = getContext();
         if (context == null) return;
         binding.results.setLayoutManager(new LinearLayoutManager(context));
-        resultsAdapter = new UserSearchResultsAdapter(multiple, (position, user, selected) -> {
+        resultsAdapter = new UserSearchResultsAdapter(multiple, (position, recipient, selected) -> {
             if (!multiple) {
                 final NavController navController = NavHostFragment.findNavController(this);
-                final NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
-                if (navBackStackEntry == null) return;
-                final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
-                savedStateHandle.set("result", user);
+                if (!setResult(navController, recipient)) return;
                 navController.navigateUp();
                 return;
             }
-            viewModel.setSelectedUser(user, !selected);
-            resultsAdapter.setSelectedUser(user.getPk(), !selected);
+            viewModel.setSelectedRecipient(recipient, !selected);
+            resultsAdapter.setSelectedRecipient(recipient, !selected);
             if (!selected) {
-                createUserChip(user);
+                createChip(recipient);
                 return;
             }
-            final View chip = findChip(user.getPk());
+            final View chip = findChip(recipient);
             if (chip == null) return;
-            removeChip(chip);
+            removeChipFromGroup(chip);
         });
         binding.results.setAdapter(resultsAdapter);
         binding.done.setOnClickListener(v -> {
             final NavController navController = NavHostFragment.findNavController(this);
-            final NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
-            if (navBackStackEntry == null) return;
-            final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
-            savedStateHandle.set("result", viewModel.getSelectedUsers());
+            if (!setResult(navController, viewModel.getSelectedRecipients())) return;
             navController.navigateUp();
         });
+    }
+
+    private boolean setResult(@NonNull final NavController navController, final RankedRecipient rankedRecipient) {
+        final NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
+        if (navBackStackEntry == null) return false;
+        final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        savedStateHandle.set("result", rankedRecipient);
+        return true;
+    }
+
+    private boolean setResult(@NonNull final NavController navController, final Set<RankedRecipient> rankedRecipients) {
+        final NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
+        if (navBackStackEntry == null) return false;
+        final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        savedStateHandle.set("result", rankedRecipients);
+        return true;
     }
 
     private void setupInput() {
         binding.search.addTextChangedListener(new TextWatcherAdapter() {
             @Override
             public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
-                if (TextUtils.isEmpty(s)) {
-                    viewModel.cancelSearch();
-                    viewModel.clearResults();
-                    return;
-                }
-                viewModel.search(s.toString().trim());
+                // if (TextUtils.isEmpty(s)) {
+                //     viewModel.cancelSearch();
+                //     viewModel.clearResults();
+                //     return;
+                // }
+                viewModel.search(s == null ? null : s.toString().trim());
             }
         });
         binding.search.setOnKeyListener((v, keyCode, event) -> {
             if (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
                 final View chip = getLastChip();
                 if (chip == null) return false;
-                removeSelectedUser(chip);
+                removeChip(chip);
             }
             return false;
         });
@@ -175,32 +192,41 @@ public class UserSearchFragment extends Fragment {
     }
 
     private void setupObservers() {
-        viewModel.getUsers().observe(getViewLifecycleOwner(), results -> {
+        viewModel.getRecipients().observe(getViewLifecycleOwner(), results -> {
             if (results == null) return;
             switch (results.status) {
                 case SUCCESS:
-                    resultsAdapter.submitList(results.data);
+                    if (results.data != null) {
+                        resultsAdapter.submitList(results.data);
+                    }
                     break;
                 case ERROR:
                     if (results.message != null) {
                         Snackbar.make(binding.getRoot(), results.message, Snackbar.LENGTH_LONG).show();
                     }
+                    if (results.data != null) {
+                        resultsAdapter.submitList(results.data);
+                    }
                     break;
                 case LOADING:
+                    //noinspection DuplicateBranchesInSwitch
+                    if (results.data != null) {
+                        resultsAdapter.submitList(results.data);
+                    }
                     break;
             }
         });
         viewModel.showAction().observe(getViewLifecycleOwner(), showAction -> binding.done.setVisibility(showAction ? View.VISIBLE : View.GONE));
     }
 
-    private void createUserChip(final User user) {
+    private void createChip(final RankedRecipient recipient) {
         final Context context = getContext();
         if (context == null) return;
         final Chip chip = new Chip(context);
-        chip.setTag(user);
-        chip.setText(user.getFullName());
+        chip.setTag(recipient);
+        chip.setText(getRecipientText(recipient));
         chip.setCloseIconVisible(true);
-        chip.setOnCloseIconClickListener(v -> removeSelectedUser(chip));
+        chip.setOnCloseIconClickListener(v -> removeChip(chip));
         binding.group.post(() -> {
             final Pair<Integer, Integer> measure = ViewUtils.measure(chip, binding.group);
             TransitionManager.beginDelayedTransition(binding.getRoot());
@@ -209,31 +235,44 @@ public class UserSearchFragment extends Fragment {
         });
     }
 
-    private void removeSelectedUser(final View chip) {
-        final User user = (User) chip.getTag();
-        if (user == null) return;
-        viewModel.setSelectedUser(user, false);
-        resultsAdapter.setSelectedUser(user.getPk(), false);
-        removeChip(chip);
+    private String getRecipientText(final RankedRecipient recipient) {
+        if (recipient == null) return null;
+        if (recipient.getUser() != null) {
+            return recipient.getUser().getFullName();
+        }
+        if (recipient.getThread() != null) {
+            return recipient.getThread().getThreadTitle();
+        }
+        return null;
     }
 
-    private View findChip(final long userId) {
+    private void removeChip(@NonNull final View chip) {
+        final RankedRecipient recipient = (RankedRecipient) chip.getTag();
+        if (recipient == null) return;
+        viewModel.setSelectedRecipient(recipient, false);
+        resultsAdapter.setSelectedRecipient(recipient, false);
+        removeChipFromGroup(chip);
+    }
+
+    private View findChip(final RankedRecipient recipient) {
+        if (recipient == null || recipient.getUser() == null && recipient.getThread() == null) return null;
+        boolean isUser = recipient.getUser() != null;
         final int childCount = binding.group.getChildCount();
-        if (childCount == 0) {
-            return null;
-        }
+        if (childCount == 0) return null;
         for (int i = childCount - 1; i >= 0; i--) {
             final View child = binding.group.getChildAt(i);
             if (child == null) continue;
-            final User user = (User) child.getTag();
-            if (user != null && user.getPk() == userId) {
+            final RankedRecipient tag = (RankedRecipient) child.getTag();
+            if (tag == null || isUser && tag.getUser() == null || !isUser && tag.getThread() == null) continue;
+            if ((isUser && tag.getUser().getPk() == recipient.getUser().getPk())
+                    || (!isUser && Objects.equals(tag.getThread().getThreadId(), recipient.getThread().getThreadId()))) {
                 return child;
             }
         }
         return null;
     }
 
-    private void removeChip(final View chip) {
+    private void removeChipFromGroup(final View chip) {
         binding.group.post(() -> {
             TransitionManager.beginDelayedTransition(binding.getRoot());
             binding.group.removeView(chip);
@@ -266,5 +305,21 @@ public class UserSearchFragment extends Fragment {
             }
         }
         return null;
+    }
+
+    public enum SearchMode {
+        USER_SEARCH("user_name"),
+        RAVEN("raven"),
+        RESHARE("reshare");
+
+        private final String name;
+
+        SearchMode(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

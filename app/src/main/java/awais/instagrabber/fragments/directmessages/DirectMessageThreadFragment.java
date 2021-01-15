@@ -34,6 +34,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
@@ -53,8 +54,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import awais.instagrabber.R;
+import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.activities.CameraActivity;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.DirectItemsAdapter;
@@ -75,6 +78,8 @@ import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.DirectItemReactionDialogFragment;
 import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
+import awais.instagrabber.fragments.UserSearchFragment;
+import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
@@ -83,6 +88,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.PermissionUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -124,6 +130,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private boolean isRecording;
     private boolean wasKbShowing;
     private int keyboardHeight = Utils.convertDpToPx(250);
+    private DirectItemReactionDialogFragment reactionDialogFragment;
+    private DirectItem itemToForward;
+    private MutableLiveData<Object> backStackSavedStateResultLiveData;
 
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -229,13 +238,48 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 handleSentMessage(viewModel.unsend(item));
                 return;
             }
+            if (itemId == R.id.forward) {
+                itemToForward = item;
+                final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                        .actionGlobalUserSearch()
+                        .setTitle(getString(R.string.forward))
+                        .setActionLabel(getString(R.string.send))
+                        .setShowGroups(true)
+                        .setMultiple(true)
+                        .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+                final NavController navController = NavHostFragment.findNavController(DirectMessageThreadFragment.this);
+                navController.navigate(actionGlobalUserSearch);
+            }
         }
     };
 
     private final DirectItemLongClickListener directItemLongClickListener = position -> {
         // viewModel.setSelectedPosition(position);
     };
-    private DirectItemReactionDialogFragment reactionDialogFragment;
+    private final Observer<Object> backStackSavedStateObserver = result -> {
+        if (result == null) return;
+        if (result instanceof Uri) {
+            final Uri uri = (Uri) result;
+            handleSentMessage(viewModel.sendUri(uri));
+        } else if ((result instanceof RankedRecipient)) {
+            // Log.d(TAG, "result: " + result);
+            if (itemToForward != null) {
+                viewModel.forward((RankedRecipient) result, itemToForward);
+            }
+        } else if ((result instanceof Set)) {
+            try {
+                // Log.d(TAG, "result: " + result);
+                if (itemToForward != null) {
+                    //noinspection unchecked
+                    viewModel.forward((Set<RankedRecipient>) result, itemToForward);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "forward result: ", e);
+            }
+        }
+        // clear result
+        backStackSavedStateResultLiveData.postValue(null);
+    };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -361,6 +405,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             binding.send.setX(initialSendX);
         }
         binding.send.stopScale();
+        setupBackStackResultObserver();
     }
 
     @Override
@@ -587,17 +632,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             setupItemsAdapter(userThreadPair.first, userThreadPair.second);
         });
         viewModel.getItems().observe(getViewLifecycleOwner(), this::submitItemsToAdapter);
+    }
+
+    private void setupBackStackResultObserver() {
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
-            final MutableLiveData<Object> resultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
-            resultLiveData.observe(getViewLifecycleOwner(), result -> {
-                if (!(result instanceof Uri)) return;
-                final Uri uri = (Uri) result;
-                viewModel.sendUri(uri);
-                // clear result
-                resultLiveData.postValue(null);
-            });
+            backStackSavedStateResultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
+            backStackSavedStateResultLiveData.observe(getViewLifecycleOwner(), backStackSavedStateObserver);
         }
     }
 

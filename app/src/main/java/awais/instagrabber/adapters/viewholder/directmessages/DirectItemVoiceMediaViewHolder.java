@@ -169,6 +169,11 @@ public class DirectItemVoiceMediaViewHolder extends DirectItemViewHolder {
         }
     }
 
+    @Override
+    protected boolean canForward() {
+        return false;
+    }
+
     private static class AudioItemState {
         private boolean prepared;
 

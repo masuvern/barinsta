@@ -86,23 +86,23 @@
     <action
         android:id="@+id/action_global_user_search"
         app:destination="@id/user_search_nav_graph">
-        <argument
-            android:name="multiple"
-            app:argType="boolean" />
+        <!--<argument-->
+        <!--    android:name="multiple"-->
+        <!--    app:argType="boolean" />-->
 
-        <argument
-            android:name="title"
-            app:argType="string"
-            app:nullable="true" />
+        <!--<argument-->
+        <!--    android:name="title"-->
+        <!--    app:argType="string"-->
+        <!--    app:nullable="true" />-->
 
-        <argument
-            android:name="action_label"
-            app:argType="string"
-            app:nullable="true" />
+        <!--<argument-->
+        <!--    android:name="action_label"-->
+        <!--    app:argType="string"-->
+        <!--    app:nullable="true" />-->
 
-        <argument
-            android:name="hideUserIds"
-            app:argType="long[]" />
+        <!--<argument-->
+        <!--    android:name="hideUserIds"-->
+        <!--    app:argType="long[]" />-->
     </action>
 
     <fragment

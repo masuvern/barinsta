@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
-import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -29,18 +28,24 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.R;
+import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.adapters.DirectUsersAdapter;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesSettingsBinding;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment.Option;
+import awais.instagrabber.fragments.UserSearchFragment;
+import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
 import awais.instagrabber.viewmodels.DirectSettingsViewModel;
 
@@ -155,6 +160,12 @@ public class DirectMessageSettingsFragment extends Fragment {
         setupObservers();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
     private void setupObservers() {
         viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
             if (usersAdapter == null) return;
@@ -171,16 +182,27 @@ public class DirectMessageSettingsFragment extends Fragment {
             final MutableLiveData<Object> resultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
             resultLiveData.observe(getViewLifecycleOwner(), result -> {
                 LiveData<Resource<Object>> detailsChangeResourceLiveData = null;
-                if ((result instanceof User)) {
-                    // Log.d(TAG, "result: " + result);
-                    detailsChangeResourceLiveData = viewModel.addMembers(Collections.singleton((User) result));
+                if ((result instanceof RankedRecipient)) {
+                    final RankedRecipient recipient = (RankedRecipient) result;
+                    final User user = getUser(recipient);
+                    // Log.d(TAG, "result: " + user);
+                    if (user != null) {
+                        detailsChangeResourceLiveData = viewModel.addMembers(Collections.singleton(recipient.getUser()));
+                    }
                 } else if ((result instanceof Set)) {
                     try {
-                        // Log.d(TAG, "result: " + result);
                         //noinspection unchecked
-                        detailsChangeResourceLiveData = viewModel.addMembers((Set<User>) result);
+                        final Set<RankedRecipient> recipients = (Set<RankedRecipient>) result;
+                        final Set<User> users = recipients.stream()
+                                                          .filter(Objects::nonNull)
+                                                          .map(this::getUser)
+                                                          .filter(Objects::nonNull)
+                                                          .collect(Collectors.toSet());
+                        // Log.d(TAG, "result: " + users);
+                        detailsChangeResourceLiveData = viewModel.addMembers(users);
                     } catch (Exception e) {
                         Log.e(TAG, "search users result: ", e);
+                        Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
                     }
                 }
                 if (detailsChangeResourceLiveData != null) {
@@ -188,6 +210,17 @@ public class DirectMessageSettingsFragment extends Fragment {
                 }
             });
         }
+    }
+
+    @Nullable
+    private User getUser(@NonNull final RankedRecipient recipient) {
+        User user = null;
+        if (recipient.getUser() != null) {
+            user = recipient.getUser();
+        } else if (recipient.getThread() != null && !recipient.getThread().isGroup()) {
+            user = recipient.getThread().getUsers().get(0);
+        }
+        return user;
     }
 
     private void init() {
@@ -232,13 +265,14 @@ public class DirectMessageSettingsFragment extends Fragment {
             } else {
                 currentUserIds = new long[0];
             }
-            final NavDirections directions = DirectMessageSettingsFragmentDirections.actionGlobalUserSearch(
-                    true,
-                    "Add users",
-                    "Add",
-                    currentUserIds
-            );
-            navController.navigate(directions);
+            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                    .actionGlobalUserSearch()
+                    .setTitle(getString(R.string.add_members))
+                    .setActionLabel(getString(R.string.add))
+                    .setHideUserIds(currentUserIds)
+                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN)
+                    .setMultiple(true);
+            navController.navigate(actionGlobalUserSearch);
         });
     }
 

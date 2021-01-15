@@ -22,4 +22,9 @@ public class DirectItemLikeViewHolder extends DirectItemViewHolder {
 
     @Override
     public void bindItem(final DirectItem directItemModel, final MessageDirection messageDirection) {}
+
+    @Override
+    protected boolean canForward() {
+        return false;
+    }
 }

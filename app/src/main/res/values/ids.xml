@@ -2,4 +2,5 @@
 <resources>
     <item name="reply" type="id" />
     <item name="unsend" type="id" />
+    <item name="forward" type="id" />
 </resources>

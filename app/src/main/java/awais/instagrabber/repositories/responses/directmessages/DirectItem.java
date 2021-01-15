@@ -39,6 +39,7 @@ public class DirectItem implements Cloneable {
     private final int hideInThread;
     private Date date;
     private boolean isPending;
+    private boolean showForwardAttribution;
 
     public DirectItem(final String itemId,
                       final long userId,
@@ -65,7 +66,8 @@ public class DirectItem implements Cloneable {
                       final DirectItem repliedToMessage,
                       final DirectItemVoiceMedia voiceMedia,
                       final Location location,
-                      final int hideInThread) {
+                      final int hideInThread,
+                      final boolean showForwardAttribution) {
         this.itemId = itemId;
         this.userId = userId;
         this.timestamp = timestamp;
@@ -92,6 +94,7 @@ public class DirectItem implements Cloneable {
         this.voiceMedia = voiceMedia;
         this.location = location;
         this.hideInThread = hideInThread;
+        this.showForwardAttribution = showForwardAttribution;
     }
 
     public String getItemId() {
@@ -220,6 +223,10 @@ public class DirectItem implements Cloneable {
 
     public void setReactions(final DirectItemReactions reactions) {
         this.reactions = reactions;
+    }
+
+    public boolean showForwardAttribution() {
+        return showForwardAttribution;
     }
 
     @NonNull

@@ -27,12 +27,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.UploadVideoOptions;
+import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.responses.User;
@@ -44,6 +46,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroa
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.BitmapUtils;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -925,5 +928,95 @@ public class DirectThreadViewModel extends AndroidViewModel {
             data.postValue(Resource.error(e.getMessage(), directItem));
             Log.e(TAG, "onResponse: ", e);
         }
+    }
+
+    public void forward(final Set<RankedRecipient> recipients, final DirectItem itemToForward) {
+        if (recipients == null || itemToForward == null) return;
+        for (final RankedRecipient recipient : recipients) {
+            forward(recipient, itemToForward);
+        }
+    }
+
+    public void forward(final RankedRecipient recipient, final DirectItem itemToForward) {
+        if (recipient == null || itemToForward == null) return;
+        if (recipient.getThread() == null && recipient.getUser() != null) {
+            // create thread and forward
+            final Call<DirectThread> createThreadRequest = service.createThread(Collections.singletonList(recipient.getUser().getPk()), null);
+            createThreadRequest.enqueue(new Callback<DirectThread>() {
+                @Override
+                public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
+                    if (!response.isSuccessful()) {
+                        if (response.errorBody() != null) {
+                            try {
+                                final String string = response.errorBody().string();
+                                final String msg = String.format(Locale.US,
+                                                                 "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                                                 call.request().url().toString(),
+                                                                 response.code(),
+                                                                 string);
+                                Log.e(TAG, msg);
+                            } catch (IOException e) {
+                                Log.e(TAG, "onResponse: ", e);
+                            }
+                            return;
+                        }
+                        Log.e(TAG, "onResponse: request was not successful and response error body was null");
+                        return;
+                    }
+                    final DirectThread thread = response.body();
+                    if (thread == null) {
+                        Log.e(TAG, "onResponse: thread is null");
+                        return;
+                    }
+                    forward(thread, itemToForward);
+                }
+
+                @Override
+                public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
+
+                }
+            });
+            return;
+        }
+        if (recipient.getThread() != null) {
+            // just forward
+            final DirectThread thread = recipient.getThread();
+            forward(thread, itemToForward);
+        }
+    }
+
+    private void forward(@NonNull final DirectThread thread, @NonNull final DirectItem itemToForward) {
+        final DirectItemType itemType = itemToForward.getItemType();
+        final Call<DirectThreadBroadcastResponse> request = service.forward(thread.getThreadId(),
+                                                                            itemType.getName(),
+                                                                            threadId,
+                                                                            itemToForward.getItemId());
+        request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
+                                   @NonNull final Response<DirectThreadBroadcastResponse> response) {
+                if (response.isSuccessful()) return;
+                if (response.errorBody() != null) {
+                    try {
+                        final String string = response.errorBody().string();
+                        final String msg = String.format(Locale.US,
+                                                         "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                                         call.request().url().toString(),
+                                                         response.code(),
+                                                         string);
+                        Log.e(TAG, msg);
+                    } catch (IOException e) {
+                        Log.e(TAG, "onResponse: ", e);
+                    }
+                    return;
+                }
+                Log.e(TAG, "onResponse: request was not successful and response error body was null");
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 }

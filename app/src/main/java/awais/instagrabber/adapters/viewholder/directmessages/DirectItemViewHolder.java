@@ -135,6 +135,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         }
         setupReply(item, messageDirection);
         setReactions(item, position);
+        if (item.getRepliedToMessage() == null && item.showForwardAttribution()) {
+            setForwardInfo(messageDirection);
+        }
     }
 
     private void setBackground(final MessageDirection messageDirection) {
@@ -316,6 +319,11 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         return String.format("Replied to %s", repliedToUsername);
     }
 
+    private void setForwardInfo(final MessageDirection direction) {
+        binding.replyInfo.setVisibility(View.VISIBLE);
+        binding.replyInfo.setText(direction == MessageDirection.OUTGOING ? "You forwarded a message" : "Forwarded a message");
+    }
+
     private void setReplyGravity(final MessageDirection messageDirection) {
         final boolean isIncoming = messageDirection == MessageDirection.INCOMING;
         final ConstraintLayout.LayoutParams quoteLineLayoutParams = (ConstraintLayout.LayoutParams) binding.quoteLine.getLayoutParams();
@@ -426,6 +434,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         return true;
     }
 
+    protected boolean canForward() {
+        return true;
+    }
+
     protected List<DirectItemContextMenu.MenuItem> getLongClickOptions() {
         return null;
     }
@@ -509,6 +521,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
         final ImmutableList.Builder<DirectItemContextMenu.MenuItem> builder = ImmutableList.builder();
         if (longClickOptions != null) {
             builder.addAll(longClickOptions);
+        }
+        if (canForward()) {
+            builder.add(new DirectItemContextMenu.MenuItem(R.id.forward, R.string.forward));
         }
         if (messageDirection == MessageDirection.OUTGOING) {
             builder.add(new DirectItemContextMenu.MenuItem(R.id.unsend, R.string.dms_inbox_unsend));

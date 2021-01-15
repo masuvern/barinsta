@@ -1,6 +1,7 @@
 package awais.instagrabber.webservices;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.repositories.DirectMessagesRepository;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
@@ -26,9 +28,11 @@ import awais.instagrabber.repositories.requests.directmessages.VideoBroadcastOpt
 import awais.instagrabber.repositories.requests.directmessages.VoiceBroadcastOptions;
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
@@ -246,5 +250,57 @@ public class DirectMessagesService extends BaseService {
                 "_uuid", deviceUuid
         );
         return repository.deleteItem(threadId, itemId, form);
+    }
+
+    public Call<RankedRecipientsResponse> rankedRecipients(@Nullable final String mode,
+                                                           @Nullable final Boolean showThreads,
+                                                           @Nullable final String query) {
+        // String correctedMode = mode;
+        // if (TextUtils.isEmpty(mode) || (!mode.equals("raven") && !mode.equals("reshare"))) {
+        //     correctedMode = "raven";
+        // }
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        if (mode != null) {
+            builder.put("mode", mode);
+        }
+        if (query != null) {
+            builder.put("query", query);
+        }
+        if (showThreads != null) {
+            builder.put("showThreads", String.valueOf(showThreads));
+        }
+        return repository.rankedRecipients(builder.build());
+    }
+
+    public Call<DirectThreadBroadcastResponse> forward(@NonNull final String toThreadId,
+                                                       @NonNull final String itemType,
+                                                       @NonNull final String fromThreadId,
+                                                       @NonNull final String itemId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "action", "forward_item",
+                "thread_id", toThreadId,
+                "item_type", itemType,
+                "forwarded_from_thread_id", fromThreadId,
+                "forwarded_from_thread_item_id", itemId
+        );
+        return repository.forward(form);
+    }
+
+    public Call<DirectThread> createThread(@NonNull final List<Long> userIds,
+                                           @Nullable final String threadTitle) {
+        final List<String> userIdStringList = userIds.stream()
+                                                     .filter(Objects::nonNull)
+                                                     .map(String::valueOf)
+                                                     .collect(Collectors.toList());
+        final ImmutableMap.Builder<String, Object> formBuilder = ImmutableMap.<String, Object>builder()
+                .put("_csrftoken", csrfToken)
+                .put("_uuid", deviceUuid)
+                .put("_uid", userId)
+                .put("recipient_users", new JSONArray(userIdStringList).toString());
+        if (threadTitle != null) {
+            formBuilder.put("thread_title", threadTitle);
+        }
+        final Map<String, String> signedForm = Utils.sign(formBuilder.build());
+        return repository.createThread(signedForm);
     }
 }

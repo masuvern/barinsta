@@ -47,8 +47,8 @@ public class DirectItemFactory {
                 null,
                 null,
                 null,
-                0
-        );
+                0,
+                false);
     }
 
     public static DirectItem createImageOrVideo(final long userId,
@@ -128,8 +128,8 @@ public class DirectItemFactory {
                 null,
                 null,
                 null,
-                0
-        );
+                0,
+                false);
     }
 
     public static DirectItem createVoice(final long userId,
@@ -209,7 +209,7 @@ public class DirectItemFactory {
                 null,
                 voiceMedia,
                 null,
-                0
-        );
+                0,
+                false);
     }
 }

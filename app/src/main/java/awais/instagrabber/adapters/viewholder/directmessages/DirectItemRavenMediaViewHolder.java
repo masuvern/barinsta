@@ -184,4 +184,9 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(imageVersions2);
         binding.preview.setImageURI(thumbUrl);
     }
+
+    @Override
+    protected boolean allowLongClick() {
+        return false; // disabling until confirmed
+    }
 }

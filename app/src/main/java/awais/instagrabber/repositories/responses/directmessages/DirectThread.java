@@ -2,13 +2,14 @@ package awais.instagrabber.repositories.responses.directmessages;
 
 import androidx.annotation.Nullable;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import awais.instagrabber.repositories.responses.User;
 
-public class DirectThread {
+public class DirectThread implements Serializable {
     private final String threadId;
     private final String threadV2Id;
     private final List<User> users;

@@ -105,4 +105,9 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
         binding.ivMediaPreview.setVisibility(View.GONE);
         binding.typeIcon.setVisibility(View.GONE);
     }
+
+    @Override
+    protected boolean canForward() {
+        return false;
+    }
 }

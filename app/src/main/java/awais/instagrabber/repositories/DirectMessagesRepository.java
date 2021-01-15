@@ -4,9 +4,11 @@ import java.util.Map;
 
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -62,4 +64,15 @@ public interface DirectMessagesRepository {
     Call<String> deleteItem(@Path("threadId") String threadId,
                             @Path("itemId") String itemId,
                             @FieldMap final Map<String, String> form);
+
+    @GET("/api/v1/direct_v2/ranked_recipients/")
+    Call<RankedRecipientsResponse> rankedRecipients(@QueryMap Map<String, String> queryMap);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/broadcast/forward/")
+    Call<DirectThreadBroadcastResponse> forward(@FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/create_group_thread/")
+    Call<DirectThread> createThread(@FieldMap final Map<String, String> signedForm);
 }

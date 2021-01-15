@@ -398,4 +398,7 @@
     <string name="message">Message</string>
     <string name="reply">Reply</string>
     <string name="tap_to_remove">Tap to remove</string>
+    <string name="forward">Forward</string>
+    <string name="add">Add</string>
+    <string name="send">Send</string>
 </resources>

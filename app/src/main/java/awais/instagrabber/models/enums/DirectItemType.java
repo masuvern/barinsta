@@ -1,5 +1,7 @@
 package awais.instagrabber.models.enums;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -61,5 +63,47 @@ public enum DirectItemType implements Serializable {
 
     public static DirectItemType valueOf(final int id) {
         return map.get(id);
+    }
+
+    @Nullable
+    public String getName() {
+        switch (this) {
+            case TEXT:
+                return "text";
+            case LIKE:
+                return "like";
+            case LINK:
+                return "link";
+            case MEDIA:
+                return "media";
+            case RAVEN_MEDIA:
+                return "raven_media";
+            case PROFILE:
+                return "profile";
+            case VIDEO_CALL_EVENT:
+                return "video_call_event";
+            case ANIMATED_MEDIA:
+                return "animated_media";
+            case VOICE_MEDIA:
+                return "voice_media";
+            case MEDIA_SHARE:
+                return "media_share";
+            case REEL_SHARE:
+                return "reel_share";
+            case ACTION_LOG:
+                return "action_log";
+            case PLACEHOLDER:
+                return "placeholder";
+            case STORY_SHARE:
+                return "story_share";
+            case CLIP:
+                return "clip";
+            case FELIX_SHARE:
+                return "felix_share";
+            case LOCATION:
+                return "location";
+            default:
+                return null;
+        }
     }
 }

@@ -24,6 +24,17 @@
         app:roundAsCircle="true"
         tools:background="@mipmap/ic_launcher" />
 
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/profile_pic2"
+        android:layout_width="@dimen/dm_inbox_avatar_size"
+        android:layout_height="@dimen/dm_inbox_avatar_size"
+        app:actualImageScaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:roundAsCircle="true"
+        tools:background="@mipmap/ic_launcher" />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/full_name"
         android:layout_width="0dp"
@@ -55,7 +66,8 @@
         app:layout_constraintEnd_toStartOf="@id/select"
         app:layout_constraintStart_toEndOf="@id/full_name"
         app:layout_constraintTop_toTopOf="@id/full_name"
-        tools:text="Admin" />
+        tools:text="Admin"
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/username"
@@ -68,7 +80,8 @@
         app:layout_constraintEnd_toStartOf="@id/select"
         app:layout_constraintStart_toStartOf="@id/full_name"
         app:layout_constraintTop_toBottomOf="@id/full_name"
-        tools:text="username" />
+        tools:text="username"
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/select"
@@ -83,7 +96,7 @@
         app:layout_constraintTop_toTopOf="@id/profile_pic"
         app:srcCompat="@drawable/ic_circle_check"
         app:tint="@color/ic_circle_check_tint"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/secondary_image"
