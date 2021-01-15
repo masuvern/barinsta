@@ -135,7 +135,7 @@ public final class DownloadUtils {
                                             final String postId,
                                             final String sliderPostfix,
                                             final String displayUrl) {
-        final String fileName = postId + sliderPostfix + "." + getFileExtensionFromUrl(displayUrl);
+        final String fileName = postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
     }
 

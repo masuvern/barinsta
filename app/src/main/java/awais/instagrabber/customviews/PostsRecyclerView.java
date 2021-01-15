@@ -289,6 +289,7 @@ public class PostsRecyclerView extends RecyclerView {
             lazyLoader.resetState();
         }
         if (postFetcher != null) {
+            mediaViewModel.getList().postValue(Collections.emptyList());
             postFetcher.reset();
             postFetcher.fetch();
         }
