@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
@@ -36,6 +37,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
     private final LayoutDmMediaShareBinding binding;
     private final RoundingParams incomingRoundingParams;
     private final RoundingParams outgoingRoundingParams;
+    private DirectItemType itemType;
 
     public DirectItemMediaShareViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
                                           @NonNull final LayoutDmMediaShareBinding binding,
@@ -148,13 +150,14 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
     @Nullable
     private Media getMedia(@NonNull final DirectItem item) {
         Media media = null;
-        if (item.getItemType() == DirectItemType.MEDIA_SHARE) {
+        itemType = item.getItemType();
+        if (itemType == DirectItemType.MEDIA_SHARE) {
             media = item.getMediaShare();
-        } else if (item.getItemType() == DirectItemType.CLIP) {
+        } else if (itemType == DirectItemType.CLIP) {
             final DirectItemClip clip = item.getClip();
             if (clip == null) return null;
             media = clip.getClip();
-        } else if (item.getItemType() == DirectItemType.FELIX_SHARE) {
+        } else if (itemType == DirectItemType.FELIX_SHARE) {
             final DirectItemFelixShare felixShare = item.getFelixShare();
             if (felixShare == null) return null;
             media = felixShare.getVideo();
@@ -165,5 +168,13 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
     @Override
     protected int getReactionsTranslationY() {
         return reactionTranslationYType2;
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        if (itemType != null && (itemType == DirectItemType.CLIP || itemType == DirectItemType.FELIX_SHARE)) {
+            return ItemTouchHelper.ACTION_STATE_IDLE;
+        }
+        return super.getSwipeDirection();
     }
 }

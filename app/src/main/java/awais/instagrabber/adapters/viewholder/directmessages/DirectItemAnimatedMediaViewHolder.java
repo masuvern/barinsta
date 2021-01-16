@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
@@ -58,5 +59,10 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
                                                       .setUri(url)
                                                       .setAutoPlayAnimations(true)
                                                       .build());
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        return ItemTouchHelper.ACTION_STATE_IDLE;
     }
 }

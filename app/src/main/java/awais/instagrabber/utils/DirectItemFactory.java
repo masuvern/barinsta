@@ -20,7 +20,8 @@ public class DirectItemFactory {
 
     public static DirectItem createText(final long userId,
                                         final String clientContext,
-                                        final String text) {
+                                        final String text,
+                                        final DirectItem repliedToMessage) {
         return new DirectItem(
                 UUID.randomUUID().toString(),
                 userId,
@@ -44,7 +45,7 @@ public class DirectItemFactory {
                 null,
                 null,
                 null,
-                null,
+                repliedToMessage,
                 null,
                 null,
                 0,

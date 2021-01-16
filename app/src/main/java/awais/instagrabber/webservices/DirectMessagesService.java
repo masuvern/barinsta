@@ -119,19 +119,29 @@ public class DirectMessagesService extends BaseService {
 
     public Call<DirectThreadBroadcastResponse> broadcastText(final String clientContext,
                                                              final ThreadIdOrUserIds threadIdOrUserIds,
-                                                             final String text) {
+                                                             final String text,
+                                                             final String repliedToItemId,
+                                                             final String repliedToClientContext) {
         final List<String> urls = TextUtils.extractUrls(text);
         if (!urls.isEmpty()) {
-            return broadcastLink(clientContext, threadIdOrUserIds, text, urls);
+            return broadcastLink(clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext);
         }
-        return broadcast(new TextBroadcastOptions(clientContext, threadIdOrUserIds, text));
+        final TextBroadcastOptions broadcastOptions = new TextBroadcastOptions(clientContext, threadIdOrUserIds, text);
+        broadcastOptions.setRepliedToItemId(repliedToItemId);
+        broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        return broadcast(broadcastOptions);
     }
 
     public Call<DirectThreadBroadcastResponse> broadcastLink(final String clientContext,
                                                              final ThreadIdOrUserIds threadIdOrUserIds,
                                                              final String linkText,
-                                                             final List<String> urls) {
-        return broadcast(new LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls));
+                                                             final List<String> urls,
+                                                             final String repliedToItemId,
+                                                             final String repliedToClientContext) {
+        final LinkBroadcastOptions broadcastOptions = new LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls);
+        broadcastOptions.setRepliedToItemId(repliedToItemId);
+        broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        return broadcast(broadcastOptions);
     }
 
     public Call<DirectThreadBroadcastResponse> broadcastPhoto(final String clientContext,
@@ -187,6 +197,10 @@ public class DirectMessagesService extends BaseService {
         form.put("__uuid", deviceUuid);
         form.put("client_context", broadcastOptions.getClientContext());
         form.put("mutation_token", broadcastOptions.getClientContext());
+        if (!TextUtils.isEmpty(broadcastOptions.getRepliedToItemId()) && !TextUtils.isEmpty(broadcastOptions.getRepliedToClientContext())) {
+            form.put("replied_to_item_id", broadcastOptions.getRepliedToItemId());
+            form.put("replied_to_client_context", broadcastOptions.getRepliedToClientContext());
+        }
         form.putAll(broadcastOptions.getFormMap());
         form.put("action", "send_item");
         final Map<String, String> signedForm = Utils.sign(form);

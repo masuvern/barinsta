@@ -342,7 +342,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public static class DirectItemOrHeader {
         Date date;
-        DirectItem item;
+        public DirectItem item;
 
         public boolean isHeader() {
             return date != null;

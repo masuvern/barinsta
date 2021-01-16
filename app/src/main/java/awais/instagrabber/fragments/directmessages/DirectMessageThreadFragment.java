@@ -41,9 +41,11 @@ import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+import androidx.transition.TransitionManager;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
@@ -73,6 +75,7 @@ import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.customviews.helpers.HeaderItemDecoration;
 import awais.instagrabber.customviews.helpers.HeightProvider;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
+import awais.instagrabber.customviews.helpers.SwipeAndRestoreItemTouchHelperCallback;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.DirectItemReactionDialogFragment;
@@ -81,16 +84,19 @@ import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemVisualMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.PermissionUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
@@ -133,6 +139,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private DirectItemReactionDialogFragment reactionDialogFragment;
     private DirectItem itemToForward;
     private MutableLiveData<Object> backStackSavedStateResultLiveData;
+    private int prevLength;
 
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -252,7 +259,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
         }
     };
-
     private final DirectItemLongClickListener directItemLongClickListener = position -> {
         // viewModel.setSelectedPosition(position);
     };
@@ -280,6 +286,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         // clear result
         backStackSavedStateResultLiveData.postValue(null);
     };
+    private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -491,6 +498,17 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
         });
         binding.chats.addItemDecoration(headerItemDecoration);
+        final SwipeAndRestoreItemTouchHelperCallback touchHelperCallback = new SwipeAndRestoreItemTouchHelperCallback(
+                context,
+                (adapterPosition, viewHolder) -> {
+                    if (itemsAdapter == null) return;
+                    final DirectItemOrHeader directItemOrHeader = itemsAdapter.getList().get(adapterPosition);
+                    if (directItemOrHeader.isHeader()) return;
+                    viewModel.setReplyToItem(directItemOrHeader.item);
+                }
+        );
+        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(touchHelperCallback);
+        itemTouchHelper.attachToRecyclerView(binding.chats);
         // final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> searchUsername(text);
         // final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
         //     if (which == 0) {
@@ -632,6 +650,141 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             setupItemsAdapter(userThreadPair.first, userThreadPair.second);
         });
         viewModel.getItems().observe(getViewLifecycleOwner(), this::submitItemsToAdapter);
+        viewModel.getReplyToItem().observe(getViewLifecycleOwner(), item -> {
+            if (item == null) {
+                if (binding.input.length() == 0) {
+                    showExtraInputOption(true);
+                }
+                binding.getRoot().post(() -> {
+                    TransitionManager.beginDelayedTransition(binding.getRoot());
+                    binding.replyBg.setVisibility(View.GONE);
+                    binding.replyInfo.setVisibility(View.GONE);
+                    binding.replyPreviewImage.setVisibility(View.GONE);
+                    binding.replyCancel.setVisibility(View.GONE);
+                    binding.replyPreviewText.setVisibility(View.GONE);
+                });
+                return;
+            }
+            showExtraInputOption(false);
+            binding.getRoot().postDelayed(() -> {
+                binding.replyBg.setVisibility(View.VISIBLE);
+                binding.replyInfo.setVisibility(View.VISIBLE);
+                binding.replyPreviewImage.setVisibility(View.VISIBLE);
+                binding.replyCancel.setVisibility(View.VISIBLE);
+                binding.replyPreviewText.setVisibility(View.VISIBLE);
+                if (item.getUserId() == viewModel.getViewerId()) {
+                    binding.replyInfo.setText(R.string.replying_to_yourself);
+                } else {
+                    final User user = viewModel.getUser(item.getUserId());
+                    if (user != null) {
+                        binding.replyInfo.setText(getString(R.string.replying_to_user, user.getFullName()));
+                    } else {
+                        binding.replyInfo.setVisibility(View.GONE);
+                    }
+                }
+                final String previewText = getDirectItemPreviewText(item);
+                binding.replyPreviewText.setText(TextUtils.isEmpty(previewText) ? getString(R.string.message) : previewText);
+                final String previewImageUrl = getDirectItemPreviewImageUrl(item);
+                if (TextUtils.isEmpty(previewImageUrl)) {
+                    binding.replyPreviewImage.setVisibility(View.GONE);
+                } else {
+                    binding.replyPreviewImage.setImageURI(previewImageUrl);
+                }
+                binding.replyCancel.setOnClickListener(v -> viewModel.setReplyToItem(null));
+            }, 200);
+        });
+        inputLength.observe(getViewLifecycleOwner(), length -> {
+            if (length == null) return;
+            final boolean hasReplyToItem = viewModel.getReplyToItem().getValue() != null;
+            if (hasReplyToItem) {
+                prevLength = length;
+                return;
+            }
+            if ((prevLength == 0 && length != 0) || (prevLength != 0 && length == 0)) {
+                showExtraInputOption(length == 0);
+            }
+            prevLength = length;
+        });
+    }
+
+    private void showExtraInputOption(final boolean show) {
+        if (show) {
+            if (!binding.send.isListenForRecord()) {
+                binding.send.setListenForRecord(true);
+                startIconAnimation();
+            }
+            binding.gallery.setVisibility(View.VISIBLE);
+            binding.camera.setVisibility(View.VISIBLE);
+            return;
+        }
+        if (binding.send.isListenForRecord()) {
+            binding.send.setListenForRecord(false);
+            startIconAnimation();
+        }
+        binding.gallery.setVisibility(View.GONE);
+        binding.camera.setVisibility(View.GONE);
+    }
+
+    private String getDirectItemPreviewText(final DirectItem item) {
+        switch (item.getItemType()) {
+            case TEXT:
+                return item.getText();
+            case LINK:
+                return item.getLink().getText();
+            case MEDIA: {
+                final Media media = item.getMedia();
+                return getMediaPreviewTextString(media);
+            }
+            case RAVEN_MEDIA: {
+                final DirectItemVisualMedia visualMedia = item.getVisualMedia();
+                final Media media = visualMedia.getMedia();
+                return getMediaPreviewTextString(media);
+            }
+            case VOICE_MEDIA:
+                return getString(R.string.voice_message);
+            case MEDIA_SHARE:
+                return getString(R.string.post);
+            case REEL_SHARE:
+                return item.getReelShare().getText();
+        }
+        return "";
+    }
+
+    @NonNull
+    private String getMediaPreviewTextString(final Media media) {
+        final MediaItemType mediaType = media.getMediaType();
+        switch (mediaType) {
+            case MEDIA_TYPE_IMAGE:
+                return getString(R.string.photo);
+            case MEDIA_TYPE_VIDEO:
+                return getString(R.string.video);
+            default:
+                return "";
+        }
+    }
+
+    private String getDirectItemPreviewImageUrl(final DirectItem item) {
+        switch (item.getItemType()) {
+            case TEXT:
+            case LINK:
+            case VOICE_MEDIA:
+            case REEL_SHARE:
+                return null;
+            case MEDIA: {
+                final Media media = item.getMedia();
+                return ResponseBodyUtils.getThumbUrl(media);
+            }
+            case RAVEN_MEDIA: {
+                final DirectItemVisualMedia visualMedia = item.getVisualMedia();
+                final Media media = visualMedia.getMedia();
+                return ResponseBodyUtils.getThumbUrl(media);
+            }
+            case MEDIA_SHARE: {
+                final Media media = item.getMediaShare();
+                return ResponseBodyUtils.getThumbUrl(media);
+            }
+        }
+        return null;
     }
 
     private void setupBackStackResultObserver() {
@@ -750,33 +903,29 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             binding.camera.setVisibility(View.VISIBLE);
         });
         binding.input.addTextChangedListener(new TextWatcherAdapter() {
-            int prevLength = 0;
+            // int prevLength = 0;
 
             @Override
             public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
                 final int length = s.length();
-                if (prevLength != 0 && length == 0) {
-                    binding.send.setListenForRecord(true);
-                    startIconAnimation();
-                }
-                if (prevLength == 0 && length != 0) {
-                    binding.send.setListenForRecord(false);
-                    startIconAnimation();
-                }
-                binding.gallery.setVisibility(length == 0 ? View.VISIBLE : View.GONE);
-                binding.camera.setVisibility(length == 0 ? View.VISIBLE : View.GONE);
-                prevLength = length;
-            }
-
-            private void startIconAnimation() {
-                final Drawable icon = binding.send.getIcon();
-                if (icon instanceof Animatable) {
-                    final Animatable animatable = (Animatable) icon;
-                    if (animatable.isRunning()) {
-                        animatable.stop();
-                    }
-                    animatable.start();
-                }
+                inputLength.postValue(length);
+                // boolean showExtraInputOptionsChanged = false;
+                // if (prevLength != 0 && length == 0) {
+                //     inputLength.postValue(true);
+                // showExtraInputOptionsChanged = true;
+                // binding.send.setListenForRecord(true);
+                // startIconAnimation();
+                // }
+                // if (prevLength == 0 && length != 0) {
+                //     inputLength.postValue(false);
+                // showExtraInputOptionsChanged = true;
+                // binding.send.setListenForRecord(false);
+                // startIconAnimation();
+                // }
+                // if (!showExtraInputOptionsChanged) {
+                //     showExtraInputOptions.postValue(length == 0);
+                // }
+                // prevLength = length;
             }
         });
         binding.send.setOnRecordClickListener(v -> {
@@ -785,6 +934,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendText(text.toString());
             resourceLiveData.observe(getViewLifecycleOwner(), resource -> handleSentMessage(resourceLiveData));
             binding.input.setText("");
+            viewModel.setReplyToItem(null);
         });
         binding.send.setOnRecordLongClickListener(v -> {
             Log.d(TAG, "setOnRecordLongClickListener");
@@ -831,6 +981,17 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             final Intent intent = new Intent(context, CameraActivity.class);
             startActivityForResult(intent, CAMERA_REQUEST_CODE);
         });
+    }
+
+    private void startIconAnimation() {
+        final Drawable icon = binding.send.getIcon();
+        if (icon instanceof Animatable) {
+            final Animatable animatable = (Animatable) icon;
+            if (animatable.isRunning()) {
+                animatable.stop();
+            }
+            animatable.start();
+        }
     }
 
     private void navigateToImageEditFragment(final String path) {
@@ -1168,6 +1329,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 ObjectAnimator.ofFloat(binding.gallery, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.camera, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.send, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.replyBg, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.replyInfo, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.replyCancel, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.replyPreviewImage, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.replyPreviewText, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.emojiPicker, TRANSLATION_Y, keyboardHeight - height)
         );
         // if (headerItemDecoration != null && headerItemDecoration.getCurrentHeader() != null) {

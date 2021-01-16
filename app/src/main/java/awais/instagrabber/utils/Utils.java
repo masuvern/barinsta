@@ -62,8 +62,8 @@ public final class Utils {
     public static SettingsHelper settingsHelper;
     public static boolean sessionVolumeFull = false;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+    public static final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static ClipboardManager clipboardManager;
-    public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
     private static int statusBarHeight;
@@ -73,9 +73,7 @@ public final class Utils {
     private static int defaultStatusBarColor;
 
     public static int convertDpToPx(final float dp) {
-        if (displayMetrics == null)
-            displayMetrics = Resources.getSystem().getDisplayMetrics();
-        return Math.round((dp * displayMetrics.densityDpi) / 160.0f);
+        return Math.round((dp * displayMetrics.densityDpi) / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     public static void copyText(@NonNull final Context context, final CharSequence string) {

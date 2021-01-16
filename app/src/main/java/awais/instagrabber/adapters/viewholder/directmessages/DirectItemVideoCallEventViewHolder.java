@@ -7,6 +7,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import java.util.List;
 
@@ -75,5 +76,10 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
     @Override
     protected boolean allowLongClick() {
         return false;
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        return ItemTouchHelper.ACTION_STATE_IDLE;
     }
 }

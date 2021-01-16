@@ -11,11 +11,97 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scrollbars="none"
-        app:layout_constraintBottom_toTopOf="@id/input"
+        app:layout_constraintBottom_toTopOf="@id/reply_info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/layout_dm_base" />
+
+    <View
+        android:id="@+id/reply_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_input"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toEndOf="@id/input_bg"
+        app:layout_constraintStart_toStartOf="@id/input_bg"
+        app:layout_constraintTop_toTopOf="@id/reply_info"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/reply_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="4dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/reply_preview_text"
+        app:layout_constraintEnd_toStartOf="@id/reply_preview_image"
+        app:layout_constraintStart_toStartOf="@id/input_bg"
+        app:layout_constraintTop_toBottomOf="@id/chats"
+        tools:text="Replying to yourself"
+        tools:visibility="visible" />
+
+    <androidx.emoji.widget.EmojiAppCompatTextView
+        android:id="@+id/reply_preview_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:paddingStart="16dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/input_bg"
+        app:layout_constraintEnd_toStartOf="@id/reply_preview_image"
+        app:layout_constraintStart_toStartOf="@id/input_bg"
+        app:layout_constraintTop_toBottomOf="@id/reply_info"
+        app:layout_goneMarginTop="8dp"
+        tools:text="Post"
+        tools:visibility="visible" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/reply_preview_image"
+        android:layout_width="@dimen/dm_inbox_avatar_size_small"
+        android:layout_height="@dimen/dm_inbox_avatar_size_small"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        app:actualImageScaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/reply_preview_text"
+        app:layout_constraintEnd_toStartOf="@id/reply_cancel"
+        app:layout_constraintStart_toEndOf="@id/reply_preview_text"
+        app:layout_constraintTop_toTopOf="@id/reply_info"
+        tools:background="@mipmap/ic_launcher"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/reply_cancel"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="12dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/reply_preview_text"
+        app:layout_constraintEnd_toEndOf="@id/input_bg"
+        app:layout_constraintStart_toEndOf="@id/reply_preview_image"
+        app:layout_constraintTop_toTopOf="@id/reply_info"
+        app:srcCompat="@drawable/ic_close_24"
+        tools:visibility="visible" />
+
+    <!--<androidx.constraintlayout.widget.Group-->
+    <!--    android:id="@+id/reply_group"-->
+    <!--    android:layout_width="0dp"-->
+    <!--    android:layout_height="0dp"-->
+    <!--    android:visibility="gone"-->
+    <!--    app:constraint_referenced_ids="reply_bg,reply_cancel,reply_info,reply_item_type,reply_preview"-->
+    <!--    tools:visibility="visible" />-->
 
     <View
         android:id="@+id/input_bg"
@@ -65,7 +151,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/camera"
         app:layout_constraintStart_toEndOf="@id/emoji_toggle"
-        app:layout_constraintTop_toBottomOf="@id/chats"
+        app:layout_constraintTop_toBottomOf="@id/reply_preview_text"
         app:layout_goneMarginBottom="4dp"
         app:layout_goneMarginEnd="24dp" />
 

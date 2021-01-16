@@ -73,9 +73,20 @@ public class DirectItemFrameLayout extends FrameLayout {
                 touchY = ev.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (longPressed || Math.abs(touchX - ev.getRawX()) > touchSlop || Math.abs(touchY - ev.getRawY()) > touchSlop) {
+                final float diffX = touchX - ev.getRawX();
+                final float diffXAbs = Math.abs(diffX);
+                final boolean isMoved = diffXAbs > touchSlop || Math.abs(touchY - ev.getRawY()) > touchSlop;
+                if (longPressed || isMoved) {
                     handler.removeCallbacks(longPressStartRunnable);
                     handler.removeCallbacks(longPressRunnable);
+                    if (!longPressed) {
+                        if (onItemLongClickListener != null) {
+                            onItemLongClickListener.onLongClickCancel(this);
+                        }
+                    }
+                    // if (diffXAbs > touchSlop) {
+                    //     setTranslationX(-diffX);
+                    // }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -91,6 +102,9 @@ public class DirectItemFrameLayout extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 handler.removeCallbacks(longPressRunnable);
                 handler.removeCallbacks(longPressStartRunnable);
+                if (onItemLongClickListener != null) {
+                    onItemLongClickListener.onLongClickCancel(this);
+                }
                 break;
         }
         final boolean dispatchTouchEvent = super.dispatchTouchEvent(ev);

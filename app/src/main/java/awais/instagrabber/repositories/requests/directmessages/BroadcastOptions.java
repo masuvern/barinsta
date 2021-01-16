@@ -13,6 +13,9 @@ public abstract class BroadcastOptions {
     private final ThreadIdOrUserIds threadIdOrUserIds;
     private final BroadcastItemType itemType;
 
+    private String repliedToItemId;
+    private String repliedToClientContext;
+
     public BroadcastOptions(final String clientContext,
                             @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
                             @NonNull final BroadcastItemType itemType) {
@@ -38,6 +41,22 @@ public abstract class BroadcastOptions {
     }
 
     public abstract Map<String, String> getFormMap();
+
+    public String getRepliedToItemId() {
+        return repliedToItemId;
+    }
+
+    public void setRepliedToItemId(final String repliedToItemId) {
+        this.repliedToItemId = repliedToItemId;
+    }
+
+    public String getRepliedToClientContext() {
+        return repliedToClientContext;
+    }
+
+    public void setRepliedToClientContext(final String repliedToClientContext) {
+        this.repliedToClientContext = repliedToClientContext;
+    }
 
     public static final class ThreadIdOrUserIds {
         private final String threadId;

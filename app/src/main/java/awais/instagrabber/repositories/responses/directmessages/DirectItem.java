@@ -11,7 +11,7 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 
 public class DirectItem implements Cloneable {
-    private final String itemId;
+    private String itemId;
     private final long userId;
     private long timestamp;
     private final DirectItemType itemType;
@@ -211,6 +211,10 @@ public class DirectItem implements Cloneable {
             date = new Date(timestamp / 1000);
         }
         return date;
+    }
+
+    public void setItemId(final String itemId) {
+        this.itemId = itemId;
     }
 
     public boolean isPending() {

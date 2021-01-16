@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.widget.ImageViewCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionManager;
 
@@ -33,6 +34,7 @@ import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemInternalLongClic
 import awais.instagrabber.customviews.DirectItemContextMenu;
 import awais.instagrabber.customviews.DirectItemFrameLayout;
 import awais.instagrabber.customviews.RamboTextViewV2;
+import awais.instagrabber.customviews.helpers.SwipeAndRestoreItemTouchHelperCallback.SwipeableViewHolder;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -46,7 +48,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.DeepLinkParser;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
-public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
+public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder implements SwipeableViewHolder {
     private static final String TAG = DirectItemViewHolder.class.getSimpleName();
 
     private final LayoutDmBaseBinding binding;
@@ -72,6 +74,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
     private DirectItemInternalLongClickListener longClickListener;
     private DirectItem item;
     private ViewPropertyAnimator shrinkGrowAnimator;
+    private MessageDirection messageDirection;
     // private View.OnLayoutChangeListener layoutChangeListener;
 
     public DirectItemViewHolder(@NonNull final LayoutDmBaseBinding binding,
@@ -108,7 +111,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(final int position, final DirectItem item) {
         this.item = item;
-        final MessageDirection messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
+        messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
         itemView.post(() -> bindBase(item, messageDirection, position));
         itemView.post(() -> bindItem(item, messageDirection));
         itemView.post(() -> setupLongClickListener(position, messageDirection));
@@ -266,6 +269,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
             //     if (media == null) break;
             //     url = ResponseBodyUtils.getThumbUrl(media.getImageVersions2());
             //     break;
+            // case LOCATION
         }
         if (text == null && url == null) {
             binding.quoteLine.setVisibility(View.GONE);
@@ -566,6 +570,12 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder {
                                      .setDuration(200)
                                      .withEndAction(() -> shrinkGrowAnimator = null);
         shrinkGrowAnimator.start();
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        if (item == null || messageDirection == null) return ItemTouchHelper.ACTION_STATE_IDLE;
+        return messageDirection == MessageDirection.OUTGOING ? ItemTouchHelper.START : ItemTouchHelper.END;
     }
 
     public enum MessageDirection {

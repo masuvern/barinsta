@@ -1,7 +1,5 @@
 package awais.instagrabber.models.enums;
 
-import androidx.annotation.Nullable;
-
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -65,7 +63,6 @@ public enum DirectItemType implements Serializable {
         return map.get(id);
     }
 
-    @Nullable
     public String getName() {
         switch (this) {
             case TEXT:
@@ -102,8 +99,7 @@ public enum DirectItemType implements Serializable {
                 return "felix_share";
             case LOCATION:
                 return "location";
-            default:
-                return null;
         }
+        return null;
     }
 }

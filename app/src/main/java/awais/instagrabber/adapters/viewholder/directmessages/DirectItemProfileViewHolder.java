@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
@@ -116,5 +117,10 @@ public class DirectItemProfileViewHolder extends DirectItemViewHolder {
         }
         binding.isVerified.setVisibility(View.GONE);
         itemView.setOnClickListener(v -> openLocation(location.getPk()));
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        return ItemTouchHelper.ACTION_STATE_IDLE;
     }
 }

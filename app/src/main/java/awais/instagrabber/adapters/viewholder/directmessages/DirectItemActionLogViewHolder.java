@@ -10,6 +10,7 @@ import android.text.style.StyleSpan;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import java.util.List;
 
@@ -85,5 +86,10 @@ public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
     @Override
     protected boolean allowLongClick() {
         return false;
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        return ItemTouchHelper.ACTION_STATE_IDLE;
     }
 }

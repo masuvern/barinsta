@@ -3,6 +3,7 @@ package awais.instagrabber.adapters.viewholder.directmessages;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
@@ -34,5 +35,10 @@ public class DirectItemDefaultViewHolder extends DirectItemViewHolder {
     @Override
     protected boolean allowLongClick() {
         return false;
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        return ItemTouchHelper.ACTION_STATE_IDLE;
     }
 }

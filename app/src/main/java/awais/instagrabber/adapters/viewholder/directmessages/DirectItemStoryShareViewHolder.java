@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
@@ -109,5 +110,10 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
     @Override
     protected boolean canForward() {
         return false;
+    }
+
+    @Override
+    public int getSwipeDirection() {
+        return ItemTouchHelper.ACTION_STATE_IDLE;
     }
 }

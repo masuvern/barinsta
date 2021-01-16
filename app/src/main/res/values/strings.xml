@@ -401,4 +401,10 @@
     <string name="forward">Forward</string>
     <string name="add">Add</string>
     <string name="send">Send</string>
+    <string name="replying_to_yourself">Replying to yourself</string>
+    <string name="replying_to_user">Replying to %s</string>
+    <string name="photo">Photo</string>
+    <string name="video">Video</string>
+    <string name="voice_message">Voice message</string>
+    <string name="post">Post</string>
 </resources>

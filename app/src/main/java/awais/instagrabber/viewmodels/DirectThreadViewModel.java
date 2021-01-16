@@ -81,6 +81,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> fetching = new MutableLiveData<>(false);
     private final MutableLiveData<List<User>> users = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<User>> leftUsers = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<DirectItem> replyToItem = new MutableLiveData<>();
 
     private final DirectMessagesService service;
     private final ContentResolver contentResolver;
@@ -285,7 +286,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         return index;
     }
 
-    private void updateItemSent(final String clientContext, final long timestamp) {
+    private void updateItemSent(final String clientContext, final long timestamp, final String itemId) {
         if (clientContext == null) return;
         List<DirectItem> list = this.items.getValue();
         list = list == null ? new LinkedList<>() : new LinkedList<>(list);
@@ -297,6 +298,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         final DirectItem directItem = list.get(index);
         try {
             final DirectItem itemClone = (DirectItem) directItem.clone();
+            itemClone.setItemId(itemId);
             itemClone.setPending(false);
             itemClone.setTimestamp(timestamp);
             list.set(index, itemClone);
@@ -320,6 +322,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     public LiveData<List<User>> getLeftUsers() {
         return leftUsers;
+    }
+
+    public LiveData<DirectItem> getReplyToItem() {
+        return replyToItem;
     }
 
     public void fetchChats() {
@@ -392,12 +398,21 @@ public class DirectThreadViewModel extends AndroidViewModel {
         final Long userId = handleCurrentUser(data);
         if (userId == null) return data;
         final String clientContext = UUID.randomUUID().toString();
-        final DirectItem directItem = DirectItemFactory.createText(userId, clientContext, text);
+        final DirectItem replyToItemValue = replyToItem.getValue();
+        final DirectItem directItem = DirectItemFactory.createText(userId, clientContext, text, replyToItemValue);
         // Log.d(TAG, "sendText: sending: itemId: " + directItem.getItemId());
         directItem.setPending(true);
         addItems(0, Collections.singletonList(directItem));
         data.postValue(Resource.loading(directItem));
-        final Call<DirectThreadBroadcastResponse> request = service.broadcastText(clientContext, threadIdOrUserIds, text);
+        final String repliedToItemId = replyToItemValue != null ? replyToItemValue.getItemId() : null;
+        final String repliedToClientContext = replyToItemValue != null ? replyToItemValue.getClientContext() : null;
+        final Call<DirectThreadBroadcastResponse> request = service.broadcastText(
+                clientContext,
+                threadIdOrUserIds,
+                text,
+                repliedToItemId,
+                repliedToClientContext
+        );
         enqueueRequest(request, data, directItem);
         return data;
     }
@@ -848,6 +863,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
                     }
                     final String payloadClientContext;
                     final long timestamp;
+                    final String itemId;
                     final DirectThreadBroadcastResponsePayload payload = broadcastResponse.getPayload();
                     if (payload == null) {
                         final List<DirectThreadBroadcastResponseMessageMetadata> messageMetadata = broadcastResponse.getMessageMetadata();
@@ -857,12 +873,14 @@ public class DirectThreadViewModel extends AndroidViewModel {
                         }
                         final DirectThreadBroadcastResponseMessageMetadata metadata = messageMetadata.get(0);
                         payloadClientContext = metadata.getClientContext();
+                        itemId = metadata.getItemId();
                         timestamp = metadata.getTimestamp();
                     } else {
                         payloadClientContext = payload.getClientContext();
                         timestamp = payload.getTimestamp();
+                        itemId = payload.getItemId();
                     }
-                    updateItemSent(payloadClientContext, timestamp);
+                    updateItemSent(payloadClientContext, timestamp, itemId);
                     data.postValue(Resource.success(directItem));
                     return;
                 }
@@ -987,8 +1005,13 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     private void forward(@NonNull final DirectThread thread, @NonNull final DirectItem itemToForward) {
         final DirectItemType itemType = itemToForward.getItemType();
+        final String itemTypeName = itemType.getName();
+        if (itemTypeName == null) {
+            Log.e(TAG, "forward: itemTypeName was null!");
+            return;
+        }
         final Call<DirectThreadBroadcastResponse> request = service.forward(thread.getThreadId(),
-                                                                            itemType.getName(),
+                                                                            itemTypeName,
                                                                             threadId,
                                                                             itemToForward.getItemId());
         request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
@@ -1018,5 +1041,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
                 Log.e(TAG, "onFailure: ", t);
             }
         });
+    }
+
+    public void setReplyToItem(final DirectItem item) {
+        // Log.d(TAG, "setReplyToItem: " + item);
+        replyToItem.postValue(item);
     }
 }
