@@ -4,10 +4,15 @@ import androidx.annotation.NonNull;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import awais.instagrabber.repositories.ProfileRepository;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.UserFeedResponse;
+import awais.instagrabber.repositories.responses.saved.CollectionsListResponse;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -68,12 +73,15 @@ public class ProfileService extends BaseService {
     }
 
     public void fetchSaved(final String maxId,
+                           final String collectionId,
                            final ServiceCallback<PostsFetchResponse> callback) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        Call<UserFeedResponse> request = null;
         if (!TextUtils.isEmpty(maxId)) {
             builder.put("max_id", maxId);
         }
-        final Call<UserFeedResponse> request = repository.fetchSaved(builder.build());
+        if (TextUtils.isEmpty(collectionId) || collectionId.equals("ALL_MEDIA_AUTO_COLLECTION")) request = repository.fetchSaved(builder.build());
+        else request = repository.fetchSavedCollection(collectionId, builder.build());
         request.enqueue(new Callback<UserFeedResponse>() {
             @Override
             public void onResponse(@NonNull final Call<UserFeedResponse> call, @NonNull final Response<UserFeedResponse> response) {
@@ -98,6 +106,71 @@ public class ProfileService extends BaseService {
             }
         });
     }
+
+    public void fetchCollections(final String maxId,
+                                 final ServiceCallback<CollectionsListResponse> callback) {
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        if (!TextUtils.isEmpty(maxId)) {
+            builder.put("max_id", maxId);
+        }
+        builder.put("collection_types", "[\"ALL_MEDIA_AUTO_COLLECTION\",\"MEDIA\",\"PRODUCT_AUTO_COLLECTION\"]");
+        final Call<CollectionsListResponse> request = repository.fetchCollections(builder.build());
+        request.enqueue(new Callback<CollectionsListResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<CollectionsListResponse> call, @NonNull final Response<CollectionsListResponse> response) {
+                if (callback == null) return;
+                final CollectionsListResponse collectionsListResponse = response.body();
+                if (collectionsListResponse == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+                callback.onSuccess(collectionsListResponse);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<CollectionsListResponse> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    public void createCollection(final String name,
+                                 final String deviceUuid,
+                                 final long userId,
+                                 final String csrfToken,
+                                 final ServiceCallback<String> callback) {
+        final Map<String, Object> form = new HashMap<>(6);
+        form.put("_csrftoken", csrfToken);
+        form.put("_uuid", deviceUuid);
+        form.put("_uid", userId);
+        form.put("collection_visibility", "0"); // 1 for public, planned for future but currently inexistant
+        form.put("module_name", "collection_create");
+        form.put("name", name);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<String> request = repository.createCollection(signedForm);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                if (callback == null) return;
+                final String collectionsListResponse = response.body();
+                if (collectionsListResponse == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+                callback.onSuccess(collectionsListResponse);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
 
     public void fetchLiked(final String maxId,
                            final ServiceCallback<PostsFetchResponse> callback) {
