@@ -79,6 +79,11 @@ public class DirectItemActionLogViewHolder extends DirectItemViewHolder {
     }
 
     @Override
+    protected boolean showUserDetailsInGroup() {
+        return false;
+    }
+
+    @Override
     protected boolean showMessageInfo() {
         return false;
     }

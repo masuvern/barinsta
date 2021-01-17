@@ -69,6 +69,11 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
     }
 
     @Override
+    protected boolean showUserDetailsInGroup() {
+        return false;
+    }
+
+    @Override
     protected boolean showMessageInfo() {
         return false;
     }

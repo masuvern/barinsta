@@ -112,12 +112,13 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
     public void bind(final int position, final DirectItem item) {
         this.item = item;
         messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
-        itemView.post(() -> bindBase(item, messageDirection, position));
-        itemView.post(() -> bindItem(item, messageDirection));
-        itemView.post(() -> setupLongClickListener(position, messageDirection));
-        // bindBase(item, messageDirection);
-        // bindItem(item, messageDirection);
-        // setupLongClickListener(position);
+        // Asynchronous binding causes some weird behaviour
+        // itemView.post(() -> bindBase(item, messageDirection, position));
+        // itemView.post(() -> bindItem(item, messageDirection));
+        // itemView.post(() -> setupLongClickListener(position, messageDirection));
+        bindBase(item, messageDirection, position);
+        bindItem(item, messageDirection);
+        setupLongClickListener(position, messageDirection);
     }
 
     private void bindBase(final DirectItem item, final MessageDirection messageDirection, final int position) {
@@ -134,7 +135,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         if (itemType == DirectItemType.TEXT || itemType == DirectItemType.LINK) {
             binding.messageInfo.setPadding(0, 0, dmRadius, dmRadiusSmall);
         } else {
-            binding.messageInfo.setPadding(0, 0, messageInfoPaddingSmall, dmRadiusSmall);
+            if (showMessageInfo()) {
+                binding.messageInfo.setPadding(0, 0, messageInfoPaddingSmall, dmRadiusSmall);
+            }
         }
         setupReply(item, messageDirection);
         setReactions(item, position);
