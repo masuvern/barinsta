@@ -17,7 +17,7 @@ public class DirectThread implements Serializable {
     private final List<Long> adminUserIds;
     private final List<DirectItem> items;
     private final long lastActivityAt;
-    private final boolean muted;
+    private boolean muted;
     private final boolean isPin;
     private final boolean named;
     private final boolean canonical;
@@ -31,7 +31,7 @@ public class DirectThread implements Serializable {
     private final long folder;
     private final boolean vcMuted;
     private final boolean isGroup;
-    private final boolean mentionsMuted;
+    private boolean mentionsMuted;
     private final User inviter;
     private final boolean hasOlder;
     private final boolean hasNewer;
@@ -138,6 +138,10 @@ public class DirectThread implements Serializable {
         return muted;
     }
 
+    public void setMuted(final boolean muted) {
+        this.muted = muted;
+    }
+
     public boolean isPin() {
         return isPin;
     }
@@ -192,6 +196,10 @@ public class DirectThread implements Serializable {
 
     public boolean isMentionsMuted() {
         return mentionsMuted;
+    }
+
+    public void setMentionsMuted(final boolean mentionsMuted) {
+        this.mentionsMuted = mentionsMuted;
     }
 
     public User getInviter() {

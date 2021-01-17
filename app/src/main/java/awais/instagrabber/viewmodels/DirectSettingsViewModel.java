@@ -59,14 +59,16 @@ public class DirectSettingsViewModel extends AndroidViewModel {
             new Pair<>(Collections.emptyList(), Collections.emptyList()));
     private final MutableLiveData<String> title = new MutableLiveData<>("");
     private final MutableLiveData<List<Long>> adminUserIds = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<Boolean> muted = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> mentionsMuted = new MutableLiveData<>(false);
     private final DirectMessagesService directMessagesService;
-
-    private DirectThread thread;
     private final long userId;
-    private boolean viewerIsAdmin;
     private final Resources resources;
     private final FriendshipService friendshipService;
     private final String csrfToken;
+
+    private DirectThread thread;
+    private boolean viewerIsAdmin;
     private User viewer;
 
     public DirectSettingsViewModel(final Application application) {
@@ -103,6 +105,8 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         final List<Long> adminUserIds = thread.getAdminUserIds();
         this.adminUserIds.postValue(adminUserIds);
         viewerIsAdmin = adminUserIds.contains(userId);
+        muted.postValue(thread.isMuted());
+        mentionsMuted.postValue(thread.isMentionsMuted());
     }
 
     public boolean isGroup() {
@@ -132,6 +136,10 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return adminUserIds;
     }
 
+    public LiveData<Boolean> getMuted() {
+        return muted;
+    }
+
     public LiveData<Resource<Object>> updateTitle(final String newTitle) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final Call<DirectThreadDetailsChangeResponse> addUsersRequest = directMessagesService
@@ -156,7 +164,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 if (!response.isSuccessful()) {
-                    handleAdminChangeResponseError(response, data);
+                    handleSettingChangeResponseError(response, data);
                     return;
                 }
                 Pair<List<User>, List<User>> usersValue = users.getValue();
@@ -198,7 +206,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 if (!response.isSuccessful()) {
-                    handleAdminChangeResponseError(response, data);
+                    handleSettingChangeResponseError(response, data);
                     return;
                 }
                 final List<Long> currentAdmins = adminUserIds.getValue();
@@ -225,7 +233,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
                 if (!response.isSuccessful()) {
-                    handleAdminChangeResponseError(response, data);
+                    handleSettingChangeResponseError(response, data);
                     return;
                 }
                 final List<Long> currentAdmins = adminUserIds.getValue();
@@ -244,8 +252,124 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
-    private void handleAdminChangeResponseError(@NonNull final Response<String> response,
-                                                final MutableLiveData<Resource<Object>> data) {
+    public LiveData<Resource<Object>> mute() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        if (thread.isMuted()) {
+            data.postValue(Resource.success(new Object()));
+            return data;
+        }
+        final Call<String> request = directMessagesService.mute(thread.getThreadId());
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                if (!response.isSuccessful()) {
+                    handleSettingChangeResponseError(response, data);
+                    return;
+                }
+                thread.setMuted(true);
+                muted.postValue(true);
+                data.postValue(Resource.success(new Object()));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return data;
+    }
+
+    public LiveData<Resource<Object>> unmute() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        if (!thread.isMuted()) {
+            data.postValue(Resource.success(new Object()));
+            return data;
+        }
+        final Call<String> request = directMessagesService.unmute(thread.getThreadId());
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                if (!response.isSuccessful()) {
+                    handleSettingChangeResponseError(response, data);
+                    return;
+                }
+                thread.setMuted(false);
+                muted.postValue(false);
+                data.postValue(Resource.success(new Object()));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return data;
+    }
+
+    public LiveData<Resource<Object>> muteMentions() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        if (thread.isMentionsMuted()) {
+            data.postValue(Resource.success(new Object()));
+            return data;
+        }
+        final Call<String> request = directMessagesService.muteMentions(thread.getThreadId());
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                if (!response.isSuccessful()) {
+                    handleSettingChangeResponseError(response, data);
+                    return;
+                }
+                thread.setMentionsMuted(true);
+                mentionsMuted.postValue(true);
+                data.postValue(Resource.success(new Object()));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return data;
+    }
+
+    public LiveData<Resource<Object>> unmuteMentions() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        if (!thread.isMentionsMuted()) {
+            data.postValue(Resource.success(new Object()));
+            return data;
+        }
+        final Call<String> request = directMessagesService.unmuteMentions(thread.getThreadId());
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                if (!response.isSuccessful()) {
+                    handleSettingChangeResponseError(response, data);
+                    return;
+                }
+                thread.setMentionsMuted(false);
+                mentionsMuted.postValue(false);
+                data.postValue(Resource.success(new Object()));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
+        return data;
+    }
+
+    private void handleSettingChangeResponseError(@NonNull final Response<String> response,
+                                                  final MutableLiveData<Resource<Object>> data) {
         final ResponseBody errorBody = response.errorBody();
         if (errorBody == null) {
             handleErrorResponse(response, data);

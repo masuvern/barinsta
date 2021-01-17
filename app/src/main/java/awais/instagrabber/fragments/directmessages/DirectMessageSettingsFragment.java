@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -176,6 +177,7 @@ public class DirectMessageSettingsFragment extends Fragment {
             if (usersAdapter == null) return;
             usersAdapter.setAdminUserIds(adminUserIds);
         });
+        viewModel.getMuted().observe(getViewLifecycleOwner(), muted -> binding.muteMessages.setChecked(muted));
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
@@ -202,7 +204,7 @@ public class DirectMessageSettingsFragment extends Fragment {
                         detailsChangeResourceLiveData = viewModel.addMembers(users);
                     } catch (Exception e) {
                         Log.e(TAG, "search users result: ", e);
-                        Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(binding.getRoot(), e.getMessage() != null ? e.getMessage() : "", Snackbar.LENGTH_LONG).show();
                     }
                 }
                 if (detailsChangeResourceLiveData != null) {
@@ -273,6 +275,36 @@ public class DirectMessageSettingsFragment extends Fragment {
                     .setSearchMode(UserSearchFragment.SearchMode.RAVEN)
                     .setMultiple(true);
             navController.navigate(actionGlobalUserSearch);
+        });
+        binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
+        binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.mute() : viewModel.unmute();
+            handleMuteChangeResource(resourceLiveData, buttonView);
+        });
+        binding.muteMentionsLabel.setOnClickListener(v -> binding.muteMentions.toggle());
+        binding.muteMentions.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.muteMentions() : viewModel.unmuteMentions();
+            handleMuteChangeResource(resourceLiveData, buttonView);
+        });
+    }
+
+    private void handleMuteChangeResource(final LiveData<Resource<Object>> resourceLiveData, final CompoundButton buttonView) {
+        resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            switch (resource.status) {
+                case SUCCESS:
+                    buttonView.setEnabled(true);
+                    break;
+                case ERROR:
+                    buttonView.setEnabled(true);
+                    if (resource.message != null) {
+                        Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    break;
+                case LOADING:
+                    buttonView.setEnabled(false);
+                    break;
+            }
         });
     }
 

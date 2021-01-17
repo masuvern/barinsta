@@ -75,4 +75,24 @@ public interface DirectMessagesRepository {
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/create_group_thread/")
     Call<DirectThread> createThread(@FieldMap final Map<String, String> signedForm);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/mute/")
+    Call<String> mute(@Path("threadId") String threadId,
+                      @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/unmute/")
+    Call<String> unmute(@Path("threadId") String threadId,
+                        @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/mute_mentions/")
+    Call<String> muteMentions(@Path("threadId") String threadId,
+                              @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/unmute_mentions/")
+    Call<String> unmuteMentions(@Path("threadId") String threadId,
+                                @FieldMap final Map<String, String> form);
 }

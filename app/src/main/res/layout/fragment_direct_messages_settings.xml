@@ -50,11 +50,11 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.button.MaterialButton
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/mute_messages_label"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:background="?selectableItemBackground"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
@@ -70,18 +70,18 @@
                     android:id="@+id/mute_messages"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:paddingStart="0dp"
                     android:paddingEnd="8dp"
-                    android:layout_margin="8dp"
                     app:layout_constraintBottom_toTopOf="@id/mute_mentions"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/title_edit_input_layout" />
 
-                <com.google.android.material.button.MaterialButton
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/mute_mentions_label"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
@@ -97,44 +97,47 @@
                     android:id="@+id/mute_mentions"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:paddingStart="0dp"
                     android:paddingEnd="8dp"
-                    android:layout_margin="8dp"
                     app:layout_constraintBottom_toTopOf="@id/leave"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/mute_messages" />
 
-                <com.google.android.material.button.MaterialButton
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/leave"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="?selectableItemBackground"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:paddingTop="8dp"
+                    android:paddingTop="12dp"
                     android:paddingEnd="16dp"
-                    android:paddingBottom="8dp"
+                    android:paddingBottom="12dp"
                     android:text="@string/dms_action_leave"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                     android:textColor="@color/red_600"
                     app:layout_constraintBottom_toTopOf="@id/add_members"
                     app:layout_constraintTop_toBottomOf="@id/mute_mentions" />
 
-                <com.google.android.material.button.MaterialButton
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/add_members"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="?selectableItemBackground"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
-                    android:paddingTop="8dp"
+                    android:paddingTop="12dp"
                     android:paddingEnd="16dp"
-                    android:paddingBottom="8dp"
+                    android:paddingBottom="12dp"
                     android:text="@string/add_members"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                     android:textColor="?android:textColorPrimary"
-                    app:icon="@drawable/ic_add"
-                    app:iconTint="?android:textColorPrimary"
+                    app:drawableStartCompat="@drawable/ic_add"
+                    app:drawableTint="?android:textColorPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/leave" />
 

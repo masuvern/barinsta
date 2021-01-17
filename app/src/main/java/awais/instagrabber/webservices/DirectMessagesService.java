@@ -317,4 +317,36 @@ public class DirectMessagesService extends BaseService {
         final Map<String, String> signedForm = Utils.sign(formBuilder.build());
         return repository.createThread(signedForm);
     }
+
+    public Call<String> mute(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.mute(threadId, form);
+    }
+
+    public Call<String> unmute(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.unmute(threadId, form);
+    }
+
+    public Call<String> muteMentions(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.muteMentions(threadId, form);
+    }
+
+    public Call<String> unmuteMentions(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.unmuteMentions(threadId, form);
+    }
 }
