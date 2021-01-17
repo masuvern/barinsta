@@ -242,6 +242,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
         if (feedModel.getItemType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
         }
+        captionState = settingsHelper.getBoolean(Constants.SHOW_CAPTIONS) ?
+                BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_HIDDEN;
     }
 
     @Nullable
@@ -384,7 +386,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                                                                                 ViewGroup.LayoutParams.MATCH_PARENT));
             binding.postImage.requestLayout();
             if (bottomSheetBehavior != null) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setState(captionState);
             }
             return;
         }
@@ -393,7 +395,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                                                                                    ViewGroup.LayoutParams.MATCH_PARENT));
             binding.sliderParent.requestLayout();
             if (bottomSheetBehavior != null) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setState(captionState);
             }
             return;
         }
@@ -404,7 +406,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
             binding.videoPost.thumbnailParent.setLayoutParams(params);
             binding.videoPost.thumbnailParent.requestLayout();
             if (bottomSheetBehavior != null) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setState(captionState);
             }
         }
     }
@@ -846,7 +848,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment {
                 public void onGlobalLayout() {
                     binding.getRoot().getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     if (bottomSheetBehavior == null) return;
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    bottomSheetBehavior.setState(captionState);
                 }
             });
         }
