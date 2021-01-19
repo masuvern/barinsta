@@ -2,7 +2,6 @@ package awais.instagrabber.viewmodels;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -35,7 +34,7 @@ public class AppStateViewModel extends AndroidViewModel {
 
     public AppStateViewModel(@NonNull final Application application) {
         super(application);
-        Log.d(TAG, "AppStateViewModel: constructor");
+        // Log.d(TAG, "AppStateViewModel: constructor");
         cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         if (!isLoggedIn) return;

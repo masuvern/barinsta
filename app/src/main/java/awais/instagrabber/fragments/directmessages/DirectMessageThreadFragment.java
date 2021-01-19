@@ -293,6 +293,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         backStackSavedStateResultLiveData.postValue(null);
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
+    private ItemTouchHelper itemTouchHelper;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -520,135 +521,29 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                     viewModel.setReplyToItem(directItemOrHeader.item);
                 }
         );
-        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(touchHelperCallback);
-        itemTouchHelper.attachToRecyclerView(binding.chats);
-        // final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> searchUsername(text);
-        // final DialogInterface.OnClickListener onDialogListener = (dialogInterface, which) -> {
-        //     if (which == 0) {
-        //         final DirectItemType itemType = directItemModel.getItemType();
-        //         switch (itemType) {
-        //             case MEDIA_SHARE:
-        //             case CLIP:
-        //             case FELIX_SHARE:
-        //                 final String shortCode = ((DirectItemMediaModel) directItemModel.getMediaModel()).getCode();
-        //                 new PostFetcher(shortCode, feedModel -> {
-        //                     final PostViewV2Fragment fragment = PostViewV2Fragment
-        //                             .builder(feedModel)
-        //                             .build();
-        //                     fragment.show(getChildFragmentManager(), "post_view");
-        //                 }).execute();
-        //                 break;
-        //             case LINK:
-        //                 Intent linkIntent = new Intent(Intent.ACTION_VIEW);
-        //                 linkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        //                 linkIntent.setData(Uri.parse(((DirectItemLinkModel) directItemModel.getMediaModel()).getLinkContext().getLinkUrl()));
-        //                 startActivity(linkIntent);
-        //                 break;
-        //             case TEXT:
-        //             case REEL_SHARE:
-        //                 Utils.copyText(context, directItemModel.getText());
-        //                 Toast.makeText(context, R.string.clipboard_copied, Toast.LENGTH_SHORT).show();
-        //                 break;
-        //             case RAVEN_MEDIA:
-        //             case MEDIA:
-        //                 downloadItem(context);
-        //                 break;
-        //             case STORY_SHARE:
-        //                 if (directItemModel.getMediaModel() != null) {
-        //                     // StoryModel sm = new StoryModel(
-        //                     //         directItemModel.getReelShare().getReelId(),
-        //                     //         directItemModel.getReelShare().getMedia().getVideoUrl(),
-        //                     //         directItemModel.getReelShare().getMedia().getMediaType(),
-        //                     //         directItemModel.getTimestamp(),
-        //                     //         directItemModel.getReelShare().getReelOwnerName(),
-        //                     //         String.valueOf(directItemModel.getReelShare().getReelOwnerId()),
-        //                     //         false
-        //                     // );
-        //                     // sm.setVideoUrl(directItemModel.getReelShare().getMedia().getVideoUrl());
-        //                     // StoryModel[] sms = {sm};
-        //                     // startActivity(new Intent(getContext(), StoryViewer.class)
-        //                     //         .putExtra(Constants.EXTRAS_USERNAME, directItemModel.getReelShare().getReelOwnerName())
-        //                     //         .putExtra(Constants.EXTRAS_STORIES, sms)
-        //                     // );
-        //                 } else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
-        //                     searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
-        //                 }
-        //                 break;
-        //             case PLACEHOLDER:
-        //                 if (directItemModel.getText().toString().contains("@"))
-        //                     searchUsername(directItemModel.getText().toString().split("@")[1].split(" ")[0]);
-        //                 break;
-        //             default:
-        //                 Log.d(TAG, "unsupported type " + itemType);
-        //         }
-        //     } else if (which == 1) {
-        //         sendText(null, directItemModel.getItemId(), directItemModel.isLiked());
-        //     } else if (which == 2) {
-        //         if (directItemModel == null) {
-        //             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-        //         } else if (String.valueOf(directItemModel.getUserId()).equals(myId)) {
-        //             new ThreadAction().execute("delete", directItemModel.getItemId());
-        //         } else {
-        //             searchUsername(getUser(directItemModel.getUserId()).getUsername());
-        //         }
-        //     }
-        // };
-        // final View.OnClickListener onClickListener = v -> {
-        //     Object tag = v.getTag();
-        //     if (tag instanceof ProfileModel) {
-        //         searchUsername(((ProfileModel) tag).getUsername());
-        //     } else if (tag instanceof DirectItemModel) {
-        //         directItemModel = (DirectItemModel) tag;
-        //         final DirectItemType itemType = directItemModel.getItemType();
-        //         int firstOption = R.string.dms_inbox_raven_message_unknown;
-        //         String[] dialogList;
-        //
-        //         switch (itemType) {
-        //             case MEDIA_SHARE:
-        //             case CLIP:
-        //             case FELIX_SHARE:
-        //                 firstOption = R.string.view_post;
-        //                 break;
-        //             case LINK:
-        //                 firstOption = R.string.dms_inbox_open_link;
-        //                 break;
-        //             case TEXT:
-        //             case REEL_SHARE:
-        //                 firstOption = R.string.dms_inbox_copy_text;
-        //                 break;
-        //             case RAVEN_MEDIA:
-        //             case MEDIA:
-        //                 firstOption = R.string.dms_inbox_download;
-        //                 break;
-        //             case STORY_SHARE:
-        //                 if (directItemModel.getMediaModel() != null) {
-        //                     firstOption = R.string.show_stories;
-        //                 } else if (directItemModel.getText() != null && directItemModel.getText().toString().contains("@")) {
-        //                     firstOption = R.string.open_profile;
-        //                 }
-        //                 break;
-        //             case PLACEHOLDER:
-        //                 if (directItemModel.getText().toString().contains("@"))
-        //                     firstOption = R.string.open_profile;
-        //                 break;
-        //         }
-        //
-        //         dialogList = new String[]{
-        //                 getString(firstOption),
-        //                 getString(directItemModel.isLiked() ? R.string.dms_inbox_unlike : R.string.dms_inbox_like),
-        //                 getString(String.valueOf(directItemModel.getUserId()).equals(myId) ? R.string.dms_inbox_unsend : R.string.dms_inbox_author)
-        //         };
-        //
-        //         dialogAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, dialogList);
-        //
-        //         new AlertDialog.Builder(context)
-        //                 .setAdapter(dialogAdapter, onDialogListener)
-        //                 .show();
-        //     }
-        // };
+        final Integer inputMode = viewModel.getInputMode().getValue();
+        if (inputMode != null && inputMode != 1) {
+            itemTouchHelper = new ItemTouchHelper(touchHelperCallback);
+            itemTouchHelper.attachToRecyclerView(binding.chats);
+        }
     }
 
     private void setObservers() {
+        viewModel.getInputMode().observe(getViewLifecycleOwner(), inputMode -> {
+            if (inputMode == null || inputMode == 0) return;
+            if (inputMode == 1) {
+                binding.emojiToggle.setVisibility(View.GONE);
+                binding.camera.setVisibility(View.GONE);
+                binding.gallery.setVisibility(View.GONE);
+                binding.input.setVisibility(View.GONE);
+                binding.inputBg.setVisibility(View.GONE);
+                binding.recordView.setVisibility(View.GONE);
+                binding.send.setVisibility(View.GONE);
+                if (itemTouchHelper != null) {
+                    itemTouchHelper.attachToRecyclerView(null);
+                }
+            }
+        });
         viewModel.getThreadTitle().observe(getViewLifecycleOwner(), this::setTitle);
         viewModel.getFetching().observe(getViewLifecycleOwner(), fetching -> {
             if (fetching) {
@@ -882,6 +777,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void setupInput() {
+        final Integer inputMode = viewModel.getInputMode().getValue();
+        if (inputMode != null && inputMode == 1) return;
         final Context context = getContext();
         if (context == null) return;
         tooltip.setText(HOLD_TO_RECORD_AUDIO_LABEL);

@@ -127,4 +127,9 @@ public interface DirectMessagesRepository {
     @POST("/api/v1/direct_v2/threads/{threadId}/leave/")
     Call<DirectThreadDetailsChangeResponse> leave(@Path("threadId") String threadId,
                                                   @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/remove_all_users/")
+    Call<DirectThreadDetailsChangeResponse> end(@Path("threadId") String threadId,
+                                                @FieldMap final Map<String, String> form);
 }

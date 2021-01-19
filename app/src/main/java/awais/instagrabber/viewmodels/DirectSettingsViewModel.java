@@ -66,6 +66,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> mentionsMuted = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> approvalRequiredToJoin = new MutableLiveData<>(false);
     private final MutableLiveData<DirectThreadParticipantRequestsResponse> pendingRequests = new MutableLiveData<>(null);
+    private final MutableLiveData<Integer> inputMode = new MutableLiveData<>(null);
     private final DirectMessagesService directMessagesService;
     private final long userId;
     private final Resources resources;
@@ -97,6 +98,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     public void setThread(@NonNull final DirectThread thread) {
         this.thread = thread;
+        inputMode.postValue(thread.getInputMode());
         List<User> users = thread.getUsers();
         if (viewer != null) {
             final ImmutableList.Builder<User> builder = ImmutableList.<User>builder().add(viewer);
@@ -113,9 +115,13 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         muted.postValue(thread.isMuted());
         mentionsMuted.postValue(thread.isMentionsMuted());
         approvalRequiredToJoin.postValue(thread.isApprovalRequiredForNewMembers());
-        if (thread.isGroup() && viewerIsAdmin) {
+        if (thread.getInputMode() != 1 && thread.isGroup() && viewerIsAdmin) {
             fetchPendingRequests();
         }
+    }
+
+    public LiveData<Integer> getInputMode() {
+        return inputMode;
     }
 
     public boolean isGroup() {
@@ -542,8 +548,17 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
         final Call<DirectThreadDetailsChangeResponse> request = directMessagesService.leave(thread.getThreadId());
-        handleDetailsChangeRequest(data, request, () -> {
+        handleDetailsChangeRequest(data, request);
+        return data;
+    }
 
+    public LiveData<Resource<Object>> end() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        final Call<DirectThreadDetailsChangeResponse> request = directMessagesService.end(thread.getThreadId());
+        handleDetailsChangeRequest(data, request, () -> {
+            thread.setInputMode(1);
+            inputMode.postValue(1);
         });
         return data;
     }

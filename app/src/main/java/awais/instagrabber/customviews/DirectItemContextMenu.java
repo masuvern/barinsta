@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.TypedValue;
@@ -60,11 +61,8 @@ public class DirectItemContextMenu extends PopupWindow {
     private final int addAdjust;
     private final boolean hasOptions;
     private final List<MenuItem> options;
+    private final int widthWithoutReactions;
 
-    /* = ImmutableList.of(
-            new MenuItem(R.id.reply, R.string.reply),
-            new MenuItem(R.id.unsend, R.string.dms_inbox_unsend)
-    );*/
     private AnimatorSet openCloseAnimator;
     private Point location;
     private Point point;
@@ -81,13 +79,15 @@ public class DirectItemContextMenu extends PopupWindow {
             throw new IllegalArgumentException("showReactions is set false and options are empty");
         }
         reactionsManager = ReactionsManager.getInstance();
-        emojiSize = context.getResources().getDimensionPixelSize(R.dimen.reaction_picker_emoji_size);
-        emojiMargin = context.getResources().getDimensionPixelSize(R.dimen.reaction_picker_emoji_margin);
+        final Resources resources = context.getResources();
+        emojiSize = resources.getDimensionPixelSize(R.dimen.reaction_picker_emoji_size);
+        emojiMargin = resources.getDimensionPixelSize(R.dimen.reaction_picker_emoji_margin);
         emojiMarginHalf = emojiMargin / 2;
-        addAdjust = context.getResources().getDimensionPixelSize(R.dimen.reaction_picker_add_padding_adjustment);
-        dividerHeight = context.getResources().getDimensionPixelSize(R.dimen.horizontal_divider_height);
-        optionHeight = context.getResources().getDimensionPixelSize(R.dimen.reaction_picker_option_height);
-        optionPadding = context.getResources().getDimensionPixelSize(R.dimen.dm_message_card_radius);
+        addAdjust = resources.getDimensionPixelSize(R.dimen.reaction_picker_add_padding_adjustment);
+        dividerHeight = resources.getDimensionPixelSize(R.dimen.horizontal_divider_height);
+        optionHeight = resources.getDimensionPixelSize(R.dimen.reaction_picker_option_height);
+        optionPadding = resources.getDimensionPixelSize(R.dimen.dm_message_card_radius);
+        widthWithoutReactions = resources.getDimensionPixelSize(R.dimen.dm_item_context_min_width);
         exitAnimationListener = new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(final Animator animation) {
@@ -315,6 +315,9 @@ public class DirectItemContextMenu extends PopupWindow {
                             final ConstraintLayout container,
                             @Nullable final View divider) {
         View prevOptionView = null;
+        if (!showReactions) {
+            container.getLayoutParams().width = widthWithoutReactions;
+        }
         for (int i = 0; i < options.size(); i++) {
             final MenuItem menuItem = options.get(i);
             final AppCompatTextView textView = getTextView();
@@ -324,11 +327,12 @@ public class DirectItemContextMenu extends PopupWindow {
             if (i == 0) {
                 if (divider != null) {
                     layoutParams.topToBottom = divider.getId();
+                    ((ConstraintLayout.LayoutParams) divider.getLayoutParams()).bottomToTop = textView.getId();
                 } else {
                     // if divider is null mean reactions were not added, so connect top to top of parent
                     layoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+                    layoutParams.topMargin = emojiMargin; // material design spec (https://material.io/components/menus#specs)
                 }
-                ((ConstraintLayout.LayoutParams) divider.getLayoutParams()).bottomToTop = textView.getId();
             } else {
                 layoutParams.topToBottom = prevOptionView.getId();
                 final ConstraintLayout.LayoutParams prevLayoutParams = (ConstraintLayout.LayoutParams) prevOptionView.getLayoutParams();

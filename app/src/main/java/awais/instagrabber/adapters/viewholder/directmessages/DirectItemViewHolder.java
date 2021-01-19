@@ -50,6 +50,7 @@ import awais.instagrabber.utils.ResponseBodyUtils;
 
 public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder implements SwipeableViewHolder {
     private static final String TAG = DirectItemViewHolder.class.getSimpleName();
+    // private static final List<Integer> THREAD_CHANGING_OPTIONS = ImmutableList.of(R.id.unsend);
 
     private final LayoutDmBaseBinding binding;
     private final User currentUser;
@@ -532,10 +533,13 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         if (canForward()) {
             builder.add(new DirectItemContextMenu.MenuItem(R.id.forward, R.string.forward));
         }
-        if (messageDirection == MessageDirection.OUTGOING) {
+        if (thread.getInputMode() != 1 && messageDirection == MessageDirection.OUTGOING) {
             builder.add(new DirectItemContextMenu.MenuItem(R.id.unsend, R.string.dms_inbox_unsend));
         }
-        final DirectItemContextMenu menu = new DirectItemContextMenu(itemView.getContext(), allowReaction(), builder.build());
+        final boolean showReactions = thread.getInputMode() != 1 && allowReaction();
+        final ImmutableList<DirectItemContextMenu.MenuItem> menuItems = builder.build();
+        if (!showReactions && menuItems.isEmpty()) return;
+        final DirectItemContextMenu menu = new DirectItemContextMenu(itemView.getContext(), showReactions, menuItems);
         menu.setOnDismissListener(() -> setSelected(false));
         menu.setOnReactionClickListener(emoji -> callback.onReaction(item, emoji));
         menu.setOnOptionSelectListener(itemId -> callback.onOptionSelect(item, itemId));

@@ -62,6 +62,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
     private static final String TAG = DirectMessageSettingsFragment.class.getSimpleName();
     private static final int APPROVAL_REQUIRED_REQUEST_CODE = 200;
     private static final int LEAVE_THREAD_REQUEST_CODE = 201;
+    private static final int END_THREAD_REQUEST_CODE = 202;
 
     private FragmentDirectMessagesSettingsBinding binding;
     private DirectSettingsViewModel viewModel;
@@ -147,6 +148,17 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
     }
 
     private void setupObservers() {
+        viewModel.getInputMode().observe(getViewLifecycleOwner(), inputMode -> {
+            if (inputMode == null || inputMode == 0) return;
+            if (inputMode == 1) {
+                binding.groupSettings.setVisibility(View.GONE);
+                binding.pendingMembersGroup.setVisibility(View.GONE);
+                binding.approvalRequired.setVisibility(View.GONE);
+                binding.approvalRequiredLabel.setVisibility(View.GONE);
+                binding.muteMessagesLabel.setVisibility(View.GONE);
+                binding.muteMessages.setVisibility(View.GONE);
+            }
+        });
         viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
             if (usersAdapter == null) return;
             usersAdapter.submitUsers(users.first, users.second);
@@ -230,6 +242,11 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
 
     private void setupSettings() {
         binding.groupSettings.setVisibility(viewModel.isGroup() ? View.VISIBLE : View.GONE);
+        binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
+        binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.mute() : viewModel.unmute();
+            handleSwitchChangeResource(resourceLiveData, buttonView);
+        });
         if (!viewModel.isGroup()) return;
         binding.titleEdit.addTextChangedListener(new TextWatcherAdapter() {
             @Override
@@ -274,11 +291,6 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     .setMultiple(true);
             navController.navigate(actionGlobalUserSearch);
         });
-        binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
-        binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.mute() : viewModel.unmute();
-            handleSwitchChangeResource(resourceLiveData, buttonView);
-        });
         binding.muteMentionsLabel.setOnClickListener(v -> binding.muteMentions.toggle());
         binding.muteMentions.setOnCheckedChangeListener((buttonView, isChecked) -> {
             final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.muteMentions() : viewModel.unmuteMentions();
@@ -296,6 +308,22 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             );
             confirmDialogFragment.show(getChildFragmentManager(), "leave_thread_confirmation_dialog");
         });
+        if (viewModel.isViewerAdmin()) {
+            binding.end.setVisibility(View.VISIBLE);
+            binding.end.setOnClickListener(v -> {
+                final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
+                        END_THREAD_REQUEST_CODE,
+                        R.string.dms_action_end_question,
+                        R.string.dms_action_end_description,
+                        R.string.yes,
+                        R.string.no,
+                        -1
+                );
+                confirmDialogFragment.show(getChildFragmentManager(), "end_thread_confirmation_dialog");
+            });
+        } else {
+            binding.end.setVisibility(View.GONE);
+        }
     }
 
     private void setApprovalRelatedUI() {
@@ -473,6 +501,26 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                         break;
                     case LOADING:
                         binding.leave.setEnabled(false);
+                        break;
+                }
+            });
+            return;
+        }
+        if (requestCode == END_THREAD_REQUEST_CODE) {
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.end();
+            resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
+                if (resource == null) return;
+                switch (resource.status) {
+                    case SUCCESS:
+                        break;
+                    case ERROR:
+                        binding.end.setEnabled(true);
+                        if (resource.message != null) {
+                            Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                        }
+                        break;
+                    case LOADING:
+                        binding.end.setEnabled(false);
                         break;
                 }
             });

@@ -27,7 +27,7 @@
         app:layout_constraintEnd_toEndOf="@id/input_bg"
         app:layout_constraintStart_toStartOf="@id/input_bg"
         app:layout_constraintTop_toTopOf="@id/reply_info"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/reply_info"
@@ -46,7 +46,7 @@
         app:layout_constraintStart_toStartOf="@id/input_bg"
         app:layout_constraintTop_toBottomOf="@id/chats"
         tools:text="Replying to yourself"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.emoji.widget.EmojiAppCompatTextView
         android:id="@+id/reply_preview_text"
@@ -66,7 +66,7 @@
         app:layout_constraintTop_toBottomOf="@id/reply_info"
         app:layout_goneMarginTop="8dp"
         tools:text="Post"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/reply_preview_image"
@@ -80,7 +80,7 @@
         app:layout_constraintStart_toEndOf="@id/reply_preview_text"
         app:layout_constraintTop_toTopOf="@id/reply_info"
         tools:background="@mipmap/ic_launcher"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/reply_cancel"
@@ -93,7 +93,7 @@
         app:layout_constraintStart_toEndOf="@id/reply_preview_image"
         app:layout_constraintTop_toTopOf="@id/reply_info"
         app:srcCompat="@drawable/ic_close_24"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <!--<androidx.constraintlayout.widget.Group-->
     <!--    android:id="@+id/reply_group"-->

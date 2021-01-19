@@ -415,4 +415,7 @@
     <string name="added_by">Added by %s</string>
     <string name="admin_approval_required">Admin approval required</string>
     <string name="admin_approval_required_description">An admin approval will be required to add new members to the group</string>
+    <string name="dms_action_end">End chat</string>
+    <string name="dms_action_end_question">End chat?</string>
+    <string name="dms_action_end_description">All members will be removed from the group. They will still be able to view the chat history.</string>
 </resources>

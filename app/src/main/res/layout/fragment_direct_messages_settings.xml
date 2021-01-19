@@ -146,8 +146,25 @@
                     android:text="@string/dms_action_leave"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                     android:textColor="@color/red_600"
-                    app:layout_constraintBottom_toTopOf="@id/pending_members_header"
+                    app:layout_constraintBottom_toTopOf="@id/end"
                     app:layout_constraintTop_toBottomOf="@id/approval_required" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/end"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="?selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="12dp"
+                    android:text="@string/dms_action_end"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:textColor="@color/red_600"
+                    app:layout_constraintBottom_toTopOf="@id/pending_members_header"
+                    app:layout_constraintTop_toBottomOf="@id/leave" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/pending_members_header"
@@ -163,7 +180,7 @@
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@id/pending_members"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/leave" />
+                    app:layout_constraintTop_toBottomOf="@id/end" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/pending_members_admin_only"
@@ -216,7 +233,7 @@
                     android:id="@+id/group_settings"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    app:constraint_referenced_ids="title_edit_input_layout, mute_mentions_label, mute_mentions, leave, add_members, approval_required, approval_required_label" />
+                    app:constraint_referenced_ids="title_edit_input_layout, mute_mentions_label, mute_mentions, leave, end, add_members, approval_required, approval_required_label" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>

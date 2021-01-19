@@ -401,4 +401,12 @@ public class DirectMessagesService extends BaseService {
         );
         return repository.leave(threadId, form);
     }
+
+    public Call<DirectThreadDetailsChangeResponse> end(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.end(threadId, form);
+    }
 }

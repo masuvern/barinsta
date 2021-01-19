@@ -84,6 +84,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final MutableLiveData<List<User>> leftUsers = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<DirectItem> replyToItem = new MutableLiveData<>();
     private final MutableLiveData<Integer> pendingRequestsCount = new MutableLiveData<>(null);
+    private final MutableLiveData<Integer> inputMode = new MutableLiveData<>(0);
 
     private final DirectMessagesService service;
     private final ContentResolver contentResolver;
@@ -335,6 +336,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
         return pendingRequestsCount;
     }
 
+    public LiveData<Integer> getInputMode() {
+        return inputMode;
+    }
+
     public void fetchChats() {
         final Boolean isFetching = fetching.getValue();
         if ((isFetching != null && isFetching) || !hasOlder) return;
@@ -382,6 +387,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     private void setupThreadInfo(final DirectThread thread) {
         if (thread == null) return;
+        inputMode.postValue(thread.getInputMode());
         final List<DirectItem> items = thread.getItems()
                                              .stream()
                                              .filter(directItem -> directItem.getHideInThread() == 0)
@@ -400,7 +406,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         fetching.postValue(false);
         final List<Long> adminUserIds = thread.getAdminUserIds();
         viewerIsAdmin = adminUserIds.contains(viewerId);
-        if (thread.isGroup() && viewerIsAdmin) {
+        if (thread.getInputMode() != 1 && thread.isGroup() && viewerIsAdmin) {
             fetchPendingRequests();
         }
     }

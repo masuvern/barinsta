@@ -43,6 +43,7 @@
     <dimen name="reaction_picker_emoji_margin">8dp</dimen>
     <dimen name="reaction_picker_option_height">48dp</dimen>
     <dimen name="reaction_picker_add_padding_adjustment">4dp</dimen>
+    <dimen name="dm_item_context_min_width">200dp</dimen>
 
     <dimen name="horizontal_divider_height">1dp</dimen>
 </resources>
