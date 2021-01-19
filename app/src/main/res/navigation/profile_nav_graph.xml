@@ -82,6 +82,12 @@
             app:nullable="false" />
     </action>
 
+    <include app:graph="@navigation/saved_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_savedCollectionsFragment"
+        app:destination="@id/saved_nav_graph" />
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="awais.instagrabber.fragments.main.ProfileFragment"

@@ -1,7 +1,13 @@
 package awais.instagrabber.fragments;
 
+import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.ActionMode;
@@ -16,55 +22,60 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.PermissionChecker;
+import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.transition.ChangeBounds;
+import androidx.transition.TransitionInflater;
+import androidx.transition.TransitionSet;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.google.common.collect.ImmutableList;
 
 import java.util.Set;
 
 import awais.instagrabber.R;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.asyncs.SavedPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
-import awais.instagrabber.databinding.FragmentSavedBinding;
+import awais.instagrabber.databinding.FragmentCollectionPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.fragments.main.ProfileFragmentDirections;
+import awais.instagrabber.fragments.CollectionPostsFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.saved.SavedCollection;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
-import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public final class SavedViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class CollectionPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
-    private FragmentSavedBinding binding;
-    private String username;
-    private long profileId;
+    private MainActivity fragmentActivity;
+    private FragmentCollectionPostsBinding binding;
+    private CoordinatorLayout root;
+    private boolean shouldRefresh = true;
+    private SavedCollection savedCollection;
     private ActionMode actionMode;
-    private SwipeRefreshLayout root;
-    private AppCompatActivity fragmentActivity;
-    private boolean isLoggedIn, shouldRefresh = true;
-    private PostItemType type;
     private Set<Media> selectedFeedModels;
     private Media downloadFeedModel;
     private int downloadChildPosition = -1;
-    private PostsLayoutPreferences layoutPreferences;
+    private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_SAVED_POSTS_LAYOUT);
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -73,29 +84,29 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
-            R.menu.multi_select_download_menu,
-            new PrimaryActionModeCallback.CallbacksHelper() {
-                @Override
-                public void onDestroy(final ActionMode mode) {
-                    binding.posts.endSelection();
-                }
+            R.menu.multi_select_download_menu, new PrimaryActionModeCallback.CallbacksHelper() {
+        @Override
+        public void onDestroy(final ActionMode mode) {
+            binding.posts.endSelection();
+        }
 
-                @Override
-                public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
-                    if (item.getItemId() == R.id.action_download) {
-                        if (SavedViewerFragment.this.selectedFeedModels == null) return false;
-                        final Context context = getContext();
-                        if (context == null) return false;
-                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                            DownloadUtils.download(context, ImmutableList.copyOf(SavedViewerFragment.this.selectedFeedModels));
-                            binding.posts.endSelection();
-                            return true;
-                        }
-                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
-                    }
-                    return false;
+        @Override
+        public boolean onActionItemClicked(final ActionMode mode,
+                                           final MenuItem item) {
+            if (item.getItemId() == R.id.action_download) {
+                if (CollectionPostsFragment.this.selectedFeedModels == null) return false;
+                final Context context = getContext();
+                if (context == null) return false;
+                if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                    DownloadUtils.download(context, ImmutableList.copyOf(CollectionPostsFragment.this.selectedFeedModels));
+                    binding.posts.endSelection();
+                    return true;
                 }
-            });
+                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+            }
+            return false;
+        }
+    });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
         public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
@@ -109,12 +120,12 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = ProfileFragmentDirections.actionGlobalCommentsViewerFragment(
+            final NavDirections commentsAction = CollectionPostsFragmentDirections.actionGlobalCommentsViewerFragment(
                     feedModel.getCode(),
                     feedModel.getPk(),
                     feedModel.getUser().getPk()
             );
-            NavHostFragment.findNavController(SavedViewerFragment.this).navigate(commentsAction);
+            NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(commentsAction);
         }
 
         @Override
@@ -126,20 +137,20 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                 return;
             }
             downloadFeedModel = feedModel;
-            downloadChildPosition = childPosition;
+            downloadChildPosition = -1;
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = ProfileFragmentDirections.actionGlobalHashTagFragment(hashtag);
-            NavHostFragment.findNavController(SavedViewerFragment.this).navigate(action);
+            final NavDirections action = CollectionPostsFragmentDirections.actionGlobalHashTagFragment(hashtag);
+            NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
         }
 
         @Override
         public void onLocationClick(final Media feedModel) {
-            final NavDirections action = ProfileFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
-            NavHostFragment.findNavController(SavedViewerFragment.this).navigate(action);
+            final NavDirections action = CollectionPostsFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
+            NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
         }
 
         @Override
@@ -203,7 +214,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
             if (actionMode != null) {
                 actionMode.setTitle(title);
             }
-            SavedViewerFragment.this.selectedFeedModels = selectedFeedModels;
+            CollectionPostsFragment.this.selectedFeedModels = selectedFeedModels;
         }
 
         @Override
@@ -222,19 +233,26 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fragmentActivity = (AppCompatActivity) getActivity();
+        fragmentActivity = (MainActivity) requireActivity();
+        final TransitionSet transitionSet = new TransitionSet();
+        transitionSet.addTransition(new ChangeBounds())
+                     .addTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move))
+                     .setDuration(200);
+        setSharedElementEnterTransition(transitionSet);
+        postponeEnterTransition();
         setHasOptionsMenu(true);
     }
 
+    @Nullable
     @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
+    public View onCreateView(@NonNull final LayoutInflater inflater,
+                             @Nullable final ViewGroup container,
+                             @Nullable final Bundle savedInstanceState) {
         if (root != null) {
             shouldRefresh = false;
             return root;
         }
-        binding = FragmentSavedBinding.inflate(getLayoutInflater(), container, false);
+        binding = FragmentCollectionPostsBinding.inflate(inflater, container, false);
         root = binding.getRoot();
         return root;
     }
@@ -249,7 +267,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
 
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
-        inflater.inflate(R.menu.saved_viewer_menu, menu);
+        inflater.inflate(R.menu.topic_posts_menu, menu);
     }
 
     @Override
@@ -264,7 +282,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     @Override
     public void onResume() {
         super.onResume();
-        setTitle();
+        fragmentActivity.setToolbar(binding.toolbar);
     }
 
     @Override
@@ -272,40 +290,16 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         binding.posts.refresh();
     }
 
-    private void init() {
-        final Bundle arguments = getArguments();
-        if (arguments == null) return;
-        final SavedViewerFragmentArgs fragmentArgs = SavedViewerFragmentArgs.fromBundle(arguments);
-        username = fragmentArgs.getUsername();
-        profileId = fragmentArgs.getProfileId();
-        type = fragmentArgs.getType();
-        layoutPreferences = Utils.getPostsLayoutPreferences(getPostsLayoutPreferenceKey());
-        setupPosts();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        resetToolbar();
     }
 
-    private void setupPosts() {
-        binding.posts.setViewModelStoreOwner(this)
-                     .setLifeCycleOwner(this)
-                     .setPostFetchService(new SavedPostFetchService(profileId, type, isLoggedIn, null))
-                     .setLayoutPreferences(layoutPreferences)
-                     .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
-                     .setFeedItemCallback(feedItemCallback)
-                     .setSelectionModeCallback(selectionModeCallback)
-                     .init();
-        binding.swipeRefreshLayout.setRefreshing(true);
-    }
-
-    @NonNull
-    private String getPostsLayoutPreferenceKey() {
-        switch (type) {
-            case LIKED:
-                return Constants.PREF_LIKED_POSTS_LAYOUT;
-            case TAGGED:
-                return Constants.PREF_TAGGED_POSTS_LAYOUT;
-            case SAVED:
-            default:
-                return Constants.PREF_SAVED_POSTS_LAYOUT;
-        }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        resetToolbar();
     }
 
     @Override
@@ -327,24 +321,92 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         }
     }
 
-    private void setTitle() {
-        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (actionBar == null) return;
-        final int titleRes;
-        switch (type) {
-            case LIKED:
-                titleRes = R.string.liked;
-                break;
-            case TAGGED:
-                titleRes = R.string.tagged;
-                break;
-            default:
-            case SAVED:
-                titleRes = R.string.saved;
-                break;
+    private void resetToolbar() {
+        fragmentActivity.resetToolbar();
+    }
+
+    private void init() {
+        if (getArguments() == null) return;
+        final CollectionPostsFragmentArgs fragmentArgs = CollectionPostsFragmentArgs.fromBundle(getArguments());
+        savedCollection = fragmentArgs.getSavedCollection();
+        setupToolbar(fragmentArgs.getTitleColor(), fragmentArgs.getBackgroundColor());
+        setupPosts();
+    }
+
+    private void setupToolbar(final int titleColor, final int backgroundColor) {
+        if (savedCollection == null) {
+            return;
         }
-        actionBar.setTitle(titleRes);
-        actionBar.setSubtitle(username);
+        binding.cover.setTransitionName("collection-" + savedCollection.getId());
+        fragmentActivity.setToolbar(binding.toolbar);
+        binding.collapsingToolbarLayout.setTitle(savedCollection.getTitle());
+        final int collapsedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0xFF);
+        final int expandedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0x99);
+        binding.collapsingToolbarLayout.setExpandedTitleColor(expandedTitleTextColor);
+        binding.collapsingToolbarLayout.setCollapsedTitleTextColor(collapsedTitleTextColor);
+        binding.collapsingToolbarLayout.setContentScrimColor(backgroundColor);
+        final Drawable navigationIcon = binding.toolbar.getNavigationIcon();
+        final Drawable overflowIcon = binding.toolbar.getOverflowIcon();
+        if (navigationIcon != null && overflowIcon != null) {
+            final Drawable navDrawable = navigationIcon.mutate();
+            final Drawable overflowDrawable = overflowIcon.mutate();
+            navDrawable.setAlpha(0xFF);
+            overflowDrawable.setAlpha(0xFF);
+            final ArgbEvaluator argbEvaluator = new ArgbEvaluator();
+            binding.appBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+                final int totalScrollRange = appBarLayout.getTotalScrollRange();
+                final float current = totalScrollRange + verticalOffset;
+                final float fraction = current / totalScrollRange;
+                final int tempColor = (int) argbEvaluator.evaluate(fraction, collapsedTitleTextColor, expandedTitleTextColor);
+                navDrawable.setColorFilter(tempColor, PorterDuff.Mode.SRC_ATOP);
+                overflowDrawable.setColorFilter(tempColor, PorterDuff.Mode.SRC_ATOP);
+
+            });
+        }
+        final GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{Color.TRANSPARENT, backgroundColor});
+        binding.background.setBackground(gd);
+        setupCover();
+    }
+
+    private void setupCover() {
+        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMedias() == null
+                ? null
+                : savedCollection.getCoverMedias().get(0));
+        final DraweeController controller = Fresco
+                .newDraweeControllerBuilder()
+                .setOldController(binding.cover.getController())
+                .setUri(coverUrl)
+                .setControllerListener(new BaseControllerListener<ImageInfo>() {
+
+                    @Override
+                    public void onFailure(final String id, final Throwable throwable) {
+                        super.onFailure(id, throwable);
+                        startPostponedEnterTransition();
+                    }
+
+                    @Override
+                    public void onFinalImageSet(final String id,
+                                                @Nullable final ImageInfo imageInfo,
+                                                @Nullable final Animatable animatable) {
+                        startPostponedEnterTransition();
+                    }
+                })
+                .build();
+        binding.cover.setController(controller);
+    }
+
+    private void setupPosts() {
+        binding.posts.setViewModelStoreOwner(this)
+                     .setLifeCycleOwner(this)
+                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getId()))
+                     .setLayoutPreferences(layoutPreferences)
+                     .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
+                     .setFeedItemCallback(feedItemCallback)
+                     .setSelectionModeCallback(selectionModeCallback)
+                     .init();
+        binding.swipeRefreshLayout.setRefreshing(true);
     }
 
     private void updateSwipeRefreshState() {
@@ -360,7 +422,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
 
     private void showPostsLayoutPreferences() {
         final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(
-                getPostsLayoutPreferenceKey(),
+                Constants.PREF_TOPIC_POSTS_LAYOUT,
                 preferences -> {
                     layoutPreferences = preferences;
                     new Handler().postDelayed(() -> binding.posts.setLayoutPreferences(preferences), 200);

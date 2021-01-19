@@ -27,12 +27,12 @@
     <string name="title_highlight">ハイライト: %s</string>
     <string name="update_check">起動時にアップデートを確認</string>
     <string name="download_user_folder">ユーザ名のフォルダに投稿をダウンロード</string>
-    <string name="mark_as_seen_setting">ストーリーを表示後に既読としてマーク</string>
+    <string name="mark_as_seen_setting">ストーリーズを表示後に既読にする</string>
     <string name="mark_as_seen_setting_summary">ストーリーの作成者は、あなたが閲覧したことを知ることができます。</string>
-    <string name="dm_mark_as_seen_setting">DMを表示後に既読としてマーク</string>
+    <string name="dm_mark_as_seen_setting">DMを表示後に既読にする</string>
     <string name="dm_mark_as_seen_setting_summary">ほかのメンバーは、あなたが閲覧したことを知ることができます。</string>
     <string name="activity_setting">アクティビティの通知を有効化</string>
-    <string name="story_sort_setting">フィードのストーリーの並び順</string>
+    <string name="story_sort_setting">フィードのストーリーズの並び順</string>
     <string name="error_loading_profile">プロファイルの読み込みエラー！\nログインしてもう一度検索してください。</string>
     <string name="error_creating_folders">ダウンロードフォルダの作成中にエラーが発生しました。</string>
     <string name="save_to_folder">カスタムフォルダーに保存</string>
@@ -40,7 +40,7 @@
     <string name="theme_settings">テーマ</string>
     <string name="login_settings">ログインユーザーにのみ影響します:</string>
     <string name="anonymous_settings">匿名ユーザーにのみ影響します:</string>
-    <string name="instadp_settings">高解像度のプロフィール画像にInstadpを使用する</string>
+    <string name="instadp_settings">プロフ画像にInstadpを使用</string>
     <string name="import_export">インポート/エクスポート</string>
     <string name="select_language">言語</string>
     <plurals name="main_posts_count_inline">
@@ -167,7 +167,7 @@
     <string name="dms_inbox_raven_media_sending">送信中…</string>
     <string name="dms_inbox_raven_media_blocked">ブロック済</string>
     <string name="dms_inbox_raven_media_suggested">Suggested</string>
-    <string name="dms_inbox_raven_media_screenshot">Screenshotted</string>
+    <string name="dms_inbox_raven_media_screenshot">スクリーンショット撮影済み</string>
     <string name="dms_inbox_raven_media_cant_deliver">配信できません</string>
     <string name="dms_action_success">成功！</string>
     <string name="dms_action_leave">退出する</string>
@@ -196,7 +196,7 @@
     <string name="comment_viewer_unlike_comment">コメントのいいね！を取り消す</string>
     <string name="comment_viewer_translate_comment">コメントを翻訳</string>
     <string name="comment_viewer_delete_comment">コメントを削除</string>
-    <string name="comment_send_empty_comment">No empty comments!</string>
+    <string name="comment_send_empty_comment">メッセージが未入力です！</string>
     <string name="comment_view_mention_user_search">ユーザー名を検索しますか？</string>
     <string name="comment_view_mention_hash_search">ハッシュタグを検索しますか？</string>
     <string name="followers_type_followers">フォロワー</string>
@@ -222,10 +222,10 @@
     <string name="update_available">アップデートが利用可能です！ (%s)</string>
     <string name="update_notice">注意: F-Droidからダウンロードした場合は、そちらからアップデートする必要があります。GitHubでも同様です。</string>
     <string name="updated">Barinstaをアップデートしていただきありがとうございます！</string>
-    <string name="crash_title">アプリがクラッシュしました</string>
+    <string name="crash_title">アプリがクラッシュ</string>
     <string name="crash_descr">アプリがクラッシュしましたが、エラーレポートを開発者に送信して問題の解決を手助けすることができます。(:</string>
     <string name="action_notif">アクティビティ</string>
-    <string name="action_archive">ストーリーのアーカイブ</string>
+    <string name="action_archive">ストーリーズのアーカイブ</string>
     <string name="action_ayml">おすすめのユーザー</string>
     <string name="select_picture">画像を選択</string>
     <string name="uploading">アップロード中…</string>
@@ -233,7 +233,7 @@
     <string name="activity_count_relationship">%d 人のフォロワー</string>
     <string name="activity_count_comments">%d コメント</string>
     <string name="activity_count_commentlikes">%d 個のコメントへのいいね！</string>
-    <string name="activity_count_usertags">%d 個のユーザータグ</string>
+    <string name="activity_count_usertags">%d 個のタグ付け</string>
     <string name="activity_count_likes">%d いいね！</string>
     <string name="activity_notloggedin">この通知をクリックする前にログアウトしましたか？</string>
     <string name="feed">フィード</string>
@@ -252,7 +252,7 @@
     <string name="pref_category_downloads">ダウンロード</string>
     <string name="pref_category_locale">言語</string>
     <string name="account">アカウント</string>
-    <string name="account_hint">現在のログインが動作しませんか？アカウントを再度追加してください</string>
+    <string name="account_hint">ログインできない場合はアカウントを再度追加してください</string>
     <string name="add_account">アカウントを追加</string>
     <string name="about_category_license">ライセンス(英語のみ)</string>
     <string name="about_documentation">ウェブサイトを開く</string>
@@ -262,7 +262,7 @@
     <string name="about_feedback">メールでフィードバックを送信</string>
     <string name="about_category_3pt">サードパーティ製アプリ</string>
     <string name="about_category_3pt_summary">以下のサードパーティー製のオープンソースライブラリが使用されています:</string>
-    <string name="reminder">Reminder</string>
+    <string name="reminder">注意:</string>
     <string name="reminder_summary">このアプリは自己責任で使用してください。ダウンロードした画像は、適用される法律で許可されている目的の範囲内でのみ使用することができます。</string>
     <string name="light_white_theme">ホワイト</string>
     <string name="dark_black_theme">ブラック</string>
@@ -286,7 +286,7 @@
     <string name="file_chosen_label">ファイル:</string>
     <string name="enter_password">パスワードを入力してください</string>
     <string name="select_backup_file">バックアップ ファイルを選択してください (.zaai/.backup)</string>
-    <string name="apply">適用する</string>
+    <string name="apply">適用</string>
     <string name="save">保存</string>
     <string name="caption">キャプション</string>
     <string name="edit_caption">キャプションを編集...</string>
@@ -306,7 +306,7 @@
     <string name="delete">削除</string>
     <string name="comment">コメント</string>
     <string name="layout">レイアウト</string>
-    <string name="feed_stories">フィードのストーリー</string>
+    <string name="feed_stories">フィードのストーリーズ</string>
     <string name="opening_post">投稿を開いています...</string>
     <string name="share">共有</string>
     <string name="layout_style">レイアウトスタイル</string>

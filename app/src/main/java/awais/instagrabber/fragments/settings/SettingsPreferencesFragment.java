@@ -52,6 +52,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         generalCategory.addPreference(getUpdateCheckPreference());
         // generalCategory.addPreference(getAutoPlayVideosPreference());
         generalCategory.addPreference(getAlwaysMuteVideosPreference());
+        generalCategory.addPreference(getShowCaptionPreference());
 
         // screen.addPreference(getDivider(context));
         // final PreferenceCategory themeCategory = new PreferenceCategory(context);
@@ -200,6 +201,17 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.MUTED_VIDEOS);
         preference.setTitle(R.string.post_viewer_muted_autoplay);
+        preference.setIconSpaceReserved(false);
+        return preference;
+    }
+
+    private Preference getShowCaptionPreference() {
+        final Context context = getContext();
+        if (context == null) return null;
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
+        preference.setKey(Constants.SHOW_CAPTIONS);
+        preference.setDefaultValue(true);
+        preference.setTitle(R.string.post_viewer_show_captions);
         preference.setIconSpaceReserved(false);
         return preference;
     }

@@ -238,6 +238,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.PostViewV2Style);
         viewModel = new ViewModelProvider(this).get(PostViewV2ViewModel.class);
+        captionState = settingsHelper.getBoolean(Constants.SHOW_CAPTIONS) ?
+                BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_HIDDEN;
     }
 
     @Nullable
@@ -382,7 +384,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                                                                                 ViewGroup.LayoutParams.MATCH_PARENT));
             binding.postImage.requestLayout();
             if (bottomSheetBehavior != null) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setState(captionState);
             }
             return;
         }
@@ -391,7 +393,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                                                                                    ViewGroup.LayoutParams.MATCH_PARENT));
             binding.sliderParent.requestLayout();
             if (bottomSheetBehavior != null) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setState(captionState);
             }
             return;
         }
@@ -402,7 +404,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             binding.videoPost.thumbnailParent.setLayoutParams(params);
             binding.videoPost.thumbnailParent.requestLayout();
             if (bottomSheetBehavior != null) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setState(captionState);
             }
         }
     }

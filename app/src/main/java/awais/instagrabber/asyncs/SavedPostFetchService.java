@@ -19,12 +19,14 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
     private final boolean isLoggedIn;
 
     private String nextMaxId;
+    private final String collectionId;
     private boolean moreAvailable;
 
-    public SavedPostFetchService(final long profileId, final PostItemType type, final boolean isLoggedIn) {
+    public SavedPostFetchService(final long profileId, final PostItemType type, final boolean isLoggedIn, final String collectionId) {
         this.profileId = profileId;
         this.type = type;
         this.isLoggedIn = isLoggedIn;
+        this.collectionId = collectionId;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
@@ -58,10 +60,12 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
                 if (isLoggedIn) profileService.fetchTagged(profileId, nextMaxId, callback);
                 else graphQLService.fetchTaggedPosts(profileId, 30, nextMaxId, callback);
                 break;
+            case COLLECTION:
             case SAVED:
-            default:
-                profileService.fetchSaved(nextMaxId, callback);
+                profileService.fetchSaved(nextMaxId, collectionId, callback);
                 break;
+            default:
+                callback.onFailure(null);
         }
     }
 
