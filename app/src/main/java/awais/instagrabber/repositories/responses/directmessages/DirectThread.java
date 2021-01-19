@@ -41,7 +41,7 @@ public class DirectThread implements Serializable {
     private final boolean isSpam;
     private final DirectItem lastPermanentItem;
     private final DirectThreadDirectStory directStory;
-    private final boolean approvalRequiredForNewMembers;
+    private boolean approvalRequiredForNewMembers;
 
     public DirectThread(final String threadId,
                         final String threadV2Id,
@@ -243,6 +243,10 @@ public class DirectThread implements Serializable {
 
     public boolean isApprovalRequiredForNewMembers() {
         return approvalRequiredForNewMembers;
+    }
+
+    public void setApprovalRequiredForNewMembers(final boolean approvalRequiredForNewMembers) {
+        this.approvalRequiredForNewMembers = approvalRequiredForNewMembers;
     }
 
     @Nullable

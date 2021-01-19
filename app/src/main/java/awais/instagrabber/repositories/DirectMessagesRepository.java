@@ -112,4 +112,19 @@ public interface DirectMessagesRepository {
     @POST("/api/v1/direct_v2/threads/{threadId}/deny_participant_requests/")
     Call<DirectThreadDetailsChangeResponse> declineParticipantRequests(@Path("threadId") String threadId,
                                                                        @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/approval_required_for_new_members/")
+    Call<DirectThreadDetailsChangeResponse> approvalRequired(@Path("threadId") String threadId,
+                                                             @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/approval_not_required_for_new_members/")
+    Call<DirectThreadDetailsChangeResponse> approvalNotRequired(@Path("threadId") String threadId,
+                                                                @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/leave/")
+    Call<DirectThreadDetailsChangeResponse> leave(@Path("threadId") String threadId,
+                                                  @FieldMap final Map<String, String> form);
 }

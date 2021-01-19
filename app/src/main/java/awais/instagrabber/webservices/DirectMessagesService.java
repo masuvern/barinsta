@@ -377,4 +377,28 @@ public class DirectMessagesService extends BaseService {
         );
         return repository.declineParticipantRequests(threadId, form);
     }
+
+    public Call<DirectThreadDetailsChangeResponse> approvalRequired(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.approvalRequired(threadId, form);
+    }
+
+    public Call<DirectThreadDetailsChangeResponse> approvalNotRequired(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.approvalNotRequired(threadId, form);
+    }
+
+    public Call<DirectThreadDetailsChangeResponse> leave(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.leave(threadId, form);
+    }
 }

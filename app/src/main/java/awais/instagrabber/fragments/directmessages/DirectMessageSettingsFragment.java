@@ -94,41 +94,6 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         viewModel = new ViewModelProvider(this).get(DirectSettingsViewModel.class);
         viewModel.setViewer(inboxViewModel.getViewer());
         viewModel.setThread(first.get());
-        // basicClickListener = v -> {
-        //     final Object tag = v.getTag();
-        //     if (tag instanceof ProfileModel) {
-        //         ProfileModel model = (ProfileModel) tag;
-        //         final Bundle bundle = new Bundle();
-        //         bundle.putString("username", "@" + model.getUsername());
-        //         NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle);
-        //     }
-        // };
-        //
-        // clickListener = v -> {
-        //     final Object tag = v.getTag();
-        //     if (tag instanceof ProfileModel) {
-        //         ProfileModel model = (ProfileModel) tag;
-        //         final Context context = getContext();
-        //         if (context == null) return;
-        //         final ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{
-        //                 getString(R.string.open_profile),
-        //                 getString(R.string.dms_action_kick),
-        //         });
-        //         final DialogInterface.OnClickListener clickListener = (d, w) -> {
-        //             if (w == 0) {
-        //                 final Bundle bundle = new Bundle();
-        //                 bundle.putString("username", "@" + model.getUsername());
-        //                 NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle);
-        //             } else if (w == 1) {
-        //                 new ChangeSettings(titleText.getText().toString()).execute("remove_users", model.getId());
-        //                 onRefresh();
-        //             }
-        //         };
-        //         new AlertDialog.Builder(context)
-        //                 .setAdapter(adapter, clickListener)
-        //                 .show();
-        //     }
-        // };
     }
 
     @NonNull
@@ -327,7 +292,8 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         binding.approvalRequiredLabel.setVisibility(View.VISIBLE);
         binding.approvalRequiredLabel.setOnClickListener(v -> binding.approvalRequired.toggle());
         binding.approvalRequired.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
+            final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.approvalRequired() : viewModel.approvalNotRequired();
+            handleSwitchChangeResource(resourceLiveData, buttonView);
         });
     }
 

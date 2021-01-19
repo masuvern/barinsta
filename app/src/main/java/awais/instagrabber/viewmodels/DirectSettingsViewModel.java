@@ -508,6 +508,36 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
+    public LiveData<Resource<Object>> approvalRequired() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        if (thread.isApprovalRequiredForNewMembers()) {
+            data.postValue(Resource.success(new Object()));
+            return data;
+        }
+        final Call<DirectThreadDetailsChangeResponse> request = directMessagesService.approvalRequired(thread.getThreadId());
+        handleDetailsChangeRequest(data, request, () -> {
+            thread.setApprovalRequiredForNewMembers(true);
+            approvalRequiredToJoin.postValue(true);
+        });
+        return data;
+    }
+
+    public LiveData<Resource<Object>> approvalNotRequired() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        if (!thread.isApprovalRequiredForNewMembers()) {
+            data.postValue(Resource.success(new Object()));
+            return data;
+        }
+        final Call<DirectThreadDetailsChangeResponse> request = directMessagesService.approvalNotRequired(thread.getThreadId());
+        handleDetailsChangeRequest(data, request, () -> {
+            thread.setApprovalRequiredForNewMembers(false);
+            approvalRequiredToJoin.postValue(false);
+        });
+        return data;
+    }
+
     private interface OnSuccessAction {
         void onSuccess();
     }
