@@ -538,6 +538,16 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
+    public LiveData<Resource<Object>> leave() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        final Call<DirectThreadDetailsChangeResponse> request = directMessagesService.leave(thread.getThreadId());
+        handleDetailsChangeRequest(data, request, () -> {
+
+        });
+        return data;
+    }
+
     private interface OnSuccessAction {
         void onSuccess();
     }

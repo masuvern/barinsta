@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
+import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -59,7 +60,8 @@ import awais.instagrabber.viewmodels.DirectSettingsViewModel;
 
 public class DirectMessageSettingsFragment extends Fragment implements ConfirmDialogFragmentCallback {
     private static final String TAG = DirectMessageSettingsFragment.class.getSimpleName();
-    public static final int APPROVAL_REQUIRED_REQUEST_CODE = 200;
+    private static final int APPROVAL_REQUIRED_REQUEST_CODE = 200;
+    private static final int LEAVE_THREAD_REQUEST_CODE = 201;
 
     private FragmentDirectMessagesSettingsBinding binding;
     private DirectSettingsViewModel viewModel;
@@ -282,6 +284,21 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.muteMentions() : viewModel.unmuteMentions();
             handleSwitchChangeResource(resourceLiveData, buttonView);
         });
+        setApprovalRelatedUI();
+        binding.leave.setOnClickListener(v -> {
+            final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
+                    LEAVE_THREAD_REQUEST_CODE,
+                    R.string.dms_action_leave_question,
+                    -1,
+                    R.string.yes,
+                    R.string.no,
+                    -1
+            );
+            confirmDialogFragment.show(getChildFragmentManager(), "leave_thread_confirmation_dialog");
+        });
+    }
+
+    private void setApprovalRelatedUI() {
         if (!viewModel.isViewerAdmin()) {
             binding.pendingMembersGroup.setVisibility(View.GONE);
             binding.approvalRequired.setVisibility(View.GONE);
@@ -392,8 +409,8 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         }
     }
 
-    private void observeDetailsChange(@NonNull final LiveData<Resource<Object>> detailsChangeResourceLiveData) {
-        detailsChangeResourceLiveData.observe(getViewLifecycleOwner(), resource -> {
+    private void observeDetailsChange(@NonNull final LiveData<Resource<Object>> resourceLiveData) {
+        resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
             switch (resource.status) {
                 case SUCCESS:
@@ -437,6 +454,28 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         if (requestCode == APPROVAL_REQUIRED_REQUEST_CODE && approvalRequiredUsers != null) {
             final LiveData<Resource<Object>> detailsChangeResourceLiveData = viewModel.addMembers(approvalRequiredUsers);
             observeDetailsChange(detailsChangeResourceLiveData);
+            return;
+        }
+        if (requestCode == LEAVE_THREAD_REQUEST_CODE) {
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.leave();
+            resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
+                if (resource == null) return;
+                switch (resource.status) {
+                    case SUCCESS:
+                        final NavDirections directions = DirectMessageSettingsFragmentDirections.actionSettingsToInbox();
+                        NavHostFragment.findNavController(this).navigate(directions);
+                        break;
+                    case ERROR:
+                        binding.leave.setEnabled(true);
+                        if (resource.message != null) {
+                            Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                        }
+                        break;
+                    case LOADING:
+                        binding.leave.setEnabled(false);
+                        break;
+                }
+            });
         }
     }
 
@@ -449,69 +488,4 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
 
     @Override
     public void onNeutralButtonClicked(final int requestCode) {}
-
-    // class ChangeSettings extends AsyncTask<String, Void, Void> {
-    //     String action, argument;
-    //     boolean ok = false;
-    //     private final String text;
-    //
-    //     public ChangeSettings(final String text) {
-    //         this.text = text;
-    //     }
-    //
-    //     protected Void doInBackground(String... rawAction) {
-    //         action = rawAction[0];
-    //         if (rawAction.length == 2) argument = rawAction[1];
-    //         final String url = "https://i.instagram.com/api/v1/direct_v2/threads/" + threadId + "/" + action + "/";
-    //         try {
-    //             String urlParameters = "_csrftoken=" + cookie.split("csrftoken=")[1].split(";")[0]
-    //                     + "&_uuid=" + Utils.settingsHelper.getString(Constants.DEVICE_UUID);
-    //             if (action.equals("update_title")) {
-    //                 urlParameters += "&title=" + URLEncoder.encode(text, "UTF-8")
-    //                                                        .replaceAll("\\+", "%20").replaceAll("%21", "!").replaceAll("%27", "'")
-    //                                                        .replaceAll("%28", "(").replaceAll("%29", ")").replaceAll("%7E", "~");
-    //             } else if (action.startsWith("remove_users"))
-    //                 urlParameters += ("&user_ids=[" + argument + "]");
-    //             final HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-    //             urlConnection.setRequestMethod("POST");
-    //             urlConnection.setUseCaches(false);
-    //             urlConnection.setRequestProperty("User-Agent", Constants.I_USER_AGENT);
-    //             urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-    //             urlConnection.setRequestProperty("Content-Length", Integer.toString(urlParameters.getBytes().length));
-    //             urlConnection.setDoOutput(true);
-    //             DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-    //             wr.writeBytes(urlParameters);
-    //             wr.flush();
-    //             wr.close();
-    //             urlConnection.connect();
-    //             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-    //                 ok = true;
-    //             }
-    //             urlConnection.disconnect();
-    //         } catch (Throwable ex) {
-    //             Log.e("austin_debug", "unsend: " + ex);
-    //         }
-    //         return null;
-    //     }
-    //
-    //     @Override
-    //     protected void onPostExecute(Void result) {
-    //         final Context context = getContext();
-    //         if (context == null) return;
-    //         if (ok) {
-    //             Toast.makeText(context, R.string.dms_action_success, Toast.LENGTH_SHORT).show();
-    //             if (action.equals("update_title")) {
-    //                 threadTitle = titleText.getText().toString();
-    //                 titleSend.setVisibility(View.GONE);
-    //                 titleText.clearFocus();
-    //                 DirectMessageThreadFragment.hasSentSomething = true;
-    //             } else if (action.equals("leave")) {
-    //                 context.sendBroadcast(new Intent(DMRefreshBroadcastReceiver.ACTION_REFRESH_DM));
-    //                 NavHostFragment.findNavController(DirectMessageSettingsFragment.this).popBackStack(R.id.directMessagesInboxFragment, false);
-    //             } else {
-    //                 DirectMessageThreadFragment.hasSentSomething = true;
-    //             }
-    //         } else Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-    //     }
-    // }
 }
