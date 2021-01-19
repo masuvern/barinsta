@@ -394,7 +394,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 if (!TextUtils.isEmpty(defaultTabResNameString)) {
                     navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
                 }
-                final int defaultNavId = navId <= 0 ? R.navigation.profile_nav_graph
+                final int defaultNavId = navId <= 0 ? R.navigation.feed_nav_graph
                                                     : navId;
                 final int index = mainNavList.indexOf(defaultNavId);
                 if (index >= 0) firstFragmentGraphIndex = index;
