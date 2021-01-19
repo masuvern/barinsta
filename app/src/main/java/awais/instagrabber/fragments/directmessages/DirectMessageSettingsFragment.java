@@ -34,11 +34,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.UserSearchNavGraphDirections;
+import awais.instagrabber.adapters.DirectPendingUsersAdapter;
+import awais.instagrabber.adapters.DirectPendingUsersAdapter.PendingUser;
+import awais.instagrabber.adapters.DirectPendingUsersAdapter.PendingUserCallback;
 import awais.instagrabber.adapters.DirectUsersAdapter;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesSettingsBinding;
+import awais.instagrabber.dialogs.ConfirmDialogFragment;
+import awais.instagrabber.dialogs.ConfirmDialogFragment.ConfirmDialogFragmentCallback;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment;
 import awais.instagrabber.dialogs.MultiOptionDialogFragment.Option;
 import awais.instagrabber.fragments.UserSearchFragment;
@@ -46,16 +52,21 @@ import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
 import awais.instagrabber.viewmodels.DirectSettingsViewModel;
 
-public class DirectMessageSettingsFragment extends Fragment {
+public class DirectMessageSettingsFragment extends Fragment implements ConfirmDialogFragmentCallback {
     private static final String TAG = DirectMessageSettingsFragment.class.getSimpleName();
+    public static final int APPROVAL_REQUIRED_REQUEST_CODE = 200;
 
     private FragmentDirectMessagesSettingsBinding binding;
     private DirectSettingsViewModel viewModel;
     private DirectUsersAdapter usersAdapter;
+    private boolean isPendingRequestsSetupDone = false;
+    private DirectPendingUsersAdapter pendingUsersAdapter;
+    private Set<User> approvalRequiredUsers;
     // private List<Option<String>> options;
 
     @Override
@@ -165,6 +176,7 @@ public class DirectMessageSettingsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        isPendingRequestsSetupDone = false;
     }
 
     private void setupObservers() {
@@ -178,18 +190,21 @@ public class DirectMessageSettingsFragment extends Fragment {
             usersAdapter.setAdminUserIds(adminUserIds);
         });
         viewModel.getMuted().observe(getViewLifecycleOwner(), muted -> binding.muteMessages.setChecked(muted));
+        if (viewModel.isViewerAdmin()) {
+            viewModel.getApprovalRequiredToJoin().observe(getViewLifecycleOwner(), required -> binding.approvalRequired.setChecked(required));
+            viewModel.getPendingRequests().observe(getViewLifecycleOwner(), this::setPendingRequests);
+        }
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
             final MutableLiveData<Object> resultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
             resultLiveData.observe(getViewLifecycleOwner(), result -> {
-                LiveData<Resource<Object>> detailsChangeResourceLiveData = null;
                 if ((result instanceof RankedRecipient)) {
                     final RankedRecipient recipient = (RankedRecipient) result;
                     final User user = getUser(recipient);
                     // Log.d(TAG, "result: " + user);
                     if (user != null) {
-                        detailsChangeResourceLiveData = viewModel.addMembers(Collections.singleton(recipient.getUser()));
+                        addMembers(Collections.singleton(recipient.getUser()));
                     }
                 } else if ((result instanceof Set)) {
                     try {
@@ -201,17 +216,33 @@ public class DirectMessageSettingsFragment extends Fragment {
                                                           .filter(Objects::nonNull)
                                                           .collect(Collectors.toSet());
                         // Log.d(TAG, "result: " + users);
-                        detailsChangeResourceLiveData = viewModel.addMembers(users);
+                        addMembers(users);
                     } catch (Exception e) {
                         Log.e(TAG, "search users result: ", e);
                         Snackbar.make(binding.getRoot(), e.getMessage() != null ? e.getMessage() : "", Snackbar.LENGTH_LONG).show();
                     }
                 }
-                if (detailsChangeResourceLiveData != null) {
-                    observeDetailsChange(detailsChangeResourceLiveData);
-                }
             });
         }
+    }
+
+    private void addMembers(final Set<User> users) {
+        final Boolean approvalRequired = viewModel.getApprovalRequiredToJoin().getValue();
+        if (!viewModel.isViewerAdmin() && approvalRequired != null && approvalRequired) {
+            approvalRequiredUsers = users;
+            final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
+                    APPROVAL_REQUIRED_REQUEST_CODE,
+                    R.string.admin_approval_required,
+                    R.string.admin_approval_required_description,
+                    R.string.ok,
+                    R.string.cancel,
+                    -1
+            );
+            confirmDialogFragment.show(getChildFragmentManager(), "approval_required_dialog");
+            return;
+        }
+        final LiveData<Resource<Object>> detailsChangeResourceLiveData = viewModel.addMembers(users);
+        observeDetailsChange(detailsChangeResourceLiveData);
     }
 
     @Nullable
@@ -279,16 +310,28 @@ public class DirectMessageSettingsFragment extends Fragment {
         binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
         binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
             final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.mute() : viewModel.unmute();
-            handleMuteChangeResource(resourceLiveData, buttonView);
+            handleSwitchChangeResource(resourceLiveData, buttonView);
         });
         binding.muteMentionsLabel.setOnClickListener(v -> binding.muteMentions.toggle());
         binding.muteMentions.setOnCheckedChangeListener((buttonView, isChecked) -> {
             final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.muteMentions() : viewModel.unmuteMentions();
-            handleMuteChangeResource(resourceLiveData, buttonView);
+            handleSwitchChangeResource(resourceLiveData, buttonView);
+        });
+        if (!viewModel.isViewerAdmin()) {
+            binding.pendingMembersGroup.setVisibility(View.GONE);
+            binding.approvalRequired.setVisibility(View.GONE);
+            binding.approvalRequiredLabel.setVisibility(View.GONE);
+            return;
+        }
+        binding.approvalRequired.setVisibility(View.VISIBLE);
+        binding.approvalRequiredLabel.setVisibility(View.VISIBLE);
+        binding.approvalRequiredLabel.setOnClickListener(v -> binding.approvalRequired.toggle());
+        binding.approvalRequired.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
         });
     }
 
-    private void handleMuteChangeResource(final LiveData<Resource<Object>> resourceLiveData, final CompoundButton buttonView) {
+    private void handleSwitchChangeResource(final LiveData<Resource<Object>> resourceLiveData, final CompoundButton buttonView) {
         resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
             switch (resource.status) {
@@ -297,6 +340,7 @@ public class DirectMessageSettingsFragment extends Fragment {
                     break;
                 case ERROR:
                     buttonView.setEnabled(true);
+                    buttonView.setChecked(!buttonView.isChecked());
                     if (resource.message != null) {
                         Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                     }
@@ -316,7 +360,10 @@ public class DirectMessageSettingsFragment extends Fragment {
         usersAdapter = new DirectUsersAdapter(
                 inviter != null ? inviter.getPk() : -1,
                 (position, user, selected) -> {
-                    // navigate to profile
+                    final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
+                            .actionGlobalProfileFragment()
+                            .setUsername("@" + user.getUsername());
+                    NavHostFragment.findNavController(this).navigate(directions);
                 },
                 (position, user) -> {
                     final ArrayList<Option<String>> options = viewModel.createUserOptions(user);
@@ -340,6 +387,45 @@ public class DirectMessageSettingsFragment extends Fragment {
         binding.users.setAdapter(usersAdapter);
     }
 
+    private void setPendingRequests(final DirectThreadParticipantRequestsResponse requests) {
+        if (requests == null || requests.getUsers() == null || requests.getUsers().isEmpty()) {
+            binding.pendingMembersGroup.setVisibility(View.GONE);
+            return;
+        }
+        if (!isPendingRequestsSetupDone) {
+            final Context context = getContext();
+            if (context == null) return;
+            binding.pendingMembers.setLayoutManager(new LinearLayoutManager(context));
+            pendingUsersAdapter = new DirectPendingUsersAdapter(new PendingUserCallback() {
+                @Override
+                public void onClick(final int position, final PendingUser pendingUser) {
+                    final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
+                            .actionGlobalProfileFragment()
+                            .setUsername("@" + pendingUser.getUser().getUsername());
+                    NavHostFragment.findNavController(DirectMessageSettingsFragment.this).navigate(directions);
+                }
+
+                @Override
+                public void onApprove(final int position, final PendingUser pendingUser) {
+                    final LiveData<Resource<Object>> resourceLiveData = viewModel.approveUsers(Collections.singletonList(pendingUser.getUser()));
+                    observeApprovalChange(resourceLiveData, position, pendingUser);
+                }
+
+                @Override
+                public void onDeny(final int position, final PendingUser pendingUser) {
+                    final LiveData<Resource<Object>> resourceLiveData = viewModel.denyUsers(Collections.singletonList(pendingUser.getUser()));
+                    observeApprovalChange(resourceLiveData, position, pendingUser);
+                }
+            });
+            binding.pendingMembers.setAdapter(pendingUsersAdapter);
+            binding.pendingMembersGroup.setVisibility(View.VISIBLE);
+            isPendingRequestsSetupDone = true;
+        }
+        if (pendingUsersAdapter != null) {
+            pendingUsersAdapter.submitPendingRequests(requests);
+        }
+    }
+
     private void observeDetailsChange(@NonNull final LiveData<Resource<Object>> detailsChangeResourceLiveData) {
         detailsChangeResourceLiveData.observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
@@ -355,6 +441,48 @@ public class DirectMessageSettingsFragment extends Fragment {
             }
         });
     }
+
+    private void observeApprovalChange(@NonNull final LiveData<Resource<Object>> detailsChangeResourceLiveData,
+                                       final int position,
+                                       @NonNull final PendingUser pendingUser) {
+        detailsChangeResourceLiveData.observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            switch (resource.status) {
+                case SUCCESS:
+                    // pending user will be removed from the list, so no need to set the progress to false
+                    // pendingUser.setInProgress(false);
+                    break;
+                case LOADING:
+                    pendingUser.setInProgress(true);
+                    break;
+                case ERROR:
+                    pendingUser.setInProgress(false);
+                    if (resource.message != null) {
+                        Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    break;
+            }
+            pendingUsersAdapter.notifyItemChanged(position);
+        });
+    }
+
+    @Override
+    public void onPositiveButtonClicked(final int requestCode) {
+        if (requestCode == APPROVAL_REQUIRED_REQUEST_CODE && approvalRequiredUsers != null) {
+            final LiveData<Resource<Object>> detailsChangeResourceLiveData = viewModel.addMembers(approvalRequiredUsers);
+            observeDetailsChange(detailsChangeResourceLiveData);
+        }
+    }
+
+    @Override
+    public void onNegativeButtonClicked(final int requestCode) {
+        if (requestCode == APPROVAL_REQUIRED_REQUEST_CODE) {
+            approvalRequiredUsers = null;
+        }
+    }
+
+    @Override
+    public void onNeutralButtonClicked(final int requestCode) {}
 
     // class ChangeSettings extends AsyncTask<String, Void, Void> {
     //     String action, argument;

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +50,8 @@ import androidx.transition.TransitionManager;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
@@ -58,6 +61,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.activities.CameraActivity;
@@ -140,6 +144,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private DirectItem itemToForward;
     private MutableLiveData<Object> backStackSavedStateResultLiveData;
     private int prevLength;
+    private BadgeDrawable pendingRequestCountBadgeDrawable;
+    private boolean isPendingRequestCountBadgeAttached = false;
 
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -413,6 +419,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
         binding.send.stopScale();
         setupBackStackResultObserver();
+        attachPendingRequestsBadge(viewModel.getPendingRequestsCount().getValue());
     }
 
     @Override
@@ -421,6 +428,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         cleanup();
     }
 
+    @SuppressLint("UnsafeExperimentalUsageError")
     private void cleanup() {
         if (prevTitleRunnable != null) {
             appExecutors.mainThread().cancel(prevTitleRunnable);
@@ -438,6 +446,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             if (holder instanceof DirectItemViewHolder) {
                 ((DirectItemViewHolder) holder).cleanup();
             }
+        }
+        isPendingRequestCountBadgeAttached = false;
+        if (pendingRequestCountBadgeDrawable != null) {
+            BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            pendingRequestCountBadgeDrawable = null;
         }
     }
 
@@ -705,6 +718,28 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
             prevLength = length;
         });
+        viewModel.getPendingRequestsCount().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
+    }
+
+    @SuppressLint("UnsafeExperimentalUsageError")
+    private void attachPendingRequestsBadge(@Nullable final Integer count) {
+        if (pendingRequestCountBadgeDrawable == null) {
+            final Context context = getContext();
+            if (context == null) return;
+            pendingRequestCountBadgeDrawable = BadgeDrawable.create(context);
+        }
+        if (count == null || count == 0) {
+            BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            isPendingRequestCountBadgeAttached = false;
+            pendingRequestCountBadgeDrawable.setNumber(0);
+            return;
+        }
+        if (pendingRequestCountBadgeDrawable.getNumber() == count) return;
+        pendingRequestCountBadgeDrawable.setNumber(count);
+        if (!isPendingRequestCountBadgeAttached) {
+            BadgeUtils.attachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            isPendingRequestCountBadgeAttached = true;
+        }
     }
 
     private void showExtraInputOption(final boolean show) {
@@ -1396,9 +1431,10 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void navigateToUser(@NonNull final String username) {
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", "@" + username);
-        NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(R.id.action_global_profileFragment, bundle);
+        final ProfileNavGraphDirections.ActionGlobalProfileFragment direction = ProfileNavGraphDirections
+                .actionGlobalProfileFragment()
+                .setUsername("@" + username);
+        NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(direction);
     }
 
     public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<User, DirectThread>> {

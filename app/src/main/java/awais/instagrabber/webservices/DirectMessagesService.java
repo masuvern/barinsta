@@ -32,6 +32,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -348,5 +349,32 @@ public class DirectMessagesService extends BaseService {
                 "_uuid", deviceUuid
         );
         return repository.unmuteMentions(threadId, form);
+    }
+
+    public Call<DirectThreadParticipantRequestsResponse> participantRequests(@NonNull final String threadId,
+                                                                             final int pageSize,
+                                                                             @Nullable final String cursor) {
+        return repository.participantRequests(threadId, pageSize, cursor);
+    }
+
+    public Call<DirectThreadDetailsChangeResponse> approveParticipantRequests(@NonNull final String threadId,
+                                                                              @NonNull final List<Long> userIds) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "user_ids", new JSONArray(userIds).toString()
+                // , "share_join_chat_story", String.valueOf(true)
+        );
+        return repository.approveParticipantRequests(threadId, form);
+    }
+
+    public Call<DirectThreadDetailsChangeResponse> declineParticipantRequests(@NonNull final String threadId,
+                                                                              @NonNull final List<Long> userIds) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid,
+                "user_ids", new JSONArray(userIds).toString()
+        );
+        return repository.declineParticipantRequests(threadId, form);
     }
 }

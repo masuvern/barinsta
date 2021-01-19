@@ -9,12 +9,7 @@
 
     <action
         android:id="@+id/action_global_profileFragment"
-        app:destination="@id/profile_nav_graph">
-        <argument
-            android:name="username"
-            app:argType="string"
-            app:nullable="true" />
-    </action>
+        app:destination="@id/profile_nav_graph" />
 
     <include app:graph="@navigation/location_nav_graph" />
 

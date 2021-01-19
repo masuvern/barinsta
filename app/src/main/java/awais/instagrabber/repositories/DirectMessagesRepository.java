@@ -8,6 +8,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
@@ -15,6 +16,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
 
 public interface DirectMessagesRepository {
@@ -95,4 +97,19 @@ public interface DirectMessagesRepository {
     @POST("/api/v1/direct_v2/threads/{threadId}/unmute_mentions/")
     Call<String> unmuteMentions(@Path("threadId") String threadId,
                                 @FieldMap final Map<String, String> form);
+
+    @GET("/api/v1/direct_v2/threads/{threadId}/participant_requests/")
+    Call<DirectThreadParticipantRequestsResponse> participantRequests(@Path("threadId") String threadId,
+                                                                      @Query("page_size") int pageSize,
+                                                                      @Query("cursor") String cursor);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/approve_participant_requests/")
+    Call<DirectThreadDetailsChangeResponse> approveParticipantRequests(@Path("threadId") String threadId,
+                                                                       @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/deny_participant_requests/")
+    Call<DirectThreadDetailsChangeResponse> declineParticipantRequests(@Path("threadId") String threadId,
+                                                                       @FieldMap final Map<String, String> form);
 }

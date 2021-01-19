@@ -700,4 +700,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
               });
         EmojiCompat.init(config);
     }
+
+    public Toolbar getToolbar() {
+        return binding.toolbar;
+    }
 }

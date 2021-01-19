@@ -46,6 +46,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroa
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.BitmapUtils;
 import awais.instagrabber.utils.Constants;
@@ -82,6 +83,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final MutableLiveData<List<User>> users = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<User>> leftUsers = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<DirectItem> replyToItem = new MutableLiveData<>();
+    private final MutableLiveData<Integer> pendingRequestsCount = new MutableLiveData<>(null);
 
     private final DirectMessagesService service;
     private final ContentResolver contentResolver;
@@ -89,6 +91,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final String csrfToken;
     private final File recordingsDir;
     private final Application application;
+    private final long viewerId;
 
     private String cursor;
     private String threadId;
@@ -97,7 +100,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private User currentUser;
     private Call<DirectThreadFeedResponse> chatsRequest;
     private VoiceRecorder voiceRecorder;
-    private final long viewerId;
+    private boolean viewerIsAdmin;
 
     public DirectThreadViewModel(@NonNull final Application application) {
         super(application);
@@ -328,6 +331,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
         return replyToItem;
     }
 
+    public LiveData<Integer> getPendingRequestsCount() {
+        return pendingRequestsCount;
+    }
+
     public void fetchChats() {
         final Boolean isFetching = fetching.getValue();
         if ((isFetching != null && isFetching) || !hasOlder) return;
@@ -391,6 +398,11 @@ public class DirectThreadViewModel extends AndroidViewModel {
         users.postValue(thread.getUsers());
         leftUsers.postValue(thread.getLeftUsers());
         fetching.postValue(false);
+        final List<Long> adminUserIds = thread.getAdminUserIds();
+        viewerIsAdmin = adminUserIds.contains(viewerId);
+        if (thread.isGroup() && viewerIsAdmin) {
+            fetchPendingRequests();
+        }
     }
 
     public LiveData<Resource<DirectItem>> sendText(final String text) {
@@ -934,7 +946,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
                                  @NonNull final MutableLiveData<Resource<DirectItem>> data,
                                  @NonNull final DirectItem directItem) {
         try {
-            final String string = response.errorBody().string();
+            final String string = response.errorBody() != null ? response.errorBody().string() : "";
             final String msg = String.format(Locale.US,
                                              "onResponse: url: %s, responseCode: %d, errorBody: %s",
                                              call.request().url().toString(),
@@ -1046,5 +1058,45 @@ public class DirectThreadViewModel extends AndroidViewModel {
     public void setReplyToItem(final DirectItem item) {
         // Log.d(TAG, "setReplyToItem: " + item);
         replyToItem.postValue(item);
+    }
+
+    private void fetchPendingRequests() {
+        final Call<DirectThreadParticipantRequestsResponse> request = service.participantRequests(threadId, 1, null);
+        request.enqueue(new Callback<DirectThreadParticipantRequestsResponse>() {
+
+            @Override
+            public void onResponse(@NonNull final Call<DirectThreadParticipantRequestsResponse> call,
+                                   @NonNull final Response<DirectThreadParticipantRequestsResponse> response) {
+                if (!response.isSuccessful()) {
+                    if (response.errorBody() != null) {
+                        try {
+                            final String string = response.errorBody().string();
+                            final String msg = String.format(Locale.US,
+                                                             "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                                             call.request().url().toString(),
+                                                             response.code(),
+                                                             string);
+                            Log.e(TAG, msg);
+                        } catch (IOException e) {
+                            Log.e(TAG, "onResponse: ", e);
+                        }
+                        return;
+                    }
+                    Log.e(TAG, "onResponse: request was not successful and response error body was null");
+                    return;
+                }
+                final DirectThreadParticipantRequestsResponse body = response.body();
+                if (body == null) {
+                    Log.e(TAG, "onResponse: response body was null");
+                    return;
+                }
+                pendingRequestsCount.postValue(body.getTotalParticipantRequests());
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<DirectThreadParticipantRequestsResponse> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 }

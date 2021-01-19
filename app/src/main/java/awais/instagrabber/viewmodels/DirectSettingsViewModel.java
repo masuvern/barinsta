@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.util.Pair;
 import androidx.lifecycle.AndroidViewModel;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -61,6 +64,8 @@ public class DirectSettingsViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Long>> adminUserIds = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<Boolean> muted = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> mentionsMuted = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> approvalRequiredToJoin = new MutableLiveData<>(false);
+    private final MutableLiveData<DirectThreadParticipantRequestsResponse> pendingRequests = new MutableLiveData<>(null);
     private final DirectMessagesService directMessagesService;
     private final long userId;
     private final Resources resources;
@@ -107,6 +112,10 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         viewerIsAdmin = adminUserIds.contains(userId);
         muted.postValue(thread.isMuted());
         mentionsMuted.postValue(thread.isMentionsMuted());
+        approvalRequiredToJoin.postValue(thread.isApprovalRequiredForNewMembers());
+        if (thread.isGroup() && viewerIsAdmin) {
+            fetchPendingRequests();
+        }
     }
 
     public boolean isGroup() {
@@ -138,6 +147,18 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getMuted() {
         return muted;
+    }
+
+    public LiveData<Boolean> getApprovalRequiredToJoin() {
+        return approvalRequiredToJoin;
+    }
+
+    public LiveData<DirectThreadParticipantRequestsResponse> getPendingRequests() {
+        return pendingRequests;
+    }
+
+    public boolean isViewerAdmin() {
+        return viewerIsAdmin;
     }
 
     public LiveData<Resource<Object>> updateTitle(final String newTitle) {
@@ -454,9 +475,52 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         return data;
     }
 
+    public LiveData<Resource<Object>> approveUsers(final List<User> users) {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        final Call<DirectThreadDetailsChangeResponse> approveUsersRequest = directMessagesService
+                .approveParticipantRequests(thread.getThreadId(), users.stream().map(User::getPk).collect(Collectors.toList()));
+        handleDetailsChangeRequest(data, approveUsersRequest);
+        return data;
+    }
+
+    public LiveData<Resource<Object>> denyUsers(final List<User> users) {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
+        final Call<DirectThreadDetailsChangeResponse> approveUsersRequest = directMessagesService
+                .declineParticipantRequests(thread.getThreadId(), users.stream().map(User::getPk).collect(Collectors.toList()));
+        handleDetailsChangeRequest(data, approveUsersRequest, () -> {
+            final DirectThreadParticipantRequestsResponse pendingRequestsValue = pendingRequests.getValue();
+            if (pendingRequestsValue == null) return;
+            final List<User> pendingUsers = pendingRequestsValue.getUsers();
+            if (pendingUsers == null || pendingUsers.isEmpty()) return;
+            final List<User> filtered = pendingUsers.stream()
+                                                    .filter(o -> !users.contains(o))
+                                                    .collect(Collectors.toList());
+            try {
+                final DirectThreadParticipantRequestsResponse clone = (DirectThreadParticipantRequestsResponse) pendingRequestsValue.clone();
+                clone.setUsers(filtered);
+                pendingRequests.postValue(clone);
+            } catch (CloneNotSupportedException e) {
+                Log.e(TAG, "denyUsers: ", e);
+            }
+        });
+        return data;
+    }
+
+    private interface OnSuccessAction {
+        void onSuccess();
+    }
+
     private void handleDetailsChangeRequest(final MutableLiveData<Resource<Object>> data,
-                                            final Call<DirectThreadDetailsChangeResponse> addUsersRequest) {
-        addUsersRequest.enqueue(new Callback<DirectThreadDetailsChangeResponse>() {
+                                            final Call<DirectThreadDetailsChangeResponse> request) {
+        handleDetailsChangeRequest(data, request, null);
+    }
+
+    private void handleDetailsChangeRequest(final MutableLiveData<Resource<Object>> data,
+                                            final Call<DirectThreadDetailsChangeResponse> request,
+                                            @Nullable final OnSuccessAction action) {
+        request.enqueue(new Callback<DirectThreadDetailsChangeResponse>() {
             @Override
             public void onResponse(@NonNull final Call<DirectThreadDetailsChangeResponse> call,
                                    @NonNull final Response<DirectThreadDetailsChangeResponse> response) {
@@ -464,15 +528,18 @@ public class DirectSettingsViewModel extends AndroidViewModel {
                     handleErrorResponse(response, data);
                     return;
                 }
-                final DirectThreadDetailsChangeResponse addUserResponse = response.body();
-                if (addUserResponse == null) {
+                final DirectThreadDetailsChangeResponse changeResponse = response.body();
+                if (changeResponse == null) {
                     data.postValue(Resource.error("Response is null", null));
                     return;
                 }
                 data.postValue(Resource.success(new Object()));
-                final DirectThread thread = addUserResponse.getThread();
+                final DirectThread thread = changeResponse.getThread();
                 if (thread != null) {
                     setThread(thread);
+                }
+                if (action != null) {
+                    action.onSuccess();
                 }
             }
 
@@ -577,5 +644,45 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     public void setViewer(final User viewer) {
         this.viewer = viewer;
+    }
+
+    private void fetchPendingRequests() {
+        final Call<DirectThreadParticipantRequestsResponse> request = directMessagesService.participantRequests(thread.getThreadId(), 5, null);
+        request.enqueue(new Callback<DirectThreadParticipantRequestsResponse>() {
+
+            @Override
+            public void onResponse(@NonNull final Call<DirectThreadParticipantRequestsResponse> call,
+                                   @NonNull final Response<DirectThreadParticipantRequestsResponse> response) {
+                if (!response.isSuccessful()) {
+                    if (response.errorBody() != null) {
+                        try {
+                            final String string = response.errorBody().string();
+                            final String msg = String.format(Locale.US,
+                                                             "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                                             call.request().url().toString(),
+                                                             response.code(),
+                                                             string);
+                            Log.e(TAG, msg);
+                        } catch (IOException e) {
+                            Log.e(TAG, "onResponse: ", e);
+                        }
+                        return;
+                    }
+                    Log.e(TAG, "onResponse: request was not successful and response error body was null");
+                    return;
+                }
+                final DirectThreadParticipantRequestsResponse body = response.body();
+                if (body == null) {
+                    Log.e(TAG, "onResponse: response body was null");
+                    return;
+                }
+                pendingRequests.postValue(body);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<DirectThreadParticipantRequestsResponse> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 }

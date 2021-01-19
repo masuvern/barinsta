@@ -41,6 +41,7 @@ public class DirectThread implements Serializable {
     private final boolean isSpam;
     private final DirectItem lastPermanentItem;
     private final DirectThreadDirectStory directStory;
+    private final boolean approvalRequiredForNewMembers;
 
     public DirectThread(final String threadId,
                         final String threadV2Id,
@@ -72,7 +73,8 @@ public class DirectThread implements Serializable {
                         final String oldestCursor,
                         final boolean isSpam,
                         final DirectItem lastPermanentItem,
-                        final DirectThreadDirectStory directStory) {
+                        final DirectThreadDirectStory directStory,
+                        final boolean approvalRequiredForNewMembers) {
         this.threadId = threadId;
         this.threadV2Id = threadV2Id;
         this.users = users;
@@ -104,6 +106,7 @@ public class DirectThread implements Serializable {
         this.isSpam = isSpam;
         this.lastPermanentItem = lastPermanentItem;
         this.directStory = directStory;
+        this.approvalRequiredForNewMembers = approvalRequiredForNewMembers;
     }
 
     public String getThreadId() {
@@ -236,6 +239,10 @@ public class DirectThread implements Serializable {
 
     public DirectThreadDirectStory getDirectStory() {
         return directStory;
+    }
+
+    public boolean isApprovalRequiredForNewMembers() {
+        return approvalRequiredForNewMembers;
     }
 
     @Nullable
