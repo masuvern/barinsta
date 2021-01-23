@@ -22,9 +22,12 @@ public class SavedCollectionsAdapter extends ListAdapter<SavedCollection, TopicC
 
         @Override
         public boolean areContentsTheSame(@NonNull final SavedCollection oldItem, @NonNull final SavedCollection newItem) {
-            if (oldItem.getCoverMedias().size() == newItem.getCoverMedias().size()) {
-                if (oldItem.getCoverMedias().size() == 0) return true;
+            if (oldItem.getCoverMedias() != null && newItem.getCoverMedias() != null
+                && oldItem.getCoverMedias().size() == newItem.getCoverMedias().size()) {
                 return oldItem.getCoverMedias().get(0).getId().equals(newItem.getCoverMedias().get(0).getId());
+            }
+            else if (oldItem.getCoverMedia() != null && newItem.getCoverMedia() != null) {
+                return oldItem.getCoverMedia().getId().equals(newItem.getCoverMedia().getId());
             }
             return false;
         }

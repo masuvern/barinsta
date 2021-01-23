@@ -78,6 +78,10 @@
         android:name="awais.instagrabber.fragments.SavedCollectionsFragment"
         android:label="@string/saved"
         tools:layout="@layout/fragment_saved_collections" >
+        <argument
+            android:name="isSaving"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
             android:id="@+id/action_savedCollectionsFragment_to_collectionPostsFragment"
             app:destination="@id/collectionPostsFragment" />

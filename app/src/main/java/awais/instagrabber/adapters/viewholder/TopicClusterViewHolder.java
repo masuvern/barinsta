@@ -127,7 +127,7 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
         // binding.title.setTransitionName("title-" + topicCluster.getId());
         binding.cover.setTransitionName("cover-" + topicCluster.getId());
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMedias() == null
-                ? null
+                ? topicCluster.getCoverMedia()
                 : topicCluster.getCoverMedias().get(0));
         if (thumbUrl == null) {
             binding.cover.setImageURI((String) null);

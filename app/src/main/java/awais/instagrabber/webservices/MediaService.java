@@ -102,33 +102,37 @@ public class MediaService extends BaseService {
 
     public void like(final String mediaId,
                      final ServiceCallback<Boolean> callback) {
-        action(mediaId, "like", callback);
+        action(mediaId, "like", null, callback);
     }
 
     public void unlike(final String mediaId,
                        final ServiceCallback<Boolean> callback) {
-        action(mediaId, "unlike", callback);
+        action(mediaId, "unlike", null, callback);
     }
 
     public void save(final String mediaId,
+                     final String collection,
                      final ServiceCallback<Boolean> callback) {
-        action(mediaId, "save", callback);
+        action(mediaId, "save", collection, callback);
     }
 
     public void unsave(final String mediaId,
                        final ServiceCallback<Boolean> callback) {
-        action(mediaId, "unsave", callback);
+        action(mediaId, "unsave", null, callback);
     }
 
     private void action(final String mediaId,
                         final String action,
+                        final String collection,
                         final ServiceCallback<Boolean> callback) {
-        final Map<String, Object> form = new HashMap<>(4);
+        final Map<String, Object> form = new HashMap<>();
         form.put("media_id", mediaId);
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
         form.put("_uuid", deviceUuid);
         // form.put("radio_type", "wifi-none");
+        if (action.equals("save") && !TextUtils.isEmpty(collection)) form.put("added_collection_ids", "[" + collection + "]");
+        // there also exists "removed_collection_ids" which can be used with "save" and "unsave"
         final Map<String, String> signedForm = Utils.sign(form);
         final Call<String> request = repository.action(action, mediaId, signedForm);
         request.enqueue(new Callback<String>() {

@@ -2,6 +2,7 @@ package awais.instagrabber.repositories;
 
 import java.util.Map;
 
+import awais.instagrabber.repositories.responses.WrappedFeedResponse;
 import awais.instagrabber.repositories.responses.saved.CollectionsListResponse;
 import awais.instagrabber.repositories.responses.UserFeedResponse;
 import retrofit2.Call;
@@ -18,11 +19,11 @@ public interface ProfileRepository {
     Call<UserFeedResponse> fetch(@Path("uid") final long uid, @QueryMap Map<String, String> queryParams);
 
     @GET("/api/v1/feed/saved/")
-    Call<UserFeedResponse> fetchSaved(@QueryMap Map<String, String> queryParams);
+    Call<WrappedFeedResponse> fetchSaved(@QueryMap Map<String, String> queryParams);
 
     @GET("/api/v1/feed/collection/{collectionId}/")
-    Call<UserFeedResponse> fetchSavedCollection(@Path("collectionId") final String collectionId,
-                                                @QueryMap Map<String, String> queryParams);
+    Call<WrappedFeedResponse> fetchSavedCollection(@Path("collectionId") final String collectionId,
+                                                   @QueryMap Map<String, String> queryParams);
 
     @GET("/api/v1/feed/liked/")
     Call<UserFeedResponse> fetchLiked(@QueryMap Map<String, String> queryParams);

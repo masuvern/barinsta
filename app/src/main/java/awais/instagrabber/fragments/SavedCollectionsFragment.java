@@ -17,7 +17,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavBackStackEntry;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -27,7 +30,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.SavedCollectionsAdapter;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.databinding.FragmentSavedCollectionsBinding;
-import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.repositories.responses.saved.CollectionsListResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -40,12 +42,14 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "SavedCollectionsFragment";
+    public static boolean pleaseRefresh = false;
 
     private MainActivity fragmentActivity;
     private CoordinatorLayout root;
     private FragmentSavedCollectionsBinding binding;
     private SavedCollectionsViewModel savedCollectionsViewModel;
     private boolean shouldRefresh = true;
+    private boolean isSaving;
     private ProfileService profileService;
 
     @Override
@@ -80,6 +84,12 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.saved_collection_menu, menu);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (pleaseRefresh) onRefresh();
     }
 
     @Override
@@ -120,6 +130,8 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
     private void init() {
         setupTopics();
         fetchTopics(null);
+        final SavedCollectionsFragmentArgs fragmentArgs = SavedCollectionsFragmentArgs.fromBundle(getArguments());
+        isSaving = fragmentArgs.getIsSaving();
     }
 
     @Override
@@ -131,11 +143,18 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
         savedCollectionsViewModel = new ViewModelProvider(fragmentActivity).get(SavedCollectionsViewModel.class);
         binding.topicsRecyclerView.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(2)));
         final SavedCollectionsAdapter adapter = new SavedCollectionsAdapter((topicCluster, root, cover, title, titleColor, backgroundColor) -> {
-            final FragmentNavigator.Extras.Builder builder = new FragmentNavigator.Extras.Builder()
-                    .addSharedElement(cover, "collection-" + topicCluster.getId());
-            final SavedCollectionsFragmentDirections.ActionSavedCollectionsFragmentToCollectionPostsFragment action = SavedCollectionsFragmentDirections
-                    .actionSavedCollectionsFragmentToCollectionPostsFragment(topicCluster, titleColor, backgroundColor);
-            NavHostFragment.findNavController(this).navigate(action, builder.build());
+            final NavController navController = NavHostFragment.findNavController(this);
+            if (isSaving) {
+                setNavControllerResult(navController, topicCluster.getId());
+                navController.navigateUp();
+            }
+            else {
+                final FragmentNavigator.Extras.Builder builder = new FragmentNavigator.Extras.Builder()
+                        .addSharedElement(cover, "collection-" + topicCluster.getId());
+                final SavedCollectionsFragmentDirections.ActionSavedCollectionsFragmentToCollectionPostsFragment action = SavedCollectionsFragmentDirections
+                        .actionSavedCollectionsFragmentToCollectionPostsFragment(topicCluster, titleColor, backgroundColor);
+                navController.navigate(action, builder.build());
+            }
         });
         binding.topicsRecyclerView.setAdapter(adapter);
         savedCollectionsViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
@@ -157,5 +176,12 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
                 binding.swipeRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    private void setNavControllerResult(@NonNull final NavController navController, final String result) {
+        final NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
+        if (navBackStackEntry == null) return;
+        final SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        savedStateHandle.set("collection", result);
     }
 }

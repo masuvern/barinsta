@@ -4,12 +4,19 @@ import androidx.annotation.NonNull;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.repositories.ProfileRepository;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.UserFeedResponse;
+import awais.instagrabber.repositories.responses.WrappedFeedResponse;
+import awais.instagrabber.repositories.responses.WrappedMedia;
 import awais.instagrabber.repositories.responses.saved.CollectionsListResponse;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -76,30 +83,40 @@ public class ProfileService extends BaseService {
                            final String collectionId,
                            final ServiceCallback<PostsFetchResponse> callback) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        Call<UserFeedResponse> request = null;
+        Call<WrappedFeedResponse> request = null;
         if (!TextUtils.isEmpty(maxId)) {
             builder.put("max_id", maxId);
         }
         if (TextUtils.isEmpty(collectionId) || collectionId.equals("ALL_MEDIA_AUTO_COLLECTION")) request = repository.fetchSaved(builder.build());
         else request = repository.fetchSavedCollection(collectionId, builder.build());
-        request.enqueue(new Callback<UserFeedResponse>() {
+        request.enqueue(new Callback<WrappedFeedResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<UserFeedResponse> call, @NonNull final Response<UserFeedResponse> response) {
+            public void onResponse(@NonNull final Call<WrappedFeedResponse> call, @NonNull final Response<WrappedFeedResponse> response) {
                 if (callback == null) return;
-                final UserFeedResponse userFeedResponse = response.body();
+                final WrappedFeedResponse userFeedResponse = response.body();
                 if (userFeedResponse == null) {
                     callback.onSuccess(null);
                     return;
                 }
+                final List<WrappedMedia> items = userFeedResponse.getItems();
+                final List<Media> posts;
+                if (items == null) {
+                    posts = Collections.emptyList();
+                } else {
+                    posts = items.stream()
+                            .map(WrappedMedia::getMedia)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
+                }
                 callback.onSuccess(new PostsFetchResponse(
-                        userFeedResponse.getItems(),
+                        posts,
                         userFeedResponse.isMoreAvailable(),
                         userFeedResponse.getNextMaxId()
                 ));
             }
 
             @Override
-            public void onFailure(@NonNull final Call<UserFeedResponse> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull final Call<WrappedFeedResponse> call, @NonNull final Throwable t) {
                 if (callback != null) {
                     callback.onFailure(t);
                 }
@@ -170,7 +187,6 @@ public class ProfileService extends BaseService {
             }
         });
     }
-
 
     public void fetchLiked(final String maxId,
                            final ServiceCallback<PostsFetchResponse> callback) {

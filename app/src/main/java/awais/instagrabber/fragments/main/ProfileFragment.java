@@ -946,7 +946,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
         });
         profileDetailsBinding.btnSaved.setOnClickListener(v -> {
-            final NavDirections action = ProfileFragmentDirections.actionGlobalSavedCollectionsFragment();
+            final NavDirections action = ProfileFragmentDirections.actionGlobalSavedCollectionsFragment(false);
             NavHostFragment.findNavController(this).navigate(action);
         });
         profileDetailsBinding.btnLiked.setOnClickListener(v -> {
