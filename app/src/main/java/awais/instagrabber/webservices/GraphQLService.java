@@ -271,4 +271,82 @@ public class GraphQLService extends BaseService {
             }
         });
     }
+
+    public void fetchUser(final String username,
+                          final ServiceCallback<User> callback) {
+        final Call<String> request = repository.getUser(username);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String rawBody = response.body();
+                if (rawBody == null) {
+                    Log.e(TAG, "Error occurred while fetching gql user of " + username);
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject body = new JSONObject(rawBody);
+                    final JSONObject userJson = body.getJSONObject("graphql")
+                            .getJSONObject(Constants.EXTRAS_USER);
+
+                    boolean isPrivate = userJson.getBoolean("is_private");
+                    final long id = userJson.optLong(Constants.EXTRAS_ID, 0);
+                    final JSONObject timelineMedia = userJson.getJSONObject("edge_owner_to_timeline_media");
+                    // if (timelineMedia.has("edges")) {
+                    //     final JSONArray edges = timelineMedia.getJSONArray("edges");
+                    // }
+
+                    String url = userJson.optString("external_url");
+                    if (TextUtils.isEmpty(url)) url = null;
+
+                    callback.onSuccess(new User(
+                            id,
+                            username,
+                            userJson.getString("full_name"),
+                            isPrivate,
+                            userJson.getString("profile_pic_url_hd"),
+                            null,
+                            new FriendshipStatus(
+                                    userJson.optBoolean("followed_by_viewer"),
+                                    userJson.optBoolean("follows_viewer"),
+                                    userJson.optBoolean("blocked_by_viewer"),
+                                    false,
+                                    isPrivate,
+                                    userJson.optBoolean("has_requested_viewer"),
+                                    userJson.optBoolean("requested_by_viewer"),
+                                    false,
+                                    userJson.optBoolean("restricted_by_viewer"),
+                                    false
+                            ),
+                            userJson.getBoolean("is_verified"),
+                            false,
+                            false,
+                            false,
+                            false,
+                            null,
+                            null,
+                            timelineMedia.getLong("count"),
+                            userJson.getJSONObject("edge_followed_by").getLong("count"),
+                            userJson.getJSONObject("edge_follow").getLong("count"),
+                            0,
+                            userJson.getString("biography"),
+                            url,
+                            0,
+                            null));
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    if (callback != null) {
+                        callback.onFailure(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
 }

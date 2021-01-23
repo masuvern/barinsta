@@ -538,7 +538,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void fetchProfileDetails() {
         if (TextUtils.isEmpty(username)) return;
-        new ProfileFetcher(username.trim().substring(1), profileModel -> {
+        new ProfileFetcher(username.trim().substring(1), isLoggedIn, profileModel -> {
             if (getContext() == null) return;
             this.profileModel = profileModel;
             setProfileDetails();

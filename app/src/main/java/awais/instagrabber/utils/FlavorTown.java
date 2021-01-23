@@ -102,8 +102,7 @@ public final class FlavorTown {
     }
 
     public static void changelogCheck(@NonNull final Context context) {
-//        if (settingsHelper.getInteger(Constants.PREV_INSTALL_VERSION) < BuildConfig.VERSION_CODE) {
-        if (true) {
+        if (settingsHelper.getInteger(Constants.PREV_INSTALL_VERSION) < BuildConfig.VERSION_CODE) {
             final int appUaCode = settingsHelper.getInteger(Constants.APP_UA_CODE);
             final String appUa = UserAgentUtils.generateAppUA(appUaCode, LocaleUtils.getCurrentLocale().getLanguage());
             settingsHelper.putString(Constants.APP_UA, appUa);
