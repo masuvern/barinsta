@@ -236,8 +236,11 @@ public class StoryViewerFragment extends Fragment {
 
                                 @Override
                                 public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
-                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                    Log.e(TAG, "onFailure: ", t);
+                                    try {
+                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                        Log.e(TAG, "onFailure: ", t);
+                                    }
+                                    catch(Throwable e) {}
                                 }
                             });
                         } catch (UnsupportedEncodingException e) {

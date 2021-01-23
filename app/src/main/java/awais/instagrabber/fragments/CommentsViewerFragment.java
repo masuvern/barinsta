@@ -99,9 +99,12 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
         @Override
         public void onFailure(Throwable t) {
-            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            binding.swipeRefreshLayout.setRefreshing(false);
-            stopCurrentExecutor();
+            try {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                binding.swipeRefreshLayout.setRefreshing(false);
+                stopCurrentExecutor();
+            }
+            catch(Throwable e) {}
         }
     };
 
