@@ -49,7 +49,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -129,6 +132,17 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     private PostViewV2ViewModel viewModel;
     private PopupMenu optionsPopup;
     private EditTextDialogFragment editTextDialogFragment;
+
+    private MutableLiveData<Object> backStackSavedStateResultLiveData;
+    private final Observer<Object> backStackSavedStateObserver = result -> {
+        if (result == null) return;
+        if (result instanceof String) {
+            final String collection = (String) result;
+            handleSaveUnsaveResourceLiveData(viewModel.toggleSave(collection, viewModel.getMedia().hasViewerSaved()));
+        }
+        // clear result
+        backStackSavedStateResultLiveData.postValue(null);
+    };
 
     // private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
     //
@@ -302,6 +316,17 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         wasPaused = true;
         if (bottomSheetBehavior != null) {
             captionState = bottomSheetBehavior.getState();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        final NavController navController = NavHostFragment.findNavController(this);
+        final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
+        if (backStackEntry != null) {
+            backStackSavedStateResultLiveData = backStackEntry.getSavedStateHandle().getLiveData("collection");
+            backStackSavedStateResultLiveData.observe(getViewLifecycleOwner(), backStackSavedStateObserver);
         }
     }
 
@@ -666,7 +691,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             handleSaveUnsaveResourceLiveData(viewModel.toggleSave());
         });
         binding.save.setOnLongClickListener(v -> {
-            Utils.displayToastAboveView(context, v, getString(R.string.save));
+            final NavController navController = NavHostFragment.findNavController(this);
+            final Bundle bundle = new Bundle();
+            bundle.putBoolean("isSaving", true);
+            navController.navigate(R.id.action_global_savedCollectionsFragment, bundle);
             return true;
         });
     }

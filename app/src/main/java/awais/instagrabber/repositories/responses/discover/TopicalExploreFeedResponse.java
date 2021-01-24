@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses.discover;
 
 import java.util.List;
+import awais.instagrabber.repositories.responses.WrappedMedia;
 
 public class TopicalExploreFeedResponse {
     private final boolean moreAvailable;
@@ -9,7 +10,7 @@ public class TopicalExploreFeedResponse {
     private final String status;
     private final int numResults;
     private final List<TopicCluster> clusters;
-    private final List<TopicalExploreItem> items;
+    private final List<WrappedMedia> items;
 
     public TopicalExploreFeedResponse(final boolean moreAvailable,
                                       final String nextMaxId,
@@ -17,7 +18,7 @@ public class TopicalExploreFeedResponse {
                                       final String status,
                                       final int numResults,
                                       final List<TopicCluster> clusters,
-                                      final List<TopicalExploreItem> items) {
+                                      final List<WrappedMedia> items) {
         this.moreAvailable = moreAvailable;
         this.nextMaxId = nextMaxId;
         this.maxId = maxId;
@@ -51,7 +52,7 @@ public class TopicalExploreFeedResponse {
         return clusters;
     }
 
-    public List<TopicalExploreItem> getItems() {
+    public List<WrappedMedia> getItems() {
         return items;
     }
 }

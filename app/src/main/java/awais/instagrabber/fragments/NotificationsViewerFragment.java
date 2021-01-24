@@ -271,8 +271,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
 
                     @Override
                     public void onFailure(Throwable t) {
-                        binding.swipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        try {
+                            binding.swipeRefreshLayout.setRefreshing(false);
+                            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                        catch(Throwable e) {}
                     }
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
@@ -287,8 +290,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
 
                     @Override
                     public void onFailure(final Throwable t) {
-                        binding.swipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        try {
+                            binding.swipeRefreshLayout.setRefreshing(false);
+                            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                        catch(Throwable e) {}
                     }
                 });
                 break;

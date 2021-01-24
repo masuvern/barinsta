@@ -5,131 +5,81 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.NetworkUtils;
-import awais.instagrabber.utils.TextUtils;
-import awaisomereport.LogCollector;
+import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.UserService;
 
-import static awais.instagrabber.utils.Utils.logCollector;
-import static awais.instagrabber.utils.Utils.settingsHelper;
-
-public final class ProfileFetcher extends AsyncTask<Void, Void, User> {
+public final class ProfileFetcher extends AsyncTask<Void, Void, String> {
     private static final String TAG = ProfileFetcher.class.getSimpleName();
+    private final UserService userService;
+    private final GraphQLService graphQLService;
 
     private final FetchListener<User> fetchListener;
+    private final boolean isLoggedIn;
     private final String userName;
 
-    public ProfileFetcher(String userName, FetchListener<User> fetchListener) {
+    public ProfileFetcher(final String userName,
+                          final boolean isLoggedIn,
+                          final FetchListener<User> fetchListener) {
         this.userName = userName;
+        this.isLoggedIn = isLoggedIn;
         this.fetchListener = fetchListener;
+        userService = isLoggedIn ? UserService.getInstance() : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
     }
 
     @Nullable
     @Override
-    protected User doInBackground(final Void... voids) {
-        User result = null;
+    protected String doInBackground(final Void... voids) {
+        if (isLoggedIn) {
+            userService.getUsernameInfo(userName, new ServiceCallback<User>() {
+                @Override
+                public void onSuccess(final User user) {
+                    Log.d("austin_debug", user.getUsername() + " " + userName);
+                    userService.getUserFriendship(user.getPk(), new ServiceCallback<FriendshipStatus>() {
+                        @Override
+                        public void onSuccess(final FriendshipStatus status) {
+                            user.setFriendshipStatus(status);
+                            fetchListener.onResult(user);
+                        }
 
-        try {
-            final HttpURLConnection conn = (HttpURLConnection) new URL("https://www.instagram.com/" + userName + "/?__a=1").openConnection();
-            conn.setUseCaches(true);
-            conn.connect();
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error", t);
+                        }
+                    });
+                }
 
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                final String json = NetworkUtils.readFromConnection(conn);
-                // Log.d(TAG, "doInBackground: " + json);
-                final JSONObject userJson = new JSONObject(json).getJSONObject("graphql")
-                                                                .getJSONObject(Constants.EXTRAS_USER);
-
-                final String cookie = settingsHelper.getString(Constants.COOKIE);
-
-                boolean isPrivate = userJson.getBoolean("is_private");
-                final long id = userJson.optLong(Constants.EXTRAS_ID, 0);
-                final long uid = CookieUtils.getUserIdFromCookie(cookie);
-                final JSONObject timelineMedia = userJson.getJSONObject("edge_owner_to_timeline_media");
-                // if (timelineMedia.has("edges")) {
-                //     final JSONArray edges = timelineMedia.getJSONArray("edges");
-                // }
-
-                String url = userJson.optString("external_url");
-                if (TextUtils.isEmpty(url)) url = null;
-
-                return new User(
-                        id,
-                        userName,
-                        userJson.getString("full_name"),
-                        isPrivate,
-                        userJson.getString("profile_pic_url_hd"),
-                        null,
-                        new FriendshipStatus(
-                                userJson.optBoolean("followed_by_viewer"),
-                                userJson.optBoolean("follows_viewer"),
-                                userJson.optBoolean("blocked_by_viewer"),
-                                false,
-                                isPrivate,
-                                userJson.optBoolean("has_requested_viewer"),
-                                userJson.optBoolean("requested_by_viewer"),
-                                false,
-                                userJson.optBoolean("restricted_by_viewer"),
-                                false
-                        ),
-                        userJson.getBoolean("is_verified"),
-                        false,
-                        false,
-                        false,
-                        false,
-                        null,
-                        null,
-                        timelineMedia.getLong("count"),
-                        userJson.getJSONObject("edge_followed_by").getLong("count"),
-                        userJson.getJSONObject("edge_follow").getLong("count"),
-                        0,
-                        userJson.getString("biography"),
-                        url,
-                        0,
-                        null);
-
-                // result = new ProfileModel(isPrivate,
-                //                           !user.optBoolean("followed_by_viewer") && (id != uid && isPrivate),
-                //                           user.getBoolean("is_verified"),
-                //                           id,
-                //                           userName,
-                //                           user.getString("full_name"),
-                //                           user.getString("biography"),
-                //                           url,
-                //                           user.getString("profile_pic_url"),
-                //                           user.getString("profile_pic_url_hd"),
-                //                           timelineMedia.getLong("count"),
-                //                           user.getJSONObject("edge_followed_by").getLong("count"),
-                //                           user.getJSONObject("edge_follow").getLong("count"),
-                //                           user.optBoolean("followed_by_viewer"),
-                //                           user.optBoolean("follows_viewer"),
-                //                           user.optBoolean("restricted_by_viewer"),
-                //                           user.optBoolean("blocked_by_viewer"),
-                //                           user.optBoolean("requested_by_viewer"));
-            }
-
-            conn.disconnect();
-        } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.ASYNC_PROFILE_FETCHER, "doInBackground");
-            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error", t);
+                }
+            });
         }
+        else {
+            graphQLService.fetchUser(userName, new ServiceCallback<User>() {
+                @Override
+                public void onSuccess(final User user) {
+                    fetchListener.onResult(user);
+                }
 
-        return result;
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error", t);
+                }
+            });
+        }
+        return "yeah";
     }
 
     @Override
-    protected void onPostExecute(final User result) {
-        if (fetchListener != null) fetchListener.onResult(result);
+    protected void onPreExecute() {
+        if (fetchListener != null) fetchListener.doBefore();
     }
 }

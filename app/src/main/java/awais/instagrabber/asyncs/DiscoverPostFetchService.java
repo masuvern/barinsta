@@ -9,7 +9,7 @@ import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.discover.TopicalExploreFeedResponse;
-import awais.instagrabber.repositories.responses.discover.TopicalExploreItem;
+import awais.instagrabber.repositories.responses.WrappedMedia;
 import awais.instagrabber.webservices.DiscoverService;
 import awais.instagrabber.webservices.ServiceCallback;
 
@@ -35,13 +35,13 @@ public class DiscoverPostFetchService implements PostFetcher.PostFetchService {
                 }
                 moreAvailable = result.isMoreAvailable();
                 topicalExploreRequest.setMaxId(result.getNextMaxId());
-                final List<TopicalExploreItem> items = result.getItems();
+                final List<WrappedMedia> items = result.getItems();
                 final List<Media> posts;
                 if (items == null) {
                     posts = Collections.emptyList();
                 } else {
                     posts = items.stream()
-                                 .map(TopicalExploreItem::getMedia)
+                                 .map(WrappedMedia::getMedia)
                                  .filter(Objects::nonNull)
                                  .collect(Collectors.toList());
                 }

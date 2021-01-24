@@ -35,6 +35,7 @@ public abstract class BaseService {
             final Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .registerTypeAdapter(Caption.class, new Caption.CaptionDeserializer())
+                    .setLenient()
                     .create();
             builder = new Retrofit.Builder()
                     .addConverterFactory(ScalarsConverterFactory.create())

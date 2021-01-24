@@ -83,6 +83,7 @@ public class AppStateViewModel extends AndroidViewModel {
         if (TextUtils.isEmpty(username)) return;
         new ProfileFetcher(
                 username.trim().substring(1),
+                true,
                 currentUser::postValue
         ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

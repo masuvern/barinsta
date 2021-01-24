@@ -10,7 +10,7 @@ public class User implements Serializable {
     private final boolean isPrivate;
     private final String profilePicUrl;
     private final String profilePicId;
-    private final FriendshipStatus friendshipStatus;
+    private FriendshipStatus friendshipStatus;
     private final boolean isVerified;
     private final boolean hasAnonymousProfilePicture;
     private final boolean isUnpublished;
@@ -100,6 +100,10 @@ public class User implements Serializable {
 
     public FriendshipStatus getFriendshipStatus() {
         return friendshipStatus;
+    }
+
+    public void setFriendshipStatus(final FriendshipStatus friendshipStatus) {
+        this.friendshipStatus = friendshipStatus;
     }
 
     public boolean isVerified() {

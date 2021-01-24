@@ -26,7 +26,9 @@ import awais.instagrabber.dialogs.TimeSettingsDialog;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DirectoryChooser;
+import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.UserAgentUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
@@ -111,6 +113,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setEntryValues(values);
         preference.setOnPreferenceChangeListener((preference1, newValue) -> {
             shouldRecreate();
+            final int appUaCode = settingsHelper.getInteger(Constants.APP_UA_CODE);
+            final String appUa = UserAgentUtils.generateAppUA(appUaCode, LocaleUtils.getCurrentLocale().getLanguage());
+            settingsHelper.putString(Constants.APP_UA, appUa);
             return true;
         });
         return preference;

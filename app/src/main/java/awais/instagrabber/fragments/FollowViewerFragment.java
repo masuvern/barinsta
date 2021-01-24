@@ -83,8 +83,11 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onFailure(final Throwable t) {
-            binding.swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            try {
+                binding.swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch(Throwable e) {}
             Log.e(TAG, "Error fetching list (double, following)", t);
         }
     };
@@ -109,8 +112,11 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
 
         @Override
         public void onFailure(final Throwable t) {
-            binding.swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            try {
+                binding.swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch(Throwable e) {}
             Log.e(TAG, "Error fetching list (double, follower)", t);
         }
     };
@@ -221,8 +227,11 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
 
             @Override
             public void onFailure(final Throwable t) {
-                binding.swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                try {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                catch(Throwable e) {}
                 Log.e(TAG, "Error fetching list (single)", t);
             }
         };

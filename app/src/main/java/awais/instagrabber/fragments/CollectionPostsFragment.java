@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,11 +18,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.core.graphics.ColorUtils;
@@ -49,20 +53,23 @@ import awais.instagrabber.asyncs.SavedPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentCollectionPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.fragments.CollectionPostsFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.saved.SavedCollection;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.webservices.CollectionService;
+import awais.instagrabber.webservices.ServiceCallback;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 
 public class CollectionPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+    private static final String TAG = "CollectionPostsFragment";
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
@@ -75,6 +82,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private Set<Media> selectedFeedModels;
     private Media downloadFeedModel;
     private int downloadChildPosition = -1;
+    private CollectionService collectionService;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_SAVED_POSTS_LAYOUT);
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
@@ -84,7 +92,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         }
     };
     private final PrimaryActionModeCallback multiSelectAction = new PrimaryActionModeCallback(
-            R.menu.multi_select_download_menu, new PrimaryActionModeCallback.CallbacksHelper() {
+            R.menu.saved_collection_select_menu, new PrimaryActionModeCallback.CallbacksHelper() {
         @Override
         public void onDestroy(final ActionMode mode) {
             binding.posts.endSelection();
@@ -241,6 +249,11 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         setSharedElementEnterTransition(transitionSet);
         postponeEnterTransition();
         setHasOptionsMenu(true);
+        final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        collectionService = CollectionService.getInstance(deviceUuid, csrfToken, userId);
     }
 
     @Nullable
@@ -267,7 +280,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
-        inflater.inflate(R.menu.topic_posts_menu, menu);
+        inflater.inflate(R.menu.collection_posts_menu, menu);
     }
 
     @Override
@@ -275,6 +288,58 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         if (item.getItemId() == R.id.layout) {
             showPostsLayoutPreferences();
             return true;
+        }
+        else if (item.getItemId() == R.id.delete) {
+            final Context context = getContext();
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.edit_collection)
+                    .setMessage(R.string.delete_collection_note)
+                    .setPositiveButton(R.string.confirm, (d, w) -> {
+                        collectionService.deleteCollection(
+                                savedCollection.getId(),
+                                new ServiceCallback<String>() {
+                                    @Override
+                                    public void onSuccess(final String result) {
+                                        SavedCollectionsFragment.pleaseRefresh = true;
+                                        NavHostFragment.findNavController(CollectionPostsFragment.this).navigateUp();
+                                    }
+
+                                    @Override
+                                    public void onFailure(final Throwable t) {
+                                        Log.e(TAG, "Error deleting collection", t);
+                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+        }
+        else if (item.getItemId() == R.id.edit) {
+            final Context context = getContext();
+            final EditText input = new EditText(context);
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.edit_collection)
+                    .setView(input)
+                    .setPositiveButton(R.string.confirm, (d, w) -> {
+                        collectionService.editCollectionName(
+                                savedCollection.getId(),
+                                input.getText().toString(),
+                                new ServiceCallback<String>() {
+                                    @Override
+                                    public void onSuccess(final String result) {
+                                        binding.collapsingToolbarLayout.setTitle(input.getText().toString());
+                                        SavedCollectionsFragment.pleaseRefresh = true;
+                                    }
+
+                                    @Override
+                                    public void onFailure(final Throwable t) {
+                                        Log.e(TAG, "Error editing collection", t);
+                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -372,7 +437,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     private void setupCover() {
         final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMedias() == null
-                ? null
+                ? savedCollection.getCoverMedia()
                 : savedCollection.getCoverMedias().get(0));
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()

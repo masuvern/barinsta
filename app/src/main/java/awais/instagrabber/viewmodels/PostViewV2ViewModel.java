@@ -188,27 +188,33 @@ public class PostViewV2ViewModel extends ViewModel {
     @NonNull
     public LiveData<Resource<Object>> toggleSave() {
         if (!media.hasViewerSaved()) {
-            return save();
+            return save(null, false);
         }
         return unsave();
     }
 
-    public LiveData<Resource<Object>> save() {
+    @NonNull
+    public LiveData<Resource<Object>> toggleSave(final String collection, final boolean ignoreSaveState) {
+        return save(collection, ignoreSaveState);
+    }
+
+    public LiveData<Resource<Object>> save(final String collection, final boolean ignoreSaveState) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.save(media.getPk(), getSaveUnsaveCallback(data));
+        mediaService.save(media.getPk(), collection, getSaveUnsaveCallback(data, ignoreSaveState));
         return data;
     }
 
     public LiveData<Resource<Object>> unsave() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        mediaService.unsave(media.getPk(), getSaveUnsaveCallback(data));
+        mediaService.unsave(media.getPk(), getSaveUnsaveCallback(data, false));
         return data;
     }
 
     @NonNull
-    private ServiceCallback<Boolean> getSaveUnsaveCallback(final MutableLiveData<Resource<Object>> data) {
+    private ServiceCallback<Boolean> getSaveUnsaveCallback(final MutableLiveData<Resource<Object>> data,
+                                                           final boolean ignoreSaveState) {
         return new ServiceCallback<Boolean>() {
             @Override
             public void onSuccess(final Boolean result) {
@@ -217,7 +223,7 @@ public class PostViewV2ViewModel extends ViewModel {
                     return;
                 }
                 data.postValue(Resource.success(true));
-                media.setHasViewerSaved(!media.hasViewerSaved());
+                if (!ignoreSaveState) media.setHasViewerSaved(!media.hasViewerSaved());
                 saved.postValue(media.hasViewerSaved());
             }
 
