@@ -1,4 +1,4 @@
-**THERE ARE CURRENTLY NO OFFICIAL GOOGLE PLAY RELEASES. PLEASE REPORT ANY OCCURRENCES TO US.**
+## THERE ARE CURRENTLY NO OFFICIAL GOOGLE PLAY RELEASES. PLEASE REPORT ANY OCCURRENCES TO US.
 
 <img src="./app/src/main/ic_launcher-round.png" alt="Barinsta logo" align="right" width="20%"/>
 
@@ -12,7 +12,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-32-orange.svg)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-We're previously known as InstaGrabber.
+Instagram client; previously known as InstaGrabber.
 
 For documentation, visit [Barinsta.AustinHuang.me](https://barinsta.austinhuang.me).
 
@@ -24,6 +24,8 @@ For documentation, visit [Barinsta.AustinHuang.me](https://barinsta.austinhuang.
 <a href="https://github.com/austinhuang0131/barinsta/releases/latest"><img src="https://raw.githubusercontent.com/andOTP/andOTP/master/assets/badges/get-it-on-github.png" height="75"></a>
 
 Version status: ![F-Droid](https://img.shields.io/f-droid/v/me.austinhuang.instagrabber.svg) vs. ![GitHub](https://img.shields.io/github/release/austinhuang0131/barinsta.svg?logo=github)
+
+## Screenshots
 
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" alt="Profile" width="15%"/></a>
 <a href="https://github.com/austinhuang0131/instagrabber/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg"><img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" alt="Post" width="15%"/></a>
@@ -103,7 +105,7 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
 
 ## License
 
-This app's predecessor, InstaGrabber, is originally made by [@AwaisKing](https://github.com/AwaisKing) on [GitLab](https://gitlab.com/AwaisKing/instagrabber).
+This app's predecessor, InstaGrabber, was originally made by [@AwaisKing](https://github.com/AwaisKing) on [GitLab](https://gitlab.com/AwaisKing/instagrabber).
 
     Barinsta
     Copyright (C) 2020-2021  Austin Huang <im@austinhuang.me>
