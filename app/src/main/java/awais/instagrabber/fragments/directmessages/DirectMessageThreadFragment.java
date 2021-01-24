@@ -105,6 +105,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
+import awais.instagrabber.viewmodels.DirectPendingInboxViewModel;
 import awais.instagrabber.viewmodels.DirectThreadViewModel;
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -347,9 +348,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         final int itemId = item.getItemId();
         if (itemId == R.id.info) {
-            final NavDirections action = DirectMessageThreadFragmentDirections
-                    .actionDMThreadFragmentToDMSettingsFragment(viewModel.getThreadId(), null);
-            NavHostFragment.findNavController(this).navigate(action);
+            final DirectMessageThreadFragmentDirections.ActionThreadToSettings directions = DirectMessageThreadFragmentDirections
+                    .actionThreadToSettings(viewModel.getThreadId(), null);
+            final Boolean pending = viewModel.isPending().getValue();
+            directions.setPending(pending == null ? false : pending);
+            NavHostFragment.findNavController(this).navigate(directions);
             return true;
         }
         if (itemId == R.id.mark_as_seen) {
@@ -470,10 +473,20 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void getInitialData() {
+        final Bundle arguments = getArguments();
+        if (arguments == null) return;
+        final DirectMessageThreadFragmentArgs args = DirectMessageThreadFragmentArgs.fromBundle(arguments);
+        final boolean pending = args.getPending();
         final NavController navController = NavHostFragment.findNavController(this);
         final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
-        final DirectInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
-        final List<DirectThread> threads = threadListViewModel.getThreads().getValue();
+        final List<DirectThread> threads;
+        if (!pending) {
+            final DirectInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
+            threads = threadListViewModel.getThreads().getValue();
+        } else {
+            final DirectPendingInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectPendingInboxViewModel.class);
+            threads = threadListViewModel.getThreads().getValue();
+        }
         final Optional<DirectThread> first = threads != null
                                              ? threads.stream()
                                                       .filter(thread -> thread.getThreadId().equals(viewModel.getThreadId()))
@@ -529,19 +542,26 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void setObservers() {
+        viewModel.isPending().observe(getViewLifecycleOwner(), isPending -> {
+            if (isPending == null) {
+                hideInput();
+                return;
+            }
+            if (isPending) {
+                showPendingOptions();
+                return;
+            }
+            hidePendingOptions();
+            final Integer inputMode = viewModel.getInputMode().getValue();
+            if (inputMode != null && inputMode == 1) return;
+            showInput();
+        });
         viewModel.getInputMode().observe(getViewLifecycleOwner(), inputMode -> {
+            final Boolean isPending = viewModel.isPending().getValue();
+            if (isPending != null && isPending) return;
             if (inputMode == null || inputMode == 0) return;
             if (inputMode == 1) {
-                binding.emojiToggle.setVisibility(View.GONE);
-                binding.camera.setVisibility(View.GONE);
-                binding.gallery.setVisibility(View.GONE);
-                binding.input.setVisibility(View.GONE);
-                binding.inputBg.setVisibility(View.GONE);
-                binding.recordView.setVisibility(View.GONE);
-                binding.send.setVisibility(View.GONE);
-                if (itemTouchHelper != null) {
-                    itemTouchHelper.attachToRecyclerView(null);
-                }
+                hideInput();
             }
         });
         viewModel.getThreadTitle().observe(getViewLifecycleOwner(), this::setTitle);
@@ -614,6 +634,81 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             prevLength = length;
         });
         viewModel.getPendingRequestsCount().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
+        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
+            if (users == null || users.isEmpty()) return;
+            final User user = users.get(0);
+            binding.acceptPendingRequestQuestion.setText(getString(R.string.accept_request_from_user, user.getUsername(), user.getFullName()));
+        });
+    }
+
+    private void hidePendingOptions() {
+        binding.acceptPendingRequestQuestion.setVisibility(View.GONE);
+        binding.decline.setVisibility(View.GONE);
+        binding.accept.setVisibility(View.GONE);
+    }
+
+    private void showPendingOptions() {
+        binding.acceptPendingRequestQuestion.setVisibility(View.VISIBLE);
+        binding.decline.setVisibility(View.VISIBLE);
+        binding.accept.setVisibility(View.VISIBLE);
+        binding.accept.setOnClickListener(v -> {
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.acceptRequest();
+            handlePendingChangeResource(resourceLiveData, false);
+        });
+        binding.decline.setOnClickListener(v -> {
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.declineRequest();
+            handlePendingChangeResource(resourceLiveData, true);
+        });
+    }
+
+    private void handlePendingChangeResource(final LiveData<Resource<Object>> resourceLiveData, final boolean isDecline) {
+        resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            final Resource.Status status = resource.status;
+            switch (status) {
+                case SUCCESS:
+                    resourceLiveData.removeObservers(getViewLifecycleOwner());
+                    if (isDecline) {
+                        final NavController navController = NavHostFragment.findNavController(this);
+                        navController.navigateUp();
+                    }
+                    break;
+                case LOADING:
+                    break;
+                case ERROR:
+                    if (resource.message != null) {
+                        Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    resourceLiveData.removeObservers(getViewLifecycleOwner());
+                    break;
+            }
+        });
+    }
+
+    private void hideInput() {
+        binding.emojiToggle.setVisibility(View.GONE);
+        binding.camera.setVisibility(View.GONE);
+        binding.gallery.setVisibility(View.GONE);
+        binding.input.setVisibility(View.GONE);
+        binding.inputBg.setVisibility(View.GONE);
+        binding.recordView.setVisibility(View.GONE);
+        binding.send.setVisibility(View.GONE);
+        if (itemTouchHelper != null) {
+            itemTouchHelper.attachToRecyclerView(null);
+        }
+    }
+
+    private void showInput() {
+        binding.emojiToggle.setVisibility(View.VISIBLE);
+        binding.camera.setVisibility(View.VISIBLE);
+        binding.gallery.setVisibility(View.VISIBLE);
+        binding.input.setVisibility(View.VISIBLE);
+        binding.inputBg.setVisibility(View.VISIBLE);
+        binding.recordView.setVisibility(View.VISIBLE);
+        binding.send.setVisibility(View.VISIBLE);
+        if (itemTouchHelper != null) {
+            itemTouchHelper.attachToRecyclerView(binding.chats);
+        }
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")

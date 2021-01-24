@@ -16,7 +16,7 @@ import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVoiceMedia;
 
-public class DirectItemFactory {
+public final class DirectItemFactory {
 
     public static DirectItem createText(final long userId,
                                         final String clientContext,

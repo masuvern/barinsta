@@ -67,6 +67,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> approvalRequiredToJoin = new MutableLiveData<>(false);
     private final MutableLiveData<DirectThreadParticipantRequestsResponse> pendingRequests = new MutableLiveData<>(null);
     private final MutableLiveData<Integer> inputMode = new MutableLiveData<>(null);
+    private final MutableLiveData<Boolean> isPending = new MutableLiveData<>(false);
     private final DirectMessagesService directMessagesService;
     private final long userId;
     private final Resources resources;
@@ -115,6 +116,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         muted.postValue(thread.isMuted());
         mentionsMuted.postValue(thread.isMentionsMuted());
         approvalRequiredToJoin.postValue(thread.isApprovalRequiredForNewMembers());
+        isPending.postValue(thread.isPending());
         if (thread.getInputMode() != 1 && thread.isGroup() && viewerIsAdmin) {
             fetchPendingRequests();
         }
@@ -161,6 +163,10 @@ public class DirectSettingsViewModel extends AndroidViewModel {
 
     public LiveData<DirectThreadParticipantRequestsResponse> getPendingRequests() {
         return pendingRequests;
+    }
+
+    public LiveData<Boolean> isPending() {
+        return isPending;
     }
 
     public boolean isViewerAdmin() {

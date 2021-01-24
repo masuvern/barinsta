@@ -418,4 +418,8 @@
     <string name="dms_action_end">End chat</string>
     <string name="dms_action_end_question">End chat?</string>
     <string name="dms_action_end_description">All members will be removed from the group. They will still be able to view the chat history.</string>
+    <string name="pending_requests">Pending Requests</string>
+    <string name="accept_request_from_user">Accept request from %1s (%2s)?</string>
+    <string name="decline">Decline</string>
+    <string name="accept">Accept</string>
 </resources>

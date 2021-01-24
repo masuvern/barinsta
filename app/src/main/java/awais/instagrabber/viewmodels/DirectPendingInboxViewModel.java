@@ -26,15 +26,12 @@ import retrofit2.Response;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-public class DirectInboxViewModel extends ViewModel {
-    private static final String TAG = DirectInboxViewModel.class.getSimpleName();
+public class DirectPendingInboxViewModel extends ViewModel {
+    private static final String TAG = DirectPendingInboxViewModel.class.getSimpleName();
 
     private final DirectMessagesService service;
     private final MutableLiveData<Boolean> fetchingInbox = new MutableLiveData<>(false);
     private final MutableLiveData<List<DirectThread>> threads = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> fetchingUnseenCount = new MutableLiveData<>(false);
-    private final MutableLiveData<Integer> unseenCount = new MutableLiveData<>(0);
-    private final MutableLiveData<Integer> pendingRequestsTotal = new MutableLiveData<>(0);
 
     private Call<DirectInboxResponse> inboxRequest;
     private Call<DirectBadgeCount> unseenCountRequest;
@@ -43,7 +40,7 @@ public class DirectInboxViewModel extends ViewModel {
     private boolean hasOlder = true;
     private User viewer;
 
-    public DirectInboxViewModel() {
+    public DirectPendingInboxViewModel() {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
@@ -53,7 +50,6 @@ public class DirectInboxViewModel extends ViewModel {
         }
         service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
         fetchInbox();
-        fetchUnseenCount();
     }
 
     public LiveData<List<DirectThread>> getThreads() {
@@ -72,16 +68,8 @@ public class DirectInboxViewModel extends ViewModel {
         this.threads.postValue(list);
     }
 
-    public LiveData<Integer> getUnseenCount() {
-        return unseenCount;
-    }
-
     public LiveData<Boolean> getFetchingInbox() {
         return fetchingInbox;
-    }
-
-    public LiveData<Integer> getPendingRequestsTotal() {
-        return pendingRequestsTotal;
     }
 
     public User getViewer() {
@@ -92,7 +80,7 @@ public class DirectInboxViewModel extends ViewModel {
         if ((fetchingInbox.getValue() != null && fetchingInbox.getValue()) || !hasOlder) return;
         stopCurrentInboxRequest();
         fetchingInbox.postValue(true);
-        inboxRequest = service.fetchInbox(cursor, seqId);
+        inboxRequest = service.fetchPendingInbox(cursor, seqId);
         inboxRequest.enqueue(new Callback<DirectInboxResponse>() {
             @Override
             public void onResponse(@NonNull final Call<DirectInboxResponse> call, @NonNull final Response<DirectInboxResponse> response) {
@@ -102,7 +90,7 @@ public class DirectInboxViewModel extends ViewModel {
 
             @Override
             public void onFailure(@NonNull final Call<DirectInboxResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "Failed fetching dm inbox", t);
+                Log.e(TAG, "Failed fetching pending inbox", t);
                 fetchingInbox.postValue(false);
                 hasOlder = false;
             }
@@ -115,7 +103,7 @@ public class DirectInboxViewModel extends ViewModel {
             return;
         }
         if (!response.getStatus().equals("ok")) {
-            Log.e(TAG, "DM inbox fetch response: status not ok");
+            Log.e(TAG, "DM pending inbox fetch response: status not ok");
             hasOlder = false;
             return;
         }
@@ -132,8 +120,6 @@ public class DirectInboxViewModel extends ViewModel {
         }
         cursor = inbox.getOldestCursor();
         hasOlder = inbox.hasOlder();
-        pendingRequestsTotal.postValue(response.getPendingRequestsTotal());
-        // unseenCount.postValue(inbox.getUnseenCount());
     }
 
     private void stopCurrentInboxRequest() {
@@ -142,47 +128,14 @@ public class DirectInboxViewModel extends ViewModel {
         inboxRequest = null;
     }
 
-    public void fetchUnseenCount() {
-        if ((fetchingUnseenCount.getValue() != null && fetchingUnseenCount.getValue())) return;
-        stopCurrentUnseenCountRequest();
-        fetchingUnseenCount.postValue(true);
-        unseenCountRequest = service.fetchUnseenCount();
-        unseenCountRequest.enqueue(new Callback<DirectBadgeCount>() {
-            @Override
-            public void onResponse(@NonNull final Call<DirectBadgeCount> call, @NonNull final Response<DirectBadgeCount> response) {
-                parseUnseenCountResponse(response.body());
-                fetchingUnseenCount.postValue(false);
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<DirectBadgeCount> call, @NonNull final Throwable t) {
-                Log.e(TAG, "Failed fetching unseen count", t);
-                fetchingUnseenCount.postValue(false);
-            }
-        });
-    }
-
-    private void parseUnseenCountResponse(final DirectBadgeCount directBadgeCount) {
-        if (directBadgeCount == null) return;
-        unseenCount.postValue(directBadgeCount.getBadgeCount());
-    }
-
-    private void stopCurrentUnseenCountRequest() {
-        if (unseenCountRequest == null || unseenCountRequest.isCanceled() || unseenCountRequest.isExecuted()) return;
-        unseenCountRequest.cancel();
-        unseenCountRequest = null;
-    }
-
     public void refresh() {
         cursor = null;
         seqId = 0;
         hasOlder = true;
         fetchInbox();
-        fetchUnseenCount();
     }
 
     public void onDestroy() {
         stopCurrentInboxRequest();
-        // getThreads().postValue(Collections.emptyList());
     }
 }

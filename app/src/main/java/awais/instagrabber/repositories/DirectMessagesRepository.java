@@ -24,6 +24,9 @@ public interface DirectMessagesRepository {
     @GET("/api/v1/direct_v2/inbox/")
     Call<DirectInboxResponse> fetchInbox(@QueryMap Map<String, Object> queryMap);
 
+    @GET("/api/v1/direct_v2/pending_inbox/")
+    Call<DirectInboxResponse> fetchPendingInbox(@QueryMap Map<String, Object> queryMap);
+
     @GET("/api/v1/direct_v2/threads/{threadId}/")
     Call<DirectThreadFeedResponse> fetchThread(@Path("threadId") String threadId,
                                                @QueryMap Map<String, Object> queryMap);
@@ -132,4 +135,14 @@ public interface DirectMessagesRepository {
     @POST("/api/v1/direct_v2/threads/{threadId}/remove_all_users/")
     Call<DirectThreadDetailsChangeResponse> end(@Path("threadId") String threadId,
                                                 @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/approve/")
+    Call<String> approveRequest(@Path("threadId") String threadId,
+                                @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/decline/")
+    Call<String> declineRequest(@Path("threadId") String threadId,
+                                @FieldMap final Map<String, String> form);
 }

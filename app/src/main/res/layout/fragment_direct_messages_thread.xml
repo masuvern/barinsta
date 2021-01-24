@@ -11,11 +11,17 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scrollbars="none"
-        app:layout_constraintBottom_toTopOf="@id/reply_info"
+        app:layout_constraintBottom_toTopOf="@id/chats_barrier"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/layout_dm_base" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/chats_barrier"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:barrierDirection="bottom" />
 
     <View
         android:id="@+id/reply_bg"
@@ -44,7 +50,7 @@
         app:layout_constraintBottom_toTopOf="@id/reply_preview_text"
         app:layout_constraintEnd_toStartOf="@id/reply_preview_image"
         app:layout_constraintStart_toStartOf="@id/input_bg"
-        app:layout_constraintTop_toBottomOf="@id/chats"
+        app:layout_constraintTop_toBottomOf="@id/chats_barrier"
         tools:text="Replying to yourself"
         tools:visibility="gone" />
 
@@ -110,6 +116,7 @@
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/bg_input"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/input"
         app:layout_constraintEnd_toStartOf="@id/send"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,6 +131,7 @@
         android:layout_marginEnd="2dp"
         android:background="@android:color/transparent"
         android:scrollbars="none"
+        android:visibility="gone"
         app:icon="@drawable/ic_face_24"
         app:iconGravity="textStart"
         app:iconSize="24dp"
@@ -148,6 +156,7 @@
         android:paddingBottom="12dp"
         android:textColor="@color/white"
         android:textColorHint="@color/grey_500"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/camera"
         app:layout_constraintStart_toEndOf="@id/emoji_toggle"
@@ -163,12 +172,13 @@
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:scaleType="fitCenter"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/input_bg"
         app:layout_constraintEnd_toStartOf="@id/gallery"
         app:layout_constraintStart_toEndOf="@id/input"
         app:layout_constraintTop_toTopOf="@id/input"
         app:srcCompat="@drawable/ic_camera_24"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/gallery"
@@ -181,22 +191,23 @@
         android:paddingEnd="4dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_image_24"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/input_bg"
         app:layout_constraintEnd_toStartOf="@id/send"
         app:layout_constraintStart_toEndOf="@id/camera"
         app:layout_constraintTop_toTopOf="@id/input"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <awais.instagrabber.customviews.RecordView
         android:id="@+id/record_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:counter_time_color="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/input_bg"
         app:layout_constraintEnd_toEndOf="@id/input_bg"
         app:layout_constraintStart_toStartOf="@id/input"
-        app:layout_constraintTop_toBottomOf="@id/chats"
+        app:layout_constraintTop_toBottomOf="@id/chats_barrier"
         app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
         app:slide_to_cancel_arrow_color="@color/white"
         app:slide_to_cancel_bounds="0dp"
@@ -210,6 +221,7 @@
         style="@style/Widget.MaterialComponents.Button.Icon.NoInsets"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:visibility="gone"
         app:backgroundTint="@color/blue_900"
         app:elevation="4dp"
         app:icon="@drawable/avd_mic_to_send_anim"
@@ -226,17 +238,55 @@
         android:layout_width="0dp"
         android:layout_height="250dp"
         android:translationY="250dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <View
-        android:id="@+id/long_click_backdrop"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/accept_pending_request_question"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"
-        android:elevation="5dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:visibility="gone" />
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/accept_request_from_user"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/decline"
+        app:layout_constraintTop_toBottomOf="@id/chats_barrier"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/decline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:padding="16dp"
+        android:text="@string/decline"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textColor="@color/red_500"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/accept"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/accept_pending_request_question"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/accept"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:padding="16dp"
+        android:text="@string/accept"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/decline"
+        app:layout_constraintTop_toBottomOf="@id/accept_pending_request_question"
+        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

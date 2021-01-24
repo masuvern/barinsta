@@ -409,4 +409,36 @@ public class DirectMessagesService extends BaseService {
         );
         return repository.end(threadId, form);
     }
+
+    public Call<DirectInboxResponse> fetchPendingInbox(final String cursor, final long seqId) {
+        final ImmutableMap.Builder<String, Object> queryMapBuilder = ImmutableMap.<String, Object>builder()
+                .put("visual_message_return_type", "unseen")
+                .put("thread_message_limit", 10)
+                .put("persistentBadging", true)
+                .put("limit", 10);
+        if (!TextUtils.isEmpty(cursor)) {
+            queryMapBuilder.put("cursor", cursor);
+            queryMapBuilder.put("direction", "older");
+        }
+        if (seqId != 0) {
+            queryMapBuilder.put("seq_id", seqId);
+        }
+        return repository.fetchPendingInbox(queryMapBuilder.build());
+    }
+
+    public Call<String> approveRequest(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.approveRequest(threadId, form);
+    }
+
+    public Call<String> declineRequest(@NonNull final String threadId) {
+        final ImmutableMap<String, String> form = ImmutableMap.of(
+                "_csrftoken", csrfToken,
+                "_uuid", deviceUuid
+        );
+        return repository.declineRequest(threadId, form);
+    }
 }

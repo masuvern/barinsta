@@ -56,6 +56,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
+import awais.instagrabber.viewmodels.DirectPendingInboxViewModel;
 import awais.instagrabber.viewmodels.DirectSettingsViewModel;
 
 public class DirectMessageSettingsFragment extends Fragment implements ConfirmDialogFragmentCallback {
@@ -70,22 +71,28 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
     private boolean isPendingRequestsSetupDone = false;
     private DirectPendingUsersAdapter pendingUsersAdapter;
     private Set<User> approvalRequiredUsers;
-    // private List<Option<String>> options;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final Bundle arguments = getArguments();
+        if (arguments == null) return;
         final NavController navController = NavHostFragment.findNavController(this);
         final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
-        final DirectInboxViewModel inboxViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
-        final List<DirectThread> threads = inboxViewModel.getThreads().getValue();
-        final Bundle arguments = getArguments();
-        if (arguments == null) {
-            navController.navigateUp();
-            return;
+        final DirectMessageSettingsFragmentArgs args = DirectMessageSettingsFragmentArgs.fromBundle(arguments);
+        final boolean pending = args.getPending();
+        final List<DirectThread> threads;
+        final User viewer;
+        if (pending) {
+            final DirectPendingInboxViewModel inboxViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectPendingInboxViewModel.class);
+            threads = inboxViewModel.getThreads().getValue();
+            viewer = inboxViewModel.getViewer();
+        } else {
+            final DirectInboxViewModel inboxViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
+            threads = inboxViewModel.getThreads().getValue();
+            viewer = inboxViewModel.getViewer();
         }
-        final DirectMessageSettingsFragmentArgs fragmentArgs = DirectMessageSettingsFragmentArgs.fromBundle(arguments);
-        final String threadId = fragmentArgs.getThreadId();
+        final String threadId = args.getThreadId();
         final Optional<DirectThread> first = threads != null ? threads.stream()
                                                                       .filter(thread -> thread.getThreadId().equals(threadId))
                                                                       .findFirst()
@@ -95,7 +102,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             return;
         }
         viewModel = new ViewModelProvider(this).get(DirectSettingsViewModel.class);
-        viewModel.setViewer(inboxViewModel.getViewer());
+        viewModel.setViewer(viewer);
         viewModel.setThread(first.get());
     }
 
@@ -105,37 +112,14 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                              final ViewGroup container,
                              final Bundle savedInstanceState) {
         binding = FragmentDirectMessagesSettingsBinding.inflate(inflater, container, false);
-        // final String threadId = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getThreadId();
-        // threadTitle = DirectMessageSettingsFragmentArgs.fromBundle(getArguments()).getTitle();
-        // binding.swipeRefreshLayout.setEnabled(false);
-
-        // final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        // if (actionBar != null) {
-        //     actionBar.setTitle(threadTitle);
-        // }
-
-        // titleSend.setOnClickListener(v -> new ChangeSettings(titleText.getText().toString()).execute("update_title"));
-
-        // binding.titleText.addTextChangedListener(new TextWatcherAdapter() {
-        //     @Override
-        //     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        //         binding.titleSend.setVisibility(s.toString().equals(threadTitle) ? View.GONE : View.VISIBLE);
-        //     }
-        // });
-
-        // final AppCompatButton btnLeave = binding.btnLeave;
-        // btnLeave.setOnClickListener(v -> new AlertDialog.Builder(context)
-        //         .setTitle(R.string.dms_action_leave_question)
-        //         .setPositiveButton(R.string.yes, (x, y) -> new ChangeSettings(titleText.getText().toString()).execute("leave"))
-        //         .setNegativeButton(R.string.no, null)
-        //         .show());
-
         // currentlyRunning = new DirectMessageInboxThreadFetcher(threadId, null, null, fetchListener).execute();
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        final Bundle arguments = getArguments();
+        if (arguments == null) return;
         init();
         setupObservers();
     }
@@ -169,6 +153,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             usersAdapter.setAdminUserIds(adminUserIds);
         });
         viewModel.getMuted().observe(getViewLifecycleOwner(), muted -> binding.muteMessages.setChecked(muted));
+        viewModel.isPending().observe(getViewLifecycleOwner(), pending -> binding.muteMessages.setVisibility(pending ? View.GONE : View.VISIBLE));
         if (viewModel.isViewerAdmin()) {
             viewModel.getApprovalRequiredToJoin().observe(getViewLifecycleOwner(), required -> binding.approvalRequired.setChecked(required));
             viewModel.getPendingRequests().observe(getViewLifecycleOwner(), this::setPendingRequests);

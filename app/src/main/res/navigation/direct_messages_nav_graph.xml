@@ -80,25 +80,7 @@
 
     <action
         android:id="@+id/action_global_user_search"
-        app:destination="@id/user_search_nav_graph">
-        <!--<argument-->
-        <!--    android:name="multiple"-->
-        <!--    app:argType="boolean" />-->
-
-        <!--<argument-->
-        <!--    android:name="title"-->
-        <!--    app:argType="string"-->
-        <!--    app:nullable="true" />-->
-
-        <!--<argument-->
-        <!--    android:name="action_label"-->
-        <!--    app:argType="string"-->
-        <!--    app:nullable="true" />-->
-
-        <!--<argument-->
-        <!--    android:name="hideUserIds"-->
-        <!--    app:argType="long[]" />-->
-    </action>
+        app:destination="@id/user_search_nav_graph" />
 
     <fragment
         android:id="@+id/directMessagesInboxFragment"
@@ -108,6 +90,9 @@
         <action
             android:id="@+id/action_inbox_to_thread"
             app:destination="@id/directMessagesThreadFragment" />
+        <action
+            android:id="@+id/action_inbox_to_pending_inbox"
+            app:destination="@id/directPendingInboxFragment" />
     </fragment>
     <fragment
         android:id="@+id/directMessagesThreadFragment"
@@ -119,8 +104,12 @@
         <argument
             android:name="title"
             app:argType="string" />
+        <argument
+            android:name="pending"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
-            android:id="@+id/action_dMThreadFragment_to_dMSettingsFragment"
+            android:id="@+id/action_thread_to_settings"
             app:destination="@id/directMessagesSettingsFragment" />
         <action
             android:id="@+id/action_thread_to_image_edit"
@@ -143,6 +132,11 @@
             android:name="title"
             app:argType="string"
             app:nullable="true" />
+
+        <argument
+            android:name="pending"
+            android:defaultValue="false"
+            app:argType="boolean" />
 
         <action
             android:id="@+id/action_settings_to_inbox"
@@ -169,5 +163,14 @@
         <argument
             android:name="options"
             app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
+    </fragment>
+    <fragment
+        android:id="@+id/directPendingInboxFragment"
+        android:name="awais.instagrabber.fragments.directmessages.DirectPendingInboxFragment"
+        android:label="@string/pending_requests"
+        tools:layout="@layout/fragment_direct_pending_inbox">
+        <action
+            android:id="@+id/action_pending_inbox_to_thread"
+            app:destination="@id/directMessagesThreadFragment" />
     </fragment>
 </navigation>

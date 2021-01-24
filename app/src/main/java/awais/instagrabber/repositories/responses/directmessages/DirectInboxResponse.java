@@ -8,6 +8,7 @@ public class DirectInboxResponse {
     private final long seqId;
     private final long snapshotAtMs;
     private final int pendingRequestsTotal;
+    private final boolean hasPendingTopRequests;
     private final User mostRecentInviter;
     private final String status;
 
@@ -16,6 +17,7 @@ public class DirectInboxResponse {
                                final long seqId,
                                final long snapshotAtMs,
                                final int pendingRequestsTotal,
+                               final boolean hasPendingTopRequests,
                                final User mostRecentInviter,
                                final String status) {
         this.viewer = viewer;
@@ -23,6 +25,7 @@ public class DirectInboxResponse {
         this.seqId = seqId;
         this.snapshotAtMs = snapshotAtMs;
         this.pendingRequestsTotal = pendingRequestsTotal;
+        this.hasPendingTopRequests = hasPendingTopRequests;
         this.mostRecentInviter = mostRecentInviter;
         this.status = status;
     }
@@ -45,6 +48,10 @@ public class DirectInboxResponse {
 
     public int getPendingRequestsTotal() {
         return pendingRequestsTotal;
+    }
+
+    public boolean hasPendingTopRequests() {
+        return hasPendingTopRequests;
     }
 
     public User getMostRecentInviter() {

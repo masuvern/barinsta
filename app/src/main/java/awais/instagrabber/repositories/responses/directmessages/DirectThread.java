@@ -21,7 +21,7 @@ public class DirectThread implements Serializable {
     private final boolean isPin;
     private final boolean named;
     private final boolean canonical;
-    private final boolean pending;
+    private boolean pending;
     private final boolean archived;
     private final boolean valuedRequest;
     private final String threadType;
@@ -43,6 +43,7 @@ public class DirectThread implements Serializable {
     private final DirectThreadDirectStory directStory;
     private boolean approvalRequiredForNewMembers;
     private int inputMode;
+    private final List<ThreadContext> threadContextItems;
 
     public DirectThread(final String threadId,
                         final String threadV2Id,
@@ -76,7 +77,8 @@ public class DirectThread implements Serializable {
                         final DirectItem lastPermanentItem,
                         final DirectThreadDirectStory directStory,
                         final boolean approvalRequiredForNewMembers,
-                        final int inputMode) {
+                        final int inputMode,
+                        final List<ThreadContext> threadContextItems) {
         this.threadId = threadId;
         this.threadV2Id = threadV2Id;
         this.users = users;
@@ -110,6 +112,7 @@ public class DirectThread implements Serializable {
         this.directStory = directStory;
         this.approvalRequiredForNewMembers = approvalRequiredForNewMembers;
         this.inputMode = inputMode;
+        this.threadContextItems = threadContextItems;
     }
 
     public String getThreadId() {
@@ -162,6 +165,10 @@ public class DirectThread implements Serializable {
 
     public boolean isPending() {
         return pending;
+    }
+
+    public void setPending(final boolean pending) {
+        this.pending = pending;
     }
 
     public boolean isArchived() {
@@ -258,6 +265,10 @@ public class DirectThread implements Serializable {
 
     public void setInputMode(final int inputMode) {
         this.inputMode = inputMode;
+    }
+
+    public List<ThreadContext> getThreadContextItems() {
+        return threadContextItems;
     }
 
     @Nullable
