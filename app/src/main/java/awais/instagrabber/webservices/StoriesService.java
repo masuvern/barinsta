@@ -145,6 +145,7 @@ public class StoriesService extends BaseService {
                                            null,
                                            null,
                                            0,
+                                           null,
                                            null
                 );
                 final String id = node.getString("id");
@@ -201,6 +202,7 @@ public class StoriesService extends BaseService {
                                            null,
                                            null,
                                            0,
+                                           null,
                                            null
                 );
                 final String id = node.getString("id");

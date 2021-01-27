@@ -120,7 +120,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 @Override
                 public void onSuccess(final User result) {
                     if (result != null) {
-                        setupPhoto(result.getProfilePicUrl());
+                        setupPhoto(result.getHDProfilePicUrl());
                     }
                 }
 

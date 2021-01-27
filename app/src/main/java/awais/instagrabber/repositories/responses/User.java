@@ -26,6 +26,7 @@ public class User implements Serializable {
     private final String externalUrl;
     private final long usertagsCount;
     private final String publicEmail;
+    private final HdProfilePicUrlInfo hdProfilePicUrlInfo;
 
 
     public User(final long pk,
@@ -49,7 +50,8 @@ public class User implements Serializable {
                 final String biography,
                 final String externalUrl,
                 final long usertagsCount,
-                final String publicEmail) {
+                final String publicEmail,
+                final HdProfilePicUrlInfo hdProfilePicUrlInfo) {
         this.pk = pk;
         this.username = username;
         this.fullName = fullName;
@@ -72,6 +74,7 @@ public class User implements Serializable {
         this.externalUrl = externalUrl;
         this.usertagsCount = usertagsCount;
         this.publicEmail = publicEmail;
+        this.hdProfilePicUrlInfo = hdProfilePicUrlInfo;
     }
 
     public long getPk() {
@@ -92,6 +95,10 @@ public class User implements Serializable {
 
     public String getProfilePicUrl() {
         return profilePicUrl;
+    }
+
+    public String getHDProfilePicUrl() {
+        return hdProfilePicUrlInfo.getUrl();
     }
 
     public String getProfilePicId() {
