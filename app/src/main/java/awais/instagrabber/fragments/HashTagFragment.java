@@ -376,7 +376,8 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 final Context context = getContext();
                 if (context == null) return;
                 if (hashtagModel == null) {
-                    Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.error_loading_hashtag, Toast.LENGTH_SHORT).show();
+                    binding.swipeRefreshLayout.setEnabled(false);
                     return;
                 }
                 setTitle();

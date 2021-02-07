@@ -538,10 +538,26 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void fetchProfileDetails() {
         if (TextUtils.isEmpty(username)) return;
-        new ProfileFetcher(username.trim().substring(1), isLoggedIn, profileModel -> {
-            if (getContext() == null) return;
-            this.profileModel = profileModel;
-            setProfileDetails();
+        new ProfileFetcher(username.trim().substring(1), isLoggedIn, new FetchListener<User>() {
+            @Override
+            public void onResult(final User user) {
+                if (getContext() == null) return;
+                profileModel = user;
+                setProfileDetails();
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                Log.e(TAG, "Error fetching profile", t);
+                final Context context = getContext();
+                try {
+                    if (t == null) Toast.makeText(context,
+                            isLoggedIn ? R.string.error_loading_profile_loggedin : R.string.error_loading_profile,
+                            Toast.LENGTH_LONG).show();
+                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                catch(final Throwable e) {}
+            }
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -902,7 +918,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                             @Override
                                             public void onSuccess(final FriendshipChangeResponse result) {
                                                 // Log.d(TAG, "Unfollow success: " + result);
-                                                onRefresh();
+                                                fetchProfileDetails();
                                             }
 
                                             @Override
@@ -920,7 +936,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
                                 // Log.d(TAG, "Unfollow success: " + result);
-                                onRefresh();
+                                fetchProfileDetails();
                             }
 
                             @Override
@@ -935,7 +951,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
                                 // Log.d(TAG, "Follow success: " + result);
-                                onRefresh();
+                                fetchProfileDetails();
                             }
 
                             @Override

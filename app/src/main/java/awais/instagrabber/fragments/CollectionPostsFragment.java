@@ -307,7 +307,10 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                                     @Override
                                     public void onFailure(final Throwable t) {
                                         Log.e(TAG, "Error deleting collection", t);
-                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                        try {
+                                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                        catch(final Throwable e) {}
                                     }
                                 });
                     })
@@ -334,7 +337,10 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                                     @Override
                                     public void onFailure(final Throwable t) {
                                         Log.e(TAG, "Error editing collection", t);
-                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                        try {
+                                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                        catch(final Throwable e) {}
                                     }
                                 });
                     })

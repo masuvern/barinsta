@@ -385,7 +385,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (locationModel == null) {
                 final Context context = getContext();
                 if (context == null) return;
-                Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.error_loading_location, Toast.LENGTH_SHORT).show();
+                binding.swipeRefreshLayout.setEnabled(false);
                 return;
             }
             setTitle();
