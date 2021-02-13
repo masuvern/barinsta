@@ -11,7 +11,7 @@ android {
         targetSdkVersion 29
 
         versionCode 58
-        versionName '19.1.0'
+        versionName '19.1.0-a1'
 
         multiDexEnabled true
 

@@ -56,6 +56,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
+import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
 import awais.instagrabber.asyncs.UsernameFetcher;
@@ -305,9 +306,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
-        storiesService = StoriesService.getInstance();
-        mediaService = MediaService.getInstance(null, null, 0);
+        friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, userId) : null;
+        storiesService = isLoggedIn ? StoriesService.getInstance() : null;
+        mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         setHasOptionsMenu(true);
@@ -802,18 +803,19 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupButtons(final long profileId, final long myId) {
         profileDetailsBinding.btnTagged.setVisibility(isReallyPrivate() ? View.GONE : View.VISIBLE);
+        profileDetailsBinding.btnDM.setVisibility(View.GONE); // temporary measure
         if (isLoggedIn) {
             if (Objects.equals(profileId, myId)) {
                 profileDetailsBinding.btnTagged.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnSaved.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnLiked.setVisibility(View.VISIBLE);
-                profileDetailsBinding.btnDM.setVisibility(View.GONE);
+//                profileDetailsBinding.btnDM.setVisibility(View.GONE);
                 profileDetailsBinding.btnSaved.setText(R.string.saved);
                 return;
             }
             profileDetailsBinding.btnSaved.setVisibility(View.GONE);
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
-            profileDetailsBinding.btnDM.setVisibility(View.VISIBLE); // maybe there is a judgment mechanism?
+//            profileDetailsBinding.btnDM.setVisibility(View.VISIBLE);
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
@@ -977,17 +979,27 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        profileDetailsBinding.btnDM.setOnClickListener(v -> {
-            profileDetailsBinding.btnDM.setEnabled(false);
-            // new CreateThreadAction(cookie, profileModel.getPk(), threadId -> {
-            //     if (isAdded()) {
-            //         final NavDirections action = ProfileFragmentDirections
-            //                 .actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
-            //         NavHostFragment.findNavController(this).navigate(action);
-            //     }
-            //     profileDetailsBinding.btnDM.setEnabled(true);
-            // }).execute();
-        });
+//        profileDetailsBinding.btnDM.setOnClickListener(v -> {
+//            profileDetailsBinding.btnDM.setEnabled(false);
+//            new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
+//                if (thread == null) {
+//                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+//                    profileDetailsBinding.btnDM.setEnabled(true);
+//                    return;
+//                }
+//                if (isAdded()) {
+//                    final Bundle bundle = new Bundle();
+//                    bundle.putString("threadId", thread.getThreadId());
+//                    bundle.putString("title", thread.getThreadTitle());
+//                    if (isAdded()) {
+//                        final NavDirections action = ProfileFragmentDirections
+//                                .actionProfileFragmentToDMThreadFragment(thread.getThreadId(), profileModel.getUsername());
+//                        NavHostFragment.findNavController(this).navigate(action);
+//                    }
+//                }
+//                profileDetailsBinding.btnDM.setEnabled(true);
+//            }).execute();
+//        });
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic
