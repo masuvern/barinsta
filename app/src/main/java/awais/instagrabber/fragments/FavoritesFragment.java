@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.FavoritesAdapter;
@@ -30,7 +26,6 @@ import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
-import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.FavoritesViewModel;
 
 public class FavoritesFragment extends Fragment {

@@ -4,51 +4,67 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.AsyncDifferConfig;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
-import awais.instagrabber.adapters.viewholder.DirectMessageInboxItemViewHolder;
-import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
-import awais.instagrabber.models.direct_messages.InboxThreadModel;
+import java.util.List;
 
-public final class DirectMessageInboxAdapter extends ListAdapter<InboxThreadModel, DirectMessageInboxItemViewHolder> {
+import awais.instagrabber.adapters.viewholder.directmessages.DirectInboxItemViewHolder;
+import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
+import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+
+public final class DirectMessageInboxAdapter extends ListAdapter<DirectThread, DirectInboxItemViewHolder> {
     private final OnItemClickListener onClickListener;
 
-    private static final DiffUtil.ItemCallback<InboxThreadModel> diffCallback = new DiffUtil.ItemCallback<InboxThreadModel>() {
+    private static final DiffUtil.ItemCallback<DirectThread> diffCallback = new DiffUtil.ItemCallback<DirectThread>() {
         @Override
-        public boolean areItemsTheSame(@NonNull final InboxThreadModel oldItem, @NonNull final InboxThreadModel newItem) {
+        public boolean areItemsTheSame(@NonNull final DirectThread oldItem, @NonNull final DirectThread newItem) {
             return oldItem.getThreadId().equals(newItem.getThreadId());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull final InboxThreadModel oldItem, @NonNull final InboxThreadModel newItem) {
-            return oldItem.equals(newItem);
+        public boolean areContentsTheSame(@NonNull final DirectThread oldThread,
+                                          @NonNull final DirectThread newThread) {
+            final boolean titleEqual = oldThread.getThreadTitle().equals(newThread.getThreadTitle());
+            if (!titleEqual) return false;
+            final List<DirectItem> oldItems = oldThread.getItems();
+            final List<DirectItem> newItems = newThread.getItems();
+            if (oldItems == null || newItems == null) return false;
+            if (oldItems.size() != newItems.size()) return false;
+            final DirectItem oldItemFirst = oldThread.getFirstDirectItem();
+            final DirectItem newItemFirst = newThread.getFirstDirectItem();
+            if (oldItemFirst == null || newItemFirst == null) return false;
+            return oldItemFirst.getItemId().equals(newItemFirst.getItemId());
         }
     };
 
     public DirectMessageInboxAdapter(final OnItemClickListener onClickListener) {
-        super(diffCallback);
+        super(new AsyncDifferConfig.Builder<>(diffCallback).build());
         this.onClickListener = onClickListener;
     }
 
     @NonNull
     @Override
-    public DirectMessageInboxItemViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
+    public DirectInboxItemViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
         final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         final LayoutDmInboxItemBinding binding = LayoutDmInboxItemBinding.inflate(layoutInflater, parent, false);
-        return new DirectMessageInboxItemViewHolder(binding);
+        return new DirectInboxItemViewHolder(binding, onClickListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final DirectMessageInboxItemViewHolder holder, final int position) {
-        final InboxThreadModel threadModel = getItem(position);
-        if (onClickListener != null) {
-            holder.itemView.setOnClickListener((v) -> onClickListener.onItemClick(threadModel));
-        }
-        holder.bind(threadModel);
+    public void onBindViewHolder(@NonNull final DirectInboxItemViewHolder holder, final int position) {
+        final DirectThread thread = getItem(position);
+        holder.bind(thread);
+    }
+
+    @Override
+    public long getItemId(final int position) {
+        return getItem(position).getThreadId().hashCode();
     }
 
     public interface OnItemClickListener {
-        void onItemClick(final InboxThreadModel inboxThreadModel);
+        void onItemClick(final DirectThread thread);
     }
 }

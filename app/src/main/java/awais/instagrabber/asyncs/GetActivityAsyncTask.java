@@ -3,6 +3,8 @@ package awais.instagrabber.asyncs;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
@@ -12,6 +14,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 
 public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsyncTask.NotificationCounts> {
     private static final String TAG = "GetActivityAsyncTask";
@@ -35,14 +38,14 @@ public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsy
         if (cookiesArray == null) return null;
         final String cookie = cookiesArray[0];
         if (TextUtils.isEmpty(cookie)) return null;
-        final String uid = CookieUtils.getUserIdFromCookie(cookie);
+        final long uid = CookieUtils.getUserIdFromCookie(cookie);
         final String url = "https://www.instagram.com/graphql/query/?query_hash=0f318e8cfff9cc9ef09f88479ff571fb"
                 + "&variables={\"id\":\"" + uid + "\"}";
         HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) new URL(url).openConnection();
             urlConnection.setUseCaches(false);
-            urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
+            urlConnection.setRequestProperty("User-Agent", Utils.settingsHelper.getString(Constants.BROWSER_UA));
             urlConnection.setRequestProperty("x-csrftoken", cookie.split("csrftoken=")[1].split(";")[0]);
             urlConnection.connect();
             if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -117,6 +120,7 @@ public class GetActivityAsyncTask extends AsyncTask<String, Void, GetActivityAsy
             return likesCount;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "NotificationCounts{" +

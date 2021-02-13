@@ -22,9 +22,9 @@ import androidx.core.content.ContextCompat;
 import awais.instagrabber.R;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.enums.IntentModelType;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -123,7 +123,7 @@ public final class DirectDownload extends AppCompatActivity {
             return;
         }
         final String text = model.getText();
-        new PostFetcher(text, new FetchListener<FeedModel>() {
+        new PostFetcher(text, new FetchListener<Media>() {
             @Override
             public void doBefore() {
                 if (notificationManager == null) return;
@@ -138,7 +138,7 @@ public final class DirectDownload extends AppCompatActivity {
             }
 
             @Override
-            public void onResult(final FeedModel result) {
+            public void onResult(final Media result) {
                 if (notificationManager != null) notificationManager.cancel(NOTIFICATION_ID);
                 if (result == null) {
                     finish();

@@ -14,7 +14,7 @@ public final class StoryModel implements Serializable {
     private final String storyUrl;
     private String thumbnail;
     private final String username;
-    private final String userId;
+    private final long userId;
     private final MediaItemType itemType;
     private final long timestamp;
     private String videoUrl;
@@ -32,7 +32,7 @@ public final class StoryModel implements Serializable {
     private final boolean canReply;
 
     public StoryModel(final String storyMediaId, final String storyUrl, final String thumbnail, final MediaItemType itemType,
-                      final long timestamp, final String username, final String userId, final boolean canReply) {
+                      final long timestamp, final String username, final long userId, final boolean canReply) {
         this.storyMediaId = storyMediaId;
         this.storyUrl = storyUrl;
         this.thumbnail = thumbnail;
@@ -161,7 +161,7 @@ public final class StoryModel implements Serializable {
         return username;
     }
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 }

@@ -2,6 +2,8 @@ package awais.instagrabber.adapters.viewholder;
 
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +17,8 @@ import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
 import awais.instagrabber.databinding.ItemSliderPhotoBinding;
-import awais.instagrabber.models.PostChild;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class SliderPhotoViewHolder extends SliderItemViewHolder {
     private static final String TAG = "FeedSliderPhotoViewHolder";
@@ -30,11 +33,11 @@ public class SliderPhotoViewHolder extends SliderItemViewHolder {
         this.onVerticalDragListener = onVerticalDragListener;
     }
 
-    public void bind(@NonNull final PostChild model,
+    public void bind(@NonNull final Media model,
                      final int position,
                      final SliderItemsAdapter.SliderCallback sliderCallback) {
         final ImageRequest requestBuilder = ImageRequestBuilder
-                .newBuilderWithSource(Uri.parse(model.getDisplayUrl()))
+                .newBuilderWithSource(Uri.parse(ResponseBodyUtils.getImageUrl(model)))
                 .setLocalThumbnailPreviewsEnabled(true)
                 .build();
         binding.getRoot()
@@ -57,11 +60,21 @@ public class SliderPhotoViewHolder extends SliderItemViewHolder {
                                             }
                                         }
                                     })
-                                    .setLowResImageRequest(ImageRequest.fromUri(model.getThumbnailUrl()))
+                                    .setLowResImageRequest(ImageRequest.fromUri(ResponseBodyUtils.getThumbUrl(model)))
                                     .build());
-        binding.getRoot().setOnClickListener(v -> {
-            if (sliderCallback != null) {
-                sliderCallback.onItemClicked(position);
+        // binding.getRoot().setOnClickListener(v -> {
+        //     if (sliderCallback != null) {
+        //         sliderCallback.onItemClicked(position);
+        //     }
+        // });
+        binding.getRoot().setTapListener(new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(final MotionEvent e) {
+                if (sliderCallback != null) {
+                    sliderCallback.onItemClicked(position);
+                    return true;
+                }
+                return false;
             }
         });
         final AnimatedZoomableController zoomableController = AnimatedZoomableController.newInstance();

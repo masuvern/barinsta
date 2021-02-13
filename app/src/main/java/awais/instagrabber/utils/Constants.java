@@ -9,8 +9,10 @@ public final class Constants {
     public static final String APP_THEME = "app_theme_v19";
     public static final String APP_LANGUAGE = "app_language_v19";
     public static final String STORY_SORT = "story_sort";
-    // int prefs
+    // int prefs, do not export
     public static final String PREV_INSTALL_VERSION = "prevVersion";
+    public static final String BROWSER_UA_CODE = "browser_ua_code";
+    public static final String APP_UA_CODE = "app_ua_code";
     // boolean prefs
     public static final String DOWNLOAD_USER_FOLDER = "download_user_folder";
     // deprecated: public static final String BOTTOM_TOOLBAR = "bottom_toolbar";
@@ -32,6 +34,8 @@ public final class Constants {
     public static final String COOKIE = "cookie";
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
     public static final String DEVICE_UUID = "device_uuid";
+    public static final String BROWSER_UA = "browser_ua";
+    public static final String APP_UA = "app_ua";
     //////////////////////// EXTRAS ////////////////////////
     public static final String EXTRAS_USER = "user";
     public static final String EXTRAS_HASHTAG = "hashtag";
@@ -55,13 +59,6 @@ public final class Constants {
     // Notification ids
     public static final int ACTIVITY_NOTIFICATION_ID = 10;
 
-    // spoof
-    public static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) " +
-            "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 " +
-            "Instagram 169.1.0.29.135 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 262886998)";
-    public static final String I_USER_AGENT =
-            "Instagram 169.1.0.29.135 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 262886998)";
-    public static final String A_USER_AGENT = "https://Barinsta.AustinHuang.me / mailto:Barinsta@AustinHuang.me";
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
     public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
             " \"13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0," +
@@ -95,4 +92,6 @@ public final class Constants {
     public static final String PREF_LIKED_POSTS_LAYOUT = "liked_posts_layout";
     public static final String PREF_TAGGED_POSTS_LAYOUT = "tagged_posts_layout";
     public static final String PREF_SAVED_POSTS_LAYOUT = "saved_posts_layout";
+    public static final String PREF_EMOJI_VARIANTS = "emoji_variants";
+    public static final String PREF_REACTIONS = "reactions";
 }

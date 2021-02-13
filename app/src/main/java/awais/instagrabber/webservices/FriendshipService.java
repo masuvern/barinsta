@@ -14,14 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import awais.instagrabber.models.FollowModel;
 import awais.instagrabber.repositories.FriendshipRepository;
-import awais.instagrabber.repositories.responses.FriendshipRepoChangeRootResponse;
-import awais.instagrabber.repositories.responses.FriendshipRepoListFetchResponse;
-import awais.instagrabber.repositories.responses.FriendshipRepoRestrictRootResponse;
-import awais.instagrabber.utils.Constants;
+import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
+import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
+import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
@@ -33,72 +31,85 @@ public class FriendshipService extends BaseService {
     private static final String TAG = "FriendshipService";
 
     private final FriendshipRepository repository;
+    private final String deviceUuid, csrfToken;
+    private final long userId;
 
     private static FriendshipService instance;
 
-    private FriendshipService() {
+    private FriendshipService(final String deviceUuid,
+                              final String csrfToken,
+                              final long userId) {
+        this.deviceUuid = deviceUuid;
+        this.csrfToken = csrfToken;
+        this.userId = userId;
         final Retrofit retrofit = getRetrofitBuilder()
                 .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(FriendshipRepository.class);
     }
 
-    public static FriendshipService getInstance() {
-        if (instance == null) {
-            instance = new FriendshipService();
+    public String getCsrfToken() {
+        return csrfToken;
+    }
+
+    public String getDeviceUuid() {
+        return deviceUuid;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public static FriendshipService getInstance(final String deviceUuid, final String csrfToken, final long userId) {
+        if (instance == null
+                || !Objects.equals(instance.getCsrfToken(), csrfToken)
+                || !Objects.equals(instance.getDeviceUuid(), deviceUuid)
+                || !Objects.equals(instance.getUserId(), userId)) {
+            instance = new FriendshipService(deviceUuid, csrfToken, userId);
         }
         return instance;
     }
 
-    public void follow(final String userId,
-                       final String targetUserId,
-                       final String csrfToken,
-                       final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("create", userId, targetUserId, csrfToken, callback);
+    public void follow(final long targetUserId,
+                       final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("create", targetUserId, callback);
     }
 
-    public void unfollow(final String userId,
-                         final String targetUserId,
-                         final String csrfToken,
-                         final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("destroy", userId, targetUserId, csrfToken, callback);
+    public void unfollow(final long targetUserId,
+                         final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("destroy", targetUserId, callback);
     }
 
-    public void block(final String userId,
-                      final String targetUserId,
-                      final String csrfToken,
-                      final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("block", userId, targetUserId, csrfToken, callback);
+    public void block(final long targetUserId,
+                      final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("block", targetUserId, callback);
     }
 
-    public void unblock(final String userId,
-                        final String targetUserId,
-                        final String csrfToken,
-                        final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("unblock", userId, targetUserId, csrfToken, callback);
+    public void unblock(final long targetUserId,
+                        final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("unblock", targetUserId, callback);
     }
 
-    public void toggleRestrict(final String targetUserId,
+    public void toggleRestrict(final long targetUserId,
                                final boolean restrict,
-                               final String csrfToken,
-                               final ServiceCallback<FriendshipRepoRestrictRootResponse> callback) {
+                               final ServiceCallback<FriendshipRestrictResponse> callback) {
         final Map<String, String> form = new HashMap<>(3);
         form.put("_csrftoken", csrfToken);
-        form.put("_uuid", UUID.randomUUID().toString());
-        form.put("target_user_id", targetUserId);
+        form.put("_uuid", deviceUuid);
+        form.put("target_user_id", String.valueOf(targetUserId));
         final String action = restrict ? "restrict" : "unrestrict";
-        final Call<FriendshipRepoRestrictRootResponse> request = repository.toggleRestrict(Constants.I_USER_AGENT, action, form);
-        request.enqueue(new Callback<FriendshipRepoRestrictRootResponse>() {
+        final Call<FriendshipRestrictResponse> request = repository.toggleRestrict(action, form);
+        request.enqueue(new Callback<FriendshipRestrictResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<FriendshipRepoRestrictRootResponse> call,
-                                   @NonNull final Response<FriendshipRepoRestrictRootResponse> response) {
+            public void onResponse(@NonNull final Call<FriendshipRestrictResponse> call,
+                                   @NonNull final Response<FriendshipRestrictResponse> response) {
                 if (callback != null) {
                     callback.onSuccess(response.body());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull final Call<FriendshipRepoRestrictRootResponse> call,
+            public void onFailure(@NonNull final Call<FriendshipRestrictResponse> call,
                                   @NonNull final Throwable t) {
                 if (callback != null) {
                     callback.onFailure(t);
@@ -107,44 +118,38 @@ public class FriendshipService extends BaseService {
         });
     }
 
-    public void approve(final String userId,
-                       final String targetUserId,
-                       final String csrfToken,
-                       final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("approve", userId, targetUserId, csrfToken, callback);
+    public void approve(final long targetUserId,
+                        final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("approve", targetUserId, callback);
     }
 
-    public void ignore(final String userId,
-                        final String targetUserId,
-                        final String csrfToken,
-                        final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
-        change("ignore", userId, targetUserId, csrfToken, callback);
+    public void ignore(final long targetUserId,
+                       final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("ignore", targetUserId, callback);
     }
 
     private void change(final String action,
-                        final String userId,
-                        final String targetUserId,
-                        final String csrfToken,
-                        final ServiceCallback<FriendshipRepoChangeRootResponse> callback) {
+                        final long targetUserId,
+                        final ServiceCallback<FriendshipChangeResponse> callback) {
         final Map<String, Object> form = new HashMap<>(5);
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("radio_type", "wifi-none");
         form.put("user_id", targetUserId);
         final Map<String, String> signedForm = Utils.sign(form);
-        final Call<FriendshipRepoChangeRootResponse> request = repository.change(Constants.I_USER_AGENT, action, targetUserId, signedForm);
-        request.enqueue(new Callback<FriendshipRepoChangeRootResponse>() {
+        final Call<FriendshipChangeResponse> request = repository.change(action, targetUserId, signedForm);
+        request.enqueue(new Callback<FriendshipChangeResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<FriendshipRepoChangeRootResponse> call,
-                                   @NonNull final Response<FriendshipRepoChangeRootResponse> response) {
+            public void onResponse(@NonNull final Call<FriendshipChangeResponse> call,
+                                   @NonNull final Response<FriendshipChangeResponse> response) {
                 if (callback != null) {
                     callback.onSuccess(response.body());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull final Call<FriendshipRepoChangeRootResponse> call,
+            public void onFailure(@NonNull final Call<FriendshipChangeResponse> call,
                                   @NonNull final Throwable t) {
                 if (callback != null) {
                     callback.onFailure(t);
@@ -154,13 +159,13 @@ public class FriendshipService extends BaseService {
     }
 
     public void getList(final boolean follower,
-                        final String targetUserId,
+                        final long targetUserId,
                         final String maxId,
-                        final ServiceCallback<FriendshipRepoListFetchResponse> callback) {
+                        final ServiceCallback<FriendshipListFetchResponse> callback) {
         final Map<String, String> queryMap = new HashMap<>();
         if (maxId != null) queryMap.put("max_id", maxId);
-        final Call<String> request = repository.getList(Constants.I_USER_AGENT,
-                                                        targetUserId,
+        final Call<String> request = repository.getList(
+                targetUserId,
                                                         follower ? "followers" : "following",
                                                         queryMap);
         request.enqueue(new Callback<String>() {
@@ -175,7 +180,7 @@ public class FriendshipService extends BaseService {
                         callback.onSuccess(null);
                         return;
                     }
-                    final FriendshipRepoListFetchResponse friendshipListFetchResponse = parseListResponse(body);
+                    final FriendshipListFetchResponse friendshipListFetchResponse = parseListResponse(body);
                     callback.onSuccess(friendshipListFetchResponse);
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
@@ -192,13 +197,13 @@ public class FriendshipService extends BaseService {
         });
     }
 
-    private FriendshipRepoListFetchResponse parseListResponse(@NonNull final String body) throws JSONException {
+    private FriendshipListFetchResponse parseListResponse(@NonNull final String body) throws JSONException {
         final JSONObject root = new JSONObject(body);
         final String nextMaxId = root.optString("next_max_id");
         final String status = root.optString("status");
         final JSONArray itemsJson = root.optJSONArray("users");
         final List<FollowModel> items = parseItems(itemsJson);
-        return new FriendshipRepoListFetchResponse(
+        return new FriendshipListFetchResponse(
                 nextMaxId,
                 status,
                 items

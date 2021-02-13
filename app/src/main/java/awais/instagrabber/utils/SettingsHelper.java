@@ -10,7 +10,11 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import static awais.instagrabber.utils.Constants.APP_LANGUAGE;
 import static awais.instagrabber.utils.Constants.APP_THEME;
+import static awais.instagrabber.utils.Constants.APP_UA;
+import static awais.instagrabber.utils.Constants.APP_UA_CODE;
 import static awais.instagrabber.utils.Constants.AUTOPLAY_VIDEOS;
+import static awais.instagrabber.utils.Constants.BROWSER_UA;
+import static awais.instagrabber.utils.Constants.BROWSER_UA_CODE;
 import static awais.instagrabber.utils.Constants.CHECK_ACTIVITY;
 import static awais.instagrabber.utils.Constants.CHECK_UPDATES;
 import static awais.instagrabber.utils.Constants.COOKIE;
@@ -27,12 +31,14 @@ import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
+import static awais.instagrabber.utils.Constants.PREF_EMOJI_VARIANTS;
 import static awais.instagrabber.utils.Constants.PREF_HASHTAG_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_LIGHT_THEME;
 import static awais.instagrabber.utils.Constants.PREF_LIKED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_LOCATION_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_PROFILE_POSTS_LAYOUT;
+import static awais.instagrabber.utils.Constants.PREF_REACTIONS;
 import static awais.instagrabber.utils.Constants.PREF_SAVED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_TAGGED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_TOPIC_POSTS_LAYOUT;
@@ -79,7 +85,7 @@ public final class SettingsHelper {
 
     private int getIntegerDefault(@IntegerSettings final String key) {
         if (APP_THEME.equals(key)) return getThemeCode(true);
-        if (PREV_INSTALL_VERSION.equals(key)) return -1;
+        if (PREV_INSTALL_VERSION.equals(key) || APP_UA_CODE.equals(key) || BROWSER_UA_CODE.equals(key)) return -1;
         return 0;
     }
 
@@ -120,10 +126,11 @@ public final class SettingsHelper {
     }
 
     @StringDef(
-            {APP_LANGUAGE, APP_THEME, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION, CUSTOM_DATE_TIME_FORMAT,
-                    DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME, PREF_POSTS_LAYOUT,
-                    PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT, PREF_LOCATION_POSTS_LAYOUT,
-                    PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT, STORY_SORT})
+            {APP_LANGUAGE, APP_THEME, APP_UA, BROWSER_UA, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION,
+                    CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME,
+                    PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT,
+                    PREF_LOCATION_POSTS_LAYOUT, PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT,
+                    STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
@@ -131,6 +138,6 @@ public final class SettingsHelper {
                        CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED})
     public @interface BooleanSettings {}
 
-    @StringDef({PREV_INSTALL_VERSION})
+    @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE})
     public @interface IntegerSettings {}
 }

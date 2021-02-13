@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -57,11 +56,12 @@ import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -72,6 +72,7 @@ import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
+import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -87,15 +88,15 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
     private boolean opening = false;
-    private String locationId;
+    private long locationId;
     private LocationModel locationModel;
     private ActionMode actionMode;
     private StoriesService storiesService;
     private AsyncTask<?, ?, ?> currentlyExecuting;
     private boolean isLoggedIn;
     private boolean storiesFetching;
-    private Set<FeedModel> selectedFeedModels;
-    private FeedModel downloadFeedModel;
+    private Set<Media> selectedFeedModels;
+    private Media downloadFeedModel;
     private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_LOCATION_POSTS_LAYOUT);
     private LayoutLocationDetailsBinding locationDetailsBinding;
@@ -132,27 +133,27 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
             openPostDialog(feedModel, profilePicView, mainPostImage, -1);
         }
 
         @Override
-        public void onSliderClick(final FeedModel feedModel, final int position) {
+        public void onSliderClick(final Media feedModel, final int position) {
             openPostDialog(feedModel, null, null, position);
         }
 
         @Override
-        public void onCommentsClick(final FeedModel feedModel) {
+        public void onCommentsClick(final Media feedModel) {
             final NavDirections commentsAction = LocationFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getShortCode(),
-                    feedModel.getPostId(),
-                    feedModel.getProfileModel().getId()
+                    feedModel.getCode(),
+                    feedModel.getPk(),
+                    feedModel.getUser().getPk()
             );
             NavHostFragment.findNavController(LocationFragment.this).navigate(commentsAction);
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
+        public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
@@ -171,8 +172,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onLocationClick(final FeedModel feedModel) {
-            final NavDirections action = LocationFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
+        public void onLocationClick(final Media feedModel) {
+            final NavDirections action = LocationFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
             NavHostFragment.findNavController(LocationFragment.this).navigate(action);
         }
 
@@ -182,13 +183,13 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onNameClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onNameClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
@@ -201,14 +202,14 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(@NonNull final FeedModel feedModel,
+        private void openPostDialog(@NonNull final Media feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
             if (opening) return;
-            if (TextUtils.isEmpty(feedModel.getProfileModel().getUsername())) {
+            if (TextUtils.isEmpty(feedModel.getUser().getUsername())) {
                 opening = true;
-                new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
+                new PostFetcher(feedModel.getCode(), newFeedModel -> {
                     opening = false;
                     if (newFeedModel == null) return;
                     openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
@@ -244,7 +245,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+        public void onSelectionChange(final Set<Media> selectedFeedModels) {
             final String title = getString(R.string.number_selected, selectedFeedModels.size());
             if (actionMode != null) {
                 actionMode.setTitle(title);
@@ -354,7 +355,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void init() {
         if (getArguments() == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         final LocationFragmentArgs fragmentArgs = LocationFragmentArgs.fromBundle(getArguments());
         locationId = fragmentArgs.getLocationId();
         locationDetailsBinding.favChip.setVisibility(View.GONE);
@@ -384,7 +385,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (locationModel == null) {
                 final Context context = getContext();
                 if (context == null) return;
-                Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.error_loading_location, Toast.LENGTH_SHORT).show();
+                binding.swipeRefreshLayout.setEnabled(false);
                 return;
             }
             setTitle();
@@ -396,13 +398,15 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     private void setupLocationDetails() {
-        final String locationId = locationModel.getId();
+        final long locationId = locationModel.getId();
         // binding.swipeRefreshLayout.setRefreshing(true);
         locationDetailsBinding.mainLocationImage.setImageURI(locationModel.getSdProfilePic());
         final String postCount = String.valueOf(locationModel.getPostCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
-                locationModel.getPostCount() > 2000000000L ? 2000000000 : locationModel.getPostCount().intValue(),
-                postCount));
+                                                                                                        locationModel.getPostCount() > 2000000000L
+                                                                                                        ? 2000000000
+                                                                                                        : locationModel.getPostCount().intValue(),
+                                                                                                        postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         locationDetailsBinding.mainLocPostCount.setText(span);
@@ -414,15 +418,29 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         if (TextUtils.isEmpty(biography)) {
             locationDetailsBinding.locationBiography.setVisibility(View.GONE);
-        } else if (TextUtils.hasMentions(biography)) {
-            locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
-            biography = TextUtils.getMentionText(biography);
-            locationDetailsBinding.locationBiography.setText(biography, TextView.BufferType.SPANNABLE);
-            // binding.locationBiography.setMentionClickListener(mentionClickListener);
         } else {
             locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
             locationDetailsBinding.locationBiography.setText(biography);
-            locationDetailsBinding.locationBiography.setMentionClickListener(null);
+            locationDetailsBinding.locationBiography.addOnHashtagListener(autoLinkItem -> {
+                final NavController navController = NavHostFragment.findNavController(this);
+                final Bundle bundle = new Bundle();
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                bundle.putString(ARG_HASHTAG, originalText);
+                navController.navigate(R.id.action_global_hashTagFragment, bundle);
+            });
+            locationDetailsBinding.locationBiography.addOnMentionClickListener(autoLinkItem -> {
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                navigateToProfile(originalText);
+            });
+            locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
+                                                                                                                    autoLinkItem.getOriginalText()
+                                                                                                                                .trim()));
+            locationDetailsBinding.locationBiography
+                    .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+            locationDetailsBinding.locationBiography.setOnLongClickListener(v -> {
+                Utils.copyText(getContext(), biography);
+                return true;
+            });
         }
 
         if (!locationModel.getGeo().startsWith("geo:0.0,0.0?z=17")) {
@@ -450,7 +468,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(getContext());
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
+        favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
             @Override
             public void onSuccess(final Favorite result) {
                 locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
@@ -458,7 +476,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 locationDetailsBinding.favChip.setText(R.string.favorite_short);
                 favoriteRepository.insertOrUpdateFavorite(new Favorite(
                         result.getId(),
-                        locationId,
+                        String.valueOf(locationId),
                         FavoriteType.LOCATION,
                         locationModel.getName(),
                         locationModel.getSdProfilePic(),
@@ -480,10 +498,10 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
         });
         locationDetailsBinding.favChip.setOnClickListener(v -> {
-            favoriteRepository.getFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
+            favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
                 @Override
                 public void onSuccess(final Favorite result) {
-                    favoriteRepository.deleteFavorite(locationId, FavoriteType.LOCATION, new RepositoryCallback<Void>() {
+                    favoriteRepository.deleteFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
                             locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
@@ -500,7 +518,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 public void onDataNotAvailable() {
                     favoriteRepository.insertOrUpdateFavorite(new Favorite(
                             0,
-                            locationId,
+                            String.valueOf(locationId),
                             FavoriteType.LOCATION,
                             locationModel.getName(),
                             locationModel.getSdProfilePic(),
@@ -523,7 +541,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (hasStories) {
                 // show stories
                 final NavDirections action = LocationFragmentDirections
-                        .actionLocationFragmentToStoryViewerFragment(-1, null, false, true, locationId, locationModel.getName(), false, false);
+                        .actionLocationFragmentToStoryViewerFragment(StoryViewerOptions.forLocation(locationId, locationModel.getName()));
                 NavHostFragment.findNavController(this).navigate(action);
             }
         });
@@ -540,27 +558,24 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchStories() {
         if (isLoggedIn) {
             storiesFetching = true;
-            storiesService.getUserStory(locationId,
-                                        null,
-                                        true,
-                                        false,
-                                        false,
-                                        new ServiceCallback<List<StoryModel>>() {
-                                            @Override
-                                            public void onSuccess(final List<StoryModel> storyModels) {
-                                                if (storyModels != null && !storyModels.isEmpty()) {
-                                                    locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
-                                                    hasStories = true;
-                                                }
-                                                storiesFetching = false;
-                                            }
+            storiesService.getUserStory(
+                    StoryViewerOptions.forLocation(locationId, locationModel.getName()),
+                    new ServiceCallback<List<StoryModel>>() {
+                        @Override
+                        public void onSuccess(final List<StoryModel> storyModels) {
+                            if (storyModels != null && !storyModels.isEmpty()) {
+                                locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
+                                hasStories = true;
+                            }
+                            storiesFetching = false;
+                        }
 
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                Log.e(TAG, "Error", t);
-                                                storiesFetching = false;
-                                            }
-                                        });
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error", t);
+                            storiesFetching = false;
+                        }
+                    });
         }
     }
 

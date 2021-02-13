@@ -21,6 +21,7 @@ import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,6 +33,7 @@ public class NewsService extends BaseService {
     private final NewsRepository repository;
 
     private static NewsService instance;
+    private static String browserUa, appUa;
 
     private NewsService() {
         final Retrofit retrofit = getRetrofitBuilder()
@@ -44,13 +46,15 @@ public class NewsService extends BaseService {
         if (instance == null) {
             instance = new NewsService();
         }
+        appUa = Utils.settingsHelper.getString(Constants.APP_UA);
+        browserUa = Utils.settingsHelper.getString(Constants.BROWSER_UA);
         return instance;
     }
 
     public void fetchAppInbox(final boolean markAsSeen,
                               final ServiceCallback<List<NotificationModel>> callback) {
         final List<NotificationModel> result = new ArrayList<>();
-        final Call<String> request = repository.appInbox(markAsSeen);
+        final Call<String> request = repository.appInbox(appUa, markAsSeen);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -62,7 +66,7 @@ public class NewsService extends BaseService {
                 try {
                     final JSONObject jsonObject = new JSONObject(body);
                     final JSONArray oldStories = jsonObject.getJSONArray("old_stories"),
-                                    newStories = jsonObject.getJSONArray("new_stories");
+                            newStories = jsonObject.getJSONArray("new_stories");
 
                     for (int j = 0; j < newStories.length(); ++j) {
                         final NotificationModel newsItem = parseNewsItem(newStories.getJSONObject(j));
@@ -90,7 +94,7 @@ public class NewsService extends BaseService {
 
     public void fetchWebInbox(final boolean markAsSeen,
                               final ServiceCallback<List<NotificationModel>> callback) {
-        final Call<String> request = repository.webInbox();
+        final Call<String> request = repository.webInbox(browserUa);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -105,7 +109,7 @@ public class NewsService extends BaseService {
                             .getJSONObject("graphql")
                             .getJSONObject("user");
                     final JSONObject ewaf = page.getJSONObject("activity_feed")
-                            .optJSONObject("edge_web_activity_feed");
+                                                .optJSONObject("edge_web_activity_feed");
                     final JSONObject efr = page.optJSONObject("edge_follow_requests");
                     JSONObject data;
                     JSONArray media;
@@ -124,11 +128,12 @@ public class NewsService extends BaseService {
                                     data.getString(Constants.EXTRAS_ID),
                                     data.optString("text"), // comments or mentions
                                     data.getLong("timestamp"),
-                                    user.getString("id"),
+                                    user.getLong("id"),
                                     user.getString("username"),
                                     user.getString("profile_pic_url"),
-                                    !data.isNull("media") ? data.getJSONObject("media").getString("id") : null,
-                                    !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null, notificationType));
+                                    data.has("media") ? data.getJSONObject("media").getLong("id") : 0,
+                                    data.has("media") ? data.getJSONObject("media").getString("thumbnail_src") : null,
+                                    notificationType));
                         }
                     }
 
@@ -143,10 +148,10 @@ public class NewsService extends BaseService {
                                     data.getString(Constants.EXTRAS_ID),
                                     data.optString("full_name"),
                                     0L,
-                                    data.getString(Constants.EXTRAS_ID),
+                                    data.getLong(Constants.EXTRAS_ID),
                                     data.getString("username"),
                                     data.getString("profile_pic_url"),
-                                    null,
+                                    0,
                                     null, NotificationType.REQUEST));
                         }
                     }
@@ -169,7 +174,7 @@ public class NewsService extends BaseService {
         final String type = itemJson.getString("story_type");
         final NotificationType notificationType = NotificationType.valueOfType(type);
         if (notificationType == null) {
-            if (BuildConfig.DEBUG) Log.d("austin_debug", "unhandled news type: "+itemJson);
+            if (BuildConfig.DEBUG) Log.d("austin_debug", "unhandled news type: " + itemJson);
             return null;
         }
         final JSONObject data = itemJson.getJSONObject("args");
@@ -177,10 +182,10 @@ public class NewsService extends BaseService {
                 data.getString("tuuid"),
                 data.has("text") ? data.getString("text") : cleanRichText(data.optString("rich_text", "")),
                 data.getLong("timestamp"),
-                data.getString("profile_id"),
+                data.getLong("profile_id"),
                 data.getString("profile_name"),
                 data.getString("profile_image"),
-                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("id") : null,
+                !data.isNull("media") ? Long.valueOf(data.getJSONArray("media").getJSONObject(0).getString("id").split("_")[0]) : 0,
                 !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("image") : null,
                 notificationType);
     }
@@ -205,7 +210,7 @@ public class NewsService extends BaseService {
         form.put("device_id", UUID.randomUUID().toString());
         form.put("module", "discover_people");
         form.put("paginate", "false");
-        final Call<String> request = repository.getAyml(form);
+        final Call<String> request = repository.getAyml(appUa, form);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -251,11 +256,11 @@ public class NewsService extends BaseService {
                 itemJson.getString("uuid"),
                 itemJson.getString("social_context"),
                 0L,
-                data.getString("pk"),
+                data.getLong("pk"),
                 data.getString("username"),
                 data.getString("profile_pic_url"),
+                0,
                 data.getString("full_name"), // just borrowing this field
-                null,
                 NotificationType.AYML);
     }
 }

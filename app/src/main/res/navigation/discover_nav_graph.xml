@@ -34,8 +34,7 @@
         app:destination="@id/location_nav_graph">
         <argument
             android:name="locationId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/comments_nav_graph" />
@@ -53,8 +52,7 @@
             app:nullable="false" />
         <argument
             android:name="postUserId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/likes_nav_graph" />
@@ -62,14 +60,24 @@
     <action
         android:id="@+id/action_global_likesViewerFragment"
         app:destination="@id/likes_nav_graph">
-    <argument
-        android:name="postId"
-        app:argType="string"
-        app:nullable="false" />
-    <argument
-        android:name="isComment"
-        app:argType="boolean"
-        app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
+            app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/saved_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_savedCollectionsFragment"
+        app:destination="@id/saved_nav_graph">
+        <argument
+            android:name="isSaving"
+            app:argType="boolean" />
     </action>
 
     <include app:graph="@navigation/notification_viewer_nav_graph" />
@@ -98,7 +106,7 @@
         tools:layout="@layout/fragment_topic_posts">
         <argument
             android:name="topicCluster"
-            app:argType="awais.instagrabber.models.TopicCluster" />
+            app:argType="awais.instagrabber.repositories.responses.discover.TopicCluster" />
 
         <argument
             android:name="titleColor"

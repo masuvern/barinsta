@@ -14,25 +14,25 @@ import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.databinding.ItemSliderPhotoBinding;
 import awais.instagrabber.databinding.LayoutExoCustomControlsBinding;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
-import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.Media;
 
-public final class SliderItemsAdapter extends ListAdapter<PostChild, SliderItemViewHolder> {
+public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewHolder> {
 
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener;
     private final boolean loadVideoOnItemClick;
     private final SliderCallback sliderCallback;
     private final LayoutExoCustomControlsBinding controlsBinding;
 
-    private static final DiffUtil.ItemCallback<PostChild> DIFF_CALLBACK = new DiffUtil.ItemCallback<PostChild>() {
+    private static final DiffUtil.ItemCallback<Media> DIFF_CALLBACK = new DiffUtil.ItemCallback<Media>() {
         @Override
-        public boolean areItemsTheSame(@NonNull final PostChild oldItem, @NonNull final PostChild newItem) {
-            return oldItem.getPostId().equals(newItem.getPostId());
+        public boolean areItemsTheSame(@NonNull final Media oldItem, @NonNull final Media newItem) {
+            return oldItem.getPk().equals(newItem.getPk());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull final PostChild oldItem, @NonNull final PostChild newItem) {
-            return oldItem.getPostId().equals(newItem.getPostId());
+        public boolean areContentsTheSame(@NonNull final Media oldItem, @NonNull final Media newItem) {
+            return oldItem.getPk().equals(newItem.getPk());
         }
     };
 
@@ -66,14 +66,14 @@ public final class SliderItemsAdapter extends ListAdapter<PostChild, SliderItemV
 
     @Override
     public void onBindViewHolder(@NonNull final SliderItemViewHolder holder, final int position) {
-        final PostChild model = getItem(position);
-        holder.bind(model, position, sliderCallback);
+        final Media media = getItem(position);
+        holder.bind(media, position, sliderCallback);
     }
 
     @Override
     public int getItemViewType(final int position) {
-        final PostChild viewerPostModel = getItem(position);
-        return viewerPostModel.getItemType().getId();
+        final Media media = getItem(position);
+        return media.getMediaType().getId();
     }
 
     // @NonNull

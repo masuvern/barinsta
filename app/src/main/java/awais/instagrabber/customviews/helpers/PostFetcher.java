@@ -1,17 +1,21 @@
 package awais.instagrabber.customviews.helpers;
 
+import android.util.Log;
+
 import java.util.List;
 
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.repositories.responses.Media;
 
 public class PostFetcher {
+    private static final String TAG = PostFetcher.class.getSimpleName();
+
     private final PostFetchService postFetchService;
-    private final FetchListener<List<FeedModel>> fetchListener;
+    private final FetchListener<List<Media>> fetchListener;
     private boolean fetching;
 
     public PostFetcher(final PostFetchService postFetchService,
-                       final FetchListener<List<FeedModel>> fetchListener) {
+                       final FetchListener<List<Media>> fetchListener) {
         this.postFetchService = postFetchService;
         this.fetchListener = fetchListener;
     }
@@ -19,9 +23,17 @@ public class PostFetcher {
     public void fetch() {
         if (!fetching) {
             fetching = true;
-            postFetchService.fetch(result -> {
-                fetching = false;
-                fetchListener.onResult(result);
+            postFetchService.fetch(new FetchListener<List<Media>>() {
+                @Override
+                public void onResult(final List<Media> result) {
+                    fetching = false;
+                    fetchListener.onResult(result);
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "onFailure: ", t);
+                }
             });
         }
     }
@@ -39,7 +51,7 @@ public class PostFetcher {
     }
 
     public interface PostFetchService {
-        void fetch(FetchListener<List<FeedModel>> fetchListener);
+        void fetch(FetchListener<List<Media>> fetchListener);
 
         void reset();
 

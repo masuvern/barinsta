@@ -254,35 +254,37 @@ public class DownloadWorker extends Worker {
             final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
             final ContentResolver contentResolver = context.getContentResolver();
             Bitmap bitmap = null;
-            if (Utils.isImage(uri, contentResolver)) {
-                try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
-                    bitmap = BitmapFactory.decodeStream(inputStream);
-                } catch (final Exception e) {
-                    if (logCollector != null)
-                        logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
-                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-                }
-            }
-            if (bitmap == null) {
-                final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                try {
-                    try {
-                        retriever.setDataSource(context, uri);
+            final String mimeType = Utils.getMimeType(uri, contentResolver);
+            if (!TextUtils.isEmpty(mimeType)) {
+                if (mimeType.startsWith("image")) {
+                    try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
+                        bitmap = BitmapFactory.decodeStream(inputStream);
                     } catch (final Exception e) {
-                        retriever.setDataSource(file.getAbsolutePath());
+                        if (logCollector != null)
+                            logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
+                        if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                     }
-                    bitmap = retriever.getFrameAtTime();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                } else if (mimeType.startsWith("video")) {
+                    final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    try {
                         try {
-                            retriever.close();
+                            retriever.setDataSource(context, uri);
                         } catch (final Exception e) {
-                            if (logCollector != null)
-                                logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_2");
+                            retriever.setDataSource(file.getAbsolutePath());
                         }
-                } catch (final Exception e) {
-                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-                    if (logCollector != null)
-                        logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_3");
+                        bitmap = retriever.getFrameAtTime();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                            try {
+                                retriever.close();
+                            } catch (final Exception e) {
+                                if (logCollector != null)
+                                    logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_2");
+                            }
+                    } catch (final Exception e) {
+                        if (BuildConfig.DEBUG) Log.e(TAG, "", e);
+                        if (logCollector != null)
+                            logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_3");
+                    }
                 }
             }
             final String downloadComplete = context.getString(R.string.downloader_complete);

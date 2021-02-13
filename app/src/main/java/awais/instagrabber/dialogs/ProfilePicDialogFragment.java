@@ -28,20 +28,20 @@ import java.io.File;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
-import awais.instagrabber.repositories.responses.UserInfo;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.UserService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class ProfilePicDialogFragment extends DialogFragment {
     private static final String TAG = "ProfilePicDlgFragment";
 
-    private final String id;
+    private final long id;
     private final String name;
     private final String fallbackUrl;
 
@@ -49,7 +49,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
     private DialogProfilepicBinding binding;
     private String url;
 
-    public ProfilePicDialogFragment(final String id, final String name, final String fallbackUrl) {
+    public ProfilePicDialogFragment(final long id, final String name, final String fallbackUrl) {
         this.id = id;
         this.name = name;
         this.fallbackUrl = fallbackUrl;
@@ -61,7 +61,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
                              final Bundle savedInstanceState) {
         binding = DialogProfilepicBinding.inflate(inflater, container, false);
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         return binding.getRoot();
     }
 
@@ -115,10 +115,10 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void fetchAvatar() {
         if (isLoggedIn) {
-            final ProfileService profileService = ProfileService.getInstance();
-            profileService.getUserInfo(id, new ServiceCallback<UserInfo>() {
+            final UserService userService = UserService.getInstance();
+            userService.getUserInfo(id, new ServiceCallback<User>() {
                 @Override
-                public void onSuccess(final UserInfo result) {
+                public void onSuccess(final User result) {
                     if (result != null) {
                         setupPhoto(result.getHDProfilePicUrl());
                     }
@@ -127,12 +127,14 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 @Override
                 public void onFailure(final Throwable t) {
                     final Context context = getContext();
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    try {
+                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                    catch(final Throwable e) {}
                     getDialog().dismiss();
                 }
             });
-        }
-        else setupPhoto(fallbackUrl);
+        } else setupPhoto(fallbackUrl);
     }
 
     private void setupPhoto(final String result) {

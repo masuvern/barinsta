@@ -36,9 +36,9 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentSavedBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -54,14 +54,15 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private FragmentSavedBinding binding;
-    private String username, cookie, profileId;
+    private String username;
+    private long profileId;
     private ActionMode actionMode;
     private SwipeRefreshLayout root;
     private AppCompatActivity fragmentActivity;
     private boolean isLoggedIn, shouldRefresh = true;
     private PostItemType type;
-    private Set<FeedModel> selectedFeedModels;
-    private FeedModel downloadFeedModel;
+    private Set<Media> selectedFeedModels;
+    private Media downloadFeedModel;
     private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences;
 
@@ -97,27 +98,27 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
             });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
             openPostDialog(feedModel, profilePicView, mainPostImage, -1);
         }
 
         @Override
-        public void onSliderClick(final FeedModel feedModel, final int position) {
+        public void onSliderClick(final Media feedModel, final int position) {
             openPostDialog(feedModel, null, null, position);
         }
 
         @Override
-        public void onCommentsClick(final FeedModel feedModel) {
+        public void onCommentsClick(final Media feedModel) {
             final NavDirections commentsAction = ProfileFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getShortCode(),
-                    feedModel.getPostId(),
-                    feedModel.getProfileModel().getId()
+                    feedModel.getCode(),
+                    feedModel.getPk(),
+                    feedModel.getUser().getPk()
             );
             NavHostFragment.findNavController(SavedViewerFragment.this).navigate(commentsAction);
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
+        public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
@@ -136,8 +137,8 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         }
 
         @Override
-        public void onLocationClick(final FeedModel feedModel) {
-            final NavDirections action = ProfileFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
+        public void onLocationClick(final Media feedModel) {
+            final NavDirections action = ProfileFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
             NavHostFragment.findNavController(SavedViewerFragment.this).navigate(action);
         }
 
@@ -147,13 +148,13 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         }
 
         @Override
-        public void onNameClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onNameClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
@@ -166,7 +167,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final FeedModel feedModel,
+        private void openPostDialog(final Media feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
@@ -197,7 +198,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         }
 
         @Override
-        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+        public void onSelectionChange(final Set<Media> selectedFeedModels) {
             final String title = getString(R.string.number_selected, selectedFeedModels.size());
             if (actionMode != null) {
                 actionMode.setTitle(title);
@@ -227,8 +228,8 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-        cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         if (root != null) {
             shouldRefresh = false;
             return root;
@@ -285,7 +286,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     private void setupPosts() {
         binding.posts.setViewModelStoreOwner(this)
                      .setLifeCycleOwner(this)
-                     .setPostFetchService(new SavedPostFetchService(profileId, type, isLoggedIn))
+                     .setPostFetchService(new SavedPostFetchService(profileId, type, isLoggedIn, null))
                      .setLayoutPreferences(layoutPreferences)
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)

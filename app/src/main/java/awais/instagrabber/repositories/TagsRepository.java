@@ -2,6 +2,7 @@ package awais.instagrabber.repositories;
 
 import java.util.Map;
 
+import awais.instagrabber.repositories.responses.TagFeedResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -22,6 +23,6 @@ public interface TagsRepository {
                           @Path("tag") String tag);
 
     @GET("/api/v1/feed/tag/{tag}/")
-    Call<String> fetchPosts(@Path("tag") final String tag,
-                            @QueryMap Map<String, String> queryParams);
+    Call<TagFeedResponse> fetchPosts(@Path("tag") final String tag,
+                                     @QueryMap Map<String, String> queryParams);
 }

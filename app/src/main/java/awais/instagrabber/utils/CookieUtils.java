@@ -70,9 +70,17 @@ public final class CookieUtils {
         }
     }
 
-    @Nullable
-    public static String getUserIdFromCookie(final String cookies) {
-        return getCookieValue(cookies, "ds_user_id");
+    public static long getUserIdFromCookie(final String cookies) {
+        final String dsUserId = getCookieValue(cookies, "ds_user_id");
+        if (dsUserId == null) {
+            return 0;
+        }
+        try {
+            return Long.parseLong(dsUserId);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "getUserIdFromCookie: ", e);
+        }
+        return 0;
     }
 
     @Nullable

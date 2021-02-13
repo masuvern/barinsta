@@ -30,7 +30,7 @@ import awais.instagrabber.adapters.FollowAdapter;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentFollowersViewerBinding;
 import awais.instagrabber.models.FollowModel;
-import awais.instagrabber.repositories.responses.FriendshipRepoListFetchResponse;
+import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -44,8 +44,12 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     private final ArrayList<FollowModel> followersModels = new ArrayList<>();
     private final ArrayList<FollowModel> allFollowing = new ArrayList<>();
 
-    private boolean moreAvailable = true, isFollowersList, isCompare = false, loading = false, shouldRefresh = true;
-    private String profileId, username, namePost, type, endCursor;
+    private boolean moreAvailable = true, isFollowersList, isCompare = false, loading = false, shouldRefresh = true, searching = false;
+    private long profileId;
+    private String username;
+    private String namePost;
+    private String type;
+    private String endCursor;
     private Resources resources;
     private LinearLayoutManager layoutManager;
     private RecyclerLazyLoader lazyLoader;
@@ -58,10 +62,10 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     private FriendshipService friendshipService;
     private AppCompatActivity fragmentActivity;
 
-    final ServiceCallback<FriendshipRepoListFetchResponse> followingFetchCb = new ServiceCallback<FriendshipRepoListFetchResponse>() {
+    final ServiceCallback<FriendshipListFetchResponse> followingFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
         @Override
-        public void onSuccess(final FriendshipRepoListFetchResponse result) {
-            if (result != null) {
+        public void onSuccess(final FriendshipListFetchResponse result) {
+            if (result != null && isCompare) {
                 followingModels.addAll(result.getItems());
                 if (!isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
@@ -74,20 +78,23 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     if (!isFollowersList) moreAvailable = false;
                     showCompare();
                 }
-            } else binding.swipeRefreshLayout.setRefreshing(false);
+            } else if (isCompare) binding.swipeRefreshLayout.setRefreshing(false);
         }
 
         @Override
         public void onFailure(final Throwable t) {
-            binding.swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            try {
+                binding.swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch(Throwable e) {}
             Log.e(TAG, "Error fetching list (double, following)", t);
         }
     };
-    final ServiceCallback<FriendshipRepoListFetchResponse> followersFetchCb = new ServiceCallback<FriendshipRepoListFetchResponse>() {
+    final ServiceCallback<FriendshipListFetchResponse> followersFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
         @Override
-        public void onSuccess(final FriendshipRepoListFetchResponse result) {
-            if (result != null) {
+        public void onSuccess(final FriendshipListFetchResponse result) {
+            if (result != null && isCompare) {
                 followersModels.addAll(result.getItems());
                 if (isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
@@ -100,13 +107,16 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     if (isFollowersList) moreAvailable = false;
                     showCompare();
                 }
-            }
+            } else if (isCompare) binding.swipeRefreshLayout.setRefreshing(false);
         }
 
         @Override
         public void onFailure(final Throwable t) {
-            binding.swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            try {
+                binding.swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch(Throwable e) {}
             Log.e(TAG, "Error fetching list (double, follower)", t);
         }
     };
@@ -114,7 +124,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        friendshipService = FriendshipService.getInstance();
+        friendshipService = FriendshipService.getInstance(null, null, 0);
         fragmentActivity = (AppCompatActivity) getActivity();
         setHasOptionsMenu(true);
     }
@@ -195,52 +205,51 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     private void listFollows() {
         type = resources.getString(isFollowersList ? R.string.followers_type_followers : R.string.followers_type_following);
         setSubtitle(type);
-        final ServiceCallback<FriendshipRepoListFetchResponse> cb = new ServiceCallback<FriendshipRepoListFetchResponse>() {
+        final ServiceCallback<FriendshipListFetchResponse> cb = new ServiceCallback<FriendshipListFetchResponse>() {
             @Override
-            public void onSuccess(final FriendshipRepoListFetchResponse result) {
+            public void onSuccess(final FriendshipListFetchResponse result) {
                 if (result == null) {
                     binding.swipeRefreshLayout.setRefreshing(false);
                     return;
                 }
-                else {
-                    int oldSize = followModels.size() == 0 ? 0 : followModels.size() - 1;
-                    followModels.addAll(result.getItems());
-                    if (result.isMoreAvailable()) {
-                        moreAvailable = true;
-                        endCursor = result.getNextMaxId();
-                    }
-                    else moreAvailable = false;
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    if (isFollowersList) followersModels.addAll(result.getItems());
-                    else followingModels.addAll(result.getItems());
-                    refreshAdapter(followModels, null, null, null);
-                    layoutManager.scrollToPosition(oldSize);
-                }
+                int oldSize = followModels.size() == 0 ? 0 : followModels.size() - 1;
+                followModels.addAll(result.getItems());
+                if (result.isMoreAvailable()) {
+                    moreAvailable = true;
+                    endCursor = result.getNextMaxId();
+                } else moreAvailable = false;
+                binding.swipeRefreshLayout.setRefreshing(false);
+                if (isFollowersList) followersModels.addAll(result.getItems());
+                else followingModels.addAll(result.getItems());
+                refreshAdapter(followModels, null, null, null);
+                layoutManager.scrollToPosition(oldSize);
             }
 
             @Override
             public void onFailure(final Throwable t) {
-                binding.swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                try {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                catch(Throwable e) {}
                 Log.e(TAG, "Error fetching list (single)", t);
             }
         };
         layoutManager = new LinearLayoutManager(getContext());
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!TextUtils.isEmpty(endCursor)) {
+            if (!TextUtils.isEmpty(endCursor) && !searching) {
                 binding.swipeRefreshLayout.setRefreshing(true);
                 layoutManager.setStackFromEnd(true);
                 friendshipService.getList(isFollowersList, profileId, endCursor, cb);
+                endCursor = null;
             }
-            endCursor = null;
         });
         binding.rvFollow.addOnScrollListener(lazyLoader);
         binding.rvFollow.setLayoutManager(layoutManager);
         if (moreAvailable) {
             binding.swipeRefreshLayout.setRefreshing(true);
             friendshipService.getList(isFollowersList, profileId, endCursor, cb);
-        }
-        else {
+        } else {
             refreshAdapter(followModels, null, null, null);
             layoutManager.scrollToPosition(0);
         }
@@ -256,19 +265,17 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
             friendshipService.getList(isFollowersList,
-                    profileId,
-                    endCursor,
-                    isFollowersList ? followersFetchCb : followingFetchCb);
-        }
-        else if (followersModels.size() == 0 || followingModels.size() == 0) {
+                                      profileId,
+                                      endCursor,
+                                      isFollowersList ? followersFetchCb : followingFetchCb);
+        } else if (followersModels.size() == 0 || followingModels.size() == 0) {
             binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
             friendshipService.getList(!isFollowersList,
-                    profileId,
-                    null,
-                    isFollowersList ? followingFetchCb : followersFetchCb);
-        }
-        else showCompare();
+                                      profileId,
+                                      null,
+                                      isFollowersList ? followingFetchCb : followersFetchCb);
+        } else showCompare();
     }
 
     private void showCompare() {
@@ -296,68 +303,6 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         final SearchView searchView = (SearchView) menuSearch.getActionView();
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            // private final Filter filter = new Filter() {
-            //     private final ArrayList<FollowModel> searchFollowModels = new ArrayList<>(followModels.size() / 2);
-            //     private final ArrayList<FollowModel> searchFollowingModels = new ArrayList<>(followingModels.size() / 2);
-            //     private final ArrayList<FollowModel> searchFollowersModels = new ArrayList<>(followersModels.size() / 2);
-            //     private final ArrayList<FollowModel> searchAllFollowing = new ArrayList<>(allFollowing.size() / 2);
-            //
-            //     @Nullable
-            //     @Override
-            //     protected FilterResults performFiltering(@NonNull final CharSequence constraint) {
-            //         searchFollowModels.clear();
-            //         searchFollowingModels.clear();
-            //         searchFollowersModels.clear();
-            //         searchAllFollowing.clear();
-            //
-            //         final int followModelsSize = followModels.size();
-            //         final int followingModelsSize = followingModels.size();
-            //         final int followersModelsSize = followersModels.size();
-            //         final int allFollowingSize = allFollowing.size();
-            //
-            //         int maxSize = followModelsSize;
-            //         if (maxSize < followingModelsSize) maxSize = followingModelsSize;
-            //         if (maxSize < followersModelsSize) maxSize = followersModelsSize;
-            //         if (maxSize < allFollowingSize) maxSize = allFollowingSize;
-            //
-            //         final String query = constraint.toString().toLowerCase();
-            //         FollowModel followModel;
-            //         while (maxSize != -1) {
-            //             if (maxSize < followModelsSize) {
-            //                 followModel = followModels.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchFollowModels.add(followModel);
-            //             }
-            //
-            //             if (maxSize < followingModelsSize) {
-            //                 followModel = followingModels.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchFollowingModels.add(followModel);
-            //             }
-            //
-            //             if (maxSize < followersModelsSize) {
-            //                 followModel = followersModels.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchFollowersModels.add(followModel);
-            //             }
-            //
-            //             if (maxSize < allFollowingSize) {
-            //                 followModel = allFollowing.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchAllFollowing.add(followModel);
-            //             }
-            //
-            //             --maxSize;
-            //         }
-            //
-            //         return null;
-            //     }
-            //
-            //     @Override
-            //     protected void publishResults(final CharSequence query, final FilterResults results) {
-            //         refreshAdapter(searchFollowModels, searchFollowingModels, searchFollowersModels, searchAllFollowing);
-            //     }
-            // };
 
             @Override
             public boolean onQueryTextSubmit(final String query) {
@@ -366,9 +311,15 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
 
             @Override
             public boolean onQueryTextChange(final String query) {
-                // if (Utils.isEmpty(query)) refreshAdapter(followModels, followingModels, followersModels, allFollowing);
+                if (TextUtils.isEmpty(query)) {
+                    searching = false;
+                    // refreshAdapter(followModels, followingModels, followersModels, allFollowing);
+                }
                 // else filter.filter(query.toLowerCase());
-                if (adapter != null) adapter.getFilter().filter(query);
+                if (adapter != null) {
+                    searching = true;
+                    adapter.getFilter().filter(query);
+                }
                 return true;
             }
         });
@@ -383,8 +334,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         else if (isCompare) {
             isCompare = !isCompare;
             listFollows();
-        }
-        else {
+        } else {
             isCompare = !isCompare;
             listCompare();
         }

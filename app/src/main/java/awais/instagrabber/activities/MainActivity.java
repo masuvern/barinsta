@@ -1,5 +1,6 @@
 package awais.instagrabber.activities;
 
+import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -25,11 +26,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.provider.FontRequest;
+import androidx.emoji.text.EmojiCompat;
+import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
@@ -53,6 +58,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.asyncs.SuggestionsFetcher;
+import awais.instagrabber.customviews.emoji.EmojiVariantManager;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.main.FeedFragment;
@@ -61,11 +67,14 @@ import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.services.ActivityCheckerService;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.emoji.EmojiParser;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -139,6 +148,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             bindActivityCheckerService();
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);
+        // Initialise the internal map
+        AppExecutors.getInstance().tasksThread().execute(() -> {
+            EmojiParser.getInstance();
+            EmojiVariantManager.getInstance();
+        });
+        initEmojiCompat();
     }
 
     @Override
@@ -373,7 +388,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             final int selectedItemId = binding.bottomNavView.getSelectedItemId();
@@ -449,12 +464,24 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (navController == null) return;
         NavigationUI.setupWithNavController(toolbar, navController);
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            if (destination.getId() == R.id.directMessagesThreadFragment && arguments != null) {
+                // Set the thread title earlier for better ux
+                final String title = arguments.getString("title");
+                final ActionBar actionBar = getSupportActionBar();
+                if (actionBar != null && !TextUtils.isEmpty(title)) {
+                    actionBar.setTitle(title);
+                }
+            }
             // below is a hack to check if we are at the end of the current stack, to setup the search view
             binding.appBarLayout.setExpanded(true, true);
             final int destinationId = destination.getId();
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             binding.bottomNavView.setVisibility(SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId) ? View.VISIBLE : View.GONE);
+
+            // explicitly hide keyboard when we navigate
+            final View view = getCurrentFocus();
+            Utils.hideKeyboard(view);
         });
     }
 
@@ -636,5 +663,45 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public CollapsingToolbarLayout getCollapsingToolbarView() {
         return binding.collapsingToolbarLayout;
+    }
+
+    public AppBarLayout getAppbarLayout() {
+        return binding.appBarLayout;
+    }
+
+    public void removeLayoutTransition() {
+        binding.getRoot().setLayoutTransition(null);
+    }
+
+    public void setLayoutTransition() {
+        binding.getRoot().setLayoutTransition(new LayoutTransition());
+    }
+
+    private void initEmojiCompat() {
+        // Use a downloadable font for EmojiCompat
+        final FontRequest fontRequest = new FontRequest(
+                "com.google.android.gms.fonts",
+                "com.google.android.gms",
+                "Noto Color Emoji Compat",
+                R.array.com_google_android_gms_fonts_certs);
+        final EmojiCompat.Config config = new FontRequestEmojiCompatConfig(getApplicationContext(), fontRequest);
+        config.setReplaceAll(true)
+              // .setUseEmojiAsDefaultStyle(true)
+              .registerInitCallback(new EmojiCompat.InitCallback() {
+                  @Override
+                  public void onInitialized() {
+                      Log.i(TAG, "EmojiCompat initialized");
+                  }
+
+                  @Override
+                  public void onFailed(@Nullable Throwable throwable) {
+                      Log.e(TAG, "EmojiCompat initialization failed", throwable);
+                  }
+              });
+        EmojiCompat.init(config);
+    }
+
+    public Toolbar getToolbar() {
+        return binding.toolbar;
     }
 }

@@ -28,11 +28,11 @@ public class AccountRepository {
         return instance;
     }
 
-    public void getAccount(final String uid,
+    public void getAccount(final long uid,
                            final RepositoryCallback<Account> callback) {
         // request on the I/O thread
         appExecutors.diskIO().execute(() -> {
-            final Account account = accountDataSource.getAccount(uid);
+            final Account account = accountDataSource.getAccount(String.valueOf(uid));
             // notify on the main thread
             appExecutors.mainThread().execute(() -> {
                 if (callback == null) return;
@@ -81,7 +81,7 @@ public class AccountRepository {
         });
     }
 
-    public void insertOrUpdateAccount(final String uid,
+    public void insertOrUpdateAccount(final long uid,
                                       final String username,
                                       final String cookie,
                                       final String fullName,
@@ -89,8 +89,8 @@ public class AccountRepository {
                                       final RepositoryCallback<Account> callback) {
         // request on the I/O thread
         appExecutors.diskIO().execute(() -> {
-            accountDataSource.insertOrUpdateAccount(uid, username, cookie, fullName, profilePicUrl);
-            final Account updated = accountDataSource.getAccount(uid);
+            accountDataSource.insertOrUpdateAccount(String.valueOf(uid), username, cookie, fullName, profilePicUrl);
+            final Account updated = accountDataSource.getAccount(String.valueOf(uid));
             // notify on the main thread
             appExecutors.mainThread().execute(() -> {
                 if (callback == null) return;

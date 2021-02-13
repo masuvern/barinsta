@@ -37,10 +37,11 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import awais.instagrabber.R;
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostChild;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.workers.DownloadWorker;
 
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
@@ -134,14 +135,25 @@ public final class DownloadUtils {
                                             final String postId,
                                             final String sliderPostfix,
                                             final String displayUrl) {
-        final String fileName = postId + sliderPostfix + "." + getFileExtensionFromUrl(displayUrl);
+        final String fileName = postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
     }
 
     @NonNull
     public static File getTempFile() {
+        return getTempFile(null, null);
+    }
+
+    public static File getTempFile(final String fileName, final String extension) {
         final File dir = getDownloadDir();
-        return new File(dir, UUID.randomUUID().toString());
+        String name = fileName;
+        if (TextUtils.isEmpty(name)) {
+            name = UUID.randomUUID().toString();
+        }
+        if (!TextUtils.isEmpty(extension)) {
+            name += "." + extension;
+        }
+        return new File(dir, name);
     }
 
     /**
@@ -184,23 +196,29 @@ public final class DownloadUtils {
         return "";
     }
 
-    public static List<Boolean> checkDownloaded(@NonNull final FeedModel feedModel) {
+    public static List<Boolean> checkDownloaded(@NonNull final Media media) {
         final List<Boolean> checkList = new LinkedList<>();
-        final File downloadDir = getDownloadDir(null, "@" + feedModel.getProfileModel().getUsername(), true);
-        switch (feedModel.getItemType()) {
+        final User user = media.getUser();
+        String username = "username";
+        if (user != null) {
+            username = user.getUsername();
+        }
+        final File downloadDir = getDownloadDir(null, "@" + username, true);
+        switch (media.getMediaType()) {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
-                final String url = feedModel.getDisplayUrl();
-                final File file = getDownloadSaveFile(downloadDir, feedModel.getShortCode(), url);
+                final String url = ResponseBodyUtils.getImageUrl(media);
+                final File file = getDownloadSaveFile(downloadDir, media.getCode(), url);
                 checkList.add(file.exists());
                 break;
             }
             case MEDIA_TYPE_SLIDER:
-                final List<PostChild> sliderItems = feedModel.getSliderItems();
+                final List<Media> sliderItems = media.getCarouselMedia();
                 for (int i = 0; i < sliderItems.size(); i++) {
-                    final PostChild child = sliderItems.get(i);
-                    final String url = child.getDisplayUrl();
-                    final File file = getDownloadChildSaveFile(downloadDir, feedModel.getShortCode(), i + 1, url);
+                    final Media child = sliderItems.get(i);
+                    if (child == null) continue;
+                    final String url = ResponseBodyUtils.getImageUrl(child);
+                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url);
                     checkList.add(file.exists());
                 }
                 break;
@@ -210,7 +228,7 @@ public final class DownloadUtils {
     }
 
     public static void showDownloadDialog(@NonNull Context context,
-                                          @NonNull final FeedModel feedModel,
+                                          @NonNull final Media feedModel,
                                           final int childPosition) {
         if (childPosition >= 0) {
             final DialogInterface.OnClickListener clickListener = (dialog, which) -> {
@@ -255,45 +273,45 @@ public final class DownloadUtils {
     }
 
     public static void download(@NonNull final Context context,
-                                @NonNull final FeedModel feedModel) {
+                                @NonNull final Media feedModel) {
         download(context, feedModel, -1);
     }
 
     public static void download(@NonNull final Context context,
-                                @NonNull final FeedModel feedModel,
+                                @NonNull final Media feedModel,
                                 final int position) {
         download(context, Collections.singletonList(feedModel), position);
     }
 
     public static void download(@NonNull final Context context,
-                                @NonNull final List<FeedModel> feedModels) {
+                                @NonNull final List<Media> feedModels) {
         download(context, feedModels, -1);
     }
 
     private static void download(@NonNull final Context context,
-                                 @NonNull final List<FeedModel> feedModels,
+                                 @NonNull final List<Media> feedModels,
                                  final int childPositionIfSingle) {
         final Map<String, String> map = new HashMap<>();
-        for (final FeedModel feedModel : feedModels) {
-            final File downloadDir = getDownloadDir(context, "@" + feedModel.getProfileModel().getUsername());
+        for (final Media media : feedModels) {
+            final File downloadDir = getDownloadDir(context, "@" + media.getUser().getUsername());
             if (downloadDir == null) return;
-            switch (feedModel.getItemType()) {
+            switch (media.getMediaType()) {
                 case MEDIA_TYPE_IMAGE:
                 case MEDIA_TYPE_VIDEO: {
-                    final String url = feedModel.getDisplayUrl();
-                    final File file = getDownloadSaveFile(downloadDir, feedModel.getShortCode(), url);
+                    final String url = getUrlOfType(media);
+                    final File file = getDownloadSaveFile(downloadDir, media.getCode(), url);
                     map.put(url, file.getAbsolutePath());
                     break;
                 }
                 case MEDIA_TYPE_SLIDER:
-                    final List<PostChild> sliderItems = feedModel.getSliderItems();
+                    final List<Media> sliderItems = media.getCarouselMedia();
                     for (int i = 0; i < sliderItems.size(); i++) {
                         if (childPositionIfSingle >= 0 && feedModels.size() == 1 && i != childPositionIfSingle) {
                             continue;
                         }
-                        final PostChild child = sliderItems.get(i);
-                        final String url = child.getDisplayUrl();
-                        final File file = getDownloadChildSaveFile(downloadDir, feedModel.getShortCode(), i + 1, url);
+                        final Media child = sliderItems.get(i);
+                        final String url = getUrlOfType(child);
+                        final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url);
                         map.put(url, file.getAbsolutePath());
                     }
                     break;
@@ -301,6 +319,27 @@ public final class DownloadUtils {
             }
         }
         download(context, map);
+    }
+
+    @Nullable
+    private static String getUrlOfType(@NonNull final Media media) {
+        switch (media.getMediaType()) {
+            case MEDIA_TYPE_IMAGE: {
+                return ResponseBodyUtils.getImageUrl(media);
+            }
+            case MEDIA_TYPE_VIDEO: {
+                final List<VideoVersion> videoVersions = media.getVideoVersions();
+                String url = null;
+                if (videoVersions != null && !videoVersions.isEmpty()) {
+                    final VideoVersion videoVersion = videoVersions.get(0);
+                    if (videoVersion != null) {
+                        url = videoVersion.getUrl();
+                    }
+                }
+                return url;
+            }
+        }
+        return null;
     }
 
     public static void download(final Context context,

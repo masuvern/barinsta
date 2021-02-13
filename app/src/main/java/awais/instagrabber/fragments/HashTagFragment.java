@@ -55,11 +55,13 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
+import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.repositories.responses.Location;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -96,8 +98,8 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean isLoggedIn;
     private TagsService tagsService;
     private boolean storiesFetching;
-    private Set<FeedModel> selectedFeedModels;
-    private FeedModel downloadFeedModel;
+    private Set<Media> selectedFeedModels;
+    private Media downloadFeedModel;
     private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_HASHTAG_POSTS_LAYOUT);
     private LayoutHashtagDetailsBinding hashtagDetailsBinding;
@@ -135,27 +137,27 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
             openPostDialog(feedModel, profilePicView, mainPostImage, -1);
         }
 
         @Override
-        public void onSliderClick(final FeedModel feedModel, final int position) {
+        public void onSliderClick(final Media feedModel, final int position) {
             openPostDialog(feedModel, null, null, position);
         }
 
         @Override
-        public void onCommentsClick(final FeedModel feedModel) {
+        public void onCommentsClick(final Media feedModel) {
             final NavDirections commentsAction = HashTagFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getShortCode(),
-                    feedModel.getPostId(),
-                    feedModel.getProfileModel().getId()
+                    feedModel.getCode(),
+                    feedModel.getCode(),
+                    feedModel.getUser().getPk()
             );
             NavHostFragment.findNavController(HashTagFragment.this).navigate(commentsAction);
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
+        public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
@@ -174,8 +176,10 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         @Override
-        public void onLocationClick(final FeedModel feedModel) {
-            final NavDirections action = HashTagFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
+        public void onLocationClick(final Media media) {
+            final Location location = media.getLocation();
+            if (location == null) return;
+            final NavDirections action = HashTagFragmentDirections.actionGlobalLocationFragment(location.getPk());
             NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
         }
 
@@ -185,13 +189,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         @Override
-        public void onNameClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onNameClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
@@ -204,14 +208,14 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(@NonNull final FeedModel feedModel,
+        private void openPostDialog(@NonNull final Media feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
             if (opening) return;
-            if (TextUtils.isEmpty(feedModel.getProfileModel().getUsername())) {
+            if (TextUtils.isEmpty(feedModel.getUser().getUsername())) {
                 opening = true;
-                new PostFetcher(feedModel.getShortCode(), newFeedModel -> {
+                new PostFetcher(feedModel.getCode(), newFeedModel -> {
                     opening = false;
                     if (newFeedModel == null) return;
                     openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
@@ -246,7 +250,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         @Override
-        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+        public void onSelectionChange(final Set<Media> selectedFeedModels) {
             final String title = getString(R.string.number_selected, selectedFeedModels.size());
             if (actionMode != null) {
                 actionMode.setTitle(title);
@@ -355,7 +359,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void init() {
         if (getArguments() == null) return;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         final HashTagFragmentArgs fragmentArgs = HashTagFragmentArgs.fromBundle(getArguments());
         hashtag = fragmentArgs.getHashtag();
         fetchHashtagModel();
@@ -372,7 +376,8 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 final Context context = getContext();
                 if (context == null) return;
                 if (hashtagModel == null) {
-                    Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.error_loading_hashtag, Toast.LENGTH_SHORT).show();
+                    binding.swipeRefreshLayout.setEnabled(false);
                     return;
                 }
                 setTitle();
@@ -410,10 +415,11 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             hashtagDetailsBinding.btnFollowTag.setOnClickListener(v -> {
                 final String cookie = settingsHelper.getString(Constants.COOKIE);
                 final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+                final String ua = settingsHelper.getString(Constants.BROWSER_UA);
                 if (csrfToken != null) {
                     hashtagDetailsBinding.btnFollowTag.setClickable(false);
                     if (!hashtagModel.getFollowing()) {
-                        tagsService.follow(hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
+                        tagsService.follow(ua, hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
                             @Override
                             public void onSuccess(final Boolean result) {
                                 hashtagDetailsBinding.btnFollowTag.setClickable(true);
@@ -441,7 +447,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         });
                         return;
                     }
-                    tagsService.unfollow(hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
+                    tagsService.unfollow(ua, hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
                             hashtagDetailsBinding.btnFollowTag.setClickable(true);
@@ -544,8 +550,10 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         hashtagDetailsBinding.mainHashtagImage.setImageURI(hashtagModel.getSdProfilePic());
         final String postCount = String.valueOf(hashtagModel.getPostCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
-                hashtagModel.getPostCount() > 2000000000L ? 2000000000 : hashtagModel.getPostCount().intValue(),
-                postCount));
+                                                                                                        hashtagModel.getPostCount() > 2000000000L
+                                                                                                        ? 2000000000
+                                                                                                        : hashtagModel.getPostCount().intValue(),
+                                                                                                        postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         hashtagDetailsBinding.mainTagPostCount.setText(span);
@@ -554,7 +562,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!hasStories) return;
             // show stories
             final NavDirections action = HashTagFragmentDirections
-                    .actionHashtagFragmentToStoryViewerFragment(-1, null, true, false, hashtagModel.getName(), hashtagModel.getName(), false, false);
+                    .actionHashtagFragmentToStoryViewerFragment(StoryViewerOptions.forHashtag(hashtagModel.getName()));
             NavHostFragment.findNavController(this).navigate(action);
         });
     }
@@ -571,11 +579,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (!isLoggedIn) return;
         storiesFetching = true;
         storiesService.getUserStory(
-                hashtagModel.getName(),
-                null,
-                false,
-                true,
-                false,
+                StoryViewerOptions.forHashtag(hashtagModel.getName()),
                 new ServiceCallback<List<StoryModel>>() {
                     @Override
                     public void onSuccess(final List<StoryModel> storyModels) {

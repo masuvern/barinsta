@@ -2,6 +2,8 @@ package awais.instagrabber.repositories;
 
 import java.util.Map;
 
+import awais.instagrabber.repositories.responses.LikersResponse;
+import awais.instagrabber.repositories.responses.MediaInfoResponse;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -13,11 +15,11 @@ import retrofit2.http.QueryMap;
 
 public interface MediaRepository {
     @GET("/api/v1/media/{mediaId}/info/")
-    Call<String> fetch(@Path("mediaId") final String mediaId);
+    Call<MediaInfoResponse> fetch(@Path("mediaId") final long mediaId);
 
     @GET("/api/v1/media/{mediaId}/{action}/")
-    Call<String> fetchLikes(@Path("mediaId") final String mediaId,
-                            @Path("action") final String action); // one of "likers" or "comment_likers"
+    Call<LikersResponse> fetchLikes(@Path("mediaId") final String mediaId,
+                                    @Path("action") final String action); // one of "likers" or "comment_likers"
 
     @FormUrlEncoded
     @POST("/api/v1/media/{mediaId}/{action}/")
@@ -52,4 +54,10 @@ public interface MediaRepository {
 
     @GET("/api/v1/language/translate/")
     Call<String> translate(@QueryMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/media/upload_finish/")
+    Call<String> uploadFinish(@Header("retry_context") final String retryContext,
+                              @QueryMap Map<String, String> queryParams,
+                              @FieldMap final Map<String, String> signedForm);
 }

@@ -5,15 +5,14 @@ import androidx.annotation.NonNull;
 import java.util.Date;
 
 import awais.instagrabber.models.enums.NotificationType;
-import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public final class NotificationModel {
     private final String id;
-    private final String userId;
+    private final long userId;
     private final String username;
     private final String profilePicUrl;
-    private final String postId;
+    private final long postId;
     private final String previewUrl;
     private final NotificationType type;
     private final CharSequence text;
@@ -22,14 +21,14 @@ public final class NotificationModel {
     public NotificationModel(final String id,
                              final String text,
                              final long timestamp,
-                             final String userId,
+                             final long userId,
                              final String username,
                              final String profilePicUrl,
-                             final String postId,
+                             final long postId,
                              final String previewUrl,
                              final NotificationType type) {
         this.id = id;
-        this.text = TextUtils.hasMentions(text) ? TextUtils.getMentionText(text) : text;
+        this.text = text;
         this.timestamp = timestamp;
         this.userId = userId;
         this.username = username;
@@ -56,7 +55,7 @@ public final class NotificationModel {
         return Utils.datetimeParser.format(new Date(timestamp * 1000L));
     }
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -68,7 +67,7 @@ public final class NotificationModel {
         return profilePicUrl;
     }
 
-    public String getPostId() {
+    public long getPostId() {
         return postId;
     }
 

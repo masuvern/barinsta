@@ -6,10 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/black_a80">
 
-    <!--<FrameLayout-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent">-->
-
     <awais.instagrabber.customviews.drawee.DraggableZoomableDraweeView
         android:id="@+id/post_image"
         android:layout_width="match_parent"
@@ -24,8 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:background="@mipmap/ic_launcher"
-        tools:visibility="gone" />
-    <!--</FrameLayout>-->
+        tools:visibility="visible" />
 
     <include
         android:id="@+id/video_post"
@@ -53,86 +48,112 @@
         android:id="@+id/profile_pic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="12dp"
         android:transitionName="profile_pic"
         app:layout_constraintBottom_toBottomOf="@id/top_bg"
         app:layout_constraintEnd_toStartOf="@id/title"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/top_bg"
         app:size="regular" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
         android:ellipsize="marquee"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         android:textColor="@color/white"
-        android:textStyle="bold"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toTopOf="@id/subtitle"
-        app:layout_constraintEnd_toStartOf="@id/isVerified"
+        app:layout_constraintEnd_toStartOf="@id/options"
         app:layout_constraintStart_toEndOf="@id/profile_pic"
         app:layout_constraintTop_toTopOf="@id/profile_pic"
         tools:text="Username Username Username" />
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/isVerified"
-        android:layout_width="20dp"
-        android:layout_height="0dp"
-        android:scaleType="fitCenter"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/title"
-        app:layout_constraintStart_toEndOf="@id/title"
-        app:layout_constraintTop_toTopOf="@id/title"
-        app:srcCompat="@drawable/verified"
-        tools:visibility="visible" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/righttitle"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="4dp"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-        android:textColor="@color/grey_600"
-        app:layout_constraintBottom_toBottomOf="@id/title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/isVerified"
-        app:layout_constraintTop_toTopOf="@id/title"
-        tools:text="Full name Full name Full name Full name Full name Full name Full name " />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/profile_pic"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/options"
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@id/title"
-        tools:text="Location"
+        tools:text="Full name Full name Full name Full name Full name Full name Full name " />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/options"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/top_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/top_bg"
+        app:srcCompat="@drawable/ic_more_vert_24"
+        app:tint="@color/white"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/user_details_group"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="top_bg, profile_pic,title,subtitle,options"
         tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/media_counter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/rounder_corner_semi_black_bg"
         android:gravity="center"
-        android:padding="5dp"
+        android:padding="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@android:color/white"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_bg"
         tools:text="1/5"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/location"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:elevation="0dp"
+        android:ellipsize="end"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:maxWidth="200dp"
+        android:maxLines="1"
+        android:minHeight="32dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textAlignment="viewStart"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
+        app:backgroundTint="@color/black_a50"
+        app:elevation="0dp"
+        app:icon="@drawable/ic_round_location_on_24"
+        app:iconSize="16dp"
+        app:iconTint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bg"
+        app:rippleColor="@color/grey_600"
+        tools:text="Location, Location, Location, Location, "
         tools:visibility="visible" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -159,10 +180,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@null">
+
                 <LinearLayout
-                    android:id="@+id/captionFrame"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <awais.instagrabber.customviews.RamboTextViewV2
@@ -176,55 +197,55 @@
                         android:padding="16dp"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                         android:textColor="@color/white"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/translateTitle"
                         tools:text="Text text text" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/editCaption"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginLeft="16dp"
-                        android:background="@null"
-                        android:gravity="center_vertical"
-                        android:text="@string/edit_caption"
-                        android:textColor="?android:textColorSecondary"
-                        android:textSize="16dp"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toTopOf="@id/translatedCaption"
-                        app:layout_constraintTop_toBottomOf="@id/caption" />
+                    <!--<androidx.appcompat.widget.AppCompatTextView-->
+                    <!--    android:id="@+id/editCaption"-->
+                    <!--    android:layout_width="match_parent"-->
+                    <!--    android:layout_height="wrap_content"-->
+                    <!--    android:layout_marginStart="16dp"-->
+                    <!--    android:layout_marginTop="8dp"-->
+                    <!--    android:background="@null"-->
+                    <!--    android:gravity="center_vertical"-->
+                    <!--    android:text="@string/edit_caption"-->
+                    <!--    android:textColor="?android:textColorSecondary"-->
+                    <!--    android:textSize="16sp"-->
+                    <!--    android:visibility="gone"-->
+                    <!--    app:layout_constraintBottom_toTopOf="@id/translatedCaption"-->
+                    <!--    app:layout_constraintTop_toBottomOf="@id/caption"-->
+                    <!--    tools:visibility="visible" />-->
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/translateTitle"
+                        android:id="@+id/translate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginLeft="16dp"
                         android:background="@null"
-                        android:visibility="visible"
                         android:gravity="center_vertical"
-                        app:layout_constraintTop_toBottomOf="@id/caption"
-                        app:layout_constraintBottom_toTopOf="@id/translatedCaption"
+                        android:paddingStart="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="8dp"
                         android:text="@string/translate_caption"
-                        android:textColor="?android:textColorSecondary"
-                        android:textSize="16dp"/>
+                        android:textColor="@color/blue_600"
+                        android:textSize="16sp"
+                        android:visibility="visible" />
 
-                    <awais.instagrabber.customviews.RamboTextViewV2
-                        android:id="@+id/translatedCaption"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:visibility="gone"
-                        android:background="@null"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:padding="16dp"
-                        app:layout_constraintTop_toBottomOf="@id/translateTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                        android:textColor="@color/white"
-                        tools:text="Text text text" />
+                    <!--<awais.instagrabber.customviews.RamboTextViewV2-->
+                    <!--    android:id="@+id/translatedCaption"-->
+                    <!--    android:layout_width="match_parent"-->
+                    <!--    android:layout_height="wrap_content"-->
+                    <!--    android:layout_gravity="bottom"-->
+                    <!--    android:background="@null"-->
+                    <!--    android:clickable="true"-->
+                    <!--    android:focusable="true"-->
+                    <!--    android:padding="16dp"-->
+                    <!--    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"-->
+                    <!--    android:textColor="@color/white"-->
+                    <!--    android:visibility="gone"-->
+                    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+                    <!--    app:layout_constraintTop_toBottomOf="@id/translateTitle"-->
+                    <!--    tools:text="Text text text"-->
+                    <!--    tools:visibility="visible" />-->
                 </LinearLayout>
             </ScrollView>
         </androidx.core.widget.NestedScrollView>
@@ -239,7 +260,7 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_bg_barrier"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <View
         android:id="@+id/bottom_bg"
@@ -253,10 +274,11 @@
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_bg_barrier"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="bottom_bg,likes_count,comments_count" />
+        app:constraint_referenced_ids="likes_count,comments_count,views_count" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/likes_count"
@@ -264,13 +286,13 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/date"
+        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
         app:layout_constraintEnd_toStartOf="@id/comments_count"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bg_barrier"
         tools:text="9999999999 likes"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/comments_count"
@@ -278,13 +300,13 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/date"
+        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
         app:layout_constraintEnd_toStartOf="@id/views_count"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toEndOf="@id/likes_count"
-        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bg_barrier"
         tools:text="9999999 comments"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/views_count"
@@ -292,12 +314,20 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/date"
+        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/comments_count"
-        app:layout_constraintTop_toTopOf="@id/bottom_bg_barrier"
+        app:layout_constraintTop_toBottomOf="@id/bottom_bg_barrier"
         tools:text="9999999999 views"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/counts_barrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="date" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/date"
@@ -305,21 +335,19 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/buttons_barrier"
+        app:layout_constraintTop_toBottomOf="@id/counts_barrier"
         tools:text="2020-11-07 11:18:55"
-        app:layout_constraintTop_toBottomOf="@id/likes_count"
-        app:layout_constraintBottom_toBottomOf="@id/buttons_barrier" />
+        tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/buttons_barrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="true"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="likes_count,comments_count,views_count" />
+        app:constraint_referenced_ids="date" />
 
-    <!--android:text="@string/caption"-->
-    <!--app:iconGravity="top"-->
-    <!--android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        android:textColor="@color/white"-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/caption_toggle"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -338,10 +366,6 @@
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
 
-    <!--android:text="@string/like_without_count"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        android:textColor="@color/white"
-        app:iconGravity="top"-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/like"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -360,10 +384,6 @@
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
 
-    <!--android:text="@string/comment"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        android:textColor="@color/white"
-        app:iconGravity="top"-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/comment"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -382,10 +402,6 @@
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
 
-    <!--android:text="@string/controls"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        android:textColor="@color/white"
-        app:iconGravity="top"-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/player_controls_toggle"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -404,10 +420,6 @@
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
 
-    <!--android:text="@string/save"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        android:textColor="@color/white"
-        app:iconGravity="top"-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/save"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -444,10 +456,6 @@
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
 
-    <!--android:text="@string/action_download"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        android:textColor="@color/white"
-        app:iconGravity="top"-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/download"
         style="@style/Widget.MaterialComponents.Button.TextButton"

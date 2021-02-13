@@ -14,12 +14,13 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NetworkUtils;
+import awais.instagrabber.utils.Utils;
 
 public final class UsernameFetcher extends AsyncTask<Void, Void, String> {
     private final FetchListener<String> fetchListener;
-    private final String uid;
+    private final long uid;
 
-    public UsernameFetcher(final String uid, final FetchListener<String> fetchListener) {
+    public UsernameFetcher(final long uid, final FetchListener<String> fetchListener) {
         this.uid = uid;
         this.fetchListener = fetchListener;
     }
@@ -31,7 +32,7 @@ public final class UsernameFetcher extends AsyncTask<Void, Void, String> {
 
         try {
             final HttpURLConnection conn = (HttpURLConnection) new URL("https://i.instagram.com/api/v1/users/" + uid + "/info/").openConnection();
-            conn.setRequestProperty("User-Agent", Constants.USER_AGENT);
+            conn.setRequestProperty("User-Agent", Utils.settingsHelper.getString(Constants.BROWSER_UA));
             conn.setUseCaches(true);
 
             final JSONObject user;

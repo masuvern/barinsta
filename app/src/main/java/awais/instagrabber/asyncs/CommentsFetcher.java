@@ -17,7 +17,8 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.CommentModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.FriendshipStatus;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -106,33 +107,22 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
 
                             if (childComment != null) {
                                 final JSONObject owner = childComment.getJSONObject("owner");
-                                final ProfileModel profileModel = new ProfileModel(false,
-                                                                                   false,
-                                                                                   false,
-                                                                                   owner.getString(Constants.EXTRAS_ID),
-                                                                                   owner.getString(Constants.EXTRAS_USERNAME),
-                                                                                   null,
-                                                                                   null,
-                                                                                   null,
-                                                                                   owner.getString("profile_pic_url"),
-                                                                                   null,
-                                                                                   0,
-                                                                                   0,
-                                                                                   0,
-                                                                                   false,
-                                                                                   false,
-                                                                                   false,
-                                                                                   false,
-                                                                                   false);
-
+                                final User user = new User(
+                                        owner.optLong(Constants.EXTRAS_ID, 0),
+                                        owner.getString(Constants.EXTRAS_USERNAME),
+                                        null,
+                                        false,
+                                        owner.getString("profile_pic_url"),
+                                        null,
+                                        new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
+                                        false, false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null);
                                 final JSONObject likedBy = childComment.optJSONObject("edge_liked_by");
-
                                 commentModels.add(new CommentModel(childComment.getString(Constants.EXTRAS_ID),
                                                                    childComment.getString("text"),
                                                                    childComment.getLong("created_at"),
                                                                    likedBy != null ? likedBy.optLong("count", 0) : 0,
                                                                    childComment.getBoolean("viewer_has_liked"),
-                                                                   profileModel));
+                                                                   user));
                             }
                         }
                     }
@@ -156,138 +146,121 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
     @NonNull
     private synchronized List<CommentModel> getParentComments() {
         final List<CommentModel> commentModels = new ArrayList<>();
-            final String url = "https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables=" +
-                    "{\"shortcode\":\"" + shortCode + "\",\"first\":50,\"after\":\"" + endCursor.replace("\"", "\\\"") + "\"}";
+        final String url = "https://www.instagram.com/graphql/query/?query_hash=bc3296d1ce80a24b1b6e40b1e72903f5&variables=" +
+                "{\"shortcode\":\"" + shortCode + "\",\"first\":50,\"after\":\"" + endCursor.replace("\"", "\\\"") + "\"}";
         try {
-                final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-                conn.setUseCaches(false);
-                conn.connect();
+            final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setUseCaches(false);
+            conn.connect();
 
-                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) return null;
-                else {
-                    final JSONObject parentComments = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("data")
-                                                                                                           .getJSONObject("shortcode_media")
-                                                                                                           .getJSONObject(
-                                                                                                                   "edge_media_to_parent_comment");
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) return null;
+            else {
+                final JSONObject parentComments = new JSONObject(NetworkUtils.readFromConnection(conn)).getJSONObject("data")
+                                                                                                       .getJSONObject("shortcode_media")
+                                                                                                       .getJSONObject(
+                                                                                                               "edge_media_to_parent_comment");
 
-                    final JSONObject pageInfo = parentComments.getJSONObject("page_info");
-                    final String foundEndCursor = pageInfo.optString("end_cursor");
-                    final boolean hasNextPage = pageInfo.optBoolean("has_next_page", !TextUtils.isEmpty(foundEndCursor));
+                final JSONObject pageInfo = parentComments.getJSONObject("page_info");
+                final String foundEndCursor = pageInfo.optString("end_cursor");
+                final boolean hasNextPage = pageInfo.optBoolean("has_next_page", !TextUtils.isEmpty(foundEndCursor));
 
-                    // final boolean containsToken = endCursor.contains("bifilter_token");
-                    // if (!Utils.isEmpty(endCursor) && (containsToken || endCursor.contains("cached_comments_cursor"))) {
-                    //     final JSONObject endCursorObject = new JSONObject(endCursor);
-                    //     endCursor = endCursorObject.optString("cached_comments_cursor");
-                    //
-                    //     if (!Utils.isEmpty(endCursor))
-                    //         endCursor = "{\\\"cached_comments_cursor\\\": \\\"" + endCursor + "\\\", ";
-                    //     else
-                    //         endCursor = "{";
-                    //
-                    //     endCursor = endCursor + "\\\"bifilter_token\\\": \\\"" + endCursorObject.getString("bifilter_token") + "\\\"}";
-                    // }
-                    // else if (containsToken) endCursor = null;
+                // final boolean containsToken = endCursor.contains("bifilter_token");
+                // if (!Utils.isEmpty(endCursor) && (containsToken || endCursor.contains("cached_comments_cursor"))) {
+                //     final JSONObject endCursorObject = new JSONObject(endCursor);
+                //     endCursor = endCursorObject.optString("cached_comments_cursor");
+                //
+                //     if (!Utils.isEmpty(endCursor))
+                //         endCursor = "{\\\"cached_comments_cursor\\\": \\\"" + endCursor + "\\\", ";
+                //     else
+                //         endCursor = "{";
+                //
+                //     endCursor = endCursor + "\\\"bifilter_token\\\": \\\"" + endCursorObject.getString("bifilter_token") + "\\\"}";
+                // }
+                // else if (containsToken) endCursor = null;
 
-                    final JSONArray comments = parentComments.getJSONArray("edges");
-                    final int commentsLen = comments.length();
-                    for (int i = 0; i < commentsLen; ++i) {
-                        final JSONObject comment = comments.getJSONObject(i).getJSONObject("node");
+                final JSONArray comments = parentComments.getJSONArray("edges");
+                final int commentsLen = comments.length();
+                for (int i = 0; i < commentsLen; ++i) {
+                    final JSONObject comment = comments.getJSONObject(i).getJSONObject("node");
 
-                        final JSONObject owner = comment.getJSONObject("owner");
-                        final ProfileModel profileModel = new ProfileModel(false,
-                                                                           false,
-                                                                           owner.optBoolean("is_verified"),
-                                                                           owner.getString(Constants.EXTRAS_ID),
-                                                                           owner.getString(Constants.EXTRAS_USERNAME),
-                                                                           null,
-                                                                           null,
-                                                                           null,
-                                                                           owner.getString("profile_pic_url"),
-                                                                           null,
-                                                                           0,
-                                                                           0,
-                                                                           0,
-                                                                           false,
-                                                                           false,
-                                                                           false,
-                                                                           false,
-                                                                           false);
+                    final JSONObject owner = comment.getJSONObject("owner");
+                    final User user = new User(
+                            owner.optLong(Constants.EXTRAS_ID, 0),
+                            owner.getString(Constants.EXTRAS_USERNAME),
+                            null,
+                            false,
+                            owner.getString("profile_pic_url"),
+                            null,
+                            new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
+                            owner.optBoolean("is_verified"),
+                            false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null);
+                    final JSONObject likedBy = comment.optJSONObject("edge_liked_by");
+                    final String commentId = comment.getString(Constants.EXTRAS_ID);
+                    final CommentModel commentModel = new CommentModel(commentId,
+                                                                       comment.getString("text"),
+                                                                       comment.getLong("created_at"),
+                                                                       likedBy != null ? likedBy.optLong("count", 0) : 0,
+                                                                       comment.getBoolean("viewer_has_liked"),
+                                                                       user);
+                    if (i == 0 && !foundEndCursor.contains("tao_cursor"))
+                        commentModel.setPageCursor(hasNextPage, TextUtils.isEmpty(foundEndCursor) ? null : foundEndCursor);
+                    JSONObject tempJsonObject;
+                    final JSONArray childCommentsArray;
+                    final int childCommentsLen;
+                    if ((tempJsonObject = comment.optJSONObject("edge_threaded_comments")) != null &&
+                            (childCommentsArray = tempJsonObject.optJSONArray("edges")) != null
+                            && (childCommentsLen = childCommentsArray.length()) > 0) {
 
-                        final JSONObject likedBy = comment.optJSONObject("edge_liked_by");
-                        final String commentId = comment.getString(Constants.EXTRAS_ID);
-                        final CommentModel commentModel = new CommentModel(commentId,
-                                                                           comment.getString("text"),
-                                                                           comment.getLong("created_at"),
-                                                                           likedBy != null ? likedBy.optLong("count", 0) : 0,
-                                                                           comment.getBoolean("viewer_has_liked"),
-                                                                           profileModel);
-                        if (i == 0 && !foundEndCursor.contains("tao_cursor"))
-                            commentModel.setPageCursor(hasNextPage, TextUtils.isEmpty(foundEndCursor) ? null : foundEndCursor);
-                        JSONObject tempJsonObject;
-                        final JSONArray childCommentsArray;
-                        final int childCommentsLen;
-                        if ((tempJsonObject = comment.optJSONObject("edge_threaded_comments")) != null &&
-                                (childCommentsArray = tempJsonObject.optJSONArray("edges")) != null
-                                && (childCommentsLen = childCommentsArray.length()) > 0) {
-
-                            final String childEndCursor;
-                            final boolean childHasNextPage;
-                            if ((tempJsonObject = tempJsonObject.optJSONObject("page_info")) != null) {
-                                childEndCursor = tempJsonObject.optString("end_cursor");
-                                childHasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
-                            } else {
-                                childEndCursor = null;
-                                childHasNextPage = false;
-                            }
-
-                            final List<CommentModel> childCommentModels = new ArrayList<>();
-                            for (int j = 0; j < childCommentsLen; ++j) {
-                                final JSONObject childComment = childCommentsArray.getJSONObject(j).getJSONObject("node");
-
-                                tempJsonObject = childComment.getJSONObject("owner");
-                                final ProfileModel childProfileModel = new ProfileModel(false,
-                                                                                        false,
-                                                                                        tempJsonObject.optBoolean("is_verified"),
-                                                                                        tempJsonObject.getString(Constants.EXTRAS_ID),
-                                                                                        tempJsonObject.getString(Constants.EXTRAS_USERNAME),
-                                                                                        null,
-                                                                                        null,
-                                                                                        null,
-                                                                                        tempJsonObject.getString("profile_pic_url"),
-                                                                                        null,
-                                                                                        0,
-                                                                                        0,
-                                                                                        0,
-                                                                                        false,
-                                                                                        false,
-                                                                                        false,
-                                                                                        false,
-                                                                                        false);
-
-                                tempJsonObject = childComment.optJSONObject("edge_liked_by");
-                                childCommentModels.add(new CommentModel(childComment.getString(Constants.EXTRAS_ID),
-                                                                        childComment.getString("text"),
-                                                                        childComment.getLong("created_at"),
-                                                                        tempJsonObject != null ? tempJsonObject.optLong("count", 0) : 0,
-                                                                        childComment.getBoolean("viewer_has_liked"),
-                                                                        childProfileModel));
-                            }
-                            childCommentModels.get(childCommentsLen - 1).setPageCursor(childHasNextPage, childEndCursor);
-                            commentModel.setChildCommentModels(childCommentModels);
+                        final String childEndCursor;
+                        final boolean childHasNextPage;
+                        if ((tempJsonObject = tempJsonObject.optJSONObject("page_info")) != null) {
+                            childEndCursor = tempJsonObject.optString("end_cursor");
+                            childHasNextPage = tempJsonObject.optBoolean("has_next_page", !TextUtils.isEmpty(childEndCursor));
+                        } else {
+                            childEndCursor = null;
+                            childHasNextPage = false;
                         }
-                        commentModels.add(commentModel);
-                    }
-                }
 
-                conn.disconnect();
-            } catch (final Exception e) {
-                if (logCollector != null)
-                    logCollector.appendException(e, LogCollector.LogFile.ASYNC_COMMENTS_FETCHER, "getParentComments",
-                                                 new Pair<>("commentModelsList.size", commentModels.size()));
-                if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
-                if (fetchListener != null) fetchListener.onFailure(e);
-                return null;
+                        final List<CommentModel> childCommentModels = new ArrayList<>();
+                        for (int j = 0; j < childCommentsLen; ++j) {
+                            final JSONObject childComment = childCommentsArray.getJSONObject(j).getJSONObject("node");
+
+                            tempJsonObject = childComment.getJSONObject("owner");
+                            final User childUser = new User(
+                                    tempJsonObject.optLong(Constants.EXTRAS_ID, 0),
+                                    tempJsonObject.getString(Constants.EXTRAS_USERNAME),
+                                    null,
+                                    false,
+                                    tempJsonObject.getString("profile_pic_url"),
+                                    null,
+                                    new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
+                                    tempJsonObject.optBoolean("is_verified"), false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0,
+                                    null, null);
+
+                            tempJsonObject = childComment.optJSONObject("edge_liked_by");
+                            childCommentModels.add(new CommentModel(childComment.getString(Constants.EXTRAS_ID),
+                                                                    childComment.getString("text"),
+                                                                    childComment.getLong("created_at"),
+                                                                    tempJsonObject != null ? tempJsonObject.optLong("count", 0) : 0,
+                                                                    childComment.getBoolean("viewer_has_liked"),
+                                                                    childUser));
+                        }
+                        childCommentModels.get(childCommentsLen - 1).setPageCursor(childHasNextPage, childEndCursor);
+                        commentModel.setChildCommentModels(childCommentModels);
+                    }
+                    commentModels.add(commentModel);
+                }
             }
+
+            conn.disconnect();
+        } catch (final Exception e) {
+            if (logCollector != null)
+                logCollector.appendException(e, LogCollector.LogFile.ASYNC_COMMENTS_FETCHER, "getParentComments",
+                                             new Pair<>("commentModelsList.size", commentModels.size()));
+            if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
+            if (fetchListener != null) fetchListener.onFailure(e);
+            return null;
+        }
         return commentModels;
     }
 }

@@ -35,8 +35,7 @@
         app:destination="@id/location_nav_graph">
         <argument
             android:name="locationId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <action

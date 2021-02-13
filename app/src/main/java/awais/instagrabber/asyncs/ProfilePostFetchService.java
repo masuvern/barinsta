@@ -4,9 +4,9 @@ import java.util.List;
 
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -15,12 +15,12 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "ProfilePostFetchService";
     private final ProfileService profileService;
     private final GraphQLService graphQLService;
-    private final ProfileModel profileModel;
+    private final User profileModel;
     private final boolean isLoggedIn;
     private String nextMaxId;
     private boolean moreAvailable;
 
-    public ProfilePostFetchService(final ProfileModel profileModel, final boolean isLoggedIn) {
+    public ProfilePostFetchService(final User profileModel, final boolean isLoggedIn) {
         this.profileModel = profileModel;
         this.isLoggedIn = isLoggedIn;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
@@ -28,8 +28,8 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     }
 
     @Override
-    public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
-        final ServiceCallback cb = new ServiceCallback<PostsFetchResponse>() {
+    public void fetch(final FetchListener<List<Media>> fetchListener) {
+        final ServiceCallback<PostsFetchResponse> cb = new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
                 if (result == null) return;
@@ -48,8 +48,8 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
                 }
             }
         };
-        if (isLoggedIn) profileService.fetchPosts(profileModel.getId(), nextMaxId, cb);
-        else graphQLService.fetchProfilePosts(profileModel.getId(), 30, nextMaxId, cb);
+        if (isLoggedIn) profileService.fetchPosts(profileModel.getPk(), nextMaxId, cb);
+        else graphQLService.fetchProfilePosts(profileModel.getPk(), 30, nextMaxId, cb);
     }
 
     @Override

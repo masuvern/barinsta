@@ -30,7 +30,7 @@ public final class UpdateChecker extends AsyncTask<Void, Void, Boolean> {
             HttpURLConnection conn =
                     (HttpURLConnection) new URL("https://f-droid.org/api/v1/packages/me.austinhuang.instagrabber").openConnection();
             conn.setUseCaches(false);
-            conn.setRequestProperty("User-Agent", Constants.A_USER_AGENT);
+            conn.setRequestProperty("User-Agent", "https://Barinsta.AustinHuang.me / mailto:Barinsta@AustinHuang.me");
             conn.connect();
 
             final int responseCode = conn.getResponseCode();

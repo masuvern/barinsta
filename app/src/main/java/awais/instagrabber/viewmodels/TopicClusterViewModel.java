@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
 
 public class TopicClusterViewModel extends ViewModel {
     private MutableLiveData<List<TopicCluster>> list;

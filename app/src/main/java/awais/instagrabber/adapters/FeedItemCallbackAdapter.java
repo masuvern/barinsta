@@ -2,20 +2,21 @@ package awais.instagrabber.adapters;
 
 import android.view.View;
 
-import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.repositories.responses.Media;
+
 
 public class FeedItemCallbackAdapter implements FeedAdapterV2.FeedItemCallback {
     @Override
-    public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {}
+    public void onPostClick(final Media media, final View profilePicView, final View mainPostImage) {}
 
     @Override
-    public void onProfilePicClick(final FeedModel feedModel, final View profilePicView) {}
+    public void onProfilePicClick(final Media media, final View profilePicView) {}
 
     @Override
-    public void onNameClick(final FeedModel feedModel, final View profilePicView) {}
+    public void onNameClick(final Media media, final View profilePicView) {}
 
     @Override
-    public void onLocationClick(final FeedModel feedModel) {}
+    public void onLocationClick(final Media media) {}
 
     @Override
     public void onMentionClick(final String mention) {}
@@ -24,10 +25,10 @@ public class FeedItemCallbackAdapter implements FeedAdapterV2.FeedItemCallback {
     public void onHashtagClick(final String hashtag) {}
 
     @Override
-    public void onCommentsClick(final FeedModel feedModel) {}
+    public void onCommentsClick(final Media media) {}
 
     @Override
-    public void onDownloadClick(final FeedModel feedModel, final int childPosition) {}
+    public void onDownloadClick(final Media media, final int childPosition) {}
 
     @Override
     public void onEmailClick(final String emailId) {}
@@ -36,5 +37,5 @@ public class FeedItemCallbackAdapter implements FeedAdapterV2.FeedItemCallback {
     public void onURLClick(final String url) {}
 
     @Override
-    public void onSliderClick(final FeedModel feedModel, final int position) {}
+    public void onSliderClick(final Media media, final int position) {}
 }

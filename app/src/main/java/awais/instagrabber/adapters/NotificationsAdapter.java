@@ -83,7 +83,7 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
             else if (o1.getType() == NotificationType.REQUEST) return -1;
             else if (o2.getType() == NotificationType.REQUEST) return 1;
             // timestamp
-            return o1.getTimestamp() > o2.getTimestamp() ? -1 : (o1.getTimestamp() == o2.getTimestamp() ? 0 : 1);
+            return Long.compare(o2.getTimestamp(), o1.getTimestamp());
         });
         return listCopy;
     }

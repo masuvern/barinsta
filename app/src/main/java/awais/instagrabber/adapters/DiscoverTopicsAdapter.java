@@ -10,7 +10,8 @@ import androidx.recyclerview.widget.ListAdapter;
 
 import awais.instagrabber.adapters.viewholder.TopicClusterViewHolder;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
-import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
+import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class DiscoverTopicsAdapter extends ListAdapter<TopicCluster, TopicClusterViewHolder> {
     private static final DiffUtil.ItemCallback<TopicCluster> DIFF_CALLBACK = new DiffUtil.ItemCallback<TopicCluster>() {
@@ -21,7 +22,8 @@ public class DiscoverTopicsAdapter extends ListAdapter<TopicCluster, TopicCluste
 
         @Override
         public boolean areContentsTheSame(@NonNull final TopicCluster oldItem, @NonNull final TopicCluster newItem) {
-            return oldItem.getCoverMedia().getDisplayUrl().equals(newItem.getCoverMedia().getDisplayUrl())
+            final String oldThumbUrl = ResponseBodyUtils.getThumbUrl(oldItem.getCoverMedia());
+            return oldThumbUrl != null && oldThumbUrl.equals(ResponseBodyUtils.getThumbUrl(newItem.getCoverMedia()))
                     && oldItem.getTitle().equals(newItem.getTitle());
         }
     };
@@ -38,7 +40,7 @@ public class DiscoverTopicsAdapter extends ListAdapter<TopicCluster, TopicCluste
     public TopicClusterViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         final ItemDiscoverTopicBinding binding = ItemDiscoverTopicBinding.inflate(layoutInflater, parent, false);
-        return new TopicClusterViewHolder(binding, onTopicClickListener);
+        return new TopicClusterViewHolder(binding, onTopicClickListener, null);
     }
 
     @Override

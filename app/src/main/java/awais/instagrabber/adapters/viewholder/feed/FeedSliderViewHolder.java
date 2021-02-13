@@ -13,8 +13,7 @@ import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.SliderCallbackAdapter;
 import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.databinding.ItemFeedSliderBinding;
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.PostChild;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.Utils;
 
@@ -39,8 +38,8 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
     }
 
     @Override
-    public void bindItem(final FeedModel feedModel) {
-        final List<PostChild> sliderItems = feedModel.getSliderItems();
+    public void bindItem(final Media feedModel) {
+        final List<Media> sliderItems = feedModel.getCarouselMedia();
         final int sliderItemLen = sliderItems != null ? sliderItems.size() : 0;
         if (sliderItemLen <= 0) return;
         final String text = "1/" + sliderItemLen;
@@ -68,7 +67,7 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
         adapter.submitList(sliderItems);
     }
 
-    private void setDimensions(final View view, final PostChild model) {
+    private void setDimensions(final View view, final Media model) {
         final ViewGroup.LayoutParams layoutParams = binding.mediaList.getLayoutParams();
         int requiredWidth = layoutParams.width;
         if (requiredWidth <= 0) {
@@ -86,10 +85,10 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
         setLayoutParamDimens(binding.mediaList, model);
     }
 
-    private void setLayoutParamDimens(final View view, final PostChild model) {
+    private void setLayoutParamDimens(final View view, final Media model) {
         final int requiredWidth = view.getMeasuredWidth();
         final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        final int spanHeight = NumberUtils.getResultingHeight(requiredWidth, model.getHeight(), model.getWidth());
+        final int spanHeight = NumberUtils.getResultingHeight(requiredWidth, model.getOriginalHeight(), model.getOriginalWidth());
         layoutParams.height = spanHeight == 0 ? requiredWidth + 1 : spanHeight;
         view.requestLayout();
     }

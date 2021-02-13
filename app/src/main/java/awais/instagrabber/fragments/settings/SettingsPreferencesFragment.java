@@ -26,7 +26,9 @@ import awais.instagrabber.dialogs.TimeSettingsDialog;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DirectoryChooser;
+import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.UserAgentUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
@@ -40,7 +42,7 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         final Context context = getContext();
         if (context == null) return;
         final PreferenceCategory generalCategory = new PreferenceCategory(context);
@@ -85,12 +87,12 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
             loggedInUsersPreferenceCategory.addPreference(getMarkDMSeenPreference());
             loggedInUsersPreferenceCategory.addPreference(getEnableActivityNotificationsPreference());
         }
-//        else {
-//            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
-//            screen.addPreference(anonUsersPreferenceCategory);
-//            anonUsersPreferenceCategory.setIconSpaceReserved(false);
-//            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
-//        }
+        //        else {
+        //            final PreferenceCategory anonUsersPreferenceCategory = new PreferenceCategory(context);
+        //            screen.addPreference(anonUsersPreferenceCategory);
+        //            anonUsersPreferenceCategory.setIconSpaceReserved(false);
+        //            anonUsersPreferenceCategory.setTitle(R.string.anonymous_settings);
+        //        }
     }
 
     private Preference getLanguagePreference() {
@@ -111,6 +113,9 @@ public class SettingsPreferencesFragment extends BasePreferencesFragment {
         preference.setEntryValues(values);
         preference.setOnPreferenceChangeListener((preference1, newValue) -> {
             shouldRecreate();
+            final int appUaCode = settingsHelper.getInteger(Constants.APP_UA_CODE);
+            final String appUa = UserAgentUtils.generateAppUA(appUaCode, LocaleUtils.getCurrentLocale().getLanguage());
+            settingsHelper.putString(Constants.APP_UA, appUa);
             return true;
         });
         return preference;
