@@ -54,6 +54,7 @@
     <string name="main_posts_following">%s seguidos </string>
     <string name="post_viewer_autoplay_video">Autorreproducir vídeos</string>
     <string name="post_viewer_muted_autoplay">Siempre silenciar vídeos</string>
+    <string name="post_viewer_show_captions">Mostrar siempre subtítulos del post</string>
     <string name="post_viewer_download_dialog_title">Seleccionar qué descargar</string>
     <string name="post_viewer_download_current">Actual</string>
     <string name="post_viewer_download_album">Todo el álbum</string>
@@ -206,8 +207,8 @@
     <string name="followers_type_following">Siguiendo</string>
     <string name="followers_compare">Comparando seguidores &amp; seguidos</string>
     <string name="followers_both_following">Ambos se siguen mutuamente</string>
-    <string name="followers_not_following">no está siguiendo %s</string>
-    <string name="followers_not_follower">%s no está siguiendo</string>
+    <string name="followers_not_following">No sigue a %s</string>
+    <string name="followers_not_follower">%s no sigue a</string>
     <string name="login_error_loading_cookies">Error al cargar cookies</string>
     <string name="comment_hint">Escribir un nuevo comentario…</string>
     <string name="dm_hint">Escribir un mensaje nuevo…</string>

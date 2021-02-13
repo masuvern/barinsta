@@ -54,6 +54,7 @@
     <string name="main_posts_following">%s Seguindo </string>
     <string name="post_viewer_autoplay_video">Reprodução automática de vídeos</string>
     <string name="post_viewer_muted_autoplay">Sempre silenciar vídeos</string>
+    <string name="post_viewer_show_captions">Sempre mostrar as legendas das publicações</string>
     <string name="post_viewer_download_dialog_title">Selecionar o que baixar</string>
     <string name="post_viewer_download_current">Atual</string>
     <string name="post_viewer_download_album">Álbum Inteiro</string>
@@ -266,7 +267,7 @@
     <string name="about_category_3pt">Atribuições de terceiros</string>
     <string name="about_category_3pt_summary">São usadas as seguintes bibliotecas de código aberto de terceiros:</string>
     <string name="reminder">Lembrete</string>
-    <string name="reminder_summary">Por favor, use este app com responsabilidade. Imagens baixadas devem ser usadas apenas para fins permitidos pelas leis aplicáveis.</string>
+    <string name="reminder_summary">Por favor, use este aplicativo de forma responsável. As imagens baixadas só devem ser usadas para fins permitidos pelas leis aplicáveis.</string>
     <string name="light_white_theme">Branco</string>
     <string name="dark_black_theme">Preto</string>
     <string name="light_theme_settings">Tema claro</string>
