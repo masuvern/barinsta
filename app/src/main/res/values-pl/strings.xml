@@ -402,7 +402,7 @@
     <string name="mute_mentions">Mute mentions</string>
     <string name="add_members">Add members</string>
     <string name="search">Search</string>
-    <string name="done">Done</string>
+    <string name="done">Gotowe</string>
     <string name="dms_action_make_admin">Make Admin</string>
     <string name="dms_action_remove_admin">Remove as Admin</string>
     <string name="edit_unsuccessful">Edit was unsuccessful</string>
@@ -410,9 +410,9 @@
     <string name="reply">Reply</string>
     <string name="tap_to_remove">Tap to remove</string>
     <string name="forward">Forward</string>
-    <string name="add">Add</string>
-    <string name="send">Send</string>
-    <string name="replying_to_yourself">Replying to yourself</string>
+    <string name="add">Dodaj</string>
+    <string name="send">Wyślij</string>
+    <string name="replying_to_yourself">Odpowiedz sobie</string>
     <string name="replying_to_user">Replying to %s</string>
     <string name="photo">Photo</string>
     <string name="video">Video</string>
@@ -425,10 +425,10 @@
     <string name="admin_approval_required">Admin approval required</string>
     <string name="admin_approval_required_description">An admin approval will be required to add new members to the group</string>
     <string name="dms_action_end">End chat</string>
-    <string name="dms_action_end_question">End chat?</string>
-    <string name="dms_action_end_description">All members will be removed from the group. They will still be able to view the chat history.</string>
-    <string name="pending_requests">Pending Requests</string>
-    <string name="accept_request_from_user">Accept request from %1s (%2s)?</string>
-    <string name="decline">Decline</string>
-    <string name="accept">Accept</string>
+    <string name="dms_action_end_question">Zakończyć czat?</string>
+    <string name="dms_action_end_description">Wszyscy członkowie zostaną usunięci z grupy. Będą mogli przeglądać historię czatu.</string>
+    <string name="pending_requests">Zgłoszenia oczekujące</string>
+    <string name="accept_request_from_user">Zaakceptować prośbę od %1s (%2s)?</string>
+    <string name="decline">Odrzuć</string>
+    <string name="accept">Akceptuj</string>
 </resources>
