@@ -353,7 +353,7 @@
     <string name="vignette">渐晕</string>
     <string name="box_blur">方框模糊</string>
     <string name="sepia">怀旧</string>
-    <string name="clarendon">克拉伦登</string>
+    <string name="clarendon">Clarendon</string>
     <string name="one977">1977</string>
     <string name="aden">Aden</string>
     <string name="reset">重置</string>
@@ -392,7 +392,7 @@
     <string name="add">添加</string>
     <string name="send">发送</string>
     <string name="replying_to_yourself">回复给自己</string>
-    <string name="replying_to_user">回复到 %s</string>
+    <string name="replying_to_user">回复 %s</string>
     <string name="photo">照片</string>
     <string name="video">视频</string>
     <string name="voice_message">语音消息</string>
@@ -400,12 +400,12 @@
     <string name="approval_required_for_new_members">需要批准才能加入</string>
     <string name="requests">请求</string>
     <string name="admins_only">仅限管理员</string>
-    <string name="added_by">添加人 %s</string>
+    <string name="added_by">由 %s 添加</string>
     <string name="admin_approval_required">需要管理员批准</string>
     <string name="admin_approval_required_description">添加新成员到群组需要管理员批准</string>
     <string name="dms_action_end">结束聊天</string>
     <string name="dms_action_end_question">结束聊天?</string>
-    <string name="dms_action_end_description">所有成员都将从群组中被删除。他们仍然可以查看聊天记录。</string>
+    <string name="dms_action_end_description">将踢出群组中的所有成员。他们仍然可以查看聊天记录。</string>
     <string name="pending_requests">待处理请求</string>
     <string name="accept_request_from_user">接受来自 %1s (%2s) 的请求？</string>
     <string name="decline">拒绝</string>
