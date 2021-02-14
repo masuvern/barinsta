@@ -33,7 +33,7 @@
     <string name="dm_mark_as_seen_setting_summary">Altri membri sapranno che lo hai visualizzato</string>
     <string name="activity_setting">Abilita notifiche attività</string>
     <string name="story_sort_setting">Ordinamento storie feed</string>
-    <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
+    <string name="error_loading_profile">Errore nel caricamento del profilo! Il nome utente è valido? Se sì, potresti essere considerato limitato.</string>
     <string name="error_loading_profile_loggedin">Errore nel caricamento del profilo! Il nome utente è valido? O ti hanno bloccato?</string>
     <string name="error_loading_hashtag">Errore nel caricamento dell\'hashtag! Il nome è valido?</string>
     <string name="error_loading_location">Errore nel caricamento dell\'hashtag! L\'URL è valido?</string>
