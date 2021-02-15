@@ -351,9 +351,9 @@
     <string name="brightness">Jasność</string>
     <string name="contrast">Kontrast</string>
     <string name="vibrance">Vibrance</string>
-    <string name="saturation">Saturation</string>
-    <string name="sharpen">Sharpen</string>
-    <string name="exposure">Exposure</string>
+    <string name="saturation">Nasycenie</string>
+    <string name="sharpen">Ostrość</string>
+    <string name="exposure">Ekspozycja</string>
     <string name="center">Center</string>
     <string name="color">Color</string>
     <string name="start">Start</string>
