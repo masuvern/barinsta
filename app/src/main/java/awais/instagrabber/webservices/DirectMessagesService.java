@@ -413,7 +413,7 @@ public class DirectMessagesService extends BaseService {
     public Call<DirectInboxResponse> fetchPendingInbox(final String cursor, final long seqId) {
         final ImmutableMap.Builder<String, Object> queryMapBuilder = ImmutableMap.<String, Object>builder()
                 .put("visual_message_return_type", "unseen")
-                .put("thread_message_limit", 10)
+                .put("thread_message_limit", 20)
                 .put("persistentBadging", true)
                 .put("limit", 10);
         if (!TextUtils.isEmpty(cursor)) {
