@@ -34,8 +34,8 @@
     <string name="activity_setting">Włącz powiadomienia o aktywności</string>
     <string name="story_sort_setting">Sortowanie relacji</string>
     <string name="error_loading_profile">Błąd ładowania profilu! Czy nazwa użytkownika jest prawidłowa? Jeśli tak, możesz być ograniczony.</string>
-    <string name="error_loading_profile_loggedin">Error loading profile! Is the username valid? Or did they block you?</string>
-    <string name="error_loading_hashtag">Error loading hashtag! Is the name valid?</string>
+    <string name="error_loading_profile_loggedin">Wystąpił błąd podczas ładowania profilu! Czy nazwa użytkownika jest prawidłowa? Być może zostałeś zablokowany?</string>
+    <string name="error_loading_hashtag">Błąd ładowania hashtaga! Czy nazwa jest prawidłowa?</string>
     <string name="error_loading_location">Błąd ładowania hashtaga! Czy adres URL jest prawidłowy?</string>
     <string name="error_creating_folders">Błąd podczas tworzenia folderu(ów) pobierania.</string>
     <string name="save_to_folder">Zapisz w folderze niestandardowym</string>
@@ -367,7 +367,7 @@
     <string name="aden">Aden</string>
     <string name="reset">Reset</string>
     <string name="crop">Wytnij</string>
-    <string name="normal">Normal</string>
+    <string name="normal">Normalny</string>
     <plurals name="likes_count">
         <item quantity="one">%d polubienie</item>
         <item quantity="few">%d polubień</item>
@@ -413,7 +413,7 @@
     <string name="add">Dodaj</string>
     <string name="send">Wyślij</string>
     <string name="replying_to_yourself">Odpowiedz sobie</string>
-    <string name="replying_to_user">Replying to %s</string>
+    <string name="replying_to_user">Odpowiadanie %s</string>
     <string name="photo">Zdjęcie</string>
     <string name="video">Film</string>
     <string name="voice_message">Wiadomość głosowa</string>
