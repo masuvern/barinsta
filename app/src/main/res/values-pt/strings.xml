@@ -36,7 +36,7 @@
     <string name="error_loading_profile">Erro ao carregar perfil! O nome de usuário é válido? Se sim, você pode ter sido limitado pelo Instagram.</string>
     <string name="error_loading_profile_loggedin">Erro ao carregar perfil! O nome de usuário é válido? Ou eles te bloquearam?</string>
     <string name="error_loading_hashtag">Erro ao carregar hashtag! O nome é válido?</string>
-    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
+    <string name="error_loading_location">Erro ao carregar localização! A URL é válida?</string>
     <string name="error_creating_folders">Erro ao criar pasta(s) de download.</string>
     <string name="save_to_folder">Salvar em pasta personalizada</string>
     <string name="select_folder">Selecionar pasta</string>
