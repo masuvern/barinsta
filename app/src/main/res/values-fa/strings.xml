@@ -36,7 +36,7 @@
     <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
     <string name="error_loading_profile_loggedin">Error loading profile! Is the username valid? Or did they block you?</string>
     <string name="error_loading_hashtag">Error loading hashtag! Is the name valid?</string>
-    <string name="error_loading_location">Error loading hashtag! Is the URL valid?</string>
+    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
     <string name="error_creating_folders">خطا در ساخت پوشه(ها).</string>
     <string name="save_to_folder">ذخیره در پوشه سفارشی</string>
     <string name="select_folder">انتخاب پوشه</string>
@@ -164,7 +164,7 @@
     <string name="direct_messages_replied_story">به یک استوری پاسخ داده شد</string>
     <string name="direct_messages_reacted_story">به یک استوری واکنش نشان داده</string>
     <string name="direct_messages_mention_story">نام برده شده در یک استوری</string>
-    <string name="dms_inbox_raven_message_unknown"><i>نوع پیام پشتیبانی نمی شود</i></string>
+    <string name="dms_inbox_raven_message_unknown">Unsupported message type</string>
     <string name="dms_inbox_open_link">باز کردن پیوند</string>
     <string name="dms_inbox_copy_text">روبرداری نوشته</string>
     <string name="dms_inbox_download">دریافت پیوست</string>
@@ -172,7 +172,24 @@
     <string name="dms_inbox_unlike">نپسندیدن پیام</string>
     <string name="dms_inbox_unsend">بازگرداندن پیام</string>
     <string name="dms_inbox_author">دیدن پروفایل نویسنده</string>
-    <string name="dms_inbox_media_shared_from">پست به اشتراک گذاشته شده از %s</string>
+    <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
+    <string name="dms_inbox_shared_image">%s shared an image</string>
+    <string name="dms_inbox_shared_video">%s shared a video</string>
+    <string name="dms_inbox_shared_message">%s sent a message</string>
+    <string name="dms_inbox_shared_gif">%s shared a gif</string>
+    <string name="dms_inbox_shared_profile">%s shared a profile: @%s</string>
+    <string name="dms_inbox_shared_location">%s shared a location: %s</string>
+    <string name="dms_inbox_shared_highlight">%s shared a story highlight by @%s</string>
+    <string name="dms_inbox_shared_story">%s shared a story by @%s</string>
+    <string name="dms_inbox_shared_voice">%s sent a voice message</string>
+    <string name="dms_inbox_shared_clip">%s shared a clip by @%s</string>
+    <string name="dms_inbox_shared_igtv">%s shared an IGTV video by @%s</string>
+    <string name="dms_inbox_replied_story_outgoing">You replied to their story: %s</string>
+    <string name="dms_inbox_replied_story_incoming">%s replied to your story: %s</string>
+    <string name="dms_inbox_reacted_story_outgoing">You reacted to their story: %s</string>
+    <string name="dms_inbox_reacted_story_incoming">%s reacted to your story: %s</string>
+    <string name="dms_inbox_mentioned_story_outgoing">You mentioned @%s in your story</string>
+    <string name="dms_inbox_mentioned_story_incoming">%s mentioned you in their story</string>
     <string name="dms_inbox_raven_media_unknown"><i>نوع رسانه ناشناخته است</i></string>
     <string name="dms_inbox_raven_media_expired">رسانه منقضی شده!</string>
     <string name="dms_inbox_raven_media_delivered">ارسال شد</string>
@@ -418,4 +435,5 @@
     <string name="accept_request_from_user">Accept request from %1s (%2s)?</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
+    <string name="you">You</string>
 </resources>
