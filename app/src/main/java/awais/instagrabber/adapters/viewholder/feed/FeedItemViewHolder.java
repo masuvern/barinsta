@@ -115,7 +115,13 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
 
     private void setupLocation(@NonNull final Media media) {
         final Location location = media.getLocation();
-        if (location != null) {
+        if (location == null) {
+            topBinding.location.setVisibility(View.GONE);
+            topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
+            ));
+        }
+        else {
             final String locationName = location.getName();
             if (TextUtils.isEmpty(locationName)) {
                 topBinding.location.setVisibility(View.GONE);
