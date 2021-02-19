@@ -36,7 +36,7 @@
     <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
     <string name="error_loading_profile_loggedin">Profili yüklerken hata oluştu! Kullanıcı adı doğru mu? Ya da bu kişi seni engelledi mi?</string>
     <string name="error_loading_hashtag">Etiketi yüklerken hata oluştu! İsmi doğru mu?</string>
-    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
+    <string name="error_loading_location">Profili yüklerken hata oluştu! URL doğru mu?</string>
     <string name="error_creating_folders">İndirilenler klasörü(leri) oluşturulamadı.</string>
     <string name="save_to_folder">Şu klasöre kaydet:</string>
     <string name="select_folder">Klasörü seçin</string>
@@ -163,7 +163,7 @@
     <string name="direct_messages_replied_story">Bir hikayeye cevap verdi</string>
     <string name="direct_messages_reacted_story">Bir hikayeye ifade bıraktı</string>
     <string name="direct_messages_mention_story">Bir hikayede bahsetti</string>
-    <string name="dms_inbox_raven_message_unknown">Unsupported message type</string>
+    <string name="dms_inbox_raven_message_unknown">Desteklenmeyen mesaj tipi</string>
     <string name="dms_inbox_open_link">Bağlantıyı aç</string>
     <string name="dms_inbox_copy_text">Metni kopyala</string>
     <string name="dms_inbox_download">Eki indir</string>
@@ -171,11 +171,11 @@
     <string name="dms_inbox_unlike">Mesaj beğenini geri al</string>
     <string name="dms_inbox_unsend">Gönderilen mesajı geri al</string>
     <string name="dms_inbox_author">Yazarın profilini göster</string>
-    <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
-    <string name="dms_inbox_shared_image">%s shared an image</string>
-    <string name="dms_inbox_shared_video">%s shared a video</string>
-    <string name="dms_inbox_shared_message">%s sent a message</string>
-    <string name="dms_inbox_shared_gif">%s shared a gif</string>
+    <string name="dms_inbox_shared_post">%s, @%s tarafından bir gönderi paylaştı</string>
+    <string name="dms_inbox_shared_image">%s bir resim paylaştı</string>
+    <string name="dms_inbox_shared_video">%s bir video paylaştı</string>
+    <string name="dms_inbox_shared_message">%s bir mesaj yolladı</string>
+    <string name="dms_inbox_shared_gif">%s bir gif paylaştı</string>
     <string name="dms_inbox_shared_profile">%s shared a profile: @%s</string>
     <string name="dms_inbox_shared_location">%s shared a location: %s</string>
     <string name="dms_inbox_shared_highlight">%s shared a story highlight by @%s</string>
@@ -397,11 +397,11 @@
     </plurals>
     <string name="download_permission">Depolama izni verilmedi!</string>
     <string name="details">Details</string>
-    <string name="title">Title</string>
-    <string name="members">Members</string>
+    <string name="title">Başlık</string>
+    <string name="members">Üyeler</string>
     <string name="admin">Admin</string>
-    <string name="inviter">Inviter</string>
-    <string name="mute_messages">Mute messages</string>
+    <string name="inviter">Davet edici</string>
+    <string name="mute_messages">Mesajları sustur</string>
     <string name="mute_mentions">Mute mentions</string>
     <string name="add_members">Add members</string>
     <string name="search">Search</string>
