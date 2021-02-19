@@ -1,5 +1,6 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
+import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,6 +12,7 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
+import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
@@ -41,17 +43,18 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        String format = "@%s's story";
+        final Resources resources = itemView.getResources();
+        int format = R.string.story_share;
         final String reelType = item.getStoryShare().getReelType();
         if (reelType == null || item.getStoryShare().getMedia() == null) {
             setExpiredStoryInfo(item);
             return;
         }
         if (reelType.equals("highlight_reel")) {
-            format = "@%s's story highlight";
+            format = R.string.story_share_highlight;
         }
         final User user = item.getStoryShare().getMedia().getUser();
-        final String info = String.format(format, user != null ? user.getUsername() : "");
+        final String info = resources.getString(format, user != null ? user.getUsername() : "");
         binding.shareInfo.setText(info);
         binding.text.setVisibility(View.GONE);
         binding.ivMediaPreview.setController(null);

@@ -10,6 +10,7 @@ import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 
+import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
@@ -118,28 +119,28 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         if (viewMode != RavenMediaViewMode.PERMANENT) {
             final MediaItemType mediaType = media.getMediaType();
             final boolean expired = media.getPk() == null;
-            final String info;
+            final int info;
             switch (mediaType) {
                 case MEDIA_TYPE_IMAGE:
                     if (expired) {
-                        info = "Image has expired";
+                        info = R.string.raven_image_expired;
                         break;
                     }
-                    info = "Image will expire when seen";
+                    info = R.string.raven_image_info;
                     break;
                 case MEDIA_TYPE_VIDEO:
                     if (expired) {
-                        info = "Video has expired";
+                        info = R.string.raven_video_expired;
                         break;
                     }
-                    info = "Video will expire when seen";
+                    info = R.string.raven_video_info;
                     break;
                 default:
                     if (expired) {
-                        info = "Message has expired";
+                        info = R.string.raven_msg_expired;
                         break;
                     }
-                    info = "Message will expire when seen";
+                    info = R.string.raven_msg_info;
                     break;
             }
             binding.expiryInfo.setVisibility(View.VISIBLE);

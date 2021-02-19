@@ -143,7 +143,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
         final long senderId = item.getUserId();
         final DirectItemType itemType = item.getItemType();
         String subtitle = null;
-        final String username = getUsername(thread.getUsers(), senderId, viewerId);
+        final String username = getUsername(thread.getUsers(), senderId, viewerId, resources);
         String message = "";
         if (itemType == null) {
             message = resources.getString(R.string.dms_inbox_raven_message_unknown);
@@ -230,7 +230,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                             if (viewerId == item.getUserId()) {
                                 // You mentioned the other person
                                 final long mentionedUserId = item.getReelShare().getMentionedUserId();
-                                final String otherUsername = getUsername(thread.getUsers(), mentionedUserId, viewerId);
+                                final String otherUsername = getUsername(thread.getUsers(), mentionedUserId, viewerId, resources);
                                 subtitle = resources.getString(R.string.dms_inbox_mentioned_story_outgoing, otherUsername);
                             } else {
                                 // They mentioned you

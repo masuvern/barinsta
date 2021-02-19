@@ -224,6 +224,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
                           final List<User> users) {
         final DirectItem replied = item.getRepliedToMessage();
         final DirectItemType itemType = replied.getItemType();
+        final Resources resources = itemView.getResources();
         String text = null;
         String url = null;
         switch (itemType) {
@@ -243,7 +244,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
                 url = ResponseBodyUtils.getThumbUrl(replied.getVisualMedia().getMedia().getImageVersions2());
                 break;
             case VOICE_MEDIA:
-                text = "Voice message";
+                text = resources.getString(R.string.voice_message);
                 break;
             case MEDIA_SHARE:
                 Media mediaShare = replied.getMediaShare();
@@ -282,7 +283,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             return;
         }
         setReplyGravity(messageDirection);
-        final String info = setReplyInfo(item, replied, users);
+        final String info = setReplyInfo(item, replied, users, resources);
         binding.replyInfo.setVisibility(View.VISIBLE);
         binding.replyInfo.setText(info);
         binding.quoteLine.setVisibility(View.VISIBLE);
@@ -295,7 +296,6 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         }
         binding.replyImage.setVisibility(View.GONE);
         final Drawable background = binding.replyText.getBackground().mutate();
-        final Resources resources = itemView.getResources();
         background.setTint(replied.getUserId() != currentUser.getPk()
                            ? resources.getColor(R.color.grey_600)
                            : resources.getColor(R.color.deep_purple_400));
@@ -306,30 +306,33 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
 
     private String setReplyInfo(final DirectItem item,
                                 final DirectItem replied,
-                                final List<User> users) {
+                                final List<User> users,
+                                final Resources resources) {
         final long repliedToUserId = replied.getUserId();
         if (repliedToUserId == item.getUserId() && item.getUserId() == currentUser.getPk()) {
             // User replied to own message
-            return "You replied to yourself";
+            return resources.getString(R.string.replied_to_yourself);
         }
         if (repliedToUserId == item.getUserId()) {
             // opposite user replied to their own message
-            return "Replied to themself";
+            return resources.getString(R.string.replied_to_themself);
         }
         final User user = getUser(repliedToUserId, users);
         final String repliedToUsername = user != null ? user.getUsername() : "";
         if (item.getUserId() == currentUser.getPk()) {
-            return !thread.isGroup() ? "You replied" : String.format("You replied to %s", repliedToUsername);
+            return thread.isGroup()
+                    ? resources.getString(R.string.replied_you_group, repliedToUsername)
+                    : resources.getString(R.string.replied_you);
         }
         if (repliedToUserId == currentUser.getPk()) {
-            return "Replied to you";
+            return resources.getString(R.string.replied_to_you);
         }
-        return String.format("Replied to %s", repliedToUsername);
+        return resources.getString(R.string.replied_group, repliedToUsername);
     }
 
     private void setForwardInfo(final MessageDirection direction) {
         binding.replyInfo.setVisibility(View.VISIBLE);
-        binding.replyInfo.setText(direction == MessageDirection.OUTGOING ? "You forwarded a message" : "Forwarded a message");
+        binding.replyInfo.setText(direction == MessageDirection.OUTGOING ? R.string.forward_outgoing : R.string.forward_incoming);
     }
 
     private void setReplyGravity(final MessageDirection messageDirection) {

@@ -116,9 +116,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int AUDIO_RECORD_PERM_REQUEST_CODE = 1000;
     private static final int CAMERA_REQUEST_CODE = 200;
-    private static final String UPDATING_TITLE = "Updating...";
-    private static final String MESSAGE_LABEL = "Message";
-    private static final String HOLD_TO_RECORD_AUDIO_LABEL = "Press and hold to record audio";
     private static final String TRANSLATION_Y = "translationY";
 
     private DirectItemsAdapter itemsAdapter;
@@ -567,7 +564,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         viewModel.getThreadTitle().observe(getViewLifecycleOwner(), this::setTitle);
         viewModel.getFetching().observe(getViewLifecycleOwner(), fetching -> {
             if (fetching) {
-                setTitle(UPDATING_TITLE);
+                setTitle(getString(R.string.dms_thread_updating));
                 return;
             }
             setTitle(viewModel.getThreadTitle().getValue());
@@ -876,7 +873,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (inputMode != null && inputMode == 1) return;
         final Context context = getContext();
         if (context == null) return;
-        tooltip.setText(HOLD_TO_RECORD_AUDIO_LABEL);
+        tooltip.setText(R.string.dms_thread_audio_hint);
         setMicToSendIcon();
         binding.recordView.setMinMillis(1000);
         binding.recordView.setOnRecordListener(new RecordView.OnRecordListener() {
@@ -925,7 +922,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
         });
         binding.recordView.setOnBasketAnimationEndListener(() -> {
-            binding.input.setHint(MESSAGE_LABEL);
+            binding.input.setHint(R.string.dms_thread_message_hint);
             binding.gallery.setVisibility(View.VISIBLE);
             binding.camera.setVisibility(View.VISIBLE);
         });
