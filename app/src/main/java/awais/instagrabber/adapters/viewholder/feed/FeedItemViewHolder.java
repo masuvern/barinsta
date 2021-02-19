@@ -115,19 +115,21 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
 
     private void setupLocation(@NonNull final Media media) {
         final Location location = media.getLocation();
-        final String locationName = location.getName();
-        if (TextUtils.isEmpty(locationName)) {
-            topBinding.location.setVisibility(View.GONE);
-            topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
-            ));
-        } else {
-            topBinding.location.setVisibility(View.VISIBLE);
-            topBinding.location.setText(locationName);
-            topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
-            ));
-            topBinding.location.setOnClickListener(v -> feedItemCallback.onLocationClick(media));
+        if (location != null) {
+            final String locationName = location.getName();
+            if (TextUtils.isEmpty(locationName)) {
+                topBinding.location.setVisibility(View.GONE);
+                topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
+                ));
+            } else {
+                topBinding.location.setVisibility(View.VISIBLE);
+                topBinding.location.setText(locationName);
+                topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
+                ));
+                topBinding.location.setOnClickListener(v -> feedItemCallback.onLocationClick(media));
+            }
         }
     }
 

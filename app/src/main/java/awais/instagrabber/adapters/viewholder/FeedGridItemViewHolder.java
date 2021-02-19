@@ -83,6 +83,10 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
                     final Media child = sliderItems.get(0);
                     if (child != null) {
                         thumbnailUrl = ResponseBodyUtils.getThumbUrl(child);
+                        if (layoutPreferences.getType() == STAGGERED_GRID) {
+                            final float childAspectRatio = (float) child.getOriginalWidth() / child.getOriginalHeight();
+                            binding.postImage.setAspectRatio(childAspectRatio);
+                        }
                     }
                 }
                 typeIconRes = R.drawable.ic_checkbox_multiple_blank_stroke;

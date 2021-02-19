@@ -57,26 +57,30 @@ public final class LocaleUtils {
         if (TextUtils.isEmpty(appLanguageSettings)) return null;
 
         final int appLanguageIndex = Integer.parseInt(appLanguageSettings);
-        if (appLanguageIndex == 1) return "en";
-        if (appLanguageIndex == 2) return "fr";
-        if (appLanguageIndex == 3) return "es";
-        if (appLanguageIndex == 4) return "zh_CN";
-        if (appLanguageIndex == 5) return "in";
-        if (appLanguageIndex == 6) return "it";
-        if (appLanguageIndex == 7) return "de";
-        if (appLanguageIndex == 8) return "pl";
-        if (appLanguageIndex == 9) return "tr";
-        if (appLanguageIndex == 10) return "pt";
-        if (appLanguageIndex == 11) return "fa";
-        if (appLanguageIndex == 12) return "mk";
-        if (appLanguageIndex == 13) return "vi";
-        if (appLanguageIndex == 14) return "zh_TW";
-        if (appLanguageIndex == 15) return "ca";
-        if (appLanguageIndex == 16) return "ru";
-        if (appLanguageIndex == 17) return "hi";
-        if (appLanguageIndex == 18) return "nl";
-        if (appLanguageIndex == 19) return "sk";
-        if (appLanguageIndex == 20) return "ja";
+        switch (appLanguageIndex) {
+            case 1: return "en";
+            case 2: return "fr";
+            case 3: return "es";
+            case 4: return "zh_CN";
+            case 5: return "in";
+            case 6: return "it";
+            case 7: return "de";
+            case 8: return "pl";
+            case 9: return "tr";
+            case 10: return "pt";
+            case 11: return "fa";
+            case 12: return "mk";
+            case 13: return "vi";
+            case 14: return "zh_TW";
+            case 15: return "ca";
+            case 16: return "ru";
+            case 17: return "hi";
+            case 18: return "nl";
+            case 19: return "sk";
+            case 20: return "ja";
+            case 21: return "el";
+            case 22: return "eu";
+        }
 
         return null;
     }
