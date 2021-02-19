@@ -36,7 +36,7 @@
     <string name="error_loading_profile">Ошибка при загрузке профиля! Верно ли имя пользователя? Если это так, то ваш запрос мог быть ограничен сервером.</string>
     <string name="error_loading_profile_loggedin">Ошибка при загрузке профиля! Верно ли имя пользователя? Или он Вас заблокировал?</string>
     <string name="error_loading_hashtag">Ошибка загрузки хэштэга! Верно ли название?</string>
-    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
+    <string name="error_loading_location">Ошибка загрузки локации! Верен ли URL?</string>
     <string name="error_creating_folders">Ошибка при создании каталога(ов) загрузки.</string>
     <string name="save_to_folder">Сохранить в пользовательскую папку</string>
     <string name="select_folder">Выбрать папку</string>
@@ -169,7 +169,7 @@
     <string name="direct_messages_replied_story">Ответил на историю</string>
     <string name="direct_messages_reacted_story">Отреагировал на историю</string>
     <string name="direct_messages_mention_story">Упомянут в истории</string>
-    <string name="dms_inbox_raven_message_unknown">Unsupported message type</string>
+    <string name="dms_inbox_raven_message_unknown">Неподдерживаемый тип сообщения</string>
     <string name="dms_inbox_open_link">Открыть ссылку</string>
     <string name="dms_inbox_copy_text">Копировать текст</string>
     <string name="dms_inbox_download">Скачать вложение</string>
@@ -177,10 +177,10 @@
     <string name="dms_inbox_unlike">Перестать любить сообщение</string>
     <string name="dms_inbox_unsend">Отменить отправку сообщения</string>
     <string name="dms_inbox_author">Просмотреть профиль автора</string>
-    <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
-    <string name="dms_inbox_shared_image">%s shared an image</string>
-    <string name="dms_inbox_shared_video">%s shared a video</string>
-    <string name="dms_inbox_shared_message">%s sent a message</string>
+    <string name="dms_inbox_shared_post">%s поделился постом от @%s</string>
+    <string name="dms_inbox_shared_image">%s поделился изображением</string>
+    <string name="dms_inbox_shared_video">%s поделился видео</string>
+    <string name="dms_inbox_shared_message">%s прислал(а) сообщение</string>
     <string name="dms_inbox_shared_gif">%s shared a gif</string>
     <string name="dms_inbox_shared_profile">%s shared a profile: @%s</string>
     <string name="dms_inbox_shared_location">%s shared a location: %s</string>
