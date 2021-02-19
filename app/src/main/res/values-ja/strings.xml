@@ -36,7 +36,7 @@
     <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
     <string name="error_loading_profile_loggedin">Error loading profile! Is the username valid? Or did they block you?</string>
     <string name="error_loading_hashtag">Error loading hashtag! Is the name valid?</string>
-    <string name="error_loading_location">Error loading hashtag! Is the URL valid?</string>
+    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
     <string name="error_creating_folders">ダウンロードフォルダの作成中にエラーが発生しました。</string>
     <string name="save_to_folder">カスタムフォルダーに保存</string>
     <string name="select_folder">フォルダーを選択</string>
@@ -160,7 +160,7 @@
     <string name="direct_messages_replied_story">Replied to a story</string>
     <string name="direct_messages_reacted_story">Reacted on a story</string>
     <string name="direct_messages_mention_story">Mentioned in a story</string>
-    <string name="dms_inbox_raven_message_unknown"><i>サポートされていないメッセージ形式です</i></string>
+    <string name="dms_inbox_raven_message_unknown">Unsupported message type</string>
     <string name="dms_inbox_open_link">リンクを開く</string>
     <string name="dms_inbox_copy_text">テキストをコピー</string>
     <string name="dms_inbox_download">添付ファイルをダウンロード</string>
@@ -168,7 +168,24 @@
     <string name="dms_inbox_unlike">いいね！を取り消す</string>
     <string name="dms_inbox_unsend">メッセージの送信を取り消す</string>
     <string name="dms_inbox_author">投稿者プロフィールを表示</string>
-    <string name="dms_inbox_media_shared_from">%s から共有された投稿</string>
+    <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
+    <string name="dms_inbox_shared_image">%s shared an image</string>
+    <string name="dms_inbox_shared_video">%s shared a video</string>
+    <string name="dms_inbox_shared_message">%s sent a message</string>
+    <string name="dms_inbox_shared_gif">%s shared a gif</string>
+    <string name="dms_inbox_shared_profile">%s shared a profile: @%s</string>
+    <string name="dms_inbox_shared_location">%s shared a location: %s</string>
+    <string name="dms_inbox_shared_highlight">%s shared a story highlight by @%s</string>
+    <string name="dms_inbox_shared_story">%s shared a story by @%s</string>
+    <string name="dms_inbox_shared_voice">%s sent a voice message</string>
+    <string name="dms_inbox_shared_clip">%s shared a clip by @%s</string>
+    <string name="dms_inbox_shared_igtv">%s shared an IGTV video by @%s</string>
+    <string name="dms_inbox_replied_story_outgoing">You replied to their story: %s</string>
+    <string name="dms_inbox_replied_story_incoming">%s replied to your story: %s</string>
+    <string name="dms_inbox_reacted_story_outgoing">You reacted to their story: %s</string>
+    <string name="dms_inbox_reacted_story_incoming">%s reacted to your story: %s</string>
+    <string name="dms_inbox_mentioned_story_outgoing">You mentioned @%s in your story</string>
+    <string name="dms_inbox_mentioned_story_incoming">%s mentioned you in their story</string>
     <string name="dms_inbox_raven_media_unknown"><i>不明なメディアタイプ</i></string>
     <string name="dms_inbox_raven_media_expired">メディアの有効期限が切れました！</string>
     <string name="dms_inbox_raven_media_delivered">送信済み</string>
@@ -410,4 +427,5 @@
     <string name="accept_request_from_user">Accept request from %1s (%2s)?</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
+    <string name="you">You</string>
 </resources>
