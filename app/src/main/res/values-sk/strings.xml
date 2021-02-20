@@ -437,7 +437,6 @@
     <string name="replying_to_yourself">Replying to yourself</string>
     <string name="replying_to_user">Replying to %s</string>
     <string name="replied_to_yourself">You replied to yourself</string>
-    <string name="replied_you_to_you">You replied to you</string>
     <string name="replied_you">You replied</string>
     <string name="replied_you_group">You replied to %s</string>
     <string name="replied_group">Replied to %s</string>
