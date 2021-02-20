@@ -391,7 +391,7 @@
         <item quantity="other">%d commenti</item>
     </plurals>
     <plurals name="views_count">
-        <item quantity="one">%d view</item>
+        <item quantity="one">%d visualizzazione</item>
         <item quantity="other">%d visualizzazioni</item>
     </plurals>
     <plurals name="stories_count">
@@ -426,22 +426,22 @@
     <string name="replied_you">Hai risposto</string>
     <string name="replied_you_group">Hai risposto a %s</string>
     <string name="replied_group">Risposto a %s</string>
-    <string name="replied_to_you">Replied to you</string>
-    <string name="replied_to_themself">Replied to themself</string>
-    <string name="reacted_story_outgoing">You reacted to their story</string>
-    <string name="reacted_story_incoming">Reacted to your story</string>
-    <string name="mentioned_story_outgoing">You mentioned them in your story</string>
-    <string name="mentioned_story_incoming">Mentioned you in their story</string>
-    <string name="replied_story_outgoing">You replied to their story</string>
-    <string name="replied_story_incoming">Replied to your story</string>
-    <string name="raven_image_expired">Image has expired</string>
-    <string name="raven_image_info">Image will expire when seen</string>
-    <string name="raven_video_expired">Video has expired</string>
-    <string name="raven_video_info">Video will expire when seen</string>
-    <string name="raven_msg_expired">Message has expired</string>
-    <string name="raven_msg_info">Message will expire when seen</string>
-    <string name="story_share">\@%s\'s story</string>
-    <string name="story_share_highlight">\@%s\'s story highlight</string>
+    <string name="replied_to_you">Ti ha risposto</string>
+    <string name="replied_to_themself">Risposto a loro stessi</string>
+    <string name="reacted_story_outgoing">Avete reagito alla loro storia</string>
+    <string name="reacted_story_incoming">Reagito alla tua storia</string>
+    <string name="mentioned_story_outgoing">Li hai menzionati nella tua storia</string>
+    <string name="mentioned_story_incoming">Ti ha menzionato nella loro storia</string>
+    <string name="replied_story_outgoing">Hai risposto alla loro storia</string>
+    <string name="replied_story_incoming">Ha risposto alla tua storia</string>
+    <string name="raven_image_expired">L\'immagine è scaduta</string>
+    <string name="raven_image_info">L\'immagine scadrà quando sarà vista</string>
+    <string name="raven_video_expired">Il video è scaduto</string>
+    <string name="raven_video_info">Il video scadrà quando visto</string>
+    <string name="raven_msg_expired">Il messaggio è scaduto</string>
+    <string name="raven_msg_info">Il messaggio scadrà quando visto</string>
+    <string name="story_share">storia di @%s</string>
+    <string name="story_share_highlight">storia in evidenza di @%s</string>
     <string name="photo">Foto</string>
     <string name="video">Video</string>
     <string name="voice_message">Messaggio vocale</string>
