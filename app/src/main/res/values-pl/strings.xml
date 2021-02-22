@@ -177,16 +177,16 @@
     <string name="dms_inbox_unlike">Cofnij polubienie wiadomości</string>
     <string name="dms_inbox_unsend">Cofnij wysłanie wiadomości</string>
     <string name="dms_inbox_author">Wyświetl profil autora</string>
-    <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
-    <string name="dms_inbox_shared_image">%s shared an image</string>
+    <string name="dms_inbox_shared_post">%s udostępnił post @%s</string>
+    <string name="dms_inbox_shared_image">%s udostępnił obraz</string>
     <string name="dms_inbox_shared_video">%s udostępnił film</string>
     <string name="dms_inbox_shared_message">%s wysłał wiadomość</string>
     <string name="dms_inbox_shared_gif">%s udostępnił gif</string>
     <string name="dms_inbox_shared_profile">%s udostępnił profil: @%s</string>
     <string name="dms_inbox_shared_location">%s udostępnił lokalizację: %s</string>
     <string name="dms_inbox_shared_highlight">%s shared a story highlight by @%s</string>
-    <string name="dms_inbox_shared_story">%s shared a story by @%s</string>
-    <string name="dms_inbox_shared_voice">%s sent a voice message</string>
+    <string name="dms_inbox_shared_story">%s udostępnił story @%s</string>
+    <string name="dms_inbox_shared_voice">%s wysłał wiadomość głosową</string>
     <string name="dms_inbox_shared_clip">%s shared a clip by @%s</string>
     <string name="dms_inbox_shared_igtv">%s shared an IGTV video by @%s</string>
     <string name="dms_inbox_replied_story_outgoing">You replied to their story: %s</string>
@@ -208,7 +208,7 @@
     <string name="dms_inbox_raven_media_cant_deliver">Nie dostarczono</string>
     <string name="dms_thread_message_hint">Message...</string>
     <string name="dms_thread_audio_hint">Press and hold to record audio</string>
-    <string name="dms_thread_updating">Updating...</string>
+    <string name="dms_thread_updating">Aktualizowanie...</string>
     <string name="dms_action_success">Sukces!</string>
     <string name="dms_action_leave">Opuść czat</string>
     <string name="dms_action_leave_question">Opuścić ten czat?</string>
@@ -448,12 +448,12 @@
     <string name="mentioned_story_incoming">Mentioned you in their story</string>
     <string name="replied_story_outgoing">You replied to their story</string>
     <string name="replied_story_incoming">Replied to your story</string>
-    <string name="raven_image_expired">Image has expired</string>
-    <string name="raven_image_info">Image will expire when seen</string>
-    <string name="raven_video_expired">Video has expired</string>
-    <string name="raven_video_info">Video will expire when seen</string>
-    <string name="raven_msg_expired">Message has expired</string>
-    <string name="raven_msg_info">Message will expire when seen</string>
+    <string name="raven_image_expired">Zdjęcie wygasło</string>
+    <string name="raven_image_info">Obraz wygaśnie po wyświetleniu</string>
+    <string name="raven_video_expired">Film wygasł</string>
+    <string name="raven_video_info">Wideo wygaśnie po wyświetleniu</string>
+    <string name="raven_msg_expired">Wiadomość wygasła</string>
+    <string name="raven_msg_info">Wiadomość wygaśnie po wyświetleniu</string>
     <string name="story_share">\@%s\'s story</string>
     <string name="story_share_highlight">\@%s\'s story highlight</string>
     <string name="photo">Zdjęcie</string>
@@ -473,5 +473,5 @@
     <string name="accept_request_from_user">Zaakceptować prośbę od %1s (%2s)?</string>
     <string name="decline">Odrzuć</string>
     <string name="accept">Akceptuj</string>
-    <string name="you">You</string>
+    <string name="you">Ty</string>
 </resources>
