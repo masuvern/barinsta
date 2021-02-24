@@ -94,17 +94,12 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                 commentsViewModel.getList().postValue(list);
             }
             binding.swipeRefreshLayout.setRefreshing(false);
-            stopCurrentExecutor();
+            stopCurrentExecutor(false);
         }
 
         @Override
         public void onFailure(Throwable t) {
-            try {
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                binding.swipeRefreshLayout.setRefreshing(false);
-                stopCurrentExecutor();
-            }
-            catch(Throwable e) {}
+            stopCurrentExecutor(true);
         }
     };
 
@@ -227,7 +222,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         endCursor = null;
         lazyLoader.resetState();
         commentsViewModel.getList().postValue(Collections.emptyList());
-        stopCurrentExecutor();
+        stopCurrentExecutor(false);
         currentlyRunning = new CommentsFetcher(shortCode, "", fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -276,7 +271,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             endCursor = null;
         });
         binding.rvComments.addOnScrollListener(lazyLoader);
-        stopCurrentExecutor();
+        stopCurrentExecutor(false);
         onRefresh();
     }
 
@@ -462,13 +457,20 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         NavHostFragment.findNavController(this).navigate(action);
     }
 
-    private void stopCurrentExecutor() {
+    private void stopCurrentExecutor(@NonNull final boolean failed) {
         if (currentlyRunning != null) {
             try {
                 currentlyRunning.cancel(true);
             } catch (final Exception e) {
                 if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             }
+        }
+        if (failed) {
+            try {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                binding.swipeRefreshLayout.setRefreshing(false);
+            }
+            catch(Throwable e) {}
         }
     }
 

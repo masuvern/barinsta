@@ -91,7 +91,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean hasStories = false;
     private boolean opening = false;
     private String hashtag;
-    private HashtagModel hashtagModel;
+    private HashtagModel hashtagModel = null;
     private ActionMode actionMode;
     private StoriesService storiesService;
     private AsyncTask<?, ?, ?> currentlyExecuting;
@@ -373,22 +373,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             public void onResult(final HashtagModel result) {
                 hashtagModel = result;
                 binding.swipeRefreshLayout.setRefreshing(false);
-                final Context context = getContext();
-                if (context == null) return;
-                if (hashtagModel == null) {
-                    Toast.makeText(context, R.string.error_loading_hashtag, Toast.LENGTH_SHORT).show();
-                    binding.swipeRefreshLayout.setEnabled(false);
-                    return;
-                }
-                setTitle();
                 setHashtagDetails();
-                setupPosts();
-                fetchStories();
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                setHashtagDetails();
             }
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -406,6 +396,17 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void setHashtagDetails() {
+        if (hashtagModel == null) {
+            try {
+                Toast.makeText(getContext(), R.string.error_loading_hashtag, Toast.LENGTH_SHORT).show();
+                binding.swipeRefreshLayout.setEnabled(false);
+            }
+            catch (Exception ignored) {}
+            return;
+        }
+        setTitle();
+        setupPosts();
+        fetchStories();
         if (isLoggedIn) {
             hashtagDetailsBinding.btnFollowTag.setVisibility(View.VISIBLE);
             hashtagDetailsBinding.btnFollowTag.setText(hashtagModel.getFollowing() ? R.string.unfollow : R.string.follow);
