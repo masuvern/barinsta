@@ -33,10 +33,10 @@
     <string name="dm_mark_as_seen_setting_summary">Peserta lain akan tahu Anda melihatnya</string>
     <string name="activity_setting">Nyalakan pemberitahuan aktivitas</string>
     <string name="story_sort_setting">Urutan umpan cerita</string>
-    <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
-    <string name="error_loading_profile_loggedin">Error loading profile! Is the username valid? Or did they block you?</string>
-    <string name="error_loading_hashtag">Error loading hashtag! Is the name valid?</string>
-    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
+    <string name="error_loading_profile">Galat memuat profil! Apakah nama penggunanya valid? Jika iya, maka kemungkinan akses Anda sedang dibatasi.</string>
+    <string name="error_loading_profile_loggedin">Galat memuat profil! Apakah nama penggunanya valid? Ataukah dia memblokirmu?</string>
+    <string name="error_loading_hashtag">Galat memuat tagar! Apakah namanya valid?</string>
+    <string name="error_loading_location">Galat memuat lokasi! Apakah URL-nya valid?</string>
     <string name="error_creating_folders">Galat saat membuat folder unduhan.</string>
     <string name="save_to_folder">Simpan ke folder khusus</string>
     <string name="select_folder">Pilih folder</string>
@@ -229,7 +229,7 @@
     <string name="comment_viewer_delete_comment">Hapus komentar</string>
     <string name="comment_send_empty_comment">Ups, komentar kosong!</string>
     <string name="comment_view_mention_user_search">Apakah anda ingin mencari nama pengguna ini?</string>
-    <string name="comment_view_mention_hash_search">Apakah anda ingin mencari hashtag ini?</string>
+    <string name="comment_view_mention_hash_search">Apakah anda ingin mencari tagar ini?</string>
     <string name="followers_type_followers">Pengikut</string>
     <string name="followers_type_following">Diikuti</string>
     <string name="followers_compare">Membandingkan pengikut &amp; yang diikuti</string>
