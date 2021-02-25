@@ -194,7 +194,7 @@
     <string name="dms_inbox_reacted_story_outgoing">Zareagowałeś na relację: %s</string>
     <string name="dms_inbox_reacted_story_incoming">%s zareagował na Twoją relację: %s</string>
     <string name="dms_inbox_mentioned_story_outgoing">Wspomniałeś @%s w swojej relacji</string>
-    <string name="dms_inbox_mentioned_story_incoming">%s mentioned you in their story</string>
+    <string name="dms_inbox_mentioned_story_incoming">%s wspomniał o tobie w swojej relacji</string>
     <string name="dms_inbox_raven_media_unknown"><i>Nieznany typ mediów</i></string>
     <string name="dms_inbox_raven_media_expired">Media wygasły!</string>
     <string name="dms_inbox_raven_media_delivered">Dostarczono</string>
@@ -401,10 +401,10 @@
         <item quantity="other">%d komentarzy</item>
     </plurals>
     <plurals name="views_count">
-        <item quantity="one">%d view</item>
-        <item quantity="few">%d views</item>
-        <item quantity="many">%d views</item>
-        <item quantity="other">%d views</item>
+        <item quantity="one">%d wyświetlenie</item>
+        <item quantity="few">%d wyświetleń</item>
+        <item quantity="many">%d wyświetleń</item>
+        <item quantity="other">%d wyświetlenia</item>
     </plurals>
     <plurals name="stories_count">
         <item quantity="one">%s relacja</item>
@@ -431,7 +431,7 @@
     <string name="tap_to_remove">Dotknij, aby usunąć</string>
     <string name="forward">Przekaż dalej</string>
     <string name="forward_outgoing">Przesłano wiadomość</string>
-    <string name="forward_incoming">Forwarded a message</string>
+    <string name="forward_incoming">Przekazano wiadomość</string>
     <string name="add">Dodaj</string>
     <string name="send">Wyślij</string>
     <string name="replying_to_yourself">Odpowiedz sobie</string>
