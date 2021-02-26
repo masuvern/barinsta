@@ -333,7 +333,7 @@
     <string name="save_unsuccessful">Gagal menyimpan</string>
     <string name="save_remove_unsuccessful">Gagal menghilangkan</string>
     <string name="downloading">Mengunduh…</string>
-    <string name="downloader_downloading_child">Download item %1$d of %2$d</string>
+    <string name="downloader_downloading_child">Unduh item %1$d dari %2$d</string>
     <string name="delete">Hapus</string>
     <string name="comment">Komentar</string>
     <string name="layout">Tata letak</string>
@@ -354,21 +354,21 @@
     <string name="follower_start_compare">Bergantung pada akun pengguna, ini dapat memakan waktu beberapa saat. Mohon bersabar.</string>
     <string name="post_not_found">Kiriman tidak ditemukan!</string>
     <string name="no_external_app_url">Aplikasi untuk membuka url tidak ditemukan</string>
-    <string name="gallery">Gallery</string>
-    <string name="camera">Camera</string>
-    <string name="all_photos">All Photos</string>
-    <string name="all_media">All Media</string>
-    <string name="all_videos">All Videos</string>
-    <string name="brightness">Brightness</string>
-    <string name="contrast">Contrast</string>
+    <string name="gallery">Galeri</string>
+    <string name="camera">Kamera</string>
+    <string name="all_photos">Semua Foto</string>
+    <string name="all_media">Semua Media</string>
+    <string name="all_videos">Semua Video</string>
+    <string name="brightness">Kecerahan</string>
+    <string name="contrast">Kontras</string>
     <string name="vibrance">Vibrance</string>
-    <string name="saturation">Saturation</string>
-    <string name="sharpen">Sharpen</string>
-    <string name="exposure">Exposure</string>
+    <string name="saturation">Saturasi</string>
+    <string name="sharpen">Pertajam</string>
+    <string name="exposure">Pajanan</string>
     <string name="center">Center</string>
-    <string name="color">Color</string>
-    <string name="start">Start</string>
-    <string name="end">End</string>
+    <string name="color">Warna</string>
+    <string name="start">Mulai</string>
+    <string name="end">Selesai</string>
     <string name="bilateral_blur">Bilateral Blur</string>
     <string name="vignette">Vignette</string>
     <string name="box_blur">Box blur</string>
@@ -376,8 +376,8 @@
     <string name="clarendon">Clarendon</string>
     <string name="one977">1977</string>
     <string name="aden">Aden</string>
-    <string name="reset">Reset</string>
-    <string name="crop">Crop</string>
+    <string name="reset">Atur ulang</string>
+    <string name="crop">Pangkas</string>
     <string name="normal">Normal</string>
     <plurals name="likes_count">
         <item quantity="other">%d suka</item>
@@ -386,14 +386,14 @@
         <item quantity="other">%d komentar</item>
     </plurals>
     <plurals name="views_count">
-        <item quantity="other">%d views</item>
+        <item quantity="other">%d dilihat</item>
     </plurals>
     <plurals name="stories_count">
         <item quantity="other">%s cerita</item>
     </plurals>
     <string name="download_permission">Izin penyimpanan ditolak!</string>
-    <string name="details">Details</string>
-    <string name="title">Title</string>
+    <string name="details">Detail</string>
+    <string name="title">Judul</string>
     <string name="members">Members</string>
     <string name="admin">Admin</string>
     <string name="inviter">Inviter</string>
