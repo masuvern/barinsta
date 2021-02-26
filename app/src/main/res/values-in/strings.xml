@@ -55,7 +55,7 @@
     <string name="main_posts_following">%s Diikuti </string>
     <string name="post_viewer_autoplay_video">Otomatis putar video</string>
     <string name="post_viewer_muted_autoplay">Selalu bisukan video</string>
-    <string name="post_viewer_show_captions">Always show post captions</string>
+    <string name="post_viewer_show_captions">Selalu tampilkan keterangan kiriman</string>
     <string name="post_viewer_download_dialog_title">Pilih apa yang akan diunduh</string>
     <string name="post_viewer_download_current">Foto ini saja</string>
     <string name="post_viewer_download_album">Semua foto</string>
@@ -95,10 +95,10 @@
     <string name="remove_all_acc">Hapus semua akun</string>
     <string name="remove_all_acc_warning">Ini akan menghapus semua akun yang telah ditambahkan ke aplikasi!\nUntuk menghapus satu akun, ketuk lama akun tersebut di dialog penukar akun.\nApakah Anda ingin melanjutkan?</string>
     <string name="time_settings">Format tanggal</string>
-    <string name="saved_create_collection">Create new collection</string>
-    <string name="edit_collection">Edit collection name</string>
-    <string name="delete_collection">Delete collection</string>
-    <string name="delete_collection_confirm">Are you sure you want to delete this collection?</string>
+    <string name="saved_create_collection">Buat koleksi baru</string>
+    <string name="edit_collection">Sunting nama koleksi</string>
+    <string name="delete_collection">Hapus koleksi</string>
+    <string name="delete_collection_confirm">Apakah Anda yakin Anda ingin menghapus koleksi ini?</string>
     <string name="delete_collection_note">All contained media will remain in other collections.</string>
     <string name="add_to_collection">Add to collection...</string>
     <string name="remove_from_collection">Remove from collection</string>
@@ -320,8 +320,8 @@
     <string name="apply">Terapkan</string>
     <string name="save">Simpan</string>
     <string name="caption">Keterangan</string>
-    <string name="edit_caption">Edit caption</string>
-    <string name="translate_caption">Translate caption</string>
+    <string name="edit_caption">Sunting keterangan</string>
+    <string name="translate_caption">Terjemahkan keterangan</string>
     <string name="player_timeline_desc">Bilah waktu pemutar video</string>
     <string name="liking">Menyukai…</string>
     <string name="like_unsuccessful">Gagal menyukai</string>
