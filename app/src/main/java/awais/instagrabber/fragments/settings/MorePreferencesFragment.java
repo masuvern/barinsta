@@ -64,7 +64,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(accountCategory);
         if (isLoggedIn) {
             accountCategory.setSummary(R.string.account_hint);
-            accountCategory.addPreference(getAccountSwitcherPreference(cookie));
+            accountCategory.addPreference(getAccountSwitcherPreference(cookie, context));
             accountCategory.addPreference(getPreference(R.string.logout, R.string.logout_summary, R.drawable.ic_logout_24, preference -> {
                 if (getContext() == null) return false;
                 CookieUtils.setupCookies("LOGOUT");
@@ -79,7 +79,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             public void onSuccess(@NonNull final List<Account> accounts) {
                 if (!isLoggedIn) {
                     if (accounts.size() > 0) {
-                        accountCategory.addPreference(getAccountSwitcherPreference(null));
+                        accountCategory.addPreference(getAccountSwitcherPreference(null, context));
                     }
                     // Need to show something to trigger login activity
                     accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
@@ -235,8 +235,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         }
     }
 
-    private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie) {
-        final Context context = getContext();
+    private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie, final Context context) {
         if (context == null) return null;
         return new AccountSwitcherPreference(context, cookie, accountRepository, v -> showAccountSwitcherDialog());
     }

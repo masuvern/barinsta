@@ -3,77 +3,78 @@ package awais.instagrabber.asyncs;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.json.JSONObject;
+import androidx.annotation.NonNull;
 
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Locale;
 
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.webservices.DirectMessagesService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-import static awais.instagrabber.utils.Utils.settingsHelper;
-
-public class CreateThreadAction extends AsyncTask<Void, Void, String> {
+public class CreateThreadAction extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "CommentAction";
 
     private final String cookie;
     private final long userId;
     private final OnTaskCompleteListener onTaskCompleteListener;
+    private final DirectMessagesService directMessagesService;
 
     public CreateThreadAction(final String cookie, final long userId, final OnTaskCompleteListener onTaskCompleteListener) {
         this.cookie = cookie;
         this.userId = userId;
         this.onTaskCompleteListener = onTaskCompleteListener;
+        directMessagesService = DirectMessagesService.getInstance(CookieUtils.getCsrfTokenFromCookie(cookie),
+                                                                  CookieUtils.getUserIdFromCookie(cookie),
+                                                                  Utils.settingsHelper.getString(Constants.DEVICE_UUID));
     }
 
-    protected String doInBackground(Void... lmao) {
-        final String url = "https://i.instagram.com/api/v1/direct_v2/create_group_thread/";
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setRequestProperty("User-Agent", Utils.settingsHelper.getString(Constants.APP_UA));
-            urlConnection.setUseCaches(false);
-            final String urlParameters = Utils.sign("{\"_csrftoken\":\"" + cookie.split("csrftoken=")[1].split(";")[0]
-                    + "\",\"_uid\":\"" + CookieUtils.getUserIdFromCookie(cookie)
-                    + "\",\"__uuid\":\"" + settingsHelper.getString(Constants.DEVICE_UUID)
-                    + "\",\"recipient_users\":\"[" + userId // <- string of array of number (not joking)
-                    + "]\"}");
-            urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            if (urlParameters != null) {
-                urlConnection.setRequestProperty("Content-Length", "" + urlParameters.getBytes().length);
+    protected Void doInBackground(Void... lmao) {
+        final Call<DirectThread> createThreadRequest = directMessagesService.createThread(Collections.singletonList(userId), null);
+        createThreadRequest.enqueue(new Callback<DirectThread>() {
+            @Override
+            public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
+                if (!response.isSuccessful()) {
+                    if (response.errorBody() != null) {
+                        try {
+                            final String string = response.errorBody().string();
+                            final String msg = String.format(Locale.US,
+                                    "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                    call.request().url().toString(),
+                                    response.code(),
+                                    string);
+                            Log.e(TAG, msg);
+                        } catch (IOException e) {
+                            Log.e(TAG, "onResponse: ", e);
+                        }
+                    }
+                    Log.e(TAG, "onResponse: request was not successful and response error body was null");
+                }
+                onTaskCompleteListener.onTaskComplete(response.body());
+                if (response.body() == null) {
+                    Log.e(TAG, "onResponse: thread is null");
+                }
             }
-            urlConnection.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-            urlConnection.connect();
-            if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                return new JSONObject(NetworkUtils.readFromConnection(urlConnection)).getString("thread_id");
+
+            @Override
+            public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
+                onTaskCompleteListener.onTaskComplete(null);
             }
-        } catch (Throwable ex) {
-            Log.e(TAG, "reply (CT): " + ex);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
+        });
         return null;
     }
 
-    @Override
-    protected void onPostExecute(final String threadId) {
-        if (threadId == null || onTaskCompleteListener == null) {
-            return;
-        }
-        onTaskCompleteListener.onTaskComplete(threadId);
-    }
+//    @Override
+//    protected void onPostExecute() {
+//    }
 
     public interface OnTaskCompleteListener {
-        void onTaskComplete(final String threadId);
+        void onTaskComplete(final DirectThread thread);
     }
 }

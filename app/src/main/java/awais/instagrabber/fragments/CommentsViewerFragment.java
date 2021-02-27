@@ -371,7 +371,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                             @Override
                             public void onFailure(final Throwable t) {
                                 Log.e(TAG, "Error liking comment", t);
-                                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                try {
+                                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                                catch(final Throwable e) {}
                             }
                         });
                         return;
@@ -389,7 +392,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         @Override
                         public void onFailure(final Throwable t) {
                             Log.e(TAG, "Error unliking comment", t);
-                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            try {
+                                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            catch(final Throwable e) {}
                         }
                     });
                     break;
@@ -411,7 +417,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                         @Override
                         public void onFailure(final Throwable t) {
                             Log.e(TAG, "Error translating comment", t);
-                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            try {
+                                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            catch(final Throwable e) {}
                         }
                     });
                     break;
@@ -432,7 +441,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                                 @Override
                                 public void onFailure(final Throwable t) {
                                     Log.e(TAG, "Error deleting comment", t);
-                                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    try {
+                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                    catch(final Throwable e) {}
                                 }
                             });
                     break;

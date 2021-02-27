@@ -62,7 +62,7 @@ public class UserService extends BaseService {
             public void onResponse(@NonNull final Call<WrappedUser> call, @NonNull final Response<WrappedUser> response) {
                 final WrappedUser user = response.body();
                 if (user == null) {
-                    callback.onSuccess(null);
+                    callback.onFailure(null);
                     return;
                 }
                 callback.onSuccess(user.getUser());

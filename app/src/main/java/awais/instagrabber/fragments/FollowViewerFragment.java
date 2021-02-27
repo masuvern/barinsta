@@ -44,7 +44,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     private final ArrayList<FollowModel> followersModels = new ArrayList<>();
     private final ArrayList<FollowModel> allFollowing = new ArrayList<>();
 
-    private boolean moreAvailable = true, isFollowersList, isCompare = false, loading = false, shouldRefresh = true;
+    private boolean moreAvailable = true, isFollowersList, isCompare = false, loading = false, shouldRefresh = true, searching = false;
     private long profileId;
     private String username;
     private String namePost;
@@ -65,7 +65,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     final ServiceCallback<FriendshipListFetchResponse> followingFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
         @Override
         public void onSuccess(final FriendshipListFetchResponse result) {
-            if (result != null) {
+            if (result != null && isCompare) {
                 followingModels.addAll(result.getItems());
                 if (!isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
@@ -78,7 +78,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     if (!isFollowersList) moreAvailable = false;
                     showCompare();
                 }
-            } else binding.swipeRefreshLayout.setRefreshing(false);
+            } else if (isCompare) binding.swipeRefreshLayout.setRefreshing(false);
         }
 
         @Override
@@ -94,7 +94,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     final ServiceCallback<FriendshipListFetchResponse> followersFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
         @Override
         public void onSuccess(final FriendshipListFetchResponse result) {
-            if (result != null) {
+            if (result != null && isCompare) {
                 followersModels.addAll(result.getItems());
                 if (isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
@@ -107,7 +107,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     if (isFollowersList) moreAvailable = false;
                     showCompare();
                 }
-            }
+            } else if (isCompare) binding.swipeRefreshLayout.setRefreshing(false);
         }
 
         @Override
@@ -237,12 +237,12 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         };
         layoutManager = new LinearLayoutManager(getContext());
         lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!TextUtils.isEmpty(endCursor)) {
+            if (!TextUtils.isEmpty(endCursor) && !searching) {
                 binding.swipeRefreshLayout.setRefreshing(true);
                 layoutManager.setStackFromEnd(true);
                 friendshipService.getList(isFollowersList, profileId, endCursor, cb);
+                endCursor = null;
             }
-            endCursor = null;
         });
         binding.rvFollow.addOnScrollListener(lazyLoader);
         binding.rvFollow.setLayoutManager(layoutManager);
@@ -303,68 +303,6 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         final SearchView searchView = (SearchView) menuSearch.getActionView();
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            // private final Filter filter = new Filter() {
-            //     private final ArrayList<FollowModel> searchFollowModels = new ArrayList<>(followModels.size() / 2);
-            //     private final ArrayList<FollowModel> searchFollowingModels = new ArrayList<>(followingModels.size() / 2);
-            //     private final ArrayList<FollowModel> searchFollowersModels = new ArrayList<>(followersModels.size() / 2);
-            //     private final ArrayList<FollowModel> searchAllFollowing = new ArrayList<>(allFollowing.size() / 2);
-            //
-            //     @Nullable
-            //     @Override
-            //     protected FilterResults performFiltering(@NonNull final CharSequence constraint) {
-            //         searchFollowModels.clear();
-            //         searchFollowingModels.clear();
-            //         searchFollowersModels.clear();
-            //         searchAllFollowing.clear();
-            //
-            //         final int followModelsSize = followModels.size();
-            //         final int followingModelsSize = followingModels.size();
-            //         final int followersModelsSize = followersModels.size();
-            //         final int allFollowingSize = allFollowing.size();
-            //
-            //         int maxSize = followModelsSize;
-            //         if (maxSize < followingModelsSize) maxSize = followingModelsSize;
-            //         if (maxSize < followersModelsSize) maxSize = followersModelsSize;
-            //         if (maxSize < allFollowingSize) maxSize = allFollowingSize;
-            //
-            //         final String query = constraint.toString().toLowerCase();
-            //         FollowModel followModel;
-            //         while (maxSize != -1) {
-            //             if (maxSize < followModelsSize) {
-            //                 followModel = followModels.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchFollowModels.add(followModel);
-            //             }
-            //
-            //             if (maxSize < followingModelsSize) {
-            //                 followModel = followingModels.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchFollowingModels.add(followModel);
-            //             }
-            //
-            //             if (maxSize < followersModelsSize) {
-            //                 followModel = followersModels.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchFollowersModels.add(followModel);
-            //             }
-            //
-            //             if (maxSize < allFollowingSize) {
-            //                 followModel = allFollowing.get(maxSize);
-            //                 if (Utils.hasKey(query, followModel.getUsername(), followModel.getFullName()))
-            //                     searchAllFollowing.add(followModel);
-            //             }
-            //
-            //             --maxSize;
-            //         }
-            //
-            //         return null;
-            //     }
-            //
-            //     @Override
-            //     protected void publishResults(final CharSequence query, final FilterResults results) {
-            //         refreshAdapter(searchFollowModels, searchFollowingModels, searchFollowersModels, searchAllFollowing);
-            //     }
-            // };
 
             @Override
             public boolean onQueryTextSubmit(final String query) {
@@ -373,9 +311,15 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
 
             @Override
             public boolean onQueryTextChange(final String query) {
-                // if (Utils.isEmpty(query)) refreshAdapter(followModels, followingModels, followersModels, allFollowing);
+                if (TextUtils.isEmpty(query)) {
+                    searching = false;
+                    // refreshAdapter(followModels, followingModels, followersModels, allFollowing);
+                }
                 // else filter.filter(query.toLowerCase());
-                if (adapter != null) adapter.getFilter().filter(query);
+                if (adapter != null) {
+                    searching = true;
+                    adapter.getFilter().filter(query);
+                }
                 return true;
             }
         });

@@ -5,9 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.User;
@@ -15,7 +12,7 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.UserService;
 
-public final class ProfileFetcher extends AsyncTask<Void, Void, String> {
+public final class ProfileFetcher extends AsyncTask<Void, Void, Void> {
     private static final String TAG = ProfileFetcher.class.getSimpleName();
     private final UserService userService;
     private final GraphQLService graphQLService;
@@ -36,12 +33,11 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, String> {
 
     @Nullable
     @Override
-    protected String doInBackground(final Void... voids) {
+    protected Void doInBackground(final Void... voids) {
         if (isLoggedIn) {
             userService.getUsernameInfo(userName, new ServiceCallback<User>() {
                 @Override
                 public void onSuccess(final User user) {
-                    Log.d("austin_debug", user.getUsername() + " " + userName);
                     userService.getUserFriendship(user.getPk(), new ServiceCallback<FriendshipStatus>() {
                         @Override
                         public void onSuccess(final FriendshipStatus status) {
@@ -52,6 +48,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, String> {
                         @Override
                         public void onFailure(final Throwable t) {
                             Log.e(TAG, "Error", t);
+                            fetchListener.onFailure(t);
                         }
                     });
                 }
@@ -59,6 +56,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, String> {
                 @Override
                 public void onFailure(final Throwable t) {
                     Log.e(TAG, "Error", t);
+                    fetchListener.onFailure(t);
                 }
             });
         }
@@ -72,10 +70,11 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, String> {
                 @Override
                 public void onFailure(final Throwable t) {
                     Log.e(TAG, "Error", t);
+                    fetchListener.onFailure(t);
                 }
             });
         }
-        return "yeah";
+        return null;
     }
 
     @Override

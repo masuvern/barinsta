@@ -216,10 +216,14 @@ public class StoryViewerFragment extends Fragment {
             new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
-                    .setPositiveButton(R.string.confirm, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), threadId -> {
+                    .setPositiveButton(R.string.confirm, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), thread -> {
+                        if (thread == null) {
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         try {
                             final Call<DirectThreadBroadcastResponse> request = directMessagesService
-                                    .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(threadId),
+                                    .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(thread.getThreadId()),
                                                          input.getText().toString(),
                                                          currentStory.getStoryMediaId(),
                                                          String.valueOf(currentStory.getUserId()));

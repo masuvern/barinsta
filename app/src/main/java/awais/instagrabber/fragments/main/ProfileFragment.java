@@ -305,9 +305,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
-        storiesService = StoriesService.getInstance();
-        mediaService = MediaService.getInstance(null, null, 0);
+        friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, userId) : null;
+        storiesService = isLoggedIn ? StoriesService.getInstance() : null;
+        mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         setHasOptionsMenu(true);
@@ -538,10 +538,26 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void fetchProfileDetails() {
         if (TextUtils.isEmpty(username)) return;
-        new ProfileFetcher(username.trim().substring(1), isLoggedIn, profileModel -> {
-            if (getContext() == null) return;
-            this.profileModel = profileModel;
-            setProfileDetails();
+        new ProfileFetcher(username.trim().substring(1), isLoggedIn, new FetchListener<User>() {
+            @Override
+            public void onResult(final User user) {
+                if (getContext() == null) return;
+                profileModel = user;
+                setProfileDetails();
+            }
+
+            @Override
+            public void onFailure(final Throwable t) {
+                Log.e(TAG, "Error fetching profile", t);
+                final Context context = getContext();
+                try {
+                    if (t == null) Toast.makeText(context,
+                            isLoggedIn ? R.string.error_loading_profile_loggedin : R.string.error_loading_profile,
+                            Toast.LENGTH_LONG).show();
+                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                catch(final Throwable e) {}
+            }
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -786,18 +802,19 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupButtons(final long profileId, final long myId) {
         profileDetailsBinding.btnTagged.setVisibility(isReallyPrivate() ? View.GONE : View.VISIBLE);
+        profileDetailsBinding.btnDM.setVisibility(View.GONE); // temporary measure
         if (isLoggedIn) {
             if (Objects.equals(profileId, myId)) {
                 profileDetailsBinding.btnTagged.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnSaved.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnLiked.setVisibility(View.VISIBLE);
-                profileDetailsBinding.btnDM.setVisibility(View.GONE);
+//                profileDetailsBinding.btnDM.setVisibility(View.GONE);
                 profileDetailsBinding.btnSaved.setText(R.string.saved);
                 return;
             }
             profileDetailsBinding.btnSaved.setVisibility(View.GONE);
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
-            profileDetailsBinding.btnDM.setVisibility(View.VISIBLE); // maybe there is a judgment mechanism?
+//            profileDetailsBinding.btnDM.setVisibility(View.VISIBLE);
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
@@ -902,7 +919,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                             @Override
                                             public void onSuccess(final FriendshipChangeResponse result) {
                                                 // Log.d(TAG, "Unfollow success: " + result);
-                                                onRefresh();
+                                                fetchProfileDetails();
                                             }
 
                                             @Override
@@ -920,7 +937,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
                                 // Log.d(TAG, "Unfollow success: " + result);
-                                onRefresh();
+                                fetchProfileDetails();
                             }
 
                             @Override
@@ -935,7 +952,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             @Override
                             public void onSuccess(final FriendshipChangeResponse result) {
                                 // Log.d(TAG, "Follow success: " + result);
-                                onRefresh();
+                                fetchProfileDetails();
                             }
 
                             @Override
@@ -961,17 +978,27 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        profileDetailsBinding.btnDM.setOnClickListener(v -> {
-            profileDetailsBinding.btnDM.setEnabled(false);
-            // new CreateThreadAction(cookie, profileModel.getPk(), threadId -> {
-            //     if (isAdded()) {
-            //         final NavDirections action = ProfileFragmentDirections
-            //                 .actionProfileFragmentToDMThreadFragment(threadId, profileModel.getUsername());
-            //         NavHostFragment.findNavController(this).navigate(action);
-            //     }
-            //     profileDetailsBinding.btnDM.setEnabled(true);
-            // }).execute();
-        });
+//        profileDetailsBinding.btnDM.setOnClickListener(v -> {
+//            profileDetailsBinding.btnDM.setEnabled(false);
+//            new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
+//                if (thread == null) {
+//                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+//                    profileDetailsBinding.btnDM.setEnabled(true);
+//                    return;
+//                }
+//                if (isAdded()) {
+//                    final Bundle bundle = new Bundle();
+//                    bundle.putString("threadId", thread.getThreadId());
+//                    bundle.putString("title", thread.getThreadTitle());
+//                    if (isAdded()) {
+//                        final NavDirections action = ProfileFragmentDirections
+//                                .actionProfileFragmentToDMThreadFragment(thread.getThreadId(), profileModel.getUsername());
+//                        NavHostFragment.findNavController(this).navigate(action);
+//                    }
+//                }
+//                profileDetailsBinding.btnDM.setEnabled(true);
+//            }).execute();
+//        });
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic

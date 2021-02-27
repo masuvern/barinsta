@@ -242,6 +242,7 @@ public class GraphQLService extends BaseService {
                                 null,
                                 null,
                                 0,
+                                null,
                                 null
                         ));
                         // userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
@@ -332,6 +333,7 @@ public class GraphQLService extends BaseService {
                             userJson.getString("biography"),
                             url,
                             0,
+                            null,
                             null));
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);

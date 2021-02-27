@@ -120,14 +120,17 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 @Override
                 public void onSuccess(final User result) {
                     if (result != null) {
-                        setupPhoto(result.getProfilePicUrl());
+                        setupPhoto(result.getHDProfilePicUrl());
                     }
                 }
 
                 @Override
                 public void onFailure(final Throwable t) {
                     final Context context = getContext();
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    try {
+                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                    catch(final Throwable e) {}
                     getDialog().dismiss();
                 }
             });
