@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Location implements Serializable {
     private final long pk;
@@ -53,5 +54,24 @@ public class Location implements Serializable {
 
     public float getLat() {
         return lat;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Location location = (Location) o;
+        return pk == location.pk &&
+                Float.compare(location.lng, lng) == 0 &&
+                Float.compare(location.lat, lat) == 0 &&
+                Objects.equals(shortName, location.shortName) &&
+                Objects.equals(name, location.name) &&
+                Objects.equals(address, location.address) &&
+                Objects.equals(city, location.city);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, shortName, name, address, city, lng, lat);
     }
 }

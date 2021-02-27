@@ -349,9 +349,19 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setReadState(@NonNull final DirectThread thread) {
-        final DirectItem item = thread.getItems().get(0);
-        final Map<Long, DirectThreadLastSeenAt> lastSeenAtMap = thread.getLastSeenAt();
-        final boolean read = ResponseBodyUtils.isRead(item, lastSeenAtMap, Collections.singletonList(thread.getViewerId()), thread.getDirectStory());
+        final boolean read;
+        if (thread.getDirectStory() != null) {
+            read = false;
+        } else {
+            final DirectItem item = thread.getFirstDirectItem();
+            if (item.getUserId() == thread.getViewerId()) {
+                // if last item was sent by user, then it is read (even though we have auto read unchecked?)
+                read = true;
+            } else {
+                final Map<Long, DirectThreadLastSeenAt> lastSeenAtMap = thread.getLastSeenAt();
+                read = ResponseBodyUtils.isRead(item, lastSeenAtMap, Collections.singletonList(thread.getViewerId()));
+            }
+        }
         binding.unread.setVisibility(read ? View.GONE : View.VISIBLE);
         binding.threadTitle.setTypeface(binding.threadTitle.getTypeface(), read ? Typeface.NORMAL : Typeface.BOLD);
         binding.subtitle.setTypeface(binding.subtitle.getTypeface(), read ? Typeface.NORMAL : Typeface.BOLD);

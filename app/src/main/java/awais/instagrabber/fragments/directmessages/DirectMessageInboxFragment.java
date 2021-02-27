@@ -29,6 +29,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
@@ -172,6 +173,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     }
 
     private void setupObservers() {
+        removeViewModelObservers();
         threadsObserver = list -> {
             if (inboxAdapter == null) return;
             inboxAdapter.submitList(list, () -> {
@@ -181,8 +183,28 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             });
         };
         viewModel.getThreads().observe(fragmentActivity, threadsObserver);
-        viewModel.getFetchingInbox().observe(getViewLifecycleOwner(), fetching -> binding.swipeRefreshLayout.setRefreshing(fetching));
-        viewModel.getUnseenCount().observe(getViewLifecycleOwner(), this::setBottomNavBarBadge);
+        viewModel.getInbox().observe(getViewLifecycleOwner(), inboxResource -> {
+            if (inboxResource == null) return;
+            switch (inboxResource.status) {
+                case SUCCESS:
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case ERROR:
+                    if (inboxResource.message != null) {
+                        Snackbar.make(binding.getRoot(), inboxResource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case LOADING:
+                    binding.swipeRefreshLayout.setRefreshing(true);
+                    break;
+            }
+        });
+        viewModel.getUnseenCount().observe(getViewLifecycleOwner(), unseenCountResource -> {
+            if (unseenCountResource == null) return;
+            final Integer unseenCount = unseenCountResource.data;
+            setBottomNavBarBadge(unseenCount == null ? 0 : unseenCount);
+        });
         viewModel.getPendingRequestsTotal().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
     }
 
@@ -230,11 +252,10 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         inboxAdapter = new DirectMessageInboxAdapter(thread -> {
             if (navigating) return;
             navigating = true;
-            final Bundle bundle = new Bundle();
-            bundle.putString("threadId", thread.getThreadId());
-            bundle.putString("title", thread.getThreadTitle());
             if (isAdded()) {
-                NavHostFragment.findNavController(this).navigate(R.id.action_inbox_to_thread, bundle);
+                final DirectMessageInboxFragmentDirections.ActionInboxToThread directions = DirectMessageInboxFragmentDirections
+                        .actionInboxToThread(thread.getThreadId(), thread.getThreadTitle());
+                NavHostFragment.findNavController(this).navigate(directions);
             }
             navigating = false;
         });

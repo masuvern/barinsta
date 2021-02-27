@@ -196,7 +196,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
                 if (item.isPending()) {
                     binding.deliveryStatus.setImageResource(R.drawable.ic_check_24);
                 } else {
-                    final boolean read = ResponseBodyUtils.isRead(item, thread.getLastSeenAt(), userIds, null);
+                    final boolean read = ResponseBodyUtils.isRead(item,
+                                                                  thread.getLastSeenAt(),
+                                                                  userIds
+                    );
                     binding.deliveryStatus.setImageResource(R.drawable.ic_check_all_24);
                     ImageViewCompat.setImageTintList(
                             binding.deliveryStatus,
@@ -358,7 +361,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             final DirectItemReactions reactions = item.getReactions();
             final List<DirectItemEmojiReaction> emojis = reactions != null ? reactions.getEmojis() : null;
             if (emojis == null || emojis.isEmpty()) {
-                binding.container.setPadding(messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall);
+                binding.container.setPadding(messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall, 0);
                 binding.reactionsWrapper.setVisibility(View.GONE);
                 return;
             }

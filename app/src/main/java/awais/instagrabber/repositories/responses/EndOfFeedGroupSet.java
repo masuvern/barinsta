@@ -2,6 +2,7 @@ package awais.instagrabber.repositories.responses;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class EndOfFeedGroupSet implements Serializable {
     private final long id;
@@ -47,5 +48,23 @@ public class EndOfFeedGroupSet implements Serializable {
 
     public List<EndOfFeedGroup> getGroups() {
         return groups;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final EndOfFeedGroupSet that = (EndOfFeedGroupSet) o;
+        return id == that.id &&
+                Objects.equals(activeGroupId, that.activeGroupId) &&
+                Objects.equals(connectedGroupId, that.connectedGroupId) &&
+                Objects.equals(nextMaxId, that.nextMaxId) &&
+                Objects.equals(paginationSource, that.paginationSource) &&
+                Objects.equals(groups, that.groups);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, activeGroupId, connectedGroupId, nextMaxId, paginationSource, groups);
     }
 }

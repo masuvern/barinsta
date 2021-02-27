@@ -37,7 +37,6 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -58,7 +57,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import awais.instagrabber.ProfileNavGraphDirections;
@@ -104,9 +102,8 @@ import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
-import awais.instagrabber.viewmodels.DirectInboxViewModel;
-import awais.instagrabber.viewmodels.DirectPendingInboxViewModel;
 import awais.instagrabber.viewmodels.DirectThreadViewModel;
+import awais.instagrabber.viewmodels.factories.DirectThreadViewModelFactory;
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
@@ -235,7 +232,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         @Override
         public void onReaction(final DirectItem item, final Emoji emoji) {
             if (item == null) return;
-            final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendReaction(item, emoji);
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.sendReaction(item, emoji);
             if (resourceLiveData != null) {
                 resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
             }
@@ -295,13 +292,29 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
     private ItemTouchHelper itemTouchHelper;
+    private LiveData<Boolean> pendingLiveData;
+    private LiveData<DirectThread> threadLiveData;
+    private LiveData<Integer> inputModeLiveData;
+    private LiveData<String> threadTitleLiveData;
+    private LiveData<Resource<Object>> fetchingLiveData;
+    private LiveData<List<DirectItem>> itemsLiveData;
+    private LiveData<DirectItem> replyToItemLiveData;
+    private LiveData<Integer> pendingRequestsCountLiveData;
+    private LiveData<List<User>> usersLiveData;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
-        viewModel = new ViewModelProvider(this).get(DirectThreadViewModel.class);
+        final Bundle arguments = getArguments();
+        if (arguments == null) return;
+        final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
+        viewModel = new ViewModelProvider(this, new DirectThreadViewModelFactory(fragmentActivity.getApplication(),
+                                                                                 fragmentArgs.getThreadId(),
+                                                                                 fragmentArgs.getPending(),
+                                                                                 appStateViewModel.getCurrentUser()))
+                .get(DirectThreadViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -332,7 +345,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         init();
         binding.send.post(() -> initialSendX = binding.send.getX());
         shouldRefresh = false;
-        setObservers();
     }
 
     @Override
@@ -406,6 +418,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             wasKbShowing = true;
             binding.emojiPicker.setAlpha(0);
         }
+        removeObservers();
         super.onPause();
     }
 
@@ -423,7 +436,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
         binding.send.stopScale();
         setupBackStackResultObserver();
-        attachPendingRequestsBadge(viewModel.getPendingRequestsCount().getValue());
+        setObservers();
+        // attachPendingRequestsBadge(viewModel.getPendingRequestsCount().getValue());
     }
 
     @Override
@@ -463,42 +477,38 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (context == null) return;
         if (getArguments() == null) return;
         actionBar = fragmentActivity.getSupportActionBar();
-        final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(getArguments());
-        viewModel.getThreadTitle().postValue(fragmentArgs.getTitle());
-        final String threadId = fragmentArgs.getThreadId();
-        viewModel.setThreadId(threadId);
         setupList();
         root.post(this::setupInput);
-        root.post(this::getInitialData);
+        // root.post(this::getInitialData);
     }
 
-    private void getInitialData() {
-        final Bundle arguments = getArguments();
-        if (arguments == null) return;
-        final DirectMessageThreadFragmentArgs args = DirectMessageThreadFragmentArgs.fromBundle(arguments);
-        final boolean pending = args.getPending();
-        final NavController navController = NavHostFragment.findNavController(this);
-        final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
-        final List<DirectThread> threads;
-        if (!pending) {
-            final DirectInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
-            threads = threadListViewModel.getThreads().getValue();
-        } else {
-            final DirectPendingInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectPendingInboxViewModel.class);
-            threads = threadListViewModel.getThreads().getValue();
-        }
-        final Optional<DirectThread> first = threads != null
-                                             ? threads.stream()
-                                                      .filter(thread -> thread.getThreadId().equals(viewModel.getThreadId()))
-                                                      .findFirst()
-                                             : Optional.empty();
-        if (first.isPresent()) {
-            final DirectThread thread = first.get();
-            viewModel.setThread(thread);
-            return;
-        }
-        viewModel.fetchChats();
-    }
+    // private void getInitialData() {
+    //     final Bundle arguments = getArguments();
+    //     if (arguments == null) return;
+    //     final DirectMessageThreadFragmentArgs args = DirectMessageThreadFragmentArgs.fromBundle(arguments);
+    //     final boolean pending = args.getPending();
+    //     final NavController navController = NavHostFragment.findNavController(this);
+    //     final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
+    //     final List<DirectThread> threads;
+    //     if (!pending) {
+    //         final DirectInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
+    //         threads = threadListViewModel.getThreads().getValue();
+    //     } else {
+    //         final DirectPendingInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectPendingInboxViewModel.class);
+    //         threads = threadListViewModel.getThreads().getValue();
+    //     }
+    //     final Optional<DirectThread> first = threads != null
+    //                                          ? threads.stream()
+    //                                                   .filter(thread -> thread.getThreadId().equals(viewModel.getThreadId()))
+    //                                                   .findFirst()
+    //                                          : Optional.empty();
+    //     if (first.isPresent()) {
+    //         final DirectThread thread = first.get();
+    //         viewModel.setThread(thread);
+    //         return;
+    //     }
+    //     viewModel.fetchChats();
+    // }
 
     private void setupList() {
         final Context context = getContext();
@@ -542,7 +552,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void setObservers() {
-        viewModel.isPending().observe(getViewLifecycleOwner(), isPending -> {
+        threadLiveData = viewModel.getThread();
+        if (threadLiveData == null) {
+            final NavController navController = NavHostFragment.findNavController(this);
+            navController.navigateUp();
+            return;
+        }
+        pendingLiveData = viewModel.isPending();
+        pendingLiveData.observe(getViewLifecycleOwner(), isPending -> {
             if (isPending == null) {
                 hideInput();
                 return;
@@ -556,7 +573,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             if (inputMode != null && inputMode == 1) return;
             showInput();
         });
-        viewModel.getInputMode().observe(getViewLifecycleOwner(), inputMode -> {
+        inputModeLiveData = viewModel.getInputMode();
+        inputModeLiveData.observe(getViewLifecycleOwner(), inputMode -> {
             final Boolean isPending = viewModel.isPending().getValue();
             if (isPending != null && isPending) return;
             if (inputMode == null || inputMode == 0) return;
@@ -564,21 +582,34 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 hideInput();
             }
         });
-        viewModel.getThreadTitle().observe(getViewLifecycleOwner(), this::setTitle);
-        viewModel.getFetching().observe(getViewLifecycleOwner(), fetching -> {
-            if (fetching) {
-                setTitle(UPDATING_TITLE);
-                return;
+        threadTitleLiveData = viewModel.getThreadTitle();
+        threadTitleLiveData.observe(getViewLifecycleOwner(), this::setTitle);
+        fetchingLiveData = viewModel.isFetching();
+        fetchingLiveData.observe(getViewLifecycleOwner(), fetchingResource -> {
+            if (fetchingResource == null) return;
+            switch (fetchingResource.status) {
+                case SUCCESS:
+                case ERROR:
+                    setTitle(viewModel.getThreadTitle().getValue());
+                    if (fetchingResource.message != null) {
+                        Snackbar.make(binding.getRoot(), fetchingResource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    break;
+                case LOADING:
+                    setTitle(UPDATING_TITLE);
+                    break;
             }
-            setTitle(viewModel.getThreadTitle().getValue());
         });
-        final ItemsAdapterDataMerger itemsAdapterDataMerger = new ItemsAdapterDataMerger(appStateViewModel.getCurrentUser(), viewModel.getThread());
-        itemsAdapterDataMerger.observe(getViewLifecycleOwner(), userThreadPair -> {
-            viewModel.setCurrentUser(userThreadPair.first);
-            setupItemsAdapter(userThreadPair.first, userThreadPair.second);
-        });
-        viewModel.getItems().observe(getViewLifecycleOwner(), this::submitItemsToAdapter);
-        viewModel.getReplyToItem().observe(getViewLifecycleOwner(), item -> {
+        // final ItemsAdapterDataMerger itemsAdapterDataMerger = new ItemsAdapterDataMerger(appStateViewModel.getCurrentUser(), viewModel.getThread());
+        // itemsAdapterDataMerger.observe(getViewLifecycleOwner(), userThreadPair -> {
+        //     viewModel.setCurrentUser(userThreadPair.first);
+        //     setupItemsAdapter(userThreadPair.first, userThreadPair.second);
+        // });
+        threadLiveData.observe(getViewLifecycleOwner(), this::setupItemsAdapter);
+        itemsLiveData = viewModel.getItems();
+        itemsLiveData.observe(getViewLifecycleOwner(), this::submitItemsToAdapter);
+        replyToItemLiveData = viewModel.getReplyToItem();
+        replyToItemLiveData.observe(getViewLifecycleOwner(), item -> {
             if (item == null) {
                 if (binding.input.length() == 0) {
                     showExtraInputOption(true);
@@ -633,12 +664,28 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
             prevLength = length;
         });
-        viewModel.getPendingRequestsCount().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
-        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
+        pendingRequestsCountLiveData = viewModel.getPendingRequestsCount();
+        pendingRequestsCountLiveData.observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
+        usersLiveData = viewModel.getUsers();
+        usersLiveData.observe(getViewLifecycleOwner(), users -> {
             if (users == null || users.isEmpty()) return;
             final User user = users.get(0);
             binding.acceptPendingRequestQuestion.setText(getString(R.string.accept_request_from_user, user.getUsername(), user.getFullName()));
         });
+    }
+
+    private void removeObservers() {
+        pendingLiveData.removeObservers(getViewLifecycleOwner());
+        inputModeLiveData.removeObservers(getViewLifecycleOwner());
+        threadTitleLiveData.removeObservers(getViewLifecycleOwner());
+        fetchingLiveData.removeObservers(getViewLifecycleOwner());
+        threadLiveData.removeObservers(getViewLifecycleOwner());
+        itemsLiveData.removeObservers(getViewLifecycleOwner());
+        replyToItemLiveData.removeObservers(getViewLifecycleOwner());
+        inputLength.removeObservers(getViewLifecycleOwner());
+        pendingRequestsCountLiveData.removeObservers(getViewLifecycleOwner());
+        usersLiveData.removeObservers(getViewLifecycleOwner());
+
     }
 
     private void hidePendingOptions() {
@@ -669,9 +716,15 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 case SUCCESS:
                     resourceLiveData.removeObservers(getViewLifecycleOwner());
                     if (isDecline) {
+                        removeObservers();
+                        viewModel.removeThread();
                         final NavController navController = NavHostFragment.findNavController(this);
                         navController.navigateUp();
+                        return;
                     }
+                    removeObservers();
+                    viewModel.moveFromPending();
+                    setObservers();
                     break;
                 case LOADING:
                     break;
@@ -838,12 +891,15 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         });
     }
 
-    private void setupItemsAdapter(final User currentUser, final DirectThread thread) {
+    private void setupItemsAdapter(final DirectThread thread) {
+        if (thread == null) return;
         if (itemsAdapter != null) {
             if (itemsAdapter.getThread() == thread) return;
             itemsAdapter.setThread(thread);
             return;
         }
+        final User currentUser = appStateViewModel.getCurrentUser();
+        if (currentUser == null) return;
         itemsAdapter = new DirectItemsAdapter(currentUser, thread, directItemCallback, directItemLongClickListener);
         itemsAdapter.setHasStableIds(true);
         itemsAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
@@ -958,7 +1014,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         binding.send.setOnRecordClickListener(v -> {
             final Editable text = binding.input.getText();
             if (TextUtils.isEmpty(text)) return;
-            final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendText(text.toString());
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.sendText(text.toString());
             resourceLiveData.observe(getViewLifecycleOwner(), resource -> handleSentMessage(resourceLiveData));
             binding.input.setText("");
             viewModel.setReplyToItem(null);
@@ -1031,8 +1087,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         navController.navigate(navDirections);
     }
 
-    private void handleSentMessage(final LiveData<Resource<DirectItem>> resourceLiveData) {
-        final Resource<DirectItem> resource = resourceLiveData.getValue();
+    private void handleSentMessage(final LiveData<Resource<Object>> resourceLiveData) {
+        final Resource<Object> resource = resourceLiveData.getValue();
         if (resource == null) return;
         final Resource.Status status = resource.status;
         switch (status) {
@@ -1380,10 +1436,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         animatorSet.start();
     }
 
-    private void showLongClickOptions(final View itemView) {
-
-    }
-
     private void showReactionsDialog(final DirectItem item) {
         final LiveData<List<User>> users = viewModel.getUsers();
         final LiveData<List<User>> leftUsers = viewModel.getLeftUsers();
@@ -1410,7 +1462,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
         if (reaction == null) return;
         if (reaction.getSenderId() == viewModel.getViewerId()) {
-            final LiveData<Resource<DirectItem>> resourceLiveData = viewModel.sendDeleteReaction(itemId);
+            final LiveData<Resource<Object>> resourceLiveData = viewModel.sendDeleteReaction(itemId);
             if (resourceLiveData != null) {
                 resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
             }

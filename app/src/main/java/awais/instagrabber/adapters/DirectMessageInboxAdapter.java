@@ -36,7 +36,9 @@ public final class DirectMessageInboxAdapter extends ListAdapter<DirectThread, D
             final DirectItem oldItemFirst = oldThread.getFirstDirectItem();
             final DirectItem newItemFirst = newThread.getFirstDirectItem();
             if (oldItemFirst == null || newItemFirst == null) return false;
-            return oldItemFirst.getItemId().equals(newItemFirst.getItemId());
+            final boolean idsEqual = oldItemFirst.getItemId().equals(newItemFirst.getItemId());
+            if (!idsEqual) return false;
+            return oldItemFirst.getTimestamp() == newItemFirst.getTimestamp();
         }
     };
 

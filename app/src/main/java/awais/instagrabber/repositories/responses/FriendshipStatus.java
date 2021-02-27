@@ -3,6 +3,7 @@ package awais.instagrabber.repositories.responses;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class FriendshipStatus implements Serializable {
     private final boolean following;
@@ -76,6 +77,29 @@ public class FriendshipStatus implements Serializable {
 
     public boolean isMutingReel() {
         return isMutingReel;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final FriendshipStatus that = (FriendshipStatus) o;
+        return following == that.following &&
+                followedBy == that.followedBy &&
+                blocking == that.blocking &&
+                muting == that.muting &&
+                isPrivate == that.isPrivate &&
+                incomingRequest == that.incomingRequest &&
+                outgoingRequest == that.outgoingRequest &&
+                isBestie == that.isBestie &&
+                isRestricted == that.isRestricted &&
+                isMutingReel == that.isMutingReel;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(following, followedBy, blocking, muting, isPrivate, incomingRequest, outgoingRequest, isBestie, isRestricted,
+                            isMutingReel);
     }
 
     @NonNull

@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class DirectItemVideoCallEvent {
     private final String action;
@@ -39,5 +40,22 @@ public final class DirectItemVideoCallEvent {
 
     public List<DirectItemActionLog.TextRange> getTextAttributes() {
         return textAttributes;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemVideoCallEvent that = (DirectItemVideoCallEvent) o;
+        return threadHasAudioOnlyCall == that.threadHasAudioOnlyCall &&
+                Objects.equals(action, that.action) &&
+                Objects.equals(encodedServerDataInfo, that.encodedServerDataInfo) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(textAttributes, that.textAttributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(action, encodedServerDataInfo, description, threadHasAudioOnlyCall, textAttributes);
     }
 }

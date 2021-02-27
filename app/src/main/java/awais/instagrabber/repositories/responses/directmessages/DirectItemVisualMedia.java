@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
 import java.util.List;
+import java.util.Objects;
 
 import awais.instagrabber.models.enums.RavenMediaViewMode;
 import awais.instagrabber.repositories.responses.Media;
@@ -63,5 +64,26 @@ public class DirectItemVisualMedia {
 
     public Media getMedia() {
         return media;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemVisualMedia media1 = (DirectItemVisualMedia) o;
+        return urlExpireAtSecs == media1.urlExpireAtSecs &&
+                playbackDurationSecs == media1.playbackDurationSecs &&
+                seenCount == media1.seenCount &&
+                replayExpiringAtUs == media1.replayExpiringAtUs &&
+                Objects.equals(seenUserIds, media1.seenUserIds) &&
+                viewMode == media1.viewMode &&
+                Objects.equals(expiringMediaActionSummary, media1.expiringMediaActionSummary) &&
+                Objects.equals(media, media1.media);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(urlExpireAtSecs, playbackDurationSecs, seenUserIds, viewMode, seenCount, replayExpiringAtUs, expiringMediaActionSummary, media);
     }
 }

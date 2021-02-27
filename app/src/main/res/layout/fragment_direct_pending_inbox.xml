@@ -20,4 +20,14 @@
             android:paddingBottom="?attr/actionBarSize"
             tools:listitem="@layout/layout_dm_inbox_item" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/no_pending_requests"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:visibility="gone" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

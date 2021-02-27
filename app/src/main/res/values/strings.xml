@@ -428,4 +428,5 @@
     <string name="accept_request_from_user">Accept request from %1s (%2s)?</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
+    <string name="no_pending_requests">No pending requests</string>
 </resources>

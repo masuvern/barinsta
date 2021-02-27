@@ -38,6 +38,7 @@ import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -75,6 +76,7 @@ import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
+import awais.instagrabber.viewmodels.AppStateViewModel;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -102,6 +104,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private int firstFragmentGraphIndex;
     private boolean isActivityCheckerServiceBound = false;
     private boolean isBackStackEmpty = false;
+    private boolean isLoggedIn;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -131,6 +134,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         CookieUtils.setupCookies(cookie);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
@@ -142,6 +146,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
         if (checkUpdates) FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
+        new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
         handleIntent(intent);
         if (!TextUtils.isEmpty(cookie) && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
@@ -387,8 +392,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             final int selectedItemId = binding.bottomNavView.getSelectedItemId();
