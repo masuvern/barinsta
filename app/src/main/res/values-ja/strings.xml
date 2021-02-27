@@ -52,6 +52,7 @@
     <string name="main_posts_following">%s フォロー中 </string>
     <string name="post_viewer_autoplay_video">動画を自動再生する</string>
     <string name="post_viewer_muted_autoplay">動画を常にミュートする</string>
+    <string name="post_viewer_show_captions">キャプションを常に表示</string>
     <string name="post_viewer_download_dialog_title">ダウンロード対象を選択</string>
     <string name="post_viewer_download_current">この画像</string>
     <string name="post_viewer_download_album">アルバム全体</string>
@@ -112,7 +113,7 @@
     <string name="status_mutual">相互フォロー</string>
     <string name="status_following">フォロー中</string>
     <string name="status_follower">フォロワー</string>
-    <string name="map">Map</string>
+    <string name="map">マップ</string>
     <string name="dialog_export_btn_export">エクスポート</string>
     <string name="dialog_export_btn_import">インポート</string>
     <string name="dialog_export_logins">ログイン情報をエクスポート</string>
@@ -166,14 +167,14 @@
     <string name="dms_inbox_raven_media_replayed">再生済み</string>
     <string name="dms_inbox_raven_media_sending">送信中…</string>
     <string name="dms_inbox_raven_media_blocked">ブロック済</string>
-    <string name="dms_inbox_raven_media_suggested">Suggested</string>
+    <string name="dms_inbox_raven_media_suggested">おすすめ</string>
     <string name="dms_inbox_raven_media_screenshot">スクリーンショット撮影済み</string>
     <string name="dms_inbox_raven_media_cant_deliver">配信できません</string>
     <string name="dms_action_success">成功！</string>
     <string name="dms_action_leave">退出する</string>
     <string name="dms_action_leave_question">チャットを終了しますか?</string>
     <string name="dms_action_kick">キックする</string>
-    <string name="dms_left_users">Left users</string>
+    <string name="dms_left_users">退出したユーザー</string>
     <string name="direct_download">直接ダウンロードする</string>
     <string name="direct_download_desc">投稿を直接ダウンロード！</string>
     <string name="direct_download_loading">投稿を取得中</string>

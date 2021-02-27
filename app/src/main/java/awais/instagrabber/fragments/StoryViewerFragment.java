@@ -490,15 +490,21 @@ public class StoryViewerFragment extends Fragment {
                                                 @Override
                                                 public void onSuccess(final StoryStickerResponse result) {
                                                     sticking = false;
-                                                    poll.setMyChoice(w);
-                                                    Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                                    try {
+                                                        poll.setMyChoice(w);
+                                                        Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                    catch (Exception ignored) {}
                                                 }
 
                                                 @Override
                                                 public void onFailure(final Throwable t) {
                                                     sticking = false;
                                                     Log.e(TAG, "Error responding", t);
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                    try {
+                                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                    catch (Exception ignored) {}
                                                 }
                                             });
                                 }
@@ -525,14 +531,20 @@ public class StoryViewerFragment extends Fragment {
                                         @Override
                                         public void onSuccess(final StoryStickerResponse result) {
                                             sticking = false;
-                                            Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            try {
+                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                            }
+                                            catch (Exception ignored) {}
                                         }
 
                                         @Override
                                         public void onFailure(final Throwable t) {
                                             sticking = false;
                                             Log.e(TAG, "Error responding", t);
-                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            try {
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                            }
+                                            catch (Exception ignored) {}
                                         }
                                     });
                         })
@@ -565,15 +577,21 @@ public class StoryViewerFragment extends Fragment {
                                             @Override
                                             public void onSuccess(final StoryStickerResponse result) {
                                                 sticking = false;
-                                                quiz.setMyChoice(w);
-                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                            }
+                                                try {
+                                                    quiz.setMyChoice(w);
+                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                }
+                                                catch (Exception ignored) {}
+                                        }
 
                                             @Override
                                             public void onFailure(final Throwable t) {
                                                 sticking = false;
                                                 Log.e(TAG, "Error responding", t);
-                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                try {
+                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                }
+                                                catch (Exception ignored) {}
                                             }
                                         });
                             }
@@ -631,15 +649,21 @@ public class StoryViewerFragment extends Fragment {
                                             @Override
                                             public void onSuccess(final StoryStickerResponse result) {
                                                 sticking = false;
-                                                slider.setMyChoice(sliderValue);
-                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                try {
+                                                    slider.setMyChoice(sliderValue);
+                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                }
+                                                catch (Exception ignored) {}
                                             }
 
                                             @Override
                                             public void onFailure(final Throwable t) {
                                                 sticking = false;
                                                 Log.e(TAG, "Error responding", t);
-                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                try {
+                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                }
+                                                catch (Exception ignored) {}
                                             }
                                         });
                             })

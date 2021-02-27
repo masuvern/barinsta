@@ -107,7 +107,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
     private void setReply(final MessageDirection messageDirection,
                           final DirectItemReelShare reelShare,
                           final boolean isSelf) {
-        final String info = isSelf ? "You replied to their story" : "They replied to your story";
+        final int info = isSelf ? R.string.replied_story_outgoing : R.string.replied_story_incoming;
         binding.shareInfo.setText(info);
         binding.reaction.setVisibility(View.GONE);
         final String text = reelShare.getText();
@@ -122,7 +122,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
                              final DirectItemReelShare reelShare,
                              final boolean isSelf,
                              final boolean expired) {
-        final String info = isSelf ? "You reacted to their story" : "They reacted to your story";
+        final int info = isSelf ? R.string.reacted_story_outgoing : R.string.reacted_story_incoming;
         binding.shareInfo.setText(info);
         binding.message.setVisibility(View.GONE);
         final String text = reelShare.getText();
@@ -139,7 +139,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
     }
 
     private void setMention(final boolean isSelf) {
-        final String info = isSelf ? "You mentioned them in your story" : "Mentioned you in their story";
+        final int info = isSelf ? R.string.mentioned_story_outgoing : R.string.mentioned_story_incoming;
         binding.shareInfo.setText(info);
         binding.message.setVisibility(View.GONE);
         binding.reaction.setVisibility(View.GONE);

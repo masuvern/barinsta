@@ -1,5 +1,6 @@
 package awais.instagrabber.adapters.viewholder.directmessages;
 
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.view.View;
 
@@ -126,13 +127,14 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
 
     private void setSubtitle(@NonNull final DirectThread thread) {
         // If there is an unopened raven media, give it highest priority
+        final Resources resources = itemView.getResources();
         final DirectThreadDirectStory directStory = thread.getDirectStory();
         final long viewerId = thread.getViewerId();
         if (directStory != null && !directStory.getItems().isEmpty()) {
             final DirectItem item = directStory.getItems().get(0);
             final MediaItemType mediaType = item.getVisualMedia().getMedia().getMediaType();
-            final String username = getUsername(thread.getUsers(), item.getUserId(), viewerId);
-            final String subtitle = getMediaSpecificSubtitle(username, mediaType);
+            final String username = getUsername(thread.getUsers(), item.getUserId(), viewerId, resources);
+            final String subtitle = getMediaSpecificSubtitle(username, resources, mediaType);
             binding.subtitle.setText(subtitle);
             return;
         }
@@ -141,10 +143,10 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
         final long senderId = item.getUserId();
         final DirectItemType itemType = item.getItemType();
         String subtitle = null;
-        final String username = getUsername(thread.getUsers(), senderId, viewerId);
+        final String username = getUsername(thread.getUsers(), senderId, viewerId, resources);
         String message = "";
         if (itemType == null) {
-            message = "Unsupported message";
+            message = resources.getString(R.string.dms_inbox_raven_message_unknown);
         } else {
             switch (itemType) {
                 case TEXT:
@@ -160,20 +162,20 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                     message = item.getPlaceholder().getMessage();
                     break;
                 case MEDIA_SHARE:
-                    subtitle = String.format("%s shared a post", username != null ? username : "");
+                    subtitle = resources.getString(R.string.dms_inbox_shared_post, username != null ? username : "", item.getMediaShare().getUser().getUsername());
                     break;
                 case ANIMATED_MEDIA:
-                    subtitle = String.format("%s shared a gif", username != null ? username : "");
+                    subtitle = resources.getString(R.string.dms_inbox_shared_gif, username != null ? username : "");
                     break;
                 case PROFILE:
-                    subtitle = String.format("%s shared a profile: @%s", username != null ? username : "", item.getProfile().getUsername());
+                    subtitle = resources.getString(R.string.dms_inbox_shared_profile, username != null ? username : "", item.getProfile().getUsername());
                     break;
                 case LOCATION:
-                    subtitle = String.format("%s shared a location: %s", username != null ? username : "", item.getLocation().getName());
+                    subtitle = resources.getString(R.string.dms_inbox_shared_location, username != null ? username : "", item.getLocation().getName());
                     break;
                 case MEDIA: {
                     final MediaItemType mediaType = item.getMedia().getMediaType();
-                    subtitle = getMediaSpecificSubtitle(username, mediaType);
+                    subtitle = getMediaSpecificSubtitle(username, resources, mediaType);
                     break;
                 }
                 case STORY_SHARE: {
@@ -181,17 +183,16 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                     if (reelType == null) {
                         subtitle = item.getStoryShare().getTitle();
                     } else {
-                        String format = "%s shared a story by @%s";
-                        if (reelType.equals("highlight_reel")) {
-                            format = "%s shared a story highlight by @%s";
-                        }
-                        subtitle = String.format(format, username != null ? username : "",
+                        final int format = reelType.equals("highlight_reel")
+                                ? R.string.dms_inbox_shared_highlight
+                                : R.string.dms_inbox_shared_story;
+                        subtitle = resources.getString(format, username != null ? username : "",
                                                  item.getStoryShare().getMedia().getUser().getUsername());
                     }
                     break;
                 }
                 case VOICE_MEDIA:
-                    subtitle = String.format("%s sent a voice message", username != null ? username : "");
+                    subtitle = resources.getString(R.string.dms_inbox_shared_voice, username != null ? username : "");
                     break;
                 case ACTION_LOG:
                     subtitle = item.getActionLog().getDescription();
@@ -200,15 +201,15 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                     subtitle = item.getVideoCallEvent().getDescription();
                     break;
                 case CLIP:
-                    subtitle = String.format("%s shared a clip by @%s", username != null ? username : "",
-                                             item.getClip().getClip().getUser().getUsername());
+                    subtitle = resources.getString(R.string.dms_inbox_shared_clip, username != null ? username : "",
+                                                   item.getClip().getClip().getUser().getUsername());
                     break;
                 case FELIX_SHARE:
-                    subtitle = String.format("%s shared an IGTV video by @%s", username != null ? username : "",
-                                             item.getFelixShare().getVideo().getUser().getUsername());
+                    subtitle = resources.getString(R.string.dms_inbox_shared_igtv, username != null ? username : "",
+                                                   item.getFelixShare().getVideo().getUser().getUsername());
                     break;
                 case RAVEN_MEDIA:
-                    subtitle = getRavenMediaSubtitle(item, username);
+                    subtitle = getRavenMediaSubtitle(item, resources, username);
                     break;
                 case REEL_SHARE:
                     final DirectItemReelShare reelShare = item.getReelShare();
@@ -220,27 +221,27 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                     switch (reelType) {
                         case "reply":
                             if (viewerId == item.getUserId()) {
-                                subtitle = String.format("You replied to their story: %s", reelShare.getText());
+                                subtitle = resources.getString(R.string.dms_inbox_replied_story_outgoing, reelShare.getText());
                             } else {
-                                subtitle = String.format("%s replied to your story: %s", username != null ? username : "", reelShare.getText());
+                                subtitle = resources.getString(R.string.dms_inbox_replied_story_incoming, username != null ? username : "", reelShare.getText());
                             }
                             break;
                         case "mention":
                             if (viewerId == item.getUserId()) {
                                 // You mentioned the other person
                                 final long mentionedUserId = item.getReelShare().getMentionedUserId();
-                                final String otherUsername = getUsername(thread.getUsers(), mentionedUserId, viewerId);
-                                subtitle = String.format("You mentioned @%s in your story", otherUsername);
+                                final String otherUsername = getUsername(thread.getUsers(), mentionedUserId, viewerId, resources);
+                                subtitle = resources.getString(R.string.dms_inbox_mentioned_story_outgoing, otherUsername);
                             } else {
                                 // They mentioned you
-                                subtitle = String.format("%s mentioned you in their story", username != null ? username : "");
+                                subtitle = resources.getString(R.string.dms_inbox_mentioned_story_incoming, username != null ? username : "");
                             }
                             break;
                         case "reaction":
                             if (viewerId == item.getUserId()) {
-                                subtitle = String.format("You reacted to their story: %s", reelShare.getText());
+                                subtitle = resources.getString(R.string.dms_inbox_reacted_story_outgoing, reelShare.getText());
                             } else {
-                                subtitle = String.format("%s reacted to your story: %s", username != null ? username : "", reelShare.getText());
+                                subtitle = resources.getString(R.string.dms_inbox_reacted_story_incoming, username != null ? username : "", reelShare.getText());
                             }
                             break;
                         default:
@@ -249,7 +250,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
                     }
                     break;
                 default:
-                    message = "Unsupported message";
+                    message = resources.getString(R.string.dms_inbox_raven_message_unknown);
             }
         }
         if (subtitle == null) {
@@ -263,10 +264,10 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
         binding.subtitle.setText(subtitle != null ? subtitle : "");
     }
 
-    private String getMediaSpecificSubtitle(final String username, final MediaItemType mediaType) {
-        final String userSharedAnImage = String.format("%s shared an image", username != null ? username : "");
-        final String userSharedAVideo = String.format("%s shared a video", username != null ? username : "");
-        final String userSentAMessage = String.format("%s sent a message", username != null ? username : "");
+    private String getMediaSpecificSubtitle(final String username, final Resources resources, final MediaItemType mediaType) {
+        final String userSharedAnImage = resources.getString(R.string.dms_inbox_shared_image, username != null ? username : "");
+        final String userSharedAVideo = resources.getString(R.string.dms_inbox_shared_video, username != null ? username : "");
+        final String userSentAMessage = resources.getString(R.string.dms_inbox_shared_message, username != null ? username : "");
         String subtitle;
         switch (mediaType) {
             case MEDIA_TYPE_IMAGE:
@@ -283,6 +284,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private String getRavenMediaSubtitle(final DirectItem item,
+                                         final Resources resources,
                                          final String username) {
         String subtitle = "↗ ";
         final DirectItemVisualMedia visualMedia = item.getVisualMedia();
@@ -325,15 +327,16 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
             return subtitle;
         }
         final MediaItemType mediaType = visualMedia.getMedia().getMediaType();
-        subtitle = getMediaSpecificSubtitle(username, mediaType);
+        subtitle = getMediaSpecificSubtitle(username, resources, mediaType);
         return subtitle;
     }
 
     private String getUsername(final List<User> users,
                                final long userId,
-                               final long viewerId) {
+                               final long viewerId,
+                               final Resources resources) {
         if (userId == viewerId) {
-            return "You";
+            return resources.getString(R.string.you);
         }
         final Optional<User> senderOptional = users.stream()
                                                    .filter(Objects::nonNull)

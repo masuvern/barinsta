@@ -44,24 +44,25 @@
     <string name="import_export">وارد کردن/خروجی گرفتن</string>
     <string name="select_language">زبان</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="one">%s فرسته</item>
+        <item quantity="other">%s فرسته</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s Follower</item>
-        <item quantity="other">%s Followers</item>
+        <item quantity="one">%s پیگیر</item>
+        <item quantity="other">%s پیگیر</item>
     </plurals>
     <string name="main_posts_following">%s Following </string>
     <string name="post_viewer_autoplay_video">پخش خودکار فیلم ها</string>
     <string name="post_viewer_muted_autoplay">همیشه فیلم هارو بی صدا کن</string>
+    <string name="post_viewer_show_captions">Always show post captions</string>
     <string name="post_viewer_download_dialog_title">انتخاب کن چی دانلود کنی</string>
     <string name="post_viewer_download_current">کنونی</string>
     <string name="post_viewer_download_album">آلبوم کامل</string>
     <string name="show_stories">نمایش استوری ها</string>
     <string name="no_more_stories">استوری بیشتری نیست!</string>
     <string name="be_patient">صبور باشید!</string>
-    <string name="view_story_post">نگریستن پیک</string>
-    <string name="view_post">نگریستن پیک</string>
+    <string name="view_story_post">دیدن فرسته</string>
+    <string name="view_post">دیدن فرسته</string>
     <string name="spotify">Spotify</string>
     <string name="vote_story_poll">رای دادن</string>
     <string name="votef_story_poll">رای با موفقیت بود!</string>
@@ -114,8 +115,8 @@
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Mutual</string>
-    <string name="status_following">Following</string>
-    <string name="status_follower">Follower</string>
+    <string name="status_following">پیگیری</string>
+    <string name="status_follower">پیگیر</string>
     <string name="map">نقشه</string>
     <string name="dialog_export_btn_export">صادر کردن</string>
     <string name="dialog_export_btn_import">وارد کردن</string>
@@ -291,7 +292,7 @@
     <string name="enter_password">رمز عبور را وارد کنید</string>
     <string name="select_backup_file">یک فایل پشتیبان گیری انتخاب کنید (.zaai/.backup)</string>
     <string name="apply">گماشتن</string>
-    <string name="save">Save</string>
+    <string name="save">اندوختن</string>
     <string name="caption">Caption</string>
     <string name="edit_caption">Edit caption...</string>
     <string name="translate_caption">Translate caption...</string>

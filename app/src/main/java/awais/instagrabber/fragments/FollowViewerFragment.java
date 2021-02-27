@@ -348,16 +348,17 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         loading = false;
         final ArrayList<ExpandableGroup> groups = new ArrayList<>(1);
 
-        if (isCompare) {
+        if (isCompare && followingModels != null && followersModels != null && allFollowing != null) {
             if (followingModels != null && followingModels.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_following, username), followingModels));
             if (followersModels != null && followersModels.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_follower, namePost), followersModels));
             if (allFollowing != null && allFollowing.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_both_following), allFollowing));
-        } else {
+        } else if (followModels != null) {
             groups.add(new ExpandableGroup(type, followModels));
         }
+        else return;
         adapter = new FollowAdapter(clickListener, groups);
         adapter.toggleGroup(0);
         binding.rvFollow.setAdapter(adapter);

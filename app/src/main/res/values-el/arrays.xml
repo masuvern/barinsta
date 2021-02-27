@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="languages">
-        <item>Sistem Varsayılanı</item>
+        <item>Προεπιλογή Συστήματος</item>
         <item translatable="false">English</item>
         <item translatable="false">Français</item>
         <item translatable="false">Español</item>
@@ -24,21 +24,21 @@
         <item translatable="false">日本語</item>
     </string-array>
     <string-array name="theme_presets">
-        <item>Otomatik / Sistemi Takip Et</item>
-        <item>Otomatik / Bataryayı Takip Et</item>
-        <item>Koyu</item>
-        <item>Açık</item>
+        <item>Αυτόματα / Ακολούθηση Συστήματος</item>
+        <item>Αυτόματα / Ακολούθηση Μπαταρίας</item>
+        <item>Σκούρο</item>
+        <item>Φωτεινό</item>
     </string-array>
     <string-array name="story_sorts">
-        <item>Instagram varsayılanı (önce görülmemişler sonra görülmüşler)</item>
-        <item>Yeniden eskiye</item>
-        <item>Eskiden yeniye</item>
+        <item>Προεπιλεγμένο του Instagram(Αδιάβαστο και μετά διαβασμένο)</item>
+        <item>Από το νεότερο στο παλαιότερο</item>
+        <item>Από το παλαιότερο στο νεότερο</item>
     </string-array>
     <string-array name="separator_presets">
-        <item>Hiçbiri</item>
+        <item>Κανένα</item>
         <item>\@</item>
-        <item>at</item>
-        <item>on</item>
+        <item>στο</item>
+        <item>πάνω</item>
         <item>\|</item>
         <item>-</item>
     </string-array>

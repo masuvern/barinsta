@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
@@ -276,7 +275,6 @@ public class StoriesService extends BaseService {
         form.put("include_suggested_highlights", "false");
         form.put("is_in_archive_home", "true");
         form.put("include_cover", "1");
-        form.put("timezone_offset", String.valueOf((float) TimeZone.getDefault().getRawOffset() / 1000));
         if (!TextUtils.isEmpty(maxId)) {
             form.put("max_id", maxId); // NOT TESTED
         }

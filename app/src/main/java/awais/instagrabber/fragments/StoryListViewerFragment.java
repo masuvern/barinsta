@@ -87,12 +87,20 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     private final ServiceCallback<ArchiveFetchResponse> cb = new ServiceCallback<ArchiveFetchResponse>() {
         @Override
         public void onSuccess(final ArchiveFetchResponse result) {
-            endCursor = result.getNextCursor();
-            final List<HighlightModel> models = archivesViewModel.getList().getValue();
-            final List<HighlightModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
-            modelsCopy.addAll(result.getResult());
-            archivesViewModel.getList().postValue(modelsCopy);
             binding.swipeRefreshLayout.setRefreshing(false);
+            if (result == null) {
+                try {
+                    final Context context = getContext();
+                    Toast.makeText(context, R.string.empty_list, Toast.LENGTH_SHORT).show();
+                } catch (Exception ignored) {}
+            }
+            else {
+                endCursor = result.getNextCursor();
+                final List<HighlightModel> models = archivesViewModel.getList().getValue();
+                final List<HighlightModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+                modelsCopy.addAll(result.getResult());
+                archivesViewModel.getList().postValue(modelsCopy);
+            }
         }
 
         @Override
