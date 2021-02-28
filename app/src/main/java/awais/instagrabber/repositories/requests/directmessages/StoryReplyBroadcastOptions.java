@@ -17,7 +17,7 @@ public class StoryReplyBroadcastOptions extends BroadcastOptions {
                                       final String reelId)
             throws UnsupportedEncodingException {
         super(clientContext, threadIdOrUserIds, BroadcastItemType.REELSHARE);
-        this.text = TextUtils.encode(text);
+        this.text = text;
         this.mediaId = mediaId;
         this.reelId = reelId; // or user id, usually same
     }
