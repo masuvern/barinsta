@@ -43,6 +43,15 @@
       ]
     },
     {
+      "login": "MeLlamoPablo",
+      "name": "Pablo Rodríguez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11708035?v=4",
+      "profile": "https://github.com/MeLlamoPablo",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
       "login": "AwaisKing",
       "name": "AWAiS",
       "avatar_url": "https://avatars3.githubusercontent.com/u/5278488",
@@ -55,7 +64,7 @@
       "login": "snajdovski",
       "name": "Stefan Najdovski",
       "avatar_url": "https://avatars2.githubusercontent.com/u/42580385?v=4",
-      "profile": "https://stefannajdovski.com/",
+      "profile": "https://snajdovski.github.io",
       "contributions": [
         "design",
         "translation"
