@@ -33,8 +33,8 @@
     <string name="dm_mark_as_seen_setting_summary">Altres membres sabran que l\'has vist</string>
     <string name="activity_setting">Habilitar les notificacions d\'activitat</string>
     <string name="story_sort_setting">Ordre de les històries</string>
-    <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
-    <string name="error_loading_profile_loggedin">Error loading profile! Is the username valid? Or did they block you?</string>
+    <string name="error_loading_profile">S\'ha produït un error en carregar el perfil! El nom d\'usuari és vàlid? Si és així, és possible que se t\'hagi restringit.</string>
+    <string name="error_loading_profile_loggedin">S\'ha produït un error en carregar el perfil! El nom d\'usuari és vàlid? O t\'ha bloquejat?</string>
     <string name="error_loading_hashtag">Error loading hashtag! Is the name valid?</string>
     <string name="error_loading_location">Error loading location! Is the URL valid?</string>
     <string name="error_creating_folders">S\'ha produït un error en crear la(es) carpeta(es) de descàrrega.</string>
