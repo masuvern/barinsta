@@ -35,8 +35,8 @@
     <string name="story_sort_setting">Ordre de les històries</string>
     <string name="error_loading_profile">S\'ha produït un error en carregar el perfil! El nom d\'usuari és vàlid? Si és així, és possible que se t\'hagi restringit.</string>
     <string name="error_loading_profile_loggedin">S\'ha produït un error en carregar el perfil! El nom d\'usuari és vàlid? O t\'ha bloquejat?</string>
-    <string name="error_loading_hashtag">Error loading hashtag! Is the name valid?</string>
-    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
+    <string name="error_loading_hashtag">S\'ha produït un error en carregar el hashtag! El nom és vàlid?</string>
+    <string name="error_loading_location">S\'ha produït un error en carregar la ubicació! L\'URL és vàlid?</string>
     <string name="error_creating_folders">S\'ha produït un error en crear la(es) carpeta(es) de descàrrega.</string>
     <string name="save_to_folder">Desa a una carpeta personalitzada</string>
     <string name="select_folder">Selecciona la carpeta</string>
