@@ -9,8 +9,7 @@
     <string name="clipboard_error">Errorea testua kopiatzean</string>
     <string name="clipboard_copied">Arbelera kopiatu da!</string>
     <string name="report">Salatu</string>
-    <string name="password">Pasahitza (32 karak. gehienez)</string>
-    <string name="set_password">Ezarri pasahitza (32 karak. gehienez)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Pasahitza</string>
     <string name="ok">Ados</string>
     <string name="yes">Bai</string>
@@ -312,9 +311,9 @@
     <string name="locations">Kokalekuak</string>
     <string name="unknown">Ezezaguna</string>
     <string name="removed_from_favs">Gogokoetatik kenduta</string>
-    <string name="backup_and_restore">Backup &amp; Restore User Settings</string>
-    <string name="backup_summary">Back up app settings, account login information, and/or favorites data to a plain text or encrypted backup file for later restoration.</string>
-    <string name="backup_warning">If you\'re backing up login info, treat the file as confidential: Keep them somewhere safe!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Create new backup file</string>
     <string name="restore_backup">Restore from existing backup file</string>
     <string name="file_chosen_label">Fitxategia:</string>
