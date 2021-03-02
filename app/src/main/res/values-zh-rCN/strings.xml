@@ -9,8 +9,7 @@
     <string name="clipboard_error">复制文字时出错</string>
     <string name="clipboard_copied">已复制到剪贴板！</string>
     <string name="report">报告</string>
-    <string name="password">密码 (最多32字符)</string>
-    <string name="set_password">设置密码 (最多32个字符)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">密码</string>
     <string name="ok">好的</string>
     <string name="yes">是</string>
@@ -309,9 +308,9 @@
     <string name="locations">地点</string>
     <string name="unknown">未知</string>
     <string name="removed_from_favs">已从收藏夹中删除</string>
-    <string name="backup_and_restore">用户设置备份及还原</string>
-    <string name="backup_summary">将应用设置，帐户登录信息，和/或收藏数据备份至纯文本或加密文本，以备日后恢复。</string>
-    <string name="backup_warning">如果您备份登录信息，请务必妥善保管您的备份文件：把它当作密码看待！</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">创建新备份文件</string>
     <string name="restore_backup">从现有备份文件恢复</string>
     <string name="file_chosen_label">文件:</string>
