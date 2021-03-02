@@ -12,7 +12,7 @@
     <string name="clipboard_error">Error copying text</string>
     <string name="clipboard_copied">Copied to clipboard!</string>
     <string name="report">Report</string>
-    <string name="set_password">Password protect file</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Password</string>
     <string name="ok">OK</string>
     <string name="yes">Yes</string>
