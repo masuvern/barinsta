@@ -9,8 +9,7 @@
     <string name="clipboard_error">Грешка при копирање текст</string>
     <string name="clipboard_copied">Копрано на clipboard!</string>
     <string name="report">Пријави</string>
-    <string name="password">Лозинка (Максимално 32 карактери)</string>
-    <string name="set_password">Поставете лозинка (32 карактери максимално)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Лозинка</string>
     <string name="ok">ОК</string>
     <string name="yes">Да</string>
@@ -312,9 +311,9 @@
     <string name="locations">Локации</string>
     <string name="unknown">Непознато</string>
     <string name="removed_from_favs">Отстрането од омилени</string>
-    <string name="backup_and_restore">Зачувај &amp; Врати Кориснички Опции</string>
-    <string name="backup_summary">Зачувај опции од апликацијата, кориснички профил, и/или информации од твоите омилени профили во обичен текст или со енкрипција за подоцна да можеш да ги вратиш.</string>
-    <string name="backup_warning">Ако зачувуваш информации за најавување, третирај го генералниот фајл како многу важен, чувај го на безбедно место!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Креирај новa резервна копија</string>
     <string name="restore_backup">Поврати информации од резервна копија</string>
     <string name="file_chosen_label">Фајл:</string>
