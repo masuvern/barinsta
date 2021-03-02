@@ -9,8 +9,7 @@
     <string name="clipboard_error">Metin kopyalanamadı</string>
     <string name="clipboard_copied">Panoya kopyalandı!</string>
     <string name="report">Bildir</string>
-    <string name="password">Şifre (En fazla 32 krakter)</string>
-    <string name="set_password">Bir şifre belirle (Maks 32 krktr)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Şifre</string>
     <string name="ok">Tamam</string>
     <string name="yes">Evet</string>
@@ -312,9 +311,9 @@
     <string name="locations">Konumlar</string>
     <string name="unknown">Bilinmeyen</string>
     <string name="removed_from_favs">Favorilerden Kaldırıldı</string>
-    <string name="backup_and_restore">Kullanıcı Ayarlarını Yedekle &amp; Geri Yükle</string>
-    <string name="backup_summary">Daha sonra geri yüklemek için; uygulama ayarlarını, giriş bilgilerini, ve/veya favori verilerini düz metin belgesi ya da şifrelenmiş yedek dosyası olarak yedekle.</string>
-    <string name="backup_warning">Eğer giriş yapma bilginizi yedekliyorsan, bu dosyanın gizli olması gerektiğini bil: Güvenli bir yerde depola!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Yeni yedekleme dosyası oluştur</string>
     <string name="restore_backup">Var olan yedekleme dosyasından geri yükle</string>
     <string name="file_chosen_label">Dosya:</string>
