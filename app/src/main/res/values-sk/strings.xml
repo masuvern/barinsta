@@ -9,8 +9,7 @@
     <string name="clipboard_error">Chyba pri kopírovaní textu</string>
     <string name="clipboard_copied">Skopírované do schránky!</string>
     <string name="report">Nahlásiť</string>
-    <string name="password">Heslo (maximálne 32 znakov)</string>
-    <string name="set_password">Nastaviť heslo (maximálne 32 znakov)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Heslo</string>
     <string name="ok">OK</string>
     <string name="yes">Áno</string>
@@ -318,9 +317,9 @@
     <string name="locations">Miesta</string>
     <string name="unknown">Neznáme</string>
     <string name="removed_from_favs">Vymazať z obľúbených</string>
-    <string name="backup_and_restore">Zálohovať/obnoviť nastavenia používateľa</string>
-    <string name="backup_summary">Zálohovať nastavenia aplikácie, informácie o účtoch a obľúbené dáta do textového súboru alebo do zašifrovaného backupp súboru.</string>
-    <string name="backup_warning">Ak zálohuješ informácie o prihlásení, ulož ho niekde do bezpečia!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Vytvoriť súbor zálohy</string>
     <string name="restore_backup">Obnoviť z existujúceho súboru zálohy</string>
     <string name="file_chosen_label">Súbor:</string>
