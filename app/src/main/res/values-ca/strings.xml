@@ -9,8 +9,7 @@
     <string name="clipboard_error">Error copiant el text</string>
     <string name="clipboard_copied">S\'ha copiat al porta-retalls!</string>
     <string name="report">Reportar</string>
-    <string name="password">Contrasenya (màxim 32 caràcters)</string>
-    <string name="set_password">Definir una contrasenya (màxim 32 caràcters)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Contrasenya</string>
     <string name="ok">Bé</string>
     <string name="yes">Sí</string>
@@ -312,9 +311,9 @@
     <string name="locations">Ubicacions</string>
     <string name="unknown">Desconegut</string>
     <string name="removed_from_favs">Eliminat dels preferits</string>
-    <string name="backup_and_restore">Còpia de seguretat &amp; Restaurar els paràmetres de l\'usuari</string>
-    <string name="backup_summary">Fer una còpia de seguretat de la configuració de l\'aplicació, la informació d\'inici de sessió del compte, i/o dades preferides a un text net o arxiu de còpia de seguretat xifrat per a la restauració posterior.</string>
-    <string name="backup_warning">Si estàs fent una còpia de seguretat de la informació d\'inici de sessió, tracta l\'arxiu com a confidencial: Mantén-lo en algun lloc segur!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Crear un nou fitxer de còpia de seguretat</string>
     <string name="restore_backup">Restaurar des d\'un fitxer de còpia de seguretat existent</string>
     <string name="file_chosen_label">Arxiu:</string>
