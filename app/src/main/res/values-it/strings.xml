@@ -9,7 +9,7 @@
     <string name="clipboard_error">Errore copiando il testo</string>
     <string name="clipboard_copied">Copiato negli appunti!</string>
     <string name="report">Segnala</string>
-    <string name="set_password">Protect file with password</string>
+    <string name="set_password">Proteggi il file con password</string>
     <string name="password_no_max">Password</string>
     <string name="ok">OK</string>
     <string name="yes">Si</string>
@@ -311,9 +311,9 @@
     <string name="locations">Luoghi</string>
     <string name="unknown">Sconosciuto</string>
     <string name="removed_from_favs">Rimosso dai Preferiti</string>
-    <string name="backup_and_restore">Backup &amp; Restore</string>
-    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
-    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
+    <string name="backup_and_restore">Backup &amp; Ripristino</string>
+    <string name="backup_summary">Backup delle impostazioni dell\'app Barinsta, dei dati di login dell\'account e/o dei preferiti in un file di backup semplice o crittografato per il ripristino successivo.</string>
+    <string name="backup_warning">Se stai effettuando il backup dei dati di accesso dell\'account, tratta il file come confidenziale e tienilo in qualche posto sicuro!</string>
     <string name="create_backup">Crea un nuovo file di salvataggio</string>
     <string name="restore_backup">Ripristina da file di salvataggio esistente</string>
     <string name="file_chosen_label">File:</string>
