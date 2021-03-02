@@ -9,8 +9,7 @@
     <string name="clipboard_error">Erro ao copiar texto</string>
     <string name="clipboard_copied">Copiado para a área de transferência!</string>
     <string name="report">Reportar</string>
-    <string name="password">Senha (máx. 32 caracteres)</string>
-    <string name="set_password">Defina uma senha (máx. 32 caracteres)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Senha</string>
     <string name="ok">OK</string>
     <string name="yes">Sim</string>
@@ -312,9 +311,9 @@
     <string name="locations">Localizações</string>
     <string name="unknown">Desconhecido</string>
     <string name="removed_from_favs">Removido dos Favoritos</string>
-    <string name="backup_and_restore">Becape e Restauração das Configurações do Usuário</string>
-    <string name="backup_summary">Faça o becape das configurações do aplicativo, informações de login da conta e/ou dados dos favoritos em um arquivo de texto simples ou arquivo de becape criptografado para restaurar posteriormente.</string>
-    <string name="backup_warning">Se você estiver fazendo o becape das informações de login, trate o arquivo como confidencial: Mantenha-o em algum lugar seguro!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Criar novo arquivo de becape</string>
     <string name="restore_backup">Restaurar arquivo de becape existente</string>
     <string name="file_chosen_label">Arquivo:</string>
