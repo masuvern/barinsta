@@ -9,8 +9,7 @@
     <string name="clipboard_error">Ошибка при копировании текста</string>
     <string name="clipboard_copied">Скопировано в буфер обмена!</string>
     <string name="report">Отчёт</string>
-    <string name="password">Пароль (макс. 32 символа)</string>
-    <string name="set_password">Установить пароль (не более 32 символов)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Пароль</string>
     <string name="ok">Хорошо</string>
     <string name="yes">Да</string>
@@ -318,9 +317,9 @@
     <string name="locations">Местоположения</string>
     <string name="unknown">Неизвестный</string>
     <string name="removed_from_favs">Удалено из избранного</string>
-    <string name="backup_and_restore">Резервное копирование &amp; Восстановление пользовательских настроек</string>
-    <string name="backup_summary">Резервное копирование настроек приложения, регистрационных данных и/или избранных данных в обычный текст или зашифрованный файл резервной копии для последующего восстановления.</string>
-    <string name="backup_warning">Если вы резервируете информацию для входа в систему, обращайтесь с файлом как с конфиденциальным: Храните где-нибудь в безопасности!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Создать новый файл резервной копии</string>
     <string name="restore_backup">Восстановить из существующего файла резервной копии</string>
     <string name="file_chosen_label">Файл:</string>
