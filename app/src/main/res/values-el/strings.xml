@@ -9,8 +9,7 @@
     <string name="clipboard_error">Σφάλμα κατά την αντιγραφή κειμένου</string>
     <string name="clipboard_copied">Αντιγράφηκε στο clipboard!</string>
     <string name="report">Αναφορά</string>
-    <string name="password">Κωδικός Πρόσβασης (Το μέγιστο 32 χαρακτήρες)</string>
-    <string name="set_password">Ορισμός κωδικού πρόσβασης (Το μέγιστο 32 χαρακτήρες)</string>
+    <string name="set_password">Protect file with password</string>
     <string name="password_no_max">Κωδικός Πρόσβασης</string>
     <string name="ok">Εντάξει</string>
     <string name="yes">Ναι</string>
@@ -312,9 +311,9 @@
     <string name="locations">Τοποθεσίες</string>
     <string name="unknown">Άγνωστο</string>
     <string name="removed_from_favs">Αφαιρέθηκε από τα Αγαπημένα</string>
-    <string name="backup_and_restore">Ρυθμίσεις αντιγράφων ασφαλείας &amp; επαναφοράς</string>
-    <string name="backup_summary">Δημιουργήστε αντίγραφα ασφαλείας των ρυθμίσεων εφαρμογών, των πληροφοριών σύνδεσης λογαριασμού, ή/και των αγαπημένων σας σε ένα απλό κείμενο ή κρυπτογραφημένο αρχείο αντίγραφου ασφαλείας για μεταγενέστερη επαναφορά.</string>
-    <string name="backup_warning">Αν δημιουργείτε αντίγραφα ασφαλείας των πληροφοριών σύνδεσης, αντιμετωπίζετε το αρχείο ως απόρρητο: Κρατήστε το κάπου που είναι ασφαλές!</string>
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
+    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Δημιουργία νέου αρχείου αντιγράφου ασφαλείας</string>
     <string name="restore_backup">Επαναφορά από υπάρχον αρχείο αντιγράφου ασφαλείας</string>
     <string name="file_chosen_label">Αρχείο:</string>
