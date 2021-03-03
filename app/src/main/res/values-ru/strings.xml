@@ -318,8 +318,8 @@
     <string name="unknown">Неизвестный</string>
     <string name="removed_from_favs">Удалено из избранного</string>
     <string name="backup_and_restore">Резервное копирование &amp; Восстановление</string>
-    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
-    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
+    <string name="backup_summary">Резервное копирование настроек приложения Barinsta, учётных данных, и/или избранного в виде обычного текста или зашифрованного файла резервной копии для последующего восстановления.</string>
+    <string name="backup_warning">Если вы делаете резервное копирование данных для входа в учётную запись, считайте файл конфиденциальным и храните его где-то в безопасности!</string>
     <string name="create_backup">Создать новый файл резервной копии</string>
     <string name="restore_backup">Восстановить из существующего файла резервной копии</string>
     <string name="file_chosen_label">Файл:</string>
@@ -451,10 +451,10 @@
     <string name="raven_image_info">Срок действия изображения истечёт, будучи увиденным</string>
     <string name="raven_video_expired">Срок действия видео истёк</string>
     <string name="raven_video_info">Срок действия видео истечёт, будучи увиденным</string>
-    <string name="raven_msg_expired">Message has expired</string>
-    <string name="raven_msg_info">Message will expire when seen</string>
-    <string name="story_share">\@%s\'s story</string>
-    <string name="story_share_highlight">\@%s\'s story highlight</string>
+    <string name="raven_msg_expired">Истёк срок действия сообщения</string>
+    <string name="raven_msg_info">Срок действия сообщения истечёт, будучи увиденным</string>
+    <string name="story_share">История @%s</string>
+    <string name="story_share_highlight">Основные моменты истории @%s</string>
     <string name="photo">Фото</string>
     <string name="video">Видео</string>
     <string name="voice_message">Голосовое сообщение</string>
