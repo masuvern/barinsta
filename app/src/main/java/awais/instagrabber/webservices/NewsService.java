@@ -131,7 +131,7 @@ public class NewsService extends BaseService {
                                     user.getLong("id"),
                                     user.getString("username"),
                                     user.getString("profile_pic_url"),
-                                    data.has("media") ? data.getJSONObject("media").getLong("id") : 0,
+                                    !data.isNull("media") ? Long.valueOf(data.getJSONObject("media").getString("id").split("_")[0]) : 0,
                                     data.has("media") ? data.getJSONObject("media").getString("thumbnail_src") : null,
                                     notificationType));
                         }

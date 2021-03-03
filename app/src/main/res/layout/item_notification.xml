@@ -45,11 +45,11 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvComment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:linksClickable="true"
+        android:linksClickable="false"
         android:paddingStart="16dp"
         android:paddingLeft="16dp"
         android:paddingEnd="16dp"
@@ -62,13 +62,13 @@
         app:layout_constraintTop_toBottomOf="@id/tvUsername"
         tools:text="comment comment comment comment comment comment comment comment comment comment comment comment comment " />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvSubComment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:autoLink="web|email"
         android:ellipsize="end"
-        android:linksClickable="true"
+        android:linksClickable="false"
         android:paddingStart="16dp"
         android:paddingLeft="16dp"
         android:paddingEnd="8dp"

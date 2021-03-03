@@ -32,7 +32,7 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
                 text = R.string.comment_notif;
                 subtext = model.getText();
                 break;
-            case MENTION:
+            case COMMENT_MENTION:
                 text = R.string.mention_notif;
                 subtext = model.getText();
                 break;
