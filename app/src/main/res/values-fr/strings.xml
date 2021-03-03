@@ -9,7 +9,7 @@
     <string name="clipboard_error">Erreur lors de la copie des éléments</string>
     <string name="clipboard_copied">Copié dans le presse-papier !</string>
     <string name="report">Reporter</string>
-    <string name="set_password">Protect file with password</string>
+    <string name="set_password">Protéger le fichier avec un mot de passe</string>
     <string name="password_no_max">Mot de passe</string>
     <string name="ok">OK</string>
     <string name="yes">Oui</string>
@@ -311,9 +311,9 @@
     <string name="locations">Lieux</string>
     <string name="unknown">Inconnu</string>
     <string name="removed_from_favs">Supprimé des favoris</string>
-    <string name="backup_and_restore">Backup &amp; Restore</string>
-    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
-    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
+    <string name="backup_and_restore">Sauvegarder &amp; restaurer</string>
+    <string name="backup_summary">Sauvegardez les paramètres de l\'application Barinsta, les données de connexion au compte et/ou les favoris dans un fichier de sauvegarde en texte clair ou crypté pour une restauration ultérieure.</string>
+    <string name="backup_warning">Si vous sauvegardez les données de connexion de votre compte, traitez le fichier comme confidentiel et conservez-le dans un endroit sûr !</string>
     <string name="create_backup">Créer un nouveau fichier de sauvegarde</string>
     <string name="restore_backup">Restaurer à partir du fichier de sauvegarde existant</string>
     <string name="file_chosen_label">Fichier :</string>
@@ -390,7 +390,7 @@
         <item quantity="other">%d commentaires</item>
     </plurals>
     <plurals name="views_count">
-        <item quantity="one">%d view</item>
+        <item quantity="one">%d vue</item>
         <item quantity="other">%d vues</item>
     </plurals>
     <plurals name="stories_count">
