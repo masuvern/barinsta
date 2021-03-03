@@ -14,13 +14,11 @@ import java.util.List;
 
 import awais.instagrabber.adapters.viewholder.NotificationViewHolder;
 import awais.instagrabber.databinding.ItemNotificationBinding;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 
 public final class NotificationsAdapter extends ListAdapter<NotificationModel, NotificationViewHolder> {
     private final OnNotificationClickListener notificationClickListener;
-    private final MentionClickListener mentionClickListener;
 
     private static final DiffUtil.ItemCallback<NotificationModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<NotificationModel>() {
         @Override
@@ -34,11 +32,9 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
         }
     };
 
-    public NotificationsAdapter(final OnNotificationClickListener notificationClickListener,
-                                final MentionClickListener mentionClickListener) {
+    public NotificationsAdapter(final OnNotificationClickListener notificationClickListener) {
         super(DIFF_CALLBACK);
         this.notificationClickListener = notificationClickListener;
-        this.mentionClickListener = mentionClickListener;
     }
 
     @NonNull

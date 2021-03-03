@@ -18,8 +18,8 @@ public class UserAgentUtils {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.2 Safari/605.1.15"
     };
     // use APKpure, assume x86
-    private static final String igVersion = "175.1.0.25.119";
-    private static final String igVersionCode = "273907115";
+    private static final String igVersion = "177.0.0.30.119";
+    private static final String igVersionCode = "276028050";
     // only pick the ones that has width 1440 for maximum download quality
     public static final String[] devices = {
             // https://github.com/dilame/instagram-private-api/blob/master/src/samples/devices.json

@@ -104,18 +104,6 @@ public final class TextUtils {
         return (int) ((d2 - d1) / DateUtils.DAY_IN_MILLIS);
     }
 
-    @NonNull
-    public static String encode(final String text) throws UnsupportedEncodingException {
-        return URLEncoder.encode(text, "UTF-8")
-                         .replaceAll("\\+", "%20")
-                         .replaceAll("%21", "!")
-                         .replaceAll("%27", "'")
-                         .replaceAll("%28", "(")
-                         .replaceAll("%29", ")")
-                         .replaceAll("%7E", "~")
-                         .replaceAll("%0A", "\n");
-    }
-
     public static List<String> extractUrls(final String text) {
         if (isEmpty(text)) return Collections.emptyList();
         final Matcher matcher = Patterns.WEB_URL.matcher(text);

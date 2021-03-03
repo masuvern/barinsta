@@ -9,7 +9,7 @@ public enum NotificationType implements Serializable {
     LIKE("GraphLikeAggregatedStory"),
     FOLLOW("GraphFollowAggregatedStory"),
     COMMENT("GraphCommentMediaStory"),
-    MENTION("GraphMentionStory"),
+    COMMENT_MENTION("GraphMentionStory"),
     TAGGED("GraphUserTaggedStory"),
     // app story_type
     COMMENT_LIKE("13"),

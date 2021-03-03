@@ -33,7 +33,6 @@ import awais.instagrabber.asyncs.NotificationsFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.interfaces.MentionClickListener;
 import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
@@ -145,33 +144,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                                     }
                                 });
                                 return;
-                            } else if (model.getType() == NotificationType.RESPONDED_STORY) {
-                                final NavDirections action = NotificationsViewerFragmentDirections
-                                        .actionNotificationsViewerFragmentToStoryViewerFragment(StoryViewerOptions.forStory(model.getPostId(),
-                                                                                                                            model.getUsername()));
-                                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
-                                return;
                             }
-                            final AlertDialog alertDialog = new AlertDialog.Builder(context)
-                                    .setCancelable(false)
-                                    .setView(R.layout.dialog_opening_post)
-                                    .create();
-                            alertDialog.show();
-                            mediaService.fetch(model.getPostId(), new ServiceCallback<Media>() {
-                                @Override
-                                public void onSuccess(final Media feedModel) {
-                                    final PostViewV2Fragment fragment = PostViewV2Fragment
-                                            .builder(feedModel)
-                                            .build();
-                                    fragment.setOnShowListener(dialog1 -> alertDialog.dismiss());
-                                    fragment.show(getChildFragmentManager(), "post_view");
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable t) {
-                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            clickListener.onPreviewClick(model);
                             break;
                         case 2:
                             friendshipService.ignore(model.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
@@ -195,16 +169,6 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         .show();
             }
         }
-    };
-    private final MentionClickListener mentionClickListener = (view, text, isHashtag, isLocation) -> {
-        if (getContext() == null) return;
-        new AlertDialog.Builder(getContext())
-                .setTitle(text)
-                .setMessage(isHashtag ? R.string.comment_view_mention_hash_search
-                                      : R.string.comment_view_mention_user_search)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, (dialog, which) -> openProfile(text))
-                .show();
     };
 
     @Override
@@ -250,7 +214,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         notificationViewModel = new ViewModelProvider(this).get(NotificationViewModel.class);
-        final NotificationsAdapter adapter = new NotificationsAdapter(clickListener, mentionClickListener);
+        final NotificationsAdapter adapter = new NotificationsAdapter(clickListener);
         binding.rvComments.setLayoutManager(new LinearLayoutManager(context));
         binding.rvComments.setAdapter(adapter);
         notificationViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);

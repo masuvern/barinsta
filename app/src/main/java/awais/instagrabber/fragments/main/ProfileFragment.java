@@ -709,7 +709,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                                            .trim()));
             profileDetailsBinding.mainBiography
                     .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
-            profileDetailsBinding.mainBiography.setOnClickListener(v -> {
+            profileDetailsBinding.mainBiography.setOnLongClickListener(v -> {
                 String[] commentDialogList;
                 if (!TextUtils.isEmpty(cookie)) {
                     commentDialogList = new String[]{
@@ -753,9 +753,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
-            });
-            profileDetailsBinding.mainBiography.setOnLongClickListener(v -> {
-                Utils.copyText(context, biography);
                 return true;
             });
         }

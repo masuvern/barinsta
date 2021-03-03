@@ -817,7 +817,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupCaption(final Caption caption) {
-        if (caption == null) {
+        if (caption == null || TextUtils.isEmpty(caption.getText())) {
             binding.caption.setVisibility(View.GONE);
             binding.translate.setVisibility(View.GONE);
             binding.captionToggle.setVisibility(View.GONE);
