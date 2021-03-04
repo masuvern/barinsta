@@ -71,7 +71,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.asyncs.PostFetcher;
-import awais.instagrabber.asyncs.SeenAction;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
@@ -151,17 +150,16 @@ public class StoryViewerFragment extends Fragment {
     private DirectMessagesService directMessagesService;
 
     private final String cookie = settingsHelper.getString(Constants.COOKIE);
-    private final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-    private final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-    private final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
     private StoryViewerOptions options;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
+        final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
-        storiesService = StoriesService.getInstance();
-        if (csrfToken == null) return;
+        storiesService = StoriesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         setHasOptionsMenu(true);
     }
@@ -478,36 +476,32 @@ public class StoryViewerFragment extends Fragment {
                                     poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
-                                if (!TextUtils.isEmpty(cookie)) {
-                                    sticking = true;
-                                    storiesService.respondToPoll(
-                                            currentStory.getStoryMediaId().split("_")[0],
-                                            poll.getId(),
-                                            w,
-                                            userIdFromCookie,
-                                            csrfToken,
-                                            new ServiceCallback<StoryStickerResponse>() {
-                                                @Override
-                                                public void onSuccess(final StoryStickerResponse result) {
-                                                    sticking = false;
-                                                    try {
-                                                        poll.setMyChoice(w);
-                                                        Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
-                                                    }
-                                                    catch (Exception ignored) {}
+                                sticking = true;
+                                storiesService.respondToPoll(
+                                        currentStory.getStoryMediaId().split("_")[0],
+                                        poll.getId(),
+                                        w,
+                                        new ServiceCallback<StoryStickerResponse>() {
+                                            @Override
+                                            public void onSuccess(final StoryStickerResponse result) {
+                                                sticking = false;
+                                                try {
+                                                    poll.setMyChoice(w);
+                                                    Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
                                                 }
+                                                catch (Exception ignored) {}
+                                            }
 
-                                                @Override
-                                                public void onFailure(final Throwable t) {
-                                                    sticking = false;
-                                                    Log.e(TAG, "Error responding", t);
-                                                    try {
-                                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                    }
-                                                    catch (Exception ignored) {}
+                                            @Override
+                                            public void onFailure(final Throwable t) {
+                                                sticking = false;
+                                                Log.e(TAG, "Error responding", t);
+                                                try {
+                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                                 }
-                                            });
-                                }
+                                                catch (Exception ignored) {}
+                                            }
+                                        });
                             })
                             .setPositiveButton(R.string.cancel, null)
                             .show();
@@ -525,8 +519,6 @@ public class StoryViewerFragment extends Fragment {
                                     currentStory.getStoryMediaId().split("_")[0],
                                     question.getId(),
                                     input.getText().toString(),
-                                    userIdFromCookie,
-                                    csrfToken,
                                     new ServiceCallback<StoryStickerResponse>() {
                                         @Override
                                         public void onSuccess(final StoryStickerResponse result) {
@@ -565,14 +557,12 @@ public class StoryViewerFragment extends Fragment {
                 new AlertDialog.Builder(context)
                         .setTitle(quiz.getMyChoice() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
-                            if (quiz.getMyChoice() == -1 && !TextUtils.isEmpty(cookie)) {
+                            if (quiz.getMyChoice() == -1) {
                                 sticking = true;
                                 storiesService.respondToQuiz(
                                         currentStory.getStoryMediaId().split("_")[0],
                                         quiz.getId(),
                                         w,
-                                        userIdFromCookie,
-                                        csrfToken,
                                         new ServiceCallback<StoryStickerResponse>() {
                                             @Override
                                             public void onSuccess(final StoryStickerResponse result) {
@@ -643,8 +633,6 @@ public class StoryViewerFragment extends Fragment {
                                         currentStory.getStoryMediaId().split("_")[0],
                                         slider.getId(),
                                         sliderValue,
-                                        userIdFromCookie,
-                                        csrfToken,
                                         new ServiceCallback<StoryStickerResponse>() {
                                             @Override
                                             public void onSuccess(final StoryStickerResponse result) {
@@ -868,7 +856,7 @@ public class StoryViewerFragment extends Fragment {
             binding.poll.setTag(poll);
 
             question = currentStory.getQuestion();
-            binding.answer.setVisibility((question != null && !TextUtils.isEmpty(cookie)) ? View.VISIBLE : View.GONE);
+            binding.answer.setVisibility((question != null) ? View.VISIBLE : View.GONE);
             binding.answer.setTag(question);
 
             mentions = currentStory.getMentions();
@@ -909,7 +897,11 @@ public class StoryViewerFragment extends Fragment {
             actionBar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
         }
 
-        if (settingsHelper.getBoolean(MARK_AS_SEEN)) new SeenAction(cookie, currentStory).execute();
+        if (settingsHelper.getBoolean(MARK_AS_SEEN))
+            storiesService.seen(currentStory.getStoryMediaId(),
+                                currentStory.getTimestamp(),
+                                System.currentTimeMillis() / 1000,
+                                null);
     }
 
     private void downloadStory() {
@@ -947,7 +939,7 @@ public class StoryViewerFragment extends Fragment {
                                                           if (menuDownload != null) {
                                                               menuDownload.setVisible(true);
                                                           }
-                                                          if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie)) {
+                                                          if (currentStory.canReply() && menuDm != null) {
                                                               menuDm.setVisible(true);
                                                           }
                                                           binding.progressView.setVisibility(View.GONE);
@@ -980,7 +972,7 @@ public class StoryViewerFragment extends Fragment {
                                         @NonNull final LoadEventInfo loadEventInfo,
                                         @NonNull final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie))
+                if (currentStory.canReply() && menuDm != null)
                     menuDm.setVisible(true);
                 binding.progressView.setVisibility(View.GONE);
             }
@@ -991,7 +983,7 @@ public class StoryViewerFragment extends Fragment {
                                       @NonNull final LoadEventInfo loadEventInfo,
                                       @NonNull final MediaLoadData mediaLoadData) {
                 if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null && !TextUtils.isEmpty(cookie))
+                if (currentStory.canReply() && menuDm != null)
                     menuDm.setVisible(true);
                 binding.progressView.setVisibility(View.VISIBLE);
             }

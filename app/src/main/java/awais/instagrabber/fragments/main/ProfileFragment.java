@@ -307,7 +307,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, userId) : null;
-        storiesService = isLoggedIn ? StoriesService.getInstance() : null;
+        storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));

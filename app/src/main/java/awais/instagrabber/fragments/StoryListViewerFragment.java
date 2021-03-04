@@ -119,7 +119,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         fragmentActivity = (AppCompatActivity) requireActivity();
         context = getContext();
         if (context == null) return;
-        storiesService = StoriesService.getInstance();
+        storiesService = StoriesService.getInstance(null, 0L, null);
     }
 
     @NonNull
