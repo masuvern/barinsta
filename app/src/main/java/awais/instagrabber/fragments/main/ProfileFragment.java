@@ -86,6 +86,7 @@ import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.UserProfileContextLink;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -692,7 +693,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                  : profileModel.getFullName());
 
         final String biography = profileModel.getBiography();
-        if (!TextUtils.isEmpty(biography)) {
+        if (TextUtils.isEmpty(biography)) {
+            profileDetailsBinding.mainBiography.setVisibility(View.GONE);
+        }
+        else {
+            profileDetailsBinding.mainBiography.setVisibility(View.VISIBLE);
             profileDetailsBinding.mainBiography.setText(biography);
             profileDetailsBinding.mainBiography.addOnHashtagListener(autoLinkItem -> {
                 final NavController navController = NavHostFragment.findNavController(this);
@@ -757,6 +762,27 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             });
         }
+
+        String profileContext = profileModel.getProfileContext();
+        if (TextUtils.isEmpty(profileContext)) {
+            profileDetailsBinding.profileContext.setVisibility(View.GONE);
+        }
+        else {
+            profileDetailsBinding.profileContext.setVisibility(View.VISIBLE);
+            final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinks();
+            for (int i = 0; i < userProfileContextLinks.size(); i++) {
+                final UserProfileContextLink link = userProfileContextLinks.get(i);
+                if (link.getUsername() != null)
+                    profileContext = profileContext.substring(0, link.getStart() + i)
+                                     + "@" + profileContext.substring(link.getStart() + i);
+            }
+            profileDetailsBinding.profileContext.setText(profileContext);
+            profileDetailsBinding.profileContext.addOnMentionClickListener(autoLinkItem -> {
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                navigateToProfile(originalText);
+            });
+        }
+
         final String url = profileModel.getExternalUrl();
         if (TextUtils.isEmpty(url)) {
             profileDetailsBinding.mainUrl.setVisibility(View.GONE);
