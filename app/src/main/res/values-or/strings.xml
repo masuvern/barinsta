@@ -46,14 +46,14 @@
     <string name="import_export">ଇମ୍ପୋର୍ଟ/ଏକ୍ସପୋର୍ଟ</string>
     <string name="select_language">ଭାଷା</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s ପୋଷ୍ଟ</item>
-        <item quantity="other">%s ପୋଷ୍ଟସ</item>
+        <item quantity="one">%s\nPost</item>
+        <item quantity="other">%s\nPosts</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s ଅନୁଗାମୀ</item>
-        <item quantity="other">%s ଅନୁଗାମୀଗଣ</item>
+        <item quantity="one">%s\nFollower</item>
+        <item quantity="other">%s\nFollowers</item>
     </plurals>
-    <string name="main_posts_following">%s ଅନୁସରଣ କରୁଛନ୍ତି </string>
+    <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_autoplay_video">ଭିଡ଼ିଓ ସ୍ୱତଃ ଚାଲୁ କର</string>
     <string name="post_viewer_muted_autoplay">ସର୍ବଦା ଭିଡ଼ିଓକୁ ଶବ୍ଦହୀନ ରଖ</string>
     <string name="post_viewer_show_captions">Always show post captions</string>
