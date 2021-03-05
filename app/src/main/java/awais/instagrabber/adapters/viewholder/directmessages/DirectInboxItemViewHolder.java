@@ -356,7 +356,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
         final Map<Long, DirectThreadLastSeenAt> lastSeenAtMap = thread.getLastSeenAt();
         final boolean read = ResponseBodyUtils.isRead(item, lastSeenAtMap, Collections.singletonList(thread.getViewerId()), thread.getDirectStory());
         binding.unread.setVisibility(read ? View.GONE : View.VISIBLE);
-        binding.threadTitle.setTypeface(binding.threadTitle.getTypeface(), read ? Typeface.NORMAL : Typeface.BOLD);
-        binding.subtitle.setTypeface(binding.subtitle.getTypeface(), read ? Typeface.NORMAL : Typeface.BOLD);
+        binding.threadTitle.setTypeface(null, read ? Typeface.NORMAL : Typeface.BOLD);
+        binding.subtitle.setTypeface(null, read ? Typeface.NORMAL : Typeface.BOLD);
     }
 }
