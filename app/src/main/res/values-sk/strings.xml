@@ -46,18 +46,18 @@
     <string name="import_export">Import/Export</string>
     <string name="select_language">Jazyk</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s príspevok</item>
-        <item quantity="few">%s príspevky</item>
-        <item quantity="many">%s príspevku</item>
-        <item quantity="other">%s príspevkov</item>
+        <item quantity="one">%s\nPost</item>
+        <item quantity="few">%s\nPosts</item>
+        <item quantity="many">%s\nPosts</item>
+        <item quantity="other">%s\nPosts</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s sledovateľ</item>
-        <item quantity="few">%s sledovatelia</item>
-        <item quantity="many">%s sledovateľa</item>
-        <item quantity="other">%s sledovatelia</item>
+        <item quantity="one">%s\nFollower</item>
+        <item quantity="few">%s\nFollowers</item>
+        <item quantity="many">%s\nFollowers</item>
+        <item quantity="other">%s\nFollowers</item>
     </plurals>
-    <string name="main_posts_following">%s Sleduje </string>
+    <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_autoplay_video">Automaticky prehrávať videá</string>
     <string name="post_viewer_muted_autoplay">Vždy stíšiť videá</string>
     <string name="post_viewer_show_captions">Vždy zobraziť popis príspevku</string>
