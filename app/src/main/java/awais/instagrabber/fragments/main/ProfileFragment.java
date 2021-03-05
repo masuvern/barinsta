@@ -438,6 +438,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     @Override
     public void onRefresh() {
+        profileDetailsBinding.countsBarrier.setVisibility(View.GONE);
         profileDetailsBinding.mainProfileImage.setVisibility(View.INVISIBLE);
         fetchProfileDetails();
     }
@@ -655,6 +656,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         profileDetailsBinding.mainProfileImage.setImageURI(profileModel.getProfilePicUrl());
         profileDetailsBinding.mainProfileImage.setVisibility(View.VISIBLE);
 
+        profileDetailsBinding.countsBarrier.setVisibility(View.VISIBLE);
+
         final long followersCount = profileModel.getFollowerCount();
         final long followingCount = profileModel.getFollowingCount();
 
@@ -857,13 +860,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (profileModel.getFriendshipStatus().isFollowing()) {
                 profileDetailsBinding.btnFollow.setText(R.string.unfollow);
-                profileDetailsBinding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_disabled_24);
+                profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
             } else if (profileModel.getFriendshipStatus().isOutgoingRequest()) {
                 profileDetailsBinding.btnFollow.setText(R.string.cancel);
-                profileDetailsBinding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_disabled_24);
+                profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
             } else {
                 profileDetailsBinding.btnFollow.setText(R.string.follow);
-                profileDetailsBinding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_24);
+                profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_24);
             }
             if (restrictMenuItem != null) {
                 restrictMenuItem.setVisible(true);
