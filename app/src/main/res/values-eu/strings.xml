@@ -46,14 +46,14 @@
     <string name="import_export">Inportatu/Esportatu</string>
     <string name="select_language">Hizkuntza</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">Bidalketa %s</item>
-        <item quantity="other">%s bidalketa</item>
+        <item quantity="one">%s\nPost</item>
+        <item quantity="other">%s\nPosts</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">Jarraitzaile %s</item>
-        <item quantity="other">%s jarraitzaile</item>
+        <item quantity="one">%s\nFollower</item>
+        <item quantity="other">%s\nFollowers</item>
     </plurals>
-    <string name="main_posts_following">%s jarraituak</string>
+    <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_autoplay_video">Erreproduzitu bideoak automatikoki</string>
     <string name="post_viewer_muted_autoplay">Mututu bideoak beti</string>
     <string name="post_viewer_show_captions">Erakutsi argazki-oina beti</string>
