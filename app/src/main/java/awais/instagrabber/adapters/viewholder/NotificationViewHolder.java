@@ -59,8 +59,10 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
         }
         binding.tvSubComment.setText(model.getType() == NotificationType.AYML ? args.getText() : subtext);
         if (text == -1 && subtext != null) {
-            binding.tvComment.setText(subtext);
-            binding.tvComment.setVisibility(TextUtils.isEmpty(subtext) ? View.GONE : View.VISIBLE);
+            binding.tvComment.setText(args.getText());
+            binding.tvComment.setVisibility(TextUtils.isEmpty(args.getText()) || args.getText().equals(args.getFullName())
+                    ? View.GONE : View.VISIBLE);
+            binding.tvSubComment.setText(subtext);
             binding.tvSubComment.setVisibility(model.getType() == NotificationType.AYML ? View.VISIBLE : View.GONE);
         } else if (text != -1) {
             binding.tvComment.setText(text);
@@ -71,6 +73,8 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
         if (model.getType() != NotificationType.REQUEST && model.getType() != NotificationType.AYML) {
             binding.tvDate.setText(args.getDateTime());
         }
+
+        binding.isVerified.setVisibility(args.isVerified() ? View.VISIBLE : View.GONE);
 
         binding.tvUsername.setText(args.getUsername());
         binding.ivProfilePic.setImageURI(args.getProfilePic());

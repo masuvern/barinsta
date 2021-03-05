@@ -56,7 +56,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
-import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
 import awais.instagrabber.asyncs.UsernameFetcher;
@@ -125,6 +124,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem;
     private MenuItem restrictMenuItem;
+    private MenuItem chainingMenuItem;
     private boolean highlightsFetching;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -364,11 +364,31 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         inflater.inflate(R.menu.profile_menu, menu);
         blockMenuItem = menu.findItem(R.id.block);
         if (blockMenuItem != null) {
-            blockMenuItem.setVisible(false);
+            if (profileModel != null) {
+                blockMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+                blockMenuItem.setTitle(profileModel.getFriendshipStatus().isBlocking() ? R.string.unblock : R.string.block);
+            } else {
+                blockMenuItem.setVisible(false);
+            }
         }
         restrictMenuItem = menu.findItem(R.id.restrict);
         if (restrictMenuItem != null) {
-            restrictMenuItem.setVisible(false);
+            if (profileModel != null) {
+                restrictMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+                restrictMenuItem.setTitle(profileModel.getFriendshipStatus().isRestricted() ? R.string.unrestrict : R.string.restrict);
+            }
+            else {
+                restrictMenuItem.setVisible(false);
+            }
+        }
+        chainingMenuItem = menu.findItem(R.id.chaining);
+        if (chainingMenuItem != null) {
+            if (profileModel != null) {
+                chainingMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+            }
+            else {
+                chainingMenuItem.setVisible(false);
+            }
         }
     }
 
@@ -431,6 +451,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             Log.e(TAG, "Error blocking", t);
                         }
                     });
+            return true;
+        }
+        if (item.getItemId() == R.id.chaining) {
+            if (!isLoggedIn) return false;
+            final NavDirections navDirections = ProfileFragmentDirections.actionGlobalNotificationsViewerFragment("chaining", profileModel.getPk());
+            NavHostFragment.findNavController(this).navigate(navDirections);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -884,15 +910,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     blockMenuItem.setTitle(R.string.block);
                 }
             }
-            return;
-        }
-        if (!isReallyPrivate() && restrictMenuItem != null) {
-            restrictMenuItem.setVisible(true);
-            if (profileModel.getFriendshipStatus().isRestricted()) {
-                restrictMenuItem.setTitle(R.string.unrestrict);
-            } else {
-                restrictMenuItem.setTitle(R.string.restrict);
+            if (chainingMenuItem != null && !Objects.equals(profileId, myId)) {
+                chainingMenuItem.setVisible(true);
             }
+            return;
         }
     }
 

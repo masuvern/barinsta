@@ -4,6 +4,7 @@ import java.util.Map;
 
 import awais.instagrabber.repositories.responses.AymlResponse;
 import awais.instagrabber.repositories.responses.NewsInboxResponse;
+import awais.instagrabber.repositories.responses.UserSearchResponse;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -23,4 +24,7 @@ public interface NewsRepository {
     @FormUrlEncoded
     @POST("/api/v1/discover/ayml/")
     Call<AymlResponse> getAyml(@Header("User-Agent") String userAgent, @FieldMap final Map<String, String> form);
+
+    @GET("/api/v1/discover/chaining/")
+    Call<UserSearchResponse> getChaining(@Header("User-Agent") String userAgent, @Query(value = "target_id") long targetId);
 }

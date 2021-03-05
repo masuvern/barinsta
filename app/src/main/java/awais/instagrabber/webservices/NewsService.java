@@ -21,6 +21,7 @@ import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
 import awais.instagrabber.repositories.responses.AymlResponse;
 import awais.instagrabber.repositories.responses.AymlUser;
+import awais.instagrabber.repositories.responses.UserSearchResponse;
 import awais.instagrabber.repositories.responses.NewsInboxResponse;
 import awais.instagrabber.repositories.responses.Notification;
 import awais.instagrabber.repositories.responses.NotificationArgs;
@@ -126,7 +127,8 @@ public class NewsService extends BaseService {
                                             )),
                                             data.getLong("timestamp"),
                                             user.getString("username"),
-                                            null
+                                            null,
+                                            false
                                     ),
                                     type,
                                     data.getString(Constants.EXTRAS_ID)
@@ -150,7 +152,8 @@ public class NewsService extends BaseService {
                                             null,
                                             0L,
                                             data.getString("username"),
-                                            data.optString("full_name")
+                                            data.optString("full_name"),
+                                            data.optBoolean("is_verified")
                                     ),
                                     "REQUEST",
                                     data.getString(Constants.EXTRAS_ID)
@@ -172,6 +175,7 @@ public class NewsService extends BaseService {
     }
 
     public void fetchSuggestions(final String csrfToken,
+                                 final String deviceUuid,
                                  final ServiceCallback<List<Notification>> callback) {
         final Map<String, String> form = new HashMap<>();
         form.put("_uuid", UUID.randomUUID().toString());
@@ -205,7 +209,8 @@ public class NewsService extends BaseService {
                                             null,
                                             0L,
                                             u.getUsername(),
-                                            u.getFullName()
+                                            u.getFullName(),
+                                            u.isVerified()
                                     ),
                                     "AYML",
                                     i.getUuid()
@@ -217,6 +222,47 @@ public class NewsService extends BaseService {
 
             @Override
             public void onFailure(@NonNull final Call<AymlResponse> call, @NonNull final Throwable t) {
+                callback.onFailure(t);
+                // Log.e(TAG, "onFailure: ", t);
+            }
+        });
+    }
+
+    public void fetchChaining(final long targetId, final ServiceCallback<List<Notification>> callback) {
+        final Call<UserSearchResponse> request = repository.getChaining(appUa, targetId);
+        request.enqueue(new Callback<UserSearchResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<UserSearchResponse> call, @NonNull final Response<UserSearchResponse> response) {
+                final UserSearchResponse body = response.body();
+                if (body == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+
+                final List<Notification> newsItems = body.getUsers().stream()
+                        .map(u -> {
+                            return new Notification(
+                                    new NotificationArgs(
+                                            u.getSocialContext(),
+                                            null,
+                                            u.getPk(),
+                                            u.getProfilePicUrl(),
+                                            null,
+                                            0L,
+                                            u.getUsername(),
+                                            u.getFullName(),
+                                            u.isVerified()
+                                    ),
+                                    "AYML",
+                                    u.getProfilePicId() // placeholder
+                            );
+                        })
+                        .collect(Collectors.toList());
+                callback.onSuccess(newsItems);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<UserSearchResponse> call, @NonNull final Throwable t) {
                 callback.onFailure(t);
                 // Log.e(TAG, "onFailure: ", t);
             }

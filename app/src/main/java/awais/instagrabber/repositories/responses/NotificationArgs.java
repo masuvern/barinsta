@@ -20,6 +20,7 @@ public class NotificationArgs {
     private final double timestamp;
     private final String profileName;
     private final String fullName; // for AYML, not naturally generated
+    private final boolean isVerified; // mostly for AYML, not sure about notif
 
     public NotificationArgs(final String text,
                             final String richText, // for AYML, this is the algorithm
@@ -28,7 +29,8 @@ public class NotificationArgs {
                             final List<NotificationImage> media,
                             final double timestamp,
                             final String profileName,
-                            final String fullName) {
+                            final String fullName,
+                            final boolean isVerified) {
         this.text = text;
         this.richText = richText;
         this.profileId = profileId;
@@ -37,6 +39,7 @@ public class NotificationArgs {
         this.timestamp = timestamp;
         this.profileName = profileName;
         this.fullName = fullName;
+        this.isVerified = isVerified;
     }
 
     public String getText() {
@@ -65,6 +68,10 @@ public class NotificationArgs {
 
     public double getTimestamp() {
         return timestamp;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
     }
 
     @NonNull

@@ -89,6 +89,9 @@
             android:name="type"
             app:argType="string"
             app:nullable="false" />
+        <argument
+            android:name="targetId"
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/story_list_nav_graph" />

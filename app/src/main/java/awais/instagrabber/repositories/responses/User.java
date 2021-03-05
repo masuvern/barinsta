@@ -30,6 +30,7 @@ public class User implements Serializable {
     private final HdProfilePicUrlInfo hdProfilePicUrlInfo;
     private final String profileContext;
     private final List<UserProfileContextLink> profileContextLinksWithUserIds;
+    private final String socialContext;
 
     public User(final long pk,
                 final String username,
@@ -55,7 +56,8 @@ public class User implements Serializable {
                 final String publicEmail,
                 final HdProfilePicUrlInfo hdProfilePicUrlInfo,
                 final String profileContext,
-                final List<UserProfileContextLink> profileContextLinksWithUserIds) {
+                final List<UserProfileContextLink> profileContextLinksWithUserIds,
+                final String socialContext) {
         this.pk = pk;
         this.username = username;
         this.fullName = fullName;
@@ -81,6 +83,7 @@ public class User implements Serializable {
         this.hdProfilePicUrlInfo = hdProfilePicUrlInfo;
         this.profileContext = profileContext;
         this.profileContextLinksWithUserIds = profileContextLinksWithUserIds;
+        this.socialContext = socialContext;
     }
 
     public long getPk() {
@@ -181,6 +184,10 @@ public class User implements Serializable {
 
     public String getProfileContext() {
         return profileContext;
+    }
+
+    public String getSocialContext() {
+        return socialContext;
     }
 
     public List<UserProfileContextLink> getProfileContextLinks() {
