@@ -47,13 +47,13 @@
     <string name="select_language">Јазик</string>
     <plurals name="main_posts_count_inline">
         <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\nПостови</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nFollower</item>
-        <item quantity="other">%s\nFollowers</item>
+        <item quantity="other">%s\nСледбеници</item>
     </plurals>
-    <string name="main_posts_following">%s\nFollowing</string>
+    <string name="main_posts_following">%s\nСледбеници</string>
     <string name="post_viewer_autoplay_video">Autoplay на видеа</string>
     <string name="post_viewer_muted_autoplay">Секогаш гледај видеа без звук</string>
     <string name="post_viewer_show_captions">Секогаш прикажувај наслов</string>
