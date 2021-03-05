@@ -270,7 +270,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
-        storiesService = StoriesService.getInstance();
+        storiesService = StoriesService.getInstance(null, 0L, null);
         setHasOptionsMenu(true);
     }
 

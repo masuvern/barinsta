@@ -781,7 +781,8 @@ public final class ResponseBodyUtils {
                     null,
                     friendshipStatus,
                     owner.optBoolean("is_verified"),
-                    false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null);
+                    false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null,
+                    null, null, null);
         }
         final String id = feedItem.getString(Constants.EXTRAS_ID);
         final ImageVersions2 imageVersions2 = new ImageVersions2(

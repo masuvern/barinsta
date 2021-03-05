@@ -18,8 +18,6 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.asyncs.GetActivityAsyncTask.NotificationCounts;
-import awais.instagrabber.asyncs.GetActivityAsyncTask.OnTaskCompleteListener;
 import awais.instagrabber.utils.Constants;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -30,7 +28,7 @@ public class ActivityCheckerService extends Service {
     private static final int DELAY_MILLIS = 60000;
 
     private Handler handler;
-    private OnTaskCompleteListener onTaskCompleteListener;
+    // private OnTaskCompleteListener onTaskCompleteListener;
     private NotificationManagerCompat notificationManager;
 
     private final IBinder binder = new LocalBinder();
@@ -50,6 +48,7 @@ public class ActivityCheckerService extends Service {
     public void onCreate() {
         notificationManager = NotificationManagerCompat.from(getApplicationContext());
         handler = new Handler();
+        /*
         onTaskCompleteListener = result -> {
             // Log.d(TAG, "onTaskCompleteListener: result: " + result);
             try {
@@ -62,20 +61,12 @@ public class ActivityCheckerService extends Service {
                 handler.postDelayed(runnable, DELAY_MILLIS);
             }
         };
+         */
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         startChecking();
-        // Uncomment to test notifications
-        // final String notificationString = getNotificationString(new NotificationCounts(
-        //         1,
-        //         2,
-        //         3,
-        //         4,
-        //         5
-        // ));
-        // showNotification(notificationString);
         return binder;
     }
 
@@ -93,6 +84,7 @@ public class ActivityCheckerService extends Service {
         handler.removeCallbacks(runnable);
     }
 
+    /*
     private String getNotificationString(final NotificationCounts result) {
         final List<String> list = new ArrayList<>();
         if (result.getRelationshipsCount() != 0) {
@@ -113,6 +105,7 @@ public class ActivityCheckerService extends Service {
         if (list.isEmpty()) return null;
         return TextUtils.join(", ", list);
     }
+     */
 
     private void showNotification(final String notificationString) {
         final Notification notification = new NotificationCompat.Builder(this, Constants.ACTIVITY_CHANNEL_ID)

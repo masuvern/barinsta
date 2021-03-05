@@ -2,6 +2,9 @@ package awais.instagrabber.repositories;
 
 import java.util.Map;
 
+import awais.instagrabber.repositories.responses.AymlResponse;
+import awais.instagrabber.repositories.responses.NewsInboxResponse;
+import awais.instagrabber.repositories.responses.UserSearchResponse;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -16,9 +19,12 @@ public interface NewsRepository {
     Call<String> webInbox(@Header("User-Agent") String userAgent);
 
     @GET("/api/v1/news/inbox/")
-    Call<String> appInbox(@Header("User-Agent") String userAgent, @Query(value = "mark_as_seen", encoded = true) boolean markAsSeen);
+    Call<NewsInboxResponse> appInbox(@Header("User-Agent") String userAgent, @Query(value = "mark_as_seen", encoded = true) boolean markAsSeen);
 
     @FormUrlEncoded
     @POST("/api/v1/discover/ayml/")
-    Call<String> getAyml(@Header("User-Agent") String userAgent, @FieldMap final Map<String, String> form);
+    Call<AymlResponse> getAyml(@Header("User-Agent") String userAgent, @FieldMap final Map<String, String> form);
+
+    @GET("/api/v1/discover/chaining/")
+    Call<UserSearchResponse> getChaining(@Header("User-Agent") String userAgent, @Query(value = "target_id") long targetId);
 }

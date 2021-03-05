@@ -15,7 +15,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,11 +35,13 @@ import awais.instagrabber.asyncs.NotificationsFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.Notification;
+import awais.instagrabber.repositories.responses.NotificationArgs;
+import awais.instagrabber.repositories.responses.NotificationImage;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -53,15 +57,35 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public final class NotificationsViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "NotificationsViewer";
 
+    private AppCompatActivity fragmentActivity;
     private FragmentNotificationsViewerBinding binding;
     private SwipeRefreshLayout root;
     private boolean shouldRefresh = true;
     private NotificationViewModel notificationViewModel;
     private FriendshipService friendshipService;
     private MediaService mediaService;
-    private String csrfToken;
+    private NewsService newsService;
+    private String csrfToken, deviceUuid;
     private String type;
+    private long targetId;
     private Context context;
+
+    private final ServiceCallback<List<Notification>> cb = new ServiceCallback<List<Notification>>() {
+        @Override
+        public void onSuccess(final List<Notification> notificationModels) {
+            binding.swipeRefreshLayout.setRefreshing(false);
+            notificationViewModel.getList().postValue(notificationModels);
+        }
+
+        @Override
+        public void onFailure(final Throwable t) {
+            try {
+                binding.swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch(Throwable e) {}
+        }
+    };
 
     private final OnNotificationClickListener clickListener = new OnNotificationClickListener() {
         @Override
@@ -70,14 +94,18 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         }
 
         @Override
-        public void onPreviewClick(final NotificationModel model) {
+        public void onPreviewClick(final Notification model) {
+            final NotificationImage notificationImage = model.getArgs().getMedia().get(0);
+            final long mediaId = Long.valueOf(notificationImage.getId().split("_")[0]);
             if (model.getType() == NotificationType.RESPONDED_STORY) {
                 final NavDirections action = NotificationsViewerFragmentDirections
-                        .actionNotificationsViewerFragmentToStoryViewerFragment(StoryViewerOptions.forStory(model.getPostId(),
-                                                                                                            model.getUsername()));
+                        .actionNotificationsViewerFragmentToStoryViewerFragment(
+                                StoryViewerOptions.forStory(
+                                        mediaId,
+                                        model.getArgs().getUsername()));
                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
             } else {
-                mediaService.fetch(model.getPostId(), new ServiceCallback<Media>() {
+                mediaService.fetch(mediaId, new ServiceCallback<Media>() {
                     @Override
                     public void onSuccess(final Media feedModel) {
                         final PostViewV2Fragment fragment = PostViewV2Fragment
@@ -95,13 +123,14 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         }
 
         @Override
-        public void onNotificationClick(final NotificationModel model) {
+        public void onNotificationClick(final Notification model) {
             if (model == null) return;
-            final String username = model.getUsername();
+            final NotificationArgs args = model.getArgs();
+            final String username = args.getUsername();
             if (model.getType() == NotificationType.FOLLOW || model.getType() == NotificationType.AYML) {
                 openProfile(username);
             } else {
-                final SpannableString title = new SpannableString(username + (TextUtils.isEmpty(model.getText()) ? "" : (":\n" + model.getText())));
+                final SpannableString title = new SpannableString(username + (TextUtils.isEmpty(args.getText()) ? "" : (":\n" + args.getText())));
                 title.setSpan(new RelativeSizeSpan(1.23f), 0, username.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
                 String[] commentDialogList;
@@ -110,7 +139,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             getString(R.string.open_profile),
                             getString(R.string.view_story)
                     };
-                } else if (model.getPostId() > 0) {
+                } else if (args.getMedia() != null) {
                     commentDialogList = new String[]{
                             getString(R.string.open_profile),
                             getString(R.string.view_post)
@@ -131,7 +160,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(model.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
+                                friendshipService.approve(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
                                     @Override
                                     public void onSuccess(final FriendshipChangeResponse result) {
                                         onRefresh();
@@ -148,7 +177,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             clickListener.onPreviewClick(model);
                             break;
                         case 2:
-                            friendshipService.ignore(model.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
+                            friendshipService.ignore(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
                                 @Override
                                 public void onSuccess(final FriendshipChangeResponse result) {
                                     onRefresh();
@@ -174,6 +203,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fragmentActivity = (AppCompatActivity) requireActivity();
         context = getContext();
         if (context == null) return;
         NotificationManagerCompat.from(context.getApplicationContext()).cancel(Constants.ACTIVITY_NOTIFICATION_ID);
@@ -183,9 +213,10 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         }
         mediaService = MediaService.getInstance(null, null, 0);
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
+        newsService = NewsService.getInstance();
     }
 
     @NonNull
@@ -210,6 +241,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private void init() {
         final NotificationsViewerFragmentArgs fragmentArgs = NotificationsViewerFragmentArgs.fromBundle(getArguments());
         type = fragmentArgs.getType();
+        targetId = fragmentArgs.getTargetId();
         final Context context = getContext();
         CookieUtils.setupCookies(settingsHelper.getString(Constants.COOKIE));
         binding.swipeRefreshLayout.setOnRefreshListener(this);
@@ -224,11 +256,13 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     @Override
     public void onRefresh() {
         binding.swipeRefreshLayout.setRefreshing(true);
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         switch (type) {
             case "notif":
-                new NotificationsFetcher(true, new FetchListener<List<NotificationModel>>() {
+                if (actionBar != null) actionBar.setTitle(R.string.action_notif);
+                new NotificationsFetcher(true, new FetchListener<List<Notification>>() {
                     @Override
-                    public void onResult(final List<NotificationModel> notificationModels) {
+                    public void onResult(final List<Notification> notificationModels) {
                         binding.swipeRefreshLayout.setRefreshing(false);
                         notificationViewModel.getList().postValue(notificationModels);
                     }
@@ -244,23 +278,12 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                 }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 break;
             case "ayml":
-                final NewsService newsService = NewsService.getInstance();
-                newsService.fetchSuggestions(csrfToken, new ServiceCallback<List<NotificationModel>>() {
-                    @Override
-                    public void onSuccess(final List<NotificationModel> notificationModels) {
-                        binding.swipeRefreshLayout.setRefreshing(false);
-                        notificationViewModel.getList().postValue(notificationModels);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        try {
-                            binding.swipeRefreshLayout.setRefreshing(false);
-                            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        catch(Throwable e) {}
-                    }
-                });
+                if (actionBar != null) actionBar.setTitle(R.string.action_ayml);
+                newsService.fetchSuggestions(csrfToken, deviceUuid, cb);
+                break;
+            case "chaining":
+                if (actionBar != null) actionBar.setTitle(R.string.action_ayml);
+                newsService.fetchChaining(targetId, cb);
                 break;
         }
     }
