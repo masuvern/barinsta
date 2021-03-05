@@ -53,7 +53,7 @@
         <item quantity="one">%s\nFollower</item>
         <item quantity="other">%s\nFollowers</item>
     </plurals>
-    <string name="main_posts_following">%s\nFollowing</string>
+    <string name="main_posts_following">%s\nTakip</string>
     <string name="post_viewer_autoplay_video">Videoları otomatik oynat</string>
     <string name="post_viewer_muted_autoplay">Videoları her zaman sustur</string>
     <string name="post_viewer_show_captions">Gönderi başlıklarını her zaman göster</string>
