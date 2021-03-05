@@ -46,18 +46,18 @@
     <string name="import_export">Импорт/Экспорт</string>
     <string name="select_language">Язык</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s\nPost</item>
-        <item quantity="few">%s\nPosts</item>
-        <item quantity="many">%s\nPosts</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="one">%s\nПубликация</item>
+        <item quantity="few">%s\nПубликаций</item>
+        <item quantity="many">%s\nПубликаций</item>
+        <item quantity="other">%s\nПубликаций</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s\nFollower</item>
-        <item quantity="few">%s\nFollowers</item>
-        <item quantity="many">%s\nFollowers</item>
-        <item quantity="other">%s\nFollowers</item>
+        <item quantity="one">%s\nПодписчик</item>
+        <item quantity="few">%s\nПодписчиков</item>
+        <item quantity="many">%s\nПодписчиков</item>
+        <item quantity="other">%s\nПодписчиков</item>
     </plurals>
-    <string name="main_posts_following">%s\nFollowing</string>
+    <string name="main_posts_following">%s\nПоследователей</string>
     <string name="post_viewer_autoplay_video">Автовоспроизведение видео</string>
     <string name="post_viewer_muted_autoplay">Всегда заглушать видео</string>
     <string name="post_viewer_show_captions">Всегда отображать подписи к постам</string>
