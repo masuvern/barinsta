@@ -46,18 +46,18 @@
     <string name="import_export">Importuj/Eksportuj</string>
     <string name="select_language">Język</string>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s\nPost</item>
+        <item quantity="one">%s\npost</item>
         <item quantity="few">%s\nPosts</item>
         <item quantity="many">%s\nPosts</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\npostów</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s\nFollower</item>
+        <item quantity="one">%s\nobserwujący</item>
         <item quantity="few">%s\nFollowers</item>
         <item quantity="many">%s\nFollowers</item>
-        <item quantity="other">%s\nFollowers</item>
+        <item quantity="other">%s\nobserwujących</item>
     </plurals>
-    <string name="main_posts_following">%s\nFollowing</string>
+    <string name="main_posts_following">%s\nobserwowanych</string>
     <string name="post_viewer_autoplay_video">Automatyczne odtwarzanie filmów</string>
     <string name="post_viewer_muted_autoplay">Zawsze wyciszaj filmy</string>
     <string name="post_viewer_show_captions">Zawsze pokazuj napisy postów</string>
@@ -183,7 +183,7 @@
     <string name="dms_inbox_shared_gif">%s udostępnił gif</string>
     <string name="dms_inbox_shared_profile">%s udostępnił profil: @%s</string>
     <string name="dms_inbox_shared_location">%s udostępnił lokalizację: %s</string>
-    <string name="dms_inbox_shared_highlight">%s shared a story highlight by @%s</string>
+    <string name="dms_inbox_shared_highlight">%s udostępnił story @%s</string>
     <string name="dms_inbox_shared_story">%s udostępnił story @%s</string>
     <string name="dms_inbox_shared_voice">%s wysłał wiadomość głosową</string>
     <string name="dms_inbox_shared_clip">%s udostępnił klip @%s</string>
