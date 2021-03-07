@@ -276,7 +276,7 @@
     <string name="title_dm">پیام خصوصی</string>
     <string name="number_selected">%d انتخاب شده</string>
     <string name="logout_success">خروج با موفقیت!</string>
-    <string name="dm_thread_info">اطلاعات</string>
+    <string name="dm_thread_info">ازدایش</string>
     <string name="mark_as_seen">نشان کردن به عنوان دیده شده</string>
     <string name="skip_update_checkbox">دوباره نمایش نده تا بروزرسانی بعدی</string>
     <string name="version">نگارش</string>
@@ -358,7 +358,7 @@
     <string name="post_not_found">Post not found!</string>
     <string name="no_external_app_url">No app found which opens urls</string>
     <string name="gallery">Gallery</string>
-    <string name="camera">Camera</string>
+    <string name="camera">فرتورانداز</string>
     <string name="all_photos">All Photos</string>
     <string name="all_media">All Media</string>
     <string name="all_videos">All Videos</string>
@@ -370,8 +370,8 @@
     <string name="exposure">Exposure</string>
     <string name="center">Center</string>
     <string name="color">Color</string>
-    <string name="start">Start</string>
-    <string name="end">End</string>
+    <string name="start">آغاز</string>
+    <string name="end">پایان</string>
     <string name="bilateral_blur">Bilateral Blur</string>
     <string name="vignette">Vignette</string>
     <string name="box_blur">Box blur</string>
@@ -402,12 +402,12 @@
     <string name="details">Details</string>
     <string name="title">Title</string>
     <string name="members">Members</string>
-    <string name="admin">Admin</string>
+    <string name="admin">تارگردان</string>
     <string name="inviter">Inviter</string>
     <string name="mute_messages">Mute messages</string>
     <string name="mute_mentions">Mute mentions</string>
     <string name="add_members">Add members</string>
-    <string name="search">Search</string>
+    <string name="search">جستـجو</string>
     <string name="done">Done</string>
     <string name="dms_action_make_admin">Make Admin</string>
     <string name="dms_action_remove_admin">Remove as Admin</string>
@@ -445,7 +445,7 @@
     <string name="photo">Photo</string>
     <string name="video">Video</string>
     <string name="voice_message">Voice message</string>
-    <string name="post">Post</string>
+    <string name="post">فرسته</string>
     <string name="approval_required_for_new_members">Approval required to join</string>
     <string name="requests">Requests</string>
     <string name="admins_only">Admins only</string>
@@ -459,5 +459,5 @@
     <string name="accept_request_from_user">Accept request from %1s (%2s)?</string>
     <string name="decline">Decline</string>
     <string name="accept">Accept</string>
-    <string name="you">You</string>
+    <string name="you">شما</string>
 </resources>
