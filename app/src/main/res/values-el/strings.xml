@@ -312,8 +312,8 @@
     <string name="unknown">Άγνωστο</string>
     <string name="removed_from_favs">Αφαιρέθηκε από τα Αγαπημένα</string>
     <string name="backup_and_restore">Αντίγραφα ασφαλείας &amp; Επαναφορά</string>
-    <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
-    <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
+    <string name="backup_summary">Αντίγραφο ασφαλείας ρυθμίσεων εφαρμογής Barinsta, δεδομένα σύνδεσης λογαριασμού και/ή αγαπημένα σε ένα απλό κείμενο ή κρυπτογραφημένο αρχείο αντιγράφου ασφαλείας για μεταγενέστερη επαναφορά.</string>
+    <string name="backup_warning">Αν δημιουργείτε αντίγραφα ασφαλείας των δεδομένων σύνδεσης λογαριασμού, αντιμετωπίζετε το αρχείο ως απόρρητο και κρατήστε το κάπου που είναι ασφαλές!</string>
     <string name="create_backup">Δημιουργία νέου αρχείου αντιγράφου ασφαλείας</string>
     <string name="restore_backup">Επαναφορά από υπάρχον αρχείο αντιγράφου ασφαλείας</string>
     <string name="file_chosen_label">Αρχείο:</string>
