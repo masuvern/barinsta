@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_about">À propos</string>
-    <string name="action_dms">Messages privés</string>
+    <string name="action_dms">Messages directs</string>
     <string name="action_settings">Paramètres</string>
     <string name="action_download">Téléchargement</string>
     <string name="action_search">Rechercher par nom d\'utilisateur…</string>
