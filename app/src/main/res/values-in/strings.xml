@@ -45,8 +45,11 @@
     <string name="instadp_settings">Gunakan Instadp untuk foto profil kualitas tinggi</string>
     <string name="import_export">Ekspor/impor Pengaturan</string>
     <string name="select_language">Bahasa</string>
+    <plurals name="main_posts_count">
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="other">%s\nkiriman</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="other">%s\npengikut</item>
@@ -111,8 +114,7 @@
     <string name="unbookmark">Batalkan Markah</string>
     <string name="follow">Ikuti</string>
     <string name="unfollow">Batal Ikuti</string>
-    <string name="favorite_short">Favorit</string>
-    <string name="unfavorite_short">Batal Favorit</string>
+    <string name="favorite_short" comment="Adjective, not verb">Favorit</string>
     <string name="block">Blokir</string>
     <string name="unblock">Batalkan Blokir</string>
     <string name="restrict">Batasi</string>
@@ -304,14 +306,13 @@
     <string name="dark_theme_settings">Tema gelap</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
-    <string name="added_to_favs">Ditambahkan ke Kesukaan</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Ditambahkan ke Favorit</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorit</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Akun</string>
     <string name="hashtags">Tagar</string>
     <string name="locations">Lokasi</string>
     <string name="unknown">Tak diketahui</string>
-    <string name="removed_from_favs">Dihapus dari Kesukaan</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Cadangan &amp; Pemulihan</string>
     <string name="backup_summary">Cadangkan pengaturan apl Barinsta, data login akun, dan/atau favorit ke berkas cadangan teks biasa atau terenkripsi untuk pemulihan nantinya.</string>
     <string name="backup_warning">Jika Anda mencadangkan data login akun, perlakukan sebagai berkas penting dan simpan di tempat yang aman!</string>
