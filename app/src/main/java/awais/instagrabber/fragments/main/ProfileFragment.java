@@ -122,9 +122,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean hasStories = false;
     private HighlightsAdapter highlightsAdapter;
     private HighlightsViewModel highlightsViewModel;
-    private MenuItem blockMenuItem;
-    private MenuItem restrictMenuItem;
-    private MenuItem chainingMenuItem;
+    private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
+    private MenuItem muteStoriesMenuItem, mutePostsMenuItem;
     private boolean highlightsFetching;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -381,6 +380,25 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 restrictMenuItem.setVisible(false);
             }
         }
+        muteStoriesMenuItem = menu.findItem(R.id.mute_stories);
+        if (muteStoriesMenuItem != null) {
+            if (profileModel != null) {
+                muteStoriesMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+                muteStoriesMenuItem.setTitle(profileModel.getFriendshipStatus().isMutingReel() ? R.string.mute_stories : R.string.unmute_stories);
+            } else {
+                muteStoriesMenuItem.setVisible(false);
+            }
+        }
+        mutePostsMenuItem = menu.findItem(R.id.mute_posts);
+        if (mutePostsMenuItem != null) {
+            if (profileModel != null) {
+                mutePostsMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+                mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.mute_posts : R.string.unmute_posts);
+            }
+            else {
+                mutePostsMenuItem.setVisible(false);
+            }
+        }
         chainingMenuItem = menu.findItem(R.id.chaining);
         if (chainingMenuItem != null) {
             if (profileModel != null) {
@@ -457,6 +475,48 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!isLoggedIn) return false;
             final NavDirections navDirections = ProfileFragmentDirections.actionGlobalNotificationsViewerFragment("chaining", profileModel.getPk());
             NavHostFragment.findNavController(this).navigate(navDirections);
+            return true;
+        }
+        if (item.getItemId() == R.id.mute_stories) {
+            if (!isLoggedIn) return false;
+            final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
+            friendshipService.changeMute(
+                    profileModel.getFriendshipStatus().isMutingReel(),
+                    profileModel.getPk(),
+                    true,
+                    new ServiceCallback<FriendshipChangeResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipChangeResponse result) {
+                            Log.d(TAG, action + " success: " + result);
+                            fetchProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error while performing " + action, t);
+                        }
+                    });
+            return true;
+        }
+        if (item.getItemId() == R.id.mute_posts) {
+            if (!isLoggedIn) return false;
+            final String action = profileModel.getFriendshipStatus().isMuting() ? "Unmute stories" : "Mute stories";
+            friendshipService.changeMute(
+                    profileModel.getFriendshipStatus().isMuting(),
+                    profileModel.getPk(),
+                    false,
+                    new ServiceCallback<FriendshipChangeResponse>() {
+                        @Override
+                        public void onSuccess(final FriendshipChangeResponse result) {
+                            Log.d(TAG, action + " success: " + result);
+                            fetchProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error while performing " + action, t);
+                        }
+                    });
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -896,21 +956,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (restrictMenuItem != null) {
                 restrictMenuItem.setVisible(true);
-                if (profileModel.getFriendshipStatus().isRestricted()) {
-                    restrictMenuItem.setTitle(R.string.unrestrict);
-                } else {
-                    restrictMenuItem.setTitle(R.string.restrict);
-                }
+                restrictMenuItem.setTitle(profileModel.getFriendshipStatus().isRestricted() ? R.string.unrestrict : R.string.restrict);
             }
             if (blockMenuItem != null) {
                 blockMenuItem.setVisible(true);
-                if (profileModel.getFriendshipStatus().isBlocking()) {
-                    blockMenuItem.setTitle(R.string.unblock);
-                } else {
-                    blockMenuItem.setTitle(R.string.block);
-                }
+                blockMenuItem.setTitle(profileModel.getFriendshipStatus().isBlocking() ? R.string.unblock : R.string.block);
             }
-            if (chainingMenuItem != null && !Objects.equals(profileId, myId)) {
+            if (muteStoriesMenuItem != null) {
+                muteStoriesMenuItem.setVisible(true);
+                muteStoriesMenuItem.setTitle(profileModel.getFriendshipStatus().isMutingReel() ? R.string.unmute_stories : R.string.mute_stories);
+            }
+            if (mutePostsMenuItem != null) {
+                mutePostsMenuItem.setVisible(true);
+                mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.unmute_posts : R.string.mute_posts);
+            }
+            if (chainingMenuItem != null) {
                 chainingMenuItem.setVisible(true);
             }
             return;

@@ -123,6 +123,10 @@
     <string name="unblock">Unblock</string>
     <string name="restrict">Restrict</string>
     <string name="unrestrict">Unrestrict</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Mutual</string>
