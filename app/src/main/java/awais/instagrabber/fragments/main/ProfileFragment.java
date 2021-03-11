@@ -677,7 +677,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             @Override
             public void onSuccess(final Favorite result) {
                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                profileDetailsBinding.favChip.setText(R.string.added_to_favs_short);
+                profileDetailsBinding.favChip.setText(R.string.favorite_short);
                 favoriteRepository.insertOrUpdateFavorite(new Favorite(
                         result.getId(),
                         profileModel.getUsername(),
@@ -729,9 +729,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         ), new RepositoryCallback<Void>() {
                             @Override
                             public void onSuccess(final Void result) {
-                                profileDetailsBinding.favChip.setText(R.string.added_to_favs_short);
+                                profileDetailsBinding.favChip.setText(R.string.favorite_short);
                                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs_short));
+                                showSnackbar(getString(R.string.added_to_favs));
                             }
 
                             @Override
@@ -749,7 +749,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         final String postCount = String.valueOf(profileModel.getMediaCount());
 
-        SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
+        SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count,
                                                                                                   profileModel.getMediaCount() > 2000000000L
                                                                                                   ? 2000000000
                                                                                                   : (int) profileModel.getMediaCount(),
