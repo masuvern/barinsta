@@ -45,8 +45,11 @@
     <string name="instadp_settings">Dùng Instadp cho những ảnh đại diện có độ phân giải cao</string>
     <string name="import_export">Nhập/Xuất</string>
     <string name="select_language">Ngôn ngữ</string>
+    <plurals name="main_posts_count">
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="other">%s\nBài đăng</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="other">%s\nNgười theo dõi</item>
@@ -111,8 +114,7 @@
     <string name="unbookmark">Gỡ dấu trang</string>
     <string name="follow">Theo dõi</string>
     <string name="unfollow">Bỏ theo dõi</string>
-    <string name="favorite_short">Yêu thích</string>
-    <string name="unfavorite_short">Bỏ yêu thích</string>
+    <string name="favorite_short" comment="Adjective, not verb">Yêu thích</string>
     <string name="block">Chặn</string>
     <string name="unblock">Bỏ chặn</string>
     <string name="restrict">Giới hạn</string>
@@ -304,14 +306,13 @@
     <string name="dark_theme_settings">Giao diện tối</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Tối</string>
-    <string name="added_to_favs">Đã thêm vào mục Ưa thích</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorited</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorite</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Tài khoản</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Địa điểm</string>
     <string name="unknown">Không rõ</string>
-    <string name="removed_from_favs">Đã loại bỏ khỏi danh sách yêu thích</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
