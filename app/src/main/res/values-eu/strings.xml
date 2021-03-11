@@ -45,9 +45,13 @@
     <string name="instadp_settings">Erabili Instadp bereizmen handiko profil-irudietarako</string>
     <string name="import_export">Inportatu/Esportatu</string>
     <string name="select_language">Hizkuntza</string>
-    <plurals name="main_posts_count_inline">
+    <plurals name="main_posts_count">
         <item quantity="one">%s\nPost</item>
         <item quantity="other">%s\nPosts</item>
+    </plurals>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nFollower</item>
@@ -114,8 +118,7 @@
     <string name="unbookmark">Laster-marka kendu</string>
     <string name="follow">Jarraitu</string>
     <string name="unfollow">Jarraitzeari utzi</string>
-    <string name="favorite_short">Gogokoa</string>
-    <string name="unfavorite_short">Gogokoetatik kendu</string>
+    <string name="favorite_short" comment="Adjective, not verb">Gogokoa</string>
     <string name="block">Blokeatu</string>
     <string name="unblock">Desblokeatu</string>
     <string name="restrict">Mugatu</string>
@@ -307,14 +310,13 @@
     <string name="dark_theme_settings">Gai iluna</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Akeita</string>
     <string name="dark_material_dark_theme">Beltz materiala</string>
-    <string name="added_to_favs">Gogokoetara gehituta</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Gogokotua</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Gogokotu</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Kontuak</string>
     <string name="hashtags">Traolak</string>
     <string name="locations">Kokalekuak</string>
     <string name="unknown">Ezezaguna</string>
-    <string name="removed_from_favs">Gogokoetatik kenduta</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
