@@ -45,8 +45,11 @@
     <string name="instadp_settings">透過 Instadp 檢視高清大頭貼照</string>
     <string name="import_export">匯入/匯出</string>
     <string name="select_language">語言</string>
+    <plurals name="main_posts_count">
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="other">%s\n貼文</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="other">%s\n追蹤者</item>
@@ -111,8 +114,7 @@
     <string name="unbookmark">自書籤中移除</string>
     <string name="follow">追蹤</string>
     <string name="unfollow">取消追蹤</string>
-    <string name="favorite_short">收藏</string>
-    <string name="unfavorite_short">自收藏中移除</string>
+    <string name="favorite_short" comment="Adjective, not verb">收藏</string>
     <string name="block">封鎖</string>
     <string name="unblock">解除封鎖</string>
     <string name="restrict">限制</string>
@@ -304,14 +306,13 @@
     <string name="dark_theme_settings">暗色主題</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">咖啡棕</string>
     <string name="dark_material_dark_theme">暗黑 Material</string>
-    <string name="added_to_favs">已加入至收藏夾</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">已收藏</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">收藏</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">帳號</string>
     <string name="hashtags">主題標籤</string>
     <string name="locations">地點</string>
     <string name="unknown">未知</string>
-    <string name="removed_from_favs">自收藏中刪除</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
