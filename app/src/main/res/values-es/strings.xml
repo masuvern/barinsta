@@ -45,9 +45,13 @@
     <string name="instadp_settings">Usar Instadp para imágenes de perfil de alta definición</string>
     <string name="import_export">Importar/Exportar</string>
     <string name="select_language">Idioma</string>
-    <plurals name="main_posts_count_inline">
+    <plurals name="main_posts_count">
         <item quantity="one">%s\nPublicación</item>
         <item quantity="other">%s\nPublicaciones</item>
+    </plurals>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Publicación</item>
+        <item quantity="other">%s Publicaciones</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nSeguidor</item>
@@ -114,16 +118,15 @@
     <string name="unbookmark">Quitar marcador</string>
     <string name="follow">Seguir</string>
     <string name="unfollow">Dejar de seguir</string>
-    <string name="favorite_short">Agregar a favoritos</string>
-    <string name="unfavorite_short">Eliminar de favoritos</string>
+    <string name="favorite_short" comment="Adjective, not verb">Agregar a favoritos</string>
     <string name="block">Bloquear</string>
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Desrestringir</string>
-    <string name="mute_stories">Mute stories</string>
-    <string name="mute_posts">Mute posts</string>
-    <string name="unmute_stories">Unmute stories</string>
-    <string name="unmute_posts">Unmute posts</string>
+    <string name="mute_stories">Silenciar historias</string>
+    <string name="mute_posts">Silenciar publicaciones</string>
+    <string name="unmute_stories">Quitar silencio a historias</string>
+    <string name="unmute_posts">Quitar silencio a publicaciones</string>
     <string name="bio_copy">Copiar biografía</string>
     <string name="bio_translate">Traducir biografía</string>
     <string name="status_mutual">Mutuo</string>
@@ -307,14 +310,13 @@
     <string name="dark_theme_settings">Tema oscuro</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material oscuro</string>
-    <string name="added_to_favs">En favoritos</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">En favoritos</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Agregar a favoritos</string>
+    <string name="added_to_favs">¡Añadido a favoritos!</string>
+    <string name="add_to_favorites">Añadir a favoritos</string>
     <string name="accounts">Cuentas</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Ubicaciones</string>
     <string name="unknown">Desconocido</string>
-    <string name="removed_from_favs">Eliminado de favoritos</string>
+    <string name="removed_from_favs">¡Eliminado de favoritos!</string>
     <string name="backup_and_restore">Respaldar &amp; restaurar</string>
     <string name="backup_summary">Respalda los ajustes de Barinsta, datos de inicios de sesión, y/o favoritos a un archivo de texto plano o a un archivo cifrado para su posterior restauración.</string>
     <string name="backup_warning">Si está respaldando datos de inicios de sesión, trate el archivo como confidencial y ¡manténgalo a buen recaudo!</string>
