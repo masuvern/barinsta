@@ -45,8 +45,11 @@
     <string name="instadp_settings">使用 Instadp 获取高清头像</string>
     <string name="import_export">导入/导出</string>
     <string name="select_language">语言</string>
+    <plurals name="main_posts_count">
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="other">%s\n帖子</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="other">%s\n粉丝</item>
@@ -111,8 +114,7 @@
     <string name="unbookmark">解除收藏</string>
     <string name="follow">关注</string>
     <string name="unfollow">脱粉</string>
-    <string name="favorite_short">加入收藏</string>
-    <string name="unfavorite_short">取消收藏</string>
+    <string name="favorite_short" comment="Adjective, not verb">加入收藏</string>
     <string name="block">拉黑</string>
     <string name="unblock">解禁</string>
     <string name="restrict">限制</string>
@@ -304,14 +306,13 @@
     <string name="dark_theme_settings">深色主题</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">咖啡棕</string>
     <string name="dark_material_dark_theme">Material 黑</string>
-    <string name="added_to_favs">已添加至收藏夹</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">已收藏</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">收藏</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">帐户</string>
     <string name="hashtags">话题</string>
     <string name="locations">地点</string>
     <string name="unknown">未知</string>
-    <string name="removed_from_favs">已从收藏夹中删除</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">备份及恢复</string>
     <string name="backup_summary">将应用设置，帐户登录信息，和/或收藏数据备份至纯文本或加密文本，以备日后恢复。</string>
     <string name="backup_warning">如果您备份登录信息，请务必妥善保管您的备份文件：把它当作密码看待！</string>
