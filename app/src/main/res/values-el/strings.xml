@@ -120,6 +120,10 @@
     <string name="unblock">Άρση αποκλεισμού</string>
     <string name="restrict">Περιορισμός</string>
     <string name="unrestrict">Άρση Περιορισμού</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">Αντιγραφή βιογραφικού</string>
     <string name="bio_translate">Μετάφραση βιογραφικού</string>
     <string name="status_mutual">Κοινά</string>
