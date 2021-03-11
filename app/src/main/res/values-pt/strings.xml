@@ -46,12 +46,12 @@
     <string name="import_export">Importar/Exportar</string>
     <string name="select_language">Idioma</string>
     <plurals name="main_posts_count">
-        <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="one">%s\nPublicação</item>
+        <item quantity="other">%s\nPublicações</item>
     </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="one">%s Publicação</item>
+        <item quantity="other">%s Publicações</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nSeguidor</item>
@@ -123,10 +123,10 @@
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Deixar de restringir</string>
-    <string name="mute_stories">Mute stories</string>
-    <string name="mute_posts">Mute posts</string>
-    <string name="unmute_stories">Unmute stories</string>
-    <string name="unmute_posts">Unmute posts</string>
+    <string name="mute_stories">Silenciar stories</string>
+    <string name="mute_posts">Silenciar publicações</string>
+    <string name="unmute_stories">Reativar stories</string>
+    <string name="unmute_posts">Reativar publicações</string>
     <string name="bio_copy">Copiar bio</string>
     <string name="bio_translate">Traduzir bio</string>
     <string name="status_mutual">Mútuo</string>
@@ -310,13 +310,13 @@
     <string name="dark_theme_settings">Tema escuro</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Escuro (Material)</string>
-    <string name="added_to_favs">Added to Favorites!</string>
-    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="added_to_favs">Adicionado aos Favoritos!</string>
+    <string name="add_to_favorites">Adicionar aos Favoritos</string>
     <string name="accounts">Contas</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Localizações</string>
     <string name="unknown">Desconhecido</string>
-    <string name="removed_from_favs">Removed from Favourites!</string>
+    <string name="removed_from_favs">Removido dos Favoritos!</string>
     <string name="backup_and_restore">Becape e Restauração</string>
     <string name="backup_summary">Faça o becape das configurações de aplicativo do Barinsta, dados de login da conta e/ou favoritos para um texto simples ou arquivo de becape criptografado para restauração posterior.</string>
     <string name="backup_warning">Se você estiver fazendo o becape dos dados de login da conta, trate o arquivo como confidencial e mantenha-o em algum lugar seguro!</string>
