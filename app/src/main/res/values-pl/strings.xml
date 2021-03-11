@@ -45,11 +45,17 @@
     <string name="instadp_settings">Użyj Instadp dla zdjęć profilowych o wysokiej rozdzielczości</string>
     <string name="import_export">Importuj/Eksportuj</string>
     <string name="select_language">Język</string>
-    <plurals name="main_posts_count_inline">
-        <item quantity="one">%s\npost</item>
+    <plurals name="main_posts_count">
+        <item quantity="one">%s\nPost</item>
         <item quantity="few">%s\nPosts</item>
         <item quantity="many">%s\nPosts</item>
-        <item quantity="other">%s\npostów</item>
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="few">%s Posts</item>
+        <item quantity="many">%s Posts</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nobserwujący</item>
@@ -120,8 +126,7 @@
     <string name="unbookmark">Usuń z zapisanych</string>
     <string name="follow">Obserwuj</string>
     <string name="unfollow">Przestań obserwować</string>
-    <string name="favorite_short">Ulubiony</string>
-    <string name="unfavorite_short">Usuń z ulubionych</string>
+    <string name="favorite_short" comment="Adjective, not verb">Ulubiony</string>
     <string name="block">Zablokuj</string>
     <string name="unblock">Odblokuj</string>
     <string name="restrict">Ogranicz</string>
@@ -313,14 +318,13 @@
     <string name="dark_theme_settings">Ciemny motyw</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
-    <string name="added_to_favs">Dodano do ulubionych</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Ulubiony</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Ulubione</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Konta</string>
     <string name="hashtags">Hashtagi</string>
     <string name="locations">Lokalizacje</string>
     <string name="unknown">Nieznany</string>
-    <string name="removed_from_favs">Usunięto z ulubionych</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Kopia zapasowa &amp; Przywracanie</string>
     <string name="backup_summary">Kopia zapasowa ustawień aplikacji Barinsta, danych logowania do konta i/lub ulubionych do zwykłego tekstu lub zaszyfrowanego pliku kopii zapasowej w celu późniejszego przywrócenia.</string>
     <string name="backup_warning">Jeśli tworzysz kopię zapasową danych logowania do konta, potraktuj plik jako poufny i przechowuj go w bezpiecznym miejscu!</string>
