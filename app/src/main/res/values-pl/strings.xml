@@ -126,6 +126,10 @@
     <string name="unblock">Odblokuj</string>
     <string name="restrict">Ogranicz</string>
     <string name="unrestrict">Nieograniczone</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">Skopiuj bio</string>
     <string name="bio_translate">Przetłumacz bio</string>
     <string name="status_mutual">Wspólne</string>
