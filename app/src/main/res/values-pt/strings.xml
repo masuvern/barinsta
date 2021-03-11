@@ -120,6 +120,10 @@
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
     <string name="unrestrict">Deixar de restringir</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">Copiar bio</string>
     <string name="bio_translate">Traduzir bio</string>
     <string name="status_mutual">Mútuo</string>
