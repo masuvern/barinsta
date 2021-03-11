@@ -45,8 +45,11 @@
     <string name="instadp_settings">プロフ画像にInstadpを使用</string>
     <string name="import_export">インポート/エクスポート</string>
     <string name="select_language">言語</string>
+    <plurals name="main_posts_count">
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="other">%s\n投稿</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="other">%s\nフォロワー</item>
@@ -111,8 +114,7 @@
     <string name="unbookmark">ブックマークを解除する</string>
     <string name="follow">フォローする</string>
     <string name="unfollow">フォローを解除</string>
-    <string name="favorite_short">お気に入り</string>
-    <string name="unfavorite_short">お気に入りを解除</string>
+    <string name="favorite_short" comment="Adjective, not verb">お気に入り</string>
     <string name="block">ブロック</string>
     <string name="unblock">ブロックを解除</string>
     <string name="restrict">制限する</string>
@@ -304,14 +306,13 @@
     <string name="dark_theme_settings">ダークテーマ</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">マテリアルダーク</string>
-    <string name="added_to_favs">お気に入りに追加しました</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">お気に入り</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">お気に入り</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">アカウント</string>
     <string name="hashtags">ハッシュタグ</string>
     <string name="locations">場所</string>
     <string name="unknown">不明</string>
-    <string name="removed_from_favs">お気に入りから削除しました</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">バックアップと復元</string>
     <string name="backup_summary">Barinstaの設定、アカウントのログインデータ、お気に入りをテキストまたは暗号化ファイルにバックアップして、あとで復元できるようにします。</string>
     <string name="backup_warning">アカウントのログインデータをバックアップする場合は、ファイルを機密として扱い、安全な場所に保管してください!</string>
