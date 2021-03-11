@@ -45,9 +45,13 @@
     <string name="instadp_settings">Instadp für hochauflösende Profilbilder verwenden</string>
     <string name="import_export">Importieren/Exportieren</string>
     <string name="select_language">Sprache</string>
+    <plurals name="main_posts_count">
+        <item quantity="one">%s\nPost</item>
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s\nBeitrag</item>
-        <item quantity="other">%s\nBeiträge</item>
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nAbonnent</item>
@@ -114,8 +118,7 @@
     <string name="unbookmark">Lesezeichen entfernen</string>
     <string name="follow">Folgen</string>
     <string name="unfollow">Nicht mehr folgen</string>
-    <string name="favorite_short">Favorit</string>
-    <string name="unfavorite_short">Von Favoriten entfernen</string>
+    <string name="favorite_short" comment="Adjective, not verb">Favorit</string>
     <string name="block">Blockieren</string>
     <string name="unblock">Nicht mehr blockieren</string>
     <string name="restrict">Einschränken</string>
@@ -307,14 +310,13 @@
     <string name="dark_theme_settings">Dunkles Theme</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
-    <string name="added_to_favs">Zu Favoriten hinzugefügt</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Favorisiert</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Favorisieren</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Konten</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Standorte</string>
     <string name="unknown">Unbekannt</string>
-    <string name="removed_from_favs">Aus Favoriten entfernt</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
