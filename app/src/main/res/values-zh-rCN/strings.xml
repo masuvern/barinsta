@@ -117,6 +117,10 @@
     <string name="unblock">解禁</string>
     <string name="restrict">限制</string>
     <string name="unrestrict">放开</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">复制简介</string>
     <string name="bio_translate">翻译简介</string>
     <string name="status_mutual">相互关注</string>
