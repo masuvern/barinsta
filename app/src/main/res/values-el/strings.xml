@@ -45,9 +45,13 @@
     <string name="instadp_settings">Χρήση Instadp για εικόνες προφίλ υψηλής ευκρίνειας</string>
     <string name="import_export">Εισαγωγή/Εξαγωγή</string>
     <string name="select_language">Γλώσσα</string>
+    <plurals name="main_posts_count">
+        <item quantity="one">%s\nPost</item>
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s\nΔημοσίευση</item>
-        <item quantity="other">%s\nΔημοσιεύσεις</item>
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nΑκόλουθος</item>
@@ -114,8 +118,7 @@
     <string name="unbookmark">Διαγραφή σελιδοδείκτη</string>
     <string name="follow">Ακολουθήστε</string>
     <string name="unfollow">Κατάργηση ακολούθησης</string>
-    <string name="favorite_short">Προσθήκη στα αγαπημένα</string>
-    <string name="unfavorite_short">Αφαίρεση από αγαπημένα</string>
+    <string name="favorite_short" comment="Adjective, not verb">Προσθήκη στα αγαπημένα</string>
     <string name="block">Αποκλεισμός</string>
     <string name="unblock">Άρση αποκλεισμού</string>
     <string name="restrict">Περιορισμός</string>
@@ -307,14 +310,13 @@
     <string name="dark_theme_settings">Σκοτεινό θέμα</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Σκοτεινό Material</string>
-    <string name="added_to_favs">Προστέθηκε στα Αγαπημένα</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Μαρκαρισμένο ως \'Αγαπημένο\'</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Αγαπημένο</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Λογαριασμοί</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Τοποθεσίες</string>
     <string name="unknown">Άγνωστο</string>
-    <string name="removed_from_favs">Αφαιρέθηκε από τα Αγαπημένα</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Αντίγραφα ασφαλείας &amp; Επαναφορά</string>
     <string name="backup_summary">Αντίγραφο ασφαλείας ρυθμίσεων εφαρμογής Barinsta, δεδομένα σύνδεσης λογαριασμού και/ή αγαπημένα σε ένα απλό κείμενο ή κρυπτογραφημένο αρχείο αντιγράφου ασφαλείας για μεταγενέστερη επαναφορά.</string>
     <string name="backup_warning">Αν δημιουργείτε αντίγραφα ασφαλείας των δεδομένων σύνδεσης λογαριασμού, αντιμετωπίζετε το αρχείο ως απόρρητο και κρατήστε το κάπου που είναι ασφαλές!</string>
