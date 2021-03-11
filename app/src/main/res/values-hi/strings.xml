@@ -121,6 +121,10 @@
     <string name="unblock">अनब्ल़ॉक करें</string>
     <string name="restrict">प्रतिबंध लगाए</string>
     <string name="unrestrict">प्रतिबंध न लगाए</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">विवरण कॉपी करें</string>
     <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Mutual</string>
