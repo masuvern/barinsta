@@ -45,9 +45,13 @@
     <string name="instadp_settings">Користи Instadp за профили со висока резолуција</string>
     <string name="import_export">Импорт/Експорт</string>
     <string name="select_language">Јазик</string>
-    <plurals name="main_posts_count_inline">
+    <plurals name="main_posts_count">
         <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nПостови</item>
+        <item quantity="other">%s\nPosts</item>
+    </plurals>
+    <plurals name="main_posts_count_inline">
+        <item quantity="one">%s Post</item>
+        <item quantity="other">%s Posts</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nFollower</item>
@@ -114,8 +118,7 @@
     <string name="unbookmark">Одобележи</string>
     <string name="follow">Следи</string>
     <string name="unfollow">Одследи</string>
-    <string name="favorite_short">Омилен</string>
-    <string name="unfavorite_short">Одомилен</string>
+    <string name="favorite_short" comment="Adjective, not verb">Омилен</string>
     <string name="block">Блокирај</string>
     <string name="unblock">Одблокни</string>
     <string name="restrict">Ограничи</string>
@@ -307,14 +310,13 @@
     <string name="dark_theme_settings">Темна тема</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Материјално Црна</string>
-    <string name="added_to_favs">Додадено во Омилени</string>
-    <string name="added_to_favs_short" comment="Here it's an adjective (equivalent to verb past tense), used for the favorite chip on profile/hashtag/location fragments, so be short">Омилени</string>
-    <string name="add_to_favorites" comment="Here it's a verb, used for the favorite chip on profile/hashtag/location fragments, so be short">Омилено</string>
+    <string name="added_to_favs">Added to Favorites!</string>
+    <string name="add_to_favorites">Add to Favorites</string>
     <string name="accounts">Акаунти</string>
     <string name="hashtags">Хаштагови</string>
     <string name="locations">Локации</string>
     <string name="unknown">Непознато</string>
-    <string name="removed_from_favs">Отстрането од омилени</string>
+    <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
