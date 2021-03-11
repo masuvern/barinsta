@@ -126,6 +126,10 @@
     <string name="unblock">Odblokovať</string>
     <string name="restrict">Obmedziť</string>
     <string name="unrestrict">Zrušiť obmedzenie</string>
+    <string name="mute_stories">Mute stories</string>
+    <string name="mute_posts">Mute posts</string>
+    <string name="unmute_stories">Unmute stories</string>
+    <string name="unmute_posts">Unmute posts</string>
     <string name="bio_copy">Skopírovať bio</string>
     <string name="bio_translate">Preložiť bio</string>
     <string name="status_mutual">Spoločné</string>
