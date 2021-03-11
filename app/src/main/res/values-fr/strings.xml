@@ -123,10 +123,10 @@
     <string name="unblock">Débloquer</string>
     <string name="restrict">Restreindre</string>
     <string name="unrestrict">Retirer des restrictions</string>
-    <string name="mute_stories">Mute stories</string>
-    <string name="mute_posts">Mute publications</string>
-    <string name="unmute_stories">Unmute stories</string>
-    <string name="unmute_posts">Unmute posts</string>
+    <string name="mute_stories">Mute les story</string>
+    <string name="mute_posts">Mute les publications</string>
+    <string name="unmute_stories">Démutez les story</string>
+    <string name="unmute_posts">Démutez les publications</string>
     <string name="bio_copy">Copier la bio</string>
     <string name="bio_translate">Traduire la bio</string>
     <string name="status_mutual">Mutuel</string>
@@ -310,13 +310,13 @@
     <string name="dark_theme_settings">Thème sombre</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
-    <string name="added_to_favs">Added to Favorites!</string>
-    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="added_to_favs">Ajouté aux Favoris !</string>
+    <string name="add_to_favorites">Ajouter aux favoris</string>
     <string name="accounts">Comptes</string>
     <string name="hashtags">Hashtags</string>
     <string name="locations">Lieux</string>
     <string name="unknown">Inconnu</string>
-    <string name="removed_from_favs">Removed from Favourites!</string>
+    <string name="removed_from_favs">Retiré des favoris !</string>
     <string name="backup_and_restore">Sauvegarder &amp; restaurer</string>
     <string name="backup_summary">Sauvegardez les paramètres de l\'application Barinsta, les données de connexion au compte et/ou les favoris dans un fichier de sauvegarde en texte clair ou crypté pour une restauration ultérieure.</string>
     <string name="backup_warning">Si vous sauvegardez les données de connexion de votre compte, traitez le fichier comme confidentiel et conservez-le dans un endroit sûr !</string>
