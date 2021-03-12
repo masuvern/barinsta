@@ -47,11 +47,11 @@
     <string name="select_language">Lingua</string>
     <plurals name="main_posts_count">
         <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\nPost</item>
     </plurals>
     <plurals name="main_posts_count_inline">
         <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="other">%s Post</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nSeguace</item>
