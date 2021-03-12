@@ -123,10 +123,10 @@
     <string name="unblock">Sblocca</string>
     <string name="restrict">Limita</string>
     <string name="unrestrict">Rimuovi limitazione</string>
-    <string name="mute_stories">Mute stories</string>
-    <string name="mute_posts">Mute posts</string>
-    <string name="unmute_stories">Unmute stories</string>
-    <string name="unmute_posts">Unmute posts</string>
+    <string name="mute_stories">Silenzia storie</string>
+    <string name="mute_posts">Silenzia post</string>
+    <string name="unmute_stories">Riattiva storie</string>
+    <string name="unmute_posts">Riattiva i post</string>
     <string name="bio_copy">Copia bio</string>
     <string name="bio_translate">Traduci bio</string>
     <string name="status_mutual">Interesse reciproco</string>
@@ -310,13 +310,13 @@
     <string name="dark_theme_settings">Tema scuro</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Materiale Scuro</string>
-    <string name="added_to_favs">Added to Favorites!</string>
-    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="added_to_favs">Aggiunto ai Preferiti!</string>
+    <string name="add_to_favorites">Aggiungi ai Preferiti</string>
     <string name="accounts">Profili</string>
     <string name="hashtags">Hashtag</string>
     <string name="locations">Luoghi</string>
     <string name="unknown">Sconosciuto</string>
-    <string name="removed_from_favs">Removed from Favourites!</string>
+    <string name="removed_from_favs">Rimosso dai Preferiti!</string>
     <string name="backup_and_restore">Backup &amp; Ripristino</string>
     <string name="backup_summary">Backup delle impostazioni dell\'app Barinsta, dei dati di login dell\'account e/o dei preferiti in un file di backup semplice o crittografato per il ripristino successivo.</string>
     <string name="backup_warning">Se stai effettuando il backup dei dati di accesso dell\'account, tratta il file come confidenziale e tienilo in qualche posto sicuro!</string>
