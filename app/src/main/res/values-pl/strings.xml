@@ -46,16 +46,16 @@
     <string name="import_export">Importuj/Eksportuj</string>
     <string name="select_language">Język</string>
     <plurals name="main_posts_count">
-        <item quantity="one">%s\nPost</item>
+        <item quantity="one">%s\npost</item>
         <item quantity="few">%s\nPosts</item>
         <item quantity="many">%s\nPosts</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\npostów</item>
     </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
+        <item quantity="one">%s post</item>
         <item quantity="few">%s Posts</item>
         <item quantity="many">%s Posts</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="other">%s postów</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nobserwujący</item>
@@ -113,7 +113,7 @@
     <string name="edit_collection">Wpisz nazwę kolekcji</string>
     <string name="delete_collection">Usunąć kolekcję</string>
     <string name="delete_collection_confirm">Czy na pewno chcesz usunąć tę kolekcję?</string>
-    <string name="delete_collection_note">All contained media will remain in other collections.</string>
+    <string name="delete_collection_note">Wszystkie media pozostaną w innych kolekcjach.</string>
     <string name="add_to_collection">Dodaj do kolekcji...</string>
     <string name="remove_from_collection">Usuń z kolekcji</string>
     <string name="liked">Polubiono</string>
@@ -131,10 +131,10 @@
     <string name="unblock">Odblokuj</string>
     <string name="restrict">Ogranicz</string>
     <string name="unrestrict">Nieograniczone</string>
-    <string name="mute_stories">Mute stories</string>
-    <string name="mute_posts">Mute posts</string>
-    <string name="unmute_stories">Unmute stories</string>
-    <string name="unmute_posts">Unmute posts</string>
+    <string name="mute_stories">Wycisz relacje</string>
+    <string name="mute_posts">Wycisz posty</string>
+    <string name="unmute_stories">Wyłącz wyciszenie relacji</string>
+    <string name="unmute_posts">Wyłącz wyciszenie postów</string>
     <string name="bio_copy">Skopiuj bio</string>
     <string name="bio_translate">Przetłumacz bio</string>
     <string name="status_mutual">Wspólne</string>
@@ -447,12 +447,12 @@
     <string name="replied_you">Odpowiedziałeś</string>
     <string name="replied_you_group">Odpowiedziałeś %s</string>
     <string name="replied_group">Odpowiadanie na %s</string>
-    <string name="replied_to_you">Replied to you</string>
-    <string name="replied_to_themself">Replied to themself</string>
+    <string name="replied_to_you">Odpowiedział Tobie</string>
+    <string name="replied_to_themself">Odpowiedział sobie</string>
     <string name="reacted_story_outgoing">Zareagowałeś na relację</string>
-    <string name="reacted_story_incoming">Reacted to your story</string>
-    <string name="mentioned_story_outgoing">You mentioned them in your story</string>
-    <string name="mentioned_story_incoming">Mentioned you in their story</string>
+    <string name="reacted_story_incoming">Zareagował na Twoją relację</string>
+    <string name="mentioned_story_outgoing">Wspomniałeś o nich w swojej relacji</string>
+    <string name="mentioned_story_incoming">Wspomnieli o Tobie w swojej relacji</string>
     <string name="replied_story_outgoing">Odpowiedziałeś na ich relację</string>
     <string name="replied_story_incoming">Odpowiedział na Twoją relację</string>
     <string name="raven_image_expired">Zdjęcie wygasło</string>
