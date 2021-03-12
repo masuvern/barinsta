@@ -35,7 +35,7 @@
     <string name="error_loading_profile">Chyba pri načítavaní profilu! Je používateľské meno správne? Ak áno môžete byť obmedzený limitami Instagramu.</string>
     <string name="error_loading_profile_loggedin">Chyba pri načítavaní profilu! Je používateľské meno správne? Alebo ťa zablokovali?</string>
     <string name="error_loading_hashtag">Chyba pri načítavaní hashtagu! Je meno správne?</string>
-    <string name="error_loading_location">Error loading location! Is the URL valid?</string>
+    <string name="error_loading_location">Chyba pri načítavaní lokácie! Je URL správna?</string>
     <string name="error_creating_folders">Chyba pri vytvaraní priečinku(ov).</string>
     <string name="save_to_folder">Uložiť do vlastného priečinku</string>
     <string name="select_folder">Vybrať priečinok</string>
