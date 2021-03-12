@@ -318,13 +318,13 @@
     <string name="dark_theme_settings">Ciemny motyw</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Barista</string>
     <string name="dark_material_dark_theme">Material Dark</string>
-    <string name="added_to_favs">Added to Favorites!</string>
-    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="added_to_favs">Dodano do ulubionych!</string>
+    <string name="add_to_favorites">Dodaj do ulubionych</string>
     <string name="accounts">Konta</string>
     <string name="hashtags">Hashtagi</string>
     <string name="locations">Lokalizacje</string>
     <string name="unknown">Nieznany</string>
-    <string name="removed_from_favs">Removed from Favourites!</string>
+    <string name="removed_from_favs">Usunięto z ulubionych!</string>
     <string name="backup_and_restore">Kopia zapasowa &amp; Przywracanie</string>
     <string name="backup_summary">Kopia zapasowa ustawień aplikacji Barinsta, danych logowania do konta i/lub ulubionych do zwykłego tekstu lub zaszyfrowanego pliku kopii zapasowej w celu późniejszego przywrócenia.</string>
     <string name="backup_warning">Jeśli tworzysz kopię zapasową danych logowania do konta, potraktuj plik jako poufny i przechowuj go w bezpiecznym miejscu!</string>
