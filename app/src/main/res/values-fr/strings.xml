@@ -125,7 +125,7 @@
     <string name="unrestrict">Retirer des restrictions</string>
     <string name="mute_stories">Mute les stories</string>
     <string name="mute_posts">Mute les publications</string>
-    <string name="unmute_stories">Démutez les stories</string>
+    <string name="unmute_stories">Démute les stories</string>
     <string name="unmute_posts">Démutez les publications</string>
     <string name="bio_copy">Copier la bio</string>
     <string name="bio_translate">Traduire la bio</string>
