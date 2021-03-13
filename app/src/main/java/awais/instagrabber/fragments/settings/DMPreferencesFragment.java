@@ -174,7 +174,7 @@ public class DMPreferencesFragment extends BasePreferencesFragment {
         private void setupNumberEditText(final Context context) {
             int currentValue = settingsHelper.getInteger(PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER);
             if (currentValue <= 0) {
-                currentValue = 5;
+                currentValue = 30;
             }
             binding.freqNum.setText(String.valueOf(currentValue));
             binding.freqNum.addTextChangedListener(new TextWatcherAdapter() {

@@ -70,7 +70,7 @@ public class DMSyncAlarmReceiver extends BroadcastReceiver {
     private static long getIntervalMillis() {
         int amount = settingsHelper.getInteger(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER);
         if (amount <= 0) {
-            amount = 5;
+            amount = 30;
         }
         final String unit = settingsHelper.getString(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT);
         final TemporalUnit temporalUnit;

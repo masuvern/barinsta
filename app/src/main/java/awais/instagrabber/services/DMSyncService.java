@@ -40,9 +40,12 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.DateUtils;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
+
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DMSyncService extends LifecycleService {
     private static final String TAG = DMSyncService.class.getSimpleName();
@@ -209,7 +212,15 @@ public class DMSyncService extends LifecycleService {
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         super.onStartCommand(intent, flags, startId);
-        final boolean notificationsEnabled = Utils.settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_NOTIFICATIONS);
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
+        if (!isLoggedIn) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+        // Need to setup here if service was started by the boot completed receiver
+        CookieUtils.setupCookies(cookie);
+        final boolean notificationsEnabled = settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_NOTIFICATIONS);
         inboxManager.getInbox().observe(this, inboxResource -> {
             if (!notificationsEnabled || inboxResource == null || inboxResource.status != Resource.Status.SUCCESS) {
                 stopSelf();
