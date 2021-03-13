@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 
     <uses-feature
         android:name="android.hardware.camera.any"
@@ -155,11 +155,11 @@
             android:name=".services.DMSyncAlarmReceiver"
             android:enabled="true"
             android:exported="false" />
-        <receiver android:name=".services.BootCompletedReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+        <!--<receiver android:name=".services.BootCompletedReceiver" >-->
+        <!--    <intent-filter>-->
+        <!--        <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+        <!--    </intent-filter>-->
+        <!--</receiver>-->
 
         <uses-library
             android:name="org.apache.http.legacy"

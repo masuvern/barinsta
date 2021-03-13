@@ -163,7 +163,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             EmojiVariantManager.getInstance();
         });
         initEmojiCompat();
-        initDmService();
+        // initDmService();
     }
 
     private void initDmService() {

@@ -36,8 +36,8 @@ public class DMPreferencesFragment extends BasePreferencesFragment {
         final Context context = getContext();
         if (context == null) return;
         screen.addPreference(getMarkDMSeenPreference(context));
-        screen.addPreference(getAutoRefreshDMPreference(context));
-        screen.addPreference(getAutoRefreshDMFreqPreference(context));
+        // screen.addPreference(getAutoRefreshDMPreference(context));
+        // screen.addPreference(getAutoRefreshDMFreqPreference(context));
     }
 
     private Preference getMarkDMSeenPreference(@NonNull final Context context) {
