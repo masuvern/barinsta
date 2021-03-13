@@ -11,24 +11,25 @@ import androidx.recyclerview.widget.ListAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.adapters.viewholder.NotificationViewHolder;
 import awais.instagrabber.databinding.ItemNotificationBinding;
-import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
+import awais.instagrabber.repositories.responses.Notification;
 
-public final class NotificationsAdapter extends ListAdapter<NotificationModel, NotificationViewHolder> {
+public final class NotificationsAdapter extends ListAdapter<Notification, NotificationViewHolder> {
     private final OnNotificationClickListener notificationClickListener;
 
-    private static final DiffUtil.ItemCallback<NotificationModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<NotificationModel>() {
+    private static final DiffUtil.ItemCallback<Notification> DIFF_CALLBACK = new DiffUtil.ItemCallback<Notification>() {
         @Override
-        public boolean areItemsTheSame(@NonNull final NotificationModel oldItem, @NonNull final NotificationModel newItem) {
-            return oldItem.getId().equals(newItem.getId());
+        public boolean areItemsTheSame(@NonNull final Notification oldItem, @NonNull final Notification newItem) {
+            return oldItem.getPk().equals(newItem.getPk());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull final NotificationModel oldItem, @NonNull final NotificationModel newItem) {
-            return oldItem.getId().equals(newItem.getId());
+        public boolean areContentsTheSame(@NonNull final Notification oldItem, @NonNull final Notification newItem) {
+            return oldItem.getPk().equals(newItem.getPk());
         }
     };
 
@@ -47,12 +48,12 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
 
     @Override
     public void onBindViewHolder(@NonNull final NotificationViewHolder holder, final int position) {
-        final NotificationModel notificationModel = getItem(position);
-        holder.bind(notificationModel, notificationClickListener);
+        final Notification Notification = getItem(position);
+        holder.bind(Notification, notificationClickListener);
     }
 
     @Override
-    public void submitList(@Nullable final List<NotificationModel> list, @Nullable final Runnable commitCallback) {
+    public void submitList(@Nullable final List<Notification> list, @Nullable final Runnable commitCallback) {
         if (list == null) {
             super.submitList(null, commitCallback);
             return;
@@ -61,7 +62,7 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
     }
 
     @Override
-    public void submitList(@Nullable final List<NotificationModel> list) {
+    public void submitList(@Nullable final List<Notification> list) {
         if (list == null) {
             super.submitList(null);
             return;
@@ -69,8 +70,10 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
         super.submitList(sort(list));
     }
 
-    private List<NotificationModel> sort(final List<NotificationModel> list) {
-        final List<NotificationModel> listCopy = new ArrayList<>(list);
+    private List<Notification> sort(final List<Notification> list) {
+        final List<Notification> listCopy = new ArrayList<>(list).stream()
+                .filter(i -> i.getType() != null)
+                .collect(Collectors.toList());
         Collections.sort(listCopy, (o1, o2) -> {
             // keep requests at top
             if (o1.getType() == o2.getType()
@@ -79,16 +82,16 @@ public final class NotificationsAdapter extends ListAdapter<NotificationModel, N
             else if (o1.getType() == NotificationType.REQUEST) return -1;
             else if (o2.getType() == NotificationType.REQUEST) return 1;
             // timestamp
-            return Long.compare(o2.getTimestamp(), o1.getTimestamp());
+            return Double.compare(o2.getArgs().getTimestamp(), o1.getArgs().getTimestamp());
         });
         return listCopy;
     }
 
     public interface OnNotificationClickListener {
-        void onNotificationClick(final NotificationModel model);
+        void onNotificationClick(final Notification model);
 
         void onProfileClick(final String username);
 
-        void onPreviewClick(final NotificationModel model);
+        void onPreviewClick(final Notification model);
     }
 }

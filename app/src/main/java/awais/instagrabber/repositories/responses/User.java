@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 public class User implements Serializable {
@@ -27,7 +28,9 @@ public class User implements Serializable {
     private final long usertagsCount;
     private final String publicEmail;
     private final HdProfilePicUrlInfo hdProfilePicUrlInfo;
-
+    private final String profileContext;
+    private final List<UserProfileContextLink> profileContextLinksWithUserIds;
+    private final String socialContext;
 
     public User(final long pk,
                 final String username,
@@ -51,7 +54,10 @@ public class User implements Serializable {
                 final String externalUrl,
                 final long usertagsCount,
                 final String publicEmail,
-                final HdProfilePicUrlInfo hdProfilePicUrlInfo) {
+                final HdProfilePicUrlInfo hdProfilePicUrlInfo,
+                final String profileContext,
+                final List<UserProfileContextLink> profileContextLinksWithUserIds,
+                final String socialContext) {
         this.pk = pk;
         this.username = username;
         this.fullName = fullName;
@@ -75,6 +81,9 @@ public class User implements Serializable {
         this.usertagsCount = usertagsCount;
         this.publicEmail = publicEmail;
         this.hdProfilePicUrlInfo = hdProfilePicUrlInfo;
+        this.profileContext = profileContext;
+        this.profileContextLinksWithUserIds = profileContextLinksWithUserIds;
+        this.socialContext = socialContext;
     }
 
     public long getPk() {
@@ -173,46 +182,17 @@ public class User implements Serializable {
         return publicEmail;
     }
 
-    // public boolean isReallyPrivate() {
-    //     final FriendshipStatus friendshipStatus = getFriendshipStatus();
-    //     !user.optBoolean("followed_by_viewer") && (id != uid && isPrivate)
-    // }
+    public String getProfileContext() {
+        return profileContext;
+    }
 
-    // public static User fromProfileModel(final ProfileModel profileModel) {
-    //     return new User(
-    //             Long.parseLong(profileModel.getId()),
-    //             profileModel.getUsername(),
-    //             profileModel.getName(),
-    //             profileModel.isPrivate(),
-    //             profileModel.getSdProfilePic(),
-    //             null,
-    //             new FriendshipStatus(
-    //                     profileModel.isFollowing(),
-    //                     false,
-    //                     profileModel.isBlocked(),
-    //                     false,
-    //                     profileModel.isPrivate(),
-    //                     false,
-    //                     profileModel.isRequested(),
-    //                     false,
-    //                     profileModel.isRestricted(),
-    //                     false),
-    //             profileModel.isVerified(),
-    //             false,
-    //             false,
-    //             false,
-    //             false,
-    //             null,
-    //             null,
-    //             profileModel.getPostCount(),
-    //             profileModel.getFollowersCount(),
-    //             profileModel.getFollowingCount(),
-    //             0,
-    //             profileModel.getBiography(),
-    //             profileModel.getUrl(),
-    //             0,
-    //             null);
-    // }
+    public String getSocialContext() {
+        return socialContext;
+    }
+
+    public List<UserProfileContextLink> getProfileContextLinks() {
+        return profileContextLinksWithUserIds;
+    }
 
 
     @Override

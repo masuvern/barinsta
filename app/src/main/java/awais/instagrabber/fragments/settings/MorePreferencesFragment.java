@@ -134,12 +134,12 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(getDivider(context));
         if (isLoggedIn) {
             screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif", 0l);
                 NavHostFragment.findNavController(this).navigate(navDirections);
                 return true;
             }));
             screen.addPreference(getPreference(R.string.action_ayml, R.drawable.ic_suggested_users, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml");
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml", 0l);
                 NavHostFragment.findNavController(this).navigate(navDirections);
                 return true;
             }));

@@ -276,7 +276,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         tagsService = TagsService.getInstance();
-        storiesService = StoriesService.getInstance();
+        storiesService = StoriesService.getInstance(null, 0L, null);
         setHasOptionsMenu(true);
     }
 

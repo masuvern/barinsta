@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import awais.instagrabber.models.FeedStoryModel;
@@ -36,20 +37,45 @@ import retrofit2.Retrofit;
 public class StoriesService extends BaseService {
     private static final String TAG = "StoriesService";
 
-    private final StoriesRepository repository;
-
     private static StoriesService instance;
 
-    private StoriesService() {
+    private final StoriesRepository repository;
+    private final String csrfToken;
+    private final long userId;
+    private final String deviceUuid;
+
+    private StoriesService(@NonNull final String csrfToken,
+                           final long userId,
+                           @NonNull final String deviceUuid) {
+        this.csrfToken = csrfToken;
+        this.userId = userId;
+        this.deviceUuid = deviceUuid;
         final Retrofit retrofit = getRetrofitBuilder()
                 .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(StoriesRepository.class);
     }
 
-    public static StoriesService getInstance() {
-        if (instance == null) {
-            instance = new StoriesService();
+    public String getCsrfToken() {
+        return csrfToken;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public String getDeviceUuid() {
+        return deviceUuid;
+    }
+
+    public static StoriesService getInstance(final String csrfToken,
+                                             final long userId,
+                                             final String deviceUuid) {
+        if (instance == null
+                || !Objects.equals(instance.getCsrfToken(), csrfToken)
+                || !Objects.equals(instance.getUserId(), userId)
+                || !Objects.equals(instance.getDeviceUuid(), deviceUuid)) {
+            instance = new StoriesService(csrfToken, userId, deviceUuid);
         }
         return instance;
     }
@@ -146,6 +172,9 @@ public class StoriesService extends BaseService {
                                                null,
                                                0,
                                                null,
+                                               null,
+                                               null,
+                                               null,
                                                null
                     );
                     final String id = node.getString("id");
@@ -204,6 +233,9 @@ public class StoriesService extends BaseService {
                                            null,
                                            null,
                                            0,
+                                           null,
+                                           null,
+                                           null,
                                            null,
                                            null
                 );
@@ -390,13 +422,11 @@ public class StoriesService extends BaseService {
                                   final String action,
                                   final String arg1,
                                   final String arg2,
-                                  final long userId,
-                                  final String csrfToken,
                                   final ServiceCallback<StoryStickerResponse> callback) {
         final Map<String, Object> form = new HashMap<>();
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("mutation_token", UUID.randomUUID().toString());
         form.put("client_context", UUID.randomUUID().toString());
         form.put("radio_type", "wifi-none");
@@ -427,39 +457,67 @@ public class StoriesService extends BaseService {
     public void respondToQuestion(final String storyId,
                                   final String stickerId,
                                   final String answer,
-                                  final long userId,
-                                  final String csrfToken,
                                   final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_question_response", "response", answer, userId, csrfToken, callback);
+        respondToSticker(storyId, stickerId, "story_question_response", "response", answer, callback);
     }
 
     // QuizAction.java
     public void respondToQuiz(final String storyId,
                               final String stickerId,
                               final int answer,
-                              final long userId,
-                              final String csrfToken,
                               final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), userId, csrfToken, callback);
+        respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), callback);
     }
 
     // VoteAction.java
     public void respondToPoll(final String storyId,
                               final String stickerId,
                               final int answer,
-                              final long userId,
-                              final String csrfToken,
                               final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
+        respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), callback);
     }
 
     public void respondToSlider(final String storyId,
                                 final String stickerId,
                                 final double answer,
-                                final long userId,
-                                final String csrfToken,
                                 final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), userId, csrfToken, callback);
+        respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), callback);
+    }
+
+    public void seen(final String storyMediaId,
+                     final long takenAt,
+                     final long seenAt,
+                     final ServiceCallback<String> callback) {
+        final Map<String, Object> form = new HashMap<>();
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", deviceUuid);
+        form.put("container_module", "feed_timeline");
+        final Map<String, Object> reelsForm = new HashMap<>();
+        reelsForm.put(storyMediaId, Collections.singletonList(takenAt + "_" + seenAt));
+        form.put("reels", reelsForm);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("reel", "1");
+        queryMap.put("live_vod", "0");
+        final Call<String> request = repository.seen(queryMap, signedForm);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call,
+                                   @NonNull final Response<String> response) {
+                if (callback != null) {
+                    callback.onSuccess(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call,
+                                  @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
     }
 
     @Nullable

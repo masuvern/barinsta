@@ -36,4 +36,8 @@ public interface StoriesRepository {
                                                 @Path("action") String action,
                                                 // story_poll_vote, story_question_response, story_slider_vote, story_quiz_answer
                                                 @FieldMap Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v2/media/seen/")
+    Call<String> seen(@QueryMap Map<String, String> queryParams, @FieldMap Map<String, String> form);
 }

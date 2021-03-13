@@ -89,6 +89,9 @@
             android:name="type"
             app:argType="string"
             app:nullable="false" />
+        <argument
+            android:name="targetId"
+            app:argType="long" />
     </action>
 
     <fragment

@@ -85,6 +85,7 @@ import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.UserProfileContextLink;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -123,6 +124,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem;
     private MenuItem restrictMenuItem;
+    private MenuItem chainingMenuItem;
     private boolean highlightsFetching;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -306,7 +308,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, userId) : null;
-        storiesService = isLoggedIn ? StoriesService.getInstance() : null;
+        storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
@@ -362,11 +364,31 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         inflater.inflate(R.menu.profile_menu, menu);
         blockMenuItem = menu.findItem(R.id.block);
         if (blockMenuItem != null) {
-            blockMenuItem.setVisible(false);
+            if (profileModel != null) {
+                blockMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+                blockMenuItem.setTitle(profileModel.getFriendshipStatus().isBlocking() ? R.string.unblock : R.string.block);
+            } else {
+                blockMenuItem.setVisible(false);
+            }
         }
         restrictMenuItem = menu.findItem(R.id.restrict);
         if (restrictMenuItem != null) {
-            restrictMenuItem.setVisible(false);
+            if (profileModel != null) {
+                restrictMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+                restrictMenuItem.setTitle(profileModel.getFriendshipStatus().isRestricted() ? R.string.unrestrict : R.string.restrict);
+            }
+            else {
+                restrictMenuItem.setVisible(false);
+            }
+        }
+        chainingMenuItem = menu.findItem(R.id.chaining);
+        if (chainingMenuItem != null) {
+            if (profileModel != null) {
+                chainingMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+            }
+            else {
+                chainingMenuItem.setVisible(false);
+            }
         }
     }
 
@@ -431,11 +453,18 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     });
             return true;
         }
+        if (item.getItemId() == R.id.chaining) {
+            if (!isLoggedIn) return false;
+            final NavDirections navDirections = ProfileFragmentDirections.actionGlobalNotificationsViewerFragment("chaining", profileModel.getPk());
+            NavHostFragment.findNavController(this).navigate(navDirections);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onRefresh() {
+        profileDetailsBinding.countsBarrier.setVisibility(View.GONE);
         profileDetailsBinding.mainProfileImage.setVisibility(View.INVISIBLE);
         fetchProfileDetails();
     }
@@ -653,6 +682,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         profileDetailsBinding.mainProfileImage.setImageURI(profileModel.getProfilePicUrl());
         profileDetailsBinding.mainProfileImage.setVisibility(View.VISIBLE);
 
+        profileDetailsBinding.countsBarrier.setVisibility(View.VISIBLE);
+
         final long followersCount = profileModel.getFollowerCount();
         final long followingCount = profileModel.getFollowingCount();
 
@@ -691,7 +722,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                  : profileModel.getFullName());
 
         final String biography = profileModel.getBiography();
-        if (!TextUtils.isEmpty(biography)) {
+        if (TextUtils.isEmpty(biography)) {
+            profileDetailsBinding.mainBiography.setVisibility(View.GONE);
+        }
+        else {
+            profileDetailsBinding.mainBiography.setVisibility(View.VISIBLE);
             profileDetailsBinding.mainBiography.setText(biography);
             profileDetailsBinding.mainBiography.addOnHashtagListener(autoLinkItem -> {
                 final NavController navController = NavHostFragment.findNavController(this);
@@ -756,6 +791,27 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             });
         }
+
+        String profileContext = profileModel.getProfileContext();
+        if (TextUtils.isEmpty(profileContext)) {
+            profileDetailsBinding.profileContext.setVisibility(View.GONE);
+        }
+        else {
+            profileDetailsBinding.profileContext.setVisibility(View.VISIBLE);
+            final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinks();
+            for (int i = 0; i < userProfileContextLinks.size(); i++) {
+                final UserProfileContextLink link = userProfileContextLinks.get(i);
+                if (link.getUsername() != null)
+                    profileContext = profileContext.substring(0, link.getStart() + i)
+                                     + "@" + profileContext.substring(link.getStart() + i);
+            }
+            profileDetailsBinding.profileContext.setText(profileContext);
+            profileDetailsBinding.profileContext.addOnMentionClickListener(autoLinkItem -> {
+                final String originalText = autoLinkItem.getOriginalText().trim();
+                navigateToProfile(originalText);
+            });
+        }
+
         final String url = profileModel.getExternalUrl();
         if (TextUtils.isEmpty(url)) {
             profileDetailsBinding.mainUrl.setVisibility(View.GONE);
@@ -830,13 +886,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (profileModel.getFriendshipStatus().isFollowing()) {
                 profileDetailsBinding.btnFollow.setText(R.string.unfollow);
-                profileDetailsBinding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_disabled_24);
+                profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
             } else if (profileModel.getFriendshipStatus().isOutgoingRequest()) {
                 profileDetailsBinding.btnFollow.setText(R.string.cancel);
-                profileDetailsBinding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_disabled_24);
+                profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
             } else {
                 profileDetailsBinding.btnFollow.setText(R.string.follow);
-                profileDetailsBinding.btnFollow.setIconResource(R.drawable.ic_outline_person_add_24);
+                profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_24);
             }
             if (restrictMenuItem != null) {
                 restrictMenuItem.setVisible(true);
@@ -854,15 +910,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     blockMenuItem.setTitle(R.string.block);
                 }
             }
-            return;
-        }
-        if (!isReallyPrivate() && restrictMenuItem != null) {
-            restrictMenuItem.setVisible(true);
-            if (profileModel.getFriendshipStatus().isRestricted()) {
-                restrictMenuItem.setTitle(R.string.unrestrict);
-            } else {
-                restrictMenuItem.setTitle(R.string.restrict);
+            if (chainingMenuItem != null && !Objects.equals(profileId, myId)) {
+                chainingMenuItem.setVisible(true);
             }
+            return;
         }
     }
 
