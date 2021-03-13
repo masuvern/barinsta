@@ -2,6 +2,9 @@ package awais.instagrabber.repositories.responses.directmessages;
 
 import androidx.annotation.NonNull;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +44,7 @@ public class DirectItem implements Cloneable {
     private Date date;
     private boolean isPending;
     private boolean showForwardAttribution;
+    private LocalDateTime localDateTime;
 
     public DirectItem(final String itemId,
                       final long userId,
@@ -212,6 +216,13 @@ public class DirectItem implements Cloneable {
             date = new Date(timestamp / 1000);
         }
         return date;
+    }
+
+    public LocalDateTime getLocalDateTime() {
+        if (localDateTime == null) {
+            localDateTime = Instant.ofEpochMilli(timestamp / 1000).atZone(ZoneId.systemDefault()).toLocalDateTime();;
+        }
+        return localDateTime;
     }
 
     public void setItemId(final String itemId) {

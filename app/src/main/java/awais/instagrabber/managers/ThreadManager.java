@@ -382,6 +382,8 @@ public final class ThreadManager {
     }
 
     public void fetchPendingRequests() {
+        final Boolean isGroup = this.isGroup.getValue();
+        if (isGroup == null || !isGroup) return;
         final Call<DirectThreadParticipantRequestsResponse> request = service.participantRequests(threadId, 1, null);
         request.enqueue(new Callback<DirectThreadParticipantRequestsResponse>() {
 

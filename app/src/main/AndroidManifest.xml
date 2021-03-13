@@ -13,7 +13,6 @@
         android:name="android.hardware.camera.any"
         android:required="false" />
 
-
     <application
         android:name=".InstaGrabberApplication"
         android:allowBackup="true"
@@ -37,8 +36,8 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-                <!--<action android:name="android.intent.action.SEARCH" />-->
-                <!--<action android:name="android.intent.action.WEB_SEARCH" />-->
+                <!-- <action android:name="android.intent.action.SEARCH" /> -->
+                <!-- <action android:name="android.intent.action.WEB_SEARCH" /> -->
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -147,6 +146,14 @@
         <service
             android:name=".services.DeleteImageIntentService"
             android:exported="false" />
+        <service
+            android:name=".services.DMSyncService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".services.DMSyncAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -156,4 +163,5 @@
             android:name="fontProviderRequests"
             android:value="Noto Color Emoji Compat" />
     </application>
+
 </manifest>

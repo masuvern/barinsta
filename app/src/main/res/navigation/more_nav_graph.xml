@@ -78,8 +78,29 @@
         android:name="awais.instagrabber.fragments.settings.SettingsPreferencesFragment"
         android:label="@string/action_settings">
         <action
-            android:id="@+id/action_settingsPreferencesFragment_to_themePreferencesFragment"
+            android:id="@+id/action_settings_to_theme"
             app:destination="@id/themePreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_locale"
+            app:destination="@id/localePreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_general"
+            app:destination="@id/generalPreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_downloads"
+            app:destination="@id/downloadsPreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_dm"
+            app:destination="@id/DMPreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_stories"
+            app:destination="@id/storiesPreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_notifications"
+            app:destination="@id/notificationsPreferencesFragment" />
+        <action
+            android:id="@+id/action_settings_to_post"
+            app:destination="@id/postPreferencesFragment" />
     </fragment>
     <fragment
         android:id="@+id/aboutFragment"
@@ -97,4 +118,32 @@
         android:id="@+id/backupPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.BackupPreferencesFragment"
         android:label="@string/backup_and_restore" />
+    <fragment
+        android:id="@+id/localePreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.LocalePreferencesFragment"
+        android:label="@string/pref_category_locale" />
+    <fragment
+        android:id="@+id/generalPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.GeneralPreferencesFragment"
+        android:label="@string/pref_category_general" />
+    <fragment
+        android:id="@+id/downloadsPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.DownloadsPreferencesFragment"
+        android:label="@string/pref_category_downloads" />
+    <fragment
+        android:id="@+id/DMPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.DMPreferencesFragment"
+        android:label="@string/pref_category_dm" />
+    <fragment
+        android:id="@+id/storiesPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.StoriesPreferencesFragment"
+        android:label="@string/pref_category_stories" />
+    <fragment
+        android:id="@+id/notificationsPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.NotificationsPreferencesFragment"
+        android:label="@string/pref_category_notifications" />
+    <fragment
+        android:id="@+id/postPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.PostPreferencesFragment"
+        android:label="PostPreferencesFragment" />
 </navigation>

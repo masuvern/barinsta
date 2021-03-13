@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.models.StoryModel;
@@ -31,8 +30,6 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awaisomereport.LogCollector;
 
 public final class ResponseBodyUtils {
@@ -1121,25 +1118,6 @@ public final class ResponseBodyUtils {
         final MediaCandidate candidate = candidates.get(0);
         if (candidate == null) return null;
         return candidate.getUrl();
-    }
-
-    public static boolean isRead(final DirectItem item,
-                                 final Map<Long, DirectThreadLastSeenAt> lastSeenAt,
-                                 final List<Long> userIdsToCheck) {
-        // Further check if directStory exists
-        // if (read && directStory != null) {
-        //     read = false;
-        // }
-        return lastSeenAt.entrySet()
-                         .stream()
-                         .filter(entry -> userIdsToCheck.contains(entry.getKey()))
-                         .anyMatch(entry -> {
-                             final String userLastSeenTsString = entry.getValue().getTimestamp();
-                             if (userLastSeenTsString == null) return false;
-                             final long userTs = Long.parseLong(userLastSeenTsString);
-                             final long itemTs = item.getTimestamp();
-                             return userTs >= itemTs;
-                         });
     }
 
     public static StoryModel parseBroadcastItem(final JSONObject data) throws JSONException {

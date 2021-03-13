@@ -323,6 +323,7 @@ public final class InboxManager {
         if (insertIndex < 0) return;
         synchronized (this.inbox) {
             final DirectInbox currentDirectInbox = getCurrentDirectInbox();
+            if (currentDirectInbox == null) return;
             final List<DirectThread> threadsCopy = new LinkedList<>(currentDirectInbox.getThreads());
             threadsCopy.add(insertIndex, thread);
             try {
@@ -338,6 +339,7 @@ public final class InboxManager {
     public void removeThread(@NonNull final String threadId) {
         synchronized (this.inbox) {
             final DirectInbox currentDirectInbox = getCurrentDirectInbox();
+            if (currentDirectInbox == null) return;
             final List<DirectThread> threadsCopy = currentDirectInbox.getThreads()
                                                                      .stream()
                                                                      .filter(t -> !t.getThreadId().equals(threadId))

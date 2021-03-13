@@ -12,26 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.common.collect.ImmutableList;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageInboxAdapter.OnItemClickListener;
 import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
-import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemReelShare;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemVisualMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
-import awais.instagrabber.repositories.responses.directmessages.RavenExpiringMediaActionSummary;
-import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.TextUtils;
 
 public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
@@ -133,216 +124,15 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
         if (directStory != null && !directStory.getItems().isEmpty()) {
             final DirectItem item = directStory.getItems().get(0);
             final MediaItemType mediaType = item.getVisualMedia().getMedia().getMediaType();
-            final String username = getUsername(thread.getUsers(), item.getUserId(), viewerId, resources);
-            final String subtitle = getMediaSpecificSubtitle(username, resources, mediaType);
+            final String username = DMUtils.getUsername(thread.getUsers(), item.getUserId(), viewerId, resources);
+            final String subtitle = DMUtils.getMediaSpecificSubtitle(username, resources, mediaType);
             binding.subtitle.setText(subtitle);
             return;
         }
         final DirectItem item = thread.getFirstDirectItem();
         if (item == null) return;
-        final long senderId = item.getUserId();
-        final DirectItemType itemType = item.getItemType();
-        String subtitle = null;
-        final String username = getUsername(thread.getUsers(), senderId, viewerId, resources);
-        String message = "";
-        if (itemType == null) {
-            message = resources.getString(R.string.dms_inbox_raven_message_unknown);
-        } else {
-            switch (itemType) {
-                case TEXT:
-                    message = item.getText();
-                    break;
-                case LIKE:
-                    message = item.getLike();
-                    break;
-                case LINK:
-                    message = item.getLink().getText();
-                    break;
-                case PLACEHOLDER:
-                    message = item.getPlaceholder().getMessage();
-                    break;
-                case MEDIA_SHARE:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_post, username != null ? username : "", item.getMediaShare().getUser().getUsername());
-                    break;
-                case ANIMATED_MEDIA:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_gif, username != null ? username : "");
-                    break;
-                case PROFILE:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_profile, username != null ? username : "", item.getProfile().getUsername());
-                    break;
-                case LOCATION:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_location, username != null ? username : "", item.getLocation().getName());
-                    break;
-                case MEDIA: {
-                    final MediaItemType mediaType = item.getMedia().getMediaType();
-                    subtitle = getMediaSpecificSubtitle(username, resources, mediaType);
-                    break;
-                }
-                case STORY_SHARE: {
-                    final String reelType = item.getStoryShare().getReelType();
-                    if (reelType == null) {
-                        subtitle = item.getStoryShare().getTitle();
-                    } else {
-                        final int format = reelType.equals("highlight_reel")
-                                ? R.string.dms_inbox_shared_highlight
-                                : R.string.dms_inbox_shared_story;
-                        subtitle = resources.getString(format, username != null ? username : "",
-                                                 item.getStoryShare().getMedia().getUser().getUsername());
-                    }
-                    break;
-                }
-                case VOICE_MEDIA:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_voice, username != null ? username : "");
-                    break;
-                case ACTION_LOG:
-                    subtitle = item.getActionLog().getDescription();
-                    break;
-                case VIDEO_CALL_EVENT:
-                    subtitle = item.getVideoCallEvent().getDescription();
-                    break;
-                case CLIP:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_clip, username != null ? username : "",
-                                                   item.getClip().getClip().getUser().getUsername());
-                    break;
-                case FELIX_SHARE:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_igtv, username != null ? username : "",
-                                                   item.getFelixShare().getVideo().getUser().getUsername());
-                    break;
-                case RAVEN_MEDIA:
-                    subtitle = getRavenMediaSubtitle(item, resources, username);
-                    break;
-                case REEL_SHARE:
-                    final DirectItemReelShare reelShare = item.getReelShare();
-                    if (reelShare == null) {
-                        subtitle = "";
-                        break;
-                    }
-                    final String reelType = reelShare.getType();
-                    switch (reelType) {
-                        case "reply":
-                            if (viewerId == item.getUserId()) {
-                                subtitle = resources.getString(R.string.dms_inbox_replied_story_outgoing, reelShare.getText());
-                            } else {
-                                subtitle = resources.getString(R.string.dms_inbox_replied_story_incoming, username != null ? username : "", reelShare.getText());
-                            }
-                            break;
-                        case "mention":
-                            if (viewerId == item.getUserId()) {
-                                // You mentioned the other person
-                                final long mentionedUserId = item.getReelShare().getMentionedUserId();
-                                final String otherUsername = getUsername(thread.getUsers(), mentionedUserId, viewerId, resources);
-                                subtitle = resources.getString(R.string.dms_inbox_mentioned_story_outgoing, otherUsername);
-                            } else {
-                                // They mentioned you
-                                subtitle = resources.getString(R.string.dms_inbox_mentioned_story_incoming, username != null ? username : "");
-                            }
-                            break;
-                        case "reaction":
-                            if (viewerId == item.getUserId()) {
-                                subtitle = resources.getString(R.string.dms_inbox_reacted_story_outgoing, reelShare.getText());
-                            } else {
-                                subtitle = resources.getString(R.string.dms_inbox_reacted_story_incoming, username != null ? username : "", reelShare.getText());
-                            }
-                            break;
-                        default:
-                            subtitle = "";
-                            break;
-                    }
-                    break;
-                default:
-                    message = resources.getString(R.string.dms_inbox_raven_message_unknown);
-            }
-        }
-        if (subtitle == null) {
-            if (thread.getUsers().size() > 1
-                    || (thread.getUsers().size() == 1 && senderId == viewerId)) {
-                subtitle = String.format("%s: %s", username != null ? username : "", message);
-            } else {
-                subtitle = message;
-            }
-        }
+        final String subtitle = DMUtils.getMessageString(thread, resources, viewerId, item);
         binding.subtitle.setText(subtitle != null ? subtitle : "");
-    }
-
-    private String getMediaSpecificSubtitle(final String username, final Resources resources, final MediaItemType mediaType) {
-        final String userSharedAnImage = resources.getString(R.string.dms_inbox_shared_image, username != null ? username : "");
-        final String userSharedAVideo = resources.getString(R.string.dms_inbox_shared_video, username != null ? username : "");
-        final String userSentAMessage = resources.getString(R.string.dms_inbox_shared_message, username != null ? username : "");
-        String subtitle;
-        switch (mediaType) {
-            case MEDIA_TYPE_IMAGE:
-                subtitle = userSharedAnImage;
-                break;
-            case MEDIA_TYPE_VIDEO:
-                subtitle = userSharedAVideo;
-                break;
-            default:
-                subtitle = userSentAMessage;
-                break;
-        }
-        return subtitle;
-    }
-
-    private String getRavenMediaSubtitle(final DirectItem item,
-                                         final Resources resources,
-                                         final String username) {
-        String subtitle = "↗ ";
-        final DirectItemVisualMedia visualMedia = item.getVisualMedia();
-        final RavenExpiringMediaActionSummary summary = visualMedia.getExpiringMediaActionSummary();
-        if (summary != null) {
-            final RavenExpiringMediaActionSummary.ActionType expiringMediaType = summary.getType();
-            int textRes = 0;
-            switch (expiringMediaType) {
-                case DELIVERED:
-                    textRes = R.string.dms_inbox_raven_media_delivered;
-                    break;
-                case SENT:
-                    textRes = R.string.dms_inbox_raven_media_sent;
-                    break;
-                case OPENED:
-                    textRes = R.string.dms_inbox_raven_media_opened;
-                    break;
-                case REPLAYED:
-                    textRes = R.string.dms_inbox_raven_media_replayed;
-                    break;
-                case SENDING:
-                    textRes = R.string.dms_inbox_raven_media_sending;
-                    break;
-                case BLOCKED:
-                    textRes = R.string.dms_inbox_raven_media_blocked;
-                    break;
-                case SUGGESTED:
-                    textRes = R.string.dms_inbox_raven_media_suggested;
-                    break;
-                case SCREENSHOT:
-                    textRes = R.string.dms_inbox_raven_media_screenshot;
-                    break;
-                case CANNOT_DELIVER:
-                    textRes = R.string.dms_inbox_raven_media_cant_deliver;
-                    break;
-            }
-            if (textRes > 0) {
-                subtitle += itemView.getContext().getString(textRes);
-            }
-            return subtitle;
-        }
-        final MediaItemType mediaType = visualMedia.getMedia().getMediaType();
-        subtitle = getMediaSpecificSubtitle(username, resources, mediaType);
-        return subtitle;
-    }
-
-    private String getUsername(final List<User> users,
-                               final long userId,
-                               final long viewerId,
-                               final Resources resources) {
-        if (userId == viewerId) {
-            return resources.getString(R.string.you);
-        }
-        final Optional<User> senderOptional = users.stream()
-                                                   .filter(Objects::nonNull)
-                                                   .filter(user -> user.getPk() == userId)
-                                                   .findFirst();
-        return senderOptional.map(User::getUsername).orElse(null);
     }
 
     private void setDateTime(@NonNull final DirectItem item) {
@@ -352,19 +142,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setReadState(@NonNull final DirectThread thread) {
-        final boolean read;
-        if (thread.getDirectStory() != null) {
-            read = false;
-        } else {
-            final DirectItem item = thread.getFirstDirectItem();
-            if (item.getUserId() == thread.getViewerId()) {
-                // if last item was sent by user, then it is read (even though we have auto read unchecked?)
-                read = true;
-            } else {
-                final Map<Long, DirectThreadLastSeenAt> lastSeenAtMap = thread.getLastSeenAt();
-                read = ResponseBodyUtils.isRead(item, lastSeenAtMap, Collections.singletonList(thread.getViewerId()));
-            }
-        }
+        final boolean read = DMUtils.isRead(thread);
         binding.unread.setVisibility(read ? View.GONE : View.VISIBLE);
         binding.threadTitle.setTypeface(binding.threadTitle.getTypeface(), read ? Typeface.NORMAL : Typeface.BOLD);
         binding.subtitle.setTypeface(binding.subtitle.getTypeface(), read ? Typeface.NORMAL : Typeface.BOLD);
