@@ -81,6 +81,7 @@ import awais.instagrabber.customviews.helpers.SwipeAndRestoreItemTouchHelperCall
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.DirectItemReactionDialogFragment;
+import awais.instagrabber.dialogs.GifPickerBottomDialogFragment;
 import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.UserSearchFragment;
@@ -737,6 +738,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
     private void hideInput() {
         binding.emojiToggle.setVisibility(View.GONE);
+        binding.gif.setVisibility(View.GONE);
         binding.camera.setVisibility(View.GONE);
         binding.gallery.setVisibility(View.GONE);
         binding.input.setVisibility(View.GONE);
@@ -750,6 +752,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
     private void showInput() {
         binding.emojiToggle.setVisibility(View.VISIBLE);
+        binding.gif.setVisibility(View.VISIBLE);
         binding.camera.setVisibility(View.VISIBLE);
         binding.gallery.setVisibility(View.VISIBLE);
         binding.input.setVisibility(View.VISIBLE);
@@ -788,16 +791,18 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 binding.send.setListenForRecord(true);
                 startIconAnimation();
             }
-            binding.gallery.setVisibility(View.VISIBLE);
+            binding.gif.setVisibility(View.VISIBLE);
             binding.camera.setVisibility(View.VISIBLE);
+            binding.gallery.setVisibility(View.VISIBLE);
             return;
         }
         if (binding.send.isListenForRecord()) {
             binding.send.setListenForRecord(false);
             startIconAnimation();
         }
-        binding.gallery.setVisibility(View.GONE);
+        binding.gif.setVisibility(View.GONE);
         binding.camera.setVisibility(View.GONE);
+        binding.gallery.setVisibility(View.GONE);
     }
 
     private String getDirectItemPreviewText(final DirectItem item) {
@@ -937,8 +942,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             public void onStart() {
                 isRecording = true;
                 binding.input.setHint(null);
-                binding.gallery.setVisibility(View.GONE);
+                binding.gif.setVisibility(View.GONE);
                 binding.camera.setVisibility(View.GONE);
+                binding.gallery.setVisibility(View.GONE);
                 if (PermissionUtils.hasAudioRecordPerms(context)) {
                     viewModel.startRecording();
                     return;
@@ -958,8 +964,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             public void onFinish(final long recordTime) {
                 Log.d(TAG, "onFinish");
                 binding.input.setHint("Message");
-                binding.gallery.setVisibility(View.VISIBLE);
+                binding.gif.setVisibility(View.VISIBLE);
                 binding.camera.setVisibility(View.VISIBLE);
+                binding.gallery.setVisibility(View.VISIBLE);
                 viewModel.stopRecording(false);
                 isRecording = false;
             }
@@ -971,16 +978,18 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 if (PermissionUtils.hasAudioRecordPerms(context)) {
                     tooltip.show(binding.send);
                 }
-                binding.gallery.setVisibility(View.VISIBLE);
+                binding.gif.setVisibility(View.VISIBLE);
                 binding.camera.setVisibility(View.VISIBLE);
+                binding.gallery.setVisibility(View.VISIBLE);
                 viewModel.stopRecording(true);
                 isRecording = false;
             }
         });
         binding.recordView.setOnBasketAnimationEndListener(() -> {
             binding.input.setHint(R.string.dms_thread_message_hint);
-            binding.gallery.setVisibility(View.VISIBLE);
+            binding.gif.setVisibility(View.VISIBLE);
             binding.camera.setVisibility(View.VISIBLE);
+            binding.gallery.setVisibility(View.VISIBLE);
         });
         binding.input.addTextChangedListener(new TextWatcherAdapter() {
             // int prevLength = 0;
@@ -1055,6 +1064,16 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 }
             });
             mediaPicker.show(getChildFragmentManager(), "MediaPicker");
+            hideKeyboard(true);
+        });
+        binding.gif.setOnClickListener(v -> {
+            final GifPickerBottomDialogFragment gifPicker = GifPickerBottomDialogFragment.newInstance();
+            gifPicker.setOnSelectListener(giphyGif -> {
+                gifPicker.dismiss();
+                if (giphyGif == null) return;
+                handleSentMessage(viewModel.sendAnimatedMedia(giphyGif));
+            });
+            gifPicker.show(getChildFragmentManager(), "GifPicker");
             hideKeyboard(true);
         });
         binding.camera.setOnClickListener(v -> {

@@ -8,13 +8,16 @@ import java.util.UUID;
 
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.AnimatedMediaImages;
 import awais.instagrabber.repositories.responses.Audio;
 import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVoiceMedia;
+import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 
 public final class DirectItemFactory {
 
@@ -212,5 +215,46 @@ public final class DirectItemFactory {
                 null,
                 0,
                 false);
+    }
+
+    public static DirectItem createAnimatedMedia(final long userId,
+                                                 final String clientContext,
+                                                 final GiphyGif giphyGif) {
+        final AnimatedMediaImages animatedImages = new AnimatedMediaImages(giphyGif.getImages().getFixedHeight());
+        final DirectItemAnimatedMedia animateMedia = new DirectItemAnimatedMedia(
+                giphyGif.getId(),
+                animatedImages,
+                false,
+                giphyGif.isSticker()
+        );
+        return new DirectItem(
+                UUID.randomUUID().toString(),
+                userId,
+                System.currentTimeMillis() * 1000,
+                DirectItemType.ANIMATED_MEDIA,
+                null,
+                null,
+                null,
+                clientContext,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                animateMedia,
+                null,
+                null,
+                null,
+                null,
+                0,
+                false
+        );
     }
 }

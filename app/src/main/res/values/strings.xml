@@ -185,6 +185,7 @@
     <string name="dms_inbox_shared_video">%s shared a video</string>
     <string name="dms_inbox_shared_message">%s sent a message</string>
     <string name="dms_inbox_shared_gif">%s shared a gif</string>
+    <string name="dms_inbox_shared_sticker">%s shared a sticker</string>
     <string name="dms_inbox_shared_profile">%s shared a profile: @%s</string>
     <string name="dms_inbox_shared_location">%s shared a location: %s</string>
     <string name="dms_inbox_shared_highlight">%s shared a story highlight by @%s</string>
@@ -490,4 +491,5 @@
     <string name="auto_refresh_every">Auto refresh every</string>
     <string name="secs">secs</string>
     <string name="mins">mins</string>
+    <string name="search_giphy">Search GIPHY</string>
 </resources>

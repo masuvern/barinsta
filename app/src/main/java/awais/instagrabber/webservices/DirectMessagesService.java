@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.repositories.DirectMessagesRepository;
+import awais.instagrabber.repositories.requests.directmessages.AnimatedMediaBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.requests.directmessages.LinkBroadcastOptions;
@@ -34,6 +35,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThreadDeta
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
+import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
@@ -182,6 +184,11 @@ public class DirectMessagesService extends BaseService {
         return broadcast(new ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete));
     }
 
+    public Call<DirectThreadBroadcastResponse> broadcastAnimatedMedia(final String clientContext,
+                                                                      final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                      final GiphyGif giphyGif) {
+        return broadcast(new AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif));
+    }
 
     private Call<DirectThreadBroadcastResponse> broadcast(@NonNull final BroadcastOptions broadcastOptions) {
         if (TextUtils.isEmpty(broadcastOptions.getClientContext())) {

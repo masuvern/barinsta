@@ -26,6 +26,7 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
+import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DirectoryUtils;
@@ -217,6 +218,10 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     public LiveData<Resource<Object>> unsend(final DirectItem item) {
         return threadManager.unsend(item);
+    }
+
+    public LiveData<Resource<Object>> sendAnimatedMedia(@NonNull final GiphyGif giphyGif) {
+        return threadManager.sendAnimatedMedia(giphyGif);
     }
 
     public User getCurrentUser() {

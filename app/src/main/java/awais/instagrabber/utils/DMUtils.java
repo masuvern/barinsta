@@ -15,6 +15,7 @@ import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReelShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVisualMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
@@ -84,11 +85,16 @@ public final class DMUtils {
                     message = item.getPlaceholder().getMessage();
                     break;
                 case MEDIA_SHARE:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_post, username != null ? username : "",
-                                                   item.getMediaShare().getUser().getUsername());
+                    final User mediaShareUser = item.getMediaShare().getUser();
+                    subtitle = resources.getString(R.string.dms_inbox_shared_post,
+                                                   username != null ? username : "",
+                                                   mediaShareUser == null ? "" : mediaShareUser.getUsername());
                     break;
                 case ANIMATED_MEDIA:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_gif, username != null ? username : "");
+                    final DirectItemAnimatedMedia animatedMedia = item.getAnimatedMedia();
+                    subtitle = resources.getString(animatedMedia.isSticker() ? R.string.dms_inbox_shared_sticker
+                                                                             : R.string.dms_inbox_shared_gif,
+                                                   username != null ? username : "");
                     break;
                 case PROFILE:
                     subtitle = resources
@@ -111,8 +117,10 @@ public final class DMUtils {
                         final int format = reelType.equals("highlight_reel")
                                            ? R.string.dms_inbox_shared_highlight
                                            : R.string.dms_inbox_shared_story;
-                        subtitle = resources.getString(format, username != null ? username : "",
-                                                       item.getStoryShare().getMedia().getUser().getUsername());
+                        final User storyShareMediaUser = item.getStoryShare().getMedia().getUser();
+                        subtitle = resources.getString(format,
+                                                       username != null ? username : "",
+                                                       storyShareMediaUser == null ? "" : storyShareMediaUser.getUsername());
                     }
                     break;
                 }
@@ -126,12 +134,16 @@ public final class DMUtils {
                     subtitle = item.getVideoCallEvent().getDescription();
                     break;
                 case CLIP:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_clip, username != null ? username : "",
-                                                   item.getClip().getClip().getUser().getUsername());
+                    final User clipUser = item.getClip().getClip().getUser();
+                    subtitle = resources.getString(R.string.dms_inbox_shared_clip,
+                                                   username != null ? username : "",
+                                                   clipUser == null ? "" : clipUser.getUsername());
                     break;
                 case FELIX_SHARE:
-                    subtitle = resources.getString(R.string.dms_inbox_shared_igtv, username != null ? username : "",
-                                                   item.getFelixShare().getVideo().getUser().getUsername());
+                    final User felixShareVideoUser = item.getFelixShare().getVideo().getUser();
+                    subtitle = resources.getString(R.string.dms_inbox_shared_igtv,
+                                                   username != null ? username : "",
+                                                   felixShareVideoUser == null ? "" : felixShareVideoUser.getUsername());
                     break;
                 case RAVEN_MEDIA:
                     subtitle = getRavenMediaSubtitle(item, resources, username);

@@ -53,6 +53,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThreadDeta
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
+import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 import awais.instagrabber.utils.BitmapUtils;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -638,6 +639,24 @@ public final class ThreadManager {
         if (mimeType.startsWith("video")) {
             sendVideo(data, uri);
         }
+        return data;
+    }
+
+    public LiveData<Resource<Object>> sendAnimatedMedia(@NonNull final GiphyGif giphyGif) {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        final Long userId = getCurrentUserId(data);
+        if (userId == null) return data;
+        final String clientContext = UUID.randomUUID().toString();
+        final DirectItem directItem = DirectItemFactory.createAnimatedMedia(userId, clientContext, giphyGif);
+        directItem.setPending(true);
+        addItems(0, Collections.singletonList(directItem));
+        data.postValue(Resource.loading(directItem));
+        final Call<DirectThreadBroadcastResponse> request = service.broadcastAnimatedMedia(
+                clientContext,
+                threadIdOrUserIds,
+                giphyGif
+        );
+        enqueueRequest(request, data, directItem);
         return data;
     }
 
