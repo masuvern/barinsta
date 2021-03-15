@@ -883,74 +883,71 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> acceptRequest() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.success(new Object()));
-        // final Call<String> request = service.approveRequest(threadId);
-        // request.enqueue(new Callback<String>() {
-        //     @Override
-        //     public void onResponse(@NonNull final Call<String> call,
-        //                            @NonNull final Response<String> response) {
-        //         if (!response.isSuccessful()) {
-        //             try {
-        //                 final String string = response.errorBody() != null ? response.errorBody().string() : "";
-        //                 final String msg = String.format(Locale.US,
-        //                                                  "onResponse: url: %s, responseCode: %d, errorBody: %s",
-        //                                                  call.request().url().toString(),
-        //                                                  response.code(),
-        //                                                  string);
-        //                 Log.e(TAG, msg);
-        //                 data.postValue(Resource.error(msg, null));
-        //                 return;
-        //             } catch (IOException e) {
-        //                 Log.e(TAG, "onResponse: ", e);
-        //             }
-        //             return;
-        //         }
-        //         data.postValue(Resource.success(new Object()));
-        //         // refreshChats();
-        //     }
-        //
-        //     @Override
-        //     public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-        //         Log.e(TAG, "onFailure: ", t);
-        //         data.postValue(Resource.error(t.getMessage(), null));
-        //     }
-        // });
+        final Call<String> request = service.approveRequest(threadId);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call,
+                                   @NonNull final Response<String> response) {
+                if (!response.isSuccessful()) {
+                    try {
+                        final String string = response.errorBody() != null ? response.errorBody().string() : "";
+                        final String msg = String.format(Locale.US,
+                                                         "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                                         call.request().url().toString(),
+                                                         response.code(),
+                                                         string);
+                        Log.e(TAG, msg);
+                        data.postValue(Resource.error(msg, null));
+                        return;
+                    } catch (IOException e) {
+                        Log.e(TAG, "onResponse: ", e);
+                    }
+                    return;
+                }
+                data.postValue(Resource.success(new Object()));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
         return data;
     }
 
     public LiveData<Resource<Object>> declineRequest() {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.success(new Object()));
-        // final Call<String> request = service.declineRequest(threadId);
-        // request.enqueue(new Callback<String>() {
-        //     @Override
-        //     public void onResponse(@NonNull final Call<String> call,
-        //                            @NonNull final Response<String> response) {
-        //         if (!response.isSuccessful()) {
-        //             try {
-        //                 final String string = response.errorBody() != null ? response.errorBody().string() : "";
-        //                 final String msg = String.format(Locale.US,
-        //                                                  "onResponse: url: %s, responseCode: %d, errorBody: %s",
-        //                                                  call.request().url().toString(),
-        //                                                  response.code(),
-        //                                                  string);
-        //                 Log.e(TAG, msg);
-        //                 data.postValue(Resource.error(msg, null));
-        //                 return;
-        //             } catch (IOException e) {
-        //                 Log.e(TAG, "onResponse: ", e);
-        //             }
-        //             return;
-        //         }
-        //         data.postValue(Resource.success(new Object()));
-        //     }
-        //
-        //     @Override
-        //     public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-        //         Log.e(TAG, "onFailure: ", t);
-        //         data.postValue(Resource.error(t.getMessage(), null));
-        //     }
-        // });
+        final Call<String> request = service.declineRequest(threadId);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call,
+                                   @NonNull final Response<String> response) {
+                if (!response.isSuccessful()) {
+                    try {
+                        final String string = response.errorBody() != null ? response.errorBody().string() : "";
+                        final String msg = String.format(Locale.US,
+                                                         "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                                         call.request().url().toString(),
+                                                         response.code(),
+                                                         string);
+                        Log.e(TAG, msg);
+                        data.postValue(Resource.error(msg, null));
+                        return;
+                    } catch (IOException e) {
+                        Log.e(TAG, "onResponse: ", e);
+                    }
+                    return;
+                }
+                data.postValue(Resource.success(new Object()));
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
+            }
+        });
         return data;
     }
 
