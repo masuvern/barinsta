@@ -31,7 +31,7 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
         super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
         this.feedItemCallback = feedItemCallback;
-        binding.itemFeedBottom.tvVideoViews.setVisibility(View.GONE);
+        binding.itemFeedBottom.btnViews.setVisibility(View.GONE);
         // binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
         binding.imageViewer.setAllowTouchInterceptionWhileZoomed(false);
         final GenericDraweeHierarchy hierarchy = new GenericDraweeHierarchyBuilder(itemView.getContext().getResources())
