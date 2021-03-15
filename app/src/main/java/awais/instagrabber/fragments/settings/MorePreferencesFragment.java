@@ -45,10 +45,9 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class MorePreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = "MorePreferencesFragment";
 
-    private final AccountRepository accountRepository;
+    private AccountRepository accountRepository;
 
     public MorePreferencesFragment() {
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
     }
 
     @Override
@@ -58,6 +57,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
         if (context == null) return;
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);

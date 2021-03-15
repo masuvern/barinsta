@@ -158,6 +158,38 @@ public class FriendshipService extends BaseService {
         });
     }
 
+    public void changeMute(final boolean unmute,
+                           final long targetUserId,
+                           final boolean story, // true for story, false for posts
+                           final ServiceCallback<FriendshipChangeResponse> callback) {
+        final Map<String, String> form = new HashMap<>(4);
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", String.valueOf(userId));
+        form.put("_uuid", deviceUuid);
+        form.put(story ? "target_reel_author_id" : "target_posts_author_id", String.valueOf(targetUserId));
+        final Call<FriendshipChangeResponse> request = repository.changeMute(unmute ?
+                                                                                "unmute_posts_or_story_from_follow" :
+                                                                                "mute_posts_or_story_from_follow",
+                                                                             form);
+        request.enqueue(new Callback<FriendshipChangeResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<FriendshipChangeResponse> call,
+                                   @NonNull final Response<FriendshipChangeResponse> response) {
+                if (callback != null) {
+                    callback.onSuccess(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<FriendshipChangeResponse> call,
+                                  @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
     public void getList(final boolean follower,
                         final long targetUserId,
                         final String maxId,

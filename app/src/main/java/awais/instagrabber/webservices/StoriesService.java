@@ -137,6 +137,7 @@ public class StoriesService extends BaseService {
             final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
                 final JSONObject node = feedStoriesReel.getJSONObject(i);
+                if (node.optBoolean("hide_from_feed_unit")) continue;
                 final JSONObject userJson = node.getJSONObject(node.has("user") ? "user" : "owner");
                 try {
                     final User user = new User(userJson.getLong("pk"),

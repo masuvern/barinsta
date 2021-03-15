@@ -29,4 +29,9 @@ public interface FriendshipRepository {
     Call<String> getList(@Path("userId") long userId,
                          @Path("type") String type, // following or followers
                          @QueryMap(encoded = true) Map<String, String> queryParams);
+
+    @FormUrlEncoded
+    @POST("/api/v1/friendships/{action}/")
+    Call<FriendshipChangeResponse> changeMute(@Path("action") String action,
+                                              @FieldMap Map<String, String> form);
 }
