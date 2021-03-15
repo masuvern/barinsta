@@ -148,5 +148,5 @@
     <fragment
         android:id="@+id/postPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.PostPreferencesFragment"
-        android:label="PostPreferencesFragment" />
+        android:label="@string/pref_category_post" />
 </navigation>
