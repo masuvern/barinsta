@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Αναίρεση \'Μου Αρέσει\' από το μήνυμα</string>
     <string name="dms_inbox_unsend">Κατάργηση αποστολής μηνύματος</string>
     <string name="dms_inbox_author">Προβολή προφίλ του συγγραφέα</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s κοινοποίησε μια δημοσίευση από @%s</string>
     <string name="dms_inbox_shared_image">%s κοινοποίησε μια εικόνα</string>
     <string name="dms_inbox_shared_video">%s κοινοποίησε ένα βίντεο</string>
