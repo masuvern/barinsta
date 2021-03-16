@@ -253,7 +253,6 @@
     <string name="liked_notif">Του άρεσε η δημοσίευση σας</string>
     <string name="comment_notif">Σχολιάστηκε στην δημοσίευση σας:</string>
     <string name="follow_notif">Ξεκίνησε να σας ακολουθεί</string>
-    <string name="mention_notif">Σας ανέφερε:</string>
     <string name="tagged_notif">Πρόσθεσε την ετικέτα σας σε μία δημοσίευση</string>
     <string name="request_notif">Έκανε αίτημα να σας ακολουθήσει</string>
     <string name="request_approve">Έγκριση αιτήματος</string>
@@ -277,6 +276,8 @@
     <string name="activity_count_commentlikes">%d επισημάνσεις \'Μου Αρέσει\' σε σχόλια</string>
     <string name="activity_count_usertags">%d ετικέτες χρήστη</string>
     <string name="activity_count_likes">%d επισημάνσεις \"Μου αρέσει\"</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Αποσυνδεθήκατε πριν κάνετε κλικ σε αυτή την ειδοποίηση;!</string>
     <string name="feed">Ροή</string>
     <string name="profile">Προφίλ</string>
