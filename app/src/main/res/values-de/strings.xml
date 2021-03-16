@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Nachricht gefällt mir nicht mehr</string>
     <string name="dms_inbox_unsend">Nachricht zurückrufen</string>
     <string name="dms_inbox_author">Absender Profil ansehen</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s hat einen Beitrag von @%s geteilt</string>
     <string name="dms_inbox_shared_image">%s hat ein Bild geteilt</string>
     <string name="dms_inbox_shared_video">%s hat ein Video geteilt</string>
