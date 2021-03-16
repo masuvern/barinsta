@@ -182,6 +182,7 @@
     <string name="dms_inbox_shared_video">%s a partagé une vidéo</string>
     <string name="dms_inbox_shared_message">%s a envoyé un message</string>
     <string name="dms_inbox_shared_gif">%s a partagé un gif</string>
+    <string name="dms_inbox_shared_sticker">%s shared a sticker</string>
     <string name="dms_inbox_shared_profile">%s a partagé un profil : @%s</string>
     <string name="dms_inbox_shared_location">%s a partagé une position : %s</string>
     <string name="dms_inbox_shared_highlight">%s a partagé une story mise en avant de @%s</string>
@@ -465,4 +466,16 @@
     <string name="decline">Refuser</string>
     <string name="accept">Accepter</string>
     <string name="you">Vous</string>
+    <string name="no_pending_requests">No pending requests</string>
+    <string name="checking_for_new_messages">Checking for new messages</string>
+    <string name="pref_category_stories">Stories</string>
+    <string name="pref_category_dm">DM</string>
+    <string name="pref_category_notifications">Notifications</string>
+    <string name="pref_category_post">Post</string>
+    <string name="enable_dm_notifications">Enable DM notifications</string>
+    <string name="enable_dm_auto_refesh">Auto refresh messages</string>
+    <string name="auto_refresh_every">Auto refresh every</string>
+    <string name="secs">secs</string>
+    <string name="mins">mins</string>
+    <string name="search_giphy">Search GIPHY</string>
 </resources>
