@@ -249,7 +249,6 @@
     <string name="liked_notif">對您的貼文說讚</string>
     <string name="comment_notif">已回應你的貼文：</string>
     <string name="follow_notif">已開始追蹤您</string>
-    <string name="mention_notif">提及了您：</string>
     <string name="tagged_notif">在貼文中標記了你</string>
     <string name="request_notif">追蹤要求</string>
     <string name="request_approve">接受要求</string>
@@ -273,6 +272,8 @@
     <string name="activity_count_commentlikes">%d 個評論的讚</string>
     <string name="activity_count_usertags">%d 個用戶標記</string>
     <string name="activity_count_likes">%d 個讚</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">你怎麼在點擊此通知前登出的？！</string>
     <string name="feed">貼文</string>
     <string name="profile">檔案</string>
