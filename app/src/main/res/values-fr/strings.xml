@@ -253,7 +253,6 @@
     <string name="liked_notif">A aimé votre publication</string>
     <string name="comment_notif">A commenté sur ta publication :</string>
     <string name="follow_notif">A commencé à vous suivre</string>
-    <string name="mention_notif">Vous a mentionné :</string>
     <string name="tagged_notif">T\'a cité dans une publication</string>
     <string name="request_notif">A demandé à vous suivre</string>
     <string name="request_approve">Approuver la demande</string>
@@ -277,6 +276,8 @@
     <string name="activity_count_commentlikes">%d j\'aime(s) sur le commentaire</string>
     <string name="activity_count_usertags">%d usertags</string>
     <string name="activity_count_likes">%d j\'aime(s)</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Vous vous êtes déconnecté avant de cliquer sur cette notification?!</string>
     <string name="feed">Feed</string>
     <string name="profile">Profil</string>
