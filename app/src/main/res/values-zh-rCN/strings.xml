@@ -173,6 +173,7 @@
     <string name="dms_inbox_unlike">取消点赞</string>
     <string name="dms_inbox_unsend">撤回消息</string>
     <string name="dms_inbox_author">查看作者资料</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s 分享了 @%s 的帖子</string>
     <string name="dms_inbox_shared_image">%s 分享了一张图片</string>
     <string name="dms_inbox_shared_video">%s 分享了一个视频</string>
