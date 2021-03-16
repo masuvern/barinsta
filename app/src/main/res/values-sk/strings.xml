@@ -261,7 +261,6 @@
     <string name="liked_notif">Označil/a že sa mu páči váš príspevok</string>
     <string name="comment_notif">Komentoval tvoj príspevok:</string>
     <string name="follow_notif">Ťa začal sledovať</string>
-    <string name="mention_notif">Spomenul ťa:</string>
     <string name="tagged_notif">Označil ťa na príspevku</string>
     <string name="request_notif">Chce ťa začať sledovať</string>
     <string name="request_approve">Schváliť žiadosť</string>
@@ -285,6 +284,8 @@
     <string name="activity_count_commentlikes">%d komentárov ktoré sa niekomu páčia</string>
     <string name="activity_count_usertags">%d označení</string>
     <string name="activity_count_likes">%d označení \"páči sa mi to\"</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Odhlásili ste sa pred kliknutím tejto notifikácie?</string>
     <string name="feed">Novinky</string>
     <string name="profile">Profil</string>
