@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Treure el \"m\'agrada\" del missatge</string>
     <string name="dms_inbox_unsend">Anul·lar l\'enviament del missatge</string>
     <string name="dms_inbox_author">Veure el perfil de l\'autor</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s ha compartit una publicació de @%s</string>
     <string name="dms_inbox_shared_image">%s ha compartit una imatge</string>
     <string name="dms_inbox_shared_video">%s ha compartit un vídeo</string>
