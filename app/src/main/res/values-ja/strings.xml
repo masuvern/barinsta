@@ -249,7 +249,6 @@
     <string name="liked_notif">あなたの投稿にいいね！しました</string>
     <string name="comment_notif">あなたの投稿にコメント:</string>
     <string name="follow_notif">あなたをフォローしました</string>
-    <string name="mention_notif">あなたへのメンション:</string>
     <string name="tagged_notif">投稿にあなたをタグ付けしました。</string>
     <string name="request_notif">フォローをリクエストしました</string>
     <string name="request_approve">リクエストを承認</string>
@@ -273,6 +272,8 @@
     <string name="activity_count_commentlikes">%d 個のコメントへのいいね！</string>
     <string name="activity_count_usertags">%d 個のタグ付け</string>
     <string name="activity_count_likes">%d いいね！</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">この通知をクリックする前にログアウトしましたか？</string>
     <string name="feed">フィード</string>
     <string name="profile">ユーザー</string>
