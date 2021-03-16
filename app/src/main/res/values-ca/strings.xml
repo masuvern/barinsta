@@ -253,7 +253,6 @@
     <string name="liked_notif">Li ha agradat la teva publicació</string>
     <string name="comment_notif">Ha comentat en la teva publciació:</string>
     <string name="follow_notif">Ha començat a seguir-te</string>
-    <string name="mention_notif">T\'ha mencionat:</string>
     <string name="tagged_notif">T\'ha etiquetat en una publicació</string>
     <string name="request_notif">Ha sol·licitat seguir-te</string>
     <string name="request_approve">Aprovar la sol·licitud</string>
@@ -277,6 +276,8 @@
     <string name="activity_count_commentlikes">%d m\'agrades al comentari</string>
     <string name="activity_count_usertags">%d tags d\'usuari</string>
     <string name="activity_count_likes">%d m\'agrades</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Has tancat la sessió abans de fer clic a aquesta notificació?!</string>
     <string name="feed">Fil</string>
     <string name="profile">Perfil</string>
