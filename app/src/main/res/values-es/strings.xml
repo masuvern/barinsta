@@ -276,8 +276,8 @@
     <string name="activity_count_commentlikes">%d me gustas en comentarios</string>
     <string name="activity_count_usertags">%d etiquetas</string>
     <string name="activity_count_likes">%d me gustas</string>
-    <string name="activity_count_poy">%d photos of you</string>
-    <string name="activity_count_requests">%d follow requests</string>
+    <string name="activity_count_poy">%d fotos de ti</string>
+    <string name="activity_count_requests">%d solicitudes de seguimiento</string>
     <string name="activity_notloggedin">¡¿Has cerrado sesión antes de hacer clic en esta notificación?!</string>
     <string name="feed">Muro</string>
     <string name="profile">Perfil</string>
