@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Descurtir mensagem</string>
     <string name="dms_inbox_unsend">Cancelar envio</string>
     <string name="dms_inbox_author">Ver perfil do autor</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s compartilhou uma publicação de @%s</string>
     <string name="dms_inbox_shared_image">%s compartilhou uma imagem</string>
     <string name="dms_inbox_shared_video">%s compartilhou um vídeo</string>
