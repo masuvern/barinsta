@@ -416,6 +416,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         // binding.locationBiography.setCaptionIsExpandable(true);
         // binding.locationBiography.setCaptionIsExpanded(true);
 
+        final Context context = getContext();
+        if (context == null) return;
         if (TextUtils.isEmpty(biography)) {
             locationDetailsBinding.locationBiography.setVisibility(View.GONE);
         } else {
@@ -432,13 +434,13 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 final String originalText = autoLinkItem.getOriginalText().trim();
                 navigateToProfile(originalText);
             });
-            locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
+            locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(context,
                                                                                                                     autoLinkItem.getOriginalText()
                                                                                                                                 .trim()));
             locationDetailsBinding.locationBiography
-                    .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
+                    .addOnURLClickListener(autoLinkItem -> Utils.openURL(context, autoLinkItem.getOriginalText().trim()));
             locationDetailsBinding.locationBiography.setOnLongClickListener(v -> {
-                Utils.copyText(getContext(), biography);
+                Utils.copyText(context, biography);
                 return true;
             });
         }
@@ -465,7 +467,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             locationDetailsBinding.locationUrl.setVisibility(View.VISIBLE);
             locationDetailsBinding.locationUrl.setText(TextUtils.getSpannableUrl(url));
         }
-        final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(getContext());
+        final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
         favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
