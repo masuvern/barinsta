@@ -8,6 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_NOTIFICATIONS;
 import static awais.instagrabber.utils.Constants.APP_LANGUAGE;
 import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.APP_UA;
@@ -130,14 +134,14 @@ public final class SettingsHelper {
                     CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME,
                     PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT,
                     PREF_LOCATION_POSTS_LAYOUT, PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT,
-                    STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS})
+                    STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
                        SHOW_CAPTIONS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, CHECK_ACTIVITY,
-                       CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED})
+                       CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED, PREF_ENABLE_DM_NOTIFICATIONS, PREF_ENABLE_DM_AUTO_REFRESH})
     public @interface BooleanSettings {}
 
-    @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE})
+    @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER})
     public @interface IntegerSettings {}
 }

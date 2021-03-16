@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.utils.Utils;
@@ -271,5 +272,53 @@ public class Media implements Serializable {
     public void setPostCaption(final String caption) {
         final Caption caption1 = getCaption();
         caption1.setText(caption);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Media media = (Media) o;
+        return takenAt == media.takenAt &&
+                canViewerReshare == media.canViewerReshare &&
+                commentLikesEnabled == media.commentLikesEnabled &&
+                commentsDisabled == media.commentsDisabled &&
+                nextMaxId == media.nextMaxId &&
+                commentCount == media.commentCount &&
+                originalWidth == media.originalWidth &&
+                originalHeight == media.originalHeight &&
+                likeCount == media.likeCount &&
+                hasLiked == media.hasLiked &&
+                isReelMedia == media.isReelMedia &&
+                hasAudio == media.hasAudio &&
+                Double.compare(media.videoDuration, videoDuration) == 0 &&
+                viewCount == media.viewCount &&
+                canViewerSave == media.canViewerSave &&
+                isSidecarChild == media.isSidecarChild &&
+                hasViewerSaved == media.hasViewerSaved &&
+                Objects.equals(pk, media.pk) &&
+                Objects.equals(id, media.id) &&
+                Objects.equals(code, media.code) &&
+                Objects.equals(user, media.user) &&
+                mediaType == media.mediaType &&
+                Objects.equals(imageVersions2, media.imageVersions2) &&
+                Objects.equals(videoVersions, media.videoVersions) &&
+                Objects.equals(caption, media.caption) &&
+                Objects.equals(audio, media.audio) &&
+                Objects.equals(title, media.title) &&
+                Objects.equals(location, media.location) &&
+                Objects.equals(usertags, media.usertags) &&
+                Objects.equals(carouselMedia, media.carouselMedia) &&
+                Objects.equals(injected, media.injected) &&
+                Objects.equals(endOfFeedDemarcator, media.endOfFeedDemarcator) &&
+                Objects.equals(dateString, media.dateString);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pk, id, code, takenAt, user, mediaType, canViewerReshare, commentLikesEnabled, commentsDisabled, nextMaxId, commentCount,
+                            imageVersions2, originalWidth, originalHeight, likeCount, hasLiked, isReelMedia, videoVersions, hasAudio, videoDuration,
+                            viewCount, caption, canViewerSave, audio, title, location, usertags, carouselMedia, isSidecarChild, hasViewerSaved,
+                            injected, endOfFeedDemarcator, dateString);
     }
 }

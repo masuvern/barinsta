@@ -2,6 +2,8 @@ package awais.instagrabber.repositories.responses.directmessages;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Objects;
+
 public final class RavenExpiringMediaActionSummary {
     private final ActionType type;
     private final long timestamp;
@@ -23,6 +25,21 @@ public final class RavenExpiringMediaActionSummary {
 
     public ActionType getType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RavenExpiringMediaActionSummary that = (RavenExpiringMediaActionSummary) o;
+        return timestamp == that.timestamp &&
+                count == that.count &&
+                type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, timestamp, count);
     }
 
     // thanks to http://github.com/warifp/InstagramAutoPostImageUrl/blob/master/vendor/mgp25/instagram-php/src/Response/Model/ActionBadge.php

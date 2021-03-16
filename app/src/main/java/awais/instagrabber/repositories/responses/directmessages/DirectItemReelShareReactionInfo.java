@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.util.Objects;
+
 public class DirectItemReelShareReactionInfo {
     private final String emoji;
     private final String intensity;
@@ -15,5 +17,19 @@ public class DirectItemReelShareReactionInfo {
 
     public String getIntensity() {
         return intensity;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemReelShareReactionInfo that = (DirectItemReelShareReactionInfo) o;
+        return Objects.equals(emoji, that.emoji) &&
+                Objects.equals(intensity, that.intensity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(emoji, intensity);
     }
 }

@@ -11,13 +11,11 @@ import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -31,13 +29,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
 import awais.instagrabber.UserSearchNavGraphDirections;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.DirectPendingUsersAdapter;
 import awais.instagrabber.adapters.DirectPendingUsersAdapter.PendingUser;
 import awais.instagrabber.adapters.DirectPendingUsersAdapter.PendingUserCallback;
@@ -52,12 +50,11 @@ import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
-import awais.instagrabber.viewmodels.DirectInboxViewModel;
-import awais.instagrabber.viewmodels.DirectPendingInboxViewModel;
+import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectSettingsViewModel;
+import awais.instagrabber.viewmodels.factories.DirectSettingsViewModelFactory;
 
 public class DirectMessageSettingsFragment extends Fragment implements ConfirmDialogFragmentCallback {
     private static final String TAG = DirectMessageSettingsFragment.class.getSimpleName();
@@ -77,33 +74,14 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         super.onCreate(savedInstanceState);
         final Bundle arguments = getArguments();
         if (arguments == null) return;
-        final NavController navController = NavHostFragment.findNavController(this);
-        final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
         final DirectMessageSettingsFragmentArgs args = DirectMessageSettingsFragmentArgs.fromBundle(arguments);
-        final boolean pending = args.getPending();
-        final List<DirectThread> threads;
-        final User viewer;
-        if (pending) {
-            final DirectPendingInboxViewModel inboxViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectPendingInboxViewModel.class);
-            threads = inboxViewModel.getThreads().getValue();
-            viewer = inboxViewModel.getViewer();
-        } else {
-            final DirectInboxViewModel inboxViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
-            threads = inboxViewModel.getThreads().getValue();
-            viewer = inboxViewModel.getViewer();
-        }
-        final String threadId = args.getThreadId();
-        final Optional<DirectThread> first = threads != null ? threads.stream()
-                                                                      .filter(thread -> thread.getThreadId().equals(threadId))
-                                                                      .findFirst()
-                                                             : Optional.empty();
-        if (!first.isPresent()) {
-            navController.navigateUp();
-            return;
-        }
-        viewModel = new ViewModelProvider(this).get(DirectSettingsViewModel.class);
-        viewModel.setViewer(viewer);
-        viewModel.setThread(first.get());
+        final MainActivity fragmentActivity = (MainActivity) requireActivity();
+        final AppStateViewModel appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
+        viewModel = new ViewModelProvider(this, new DirectSettingsViewModelFactory(fragmentActivity.getApplication(),
+                                                                                   args.getThreadId(),
+                                                                                   args.getPending(),
+                                                                                   appStateViewModel.getCurrentUser()))
+                .get(DirectSettingsViewModel.class);
     }
 
     @NonNull
@@ -143,21 +121,23 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                 binding.muteMessages.setVisibility(View.GONE);
             }
         });
-        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
+        // Need to observe, so that getValue is correct
+        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {});
+        viewModel.getLeftUsers().observe(getViewLifecycleOwner(), users -> {});
+        viewModel.getUsersAndLeftUsers().observe(getViewLifecycleOwner(), usersPair -> {
             if (usersAdapter == null) return;
-            usersAdapter.submitUsers(users.first, users.second);
+            usersAdapter.submitUsers(usersPair.first, usersPair.second);
         });
         viewModel.getTitle().observe(getViewLifecycleOwner(), title -> binding.titleEdit.setText(title));
         viewModel.getAdminUserIds().observe(getViewLifecycleOwner(), adminUserIds -> {
             if (usersAdapter == null) return;
             usersAdapter.setAdminUserIds(adminUserIds);
         });
-        viewModel.getMuted().observe(getViewLifecycleOwner(), muted -> binding.muteMessages.setChecked(muted));
+        viewModel.isMuted().observe(getViewLifecycleOwner(), muted -> binding.muteMessages.setChecked(muted));
         viewModel.isPending().observe(getViewLifecycleOwner(), pending -> binding.muteMessages.setVisibility(pending ? View.GONE : View.VISIBLE));
-        if (viewModel.isViewerAdmin()) {
-            viewModel.getApprovalRequiredToJoin().observe(getViewLifecycleOwner(), required -> binding.approvalRequired.setChecked(required));
-            viewModel.getPendingRequests().observe(getViewLifecycleOwner(), this::setPendingRequests);
-        }
+        viewModel.isViewerAdmin().observe(getViewLifecycleOwner(), this::setApprovalRelatedUI);
+        viewModel.getApprovalRequiredToJoin().observe(getViewLifecycleOwner(), required -> binding.approvalRequired.setChecked(required));
+        viewModel.getPendingRequests().observe(getViewLifecycleOwner(), this::setPendingRequests);
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
@@ -192,7 +172,11 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
 
     private void addMembers(final Set<User> users) {
         final Boolean approvalRequired = viewModel.getApprovalRequiredToJoin().getValue();
-        if (!viewModel.isViewerAdmin() && approvalRequired != null && approvalRequired) {
+        Boolean isViewerAdmin = viewModel.isViewerAdmin().getValue();
+        if (isViewerAdmin == null) {
+            isViewerAdmin = false;
+        }
+        if (!isViewerAdmin && approvalRequired != null && approvalRequired) {
             approvalRequiredUsers = users;
             final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
                     APPROVAL_REQUIRED_REQUEST_CODE,
@@ -226,13 +210,15 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
     }
 
     private void setupSettings() {
-        binding.groupSettings.setVisibility(viewModel.isGroup() ? View.VISIBLE : View.GONE);
+        Boolean isGroup = viewModel.isGroup().getValue();
+        if (isGroup == null) isGroup = false;
+        binding.groupSettings.setVisibility(isGroup ? View.VISIBLE : View.GONE);
         binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
         binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
             final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.mute() : viewModel.unmute();
             handleSwitchChangeResource(resourceLiveData, buttonView);
         });
-        if (!viewModel.isGroup()) return;
+        if (!isGroup) return;
         binding.titleEdit.addTextChangedListener(new TextWatcherAdapter() {
             @Override
             public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
@@ -256,14 +242,13 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             final NavDestination currentDestination = navController.getCurrentDestination();
             if (currentDestination == null) return;
             if (currentDestination.getId() != R.id.directMessagesSettingsFragment) return;
-            final Pair<List<User>, List<User>> users = viewModel.getUsers().getValue();
+            final List<User> users = viewModel.getUsers().getValue();
             final long[] currentUserIds;
-            if (users != null && users.first != null) {
-                final List<User> currentMembers = users.first;
-                currentUserIds = currentMembers.stream()
-                                               .mapToLong(User::getPk)
-                                               .sorted()
-                                               .toArray();
+            if (users != null) {
+                currentUserIds = users.stream()
+                                      .mapToLong(User::getPk)
+                                      .sorted()
+                                      .toArray();
             } else {
                 currentUserIds = new long[0];
             }
@@ -281,7 +266,6 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             final LiveData<Resource<Object>> resourceLiveData = isChecked ? viewModel.muteMentions() : viewModel.unmuteMentions();
             handleSwitchChangeResource(resourceLiveData, buttonView);
         });
-        setApprovalRelatedUI();
         binding.leave.setOnClickListener(v -> {
             final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
                     LEAVE_THREAD_REQUEST_CODE,
@@ -293,7 +277,9 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             );
             confirmDialogFragment.show(getChildFragmentManager(), "leave_thread_confirmation_dialog");
         });
-        if (viewModel.isViewerAdmin()) {
+        Boolean isViewerAdmin = viewModel.isViewerAdmin().getValue();
+        if (isViewerAdmin == null) isViewerAdmin = false;
+        if (isViewerAdmin) {
             binding.end.setVisibility(View.VISIBLE);
             binding.end.setOnClickListener(v -> {
                 final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
@@ -311,8 +297,8 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         }
     }
 
-    private void setApprovalRelatedUI() {
-        if (!viewModel.isViewerAdmin()) {
+    private void setApprovalRelatedUI(final boolean isViewerAdmin) {
+        if (!isViewerAdmin) {
             binding.pendingMembersGroup.setVisibility(View.GONE);
             binding.approvalRequired.setVisibility(View.GONE);
             binding.approvalRequiredLabel.setVisibility(View.GONE);
@@ -352,7 +338,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         final Context context = getContext();
         if (context == null) return;
         binding.users.setLayoutManager(new LinearLayoutManager(context));
-        final User inviter = viewModel.getThread().getInviter();
+        final User inviter = viewModel.getInviter().getValue();
         usersAdapter = new DirectUsersAdapter(
                 inviter != null ? inviter.getPk() : -1,
                 (position, user, selected) -> {

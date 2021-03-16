@@ -5,7 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Locale;
@@ -13,14 +12,11 @@ import java.util.Locale;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.DirectMessagesService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class CreateThreadAction extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "CommentAction";

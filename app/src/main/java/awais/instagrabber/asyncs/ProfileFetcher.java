@@ -5,9 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.User;

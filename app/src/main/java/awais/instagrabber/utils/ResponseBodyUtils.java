@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.models.StoryModel;
@@ -31,9 +30,6 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awaisomereport.LogCollector;
 
 public final class ResponseBodyUtils {
@@ -1125,36 +1121,15 @@ public final class ResponseBodyUtils {
         return candidate.getUrl();
     }
 
-    public static boolean isRead(final DirectItem item,
-                                 final Map<Long, DirectThreadLastSeenAt> lastSeenAt,
-                                 final List<Long> userIdsToCheck,
-                                 final DirectThreadDirectStory directStory) {
-        boolean read = lastSeenAt.entrySet()
-                                 .stream()
-                                 .filter(entry -> userIdsToCheck.contains(entry.getKey()))
-                                 .anyMatch(entry -> {
-                                     final String userLastSeenTsString = entry.getValue().getTimestamp();
-                                     if (userLastSeenTsString == null) return false;
-                                     final long userTs = Long.parseLong(userLastSeenTsString);
-                                     final long itemTs = item.getTimestamp();
-                                     return userTs >= itemTs;
-                                 });
-        // Further check if directStory exists
-        if (read && directStory != null) {
-            read = false;
-        }
-        return read;
-    }
-  
     public static StoryModel parseBroadcastItem(final JSONObject data) throws JSONException {
         final StoryModel model = new StoryModel(data.getString("id"),
-                data.getString("cover_frame_url"),
-                data.getString("cover_frame_url"),
-                MediaItemType.MEDIA_TYPE_LIVE,
-                data.optLong("published_time", 0),
-                data.getJSONObject("broadcast_owner").getString("username"),
-                data.getJSONObject("broadcast_owner").getLong("pk"),
-                false);
+                                                data.getString("cover_frame_url"),
+                                                data.getString("cover_frame_url"),
+                                                MediaItemType.MEDIA_TYPE_LIVE,
+                                                data.optLong("published_time", 0),
+                                                data.getJSONObject("broadcast_owner").getString("username"),
+                                                data.getJSONObject("broadcast_owner").getLong("pk"),
+                                                false);
         model.setVideoUrl(data.getString("dash_playback_url"));
         return model;
     }

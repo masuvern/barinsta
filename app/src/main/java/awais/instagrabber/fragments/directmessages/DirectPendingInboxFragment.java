@@ -19,6 +19,9 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
@@ -102,16 +105,41 @@ public class DirectPendingInboxFragment extends Fragment implements SwipeRefresh
     }
 
     private void setupObservers() {
+        removeViewModelObservers();
         threadsObserver = list -> {
             if (inboxAdapter == null) return;
-            inboxAdapter.submitList(list, () -> {
+            if (binding.swipeRefreshLayout.getVisibility() == View.GONE) {
+                binding.swipeRefreshLayout.setVisibility(View.VISIBLE);
+                binding.empty.setVisibility(View.GONE);
+            }
+            inboxAdapter.submitList(list == null ? Collections.emptyList() : list, () -> {
                 if (!scrollToTop) return;
                 binding.pendingInboxList.smoothScrollToPosition(0);
                 scrollToTop = false;
             });
+            if (list == null || list.isEmpty()) {
+                binding.swipeRefreshLayout.setVisibility(View.GONE);
+                binding.empty.setVisibility(View.VISIBLE);
+            }
         };
         viewModel.getThreads().observe(fragmentActivity, threadsObserver);
-        viewModel.getFetchingInbox().observe(getViewLifecycleOwner(), fetching -> binding.swipeRefreshLayout.setRefreshing(fetching));
+        viewModel.getInbox().observe(getViewLifecycleOwner(), inboxResource -> {
+            if (inboxResource == null) return;
+            switch (inboxResource.status) {
+                case SUCCESS:
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case ERROR:
+                    if (inboxResource.message != null) {
+                        Snackbar.make(binding.getRoot(), inboxResource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case LOADING:
+                    binding.swipeRefreshLayout.setRefreshing(true);
+                    break;
+            }
+        });
     }
 
     private void removeViewModelObservers() {

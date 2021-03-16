@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.Preference;
@@ -132,43 +133,58 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         // generalCategory.setIconSpaceReserved(false);
         // screen.addPreference(generalCategory);
         screen.addPreference(getDivider(context));
+        final NavController navController = NavHostFragment.findNavController(this);
         if (isLoggedIn) {
             screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif", 0l);
-                NavHostFragment.findNavController(this).navigate(navDirections);
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif", 0L);
+                    navController.navigate(navDirections);
+                }
                 return true;
             }));
             screen.addPreference(getPreference(R.string.action_ayml, R.drawable.ic_suggested_users, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml", 0l);
-                NavHostFragment.findNavController(this).navigate(navDirections);
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml", 0L);
+                    navController.navigate(navDirections);
+                }
                 return true;
             }));
             screen.addPreference(getPreference(R.string.action_archive, R.drawable.ic_archive, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalStoryListViewerFragment("archive");
-                NavHostFragment.findNavController(this).navigate(navDirections);
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalStoryListViewerFragment("archive");
+                    navController.navigate(navDirections);
+                }
                 return true;
             }));
         }
         screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
 
         screen.addPreference(getDivider(context));
         screen.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
         screen.addPreference(getPreference(R.string.backup_and_restore, R.drawable.ic_settings_backup_restore_24, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToBackupPreferencesFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToBackupPreferencesFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
         screen.addPreference(getPreference(R.string.action_about, R.drawable.ic_outline_info_24, preference1 -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToAboutFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToAboutFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
 
@@ -185,6 +201,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
         reminderPreference.setSelectable(false);
         screen.addPreference(reminderPreference);
+    }
+
+    private boolean isSafeToNavigate(final NavController navController) {
+        return navController.getCurrentDestination() != null
+                && navController.getCurrentDestination().getId() == R.id.morePreferencesFragment;
     }
 
     @Override

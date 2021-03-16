@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
 import java.util.List;
+import java.util.Objects;
 
 public class DirectThreadDirectStory {
     private final List<DirectItem> items;
@@ -17,5 +18,19 @@ public class DirectThreadDirectStory {
 
     public int getUnseenCount() {
         return unseenCount;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectThreadDirectStory that = (DirectThreadDirectStory) o;
+        return unseenCount == that.unseenCount &&
+                Objects.equals(items, that.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(items, unseenCount);
     }
 }

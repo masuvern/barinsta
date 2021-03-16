@@ -194,17 +194,40 @@ public class User implements Serializable {
         return profileContextLinksWithUserIds;
     }
 
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final User that = (User) o;
-        return pk == that.pk &&
-                Objects.equals(username, that.username);
+        final User user = (User) o;
+        return pk == user.pk &&
+                isPrivate == user.isPrivate &&
+                isVerified == user.isVerified &&
+                hasAnonymousProfilePicture == user.hasAnonymousProfilePicture &&
+                isUnpublished == user.isUnpublished &&
+                isFavorite == user.isFavorite &&
+                isDirectappInstalled == user.isDirectappInstalled &&
+                mediaCount == user.mediaCount &&
+                followerCount == user.followerCount &&
+                followingCount == user.followingCount &&
+                followingTagCount == user.followingTagCount &&
+                usertagsCount == user.usertagsCount &&
+                Objects.equals(username, user.username) &&
+                Objects.equals(fullName, user.fullName) &&
+                Objects.equals(profilePicUrl, user.profilePicUrl) &&
+                Objects.equals(profilePicId, user.profilePicId) &&
+                Objects.equals(friendshipStatus, user.friendshipStatus) &&
+                Objects.equals(reelAutoArchive, user.reelAutoArchive) &&
+                Objects.equals(allowedCommenterType, user.allowedCommenterType) &&
+                Objects.equals(biography, user.biography) &&
+                Objects.equals(externalUrl, user.externalUrl) &&
+                Objects.equals(publicEmail, user.publicEmail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pk, username);
+        return Objects.hash(pk, username, fullName, isPrivate, profilePicUrl, profilePicId, friendshipStatus, isVerified, hasAnonymousProfilePicture,
+                            isUnpublished, isFavorite, isDirectappInstalled, reelAutoArchive, allowedCommenterType, mediaCount, followerCount,
+                            followingCount, followingTagCount, biography, externalUrl, usertagsCount, publicEmail);
     }
 }

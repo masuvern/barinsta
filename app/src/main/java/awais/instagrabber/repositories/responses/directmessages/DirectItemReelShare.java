@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.util.Objects;
+
 import awais.instagrabber.repositories.responses.Media;
 
 public class DirectItemReelShare {
@@ -60,5 +62,25 @@ public class DirectItemReelShare {
 
     public long getMentionedUserId() {
         return mentionedUserId;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemReelShare that = (DirectItemReelShare) o;
+        return reelOwnerId == that.reelOwnerId &&
+                mentionedUserId == that.mentionedUserId &&
+                isReelPersisted == that.isReelPersisted &&
+                Objects.equals(text, that.text) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(reelType, that.reelType) &&
+                Objects.equals(media, that.media) &&
+                Objects.equals(reactionInfo, that.reactionInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(text, type, reelOwnerId, mentionedUserId, isReelPersisted, reelType, media, reactionInfo);
     }
 }

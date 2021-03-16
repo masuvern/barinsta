@@ -38,6 +38,8 @@ import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -45,6 +47,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -61,12 +64,15 @@ import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.customviews.emoji.EmojiVariantManager;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
+import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDirections;
 import awais.instagrabber.fragments.main.FeedFragment;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.services.ActivityCheckerService;
+import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -75,6 +81,7 @@ import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
+import awais.instagrabber.viewmodels.AppStateViewModel;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -102,6 +109,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private int firstFragmentGraphIndex;
     private boolean isActivityCheckerServiceBound = false;
     private boolean isBackStackEmpty = false;
+    private boolean isLoggedIn;
+    private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -131,10 +140,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         CookieUtils.setupCookies(cookie);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
         createNotificationChannels();
+        try {
+            final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();
+            //noinspection unchecked
+            behavior = (HideBottomViewOnScrollBehavior<BottomNavigationView>) layoutParams.getBehavior();
+        } catch (Exception e) {
+            Log.e(TAG, "onCreate: ", e);
+        }
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
@@ -142,6 +159,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
         if (checkUpdates) FlavorTown.updateCheck(this);
         FlavorTown.changelogCheck(this);
+        new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
         handleIntent(intent);
         if (!TextUtils.isEmpty(cookie) && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
@@ -154,6 +172,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             EmojiVariantManager.getInstance();
         });
         initEmojiCompat();
+        // initDmService();
+    }
+
+    private void initDmService() {
+        if (!isLoggedIn) return;
+        final boolean enabled = settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH);
+        if (!enabled) return;
+        DMSyncAlarmReceiver.setAlarm(this);
     }
 
     @Override
@@ -242,15 +268,22 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     }
 
     private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
-            notificationManager.createNotificationChannel(new NotificationChannel(Constants.DOWNLOAD_CHANNEL_ID,
-                                                                                  Constants.DOWNLOAD_CHANNEL_NAME,
-                                                                                  NotificationManager.IMPORTANCE_DEFAULT));
-            notificationManager.createNotificationChannel(new NotificationChannel(Constants.ACTIVITY_CHANNEL_ID,
-                                                                                  Constants.ACTIVITY_CHANNEL_NAME,
-                                                                                  NotificationManager.IMPORTANCE_DEFAULT));
-        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+        notificationManager.createNotificationChannel(new NotificationChannel(Constants.DOWNLOAD_CHANNEL_ID,
+                                                                              Constants.DOWNLOAD_CHANNEL_NAME,
+                                                                              NotificationManager.IMPORTANCE_DEFAULT));
+        notificationManager.createNotificationChannel(new NotificationChannel(Constants.ACTIVITY_CHANNEL_ID,
+                                                                              Constants.ACTIVITY_CHANNEL_NAME,
+                                                                              NotificationManager.IMPORTANCE_DEFAULT));
+        notificationManager.createNotificationChannel(new NotificationChannel(Constants.DM_UNREAD_CHANNEL_ID,
+                                                                              Constants.DM_UNREAD_CHANNEL_NAME,
+                                                                              NotificationManager.IMPORTANCE_DEFAULT));
+        final NotificationChannel silentNotificationChannel = new NotificationChannel(Constants.SILENT_NOTIFICATIONS_CHANNEL_ID,
+                                                                                      Constants.SILENT_NOTIFICATIONS_CHANNEL_NAME,
+                                                                                      NotificationManager.IMPORTANCE_LOW);
+        silentNotificationChannel.setSound(null, null);
+        notificationManager.createNotificationChannel(silentNotificationChannel);
     }
 
     private void setupSuggestions() {
@@ -387,8 +420,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
         int main_nav_ids = R.array.main_nav_ids;
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) {
             main_nav_ids = R.array.logged_out_main_nav_ids;
             final int selectedItemId = binding.bottomNavView.getSelectedItemId();
@@ -477,7 +508,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final int destinationId = destination.getId();
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
-            binding.bottomNavView.setVisibility(SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId) ? View.VISIBLE : View.GONE);
+            final boolean contains = SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId);
+            binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
+            if (contains && behavior != null) {
+                behavior.slideUp(binding.bottomNavView);
+            }
 
             // explicitly hide keyboard when we navigate
             final View view = getCurrentFocus();
@@ -518,6 +553,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             showActivityView();
             return;
         }
+        if (Constants.ACTION_SHOW_DM_THREAD.equals(action)) {
+            showThread(intent);
+            return;
+        }
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (type.equals("text/plain")) {
                 handleUrl(intent.getStringExtra(Intent.EXTRA_TEXT));
@@ -528,6 +567,58 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final Uri data = intent.getData();
             if (data == null) return;
             handleUrl(data.toString());
+        }
+    }
+
+    private void showThread(@NonNull final Intent intent) {
+        final String threadId = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_ID);
+        final String threadTitle = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_TITLE);
+        navigateToThread(threadId, threadTitle);
+    }
+
+    public void navigateToThread(final String threadId, final String threadTitle) {
+        if (threadId == null || threadTitle == null) return;
+        currentNavControllerLiveData.observe(this, new Observer<NavController>() {
+            @Override
+            public void onChanged(final NavController navController) {
+                if (navController == null) return;
+                if (navController.getGraph().getId() != R.id.direct_messages_nav_graph) return;
+                try {
+                    final NavDestination currentDestination = navController.getCurrentDestination();
+                    if (currentDestination != null && currentDestination.getId() == R.id.directMessagesInboxFragment) {
+                        // if we are already on the inbox page, navigate to the thread
+                        // need handler.post() to wait for the fragment manager to be ready to navigate
+                        new Handler().post(() -> {
+                            final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
+                                    .actionInboxToThread(threadId, threadTitle);
+                            navController.navigate(action);
+                        });
+                        return;
+                    }
+                    // add a destination change listener to navigate to thread once we are on the inbox page
+                    navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
+                        @Override
+                        public void onDestinationChanged(@NonNull final NavController controller,
+                                                         @NonNull final NavDestination destination,
+                                                         @Nullable final Bundle arguments) {
+                            if (destination.getId() == R.id.directMessagesInboxFragment) {
+                                final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
+                                        .actionInboxToThread(threadId, threadTitle);
+                                controller.navigate(action);
+                                controller.removeOnDestinationChangedListener(this);
+                            }
+                        }
+                    });
+                    // pop back stack until we reach the inbox page
+                    navController.popBackStack(R.id.directMessagesInboxFragment, false);
+                } finally {
+                    currentNavControllerLiveData.removeObserver(this);
+                }
+            }
+        });
+        final int selectedItemId = binding.bottomNavView.getSelectedItemId();
+        if (selectedItemId != R.navigation.direct_messages_nav_graph) {
+            setBottomNavSelectedItem(R.navigation.direct_messages_nav_graph);
         }
     }
 

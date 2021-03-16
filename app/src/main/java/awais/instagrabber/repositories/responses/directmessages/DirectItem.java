@@ -2,8 +2,12 @@ package awais.instagrabber.repositories.responses.directmessages;
 
 import androidx.annotation.NonNull;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.responses.Location;
@@ -40,6 +44,7 @@ public class DirectItem implements Cloneable {
     private Date date;
     private boolean isPending;
     private boolean showForwardAttribution;
+    private LocalDateTime localDateTime;
 
     public DirectItem(final String itemId,
                       final long userId,
@@ -213,6 +218,13 @@ public class DirectItem implements Cloneable {
         return date;
     }
 
+    public LocalDateTime getLocalDateTime() {
+        if (localDateTime == null) {
+            localDateTime = Instant.ofEpochMilli(timestamp / 1000).atZone(ZoneId.systemDefault()).toLocalDateTime();;
+        }
+        return localDateTime;
+    }
+
     public void setItemId(final String itemId) {
         this.itemId = itemId;
     }
@@ -239,21 +251,47 @@ public class DirectItem implements Cloneable {
         return super.clone();
     }
 
-    // @Override
-    // public boolean equals(final Object o) {
-    //     if (this == o) return true;
-    //     if (o == null || getClass() != o.getClass()) return false;
-    //     final DirectItem that = (DirectItem) o;
-    //     return userId == that.userId &&
-    //             timestamp == that.timestamp &&
-    //             isPending == that.isPending &&
-    //             Objects.equals(itemId, that.itemId) &&
-    //             itemType == that.itemType &&
-    //             Objects.equals(clientContext, that.clientContext);
-    // }
-    //
-    // @Override
-    // public int hashCode() {
-    //     return Objects.hash(itemId, userId, timestamp, itemType, clientContext, isPending);
-    // }
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItem that = (DirectItem) o;
+        return userId == that.userId &&
+                timestamp == that.timestamp &&
+                hideInThread == that.hideInThread &&
+                isPending == that.isPending &&
+                showForwardAttribution == that.showForwardAttribution &&
+                Objects.equals(itemId, that.itemId) &&
+                itemType == that.itemType &&
+                Objects.equals(text, that.text) &&
+                Objects.equals(like, that.like) &&
+                Objects.equals(link, that.link) &&
+                Objects.equals(clientContext, that.clientContext) &&
+                Objects.equals(reelShare, that.reelShare) &&
+                Objects.equals(storyShare, that.storyShare) &&
+                Objects.equals(mediaShare, that.mediaShare) &&
+                Objects.equals(profile, that.profile) &&
+                Objects.equals(placeholder, that.placeholder) &&
+                Objects.equals(media, that.media) &&
+                Objects.equals(previewMedias, that.previewMedias) &&
+                Objects.equals(actionLog, that.actionLog) &&
+                Objects.equals(videoCallEvent, that.videoCallEvent) &&
+                Objects.equals(clip, that.clip) &&
+                Objects.equals(felixShare, that.felixShare) &&
+                Objects.equals(visualMedia, that.visualMedia) &&
+                Objects.equals(animatedMedia, that.animatedMedia) &&
+                Objects.equals(reactions, that.reactions) &&
+                Objects.equals(repliedToMessage, that.repliedToMessage) &&
+                Objects.equals(voiceMedia, that.voiceMedia) &&
+                Objects.equals(location, that.location) &&
+                Objects.equals(date, that.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(itemId, userId, timestamp, itemType, text, like, link, clientContext, reelShare, storyShare, mediaShare, profile, placeholder,
+                      media, previewMedias, actionLog, videoCallEvent, clip, felixShare, visualMedia, animatedMedia, reactions, repliedToMessage,
+                      voiceMedia, location, hideInThread, date, isPending, showForwardAttribution);
+    }
 }

@@ -11,6 +11,7 @@ import com.google.gson.JsonParseException;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 public class Caption implements Serializable {
     private long mPk;
@@ -40,6 +41,21 @@ public class Caption implements Serializable {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Caption caption = (Caption) o;
+        return mPk == caption.mPk &&
+                userId == caption.userId &&
+                Objects.equals(text, caption.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPk, userId, text);
     }
 
     public static class CaptionDeserializer implements JsonDeserializer<Caption> {

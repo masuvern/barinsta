@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.util.Objects;
+
 public class DirectItemPlaceholder {
     private final boolean isLinked;
     private final String title;
@@ -23,5 +25,20 @@ public class DirectItemPlaceholder {
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemPlaceholder that = (DirectItemPlaceholder) o;
+        return isLinked == that.isLinked &&
+                Objects.equals(title, that.title) &&
+                Objects.equals(message, that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isLinked, title, message);
     }
 }

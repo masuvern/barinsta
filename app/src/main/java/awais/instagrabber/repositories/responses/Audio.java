@@ -2,6 +2,7 @@ package awais.instagrabber.repositories.responses;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class Audio implements Serializable {
     private final String audioSrc;
@@ -40,5 +41,22 @@ public class Audio implements Serializable {
 
     public long getAudioSrcExpirationTimestampUs() {
         return audioSrcExpirationTimestampUs;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Audio audio = (Audio) o;
+        return duration == audio.duration &&
+                waveformSamplingFrequencyHz == audio.waveformSamplingFrequencyHz &&
+                audioSrcExpirationTimestampUs == audio.audioSrcExpirationTimestampUs &&
+                Objects.equals(audioSrc, audio.audioSrc) &&
+                Objects.equals(waveformData, audio.waveformData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(audioSrc, duration, waveformData, waveformSamplingFrequencyHz, audioSrcExpirationTimestampUs);
     }
 }

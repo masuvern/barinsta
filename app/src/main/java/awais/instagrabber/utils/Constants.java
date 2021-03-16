@@ -58,6 +58,8 @@ public final class Constants {
 
     // Notification ids
     public static final int ACTIVITY_NOTIFICATION_ID = 10;
+    public static final int DM_UNREAD_PARENT_NOTIFICATION_ID = 20;
+    public static final int DM_CHECK_NOTIFICATION_ID = 11;
 
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
     public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
@@ -74,12 +76,6 @@ public final class Constants {
     public static final String FDROID_SHA1_FINGERPRINT = "C1661EB8FD09F618307E687786D5E5056F65084D";
     public static final String SKIPPED_VERSION = "skipped_version";
     public static final String DEFAULT_TAB = "default_tab";
-    public static final String ACTIVITY_CHANNEL_ID = "activity";
-    public static final String DOWNLOAD_CHANNEL_ID = "download";
-    public static final String ACTIVITY_CHANNEL_NAME = "Activity";
-    public static final String DOWNLOAD_CHANNEL_NAME = "Downloads";
-    public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
-    public static final String ACTION_SHOW_ACTIVITY = "show_activity";
     public static final String PREF_DARK_THEME = "dark_theme";
     public static final String PREF_LIGHT_THEME = "light_theme";
     public static final String DEFAULT_HASH_TAG_PIC = "https://www.instagram.com/static/images/hashtag/search-hashtag-default-avatar.png/1d8417c9a4f5.png";
@@ -94,4 +90,27 @@ public final class Constants {
     public static final String PREF_SAVED_POSTS_LAYOUT = "saved_posts_layout";
     public static final String PREF_EMOJI_VARIANTS = "emoji_variants";
     public static final String PREF_REACTIONS = "reactions";
+
+    public static final String ACTIVITY_CHANNEL_ID = "activity";
+    public static final String ACTIVITY_CHANNEL_NAME = "Activity";
+    public static final String DOWNLOAD_CHANNEL_ID = "download";
+    public static final String DOWNLOAD_CHANNEL_NAME = "Downloads";
+    public static final String DM_UNREAD_CHANNEL_ID = "dmUnread";
+    public static final String DM_UNREAD_CHANNEL_NAME = "Messages";
+    public static final String SILENT_NOTIFICATIONS_CHANNEL_ID = "silentNotifications";
+    public static final String SILENT_NOTIFICATIONS_CHANNEL_NAME = "Silent notifications";
+
+    public static final String NOTIF_GROUP_NAME = "awais.instagrabber.InstaNotif";
+    public static final String GROUP_KEY_DM = "awais.instagrabber.MESSAGES";
+    public static final String GROUP_KEY_SILENT_NOTIFICATIONS = "awais.instagrabber.SILENT_NOTIFICATIONS";
+
+    public static final int SHOW_ACTIVITY_REQUEST_CODE = 1738;
+    public static final int SHOW_DM_THREAD = 2000;
+    public static final int DM_SYNC_SERVICE_REQUEST_CODE = 3000;
+
+    public static final String ACTION_SHOW_ACTIVITY = "show_activity";
+    public static final String ACTION_SHOW_DM_THREAD = "show_dm_thread";
+
+    public static final String DM_THREAD_ACTION_EXTRA_THREAD_ID = "thread_id";
+    public static final String DM_THREAD_ACTION_EXTRA_THREAD_TITLE = "thread_title";
 }

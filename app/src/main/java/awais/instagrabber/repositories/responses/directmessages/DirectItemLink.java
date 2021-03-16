@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.util.Objects;
+
 public class DirectItemLink {
     private final String text;
     private final DirectItemLinkContext linkContext;
@@ -30,5 +32,21 @@ public class DirectItemLink {
 
     public String getMutationToken() {
         return mutationToken;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemLink that = (DirectItemLink) o;
+        return Objects.equals(text, that.text) &&
+                Objects.equals(linkContext, that.linkContext) &&
+                Objects.equals(clientContext, that.clientContext) &&
+                Objects.equals(mutationToken, that.mutationToken);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(text, linkContext, clientContext, mutationToken);
     }
 }

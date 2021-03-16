@@ -45,6 +45,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiR
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.DeepLinkParser;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
@@ -196,7 +197,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
                 if (item.isPending()) {
                     binding.deliveryStatus.setImageResource(R.drawable.ic_check_24);
                 } else {
-                    final boolean read = ResponseBodyUtils.isRead(item, thread.getLastSeenAt(), userIds, null);
+                    final boolean read = DMUtils.isRead(item,
+                                                        thread.getLastSeenAt(),
+                                                        userIds
+                    );
                     binding.deliveryStatus.setImageResource(R.drawable.ic_check_all_24);
                     ImageViewCompat.setImageTintList(
                             binding.deliveryStatus,
@@ -321,8 +325,8 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         final String repliedToUsername = user != null ? user.getUsername() : "";
         if (item.getUserId() == currentUser.getPk()) {
             return thread.isGroup()
-                    ? resources.getString(R.string.replied_you_group, repliedToUsername)
-                    : resources.getString(R.string.replied_you);
+                   ? resources.getString(R.string.replied_you_group, repliedToUsername)
+                   : resources.getString(R.string.replied_you);
         }
         if (repliedToUserId == currentUser.getPk()) {
             return resources.getString(R.string.replied_to_you);
@@ -361,7 +365,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             final DirectItemReactions reactions = item.getReactions();
             final List<DirectItemEmojiReaction> emojis = reactions != null ? reactions.getEmojis() : null;
             if (emojis == null || emojis.isEmpty()) {
-                binding.container.setPadding(messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall);
+                binding.container.setPadding(messageInfoPaddingSmall, messageInfoPaddingSmall, messageInfoPaddingSmall, 0);
                 binding.reactionsWrapper.setVisibility(View.GONE);
                 return;
             }

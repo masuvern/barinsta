@@ -1,5 +1,6 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.Serializable;
@@ -9,13 +10,13 @@ import java.util.Objects;
 
 import awais.instagrabber.repositories.responses.User;
 
-public class DirectThread implements Serializable {
+public class DirectThread implements Serializable, Cloneable {
     private final String threadId;
     private final String threadV2Id;
-    private final List<User> users;
-    private final List<User> leftUsers;
-    private final List<Long> adminUserIds;
-    private final List<DirectItem> items;
+    private List<User> users;
+    private List<User> leftUsers;
+    private List<Long> adminUserIds;
+    private List<DirectItem> items;
     private final long lastActivityAt;
     private boolean muted;
     private final boolean isPin;
@@ -127,16 +128,32 @@ public class DirectThread implements Serializable {
         return users;
     }
 
+    public void setUsers(final List<User> users) {
+        this.users = users;
+    }
+
     public List<User> getLeftUsers() {
         return leftUsers;
+    }
+
+    public void setLeftUsers(final List<User> leftUsers) {
+        this.leftUsers = leftUsers;
     }
 
     public List<Long> getAdminUserIds() {
         return adminUserIds;
     }
 
+    public void setAdminUserIds(final List<Long> adminUserIds) {
+        this.adminUserIds = adminUserIds;
+    }
+
     public List<DirectItem> getItems() {
         return items;
+    }
+
+    public void setItems(final List<DirectItem> items) {
+        this.items = items;
     }
 
     public long getLastActivityAt() {
@@ -284,17 +301,59 @@ public class DirectThread implements Serializable {
         return firstItem;
     }
 
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final DirectThread that = (DirectThread) o;
-        return Objects.equals(threadId, that.threadId) &&
-                Objects.equals(threadV2Id, that.threadV2Id);
+        return lastActivityAt == that.lastActivityAt &&
+                muted == that.muted &&
+                isPin == that.isPin &&
+                named == that.named &&
+                canonical == that.canonical &&
+                pending == that.pending &&
+                archived == that.archived &&
+                valuedRequest == that.valuedRequest &&
+                viewerId == that.viewerId &&
+                folder == that.folder &&
+                vcMuted == that.vcMuted &&
+                isGroup == that.isGroup &&
+                mentionsMuted == that.mentionsMuted &&
+                hasOlder == that.hasOlder &&
+                hasNewer == that.hasNewer &&
+                isSpam == that.isSpam &&
+                approvalRequiredForNewMembers == that.approvalRequiredForNewMembers &&
+                inputMode == that.inputMode &&
+                Objects.equals(threadId, that.threadId) &&
+                Objects.equals(threadV2Id, that.threadV2Id) &&
+                Objects.equals(users, that.users) &&
+                Objects.equals(leftUsers, that.leftUsers) &&
+                Objects.equals(adminUserIds, that.adminUserIds) &&
+                Objects.equals(items, that.items) &&
+                Objects.equals(threadType, that.threadType) &&
+                Objects.equals(threadTitle, that.threadTitle) &&
+                Objects.equals(pendingScore, that.pendingScore) &&
+                Objects.equals(inviter, that.inviter) &&
+                Objects.equals(lastSeenAt, that.lastSeenAt) &&
+                Objects.equals(newestCursor, that.newestCursor) &&
+                Objects.equals(oldestCursor, that.oldestCursor) &&
+                Objects.equals(lastPermanentItem, that.lastPermanentItem) &&
+                Objects.equals(directStory, that.directStory) &&
+                Objects.equals(threadContextItems, that.threadContextItems);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(threadId, threadV2Id);
+        return Objects
+                .hash(threadId, threadV2Id, users, leftUsers, adminUserIds, items, lastActivityAt, muted, isPin, named, canonical, pending, archived,
+                      valuedRequest, threadType, viewerId, threadTitle, pendingScore, folder, vcMuted, isGroup, mentionsMuted, inviter, hasOlder,
+                      hasNewer, lastSeenAt, newestCursor, oldestCursor, isSpam, lastPermanentItem, directStory, approvalRequiredForNewMembers,
+                      inputMode, threadContextItems);
     }
 }

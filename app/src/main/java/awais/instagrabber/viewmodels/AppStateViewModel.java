@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.UsernameFetcher;
@@ -25,10 +23,10 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class AppStateViewModel extends AndroidViewModel {
     private static final String TAG = AppStateViewModel.class.getSimpleName();
 
-    private final MutableLiveData<User> currentUser = new MutableLiveData<>();
     private final String cookie;
     private final boolean isLoggedIn;
 
+    private User currentUser;
     private AccountRepository accountRepository;
     private String username;
 
@@ -52,7 +50,7 @@ public class AppStateViewModel extends AndroidViewModel {
         fetchUsername(usernameListener);
     }
 
-    public LiveData<User> getCurrentUser() {
+    public User getCurrentUser() {
         return currentUser;
     }
 
@@ -84,7 +82,7 @@ public class AppStateViewModel extends AndroidViewModel {
         new ProfileFetcher(
                 username.trim().substring(1),
                 true,
-                currentUser::postValue
+                user -> this.currentUser = user
         ).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }

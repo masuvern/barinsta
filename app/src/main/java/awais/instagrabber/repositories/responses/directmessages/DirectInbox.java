@@ -1,9 +1,11 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
-public class DirectInbox {
-    private final List<DirectThread> threads;
+public class DirectInbox implements Cloneable {
+    private List<DirectThread> threads;
     private final boolean hasOlder;
     private final int unseenCount;
     private final String unseenCountTs;
@@ -28,6 +30,10 @@ public class DirectInbox {
         return threads;
     }
 
+    public void setThreads(final List<DirectThread> threads) {
+        this.threads = threads;
+    }
+
     public boolean hasOlder() {
         return hasOlder;
     }
@@ -46,5 +52,11 @@ public class DirectInbox {
 
     public boolean isBlendedInboxEnabled() {
         return blendedInboxEnabled;
+    }
+
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

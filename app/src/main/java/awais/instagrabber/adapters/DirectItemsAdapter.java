@@ -258,7 +258,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     public void setThread(final DirectThread thread) {
         if (thread == null) return;
         this.thread = thread;
-        notifyDataSetChanged();
+        // notifyDataSetChanged();
     }
 
     public void submitList(@Nullable final List<DirectItem> list) {

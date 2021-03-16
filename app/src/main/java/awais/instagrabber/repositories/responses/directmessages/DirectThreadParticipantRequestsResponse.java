@@ -13,7 +13,7 @@ public class DirectThreadParticipantRequestsResponse implements Serializable, Cl
     private final Map<Long, String> requesterUsernames;
     private final String cursor;
     private final int totalThreadParticipants;
-    private final int totalParticipantRequests;
+    private int totalParticipantRequests;
     private final String status;
 
     public DirectThreadParticipantRequestsResponse(final List<User> users,
@@ -52,6 +52,10 @@ public class DirectThreadParticipantRequestsResponse implements Serializable, Cl
 
     public int getTotalParticipantRequests() {
         return totalParticipantRequests;
+    }
+
+    public void setTotalParticipantRequests(final int totalParticipantRequests) {
+        this.totalParticipantRequests = totalParticipantRequests;
     }
 
     public String getStatus() {

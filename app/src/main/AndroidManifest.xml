@@ -8,11 +8,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="false" />
-
 
     <application
         android:name=".InstaGrabberApplication"
@@ -37,8 +37,8 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-                <!--<action android:name="android.intent.action.SEARCH" />-->
-                <!--<action android:name="android.intent.action.WEB_SEARCH" />-->
+                <!-- <action android:name="android.intent.action.SEARCH" /> -->
+                <!-- <action android:name="android.intent.action.WEB_SEARCH" /> -->
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -147,6 +147,19 @@
         <service
             android:name=".services.DeleteImageIntentService"
             android:exported="false" />
+        <service
+            android:name=".services.DMSyncService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".services.DMSyncAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <!--<receiver android:name=".services.BootCompletedReceiver" >-->
+        <!--    <intent-filter>-->
+        <!--        <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+        <!--    </intent-filter>-->
+        <!--</receiver>-->
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -156,4 +169,5 @@
             android:name="fontProviderRequests"
             android:value="Noto Color Emoji Compat" />
     </application>
+
 </manifest>

@@ -120,7 +120,8 @@
         app:layout_constraintBottom_toBottomOf="@id/input"
         app:layout_constraintEnd_toStartOf="@id/send"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/input" />
+        app:layout_constraintTop_toTopOf="@id/input"
+        tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/emoji_toggle"
@@ -143,7 +144,8 @@
         app:rippleColor="@color/grey_500"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Button.Circle"
         app:strokeColor="@color/black"
-        app:strokeWidth="1dp" />
+        app:strokeWidth="1dp"
+        tools:visibility="visible" />
 
     <awais.instagrabber.customviews.KeyNotifyingEmojiEditText
         android:id="@+id/input"
@@ -158,16 +160,32 @@
         android:textColorHint="@color/grey_500"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/camera"
+        app:layout_constraintEnd_toStartOf="@id/gif"
         app:layout_constraintStart_toEndOf="@id/emoji_toggle"
         app:layout_constraintTop_toBottomOf="@id/reply_preview_text"
         app:layout_goneMarginBottom="4dp"
-        app:layout_goneMarginEnd="24dp" />
+        app:layout_goneMarginEnd="24dp"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/gif"
+        android:layout_width="32dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/input_bg"
+        app:layout_constraintEnd_toStartOf="@id/camera"
+        app:layout_constraintStart_toEndOf="@id/input"
+        app:layout_constraintTop_toTopOf="@id/input"
+        app:srcCompat="@drawable/ic_round_gif_24"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/camera"
         android:layout_width="32dp"
         android:layout_height="0dp"
+        android:layout_marginStart="4dp"
         android:background="@android:color/transparent"
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
@@ -175,10 +193,10 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/input_bg"
         app:layout_constraintEnd_toStartOf="@id/gallery"
-        app:layout_constraintStart_toEndOf="@id/input"
+        app:layout_constraintStart_toEndOf="@id/gif"
         app:layout_constraintTop_toTopOf="@id/input"
         app:srcCompat="@drawable/ic_camera_24"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/gallery"
@@ -196,7 +214,7 @@
         app:layout_constraintEnd_toStartOf="@id/send"
         app:layout_constraintStart_toEndOf="@id/camera"
         app:layout_constraintTop_toTopOf="@id/input"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
     <awais.instagrabber.customviews.RecordView
         android:id="@+id/record_view"
@@ -214,7 +232,7 @@
         app:slide_to_cancel_margin_right="16dp"
         app:slide_to_cancel_text="Slide To Cancel"
         app:slide_to_cancel_text_color="@color/white"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
     <awais.instagrabber.customviews.RecordButton
         android:id="@+id/send"
@@ -231,7 +249,8 @@
         app:layout_constraintBottom_toBottomOf="@id/input_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/input_bg"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Button.Circle" />
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Button.Circle"
+        tools:visibility="visible" />
 
     <awais.instagrabber.customviews.emoji.EmojiPicker
         android:id="@+id/emoji_picker"
@@ -241,7 +260,8 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/accept_pending_request_question"
@@ -255,7 +275,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/decline"
         app:layout_constraintTop_toBottomOf="@id/chats_barrier"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/decline"
@@ -272,7 +292,7 @@
         app:layout_constraintEnd_toStartOf="@id/accept"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/accept_pending_request_question"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/accept"
@@ -288,5 +308,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/decline"
         app:layout_constraintTop_toBottomOf="@id/accept_pending_request_question"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 </androidx.constraintlayout.widget.ConstraintLayout>

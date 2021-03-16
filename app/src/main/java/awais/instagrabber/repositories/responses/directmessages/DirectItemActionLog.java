@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
 import java.util.List;
+import java.util.Objects;
 
 public class DirectItemActionLog {
     private final String description;
@@ -25,6 +26,21 @@ public class DirectItemActionLog {
 
     public List<TextRange> getTextAttributes() {
         return textAttributes;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final DirectItemActionLog that = (DirectItemActionLog) o;
+        return Objects.equals(description, that.description) &&
+                Objects.equals(bold, that.bold) &&
+                Objects.equals(textAttributes, that.textAttributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, bold, textAttributes);
     }
 
     public static class TextRange {
@@ -54,6 +70,22 @@ public class DirectItemActionLog {
 
         public String getIntent() {
             return intent;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final TextRange textRange = (TextRange) o;
+            return start == textRange.start &&
+                    end == textRange.end &&
+                    Objects.equals(color, textRange.color) &&
+                    Objects.equals(intent, textRange.intent);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(start, end, color, intent);
         }
     }
 }

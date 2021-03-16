@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.security.cert.CertificateException;
@@ -106,11 +105,11 @@ public final class FlavorTown {
         if (settingsHelper.getInteger(Constants.PREV_INSTALL_VERSION) < BuildConfig.VERSION_CODE) {
             int appUaCode = settingsHelper.getInteger(Constants.APP_UA_CODE);
             int browserUaCode = settingsHelper.getInteger(Constants.BROWSER_UA_CODE);
-            if (browserUaCode == -1) {
+            if (browserUaCode == -1 || browserUaCode >= UserAgentUtils.browsers.length) {
                 browserUaCode = ThreadLocalRandom.current().nextInt(0, UserAgentUtils.browsers.length);
                 settingsHelper.putInteger(Constants.BROWSER_UA_CODE, browserUaCode);
             }
-            if (appUaCode == -1) {
+            if (appUaCode == -1 || appUaCode >= UserAgentUtils.devices.length) {
                 appUaCode = ThreadLocalRandom.current().nextInt(0, UserAgentUtils.devices.length);
                 settingsHelper.putInteger(Constants.APP_UA_CODE, appUaCode);
             }

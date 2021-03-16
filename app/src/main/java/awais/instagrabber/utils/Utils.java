@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
@@ -28,10 +29,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
@@ -346,5 +350,16 @@ public final class Utils {
         } catch (Exception e) {
             Log.e(TAG, "hideKeyboard: ", e);
         }
+    }
+
+    public static Drawable getAnimatableDrawable(@NonNull final Context context,
+                                                 @DrawableRes final int drawableResId) {
+        final Drawable drawable;
+        if (Build.VERSION.SDK_INT >= 24) {
+            drawable = ContextCompat.getDrawable(context, drawableResId);
+        } else {
+            drawable = AnimatedVectorDrawableCompat.create(context, drawableResId);
+        }
+        return drawable;
     }
 }
