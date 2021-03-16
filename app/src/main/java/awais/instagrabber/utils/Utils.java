@@ -93,18 +93,14 @@ public final class Utils {
     }
 
     public static Map<String, String> sign(final Map<String, Object> form) {
-        final String signed = sign(new JSONObject(form).toString());
+        final String signed = sign(Constants.SIGNATURE_KEY, new JSONObject(form).toString());
         if (signed == null) {
             return null;
         }
         final Map<String, String> map = new HashMap<>();
         map.put("ig_sig_key_version", Constants.SIGNATURE_VERSION);
-        map.put("signed_body", signed.split("&signed_body=")[1]);
+        map.put("signed_body", signed);
         return map;
-    }
-
-    public static String sign(final String message) {
-        return sign(Constants.SIGNATURE_KEY, message);
     }
 
     public static String sign(final String key, final String message) {
@@ -118,7 +114,7 @@ public final class Utils {
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            return "ig_sig_key_version=" + Constants.SIGNATURE_VERSION + "&signed_body=" + hexString.toString() + "." + message;
+            return hexString.toString() + "." + message;
         } catch (Exception e) {
             Log.e(TAG, "Error signing", e);
             return null;
