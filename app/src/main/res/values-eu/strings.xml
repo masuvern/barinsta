@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Atsegina kendu mezuari</string>
     <string name="dms_inbox_unsend">Ezabatu mezua</string>
     <string name="dms_inbox_author">Ikusi MZren autorearen profila</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
     <string name="dms_inbox_shared_image">%s shared an image</string>
     <string name="dms_inbox_shared_video">%s shared a video</string>
