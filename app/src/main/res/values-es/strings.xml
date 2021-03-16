@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Quitar \"me gusta\" al mensaje</string>
     <string name="dms_inbox_unsend">Cancelar envío de mensaje</string>
     <string name="dms_inbox_author">Ver perfil del autor</string>
+    <string name="dms_inbox_giphy">Ver en GIPHY</string>
     <string name="dms_inbox_shared_post">%s ha compartido una publicación de @%s</string>
     <string name="dms_inbox_shared_image">%s compartió una imagen</string>
     <string name="dms_inbox_shared_video">%s compartió un vídeo</string>
