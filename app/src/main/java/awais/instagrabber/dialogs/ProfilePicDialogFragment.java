@@ -41,19 +41,25 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class ProfilePicDialogFragment extends DialogFragment {
     private static final String TAG = "ProfilePicDlgFragment";
 
-    private final long id;
-    private final String name;
-    private final String fallbackUrl;
+    private long id;
+    private String name;
+    private String fallbackUrl;
 
     private boolean isLoggedIn;
     private DialogProfilepicBinding binding;
     private String url;
 
-    public ProfilePicDialogFragment(final long id, final String name, final String fallbackUrl) {
-        this.id = id;
-        this.name = name;
-        this.fallbackUrl = fallbackUrl;
+    public static ProfilePicDialogFragment getInstance(final long id, final String name, final String fallbackUrl) {
+        final Bundle args = new Bundle();
+        args.putLong("id", id);
+        args.putString("name", name);
+        args.putString("fallbackUrl", fallbackUrl);
+        final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+
+    public ProfilePicDialogFragment() {}
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
@@ -94,6 +100,14 @@ public class ProfilePicDialogFragment extends DialogFragment {
     }
 
     private void init() {
+        final Bundle arguments = getArguments();
+        if (arguments == null) {
+            dismiss();
+            return;
+        }
+        id = arguments.getLong("id");
+        name = arguments.getString("name");
+        fallbackUrl = arguments.getString("fallbackUrl");
         binding.download.setOnClickListener(v -> {
             final Context context = getContext();
             if (context == null) return;
@@ -127,11 +141,12 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 @Override
                 public void onFailure(final Throwable t) {
                     final Context context = getContext();
-                    try {
-                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (context == null) {
+                        dismiss();
+                        return;
                     }
-                    catch(final Throwable e) {}
-                    getDialog().dismiss();
+                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    dismiss();
                 }
             });
         } else setupPhoto(fallbackUrl);

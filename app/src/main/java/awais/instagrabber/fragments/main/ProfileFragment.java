@@ -375,8 +375,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (profileModel != null) {
                 restrictMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
                 restrictMenuItem.setTitle(profileModel.getFriendshipStatus().isRestricted() ? R.string.unrestrict : R.string.restrict);
-            }
-            else {
+            } else {
                 restrictMenuItem.setVisible(false);
             }
         }
@@ -394,8 +393,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (profileModel != null) {
                 mutePostsMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
                 mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.mute_posts : R.string.unmute_posts);
-            }
-            else {
+            } else {
                 mutePostsMenuItem.setVisible(false);
             }
         }
@@ -403,8 +401,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (chainingMenuItem != null) {
             if (profileModel != null) {
                 chainingMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
-            }
-            else {
+            } else {
                 chainingMenuItem.setVisible(false);
             }
         }
@@ -641,11 +638,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 final Context context = getContext();
                 try {
                     if (t == null) Toast.makeText(context,
-                            isLoggedIn ? R.string.error_loading_profile_loggedin : R.string.error_loading_profile,
-                            Toast.LENGTH_LONG).show();
+                                                  isLoggedIn ? R.string.error_loading_profile_loggedin : R.string.error_loading_profile,
+                                                  Toast.LENGTH_LONG).show();
                     else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-                catch(final Throwable e) {}
+                } catch (final Throwable e) {}
             }
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -784,8 +780,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String biography = profileModel.getBiography();
         if (TextUtils.isEmpty(biography)) {
             profileDetailsBinding.mainBiography.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             profileDetailsBinding.mainBiography.setVisibility(View.VISIBLE);
             profileDetailsBinding.mainBiography.setText(biography);
             profileDetailsBinding.mainBiography.addOnHashtagListener(autoLinkItem -> {
@@ -855,15 +850,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         String profileContext = profileModel.getProfileContext();
         if (TextUtils.isEmpty(profileContext)) {
             profileDetailsBinding.profileContext.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             profileDetailsBinding.profileContext.setVisibility(View.VISIBLE);
             final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinks();
             for (int i = 0; i < userProfileContextLinks.size(); i++) {
                 final UserProfileContextLink link = userProfileContextLinks.get(i);
                 if (link.getUsername() != null)
                     profileContext = profileContext.substring(0, link.getStart() + i)
-                                     + "@" + profileContext.substring(link.getStart() + i);
+                            + "@" + profileContext.substring(link.getStart() + i);
             }
             profileDetailsBinding.profileContext.setText(profileContext);
             profileDetailsBinding.profileContext.addOnMentionClickListener(autoLinkItem -> {
@@ -921,13 +915,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 profileDetailsBinding.btnTagged.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnSaved.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnLiked.setVisibility(View.VISIBLE);
-//                profileDetailsBinding.btnDM.setVisibility(View.GONE);
+                // profileDetailsBinding.btnDM.setVisibility(View.GONE);
                 profileDetailsBinding.btnSaved.setText(R.string.saved);
                 return;
             }
             profileDetailsBinding.btnSaved.setVisibility(View.GONE);
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
-//            profileDetailsBinding.btnDM.setVisibility(View.VISIBLE);
+            // profileDetailsBinding.btnDM.setVisibility(View.VISIBLE);
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
@@ -1037,8 +1031,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                         }))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
-            }
-            else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
+            } else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
                 friendshipService.unfollow(
                         profileModel.getPk(),
                         new ServiceCallback<FriendshipChangeResponse>() {
@@ -1086,27 +1079,27 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-//        profileDetailsBinding.btnDM.setOnClickListener(v -> {
-//            profileDetailsBinding.btnDM.setEnabled(false);
-//            new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
-//                if (thread == null) {
-//                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-//                    profileDetailsBinding.btnDM.setEnabled(true);
-//                    return;
-//                }
-//                if (isAdded()) {
-//                    final Bundle bundle = new Bundle();
-//                    bundle.putString("threadId", thread.getThreadId());
-//                    bundle.putString("title", thread.getThreadTitle());
-//                    if (isAdded()) {
-//                        final NavDirections action = ProfileFragmentDirections
-//                                .actionProfileFragmentToDMThreadFragment(thread.getThreadId(), profileModel.getUsername());
-//                        NavHostFragment.findNavController(this).navigate(action);
-//                    }
-//                }
-//                profileDetailsBinding.btnDM.setEnabled(true);
-//            }).execute();
-//        });
+        // profileDetailsBinding.btnDM.setOnClickListener(v -> {
+        //     profileDetailsBinding.btnDM.setEnabled(false);
+        //     new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
+        //         if (thread == null) {
+        //             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+        //             profileDetailsBinding.btnDM.setEnabled(true);
+        //             return;
+        //         }
+        //         if (isAdded()) {
+        //             final Bundle bundle = new Bundle();
+        //             bundle.putString("threadId", thread.getThreadId());
+        //             bundle.putString("title", thread.getThreadTitle());
+        //             if (isAdded()) {
+        //                 final NavDirections action = ProfileFragmentDirections
+        //                         .actionProfileFragmentToDMThreadFragment(thread.getThreadId(), profileModel.getUsername());
+        //                 NavHostFragment.findNavController(this).navigate(action);
+        //             }
+        //         }
+        //         profileDetailsBinding.btnDM.setEnabled(true);
+        //     }).execute();
+        // });
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic
@@ -1149,7 +1142,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void showProfilePicDialog() {
         if (profileModel != null) {
             final FragmentManager fragmentManager = getParentFragmentManager();
-            final ProfilePicDialogFragment fragment = new ProfilePicDialogFragment(profileModel.getPk(), username, profileModel.getProfilePicUrl());
+            final ProfilePicDialogFragment fragment = ProfilePicDialogFragment.getInstance(profileModel.getPk(),
+                                                                                           username,
+                                                                                           profileModel.getProfilePicUrl());
             final FragmentTransaction ft = fragmentManager.beginTransaction();
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
               .add(fragment, "profilePicDialog")
