@@ -178,6 +178,7 @@
     <string name="dms_inbox_unlike">सन्देश को पसन्द न करें</string>
     <string name="dms_inbox_unsend">सन्देश को प्रेरण न करें</string>
     <string name="dms_inbox_author">लेखक प्रोफाइल देखें</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
     <string name="dms_inbox_shared_image">%s shared an image</string>
     <string name="dms_inbox_shared_video">%s shared a video</string>
