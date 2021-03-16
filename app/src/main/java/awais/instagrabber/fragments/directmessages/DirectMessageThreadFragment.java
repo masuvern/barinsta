@@ -1424,6 +1424,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 ObjectAnimator.ofFloat(binding.inputBg, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.recordView, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.emojiToggle, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.gif, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.gallery, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.camera, TRANSLATION_Y, -height),
                 ObjectAnimator.ofFloat(binding.send, TRANSLATION_Y, -height),
