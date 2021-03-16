@@ -261,7 +261,6 @@
     <string name="liked_notif">Polubiono twój post</string>
     <string name="comment_notif">Skomentowano Twój post:</string>
     <string name="follow_notif">Zaczął Cię obserwować</string>
-    <string name="mention_notif">Wspomniał o Tobie:</string>
     <string name="tagged_notif">Oznaczono cię w poście</string>
     <string name="request_notif">Poproszono o zgodę na obserwowanie</string>
     <string name="request_approve">Potwierdź</string>
@@ -285,6 +284,8 @@
     <string name="activity_count_commentlikes">%d polubionych komentarzy</string>
     <string name="activity_count_usertags">%d tagów użytkowników</string>
     <string name="activity_count_likes">%d polubień</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Wylogowałeś się przed kliknięciem tego powiadomienia?!</string>
     <string name="feed">Aktualności</string>
     <string name="profile">Profil</string>
