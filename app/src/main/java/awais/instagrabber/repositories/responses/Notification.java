@@ -4,11 +4,11 @@ import awais.instagrabber.models.enums.NotificationType;
 
 public class Notification {
     private final NotificationArgs args;
-    private final String storyType;
+    private final int storyType;
     private final String pk;
 
     public Notification(final NotificationArgs args,
-                        final String storyType,
+                        final int storyType,
                         final String pk) {
         this.args = args;
         this.storyType = storyType;

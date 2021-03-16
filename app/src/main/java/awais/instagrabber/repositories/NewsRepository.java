@@ -14,17 +14,14 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface NewsRepository {
-
-    @GET("https://www.instagram.com/accounts/activity/?__a=1")
-    Call<String> webInbox(@Header("User-Agent") String userAgent);
-
     @GET("/api/v1/news/inbox/")
-    Call<NewsInboxResponse> appInbox(@Header("User-Agent") String userAgent, @Query(value = "mark_as_seen", encoded = true) boolean markAsSeen);
+    Call<NewsInboxResponse> appInbox(@Query(value = "mark_as_seen", encoded = true) boolean markAsSeen,
+                                     @Header(value = "x-ig-app-id") String xIgAppId);
 
     @FormUrlEncoded
     @POST("/api/v1/discover/ayml/")
-    Call<AymlResponse> getAyml(@Header("User-Agent") String userAgent, @FieldMap final Map<String, String> form);
+    Call<AymlResponse> getAyml(@FieldMap final Map<String, String> form);
 
     @GET("/api/v1/discover/chaining/")
-    Call<UserSearchResponse> getChaining(@Header("User-Agent") String userAgent, @Query(value = "target_id") long targetId);
+    Call<UserSearchResponse> getChaining(@Query(value = "target_id") long targetId);
 }

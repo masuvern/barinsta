@@ -470,8 +470,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         if (item.getItemId() == R.id.chaining) {
             if (!isLoggedIn) return false;
-            final NavDirections navDirections = ProfileFragmentDirections.actionGlobalNotificationsViewerFragment("chaining", profileModel.getPk());
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            final Bundle bundle = new Bundle();
+            bundle.putString("type", "chaining");
+            bundle.putLong("targetId", profileModel.getPk());
+            NavHostFragment.findNavController(this).navigate(R.id.action_global_notificationsViewerFragment, bundle);
             return true;
         }
         if (item.getItemId() == R.id.mute_stories) {

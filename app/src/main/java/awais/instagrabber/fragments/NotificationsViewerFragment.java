@@ -31,10 +31,8 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
 import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListener;
-import awais.instagrabber.asyncs.NotificationsFetcher;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
-import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
@@ -260,22 +258,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         switch (type) {
             case "notif":
                 if (actionBar != null) actionBar.setTitle(R.string.action_notif);
-                new NotificationsFetcher(true, new FetchListener<List<Notification>>() {
-                    @Override
-                    public void onResult(final List<Notification> notificationModels) {
-                        binding.swipeRefreshLayout.setRefreshing(false);
-                        notificationViewModel.getList().postValue(notificationModels);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        try {
-                            binding.swipeRefreshLayout.setRefreshing(false);
-                            Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        catch(Throwable e) {}
-                    }
-                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                newsService.fetchAppInbox(true, cb);
                 break;
             case "ayml":
                 if (actionBar != null) actionBar.setTitle(R.string.action_ayml);

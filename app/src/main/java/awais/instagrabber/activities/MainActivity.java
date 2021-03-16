@@ -709,7 +709,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (currentNavControllerLiveData == null) return;
         final NavController navController = currentNavControllerLiveData.getValue();
         if (navController == null) return;
-        navController.navigate(R.id.action_global_notificationsViewerFragment);
+        final Bundle bundle = new Bundle();
+        bundle.putString("type", "notif");
+        navController.navigate(R.id.action_global_notificationsViewerFragment, bundle);
     }
 
     private void bindActivityCheckerService() {

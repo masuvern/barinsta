@@ -113,4 +113,6 @@ public final class Constants {
 
     public static final String DM_THREAD_ACTION_EXTRA_THREAD_ID = "thread_id";
     public static final String DM_THREAD_ACTION_EXTRA_THREAD_TITLE = "thread_title";
+
+    public static final String X_IG_APP_ID = "936619743392459";
 }

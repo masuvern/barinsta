@@ -256,7 +256,6 @@
     <string name="liked_notif">Liked your post</string>
     <string name="comment_notif">Commented on your post:</string>
     <string name="follow_notif">Started following you</string>
-    <string name="mention_notif">Mentioned you:</string>
     <string name="tagged_notif">Tagged you in a post</string>
     <string name="request_notif">Requested following you</string>
     <string name="request_approve">Approve request</string>
@@ -282,6 +281,8 @@
     <string name="activity_count_commentlikes">%d comment likes</string>
     <string name="activity_count_usertags">%d usertags</string>
     <string name="activity_count_likes">%d likes</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">You logged out before clicking this notification?!</string>
     <string name="feed">Feed</string>
     <string name="profile">Profile</string>

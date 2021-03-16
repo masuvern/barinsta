@@ -16,6 +16,7 @@
             app:nullable="false" />
         <argument
             android:name="targetId"
+            android:defaultValue="0L"
             app:argType="long" />
         <action
             android:id="@+id/action_notificationsViewerFragment_to_storyViewerFragment"
@@ -29,6 +30,10 @@
             android:name="type"
             app:argType="string"
             app:nullable="false" />
+        <argument
+            android:name="targetId"
+            android:defaultValue="0L"
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/comments_nav_graph" />

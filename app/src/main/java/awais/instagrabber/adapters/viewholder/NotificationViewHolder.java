@@ -30,12 +30,8 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
             case LIKE:
                 text = R.string.liked_notif;
                 break;
-            case COMMENT:
+            case COMMENT: // untested
                 text = R.string.comment_notif;
-                subtext = args.getText();
-                break;
-            case COMMENT_MENTION:
-                text = R.string.mention_notif;
                 subtext = args.getText();
                 break;
             case TAGGED:
@@ -46,8 +42,8 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
                 break;
             case REQUEST:
                 text = R.string.request_notif;
-                subtext = args.getText();
                 break;
+            case COMMENT_MENTION:
             case COMMENT_LIKE:
             case TAGGED_COMMENT:
             case RESPONDED_STORY:
@@ -70,7 +66,7 @@ public final class NotificationViewHolder extends RecyclerView.ViewHolder {
         }
 
         binding.tvDate.setVisibility(model.getType() == NotificationType.AYML ? View.GONE : View.VISIBLE);
-        if (model.getType() != NotificationType.REQUEST && model.getType() != NotificationType.AYML) {
+        if (model.getType() != NotificationType.AYML) {
             binding.tvDate.setText(args.getDateTime());
         }
 

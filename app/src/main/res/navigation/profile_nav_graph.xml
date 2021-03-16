@@ -82,6 +82,7 @@
             app:nullable="false" />
         <argument
             android:name="targetId"
+            android:defaultValue="0L"
             app:argType="long" />
     </action>
 
