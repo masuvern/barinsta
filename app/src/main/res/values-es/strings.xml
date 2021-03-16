@@ -182,7 +182,7 @@
     <string name="dms_inbox_shared_video">%s compartió un vídeo</string>
     <string name="dms_inbox_shared_message">%s envió un mensaje</string>
     <string name="dms_inbox_shared_gif">%s compartió un gif</string>
-    <string name="dms_inbox_shared_sticker">%s shared a sticker</string>
+    <string name="dms_inbox_shared_sticker">%s compartió un sticker</string>
     <string name="dms_inbox_shared_profile">%s compartió un perfil: @%s</string>
     <string name="dms_inbox_shared_location">%s compartió una ubicación: %s</string>
     <string name="dms_inbox_shared_highlight">%s compartió una historia destacada de @%s</string>
@@ -466,16 +466,16 @@
     <string name="decline">Rechazar</string>
     <string name="accept">Aceptar</string>
     <string name="you">Tú</string>
-    <string name="no_pending_requests">No pending requests</string>
-    <string name="checking_for_new_messages">Checking for new messages</string>
-    <string name="pref_category_stories">Stories</string>
-    <string name="pref_category_dm">DM</string>
-    <string name="pref_category_notifications">Notifications</string>
-    <string name="pref_category_post">Post</string>
-    <string name="enable_dm_notifications">Enable DM notifications</string>
-    <string name="enable_dm_auto_refesh">Auto refresh messages</string>
-    <string name="auto_refresh_every">Auto refresh every</string>
-    <string name="secs">secs</string>
+    <string name="no_pending_requests">No hay solicitudes pendientes</string>
+    <string name="checking_for_new_messages">Comprobando mensajes nuevos</string>
+    <string name="pref_category_stories">Historias</string>
+    <string name="pref_category_dm">MD</string>
+    <string name="pref_category_notifications">Notificaciones</string>
+    <string name="pref_category_post">Publicación</string>
+    <string name="enable_dm_notifications">Habilitar notificaciones de MDs</string>
+    <string name="enable_dm_auto_refesh">Autorefrescar mensajes</string>
+    <string name="auto_refresh_every">Autorefrescar cada</string>
+    <string name="secs">segs</string>
     <string name="mins">mins</string>
-    <string name="search_giphy">Search GIPHY</string>
+    <string name="search_giphy">Buscar GIPHY</string>
 </resources>
