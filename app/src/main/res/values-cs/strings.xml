@@ -185,6 +185,7 @@
     <string name="dms_inbox_unlike">Zpráva se mi nelíbí</string>
     <string name="dms_inbox_unsend">Zrušit odeslání zprávy</string>
     <string name="dms_inbox_author">Zobrazit profil autora</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
     <string name="dms_inbox_shared_image">%s shared an image</string>
     <string name="dms_inbox_shared_video">%s shared a video</string>
