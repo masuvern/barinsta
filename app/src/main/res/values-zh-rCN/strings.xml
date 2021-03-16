@@ -249,7 +249,6 @@
     <string name="liked_notif">赞了你的帖子</string>
     <string name="comment_notif">评论了你的帖子</string>
     <string name="follow_notif">关注了您</string>
-    <string name="mention_notif">提到了您</string>
     <string name="tagged_notif">在帖子中标记了你</string>
     <string name="request_notif">请求关注您</string>
     <string name="request_approve">同意请求</string>
@@ -273,6 +272,8 @@
     <string name="activity_count_commentlikes">%d 个评论点赞</string>
     <string name="activity_count_usertags">%d 个帖子提到了您</string>
     <string name="activity_count_likes">%d 个赞</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">您在点击此通知前登出了？！</string>
     <string name="feed">动态</string>
     <string name="profile">用户</string>
