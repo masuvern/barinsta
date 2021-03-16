@@ -173,6 +173,7 @@
     <string name="dms_inbox_unlike">Batal sukai pesan</string>
     <string name="dms_inbox_unsend">Batalkan pengiriman pesan</string>
     <string name="dms_inbox_author">Lihat profil pengirim</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s berbagi kiriman @%s</string>
     <string name="dms_inbox_shared_image">%s membagikan sebuah gambar</string>
     <string name="dms_inbox_shared_video">%s membagikan sebuah video</string>
