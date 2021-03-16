@@ -43,14 +43,15 @@ public final class FeedAdapterV2 extends ListAdapter<Media, RecyclerView.ViewHol
     private static final DiffUtil.ItemCallback<Media> DIFF_CALLBACK = new DiffUtil.ItemCallback<Media>() {
         @Override
         public boolean areItemsTheSame(@NonNull final Media oldItem, @NonNull final Media newItem) {
-            return oldItem.getPk().equals(newItem.getPk());
+            return Objects.equals(oldItem.getPk(), newItem.getPk());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull final Media oldItem, @NonNull final Media newItem) {
             final Caption oldItemCaption = oldItem.getCaption();
             final Caption newItemCaption = newItem.getCaption();
-            return oldItem.getPk().equals(newItem.getPk()) && Objects.equals(getCaptionText(oldItemCaption), getCaptionText(newItemCaption));
+            return Objects.equals(oldItem.getPk(), newItem.getPk())
+                    && Objects.equals(getCaptionText(oldItemCaption), getCaptionText(newItemCaption));
         }
 
         private String getCaptionText(final Caption caption) {
