@@ -185,6 +185,7 @@
     <string name="dms_inbox_unlike">Перестать любить сообщение</string>
     <string name="dms_inbox_unsend">Отменить отправку сообщения</string>
     <string name="dms_inbox_author">Просмотреть профиль автора</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s поделился(-лась) постом @%s</string>
     <string name="dms_inbox_shared_image">%s поделился(-лась) изображением</string>
     <string name="dms_inbox_shared_video">%s поделился(-лась) видео</string>
