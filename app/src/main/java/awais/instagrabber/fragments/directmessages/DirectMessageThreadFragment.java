@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -57,6 +58,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
@@ -86,6 +88,7 @@ import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
@@ -97,6 +100,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemVisual
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.PermissionUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -121,6 +125,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private ConstraintLayout root;
     private boolean shouldRefresh = true;
     private List<DirectItemOrHeader> itemOrHeaders;
+    private List<User> users;
     private FragmentDirectMessagesThreadBinding binding;
     private Tooltip tooltip;
     private float initialSendX;
@@ -257,6 +262,19 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                         .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
                 final NavController navController = NavHostFragment.findNavController(DirectMessageThreadFragment.this);
                 navController.navigate(actionGlobalUserSearch);
+            }
+            if (itemId == R.id.detail) {
+                final Context context = getContext();
+                if (context == null) return;
+                final DirectItemType itemType = item.getItemType();
+                switch (itemType) {
+                    case ANIMATED_MEDIA:
+                        Utils.openURL(context, "https://giphy.com/gifs/" + item.getAnimatedMedia().getId());
+                        break;
+                    case VOICE_MEDIA:
+                        downloadItem(item.getVoiceMedia() == null ? null : item.getVoiceMedia().getMedia(), context);
+                        break;
+                }
             }
         }
     };
@@ -906,6 +924,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         itemsAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         binding.chats.setAdapter(itemsAdapter);
         registerDataObserver();
+        users = thread.getUsers();
         final List<DirectItem> items = viewModel.getItems().getValue();
         if (items != null && itemsAdapter.getItems() != items) {
             submitItemsToAdapter(items);
@@ -1230,25 +1249,19 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         appExecutors.mainThread().execute(prevTitleRunnable, 1000);
     }
 
-    // private void downloadItem(final Context context) {
-    //     final DirectUser user = getUser(directItemModel.getUserId());
-    //     final DirectItemMediaModel selectedItem = directItemModel.getItemType() == DirectItemType.MEDIA
-    //                                               ? (DirectItemMediaModel) directItemModel.getMediaModel()
-    //                                               : ((DirectItemRavenMediaModel) directItemModel.getMediaModel()).getMedia();
-    //     final String url = selectedItem.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
-    //                        ? selectedItem.getVideoUrl()
-    //                        : selectedItem.getThumbUrl();
-    //     if (url == null) {
-    //         Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-    //     } else {
-    //         if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-    //             DownloadUtils.dmDownload(context, user != null ? user.getUsername() : "", selectedItem.getId(), url);
-    //         } else {
-    //             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
-    //         }
-    //         Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
-    //     }
-    // }
+    // currently ONLY for voice
+    private void downloadItem(final Media media, final Context context) {
+        if (media == null) {
+            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+        } else {
+            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+                DownloadUtils.download(context, media);
+            } else {
+                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            }
+            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+        }
+    }
 
     // private void sendText(final String text, final String itemId, final boolean delete) {
     //     DirectThreadBroadcaster.TextBroadcastOptions textOptions = null;
@@ -1339,14 +1352,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     //     broadcaster.execute(broadcastOptions);
     // }
 
-    // @NonNull
-    // private DirectUser getUser(final long userId) {
-    //     for (final DirectUser user : users) {
-    //         if (userId != user.getPk()) continue;
-    //         return user;
-    //     }
-    //     return null;
-    // }
+    @NonNull
+    private User getUser(final long userId) {
+        for (final User user : users) {
+            if (userId != user.getPk()) continue;
+            return user;
+        }
+        return null;
+    }
 
     // private void searchUsername(final String text) {
     //     final Bundle bundle = new Bundle();

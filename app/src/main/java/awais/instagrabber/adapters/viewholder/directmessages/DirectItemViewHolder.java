@@ -543,6 +543,15 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         if (thread.getInputMode() != 1 && messageDirection == MessageDirection.OUTGOING) {
             builder.add(new DirectItemContextMenu.MenuItem(R.id.unsend, R.string.dms_inbox_unsend));
         }
+        final DirectItemType itemType = item.getItemType();
+        switch (itemType) {
+            case ANIMATED_MEDIA:
+                builder.add(new DirectItemContextMenu.MenuItem(R.id.detail, R.string.dms_inbox_giphy));
+                break;
+            case VOICE_MEDIA:
+                builder.add(new DirectItemContextMenu.MenuItem(R.id.detail, R.string.action_download));
+                break;
+        }
         final boolean showReactions = thread.getInputMode() != 1 && allowReaction();
         final ImmutableList<DirectItemContextMenu.MenuItem> menuItems = builder.build();
         if (!showReactions && menuItems.isEmpty()) return;

@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import awais.instagrabber.R;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.Audio;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
@@ -89,17 +90,17 @@ public final class DownloadUtils {
         return dir;
     }
 
-    public static void dmDownload(@NonNull final Context context,
-                                  @Nullable final String username,
-                                  final String modelId,
-                                  final String url) {
-        if (url == null) return;
-        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-            dmDownloadImpl(context, username, modelId, url);
-        } else if (context instanceof Activity) {
-            ActivityCompat.requestPermissions((Activity) context, PERMS, 8020);
-        }
-    }
+//    public static void dmDownload(@NonNull final Context context,
+//                                  @Nullable final String username,
+//                                  final String modelId,
+//                                  final String url) {
+//        if (url == null) return;
+//        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+//            dmDownloadImpl(context, username, modelId, url);
+//        } else if (context instanceof Activity) {
+//            ActivityCompat.requestPermissions((Activity) context, PERMS, 8020);
+//        }
+//    }
 
     private static void dmDownloadImpl(@NonNull final Context context,
                                        @Nullable final String username,
@@ -303,6 +304,17 @@ public final class DownloadUtils {
                     map.put(url, file.getAbsolutePath());
                     break;
                 }
+                case MEDIA_TYPE_VOICE: {
+                    final String url = getUrlOfType(media);
+                    String fileName = media.getId();
+                    final User user = media.getUser();
+                    if (user != null) {
+                        fileName = user.getUsername() + "_" + fileName;
+                    }
+                    final File file = getDownloadSaveFile(downloadDir, fileName, url);
+                    map.put(url, file.getAbsolutePath());
+                    break;
+                }
                 case MEDIA_TYPE_SLIDER:
                     final List<Media> sliderItems = media.getCarouselMedia();
                     for (int i = 0; i < sliderItems.size(); i++) {
@@ -335,6 +347,14 @@ public final class DownloadUtils {
                     if (videoVersion != null) {
                         url = videoVersion.getUrl();
                     }
+                }
+                return url;
+            }
+            case MEDIA_TYPE_VOICE: {
+                final Audio audio = media.getAudio();
+                String url = null;
+                if (audio != null) {
+                    url = audio.getAudioSrc();
                 }
                 return url;
             }
