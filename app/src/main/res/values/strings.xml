@@ -180,6 +180,7 @@
     <string name="dms_inbox_unlike">Unlike message</string>
     <string name="dms_inbox_unsend">Unsend message</string>
     <string name="dms_inbox_author">View author profile</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s shared a post by @%s</string>
     <string name="dms_inbox_shared_image">%s shared an image</string>
     <string name="dms_inbox_shared_video">%s shared a video</string>
