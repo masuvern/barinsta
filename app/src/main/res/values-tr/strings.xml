@@ -177,6 +177,7 @@
     <string name="dms_inbox_unlike">Mesaj beğenini geri al</string>
     <string name="dms_inbox_unsend">Gönderilen mesajı geri al</string>
     <string name="dms_inbox_author">Yazarın profilini göster</string>
+    <string name="dms_inbox_giphy">View on GIPHY</string>
     <string name="dms_inbox_shared_post">%s, @%s tarafından bir gönderi paylaştı</string>
     <string name="dms_inbox_shared_image">%s bir resim paylaştı</string>
     <string name="dms_inbox_shared_video">%s bir video paylaştı</string>
