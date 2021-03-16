@@ -254,7 +254,6 @@
     <string name="liked_notif">پیک شما را پسندید</string>
     <string name="comment_notif">کامنت رو پست شما گذاشته:</string>
     <string name="follow_notif">شروع به دنبال کردن شما کرده</string>
-    <string name="mention_notif">به شما اشاره کرده:</string>
     <string name="tagged_notif">Tagged you in a post</string>
     <string name="request_notif">درخواست دنبال کردن شما را کرده</string>
     <string name="request_approve">قبول درخواست</string>
@@ -278,6 +277,8 @@
     <string name="activity_count_commentlikes">%d پسند دیدگاه</string>
     <string name="activity_count_usertags">%d تگ های کاربر</string>
     <string name="activity_count_likes">%d پسندها</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">شما خارج شدید قبل از اینکه بروی این اعلان کلیک کنید؟</string>
     <string name="feed">پست</string>
     <string name="profile">نمایه</string>
