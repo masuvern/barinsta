@@ -30,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -1204,7 +1203,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private void setSendToMicIcon() {
         final Context context = getContext();
         if (context == null) return;
-        final Drawable sendToMicDrawable = ContextCompat.getDrawable(context, R.drawable.avd_send_to_mic_anim);
+        final Drawable sendToMicDrawable = Utils.getAnimatableDrawable(context, R.drawable.avd_send_to_mic_anim);
         if (sendToMicDrawable instanceof Animatable) {
             AnimatedVectorDrawableCompat.registerAnimationCallback(sendToMicDrawable, sendToMicAnimationCallback);
         }
@@ -1214,7 +1213,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private void setMicToSendIcon() {
         final Context context = getContext();
         if (context == null) return;
-        final Drawable micToSendDrawable = ContextCompat.getDrawable(context, R.drawable.avd_mic_to_send_anim);
+        final Drawable micToSendDrawable = Utils.getAnimatableDrawable(context, R.drawable.avd_mic_to_send_anim);
         if (micToSendDrawable instanceof Animatable) {
             AnimatedVectorDrawableCompat.registerAnimationCallback(micToSendDrawable, micToSendAnimationCallback);
         }
