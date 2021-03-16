@@ -29,7 +29,7 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
         super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
         this.feedItemCallback = feedItemCallback;
-        binding.itemFeedBottom.tvVideoViews.setVisibility(View.GONE);
+        binding.itemFeedBottom.btnViews.setVisibility(View.GONE);
         // binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
         final ViewGroup.LayoutParams layoutParams = binding.mediaList.getLayoutParams();
         layoutParams.height = Utils.displayMetrics.widthPixels + 1;

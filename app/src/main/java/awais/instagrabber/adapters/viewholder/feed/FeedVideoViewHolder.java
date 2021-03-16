@@ -50,7 +50,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
         super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
         this.feedItemCallback = feedItemCallback;
-        binding.itemFeedBottom.tvVideoViews.setVisibility(View.VISIBLE);
+        binding.itemFeedBottom.btnViews.setVisibility(View.VISIBLE);
         handler = new Handler(Looper.getMainLooper());
         final Context context = binding.getRoot().getContext();
         dataSourceFactory = new DefaultDataSourceFactory(context, "instagram");
