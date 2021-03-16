@@ -253,7 +253,6 @@
     <string name="liked_notif">Gönderini beğendi</string>
     <string name="comment_notif">Gönderine yorum yaptı:</string>
     <string name="follow_notif">Seni takip etmeye başladı</string>
-    <string name="mention_notif">Senden bahsetti:</string>
     <string name="tagged_notif">Seni bir gönderide etiketledi</string>
     <string name="request_notif">Seni takip etmek istiyor</string>
     <string name="request_approve">İsteği onayla</string>
@@ -277,6 +276,8 @@
     <string name="activity_count_commentlikes">%d yorum beğenisi</string>
     <string name="activity_count_usertags">%d kullanıcı etiketi</string>
     <string name="activity_count_likes">%d beğeni</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Bu bildirime tıklamadan önce çıkış yaptın?!</string>
     <string name="feed">Akış</string>
     <string name="profile">Profil</string>
