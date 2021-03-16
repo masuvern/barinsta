@@ -47,6 +47,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -109,6 +110,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private boolean isActivityCheckerServiceBound = false;
     private boolean isBackStackEmpty = false;
     private boolean isLoggedIn;
+    private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -143,6 +145,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
         createNotificationChannels();
+        try {
+            final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();
+            //noinspection unchecked
+            behavior = (HideBottomViewOnScrollBehavior<BottomNavigationView>) layoutParams.getBehavior();
+        } catch (Exception e) {
+            Log.e(TAG, "onCreate: ", e);
+        }
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
@@ -499,7 +508,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final int destinationId = destination.getId();
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
-            binding.bottomNavView.setVisibility(SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId) ? View.VISIBLE : View.GONE);
+            final boolean contains = SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId);
+            binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
+            if (contains && behavior != null) {
+                behavior.slideUp(binding.bottomNavView);
+            }
 
             // explicitly hide keyboard when we navigate
             final View view = getCurrentFocus();
