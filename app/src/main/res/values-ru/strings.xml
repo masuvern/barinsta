@@ -261,7 +261,6 @@
     <string name="liked_notif">Понравилась ваша публикация</string>
     <string name="comment_notif">Прокомментировал вашу публикацию:</string>
     <string name="follow_notif">Подписался на вас</string>
-    <string name="mention_notif">Упомянул вас:</string>
     <string name="tagged_notif">Отметил вас в публикации</string>
     <string name="request_notif">Запрашивается подписаться</string>
     <string name="request_approve">Одобрить запрос</string>
@@ -285,6 +284,8 @@
     <string name="activity_count_commentlikes">%d симпатий к комментарию</string>
     <string name="activity_count_usertags">%d меток пользователя</string>
     <string name="activity_count_likes">%d нравится</string>
+    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_requests">%d follow requests</string>
     <string name="activity_notloggedin">Вы вышли из системы перед нажатием на это уведомление?!</string>
     <string name="feed">Лента новостей</string>
     <string name="profile">Профиль</string>
