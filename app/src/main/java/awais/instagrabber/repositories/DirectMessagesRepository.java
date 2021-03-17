@@ -32,7 +32,7 @@ public interface DirectMessagesRepository {
     Call<DirectThreadFeedResponse> fetchThread(@Path("threadId") String threadId,
                                                @QueryMap Map<String, Object> queryMap);
 
-    @GET("/api/v1/direct_v2/get_badge_count/")
+    @GET("/api/v1/direct_v2/get_badge_count/?no_raven=1")
     Call<DirectBadgeCount> fetchUnseenCount();
 
     @FormUrlEncoded

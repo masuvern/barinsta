@@ -44,9 +44,9 @@ public final class DMUtils {
 
     public static boolean isRead(@NonNull final DirectThread thread) {
         final boolean read;
-        if (thread.getDirectStory() != null) {
-            return false;
-        }
+//        if (thread.getDirectStory() != null) {
+//            return false;
+//        }
         final DirectItem item = thread.getFirstDirectItem();
         final long viewerId = thread.getViewerId();
         if (item != null && item.getUserId() == viewerId) {
