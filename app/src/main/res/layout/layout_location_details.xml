@@ -100,7 +100,7 @@
         android:id="@+id/locationUrl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/mainBiography"
+        android:layout_below="@id/locationBiography"
         android:ellipsize="marquee"
         android:padding="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
