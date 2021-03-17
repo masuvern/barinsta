@@ -9,7 +9,7 @@
     <string name="clipboard_error">Metin kopyalanamadı</string>
     <string name="clipboard_copied">Panoya kopyalandı!</string>
     <string name="report">Bildir</string>
-    <string name="set_password">Protect file with password</string>
+    <string name="set_password">Dosyayı parola ile koru</string>
     <string name="password_no_max">Şifre</string>
     <string name="ok">Tamam</string>
     <string name="yes">Evet</string>
@@ -47,7 +47,7 @@
     <string name="select_language">Dil</string>
     <plurals name="main_posts_count">
         <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\nGönderi</item>
     </plurals>
     <plurals name="main_posts_count_inline">
         <item quantity="one">%s Post</item>
