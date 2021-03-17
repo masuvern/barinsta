@@ -216,6 +216,7 @@
     <string name="dms_inbox_raven_media_suggested">Предложено</string>
     <string name="dms_inbox_raven_media_screenshot">Сделан снимок экрана</string>
     <string name="dms_inbox_raven_media_cant_deliver">Не удаётся доставить</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">Сообщение...</string>
     <string name="dms_thread_audio_hint">Нажмите и удерживайте, чтобы записать звук</string>
     <string name="dms_thread_updating">Обновление...</string>
@@ -224,6 +225,9 @@
     <string name="dms_action_leave_question">Покинуть эту беседу?</string>
     <string name="dms_action_kick">Выгнать</string>
     <string name="dms_left_users">Оставшиеся пользователи</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">Скачать напрямую</string>
     <string name="direct_download_desc">Скачивает публикации прямо на телефон!</string>
     <string name="direct_download_loading">Получение публикации(ий)</string>
@@ -496,4 +500,7 @@
     <string name="secs">секунды</string>
     <string name="mins">минуты</string>
     <string name="search_giphy">Поиск GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
