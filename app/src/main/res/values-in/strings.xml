@@ -204,6 +204,7 @@
     <string name="dms_inbox_raven_media_suggested">Telah disarankan</string>
     <string name="dms_inbox_raven_media_screenshot">Layar tertangkap</string>
     <string name="dms_inbox_raven_media_cant_deliver">Tidak dapat mengirim</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">Pesan...</string>
     <string name="dms_thread_audio_hint">Tekan dan tahan untuk merekam</string>
     <string name="dms_thread_updating">Memperbarui...</string>
@@ -212,6 +213,9 @@
     <string name="dms_action_leave_question">Tinggalkan obrolan ini?</string>
     <string name="dms_action_kick">Keluarkan</string>
     <string name="dms_left_users">Pengguna tersisa</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">Langsung unduh</string>
     <string name="direct_download_desc">Langsung unduh kiriman ke ponsel!</string>
     <string name="direct_download_loading">Mendapatkan kiriman…</string>
@@ -472,4 +476,7 @@
     <string name="secs">secs</string>
     <string name="mins">mins</string>
     <string name="search_giphy">Search GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
