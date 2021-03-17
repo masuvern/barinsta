@@ -418,7 +418,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
                 final long userId = CookieUtils.getUserIdFromCookie(cookie);
                 final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
-                if (csrfToken != null && userId != null && deviceUuid != null) {
+                if (csrfToken != null && userId != 0 && deviceUuid != null) {
                     hashtagDetailsBinding.btnFollowTag.setClickable(false);
                     if (!hashtagModel.getFollowing()) {
                         tagsService.follow(hashtag.substring(1), csrfToken, userId, deviceUuid, new ServiceCallback<Boolean>() {
