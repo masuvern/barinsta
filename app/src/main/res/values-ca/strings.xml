@@ -208,6 +208,7 @@
     <string name="dms_inbox_raven_media_suggested">Suggerit</string>
     <string name="dms_inbox_raven_media_screenshot">Captura de pantalla feta</string>
     <string name="dms_inbox_raven_media_cant_deliver">No es pot lliurar</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">Missatge...</string>
     <string name="dms_thread_audio_hint">Premeu i mantingueu premut per enregistrar l\'àudio</string>
     <string name="dms_thread_updating">S\'està actualitzant...</string>
@@ -216,6 +217,9 @@
     <string name="dms_action_leave_question">Vols sortir d\'aquest xat?</string>
     <string name="dms_action_kick">Expulsar</string>
     <string name="dms_left_users">Usuaris que han marxat</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">Baixar directament</string>
     <string name="direct_download_desc">Descarregar publicacions directament al telèfon!</string>
     <string name="direct_download_loading">S\'estan recuperant les noves publicacions</string>
@@ -480,4 +484,7 @@
     <string name="secs">segons</string>
     <string name="mins">minuts</string>
     <string name="search_giphy">Cercar GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
