@@ -47,11 +47,11 @@
     <string name="select_language">Taal</string>
     <plurals name="main_posts_count">
         <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\nBerichten</item>
     </plurals>
     <plurals name="main_posts_count_inline">
         <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="other">%s Berichten</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nFollower</item>
