@@ -612,6 +612,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                     if (fetchingResource.message != null) {
                         Snackbar.make(binding.getRoot(), fetchingResource.message, Snackbar.LENGTH_LONG).show();
                     }
+                    if (fetchingResource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), fetchingResource.resId, Snackbar.LENGTH_LONG).show();
+                    }
                     break;
                 case LOADING:
                     setTitle(getString(R.string.dms_thread_updating));
@@ -749,6 +752,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 case ERROR:
                     if (resource.message != null) {
                         Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    if (resource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
                     }
                     resourceLiveData.removeObservers(getViewLifecycleOwner());
                     break;
@@ -1140,6 +1146,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             case ERROR:
                 if (resource.message != null) {
                     Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                }
+                if (resource.resId != 0) {
+                    Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
                 }
                 resourceLiveData.removeObservers(getViewLifecycleOwner());
                 break;

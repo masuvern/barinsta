@@ -193,6 +193,9 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
                     if (inboxResource.message != null) {
                         Snackbar.make(binding.getRoot(), inboxResource.message, Snackbar.LENGTH_LONG).show();
                     }
+                    if (inboxResource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), inboxResource.resId, Snackbar.LENGTH_LONG).show();
+                    }
                     binding.swipeRefreshLayout.setRefreshing(false);
                     break;
                 case LOADING:

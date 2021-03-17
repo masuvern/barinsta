@@ -329,6 +329,9 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     if (resource.message != null) {
                         Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                     }
+                    if (resource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
+                    }
                     break;
                 case LOADING:
                     buttonView.setEnabled(false);
@@ -427,6 +430,9 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     if (resource.message != null) {
                         Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                     }
+                    if (resource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
+                    }
                     break;
             }
         });
@@ -449,6 +455,9 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     pendingUser.setInProgress(false);
                     if (resource.message != null) {
                         Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    if (resource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
                     }
                     break;
             }
@@ -477,6 +486,9 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                         if (resource.message != null) {
                             Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                         }
+                        if (resource.resId != 0) {
+                            Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
+                        }
                         break;
                     case LOADING:
                         binding.leave.setEnabled(false);
@@ -496,6 +508,9 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                         binding.end.setEnabled(true);
                         if (resource.message != null) {
                             Snackbar.make(binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                        }
+                        if (resource.resId != 0) {
+                            Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
                         }
                         break;
                     case LOADING:

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import awais.instagrabber.R;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 import awais.instagrabber.repositories.responses.giphy.GiphyGifResponse;
@@ -70,7 +71,7 @@ public class GifPickerViewModel extends ViewModel {
                         Log.e(TAG, "onResponse: ", e);
                     }
                 }
-                images.postValue(Resource.error("request was not successful and response error body was null", getCurrentImages()));
+                images.postValue(Resource.error(R.string.generic_failed_request, getCurrentImages()));
             }
 
             @Override
@@ -85,7 +86,7 @@ public class GifPickerViewModel extends ViewModel {
     private void parseResponse(final Response<GiphyGifResponse> response) {
         final GiphyGifResponse giphyGifResponse = response.body();
         if (giphyGifResponse == null) {
-            images.postValue(Resource.error("Response body was null", getCurrentImages()));
+            images.postValue(Resource.error(R.string.generic_null_response, getCurrentImages()));
             return;
         }
         final GiphyGifResults results = giphyGifResponse.getResults();

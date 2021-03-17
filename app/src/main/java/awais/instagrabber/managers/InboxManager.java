@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.R;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
@@ -156,7 +157,7 @@ public final class InboxManager {
                 final DirectBadgeCount directBadgeCount = response.body();
                 if (directBadgeCount == null) {
                     Log.e(TAG, "onResponse: directBadgeCount Response is null");
-                    unseenCount.postValue(Resource.error("Unseen count response is null", getCurrentUnseenCount()));
+                    unseenCount.postValue(Resource.error(R.string.dms_inbox_error_null_count, getCurrentUnseenCount()));
                     return;
                 }
                 unseenCount.postValue(Resource.success(directBadgeCount.getBadgeCount()));
@@ -188,14 +189,13 @@ public final class InboxManager {
     private void parseInboxResponse(final DirectInboxResponse response) {
         if (response == null) {
             Log.e(TAG, "parseInboxResponse: Response is null");
-            inbox.postValue(Resource.error("Response is null", getCurrentDirectInbox()));
+            inbox.postValue(Resource.error(R.string.generic_null_response, getCurrentDirectInbox()));
             hasOlder = false;
             return;
         }
         if (!response.getStatus().equals("ok")) {
-            final String msg = "DM inbox fetch response: status not ok";
-            Log.e(TAG, msg);
-            inbox.postValue(Resource.error(msg, getCurrentDirectInbox()));
+            Log.e(TAG, "DM inbox fetch response: status not ok");
+            inbox.postValue(Resource.error(R.string.generic_not_ok_response, getCurrentDirectInbox()));
             hasOlder = false;
             return;
         }

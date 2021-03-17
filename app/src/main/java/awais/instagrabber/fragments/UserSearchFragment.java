@@ -204,6 +204,9 @@ public class UserSearchFragment extends Fragment {
                     if (results.message != null) {
                         Snackbar.make(binding.getRoot(), results.message, Snackbar.LENGTH_LONG).show();
                     }
+                    if (results.resId != 0) {
+                        Snackbar.make(binding.getRoot(), results.resId, Snackbar.LENGTH_LONG).show();
+                    }
                     if (results.data != null) {
                         resultsAdapter.submitList(results.data);
                     }

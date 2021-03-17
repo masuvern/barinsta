@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.R;
 import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
@@ -205,7 +206,7 @@ public class UserSearchViewModel extends ViewModel {
                 }
                 final RankedRecipientsResponse rankedRecipientsResponse = response.body();
                 if (rankedRecipientsResponse == null) {
-                    recipients.postValue(Resource.error("Response is null!", getCachedRecipients()));
+                    recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
                     searchRequest = null;
                     return;
                 }
@@ -234,7 +235,7 @@ public class UserSearchViewModel extends ViewModel {
                 }
                 final UserSearchResponse userSearchResponse = response.body();
                 if (userSearchResponse == null) {
-                    recipients.postValue(Resource.error("Response is null!", getCachedRecipients()));
+                    recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
                     searchRequest = null;
                     return;
                 }
@@ -286,7 +287,7 @@ public class UserSearchViewModel extends ViewModel {
         final ResponseBody errorBody = response.errorBody();
         if (errorBody == null) {
             if (updateResource) {
-                recipients.postValue(Resource.error("Request failed!", getCachedRecipients()));
+                recipients.postValue(Resource.error(R.string.generic_failed_request, getCachedRecipients()));
             }
             return;
         }

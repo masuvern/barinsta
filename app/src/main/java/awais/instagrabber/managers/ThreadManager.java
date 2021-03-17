@@ -32,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.R;
 import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.Resource.Status;
@@ -83,10 +84,6 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public final class ThreadManager {
     private static final String TAG = ThreadManager.class.getSimpleName();
     private static final Object LOCK = new Object();
-    private static final String ERROR_INVALID_USER = "Invalid user";
-    private static final String ERROR_RESPONSE_NOT_OK = "Response status from server was not ok";
-    private static final String ERROR_VIDEO_TOO_LONG = "Instagram does not allow uploading videos longer than 60 secs for Direct messages";
-    private static final String ERROR_AUDIO_TOO_LONG = "Instagram does not allow uploading audio longer than 60 secs";
     private static final Map<String, ThreadManager> INSTANCE_MAP = new ConcurrentHashMap<>();
 
     private final MutableLiveData<Resource<Object>> fetching = new MutableLiveData<>();
@@ -363,12 +360,12 @@ public final class ThreadManager {
             public void onResponse(@NonNull final Call<DirectThreadFeedResponse> call, @NonNull final Response<DirectThreadFeedResponse> response) {
                 final DirectThreadFeedResponse feedResponse = response.body();
                 if (feedResponse == null) {
-                    fetching.postValue(Resource.error("response was null!", null));
+                    fetching.postValue(Resource.error(R.string.generic_null_response, null));
                     Log.e(TAG, "onResponse: response was null!");
                     return;
                 }
                 if (!feedResponse.getStatus().equals("ok")) {
-                    fetching.postValue(Resource.error("response was not ok", null));
+                    fetching.postValue(Resource.error(R.string.generic_not_ok_response, null));
                     return;
                 }
                 final DirectThread thread = feedResponse.getThread();
@@ -674,7 +671,7 @@ public final class ThreadManager {
                           final long byteLength) {
         if (duration > 60000) {
             // instagram does not allow uploading audio longer than 60 secs for Direct messages
-            data.postValue(Resource.error(ERROR_AUDIO_TOO_LONG, null));
+            data.postValue(Resource.error(R.string.dms_ERROR_AUDIO_TOO_LONG, null));
             return;
         }
         final Long userId = getCurrentUserId(data);
@@ -794,7 +791,7 @@ public final class ThreadManager {
                     handleErrorBody(call, response, data);
                     return;
                 }
-                data.postValue(Resource.error("request was not successful and response error body was null", item));
+                data.postValue(Resource.error(R.string.generic_failed_request, item));
             }
 
             @Override
@@ -1056,7 +1053,7 @@ public final class ThreadManager {
                            final int height) {
         if (duration > 60000) {
             // instagram does not allow uploading videos longer than 60 secs for Direct messages
-            data.postValue(Resource.error(ERROR_VIDEO_TOO_LONG, null));
+            data.postValue(Resource.error(R.string.dms_ERROR_VIDEO_TOO_LONG, null));
             return;
         }
         final Long userId = getCurrentUserId(data);
@@ -1125,7 +1122,7 @@ public final class ThreadManager {
                 if (response.isSuccessful()) {
                     final DirectThreadBroadcastResponse broadcastResponse = response.body();
                     if (broadcastResponse == null) {
-                        data.postValue(Resource.error("Response was null from server", directItem));
+                        data.postValue(Resource.error(R.string.generic_null_response, directItem));
                         Log.e(TAG, "enqueueRequest: onResponse: response body is null");
                         return;
                     }
@@ -1155,7 +1152,7 @@ public final class ThreadManager {
                 if (response.errorBody() != null) {
                     handleErrorBody(call, response, data);
                 }
-                data.postValue(Resource.error("request was not successful and response error body was null", directItem));
+                data.postValue(Resource.error(R.string.generic_failed_request, directItem));
             }
 
             @Override
@@ -1215,12 +1212,12 @@ public final class ThreadManager {
                                           @NonNull final MediaUploader.MediaUploadResponse response) {
         final JSONObject responseJson = response.getResponse();
         if (responseJson == null || response.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            data.postValue(Resource.error(ERROR_RESPONSE_NOT_OK, null));
+            data.postValue(Resource.error(R.string.generic_not_ok_response, null));
             return true;
         }
         final String status = responseJson.optString("status");
         if (TextUtils.isEmpty(status) || !status.equals("ok")) {
-            data.postValue(Resource.error(ERROR_RESPONSE_NOT_OK, null));
+            data.postValue(Resource.error(R.string.generic_not_ok_response, null));
             return true;
         }
         return false;
@@ -1253,12 +1250,12 @@ public final class ThreadManager {
                         handleErrorBody(call, response, data);
                         return;
                     }
-                    data.postValue(Resource.error("request was not successful and response error body was null", item));
+                    data.postValue(Resource.error(R.string.generic_failed_request, item));
                     return;
                 }
                 final DirectThreadBroadcastResponse body = response.body();
                 if (body == null) {
-                    data.postValue(Resource.error("Response is null!", item));
+                    data.postValue(Resource.error(R.string.generic_null_response, item));
                 }
                 // otherwise nothing to do? maybe update the timestamp in the emoji?
             }
@@ -1282,7 +1279,7 @@ public final class ThreadManager {
     @Nullable
     private Long getCurrentUserId(final MutableLiveData<Resource<Object>> data) {
         if (currentUser == null || currentUser.getPk() <= 0) {
-            data.postValue(Resource.error(ERROR_INVALID_USER, null));
+            data.postValue(Resource.error(R.string.dms_ERROR_INVALID_USER, null));
             return null;
         }
         return currentUser.getPk();
@@ -1777,7 +1774,7 @@ public final class ThreadManager {
                 }
                 final DirectThreadDetailsChangeResponse changeResponse = response.body();
                 if (changeResponse == null) {
-                    data.postValue(Resource.error("Response is null", null));
+                    data.postValue(Resource.error(R.string.generic_null_response, null));
                     return;
                 }
                 data.postValue(Resource.success(new Object()));

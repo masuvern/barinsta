@@ -131,7 +131,10 @@ public class GifPickerBottomDialogFragment extends BottomSheetDialogFragment {
                 case ERROR:
                     final Context context = getContext();
                     if (context != null && imagesResource.message != null) {
-                        Snackbar.make(context, binding.getRoot(), imagesResource.message, Snackbar.LENGTH_LONG);
+                        Snackbar.make(context, binding.getRoot(), imagesResource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    if (context != null && imagesResource.resId != 0) {
+                        Snackbar.make(context, binding.getRoot(), getString(imagesResource.resId), Snackbar.LENGTH_LONG).show();
                     }
                     break;
                 case LOADING:
