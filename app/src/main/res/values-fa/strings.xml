@@ -209,6 +209,7 @@
     <string name="dms_inbox_raven_media_suggested">پیشنهاد شده</string>
     <string name="dms_inbox_raven_media_screenshot">اسکرین شات گرفته شده</string>
     <string name="dms_inbox_raven_media_cant_deliver">نمیتواند ارسال شود</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">Message...</string>
     <string name="dms_thread_audio_hint">Press and hold to record audio</string>
     <string name="dms_thread_updating">Updating...</string>
@@ -217,6 +218,9 @@
     <string name="dms_action_leave_question">این گفتگو را ترک میکنید؟</string>
     <string name="dms_action_kick">اخراج</string>
     <string name="dms_left_users">کاربران ترک کرده</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">دانلود مستقیم</string>
     <string name="direct_download_desc">دانلود مستقیم پست ها در موبایل!</string>
     <string name="direct_download_loading">آوردن پست (ها)</string>
@@ -481,4 +485,7 @@
     <string name="secs">secs</string>
     <string name="mins">mins</string>
     <string name="search_giphy">Search GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
