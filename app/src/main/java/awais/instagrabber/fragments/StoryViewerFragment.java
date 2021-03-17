@@ -156,6 +156,7 @@ public class StoryViewerFragment extends Fragment {
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        if (csrfToken == null) return;
         final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
@@ -241,8 +242,7 @@ public class StoryViewerFragment extends Fragment {
                                     try {
                                         Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                                         Log.e(TAG, "onFailure: ", t);
-                                    }
-                                    catch(Throwable e) {}
+                                    } catch (Throwable ignored) {}
                                 }
                             });
                         } catch (UnsupportedEncodingException e) {
@@ -488,8 +488,7 @@ public class StoryViewerFragment extends Fragment {
                                                 try {
                                                     poll.setMyChoice(w);
                                                     Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
-                                                }
-                                                catch (Exception ignored) {}
+                                                } catch (Exception ignored) {}
                                             }
 
                                             @Override
@@ -498,8 +497,7 @@ public class StoryViewerFragment extends Fragment {
                                                 Log.e(TAG, "Error responding", t);
                                                 try {
                                                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                }
-                                                catch (Exception ignored) {}
+                                                } catch (Exception ignored) {}
                                             }
                                         });
                             })
@@ -525,8 +523,7 @@ public class StoryViewerFragment extends Fragment {
                                             sticking = false;
                                             try {
                                                 Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                            }
-                                            catch (Exception ignored) {}
+                                            } catch (Exception ignored) {}
                                         }
 
                                         @Override
@@ -535,8 +532,7 @@ public class StoryViewerFragment extends Fragment {
                                             Log.e(TAG, "Error responding", t);
                                             try {
                                                 Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                            }
-                                            catch (Exception ignored) {}
+                                            } catch (Exception ignored) {}
                                         }
                                     });
                         })
@@ -570,9 +566,8 @@ public class StoryViewerFragment extends Fragment {
                                                 try {
                                                     quiz.setMyChoice(w);
                                                     Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                                }
-                                                catch (Exception ignored) {}
-                                        }
+                                                } catch (Exception ignored) {}
+                                            }
 
                                             @Override
                                             public void onFailure(final Throwable t) {
@@ -580,8 +575,7 @@ public class StoryViewerFragment extends Fragment {
                                                 Log.e(TAG, "Error responding", t);
                                                 try {
                                                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                }
-                                                catch (Exception ignored) {}
+                                                } catch (Exception ignored) {}
                                             }
                                         });
                             }
@@ -640,8 +634,7 @@ public class StoryViewerFragment extends Fragment {
                                                 try {
                                                     slider.setMyChoice(sliderValue);
                                                     Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                                }
-                                                catch (Exception ignored) {}
+                                                } catch (Exception ignored) {}
                                             }
 
                                             @Override
@@ -650,8 +643,7 @@ public class StoryViewerFragment extends Fragment {
                                                 Log.e(TAG, "Error responding", t);
                                                 try {
                                                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                }
-                                                catch (Exception ignored) {}
+                                                } catch (Exception ignored) {}
                                             }
                                         });
                             })
@@ -681,6 +673,7 @@ public class StoryViewerFragment extends Fragment {
 
     private void resetView() {
         final Context context = getContext();
+        if (context == null) return;
         StoryModel live = null;
         slidePos = 0;
         lastSlidePos = 0;
@@ -759,7 +752,6 @@ public class StoryViewerFragment extends Fragment {
 
                 @Override
                 public void onFailure(final Throwable t) {
-                    final Context context = getContext();
                     Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Error", t);
                 }
@@ -789,7 +781,6 @@ public class StoryViewerFragment extends Fragment {
 
             @Override
             public void onFailure(final Throwable t) {
-                final Context context = getContext();
                 Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Error", t);
             }
