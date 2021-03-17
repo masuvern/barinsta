@@ -208,6 +208,7 @@
     <string name="dms_inbox_raven_media_suggested">Предложено</string>
     <string name="dms_inbox_raven_media_screenshot">Скриншотнато</string>
     <string name="dms_inbox_raven_media_cant_deliver">Неможе да се прати</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">Message...</string>
     <string name="dms_thread_audio_hint">Press and hold to record audio</string>
     <string name="dms_thread_updating">Updating...</string>
@@ -216,6 +217,9 @@
     <string name="dms_action_leave_question">Дали сакате да го напуштите чатот?</string>
     <string name="dms_action_kick">Кикни</string>
     <string name="dms_left_users">Поранешни корисници</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">Превземи директно</string>
     <string name="direct_download_desc">Превземи објави во твојот телефон!</string>
     <string name="direct_download_loading">Се превземаат објава(ви)</string>
@@ -480,4 +484,7 @@
     <string name="secs">secs</string>
     <string name="mins">mins</string>
     <string name="search_giphy">Search GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
