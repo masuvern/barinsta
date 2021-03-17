@@ -276,8 +276,8 @@
     <string name="activity_count_commentlikes">%d mi piace al commento</string>
     <string name="activity_count_usertags">%d tag utente</string>
     <string name="activity_count_likes">%d mi piace</string>
-    <string name="activity_count_poy">%d photos of you</string>
-    <string name="activity_count_requests">%d follow requests</string>
+    <string name="activity_count_poy">%d foto di te</string>
+    <string name="activity_count_requests">%d richieste di seguito</string>
     <string name="activity_notloggedin">Ti sei disconnesso prima di cliccare questa notifica?!</string>
     <string name="feed">Feed</string>
     <string name="profile">Profilo</string>
