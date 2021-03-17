@@ -47,17 +47,17 @@
     <string name="select_language">Hizkuntza</string>
     <plurals name="main_posts_count">
         <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\nBidalketa</item>
     </plurals>
     <plurals name="main_posts_count_inline">
         <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="other">%s Bidalketa</item>
     </plurals>
     <plurals name="main_posts_followers">
-        <item quantity="one">%s\nFollower</item>
-        <item quantity="other">%s\nFollowers</item>
+        <item quantity="one">%s\nJarraitzaile</item>
+        <item quantity="other">%s\nJarraitzaile</item>
     </plurals>
-    <string name="main_posts_following">%s\nFollowing</string>
+    <string name="main_posts_following">%s\nJarraituak</string>
     <string name="post_viewer_autoplay_video">Erreproduzitu bideoak automatikoki</string>
     <string name="post_viewer_muted_autoplay">Mututu bideoak beti</string>
     <string name="post_viewer_show_captions">Erakutsi argazki-oina beti</string>
