@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -45,12 +46,15 @@ import awais.instagrabber.repositories.responses.directmessages.DirectInbox;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse.DirectItemSeenResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.repositories.responses.giphy.GiphyGif;
@@ -1187,7 +1191,7 @@ public final class ThreadManager {
 
     private void handleErrorBody(@NonNull final Call<?> call,
                                  @NonNull final Response<?> response,
-                                 @NonNull final MutableLiveData<Resource<Object>> data) {
+                                 final MutableLiveData<Resource<Object>> data) {
         try {
             final String string = response.errorBody() != null ? response.errorBody().string() : "";
             final String msg = String.format(Locale.US,
@@ -1195,10 +1199,14 @@ public final class ThreadManager {
                                              call.request().url().toString(),
                                              response.code(),
                                              string);
-            data.postValue(Resource.error(msg, null));
+            if (data != null) {
+                data.postValue(Resource.error(msg, null));
+            }
             Log.e(TAG, msg);
         } catch (IOException e) {
-            data.postValue(Resource.error(e.getMessage(), null));
+            if (data != null) {
+                data.postValue(Resource.error(e.getMessage(), null));
+            }
             Log.e(TAG, "onResponse: ", e);
         }
     }
@@ -1792,6 +1800,39 @@ public final class ThreadManager {
 
     public LiveData<User> getInviter() {
         return inviter;
+    }
+
+    public void markAsSeen(@NonNull final DirectItem directItem) {
+        final Call<DirectItemSeenResponse> request = service.markAsSeen(threadId, directItem);
+        request.enqueue(new Callback<DirectItemSeenResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<DirectItemSeenResponse> call,
+                                   @NonNull final Response<DirectItemSeenResponse> response) {
+                if (!response.isSuccessful()) {
+                    handleErrorBody(call, response, null);
+                    return;
+                }
+                final DirectItemSeenResponse seenResponse = response.body();
+                if (seenResponse == null) return;
+                inboxManager.fetchUnseenCount();
+                final DirectItemSeenResponsePayload payload = seenResponse.getPayload();
+                if (payload == null) return;
+                final String timestamp = payload.getTimestamp();
+                final DirectThread thread = ThreadManager.this.thread.getValue();
+                if (thread == null) return;
+                Map<Long, DirectThreadLastSeenAt> lastSeenAt = thread.getLastSeenAt();
+                lastSeenAt = lastSeenAt == null ? new HashMap<>() : new HashMap<>(lastSeenAt);
+                lastSeenAt.put(currentUser.getPk(), new DirectThreadLastSeenAt(timestamp, directItem.getItemId()));
+                thread.setLastSeenAt(lastSeenAt);
+                setThread(thread, true);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<DirectItemSeenResponse> call,
+                                  @NonNull final Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 
     private interface OnSuccessAction {

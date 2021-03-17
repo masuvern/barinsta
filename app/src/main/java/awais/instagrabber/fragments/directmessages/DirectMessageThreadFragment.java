@@ -58,7 +58,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
@@ -100,6 +99,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemVisual
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
+import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.PermissionUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -146,6 +146,17 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private int prevLength;
     private BadgeDrawable pendingRequestCountBadgeDrawable;
     private boolean isPendingRequestCountBadgeAttached = false;
+    private ItemTouchHelper itemTouchHelper;
+    private LiveData<Boolean> pendingLiveData;
+    private LiveData<DirectThread> threadLiveData;
+    private LiveData<Integer> inputModeLiveData;
+    private LiveData<String> threadTitleLiveData;
+    private LiveData<Resource<Object>> fetchingLiveData;
+    private LiveData<List<DirectItem>> itemsLiveData;
+    private LiveData<DirectItem> replyToItemLiveData;
+    private LiveData<Integer> pendingRequestsCountLiveData;
+    private LiveData<List<User>> usersLiveData;
+    private boolean autoMarkAsSeen = false;
 
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -306,22 +317,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         backStackSavedStateResultLiveData.postValue(null);
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
-    private ItemTouchHelper itemTouchHelper;
-    private LiveData<Boolean> pendingLiveData;
-    private LiveData<DirectThread> threadLiveData;
-    private LiveData<Integer> inputModeLiveData;
-    private LiveData<String> threadTitleLiveData;
-    private LiveData<Resource<Object>> fetchingLiveData;
-    private LiveData<List<DirectItem>> itemsLiveData;
-    private LiveData<DirectItem> replyToItemLiveData;
-    private LiveData<Integer> pendingRequestsCountLiveData;
-    private LiveData<List<User>> usersLiveData;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
+        autoMarkAsSeen = Utils.settingsHelper.getBoolean(Constants.DM_MARK_AS_SEEN);
         final Bundle arguments = getArguments();
         if (arguments == null) return;
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
@@ -895,6 +897,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void submitItemsToAdapter(final List<DirectItem> items) {
+        if (autoMarkAsSeen) {
+            binding.chats.post(() -> viewModel.markAsSeen());
+        }
         if (itemsAdapter == null) return;
         itemsAdapter.submitList(items, () -> {
             itemOrHeaders = itemsAdapter.getList();

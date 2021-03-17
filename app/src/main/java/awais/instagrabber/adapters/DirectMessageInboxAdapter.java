@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
 import java.util.List;
+import java.util.Objects;
 
 import awais.instagrabber.adapters.viewholder.directmessages.DirectInboxItemViewHolder;
 import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
@@ -29,6 +30,8 @@ public final class DirectMessageInboxAdapter extends ListAdapter<DirectThread, D
                                           @NonNull final DirectThread newThread) {
             final boolean titleEqual = oldThread.getThreadTitle().equals(newThread.getThreadTitle());
             if (!titleEqual) return false;
+            final boolean lastSeenAtEqual = Objects.equals(oldThread.getLastSeenAt(), newThread.getLastSeenAt());
+            if (!lastSeenAtEqual) return false;
             final List<DirectItem> oldItems = oldThread.getItems();
             final List<DirectItem> newItems = newThread.getItems();
             if (oldItems == null || newItems == null) return false;

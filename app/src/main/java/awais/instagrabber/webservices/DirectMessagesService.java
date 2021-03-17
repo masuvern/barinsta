@@ -29,6 +29,8 @@ import awais.instagrabber.repositories.requests.directmessages.VideoBroadcastOpt
 import awais.instagrabber.repositories.requests.directmessages.VoiceBroadcastOptions;
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectItem;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
@@ -447,5 +449,18 @@ public class DirectMessagesService extends BaseService {
                 "_uuid", deviceUuid
         );
         return repository.declineRequest(threadId, form);
+    }
+
+    public Call<DirectItemSeenResponse> markAsSeen(@NonNull final String threadId,
+                                                   @NonNull final DirectItem directItem) {
+        final ImmutableMap<String, String> form = ImmutableMap.<String, String>builder()
+                .put("_csrftoken", csrfToken)
+                .put("_uuid", deviceUuid)
+                .put("use_unified_inbox", "true")
+                .put("action", "mark_seen")
+                .put("thread_id", threadId)
+                .put("item_id", directItem.getItemId())
+                .build();
+        return repository.markItemSeen(threadId, directItem.getItemId(), form);
     }
 }

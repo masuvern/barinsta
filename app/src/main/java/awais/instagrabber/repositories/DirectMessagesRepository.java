@@ -4,6 +4,7 @@ import java.util.Map;
 
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
 import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
@@ -145,4 +146,10 @@ public interface DirectMessagesRepository {
     @POST("/api/v1/direct_v2/threads/{threadId}/decline/")
     Call<String> declineRequest(@Path("threadId") String threadId,
                                 @FieldMap final Map<String, String> form);
+
+    @FormUrlEncoded
+    @POST("/api/v1/direct_v2/threads/{threadId}/items/{itemId}/seen/")
+    Call<DirectItemSeenResponse> markItemSeen(@Path("threadId") String threadId,
+                                              @Path("itemId") String itemId,
+                                              @FieldMap final Map<String, String> form);
 }

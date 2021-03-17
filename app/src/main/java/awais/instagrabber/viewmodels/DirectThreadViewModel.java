@@ -15,6 +15,9 @@ import androidx.lifecycle.Transformations;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,7 @@ import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 import awais.instagrabber.utils.Constants;
@@ -272,5 +276,29 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     public LiveData<Resource<Object>> declineRequest() {
         return threadManager.declineRequest();
+    }
+
+    public void markAsSeen() {
+        final DirectThread thread = getThread().getValue();
+        if (thread == null) return;
+        final List<DirectItem> items = thread.getItems();
+        if (items == null || items.isEmpty()) return;
+        final Optional<DirectItem> itemOptional = items.stream()
+                                                       .filter(item -> item.getUserId() != currentUser.getPk())
+                                                       .findFirst();
+        if (!itemOptional.isPresent()) return;
+        final DirectItem directItem = itemOptional.get();
+        final Map<Long, DirectThreadLastSeenAt> lastSeenAt = thread.getLastSeenAt();
+        if (lastSeenAt != null) {
+            final DirectThreadLastSeenAt seenAt = lastSeenAt.get(currentUser.getPk());
+            try {
+                if (seenAt != null
+                        && (Objects.equals(seenAt.getItemId(), directItem.getItemId())
+                        || Long.parseLong(seenAt.getTimestamp()) >= directItem.getTimestamp())) {
+                    return;
+                }
+            } catch (Exception ignored) {}
+        }
+        threadManager.markAsSeen(directItem);
     }
 }

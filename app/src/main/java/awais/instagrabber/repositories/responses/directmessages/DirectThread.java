@@ -36,7 +36,7 @@ public class DirectThread implements Serializable, Cloneable {
     private final User inviter;
     private final boolean hasOlder;
     private final boolean hasNewer;
-    private final Map<Long, DirectThreadLastSeenAt> lastSeenAt;
+    private Map<Long, DirectThreadLastSeenAt> lastSeenAt;
     private final String newestCursor;
     private final String oldestCursor;
     private final boolean isSpam;
@@ -246,6 +246,10 @@ public class DirectThread implements Serializable, Cloneable {
 
     public Map<Long, DirectThreadLastSeenAt> getLastSeenAt() {
         return lastSeenAt;
+    }
+
+    public void setLastSeenAt(final Map<Long, DirectThreadLastSeenAt> lastSeenAt) {
+        this.lastSeenAt = lastSeenAt;
     }
 
     public String getNewestCursor() {
