@@ -116,7 +116,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                         null,
                                         new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
                                         false, false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null, null,
-                                        null, null);
+                                        null, null, null);
                                 final JSONObject likedBy = childComment.optJSONObject("edge_liked_by");
                                 commentModels.add(new CommentModel(childComment.getString(Constants.EXTRAS_ID),
                                                                    childComment.getString("text"),
@@ -195,7 +195,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                             new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
                             owner.optBoolean("is_verified"),
                             false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null, null, null,
-                            null);
+                            null, null);
                     final JSONObject likedBy = comment.optJSONObject("edge_liked_by");
                     final String commentId = comment.getString(Constants.EXTRAS_ID);
                     final CommentModel commentModel = new CommentModel(commentId,
@@ -237,7 +237,7 @@ public final class CommentsFetcher extends AsyncTask<Void, Void, List<CommentMod
                                     null,
                                     new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
                                     tempJsonObject.optBoolean("is_verified"), false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0,
-                                    null, null, null, null, null);
+                                    null, null, null, null, null, null);
 
                             tempJsonObject = childComment.optJSONObject("edge_liked_by");
                             childCommentModels.add(new CommentModel(childComment.getString(Constants.EXTRAS_ID),

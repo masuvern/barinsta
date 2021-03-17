@@ -52,6 +52,8 @@ import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
+import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectSettingsViewModel;
 import awais.instagrabber.viewmodels.factories.DirectSettingsViewModelFactory;
@@ -343,10 +345,15 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         usersAdapter = new DirectUsersAdapter(
                 inviter != null ? inviter.getPk() : -1,
                 (position, user, selected) -> {
-                    final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
-                            .actionGlobalProfileFragment()
-                            .setUsername("@" + user.getUsername());
-                    NavHostFragment.findNavController(this).navigate(directions);
+                    if (!TextUtils.isEmpty(user.getFbId())) {
+                        Utils.openURL(context, "https://facebook.com/" + user.getFbId());
+                    }
+                    else {
+                        final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
+                                .actionGlobalProfileFragment()
+                                .setUsername("@" + user.getUsername());
+                        NavHostFragment.findNavController(this).navigate(directions);
+                    }
                 },
                 (position, user) -> {
                     final ArrayList<Option<String>> options = viewModel.createUserOptions(user);

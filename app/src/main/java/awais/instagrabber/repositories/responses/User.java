@@ -31,6 +31,8 @@ public class User implements Serializable {
     private final String profileContext;
     private final List<UserProfileContextLink> profileContextLinksWithUserIds;
     private final String socialContext;
+    // if a DM member is a Facebook user, this is present
+    private final String interopMessagingUserFbid;
 
     public User(final long pk,
                 final String username,
@@ -57,7 +59,8 @@ public class User implements Serializable {
                 final HdProfilePicUrlInfo hdProfilePicUrlInfo,
                 final String profileContext,
                 final List<UserProfileContextLink> profileContextLinksWithUserIds,
-                final String socialContext) {
+                final String socialContext,
+                final String interopMessagingUserFbid) {
         this.pk = pk;
         this.username = username;
         this.fullName = fullName;
@@ -84,6 +87,7 @@ public class User implements Serializable {
         this.profileContext = profileContext;
         this.profileContextLinksWithUserIds = profileContextLinksWithUserIds;
         this.socialContext = socialContext;
+        this.interopMessagingUserFbid = interopMessagingUserFbid;
     }
 
     public long getPk() {
@@ -194,6 +198,9 @@ public class User implements Serializable {
         return profileContextLinksWithUserIds;
     }
 
+    public String getFbId() {
+        return interopMessagingUserFbid;
+    }
 
     @Override
     public boolean equals(final Object o) {

@@ -246,6 +246,7 @@ public class GraphQLService extends BaseService {
                                 null,
                                 null,
                                 null,
+                                null,
                                 null
                         ));
                         // userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
@@ -336,6 +337,7 @@ public class GraphQLService extends BaseService {
                             userJson.getString("biography"),
                             url,
                             0,
+                            null,
                             null,
                             null,
                             null,
