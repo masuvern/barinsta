@@ -22,6 +22,8 @@
         <item translatable="false">Nederlands</item>
         <item translatable="false">Slovenčina</item>
         <item translatable="false">日本語</item>
+        <item translatable="false">Ελληνικά</item>
+        <item translatable="false">Euskara</item>
     </string-array>
     <string-array name="theme_presets">
         <item>Auto / Seguir al sistema</item>
@@ -42,29 +44,8 @@
         <item>\|</item>
         <item>-</item>
     </string-array>
-    <string-array name="main_nav_ids_values">
-        <item>@string/title_dm</item>
-        <item>@string/feed</item>
-        <item>@string/profile</item>
-        <item>@string/title_discover</item>
-        <item>@string/more</item>
-    </string-array>
-    <string-array name="light_themes">
-        <item>@string/light_white_theme</item>
-        <item>@string/light_barinsta_theme</item>
-        <item>@string/light_bibliogram_theme</item>
-    </string-array>
-    <string-array name="light_theme_values">
-        <item>@style/AppTheme.Light.White</item>
-        <item>@style/AppTheme.Light.Barinsta</item>
-        <item>@style/AppTheme.Light.Bibliogram</item>
-    </string-array>
-    <string-array name="dark_themes">
-        <item>@string/dark_black_theme</item>
-        <item>@string/dark_material_dark_theme</item>
-    </string-array>
-    <string-array name="dark_theme_values">
-        <item>@style/AppTheme.Dark.Black</item>
-        <item>@style/AppTheme.Dark.MaterialDark</item>
+    <string-array name="dm_auto_refresh_freq_units">
+        <item>segs</item>
+        <item>mins</item>
     </string-array>
 </resources>
