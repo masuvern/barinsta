@@ -473,10 +473,10 @@
     <string name="enable_dm_notifications">启用私信通知</string>
     <string name="enable_dm_auto_refesh">自动刷新私信消息</string>
     <string name="auto_refresh_every">自动刷新间隔</string>
-    <string name="secs">secs</string>
-    <string name="mins">mins</string>
-    <string name="search_giphy">Search GIPHY</string>
-    <string name="generic_null_response">Response is null!</string>
-    <string name="generic_not_ok_response">Response status is not ok!</string>
-    <string name="generic_failed_request">Request failed!</string>
+    <string name="secs">秒</string>
+    <string name="mins">分</string>
+    <string name="search_giphy">搜索 GIPHY</string>
+    <string name="generic_null_response">回应为空！</string>
+    <string name="generic_not_ok_response">回应状态错误！</string>
+    <string name="generic_failed_request">请求失败</string>
 </resources>
