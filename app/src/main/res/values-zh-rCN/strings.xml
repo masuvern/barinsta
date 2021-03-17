@@ -204,6 +204,7 @@
     <string name="dms_inbox_raven_media_suggested">为您推荐</string>
     <string name="dms_inbox_raven_media_screenshot">已截屏</string>
     <string name="dms_inbox_raven_media_cant_deliver">无法发送</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">撰写消息...</string>
     <string name="dms_thread_audio_hint">长按即可录制语音消息</string>
     <string name="dms_thread_updating">刷新中...</string>
@@ -212,6 +213,9 @@
     <string name="dms_action_leave_question">离开此聊天吗？</string>
     <string name="dms_action_kick">移除成员</string>
     <string name="dms_left_users">已离开成员</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">直接下载</string>
     <string name="direct_download_desc">直接下载至手机!</string>
     <string name="direct_download_loading">读取帖子</string>
@@ -472,4 +476,7 @@
     <string name="secs">secs</string>
     <string name="mins">mins</string>
     <string name="search_giphy">Search GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
