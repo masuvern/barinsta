@@ -46,12 +46,12 @@
     <string name="import_export">Εισαγωγή/Εξαγωγή</string>
     <string name="select_language">Γλώσσα</string>
     <plurals name="main_posts_count">
-        <item quantity="one">%s\nPost</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="one">%s\nΔημοσίευση</item>
+        <item quantity="other">%s\nΔημοσιεύσεις</item>
     </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="one">%s Δημοσίευση</item>
+        <item quantity="other">%s Δημοσιεύσεις</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nΑκόλουθος</item>
