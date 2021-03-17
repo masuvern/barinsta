@@ -46,16 +46,16 @@
     <string name="import_export">Импорт/Экспорт</string>
     <string name="select_language">Язык</string>
     <plurals name="main_posts_count">
-        <item quantity="one">%s\nPost</item>
-        <item quantity="few">%s\nPosts</item>
-        <item quantity="many">%s\nPosts</item>
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="one">%s\nПубликация</item>
+        <item quantity="few">%s\nПубликации</item>
+        <item quantity="many">%s\nПубликаций</item>
+        <item quantity="other">%s\nПубликации</item>
     </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
-        <item quantity="few">%s Posts</item>
-        <item quantity="many">%s Posts</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="one">%s Публикация</item>
+        <item quantity="few">%s Публикации</item>
+        <item quantity="many">%s Публикаций</item>
+        <item quantity="other">%s Публикации</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nПодписчик</item>
@@ -131,10 +131,10 @@
     <string name="unblock">Разблокировать</string>
     <string name="restrict">Ограничить</string>
     <string name="unrestrict">Снять ограничение</string>
-    <string name="mute_stories">Mute stories</string>
-    <string name="mute_posts">Mute posts</string>
-    <string name="unmute_stories">Unmute stories</string>
-    <string name="unmute_posts">Unmute posts</string>
+    <string name="mute_stories">Заглушить истории</string>
+    <string name="mute_posts">Заглушить публикации</string>
+    <string name="unmute_stories">Включить звук историй</string>
+    <string name="unmute_posts">Включить звук публикаций</string>
     <string name="bio_copy">Копировать биографию</string>
     <string name="bio_translate">Перевести биографию</string>
     <string name="status_mutual">Взаимное</string>
@@ -185,13 +185,13 @@
     <string name="dms_inbox_unlike">Перестать любить сообщение</string>
     <string name="dms_inbox_unsend">Отменить отправку сообщения</string>
     <string name="dms_inbox_author">Просмотреть профиль автора</string>
-    <string name="dms_inbox_giphy">View on GIPHY</string>
+    <string name="dms_inbox_giphy">Посмотреть на GIPHY</string>
     <string name="dms_inbox_shared_post">%s поделился(-лась) постом @%s</string>
     <string name="dms_inbox_shared_image">%s поделился(-лась) изображением</string>
     <string name="dms_inbox_shared_video">%s поделился(-лась) видео</string>
     <string name="dms_inbox_shared_message">%s прислал(-а) сообщение</string>
     <string name="dms_inbox_shared_gif">%s поделился(-лась) gif</string>
-    <string name="dms_inbox_shared_sticker">%s shared a sticker</string>
+    <string name="dms_inbox_shared_sticker">%s поделился наклейкой</string>
     <string name="dms_inbox_shared_profile">%s поделился(-лась) профилем: @%s</string>
     <string name="dms_inbox_shared_location">%s поделился(-лась) локацией: %s</string>
     <string name="dms_inbox_shared_highlight">%s поделился(-лась) сохранённой историей @%s</string>
@@ -284,8 +284,8 @@
     <string name="activity_count_commentlikes">%d симпатий к комментарию</string>
     <string name="activity_count_usertags">%d меток пользователя</string>
     <string name="activity_count_likes">%d нравится</string>
-    <string name="activity_count_poy">%d photos of you</string>
-    <string name="activity_count_requests">%d follow requests</string>
+    <string name="activity_count_poy">%d фотографий с Вами</string>
+    <string name="activity_count_requests">%d запросов на подписку</string>
     <string name="activity_notloggedin">Вы вышли из системы перед нажатием на это уведомление?!</string>
     <string name="feed">Лента новостей</string>
     <string name="profile">Профиль</string>
