@@ -46,10 +46,10 @@
     <string name="import_export">匯入/匯出</string>
     <string name="select_language">語言</string>
     <plurals name="main_posts_count">
-        <item quantity="other">%s\nPosts</item>
+        <item quantity="other">%s\n貼文</item>
     </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="other">%s Posts</item>
+        <item quantity="other">%s 貼文</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="other">%s\n追蹤者</item>
