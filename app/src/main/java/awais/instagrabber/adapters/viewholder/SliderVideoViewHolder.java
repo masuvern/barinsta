@@ -1,6 +1,8 @@
 package awais.instagrabber.adapters.viewholder;
 
 import android.annotation.SuppressLint;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -28,6 +30,14 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     private final LayoutVideoPlayerWithThumbnailBinding binding;
     private final LayoutExoCustomControlsBinding controlsBinding;
     private final boolean loadVideoOnItemClick;
+    private final GestureDetector.OnGestureListener videoPlayerViewGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onSingleTapConfirmed(final MotionEvent e) {
+            binding.playerView.performClick();
+            return true;
+        }
+    };
+
     private VideoPlayerViewHelper videoPlayerViewHelper;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -39,26 +49,24 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
         this.binding = binding;
         this.controlsBinding = controlsBinding;
         this.loadVideoOnItemClick = loadVideoOnItemClick;
-        if (onVerticalDragListener != null) {
-            final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
-            final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
-            thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-            playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-            binding.thumbnailParent.setOnTouchListener((v, event) -> {
-                final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
-                if (onDragTouch) {
-                    return true;
-                }
-                return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
-            });
-            binding.playerView.setOnTouchListener((v, event) -> {
-                final boolean onDragTouch = playerVerticalDragHelper.onDragTouch(event);
-                if (onDragTouch) {
-                    return true;
-                }
-                return playerVerticalDragHelper.onGestureTouchEvent(event);
-            });
-        }
+        // if (onVerticalDragListener != null) {
+        //     final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
+        //     final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
+        //     thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
+        //     playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
+        //     binding.thumbnailParent.setOnTouchListener((v, event) -> {
+        //         final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
+        //         if (onDragTouch) {
+        //             return true;
+        //         }
+        //         return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
+        //     });
+        // }
+        final GestureDetector gestureDetector = new GestureDetector(itemView.getContext(), videoPlayerViewGestureListener);
+        binding.playerView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
     }
 
     public void bind(@NonNull final Media media,
@@ -116,6 +124,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                 videoUrl = videoVersion.getUrl();
             }
         }
+        if (videoUrl == null) return;
         videoPlayerViewHelper = new VideoPlayerViewHelper(binding.getRoot().getContext(),
                                                           binding,
                                                           videoUrl,

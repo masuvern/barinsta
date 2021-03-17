@@ -79,7 +79,6 @@ import awais.instagrabber.adapters.SliderCallbackAdapter;
 import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.adapters.viewholder.SliderVideoViewHolder;
 import awais.instagrabber.customviews.SharedElementTransitionDialogFragment;
-import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.customviews.VerticalImageSpan;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
@@ -142,6 +141,13 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         }
         // clear result
         backStackSavedStateResultLiveData.postValue(null);
+    };
+    private final GestureDetector.OnGestureListener videoPlayerViewGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onSingleTapConfirmed(final MotionEvent e) {
+            binding.videoPost.playerView.performClick();
+            return true;
+        }
     };
 
     // private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener = new VerticalDragHelper.OnVerticalDragListener() {
@@ -253,7 +259,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.PostViewV2Style);
         viewModel = new ViewModelProvider(this).get(PostViewV2ViewModel.class);
         captionState = settingsHelper.getBoolean(Constants.SHOW_CAPTIONS) ?
-                BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_HIDDEN;
+                       BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_HIDDEN;
     }
 
     @Nullable
@@ -1143,26 +1149,31 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             addSharedElement(sharedMainPostElement, binding.videoPost.thumbnailParent);
         }
         binding.videoPost.root.setVisibility(View.VISIBLE);
-        final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.videoPost.thumbnailParent);
-        final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.videoPost.playerView);
+        // final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.videoPost.thumbnailParent);
+        // final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.videoPost.playerView);
         // thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
         // playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
         enablePlayerControls(true);
-        binding.videoPost.thumbnailParent.setOnTouchListener((v, event) -> {
-            final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
-            if (onDragTouch) {
-                return true;
-            }
-            return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
-        });
-        binding.videoPost.playerView.setOnTouchListener((v, event) -> {
-            final boolean onDragTouch = playerVerticalDragHelper.onDragTouch(event);
-            if (onDragTouch) {
-                return true;
-            }
-            return playerVerticalDragHelper.onGestureTouchEvent(event);
-        });
+        // binding.videoPost.thumbnailParent.setOnTouchListener((v, event) -> {
+        //     final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
+        //     if (onDragTouch) {
+        //         return true;
+        //     }
+        //     return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
+        // });
+        // binding.videoPost.playerView.setOnTouchListener((v, event) -> {
+        //     final boolean onDragTouch = playerVerticalDragHelper.onDragTouch(event);
+        //     if (onDragTouch) {
+        //         return true;
+        //     }
+        //     return playerVerticalDragHelper.onGestureTouchEvent(event);
+        // });
         binding.videoPost.playerView.setOnClickListener(v -> toggleDetails());
+        final GestureDetector gestureDetector = new GestureDetector(context, videoPlayerViewGestureListener);
+        binding.videoPost.playerView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
         final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
             @Override
@@ -1413,6 +1424,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 binding.share.setVisibility(View.GONE);
                 binding.download.setVisibility(View.GONE);
                 binding.mediaCounter.setVisibility(View.GONE);
+                binding.viewsCount.setVisibility(View.GONE);
                 final List<Integer> options = viewModel.getOptions().getValue();
                 if (options != null && !options.isEmpty()) {
                     binding.options.setVisibility(View.GONE);
@@ -1455,6 +1467,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             }
             if (video) {
                 binding.playerControlsToggle.setVisibility(View.VISIBLE);
+                binding.viewsCount.setVisibility(View.VISIBLE);
             }
             if (wasControlsVisible) {
                 showPlayerControls();
