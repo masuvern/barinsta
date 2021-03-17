@@ -323,6 +323,20 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         if (bottomSheetBehavior != null) {
             captionState = bottomSheetBehavior.getState();
         }
+        final Media media = viewModel.getMedia();
+        if (media == null) return;
+        switch (media.getMediaType()) {
+            case MEDIA_TYPE_VIDEO:
+                if (videoPlayerViewHelper != null) {
+                    videoPlayerViewHelper.pause();
+                }
+                return;
+            case MEDIA_TYPE_SLIDER:
+                if (sliderItemsAdapter != null) {
+                    pauseSliderPlayer();
+                }
+            default:
+        }
     }
 
     @Override
@@ -1122,6 +1136,16 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         final String text = "1/" + media.getCarouselMedia().size();
         binding.mediaCounter.setText(text);
         sliderItemsAdapter.submitList(media.getCarouselMedia());
+    }
+
+    private void pauseSliderPlayer() {
+        if (binding.sliderParent.getVisibility() != View.VISIBLE) return;
+        final int currentItem = binding.sliderParent.getCurrentItem();
+        final View view = binding.sliderParent.getChildAt(0);
+        if (!(view instanceof RecyclerView)) return;
+        final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(currentItem);
+        if (!(viewHolder instanceof SliderVideoViewHolder)) return;
+        ((SliderVideoViewHolder) viewHolder).pause();
     }
 
     private void releaseAllSliderPlayers() {

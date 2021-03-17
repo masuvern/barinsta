@@ -1,10 +1,11 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import awais.instagrabber.repositories.responses.Media;
 
-public class DirectItemFelixShare {
+public class DirectItemFelixShare implements Serializable {
     private final Media video;
 
     public DirectItemFelixShare(final Media video) {

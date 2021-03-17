@@ -1,8 +1,9 @@
 package awais.instagrabber.repositories.responses;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class AnimatedMediaFixedHeight {
+public class AnimatedMediaFixedHeight implements Serializable {
     private final int height;
     private final int width;
     private final String mp4;

@@ -1,10 +1,11 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import awais.instagrabber.repositories.responses.AnimatedMediaImages;
 
-public final class DirectItemAnimatedMedia {
+public final class DirectItemAnimatedMedia implements Serializable {
     private final String id;
     private final AnimatedMediaImages images;
     private final boolean isRandom;

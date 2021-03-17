@@ -1,8 +1,9 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DirectItemReelShareReactionInfo {
+public class DirectItemReelShareReactionInfo implements Serializable {
     private final String emoji;
     private final String intensity;
 

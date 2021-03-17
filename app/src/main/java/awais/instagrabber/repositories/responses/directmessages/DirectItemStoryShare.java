@@ -1,10 +1,11 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import awais.instagrabber.repositories.responses.Media;
 
-public class DirectItemStoryShare {
+public class DirectItemStoryShare implements Serializable {
     private final String reelId;
     private final String reelType;
     private final String text;

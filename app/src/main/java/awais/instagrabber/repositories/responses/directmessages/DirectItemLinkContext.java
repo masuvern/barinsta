@@ -1,8 +1,9 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DirectItemLinkContext {
+public class DirectItemLinkContext implements Serializable {
     private final String linkUrl;
     private final String linkTitle;
     private final String linkSummary;

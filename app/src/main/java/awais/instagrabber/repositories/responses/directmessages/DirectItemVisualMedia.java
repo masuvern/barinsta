@@ -1,12 +1,13 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 import awais.instagrabber.models.enums.RavenMediaViewMode;
 import awais.instagrabber.repositories.responses.Media;
 
-public class DirectItemVisualMedia {
+public class DirectItemVisualMedia implements Serializable {
     private final long urlExpireAtSecs;
     private final int playbackDurationSecs;
     private final List<Long> seenUserIds;

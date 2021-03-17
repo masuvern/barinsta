@@ -2,9 +2,10 @@ package awais.instagrabber.repositories.responses.directmessages;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public final class RavenExpiringMediaActionSummary {
+public final class RavenExpiringMediaActionSummary implements Serializable {
     private final ActionType type;
     private final long timestamp;
     private final int count;

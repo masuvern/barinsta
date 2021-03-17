@@ -1,10 +1,11 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import awais.instagrabber.repositories.responses.Media;
 
-public class DirectItemVoiceMedia {
+public class DirectItemVoiceMedia implements Serializable {
     private final Media media;
     private final int seenCount;
     private final String viewMode;

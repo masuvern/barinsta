@@ -1,8 +1,9 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class DirectThreadLastSeenAt {
+public class DirectThreadLastSeenAt implements Serializable {
     private final String timestamp;
     private final String itemId;
 

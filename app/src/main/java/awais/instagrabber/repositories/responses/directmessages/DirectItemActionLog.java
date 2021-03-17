@@ -1,9 +1,10 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class DirectItemActionLog {
+public class DirectItemActionLog implements Serializable {
     private final String description;
     private final List<TextRange> bold;
     private final List<TextRange> textAttributes;

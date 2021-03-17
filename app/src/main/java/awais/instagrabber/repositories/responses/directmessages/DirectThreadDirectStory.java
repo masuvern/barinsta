@@ -1,9 +1,10 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class DirectThreadDirectStory {
+public class DirectThreadDirectStory implements Serializable {
     private final List<DirectItem> items;
     private final int unseenCount;
 

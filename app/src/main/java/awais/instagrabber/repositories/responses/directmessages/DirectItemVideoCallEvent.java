@@ -1,9 +1,10 @@
 package awais.instagrabber.repositories.responses.directmessages;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public final class DirectItemVideoCallEvent {
+public final class DirectItemVideoCallEvent implements Serializable {
     private final String action;
     private final String encodedServerDataInfo;
     private final String description;
