@@ -208,6 +208,7 @@
     <string name="dms_inbox_raven_media_suggested">Suggerito</string>
     <string name="dms_inbox_raven_media_screenshot">Catturato</string>
     <string name="dms_inbox_raven_media_cant_deliver">Impossibile consegnare</string>
+    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
     <string name="dms_thread_message_hint">Messaggio...</string>
     <string name="dms_thread_audio_hint">Tieni premuto per registrare l\'audio</string>
     <string name="dms_thread_updating">In aggiornamento...</string>
@@ -216,6 +217,9 @@
     <string name="dms_action_leave_question">Lasciare questa chat?</string>
     <string name="dms_action_kick">Espelli</string>
     <string name="dms_left_users">Utenti rimanenti</string>
+    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
     <string name="direct_download">Scarica direttamente</string>
     <string name="direct_download_desc">Scarica i post direttamente sul telefono!</string>
     <string name="direct_download_loading">Recuperando i post</string>
@@ -480,4 +484,7 @@
     <string name="secs">secondi</string>
     <string name="mins">minuti</string>
     <string name="search_giphy">Cerca GIPHY</string>
+    <string name="generic_null_response">Response is null!</string>
+    <string name="generic_not_ok_response">Response status is not ok!</string>
+    <string name="generic_failed_request">Request failed!</string>
 </resources>
