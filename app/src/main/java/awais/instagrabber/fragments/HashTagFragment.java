@@ -416,11 +416,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             hashtagDetailsBinding.btnFollowTag.setOnClickListener(v -> {
                 final String cookie = settingsHelper.getString(Constants.COOKIE);
                 final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-                final String ua = settingsHelper.getString(Constants.BROWSER_UA);
-                if (csrfToken != null) {
+                final long userId = CookieUtils.getUserIdFromCookie(cookie);
+                final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+                if (csrfToken != null && userId != null && deviceUuid != null) {
                     hashtagDetailsBinding.btnFollowTag.setClickable(false);
                     if (!hashtagModel.getFollowing()) {
-                        tagsService.follow(ua, hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
+                        tagsService.follow(hashtag.substring(1), csrfToken, userId, deviceUuid, new ServiceCallback<Boolean>() {
                             @Override
                             public void onSuccess(final Boolean result) {
                                 hashtagDetailsBinding.btnFollowTag.setClickable(true);
@@ -448,7 +449,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         });
                         return;
                     }
-                    tagsService.unfollow(ua, hashtag.substring(1), csrfToken, new ServiceCallback<Boolean>() {
+                    tagsService.unfollow(hashtag.substring(1), csrfToken, userId, deviceUuid, new ServiceCallback<Boolean>() {
                         @Override
                         public void onSuccess(final Boolean result) {
                             hashtagDetailsBinding.btnFollowTag.setClickable(true);

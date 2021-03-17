@@ -9,10 +9,14 @@ import com.google.common.collect.ImmutableMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import awais.instagrabber.repositories.TagsRepository;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.TagFeedResponse;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -24,14 +28,9 @@ public class TagsService extends BaseService {
 
     private static TagsService instance;
 
-    private final TagsRepository webRepository;
     private final TagsRepository repository;
 
     private TagsService() {
-        final Retrofit webRetrofit = getRetrofitBuilder()
-                .baseUrl("https://www.instagram.com/")
-                .build();
-        webRepository = webRetrofit.create(TagsRepository.class);
         final Retrofit retrofit = getRetrofitBuilder()
                 .baseUrl("https://i.instagram.com/")
                 .build();
@@ -45,11 +44,17 @@ public class TagsService extends BaseService {
         return instance;
     }
 
-    public void follow(@NonNull final String ua,
-                       @NonNull final String tag,
+    public void follow(@NonNull final String tag,
                        @NonNull final String csrfToken,
+                       @NonNull final long userId,
+                       @NonNull final String deviceUuid,
                        final ServiceCallback<Boolean> callback) {
-        final Call<String> request = webRepository.follow(ua, csrfToken, tag);
+        final Map<String, Object> form = new HashMap<>(3);
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", deviceUuid);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<String> request = repository.follow(signedForm, tag);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -75,11 +80,17 @@ public class TagsService extends BaseService {
         });
     }
 
-    public void unfollow(@NonNull final String ua,
-                         @NonNull final String tag,
+    public void unfollow(@NonNull final String tag,
                          @NonNull final String csrfToken,
+                         @NonNull final long userId,
+                         @NonNull final String deviceUuid,
                          final ServiceCallback<Boolean> callback) {
-        final Call<String> request = webRepository.unfollow(ua, csrfToken, tag);
+        final Map<String, Object> form = new HashMap<>(3);
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", deviceUuid);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final Call<String> request = repository.unfollow(signedForm, tag);
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -139,35 +150,4 @@ public class TagsService extends BaseService {
             }
         });
     }
-
-    // private PostsFetchResponse parseResponse(@NonNull final String body) throws JSONException {
-    //     final JSONObject root = new JSONObject(body);
-    //     final boolean moreAvailable = root.optBoolean("more_available");
-    //     final String nextMaxId = root.optString("next_max_id");
-    //     final JSONArray itemsJson = root.optJSONArray("items");
-    //     final List<FeedModel> items = parseItems(itemsJson);
-    //     return new PostsFetchResponse(
-    //             items,
-    //             moreAvailable,
-    //             nextMaxId
-    //     );
-    // }
-
-    // private List<FeedModel> parseItems(final JSONArray items) throws JSONException {
-    //     if (items == null) {
-    //         return Collections.emptyList();
-    //     }
-    //     final List<FeedModel> feedModels = new ArrayList<>();
-    //     for (int i = 0; i < items.length(); i++) {
-    //         final JSONObject itemJson = items.optJSONObject(i);
-    //         if (itemJson == null) {
-    //             continue;
-    //         }
-    //         final FeedModel feedModel = ResponseBodyUtils.parseItem(itemJson);
-    //         if (feedModel != null) {
-    //             feedModels.add(feedModel);
-    //         }
-    //     }
-    //     return feedModels;
-    // }
 }
