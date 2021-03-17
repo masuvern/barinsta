@@ -53,6 +53,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
     public DirectThreadViewModel(@NonNull final Application application,
                                  @NonNull final String threadId,
+                                 final DirectThread backup,
                                  final boolean pending,
                                  @NonNull final User currentUser) {
         super(application);
@@ -69,7 +70,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         contentResolver = application.getContentResolver();
         recordingsDir = DirectoryUtils.getOutputMediaDirectory(application, "Recordings");
         final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
-        threadManager = messagesManager.getThreadManager(threadId, pending, currentUser, contentResolver);
+        threadManager = messagesManager.getThreadManager(threadId, pending, backup, currentUser, contentResolver);
         threadManager.fetchPendingRequests();
     }
 

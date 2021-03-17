@@ -122,6 +122,7 @@ public final class ThreadManager {
 
     public static ThreadManager getInstance(@NonNull final String threadId,
                                             final boolean pending,
+                                            final DirectThread backup,
                                             @NonNull final User currentUser,
                                             @NonNull final ContentResolver contentResolver) {
         ThreadManager instance = INSTANCE_MAP.get(threadId);
@@ -129,7 +130,7 @@ public final class ThreadManager {
             synchronized (LOCK) {
                 instance = INSTANCE_MAP.get(threadId);
                 if (instance == null) {
-                    instance = new ThreadManager(threadId, pending, currentUser, contentResolver);
+                    instance = new ThreadManager(threadId, pending, backup, currentUser, contentResolver);
                     INSTANCE_MAP.put(threadId, instance);
                 }
             }
@@ -143,6 +144,7 @@ public final class ThreadManager {
 
     private ThreadManager(@NonNull final String threadId,
                           final boolean pending,
+                          final DirectThread backup,
                           @NonNull final User currentUser,
                           @NonNull final ContentResolver contentResolver) {
         final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
@@ -161,17 +163,17 @@ public final class ThreadManager {
         service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
         mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId);
         friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, viewerId);
-        setupTransformations();
+        setupTransformations(backup);
         // fetchChats();
     }
 
     public void moveFromPending() {
         final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
         this.inboxManager = messagesManager.getInboxManager();
-        setupTransformations();
+        setupTransformations(null);
     }
 
-    private void setupTransformations() {
+    private void setupTransformations(final DirectThread backup) {
         // Transformations
         thread = distinctUntilChanged(map(inboxManager.getInbox(), inboxResource -> {
             if (inboxResource == null) {
@@ -185,7 +187,7 @@ public final class ThreadManager {
             final DirectThread thread = threads.stream()
                                                .filter(t -> t.getThreadId().equals(threadId))
                                                .findFirst()
-                                               .orElse(null);
+                                               .orElse(backup);
             if (thread != null) {
                 cursor = thread.getOldestCursor();
                 hasOlder = thread.hasOlder();

@@ -254,7 +254,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             navigating = true;
             if (isAdded()) {
                 final DirectMessageInboxFragmentDirections.ActionInboxToThread directions = DirectMessageInboxFragmentDirections
-                        .actionInboxToThread(thread.getThreadId(), thread.getThreadTitle());
+                        .actionInboxToThread(thread.getThreadId(), thread.getThreadTitle(), thread);
                 NavHostFragment.findNavController(this).navigate(directions);
             }
             navigating = false;

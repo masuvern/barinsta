@@ -71,6 +71,7 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.services.ActivityCheckerService;
 import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
@@ -573,10 +574,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private void showThread(@NonNull final Intent intent) {
         final String threadId = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_ID);
         final String threadTitle = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_TITLE);
-        navigateToThread(threadId, threadTitle);
+        navigateToThread(threadId, threadTitle, null);
     }
 
-    public void navigateToThread(final String threadId, final String threadTitle) {
+    public void navigateToThread(final String threadId, final String threadTitle, final DirectThread backup) {
         if (threadId == null || threadTitle == null) return;
         currentNavControllerLiveData.observe(this, new Observer<NavController>() {
             @Override
@@ -590,7 +591,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                         // need handler.post() to wait for the fragment manager to be ready to navigate
                         new Handler().post(() -> {
                             final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
-                                    .actionInboxToThread(threadId, threadTitle);
+                                    .actionInboxToThread(threadId, threadTitle, backup);
                             navController.navigate(action);
                         });
                         return;
@@ -603,7 +604,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                                                          @Nullable final Bundle arguments) {
                             if (destination.getId() == R.id.directMessagesInboxFragment) {
                                 final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
-                                        .actionInboxToThread(threadId, threadTitle);
+                                        .actionInboxToThread(threadId, threadTitle, backup);
                                 controller.navigate(action);
                                 controller.removeOnDestinationChangedListener(this);
                             }

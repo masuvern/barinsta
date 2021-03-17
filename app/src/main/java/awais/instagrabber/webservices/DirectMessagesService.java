@@ -108,7 +108,7 @@ public class DirectMessagesService extends BaseService {
                                                       final String cursor) {
         final ImmutableMap.Builder<String, Object> queryMapBuilder = ImmutableMap.<String, Object>builder()
                 .put("visual_message_return_type", "unseen")
-                .put("limit", 10)
+                .put("limit", 20)
                 .put("direction", "older");
         if (!TextUtils.isEmpty(cursor)) {
             queryMapBuilder.put("cursor", cursor);

@@ -122,6 +122,10 @@
             android:name="pending"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="backup"
+            app:nullable="true"
+            app:argType="awais.instagrabber.repositories.responses.directmessages.DirectThread" />
         <action
             android:id="@+id/action_thread_to_settings"
             app:destination="@id/directMessagesSettingsFragment" />
@@ -151,6 +155,11 @@
             android:name="pending"
             android:defaultValue="false"
             app:argType="boolean" />
+
+        <argument
+            android:name="backup"
+            app:nullable="true"
+            app:argType="awais.instagrabber.repositories.responses.directmessages.DirectThread" />
 
         <action
             android:id="@+id/action_settings_to_inbox"
