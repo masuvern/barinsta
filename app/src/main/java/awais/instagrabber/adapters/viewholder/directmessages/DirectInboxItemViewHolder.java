@@ -117,18 +117,17 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setSubtitle(@NonNull final DirectThread thread) {
-        // If there is an unopened raven media, give it highest priority
         final Resources resources = itemView.getResources();
-        final DirectThreadDirectStory directStory = thread.getDirectStory();
         final long viewerId = thread.getViewerId();
-        if (directStory != null && !directStory.getItems().isEmpty()) {
-            final DirectItem item = directStory.getItems().get(0);
-            final MediaItemType mediaType = item.getVisualMedia().getMedia().getMediaType();
-            final String username = DMUtils.getUsername(thread.getUsers(), item.getUserId(), viewerId, resources);
-            final String subtitle = DMUtils.getMediaSpecificSubtitle(username, resources, mediaType);
-            binding.subtitle.setText(subtitle);
-            return;
-        }
+//        final DirectThreadDirectStory directStory = thread.getDirectStory();
+//        if (directStory != null && !directStory.getItems().isEmpty()) {
+//            final DirectItem item = directStory.getItems().get(0);
+//            final MediaItemType mediaType = item.getVisualMedia().getMedia().getMediaType();
+//            final String username = DMUtils.getUsername(thread.getUsers(), item.getUserId(), viewerId, resources);
+//            final String subtitle = DMUtils.getMediaSpecificSubtitle(username, resources, mediaType);
+//            binding.subtitle.setText(subtitle);
+//            return;
+//        }
         final DirectItem item = thread.getFirstDirectItem();
         if (item == null) return;
         final String subtitle = DMUtils.getMessageString(thread, resources, viewerId, item);
