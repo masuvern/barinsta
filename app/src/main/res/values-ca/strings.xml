@@ -471,13 +471,13 @@
     <string name="no_pending_requests">Cap sol·licitud pendent</string>
     <string name="checking_for_new_messages">S\'estan comprovant els missatges nous</string>
     <string name="pref_category_stories">Històries</string>
-    <string name="pref_category_dm">DM</string>
-    <string name="pref_category_notifications">Notifications</string>
-    <string name="pref_category_post">Post</string>
-    <string name="enable_dm_notifications">Enable DM notifications</string>
-    <string name="enable_dm_auto_refesh">Auto refresh messages</string>
-    <string name="auto_refresh_every">Auto refresh every</string>
-    <string name="secs">secs</string>
-    <string name="mins">mins</string>
-    <string name="search_giphy">Search GIPHY</string>
+    <string name="pref_category_dm">MP</string>
+    <string name="pref_category_notifications">Notificacions</string>
+    <string name="pref_category_post">Publicació</string>
+    <string name="enable_dm_notifications">Habilita les notificacions pels missatges privats (MP)</string>
+    <string name="enable_dm_auto_refesh">Actualitza automàticament els missatges</string>
+    <string name="auto_refresh_every">Actualitza automàticament cada</string>
+    <string name="secs">segons</string>
+    <string name="mins">minuts</string>
+    <string name="search_giphy">Cercar GIPHY</string>
 </resources>
