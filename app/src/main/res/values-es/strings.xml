@@ -208,7 +208,7 @@
     <string name="dms_inbox_raven_media_suggested">Sugerido</string>
     <string name="dms_inbox_raven_media_screenshot">Captura de pantalla realizada</string>
     <string name="dms_inbox_raven_media_cant_deliver">No se puede entregar</string>
-    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
+    <string name="dms_inbox_error_null_count">¡Respuesta del contador de no vistos es nulo!</string>
     <string name="dms_thread_message_hint">Mensaje...</string>
     <string name="dms_thread_audio_hint">Pulsa y mantén presionado para grabar audio</string>
     <string name="dms_thread_updating">Actualizando...</string>
@@ -217,9 +217,9 @@
     <string name="dms_action_leave_question">¿Salir de este chat?</string>
     <string name="dms_action_kick">Expulsar</string>
     <string name="dms_left_users">Usuarios que han abandonado</string>
-    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
-    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
-    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
+    <string name="dms_ERROR_INVALID_USER">Usuario no válido</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram no permite subir vídeos de más de 60 segundos para MD.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram no permite subir audios de más de 60 segundos.</string>
     <string name="direct_download">Descargar directamente</string>
     <string name="direct_download_desc">¡Descarga los mensajes directamente al teléfono!</string>
     <string name="direct_download_loading">Obteniendo publicación(es)</string>
@@ -484,7 +484,7 @@
     <string name="secs">segs</string>
     <string name="mins">mins</string>
     <string name="search_giphy">Buscar GIPHY</string>
-    <string name="generic_null_response">Response is null!</string>
-    <string name="generic_not_ok_response">Response status is not ok!</string>
-    <string name="generic_failed_request">Request failed!</string>
+    <string name="generic_null_response">¡La respuesta es nula!</string>
+    <string name="generic_not_ok_response">¡El estado de la respuesta no es correcto!</string>
+    <string name="generic_failed_request">¡Solicitud fallida!</string>
 </resources>
