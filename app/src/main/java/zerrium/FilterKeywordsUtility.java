@@ -2,10 +2,11 @@ package zerrium;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
-public class FilterKeywordsUtility {
-    private static final ArrayList<String> FILTER_KEYWORDS = new ArrayList<>();
+public abstract class FilterKeywordsUtility {
+    private static final List<String> FILTER_KEYWORDS = new ArrayList<>();
 
     public static boolean append(final String keyword){
         if(keyword == null) return false;
@@ -21,9 +22,9 @@ public class FilterKeywordsUtility {
 
     public static boolean filter(String caption){
         if(caption == null) return false;
-        caption = caption.toLowerCase(Locale.getDefault());
+        String temp = caption.toLowerCase(Locale.getDefault());
         for(final String s:FILTER_KEYWORDS){
-            if(caption.contains(s)) return true;
+            if(temp.contains(s)) return true;
         }
         return false;
     }
