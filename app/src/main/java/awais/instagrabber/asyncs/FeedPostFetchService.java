@@ -12,7 +12,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.webservices.FeedService;
 import awais.instagrabber.webservices.ServiceCallback;
-import zerrium.FilterKeywords;
+import zerrium.FilterKeywordsUtility;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -44,17 +44,16 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 hasNextPage = result.hasNextPage();
 
                 //Skip adding (junk) post to Feed models
-                for(Media m:result.getFeedModels()){
-                    Caption c = m.getCaption();
+                for(final Media m:result.getFeedModels()){
+                    final Caption c = m.getCaption();
                     if(c == null){
                         feedModels.add(m); //No caption
                         continue;
                     }
-                    if(!FilterKeywords.filter(c.getText())){ //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
+                    if(!FilterKeywordsUtility.filter(c.getText())){ //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
                         feedModels.add(m);
                     }
                 }
-                //Zerrium 18 March 2021
                 //feedModels.addAll(result.getFeedModels());
                 if (fetchListener != null) {
                     // if (feedModels.size() < 15 && hasNextPage) {
