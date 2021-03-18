@@ -1,7 +1,6 @@
 package awais.instagrabber.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,6 @@ import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Media;
-import zerrium.FilterKeywords;
 
 public final class FeedAdapterV2 extends ListAdapter<Media, RecyclerView.ViewHolder> {
     private static final String TAG = "FeedAdapterV2";

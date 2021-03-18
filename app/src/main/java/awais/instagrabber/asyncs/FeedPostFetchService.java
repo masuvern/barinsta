@@ -1,8 +1,5 @@
 package awais.instagrabber.asyncs;
 
-import android.os.Build;
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
