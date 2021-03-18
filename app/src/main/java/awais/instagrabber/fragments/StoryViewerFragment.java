@@ -684,47 +684,45 @@ public class StoryViewerFragment extends Fragment {
         String currentStoryMediaId = null;
         final Type type = options.getType();
         StoryViewerOptions fetchOptions = null;
-        if (currentFeedStoryIndex >= 0) {
-            switch (type) {
-                case HIGHLIGHT: {
-                    final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
-                    final List<HighlightModel> models = highlightsViewModel.getList().getValue();
-                    if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    final HighlightModel model = models.get(currentFeedStoryIndex);
-                    currentStoryMediaId = model.getId();
-                    fetchOptions = StoryViewerOptions.forHighlight(model.getId());
-                    currentStoryUsername = model.getTitle();
-                    break;
+        switch (type) {
+            case HIGHLIGHT: {
+                final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
+                final List<HighlightModel> models = highlightsViewModel.getList().getValue();
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size() || currentFeedStoryIndex < 0) {
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                case FEED_STORY_POSITION: {
-                    final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
-                    if (models == null) return;
-                    final FeedStoryModel model = models.get(currentFeedStoryIndex);
-                    currentStoryMediaId = model.getStoryMediaId();
-                    currentStoryUsername = model.getProfileModel().getUsername();
-                    fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
-                    if (model.isLive()) {
-                        live = model.getFirstStoryModel();
-                    }
-                    break;
+                final HighlightModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getId();
+                fetchOptions = StoryViewerOptions.forHighlight(model.getId());
+                currentStoryUsername = model.getTitle();
+                break;
+            }
+            case FEED_STORY_POSITION: {
+                final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
+                final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+                if (models == null || currentFeedStoryIndex >= models.size() || currentFeedStoryIndex < 0) return;
+                final FeedStoryModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getStoryMediaId();
+                currentStoryUsername = model.getProfileModel().getUsername();
+                fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
+                if (model.isLive()) {
+                    live = model.getFirstStoryModel();
                 }
-                case STORY_ARCHIVE: {
-                    final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
-                    final List<HighlightModel> models = archivesViewModel.getList().getValue();
-                    if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size()) {
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    final HighlightModel model = models.get(currentFeedStoryIndex);
-                    currentStoryMediaId = model.getId();
-                    currentStoryUsername = model.getTitle();
-                    fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
-                    break;
+                break;
+            }
+            case STORY_ARCHIVE: {
+                final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
+                final List<HighlightModel> models = archivesViewModel.getList().getValue();
+                if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size() || currentFeedStoryIndex < 0) {
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                final HighlightModel model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getId();
+                currentStoryUsername = model.getTitle();
+                fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
+                break;
             }
         }
         if (type == Type.USER) {
