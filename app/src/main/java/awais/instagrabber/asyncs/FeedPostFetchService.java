@@ -1,16 +1,21 @@
 package awais.instagrabber.asyncs;
 
+import android.os.Build;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.webservices.FeedService;
 import awais.instagrabber.webservices.ServiceCallback;
+import zerrium.FilterKeywords;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -40,7 +45,20 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 } else if (result == null) return;
                 nextCursor = result.getNextCursor();
                 hasNextPage = result.hasNextPage();
-                feedModels.addAll(result.getFeedModels());
+
+                //Skip adding (junk) post to Feed models
+                for(Media m:result.getFeedModels()){
+                    Caption c = m.getCaption();
+                    if(c == null){
+                        feedModels.add(m); //No caption
+                        continue;
+                    }
+                    if(!FilterKeywords.filter(c.getText())){ //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
+                        feedModels.add(m);
+                    }
+                }
+                //Zerrium 18 March 2021
+                //feedModels.addAll(result.getFeedModels());
                 if (fetchListener != null) {
                     // if (feedModels.size() < 15 && hasNextPage) {
                     //     feedService.fetch(csrfToken, nextCursor, this);
