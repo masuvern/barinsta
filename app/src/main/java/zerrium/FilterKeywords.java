@@ -20,6 +20,7 @@ public class FilterKeywords {
 
     public static boolean filter(String word){
         if(word == null) return false;
+        word = word.toLowerCase();
         for(String s:FILTER_KEYWORDS){
             if(word.contains(s)) return true;
         }
