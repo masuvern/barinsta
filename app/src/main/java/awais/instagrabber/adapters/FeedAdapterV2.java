@@ -154,15 +154,6 @@ public final class FeedAdapterV2 extends ListAdapter<Media, RecyclerView.ViewHol
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder viewHolder, final int position) {
         final Media feedModel = getItem(position);
         if (feedModel == null) return;
-
-        //Turn a junk (sponsored) instagram post from people we following into a blank post, I need help to improve this part
-        String c = feedModel.getCaption().getText();
-        if(FilterKeywords.filter(c)){
-            Log.d(TAG, "Filtered:\n" + c + "\n");
-            return;
-        }
-        //Zerrium (18 Mar 2021)
-
         switch (layoutPreferences.getType()) {
             case LINEAR:
                 ((FeedItemViewHolder) viewHolder).bind(feedModel);
