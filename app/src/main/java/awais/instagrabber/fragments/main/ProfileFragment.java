@@ -59,7 +59,6 @@ import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
-import awais.instagrabber.asyncs.UsernameFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.databinding.FragmentProfileBinding;
@@ -125,11 +124,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
     private MenuItem muteStoriesMenuItem, mutePostsMenuItem;
-    private boolean highlightsFetching;
+    private boolean accountIsUpdated = false;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
     private Media downloadFeedModel;
     private int downloadChildPosition = -1;
+    private long myId;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_PROFILE_POSTS_LAYOUT);
 
     private final Runnable usernameSettingRunnable = () -> {
@@ -303,11 +303,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onCreate(savedInstanceState);
         cookie = Utils.settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        myId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, userId) : null;
+        friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, myId) : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
@@ -363,9 +363,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.profile_menu, menu);
         blockMenuItem = menu.findItem(R.id.block);
+        final boolean isNotMe = profileModel != null && !Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie));
         if (blockMenuItem != null) {
-            if (profileModel != null) {
-                blockMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+            if (isNotMe) {
+                blockMenuItem.setVisible(true);
                 blockMenuItem.setTitle(profileModel.getFriendshipStatus().isBlocking() ? R.string.unblock : R.string.block);
             } else {
                 blockMenuItem.setVisible(false);
@@ -373,8 +374,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         restrictMenuItem = menu.findItem(R.id.restrict);
         if (restrictMenuItem != null) {
-            if (profileModel != null) {
-                restrictMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+            if (isNotMe) {
+                restrictMenuItem.setVisible(true);
                 restrictMenuItem.setTitle(profileModel.getFriendshipStatus().isRestricted() ? R.string.unrestrict : R.string.restrict);
             } else {
                 restrictMenuItem.setVisible(false);
@@ -382,8 +383,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         muteStoriesMenuItem = menu.findItem(R.id.mute_stories);
         if (muteStoriesMenuItem != null) {
-            if (profileModel != null) {
-                muteStoriesMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+            if (isNotMe) {
+                muteStoriesMenuItem.setVisible(true);
                 muteStoriesMenuItem.setTitle(profileModel.getFriendshipStatus().isMutingReel() ? R.string.mute_stories : R.string.unmute_stories);
             } else {
                 muteStoriesMenuItem.setVisible(false);
@@ -391,8 +392,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         mutePostsMenuItem = menu.findItem(R.id.mute_posts);
         if (mutePostsMenuItem != null) {
-            if (profileModel != null) {
-                mutePostsMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
+            if (isNotMe) {
+                mutePostsMenuItem.setVisible(true);
                 mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.mute_posts : R.string.unmute_posts);
             } else {
                 mutePostsMenuItem.setVisible(false);
@@ -400,11 +401,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         chainingMenuItem = menu.findItem(R.id.chaining);
         if (chainingMenuItem != null) {
-            if (profileModel != null) {
-                chainingMenuItem.setVisible(!Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie)));
-            } else {
-                chainingMenuItem.setVisible(false);
-            }
+            chainingMenuItem.setVisible(isNotMe);
         }
     }
 
@@ -588,49 +585,20 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         binding.swipeRefreshLayout.setEnabled(true);
         setupHighlights();
         setupCommonListeners();
-        fetchUsername();
-    }
-
-    private void fetchUsername() {
-        final long uid = CookieUtils.getUserIdFromCookie(cookie);
-        if (TextUtils.isEmpty(username) && uid > 0) {
-            final FetchListener<String> fetchListener = username -> {
-                if (TextUtils.isEmpty(username)) return;
-                this.username = username;
-                setUsernameDelayed();
-                fetchProfileDetails();
-            };
-            accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
-                @Override
-                public void onSuccess(final Account account) {
-                    boolean found = false;
-                    if (account != null) {
-                        final String username = account.getUsername();
-                        if (!TextUtils.isEmpty(username)) {
-                            found = true;
-                            fetchListener.onResult("@" + username);
-                        }
-                    }
-                    if (!found) {
-                        // if not in database, fetch info from instagram
-                        new UsernameFetcher(uid, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    }
-                }
-
-                @Override
-                public void onDataNotAvailable() {}
-            });
-            return;
-        }
         fetchProfileDetails();
     }
 
     private void fetchProfileDetails() {
-        if (TextUtils.isEmpty(username)) return;
-        new ProfileFetcher(username.trim().substring(1), isLoggedIn, new FetchListener<User>() {
+        accountIsUpdated = false;
+        new ProfileFetcher(TextUtils.isEmpty(username) ? null : username.trim().substring(1),
+                myId, isLoggedIn, new FetchListener<User>() {
             @Override
             public void onResult(final User user) {
                 if (getContext() == null) return;
+                if (TextUtils.isEmpty(username)) {
+                    username = user.getUsername();
+                    setUsernameDelayed();
+                }
                 profileModel = user;
                 setProfileDetails();
             }
@@ -665,11 +633,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         profileDetailsBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         final long profileId = profileModel.getPk();
-        final long myId = CookieUtils.getUserIdFromCookie(cookie);
         if (isLoggedIn) {
             fetchStoryAndHighlights(profileId);
         }
-        setupButtons(profileId, myId);
+        setupButtons(profileId);
         profileDetailsBinding.favChip.setVisibility(View.VISIBLE);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
@@ -895,13 +862,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 profileDetailsBinding.mainFollowers.setOnClickListener(followersCount > 0 ? followClickListener : null);
                 profileDetailsBinding.mainFollowing.setOnClickListener(followingCount > 0 ? followClickListener : null);
             }
-            binding.swipeRefreshLayout.setRefreshing(true);
             binding.postsRecyclerView.setVisibility(View.VISIBLE);
-            fetchPosts();
         } else {
             profileDetailsBinding.mainFollowers.setClickable(false);
             profileDetailsBinding.mainFollowing.setClickable(false);
-            binding.swipeRefreshLayout.setRefreshing(false);
             // error
             binding.privatePage1.setImageResource(R.drawable.lock);
             binding.privatePage2.setText(R.string.priv_acc);
@@ -910,7 +874,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
     }
 
-    private void setupButtons(final long profileId, final long myId) {
+    private void setupButtons(final long profileId) {
         profileDetailsBinding.btnTagged.setVisibility(isReallyPrivate() ? View.GONE : View.VISIBLE);
         if (isLoggedIn) {
             if (Objects.equals(profileId, myId)) {
@@ -919,6 +883,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 profileDetailsBinding.btnLiked.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnDM.setVisibility(View.GONE);
                 profileDetailsBinding.btnSaved.setText(R.string.saved);
+                if (!accountIsUpdated) updateAccountInfo();
                 return;
             }
             profileDetailsBinding.btnSaved.setVisibility(View.GONE);
@@ -973,6 +938,26 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
     }
 
+    private void updateAccountInfo() {
+        accountRepository.insertOrUpdateAccount(
+                profileModel.getPk(),
+                profileModel.getUsername(),
+                cookie,
+                profileModel.getFullName(),
+                profileModel.getProfilePicUrl(),
+                new RepositoryCallback<Account>() {
+                    @Override
+                    public void onSuccess(final Account result) {
+                        accountIsUpdated = true;
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
+                        Log.e(TAG, "onDataNotAvailable: insert failed");
+                    }
+                });
+    }
+
     private void fetchStoryAndHighlights(final long profileId) {
         storiesService.getUserStory(
                 StoryViewerOptions.forUser(profileId, profileModel.getFullName()),
@@ -994,7 +979,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                        new ServiceCallback<List<HighlightModel>>() {
                                            @Override
                                            public void onSuccess(final List<HighlightModel> result) {
-                                               highlightsFetching = false;
                                                if (result != null) {
                                                    profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
                                                    highlightsViewModel.getList().postValue(result);
@@ -1166,7 +1150,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.postsRecyclerView.isFetching() || highlightsFetching);
+        Log.d("austin_debug", "usrs: "+binding.postsRecyclerView.isFetching());
+        binding.swipeRefreshLayout.setRefreshing(binding.postsRecyclerView.isFetching());
     }
 
     private void setupHighlights() {
@@ -1183,14 +1168,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         profileDetailsBinding.highlightsList.setLayoutManager(layoutManager);
         profileDetailsBinding.highlightsList.setAdapter(highlightsAdapter);
         highlightsViewModel.getList().observe(getViewLifecycleOwner(), highlightModels -> highlightsAdapter.submitList(highlightModels));
-    }
-
-    private void fetchPosts() {
-        // stopCurrentExecutor();
-        binding.swipeRefreshLayout.setRefreshing(true);
-        // currentlyExecuting = new PostsFetcher(profileModel.getId(), PostItemType.MAIN, endCursor, postsFetchListener)
-        //         .setUsername(profileModel.getUsername())
-        //         .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void navigateToProfile(final String username) {
@@ -1211,8 +1188,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private boolean isReallyPrivate() {
-        final long myId = CookieUtils.getUserIdFromCookie(cookie);
+        if (profileModel.getPk() == myId) return false;
         final FriendshipStatus friendshipStatus = profileModel.getFriendshipStatus();
-        return !friendshipStatus.isFollowing() && (profileModel.getPk() != myId) && profileModel.isPrivate();
+        return !friendshipStatus.isFollowing() && profileModel.isPrivate();
     }
 }
