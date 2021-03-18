@@ -885,7 +885,11 @@ public class StoryViewerFragment extends Fragment {
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
+            try {
+                actionBar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
+            } catch (Exception e) {
+                Log.e(TAG, "refreshStory: ", e);
+            }
         }
 
         if (settingsHelper.getBoolean(MARK_AS_SEEN))
