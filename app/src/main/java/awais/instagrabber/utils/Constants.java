@@ -30,6 +30,7 @@ public final class Constants {
     // deprecated: public static final String AMOLED_THEME = "amoled_theme";
     public static final String CHECK_ACTIVITY = "check_activity";
     public static final String CHECK_UPDATES = "check_updates";
+    public static final String FLAG_SECURE = "flag_secure";
     // never Export
     public static final String COOKIE = "cookie";
     public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
