@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.models.StoryModel;
@@ -1094,29 +1095,24 @@ public final class ResponseBodyUtils {
     }
 
     public static String getThumbUrl(final Media media) {
-        if (media == null) {
-            return null;
-        }
-        final ImageVersions2 imageVersions2 = media.getImageVersions2();
-        return getThumbUrl(imageVersions2);
-    }
-
-    public static String getThumbUrl(final ImageVersions2 imageVersions2) {
-        if (imageVersions2 == null) return null;
-        final List<MediaCandidate> candidates = imageVersions2.getCandidates();
-        if (candidates == null || candidates.isEmpty()) return null;
-        final MediaCandidate mediaCandidate = candidates.get(candidates.size() - 1);
-        if (mediaCandidate == null) return null;
-        return mediaCandidate.getUrl();
+        return getImageCandidate(media, CandidateType.THUMBNAIL);
     }
 
     public static String getImageUrl(final Media media) {
+        return getImageCandidate(media, CandidateType.DOWNLOAD);
+    }
+
+    private static String getImageCandidate(final Media media, final CandidateType type) {
         if (media == null) return null;
         final ImageVersions2 imageVersions2 = media.getImageVersions2();
         if (imageVersions2 == null) return null;
         final List<MediaCandidate> candidates = imageVersions2.getCandidates();
         if (candidates == null || candidates.isEmpty()) return null;
-        final MediaCandidate candidate = candidates.get(0);
+        final List<MediaCandidate> sortedCandidates = candidates.stream()
+                .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
+                .filter(c -> c.getWidth() < type.getValue())
+                .collect(Collectors.toList());
+        final MediaCandidate candidate = sortedCandidates.get(0);
         if (candidate == null) return null;
         return candidate.getUrl();
     }
@@ -1132,5 +1128,20 @@ public final class ResponseBodyUtils {
                                                 false);
         model.setVideoUrl(data.getString("dash_playback_url"));
         return model;
+    }
+
+    private enum CandidateType {
+        THUMBNAIL(1000),
+        DOWNLOAD(10000);
+
+        private final int value;
+
+        CandidateType(final int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 }
