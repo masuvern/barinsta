@@ -87,6 +87,7 @@ import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.utils.Constants;
@@ -99,6 +100,7 @@ import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
 import awais.instagrabber.webservices.DirectMessagesService;
+import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awaisomereport.LogCollector;
@@ -123,6 +125,7 @@ public class StoryViewerFragment extends Fragment {
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
     private StoriesService storiesService;
+    private MediaService mediaService;
     private StoryModel currentStory;
     private int slidePos;
     private int lastSlidePos;
@@ -161,6 +164,7 @@ public class StoryViewerFragment extends Fragment {
         final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesService = StoriesService.getInstance(csrfToken, userIdFromCookie, deviceId);
+        mediaService = MediaService.getInstance(null, null, 0);
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         setHasOptionsMenu(true);
     }
@@ -422,35 +426,40 @@ public class StoryViewerFragment extends Fragment {
         binding.spotify.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
-                final Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(tag.toString()));
-                startActivity(intent);
+                Utils.openURL(context, tag.toString());
             }
         });
         binding.swipeUp.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
-                final Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(tag.toString()));
-                startActivity(intent);
+                Utils.openURL(context, tag.toString());
             }
         });
         binding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (!(tag instanceof CharSequence)) return;
-            final String shortCode = tag.toString();
+            final String mediaId = tag.toString();
             final AlertDialog alertDialog = new AlertDialog.Builder(context)
                     .setCancelable(false)
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            new PostFetcher(shortCode, feedModel -> {
-                final PostViewV2Fragment fragment = PostViewV2Fragment
-                        .builder(feedModel)
-                        .build();
-                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                fragment.show(getChildFragmentManager(), "post_view");
-            }).execute();
+            mediaService.fetch(Long.valueOf(mediaId), new ServiceCallback<Media>() {
+                @Override
+                public void onSuccess(final Media feedModel) {
+                    final PostViewV2Fragment fragment = PostViewV2Fragment
+                            .builder(feedModel)
+                            .build();
+                    fragment.setOnShowListener(dialog -> alertDialog.dismiss());
+                    fragment.show(getChildFragmentManager(), "post_view");
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    alertDialog.dismiss();
+                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();

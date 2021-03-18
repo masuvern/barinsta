@@ -987,7 +987,7 @@ public final class ResponseBodyUtils {
             model.setVideoUrl(ResponseBodyUtils.getHighQualityPost(videoResources, true, true, false));
 
         if (data.has("story_feed_media")) {
-            model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_code"));
+            model.setTappableShortCode(data.getJSONArray("story_feed_media").getJSONObject(0).optString("media_id"));
         }
 
         // TODO: this may not be limited to spotify
