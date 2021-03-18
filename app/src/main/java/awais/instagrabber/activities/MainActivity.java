@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.database.MatrixCursor;
+import android.net.IpSecManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -83,6 +84,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
+import zerrium.FilterKeywords;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -174,6 +176,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         });
         initEmojiCompat();
         // initDmService();
+        initZerriumFilter(); //to filter out junk instagram post
+    }
+
+    private void initZerriumFilter(){
+        boolean filter_result = false;
+        try{
+            filter_result = FilterKeywords.insert(getResources().getStringArray(R.array.filter_keyword));
+        }catch(Exception e){
+            Log.e(TAG, "initZerriumFilter: " + e);
+        }
+        if(!filter_result) Log.d(TAG, "ZerriumFilter insert failed");
+        else Log.d(TAG, "ZerriumFilter insert success");
     }
 
     private void initDmService() {

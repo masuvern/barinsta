@@ -1,6 +1,7 @@
 package awais.instagrabber.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Media;
+import zerrium.FilterKeywords;
 
 public final class FeedAdapterV2 extends ListAdapter<Media, RecyclerView.ViewHolder> {
     private static final String TAG = "FeedAdapterV2";
@@ -152,6 +154,15 @@ public final class FeedAdapterV2 extends ListAdapter<Media, RecyclerView.ViewHol
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder viewHolder, final int position) {
         final Media feedModel = getItem(position);
         if (feedModel == null) return;
+
+        //Turn a junk (sponsored) instagram post from people we following into a blank post, I need help to improve this part
+        String c = feedModel.getCaption().getText();
+        if(FilterKeywords.filter(c)){
+            Log.d(TAG, "Filtered:\n" + c + "\n");
+            return;
+        }
+        //Zerrium (18 Mar 2021)
+
         switch (layoutPreferences.getType()) {
             case LINEAR:
                 ((FeedItemViewHolder) viewHolder).bind(feedModel);
