@@ -36,7 +36,6 @@ public class AboutFragment extends BasePreferencesFragment {
         final PreferenceCategory thirdPartyCategory = new PreferenceCategory(context);
         screen.addPreference(thirdPartyCategory);
         thirdPartyCategory.setTitle(R.string.about_category_3pt);
-        //thirdPartyCategory.setSummary(R.string.about_category_3pt_summary);
         thirdPartyCategory.setIconSpaceReserved(false);
         // alphabetical order!!!
         thirdPartyCategory.addPreference(getACIPreference());
