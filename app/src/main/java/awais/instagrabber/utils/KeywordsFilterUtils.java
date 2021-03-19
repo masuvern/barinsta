@@ -17,6 +17,7 @@ public final class KeywordsFilterUtils {
 
     public boolean filter(final String caption){
         if(caption == null) return false;
+        if(keywords.isEmpty()) return false;
         final String temp = caption.toLowerCase(Locale.getDefault());
         for(final String s:keywords){
             if(temp.contains(s)) return true;
@@ -28,6 +29,7 @@ public final class KeywordsFilterUtils {
         if(media == null) return false;
         final Caption c = media.getCaption();
         if(c == null) return false;
+        if(keywords.isEmpty()) return false;
         final String temp = c.getText().toLowerCase(LocaleUtils.getCurrentLocale());
         for(final String s:keywords){
             if(temp.contains(s)) return true;
@@ -36,6 +38,7 @@ public final class KeywordsFilterUtils {
     }
 
     public List<Media> filter(final List<Media> media){
+        if(keywords.isEmpty()) return media;
         if(media == null) return new ArrayList<>();
 
         final List<Media> result= new ArrayList<>();

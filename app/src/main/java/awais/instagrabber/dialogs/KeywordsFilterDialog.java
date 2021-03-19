@@ -29,7 +29,14 @@ public final class KeywordsFilterDialog extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final DialogKeywordsFilterBinding dialogKeywordsFilterBinding = DialogKeywordsFilterBinding.inflate(inflater, container, false);
 
-        final Context context = getContext();
+        init(dialogKeywordsFilterBinding, getContext());
+
+        dialogKeywordsFilterBinding.btnOK.setOnClickListener(view -> this.dismiss());
+
+        return dialogKeywordsFilterBinding.getRoot();
+    }
+
+    private void init(DialogKeywordsFilterBinding dialogKeywordsFilterBinding, Context context){
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         final RecyclerView recyclerView = dialogKeywordsFilterBinding.recyclerKeyword;
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -55,11 +62,5 @@ public final class KeywordsFilterDialog extends DialogFragment {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             editText.setText("");
         });
-
-        dialogKeywordsFilterBinding.btnOK.setOnClickListener(view ->{
-            this.dismiss();
-        });
-
-        return dialogKeywordsFilterBinding.getRoot();
     }
 }

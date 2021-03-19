@@ -30,7 +30,7 @@ public class KeywordsFilterAdapter extends RecyclerView.Adapter<KeywordsFilterDi
     @NonNull
     @Override
     public KeywordsFilterDialogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_keyword, parent, false);
+        final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_keyword, parent, false);
         return new KeywordsFilterDialogViewHolder(v);
     }
 

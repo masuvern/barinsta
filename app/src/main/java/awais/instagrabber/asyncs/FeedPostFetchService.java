@@ -42,13 +42,12 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 nextCursor = result.getNextCursor();
                 hasNextPage = result.hasNextPage();
 
-                //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
                 final List<Media> mediaResults = result.getFeedModels();
-                if(!settingsHelper.getBoolean(Constants.TOGGLE_KEYWORD_FILTER)){
-                    feedModels.addAll(mediaResults);
-                }else{
-                    ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(Constants.KEYWORD_FILTERS));
+                if(settingsHelper.getBoolean(Constants.TOGGLE_KEYWORD_FILTER)){
+                    final ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(Constants.KEYWORD_FILTERS));
                     feedModels.addAll(new KeywordsFilterUtils(items).filter(mediaResults));
+                }else{
+                    feedModels.addAll(mediaResults);
                 }
 
                 if (fetchListener != null) {
