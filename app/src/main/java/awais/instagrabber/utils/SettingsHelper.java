@@ -57,6 +57,7 @@ import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
 import static awais.instagrabber.utils.Constants.STORY_SORT;
 import static awais.instagrabber.utils.Constants.SWAP_DATE_TIME_FORMAT_ENABLED;
+import static awais.instagrabber.utils.Constants.TOGGLE_KEYWORD_FILTER;
 
 public final class SettingsHelper {
     private final SharedPreferences sharedPreferences;
@@ -155,7 +156,7 @@ public final class SettingsHelper {
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
                        SHOW_CAPTIONS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, CHECK_ACTIVITY,
                        CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED, PREF_ENABLE_DM_NOTIFICATIONS, PREF_ENABLE_DM_AUTO_REFRESH,
-                       FLAG_SECURE})
+                       FLAG_SECURE, TOGGLE_KEYWORD_FILTER})
     public @interface BooleanSettings {}
 
     @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER})

@@ -466,4 +466,7 @@
     <string name="generic_null_response">Response is null!</string>
     <string name="generic_not_ok_response">Response status is not ok!</string>
     <string name="generic_failed_request">Request failed!</string>
+    <string name="hint_keyword">Keyword</string>
+    <string name="toggle_keyword_filter">Enable keyword filter</string>
+    <string name="edit_keyword_filter">Edit keyword filters</string>
 </resources>
