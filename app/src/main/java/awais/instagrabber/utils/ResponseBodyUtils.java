@@ -31,7 +31,7 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
 public final class ResponseBodyUtils {
     private static final String TAG = "ResponseBodyUtils";
@@ -76,10 +76,10 @@ public final class ResponseBodyUtils {
             if (lastIndexMain >= 0) return sources[lastIndexMain];
             else if (lastIndexBase >= 0) return sources[lastIndexBase];
         } catch (final Exception e) {
-            if (Utils.logCollector != null)
-                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
-                                                   new Pair<>("resourcesNull", resources == null),
-                                                   new Pair<>("isVideo", isVideo));
+//            if (Utils.logCollector != null)
+//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
+//                                                   new Pair<>("resourcesNull", resources == null),
+//                                                   new Pair<>("isVideo", isVideo));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return null;
@@ -94,9 +94,9 @@ public final class ResponseBodyUtils {
                 src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, false);
             if (src == null) return resources.getString("display_url");
         } catch (final Exception e) {
-            if (Utils.logCollector != null)
-                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
-                                                   new Pair<>("resourcesNull", resources == null));
+//            if (Utils.logCollector != null)
+//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
+//                                                   new Pair<>("resourcesNull", resources == null));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return src;

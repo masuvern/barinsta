@@ -103,7 +103,7 @@ import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -111,7 +111,7 @@ import retrofit2.Response;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
-import static awais.instagrabber.utils.Utils.logCollector;
+//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class StoryViewerFragment extends Fragment {
@@ -400,10 +400,10 @@ public class StoryViewerFragment extends Fragment {
                         return true;
                     }
                 } catch (final Exception e) {
-                    if (logCollector != null)
-                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-                                                     new Pair<>("swipeEvent", swipeEvent),
-                                                     new Pair<>("diffX", diffX));
+//                    if (logCollector != null)
+//                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
+//                                                     new Pair<>("swipeEvent", swipeEvent),
+//                                                     new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;

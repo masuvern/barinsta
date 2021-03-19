@@ -20,9 +20,9 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.HashtagModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NetworkUtils;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
-import static awais.instagrabber.utils.Utils.logCollector;
+//import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class HashtagFetcher extends AsyncTask<Void, Void, HashtagModel> {
     private static final String TAG = "HashtagFetcher";
@@ -86,8 +86,8 @@ public final class HashtagFetcher extends AsyncTask<Void, Void, HashtagModel> {
 
             conn.disconnect();
         } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.ASYNC_HASHTAG_FETCHER, "doInBackground");
+//            if (logCollector != null)
+//                logCollector.appendException(e, LogCollector.LogFile.ASYNC_HASHTAG_FETCHER, "doInBackground");
             if (BuildConfig.DEBUG) Log.e(TAG, "", e);
             if (fetchListener != null) fetchListener.onFailure(e);
         }
