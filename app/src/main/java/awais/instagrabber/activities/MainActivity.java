@@ -84,7 +84,6 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
-import zerrium.FilterKeywordsUtility;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -178,15 +177,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         });
         initEmojiCompat();
         // initDmService();
-        initZerriumFilter(); //to filter out junk instagram post
-    }
-
-    private void initZerriumFilter(){
-        try{
-            FilterKeywordsUtility.insert(getResources().getStringArray(R.array.filter_keyword));
-        }catch(Exception e){
-            Log.e(TAG, "initZerriumFilter: " + e);
-        }
     }
 
     private void initDmService() {

@@ -5,14 +5,13 @@ import java.util.List;
 
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.webservices.FeedService;
 import awais.instagrabber.webservices.ServiceCallback;
-import zerrium.FilterKeywordsUtility;
+import awais.instagrabber.utils.KeywordsFilterUtils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -43,18 +42,15 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 nextCursor = result.getNextCursor();
                 hasNextPage = result.hasNextPage();
 
-                //Skip adding (junk) post to Feed models
-                for(final Media m:result.getFeedModels()){
-                    final Caption c = m.getCaption();
-                    if(c == null){
-                        feedModels.add(m); //No caption
-                        continue;
-                    }
-                    if(!FilterKeywordsUtility.filter(c.getText())){ //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
-                        feedModels.add(m);
-                    }
+                //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
+                List<Media> mediaResults = result.getFeedModels();
+                if(!settingsHelper.getBoolean(Constants.TOGGLE_KEYWORD_FILTER)){
+                    feedModels.addAll(mediaResults);
+                }else{
+                    ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(Constants.KEYWORD_FILTERS));
+                    feedModels.addAll(new KeywordsFilterUtils(items).filter(mediaResults));
                 }
-                //feedModels.addAll(result.getFeedModels());
+
                 if (fetchListener != null) {
                     // if (feedModels.size() < 15 && hasNextPage) {
                     //     feedService.fetch(csrfToken, nextCursor, this);
