@@ -18,13 +18,16 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, Void> {
     private final GraphQLService graphQLService;
 
     private final FetchListener<User> fetchListener;
+    private final long myId;
     private final boolean isLoggedIn;
     private final String userName;
 
     public ProfileFetcher(final String userName,
+                          final long myId,
                           final boolean isLoggedIn,
                           final FetchListener<User> fetchListener) {
         this.userName = userName;
+        this.myId = myId;
         this.isLoggedIn = isLoggedIn;
         this.fetchListener = fetchListener;
         userService = isLoggedIn ? UserService.getInstance() : null;
@@ -34,7 +37,7 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, Void> {
     @Nullable
     @Override
     protected Void doInBackground(final Void... voids) {
-        if (isLoggedIn) {
+        if (isLoggedIn && userName != null) {
             userService.getUsernameInfo(userName, new ServiceCallback<User>() {
                 @Override
                 public void onSuccess(final User user) {
@@ -51,6 +54,20 @@ public final class ProfileFetcher extends AsyncTask<Void, Void, Void> {
                             fetchListener.onFailure(t);
                         }
                     });
+                }
+
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error", t);
+                    fetchListener.onFailure(t);
+                }
+            });
+        }
+        else if (isLoggedIn) {
+            userService.getUserInfo(myId, new ServiceCallback<User>() {
+                @Override
+                public void onSuccess(final User user) {
+                    fetchListener.onResult(user);
                 }
 
                 @Override

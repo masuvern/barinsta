@@ -70,11 +70,11 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.TagsService;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.logCollector;
+//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -607,8 +607,8 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             try {
                 currentlyExecuting.cancel(true);
             } catch (final Exception e) {
-                if (logCollector != null)
-                    logCollector.appendException(e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
+//                if (logCollector != null)
+//                    logCollector.appendException(e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
                 Log.e(TAG, "", e);
             }
         }

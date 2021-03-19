@@ -279,6 +279,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     }
 
     public void markAsSeen() {
+        if (currentUser == null) return;
         final DirectThread thread = getThread().getValue();
         if (thread == null) return;
         final List<DirectItem> items = thread.getItems();

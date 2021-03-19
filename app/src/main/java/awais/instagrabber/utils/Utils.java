@@ -56,13 +56,13 @@ import java.util.Map;
 import awais.instagrabber.R;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
 public final class Utils {
     private static final String TAG = "Utils";
     private static final int VIDEO_CACHE_MAX_BYTES = 10 * 1024 * 1024;
 
-    public static LogCollector logCollector;
+//    public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
     public static boolean sessionVolumeFull = false;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();

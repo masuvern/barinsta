@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
@@ -143,6 +144,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         CookieUtils.setupCookies(cookie);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
+        if (settingsHelper.getBoolean(Constants.FLAG_SECURE))
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);

@@ -647,7 +647,6 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 navController.navigate(R.id.action_global_likesViewerFragment, bundle);
                 return true;
             }
-            Utils.displayToastAboveView(context, v, getString(R.string.like_without_count));
             return true;
         });
     }
