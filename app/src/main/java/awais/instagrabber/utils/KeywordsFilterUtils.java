@@ -43,7 +43,7 @@ public final class KeywordsFilterUtils {
 
         final List<Media> result= new ArrayList<>();
         for(final Media m:media){
-            if(filter(m)) result.add(m);
+            if(!filter(m)) result.add(m);
         }
         return result;
     }
