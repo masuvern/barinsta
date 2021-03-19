@@ -11,7 +11,7 @@ public final class KeywordsFilterUtils {
 
     private final ArrayList<String> keywords;
 
-    public KeywordsFilterUtils(ArrayList<String> keywords){
+    public KeywordsFilterUtils(final ArrayList<String> keywords){
         this.keywords = keywords;
     }
 

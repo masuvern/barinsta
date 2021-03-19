@@ -17,21 +17,22 @@
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/edit_text"
-                android:layout_width="320dp"
-                android:layout_height="48dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="60dp"
                 android:hint="@string/hint_keyword" />
 
-            <ImageView
-                android:id="@+id/add_icon"
+            <Button
+                android:id="@+id/btnAdd"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/ic_add"
                 android:scaleType="center"
-                android:layout_marginStart="8dp" />
+                android:layout_marginStart="-50dp" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler"
+            android:id="@+id/recyclerKeyword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

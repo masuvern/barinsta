@@ -1,7 +1,7 @@
 package awais.instagrabber.adapters.viewholder.dialogs;
 
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,7 +11,7 @@ import awais.instagrabber.R;
 
 public class KeywordsFilterDialogViewHolder extends RecyclerView.ViewHolder {
 
-    private final ImageView deleteButton;
+    private final Button deleteButton;
     private final TextView item;
 
     public KeywordsFilterDialogViewHolder(@NonNull View itemView) {
@@ -20,7 +20,7 @@ public class KeywordsFilterDialogViewHolder extends RecyclerView.ViewHolder {
         item = itemView.findViewById(R.id.keyword_text);
     }
 
-    public ImageView getDeleteButton(){
+    public Button getDeleteButton(){
         return deleteButton;
     }
 

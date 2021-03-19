@@ -43,7 +43,7 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 hasNextPage = result.hasNextPage();
 
                 //Check caption if it doesn't contain any specified keywords in filter_keywords.xml
-                List<Media> mediaResults = result.getFeedModels();
+                final List<Media> mediaResults = result.getFeedModels();
                 if(!settingsHelper.getBoolean(Constants.TOGGLE_KEYWORD_FILTER)){
                     feedModels.addAll(mediaResults);
                 }else{
