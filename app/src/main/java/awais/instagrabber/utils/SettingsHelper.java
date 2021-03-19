@@ -8,6 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT;
@@ -38,6 +41,7 @@ import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
 import static awais.instagrabber.utils.Constants.PREF_EMOJI_VARIANTS;
 import static awais.instagrabber.utils.Constants.PREF_HASHTAG_POSTS_LAYOUT;
+import static awais.instagrabber.utils.Constants.KEYWORD_FILTERS;
 import static awais.instagrabber.utils.Constants.PREF_LIGHT_THEME;
 import static awais.instagrabber.utils.Constants.PREF_LIKED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_LOCATION_POSTS_LAYOUT;
@@ -66,6 +70,12 @@ public final class SettingsHelper {
         final String stringDefault = getStringDefault(key);
         if (sharedPreferences != null) return sharedPreferences.getString(key, stringDefault);
         return stringDefault;
+    }
+
+    public Set<String> getStringSet(@StringSetSettings final String key) {
+        final Set<String> stringSetDefault = new HashSet<>();
+        if (sharedPreferences != null) return sharedPreferences.getStringSet(key, stringSetDefault);
+        return stringSetDefault;
     }
 
     public int getInteger(@IntegerSettings final String key) {
@@ -122,6 +132,10 @@ public final class SettingsHelper {
         if (sharedPreferences != null) sharedPreferences.edit().putString(key, val).apply();
     }
 
+    public void putStringSet(@StringSetSettings final String key, final Set<String> val) {
+        if (sharedPreferences != null) sharedPreferences.edit().putStringSet(key, val).apply();
+    }
+
     public void putInteger(@IntegerSettings final String key, final int val) {
         if (sharedPreferences != null) sharedPreferences.edit().putInt(key, val).apply();
     }
@@ -146,4 +160,7 @@ public final class SettingsHelper {
 
     @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER})
     public @interface IntegerSettings {}
+
+    @StringDef({KEYWORD_FILTERS})
+    public @interface StringSetSettings {}
 }

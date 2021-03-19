@@ -1,5 +1,8 @@
 package awais.instagrabber.utils;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public final class Constants {
     // string prefs
     public static final String FOLDER_PATH = "custom_path";
@@ -9,6 +12,8 @@ public final class Constants {
     public static final String APP_THEME = "app_theme_v19";
     public static final String APP_LANGUAGE = "app_language_v19";
     public static final String STORY_SORT = "story_sort";
+    // set string prefs
+    public static final String KEYWORD_FILTERS = "keyword_filters";
     // int prefs, do not export
     public static final String PREV_INSTALL_VERSION = "prevVersion";
     public static final String BROWSER_UA_CODE = "browser_ua_code";
