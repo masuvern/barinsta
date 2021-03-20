@@ -43,7 +43,7 @@ public class KeywordsFilterAdapter extends RecyclerView.Adapter<KeywordsFilterDi
             items.remove(position);
             settingsHelper.putStringSet(Constants.KEYWORD_FILTERS, new HashSet<>(items));
             notifyDataSetChanged();
-            final String message = context.getString(R.string.removed_keywords).replace("{0}", s);
+            final String message = context.getString(R.string.removed_keywords, s);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         });
     }
