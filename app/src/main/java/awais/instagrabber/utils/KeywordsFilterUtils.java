@@ -2,7 +2,6 @@ package awais.instagrabber.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Media;
@@ -18,7 +17,7 @@ public final class KeywordsFilterUtils {
     public boolean filter(final String caption){
         if(caption == null) return false;
         if(keywords.isEmpty()) return false;
-        final String temp = caption.toLowerCase(Locale.getDefault());
+        final String temp = caption.toLowerCase();
         for(final String s:keywords){
             if(temp.contains(s)) return true;
         }
