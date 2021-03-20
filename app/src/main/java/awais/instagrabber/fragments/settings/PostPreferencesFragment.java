@@ -7,7 +7,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 
-
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.KeywordsFilterDialog;
 import awais.instagrabber.utils.Constants;
