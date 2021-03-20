@@ -347,14 +347,15 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         usersAdapter = new DirectUsersAdapter(
                 inviter != null ? inviter.getPk() : -1,
                 (position, user, selected) -> {
-                    if (!TextUtils.isEmpty(user.getFbId())) {
+                    if (TextUtils.isEmpty(user.getUsername()) && !TextUtils.isEmpty(user.getFbId())) {
                         Utils.openURL(context, "https://facebook.com/" + user.getFbId());
-                    } else {
-                        final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
-                                .actionGlobalProfileFragment()
-                                .setUsername("@" + user.getUsername());
-                        NavHostFragment.findNavController(this).navigate(directions);
+                        return;
                     }
+                    if (TextUtils.isEmpty(user.getUsername())) return;
+                    final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
+                            .actionGlobalProfileFragment()
+                            .setUsername("@" + user.getUsername());
+                    NavHostFragment.findNavController(this).navigate(directions);
                 },
                 (position, user) -> {
                     final ArrayList<Option<String>> options = viewModel.createUserOptions(user);
