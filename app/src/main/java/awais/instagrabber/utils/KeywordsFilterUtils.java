@@ -30,7 +30,7 @@ public final class KeywordsFilterUtils {
         final Caption c = media.getCaption();
         if(c == null) return false;
         if(keywords.isEmpty()) return false;
-        final String temp = c.getText().toLowerCase(LocaleUtils.getCurrentLocale());
+        final String temp = c.getText().toLowerCase();
         for(final String s:keywords){
             if(temp.contains(s)) return true;
         }
