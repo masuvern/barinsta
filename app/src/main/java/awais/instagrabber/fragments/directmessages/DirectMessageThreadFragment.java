@@ -100,6 +100,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.PermissionUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -317,6 +318,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         backStackSavedStateResultLiveData.postValue(null);
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
+    private MenuItem markAsSeenMenuItem;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -367,9 +369,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.dm_thread_menu, menu);
-        final MenuItem markAsSeenMenuItem = menu.findItem(R.id.mark_as_seen);
+        markAsSeenMenuItem = menu.findItem(R.id.mark_as_seen);
         if (markAsSeenMenuItem != null) {
-            markAsSeenMenuItem.setVisible(false);
+            if (autoMarkAsSeen) {
+                markAsSeenMenuItem.setVisible(false);
+            } else {
+                markAsSeenMenuItem.setEnabled(false);
+            }
         }
     }
 
@@ -385,8 +391,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             return true;
         }
         if (itemId == R.id.mark_as_seen) {
-            // new ThreadAction().execute("seen", lastMessage);
-            item.setVisible(false);
+            handleMarkAsSeen(item);
             return true;
         }
         if (itemId == R.id.refresh && viewModel != null) {
@@ -394,6 +399,40 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void handleMarkAsSeen(@NonNull final MenuItem item) {
+        final LiveData<Resource<Object>> resourceLiveData = viewModel.markAsSeen();
+        resourceLiveData.observe(getViewLifecycleOwner(), new Observer<Resource<Object>>() {
+            @Override
+            public void onChanged(final Resource<Object> resource) {
+                try {
+                    if (resource == null) return;
+                    final Context context = getContext();
+                    if (context == null) return;
+                    switch (resource.status) {
+                        case SUCCESS:
+                            Toast.makeText(context, R.string.marked_as_seen, Toast.LENGTH_SHORT).show();
+                        case LOADING:
+                            item.setEnabled(false);
+                            break;
+                        case ERROR:
+                            item.setEnabled(true);
+                            if (resource.message != null) {
+                                Snackbar.make(context, binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
+                                return;
+                            }
+                            if (resource.resId != 0) {
+                                Snackbar.make(binding.getRoot(), resource.resId, Snackbar.LENGTH_LONG).show();
+                                return;
+                            }
+                            break;
+                    }
+                } finally {
+                    resourceLiveData.removeObserver(this);
+                }
+            }
+        });
     }
 
     @Override
@@ -908,9 +947,15 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void submitItemsToAdapter(final List<DirectItem> items) {
-        if (autoMarkAsSeen) {
-            binding.chats.post(() -> viewModel.markAsSeen());
-        }
+        binding.chats.post(() -> {
+            if (autoMarkAsSeen) {
+                viewModel.markAsSeen();
+                return;
+            }
+            final DirectThread thread = threadLiveData.getValue();
+            if (thread == null) return;
+            markAsSeenMenuItem.setEnabled(!DMUtils.isRead(thread));
+        });
         if (itemsAdapter == null) return;
         itemsAdapter.submitList(items, () -> {
             itemOrHeaders = itemsAdapter.getList();

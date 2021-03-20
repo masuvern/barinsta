@@ -1797,18 +1797,23 @@ public final class ThreadManager {
         return inviter;
     }
 
-    public void markAsSeen(@NonNull final DirectItem directItem) {
+    public LiveData<Resource<Object>> markAsSeen(@NonNull final DirectItem directItem) {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.loading(null));
         final Call<DirectItemSeenResponse> request = service.markAsSeen(threadId, directItem);
         request.enqueue(new Callback<DirectItemSeenResponse>() {
             @Override
             public void onResponse(@NonNull final Call<DirectItemSeenResponse> call,
                                    @NonNull final Response<DirectItemSeenResponse> response) {
                 if (!response.isSuccessful()) {
-                    handleErrorBody(call, response, null);
+                    handleErrorBody(call, response, data);
                     return;
                 }
                 final DirectItemSeenResponse seenResponse = response.body();
-                if (seenResponse == null) return;
+                if (seenResponse == null) {
+                    data.postValue(Resource.error(R.string.generic_null_response, null));
+                    return;
+                }
                 inboxManager.fetchUnseenCount();
                 final DirectItemSeenResponsePayload payload = seenResponse.getPayload();
                 if (payload == null) return;
@@ -1820,14 +1825,17 @@ public final class ThreadManager {
                 lastSeenAt.put(currentUser.getPk(), new DirectThreadLastSeenAt(timestamp, directItem.getItemId()));
                 thread.setLastSeenAt(lastSeenAt);
                 setThread(thread, true);
+                data.postValue(Resource.success(new Object()));
             }
 
             @Override
             public void onFailure(@NonNull final Call<DirectItemSeenResponse> call,
                                   @NonNull final Throwable t) {
                 Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
             }
         });
+        return data;
     }
 
     private interface OnSuccessAction {

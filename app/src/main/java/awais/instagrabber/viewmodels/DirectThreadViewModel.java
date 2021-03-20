@@ -278,16 +278,24 @@ public class DirectThreadViewModel extends AndroidViewModel {
         return threadManager.declineRequest();
     }
 
-    public void markAsSeen() {
-        if (currentUser == null) return;
+    public LiveData<Resource<Object>> markAsSeen() {
+        if (currentUser == null) {
+            return getSuccessEventResObjectLiveData();
+        }
         final DirectThread thread = getThread().getValue();
-        if (thread == null) return;
+        if (thread == null) {
+            return getSuccessEventResObjectLiveData();
+        }
         final List<DirectItem> items = thread.getItems();
-        if (items == null || items.isEmpty()) return;
+        if (items == null || items.isEmpty()) {
+            return getSuccessEventResObjectLiveData();
+        }
         final Optional<DirectItem> itemOptional = items.stream()
                                                        .filter(item -> item.getUserId() != currentUser.getPk())
                                                        .findFirst();
-        if (!itemOptional.isPresent()) return;
+        if (!itemOptional.isPresent()) {
+            return getSuccessEventResObjectLiveData();
+        }
         final DirectItem directItem = itemOptional.get();
         final Map<Long, DirectThreadLastSeenAt> lastSeenAt = thread.getLastSeenAt();
         if (lastSeenAt != null) {
@@ -296,11 +304,20 @@ public class DirectThreadViewModel extends AndroidViewModel {
                 if (seenAt != null
                         && (Objects.equals(seenAt.getItemId(), directItem.getItemId())
                         || Long.parseLong(seenAt.getTimestamp()) >= directItem.getTimestamp())) {
-                    return;
+                    return getSuccessEventResObjectLiveData();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                return getSuccessEventResObjectLiveData();
+            }
         }
-        threadManager.markAsSeen(directItem);
+        return threadManager.markAsSeen(directItem);
+    }
+
+    @NonNull
+    private MutableLiveData<Resource<Object>> getSuccessEventResObjectLiveData() {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        data.postValue(Resource.success(new Object()));
+        return data;
     }
 
     public void deleteThreadIfRequired() {
@@ -311,4 +328,5 @@ public class DirectThreadViewModel extends AndroidViewModel {
             inboxManager.removeThread(threadId);
         }
     }
+
 }
