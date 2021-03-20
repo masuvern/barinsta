@@ -258,7 +258,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 builder.setSharedProfilePicElement(profilePicView)
                        .setSharedMainPostElement(mainPostImage);
             }
-            builder.build().show(getChildFragmentManager(), "post_view");
+            final PostViewV2Fragment postViewV2Fragment = builder.build();
+            postViewV2Fragment.setOnDeleteListener(() -> {
+                postViewV2Fragment.dismiss();
+                binding.postsRecyclerView.refresh();
+            });
+            postViewV2Fragment.show(getChildFragmentManager(), "post_view");
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
@@ -1086,7 +1091,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
                 profileDetailsBinding.btnDM.setEnabled(true);
             }).execute();
-         });
+        });
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic
@@ -1160,7 +1165,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateSwipeRefreshState() {
-        Log.d("austin_debug", "usrs: "+binding.postsRecyclerView.isFetching());
+        Log.d("austin_debug", "usrs: " + binding.postsRecyclerView.isFetching());
         binding.swipeRefreshLayout.setRefreshing(binding.postsRecyclerView.isFetching());
     }
 
