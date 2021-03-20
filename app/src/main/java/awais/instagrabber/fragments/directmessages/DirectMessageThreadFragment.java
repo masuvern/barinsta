@@ -329,7 +329,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
         viewModel = new ViewModelProvider(this, new DirectThreadViewModelFactory(fragmentActivity.getApplication(),
                                                                                  fragmentArgs.getThreadId(),
-                                                                                 fragmentArgs.getBackup(),
                                                                                  fragmentArgs.getPending(),
                                                                                  appStateViewModel.getCurrentUser()))
                 .get(DirectThreadViewModel.class);
@@ -379,7 +378,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final int itemId = item.getItemId();
         if (itemId == R.id.info) {
             final DirectMessageThreadFragmentDirections.ActionThreadToSettings directions = DirectMessageThreadFragmentDirections
-                    .actionThreadToSettings(viewModel.getThreadId(), null, null);
+                    .actionThreadToSettings(viewModel.getThreadId(), null);
             final Boolean pending = viewModel.isPending().getValue();
             directions.setPending(pending == null ? false : pending);
             NavHostFragment.findNavController(this).navigate(directions);
@@ -462,6 +461,12 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     public void onDestroyView() {
         super.onDestroyView();
         cleanup();
+    }
+
+    @Override
+    public void onDestroy() {
+        viewModel.deleteThreadIfRequired();
+        super.onDestroy();
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")

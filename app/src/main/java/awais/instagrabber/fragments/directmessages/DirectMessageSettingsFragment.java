@@ -81,7 +81,6 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         final AppStateViewModel appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
         viewModel = new ViewModelProvider(this, new DirectSettingsViewModelFactory(fragmentActivity.getApplication(),
                                                                                    args.getThreadId(),
-                                                                                   args.getBackup(),
                                                                                    args.getPending(),
                                                                                    appStateViewModel.getCurrentUser()))
                 .get(DirectSettingsViewModel.class);
@@ -350,8 +349,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                 (position, user, selected) -> {
                     if (!TextUtils.isEmpty(user.getFbId())) {
                         Utils.openURL(context, "https://facebook.com/" + user.getFbId());
-                    }
-                    else {
+                    } else {
                         final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
                                 .actionGlobalProfileFragment()
                                 .setUsername("@" + user.getUsername());

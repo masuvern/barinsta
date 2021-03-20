@@ -74,6 +74,8 @@ import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.managers.DirectMessagesManager;
+import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
@@ -1073,7 +1075,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     profileDetailsBinding.btnDM.setEnabled(true);
                     return;
                 }
-                fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername(), thread);
+                final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
+                if (!inboxManager.containsThread(thread.getThreadId())) {
+                    thread.setTemp(true);
+                    inboxManager.addThread(thread, 0);
+                }
+                fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
                 profileDetailsBinding.btnDM.setEnabled(true);
             }).execute();
          });
