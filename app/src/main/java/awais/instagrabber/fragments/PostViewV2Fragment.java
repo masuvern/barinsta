@@ -1206,7 +1206,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
 
             @Override
             public void onPlayerViewLoaded() {
-                binding.playerControls.getRoot().setVisibility(View.VISIBLE);
+                // binding.playerControls.getRoot().setVisibility(View.VISIBLE);
                 final ViewGroup.LayoutParams layoutParams = binding.videoPost.playerView.getLayoutParams();
                 final int requiredWidth = Utils.displayMetrics.widthPixels;
                 final int resultingHeight = NumberUtils
