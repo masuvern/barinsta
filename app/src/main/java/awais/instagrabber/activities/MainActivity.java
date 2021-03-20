@@ -714,7 +714,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final NavController navController = currentNavControllerLiveData.getValue();
         if (navController == null) return;
         final Bundle bundle = new Bundle();
-        bundle.putString("hashtag", "#" + hashtag);
+        bundle.putString("hashtag", hashtag);
         navController.navigate(R.id.action_global_hashTagFragment, bundle);
     }
 

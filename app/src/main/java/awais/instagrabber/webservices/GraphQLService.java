@@ -14,9 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import awais.instagrabber.models.enums.FollowingType;
 import awais.instagrabber.repositories.GraphQLRepository;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.GraphQLUserListFetchResponse;
+import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.User;
@@ -343,6 +345,46 @@ public class GraphQLService extends BaseService {
                             null,
                             null,
                             null));
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    if (callback != null) {
+                        callback.onFailure(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
+    public void fetchTag(final String tag,
+                         final ServiceCallback<Hashtag> callback) {
+        final Call<String> request = repository.getTag(tag);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String rawBody = response.body();
+                if (rawBody == null) {
+                    Log.e(TAG, "Error occurred while fetching gql tag of " + tag);
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject body = new JSONObject(rawBody)
+                            .getJSONObject("graphql")
+                            .getJSONObject(Constants.EXTRAS_HASHTAG);
+                    final JSONObject timelineMedia = body.getJSONObject("edge_hashtag_to_media");
+                    callback.onSuccess(new Hashtag(
+                            body.getString(Constants.EXTRAS_ID),
+                            body.getString("name"),
+                            body.getString("profile_pic_url"),
+                            timelineMedia.getLong("count"),
+                            body.optBoolean("is_following") ? FollowingType.FOLLOWING : FollowingType.NOT_FOLLOWING));
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
                     if (callback != null) {
