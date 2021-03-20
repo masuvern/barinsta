@@ -72,7 +72,6 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.services.ActivityCheckerService;
 import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
@@ -251,7 +250,17 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     @Override
     public void onBackPressed() {
-        if (isTaskRoot() && isBackStackEmpty) {
+        int currentNavControllerBackStack = 2;
+        if (currentNavControllerLiveData != null) {
+            final NavController navController = currentNavControllerLiveData.getValue();
+            if (navController != null) {
+                @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
+                if (backStack != null) {
+                    currentNavControllerBackStack = backStack.size();
+                }
+            }
+        }
+        if (isTaskRoot() && isBackStackEmpty && currentNavControllerBackStack == 2) {
             finishAfterTransition();
             return;
         }
@@ -577,10 +586,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private void showThread(@NonNull final Intent intent) {
         final String threadId = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_ID);
         final String threadTitle = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_TITLE);
-        navigateToThread(threadId, threadTitle, null);
+        navigateToThread(threadId, threadTitle);
     }
 
-    public void navigateToThread(final String threadId, final String threadTitle, final DirectThread backup) {
+    public void navigateToThread(final String threadId, final String threadTitle) {
         if (threadId == null || threadTitle == null) return;
         currentNavControllerLiveData.observe(this, new Observer<NavController>() {
             @Override
@@ -594,7 +603,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                         // need handler.post() to wait for the fragment manager to be ready to navigate
                         new Handler().post(() -> {
                             final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
-                                    .actionInboxToThread(threadId, threadTitle, backup);
+                                    .actionInboxToThread(threadId, threadTitle);
                             navController.navigate(action);
                         });
                         return;
@@ -607,7 +616,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                                                          @Nullable final Bundle arguments) {
                             if (destination.getId() == R.id.directMessagesInboxFragment) {
                                 final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
-                                        .actionInboxToThread(threadId, threadTitle, backup);
+                                        .actionInboxToThread(threadId, threadTitle);
                                 controller.navigate(action);
                                 controller.removeOnDestinationChangedListener(this);
                             }

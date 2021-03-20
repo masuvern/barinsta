@@ -48,6 +48,7 @@ import androidx.core.content.PermissionChecker;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -1062,14 +1063,27 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
 
             @Override
             public void onPlayerPlay(final int position) {
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+                Utils.enabledKeepScreenOn(activity);
                 if (!detailsVisible || hasBeenToggled) return;
                 showPlayerControls();
             }
 
             @Override
             public void onPlayerPause(final int position) {
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+                Utils.disableKeepScreenOn(activity);
                 if (detailsVisible || hasBeenToggled) return;
                 toggleDetails();
+            }
+
+            @Override
+            public void onPlayerRelease(final int position) {
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+                Utils.disableKeepScreenOn(activity);
             }
         });
         binding.sliderParent.setAdapter(sliderItemsAdapter);
@@ -1206,7 +1220,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
 
             @Override
             public void onPlayerViewLoaded() {
-                binding.playerControls.getRoot().setVisibility(View.VISIBLE);
+                // binding.playerControls.getRoot().setVisibility(View.VISIBLE);
                 final ViewGroup.LayoutParams layoutParams = binding.videoPost.playerView.getLayoutParams();
                 final int requiredWidth = Utils.displayMetrics.widthPixels;
                 final int resultingHeight = NumberUtils
@@ -1218,9 +1232,26 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
 
             @Override
             public void onPlay() {
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+                Utils.enabledKeepScreenOn(activity);
                 if (detailsVisible) {
                     new Handler().postDelayed(() -> toggleDetails(), DETAILS_HIDE_DELAY_MILLIS);
                 }
+            }
+
+            @Override
+            public void onPause() {
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+                Utils.disableKeepScreenOn(activity);
+            }
+
+            @Override
+            public void onRelease() {
+                final FragmentActivity activity = getActivity();
+                if (activity == null) return;
+                Utils.disableKeepScreenOn(activity);
             }
         };
         final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();

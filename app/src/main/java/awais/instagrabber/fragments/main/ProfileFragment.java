@@ -74,6 +74,8 @@ import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.interfaces.FetchListener;
+import awais.instagrabber.managers.DirectMessagesManager;
+import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.StoryModel;
@@ -590,8 +592,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void fetchProfileDetails() {
         accountIsUpdated = false;
-        new ProfileFetcher(TextUtils.isEmpty(username) ? null : username.trim().substring(1),
-                myId, isLoggedIn, new FetchListener<User>() {
+        String usernameTemp = username.trim();
+        if (usernameTemp.startsWith("@")) {
+            usernameTemp = usernameTemp.substring(1);
+        }
+        new ProfileFetcher(TextUtils.isEmpty(username) ? null : usernameTemp, myId, isLoggedIn, new FetchListener<User>() {
             @Override
             public void onResult(final User user) {
                 if (getContext() == null) return;
@@ -612,7 +617,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                   isLoggedIn ? R.string.error_loading_profile_loggedin : R.string.error_loading_profile,
                                                   Toast.LENGTH_LONG).show();
                     else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (final Throwable e) {}
+                } catch (final Throwable ignored) {}
             }
 
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -1073,7 +1078,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     profileDetailsBinding.btnDM.setEnabled(true);
                     return;
                 }
-                fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername(), thread);
+                final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
+                if (!inboxManager.containsThread(thread.getThreadId())) {
+                    thread.setTemp(true);
+                    inboxManager.addThread(thread, 0);
+                }
+                fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
                 profileDetailsBinding.btnDM.setEnabled(true);
             }).execute();
          });

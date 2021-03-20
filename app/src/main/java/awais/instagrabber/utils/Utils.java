@@ -359,4 +359,16 @@ public final class Utils {
         }
         return drawable;
     }
+
+    public static void enabledKeepScreenOn(@NonNull final Activity activity) {
+        final Window window = activity.getWindow();
+        if (window == null) return;
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    public static void disableKeepScreenOn(@NonNull final Activity activity) {
+        final Window window = activity.getWindow();
+        if (window == null) return;
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 }
