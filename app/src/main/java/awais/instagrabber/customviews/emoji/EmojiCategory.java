@@ -16,35 +16,6 @@ public class EmojiCategory {
 
     public EmojiCategory(final EmojiCategoryType type) {
         this.type = type;
-        switch (type) {
-            case SMILEYS_AND_EMOTION:
-                drawableRes = R.drawable.ic_round_emoji_emotions_24;
-                break;
-            case ANIMALS_AND_NATURE:
-                drawableRes = R.drawable.ic_round_emoji_nature_24;
-                break;
-            case FOOD_AND_DRINK:
-                drawableRes = R.drawable.ic_round_emoji_food_beverage_24;
-                break;
-            case TRAVEL_AND_PLACES:
-                drawableRes = R.drawable.ic_round_emoji_transportation_24;
-                break;
-            case ACTIVITIES:
-                drawableRes = R.drawable.ic_round_emoji_events_24;
-                break;
-            case OBJECTS:
-                drawableRes = R.drawable.ic_round_emoji_objects_24;
-                break;
-            case SYMBOLS:
-                drawableRes = R.drawable.ic_round_emoji_symbols_24;
-                break;
-            case FLAGS:
-                drawableRes = R.drawable.ic_round_emoji_flags_24;
-                break;
-            case OTHERS:
-                drawableRes = R.drawable.ic_round_unknown_24;
-                break;
-        }
     }
 
     public EmojiCategoryType getType() {
@@ -56,6 +27,37 @@ public class EmojiCategory {
     }
 
     public int getDrawableRes() {
+        if (drawableRes == 0) {
+            switch (type) {
+                case SMILEYS_AND_EMOTION:
+                    drawableRes = R.drawable.ic_round_emoji_emotions_24;
+                    break;
+                case ANIMALS_AND_NATURE:
+                    drawableRes = R.drawable.ic_round_emoji_nature_24;
+                    break;
+                case FOOD_AND_DRINK:
+                    drawableRes = R.drawable.ic_round_emoji_food_beverage_24;
+                    break;
+                case TRAVEL_AND_PLACES:
+                    drawableRes = R.drawable.ic_round_emoji_transportation_24;
+                    break;
+                case ACTIVITIES:
+                    drawableRes = R.drawable.ic_round_emoji_events_24;
+                    break;
+                case OBJECTS:
+                    drawableRes = R.drawable.ic_round_emoji_objects_24;
+                    break;
+                case SYMBOLS:
+                    drawableRes = R.drawable.ic_round_emoji_symbols_24;
+                    break;
+                case FLAGS:
+                    drawableRes = R.drawable.ic_round_emoji_flags_24;
+                    break;
+                case OTHERS:
+                    drawableRes = R.drawable.ic_round_unknown_24;
+                    break;
+            }
+        }
         return drawableRes;
     }
 
