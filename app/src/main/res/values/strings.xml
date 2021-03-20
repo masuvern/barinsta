@@ -469,7 +469,7 @@
     <string name="hint_keyword">Keyword</string>
     <string name="toggle_keyword_filter">Enable keyword filter</string>
     <string name="edit_keyword_filter">Edit keyword filters</string>
-    <string name="added_keywords">Added keyword: {0} to filter list</string>
-    <string name="removed_keywords">Removed keyword: {0} from filter list</string>
+    <string name="added_keywords">Added keyword: %s to filter list</string>
+    <string name="removed_keywords">Removed keyword: %s from filter list</string>
     <string name="marked_as_seen">Marked as seen</string>
 </resources>
