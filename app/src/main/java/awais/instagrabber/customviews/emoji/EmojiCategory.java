@@ -1,8 +1,8 @@
 package awais.instagrabber.customviews.emoji;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -10,12 +10,13 @@ import awais.instagrabber.R;
 
 public class EmojiCategory {
     private final EmojiCategoryType type;
-    private final Map<String, Emoji> emojis = new LinkedHashMap<>();
+    private final Map<String, Emoji> emojis;
     @DrawableRes
     private int drawableRes;
 
-    public EmojiCategory(final EmojiCategoryType type) {
+    public EmojiCategory(final EmojiCategoryType type, final Map<String, Emoji> emojis) {
         this.type = type;
+        this.emojis = emojis;
     }
 
     public EmojiCategoryType getType() {
@@ -72,5 +73,14 @@ public class EmojiCategory {
     @Override
     public int hashCode() {
         return Objects.hash(type);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "EmojiCategory{" +
+                "type=" + type +
+                ", emojis=" + emojis +
+                '}';
     }
 }
