@@ -3,10 +3,11 @@ package awais.instagrabber.utils.emoji;
 import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -52,7 +53,12 @@ public final class EmojiParser {
         }
         try (final InputStream in = classLoader.getResourceAsStream(file)) {
             final String json = NetworkUtils.readFromInputStream(in);
-            final Gson gson = new Gson();
+            final Gson gson = new GsonBuilder()
+                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                    .registerTypeAdapter(EmojiCategory.class, new EmojiCategoryDeserializer())
+                    .registerTypeAdapter(Emoji.class, new EmojiDeserializer())
+                    .setLenient()
+                    .create();
             final Type type = new TypeToken<Map<EmojiCategoryType, EmojiCategory>>() {}.getType();
             categoryMap = gson.fromJson(json, type);
             // Log.d(TAG, "EmojiParser: " + categoryMap);
