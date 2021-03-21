@@ -470,7 +470,4 @@
     <string name="delete_unsuccessful">Delete unsuccessful</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
-    <string name="enable_sentry">Enable Sentry</string>
-    <string name="sentry_summary">Sentry is a listener/handler for errors that asynchronously sends out the error/event to Sentry.io</string>
-    <string name="sentry_start_next_launch">Sentry will start on next launch</string>
 </resources>
