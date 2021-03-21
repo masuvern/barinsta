@@ -739,7 +739,7 @@ public class StoryViewerFragment extends Fragment {
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = parseStoryMediaId(model.getId());
                 currentStoryUsername = model.getTitle();
-                fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
+                fetchOptions = StoryViewerOptions.forStoryArchive(model.getId());
                 break;
             }
         }

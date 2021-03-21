@@ -962,8 +962,7 @@ public final class ResponseBodyUtils {
     // }
 
     public static StoryModel parseStoryItem(final JSONObject data,
-                                            final boolean isLoc,
-                                            final boolean isHashtag,
+                                            final boolean isLocOrHashtag,
                                             final String username) throws JSONException {
         final boolean isVideo = data.has("video_duration");
         final StoryModel model = new StoryModel(data.getString("id"),
@@ -971,9 +970,7 @@ public final class ResponseBodyUtils {
                                                     .getString("url"), null,
                                                 isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                                 data.optLong("taken_at", 0),
-                                                (isLoc || isHashtag)
-                                                ? data.getJSONObject("user").getString("username")
-                                                : username,
+                                                isLocOrHashtag ? data.getJSONObject("user").getString("username") : username,
                                                 data.getJSONObject("user").getLong("pk"),
                                                 data.optBoolean("can_reply"));
 
