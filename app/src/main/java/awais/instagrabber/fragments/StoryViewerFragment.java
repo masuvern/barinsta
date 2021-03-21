@@ -304,11 +304,18 @@ public class StoryViewerFragment extends Fragment {
         // isNotification = fragmentArgs.getIsNotification();
         final Type type = options.getType();
         if (currentFeedStoryIndex >= 0) {
-            viewModel = type == Type.HIGHLIGHT
-                        ? type == Type.STORY_ARCHIVE
-                          ? new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class)
-                          : new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
-                        : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+            switch (type) {
+                case HIGHLIGHT:
+                    viewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
+                    break;
+                case STORY_ARCHIVE:
+                    viewModel = new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class);
+                    break;
+                default:
+                case FEED_STORY_POSITION:
+                    viewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+                    break;
+            }
         }
         setupStories();
     }
