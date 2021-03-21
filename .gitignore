@@ -17,3 +17,4 @@
 .externalNativeBuild
 .cxx
 app/release
+/sentry.properties
