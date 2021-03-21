@@ -16,7 +16,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,10 +40,11 @@ import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.PasswordUtils.IncorrectPasswordException;
-//import awaisomereport.LogCollector.LogFile;
 
-//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
+
+//import awaisomereport.LogCollector.LogFile;
+//import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class ExportImportUtils {
     private static final String TAG = "ExportImportUtils";
@@ -283,7 +283,7 @@ public final class ExportImportUtils {
             final ListenableFuture<List<Object>> allFutures = Futures.allAsList(futures.build());
             Futures.addCallback(allFutures, new FutureCallback<List<Object>>() {
                 @Override
-                public void onSuccess(@NullableDecl final List<Object> result) {
+                public void onSuccess(final List<Object> result) {
                     final JSONObject jsonObject = new JSONObject();
                     if (result == null) {
                         callback.onCreated(jsonObject.toString());
