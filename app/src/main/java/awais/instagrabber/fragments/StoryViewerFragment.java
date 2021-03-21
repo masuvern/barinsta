@@ -65,6 +65,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -735,7 +737,7 @@ public class StoryViewerFragment extends Fragment {
                     return;
                 }
                 final HighlightModel model = models.get(currentFeedStoryIndex);
-                currentStoryMediaId = model.getId();
+                currentStoryMediaId = parseStoryMediaId(model.getId());
                 currentStoryUsername = model.getTitle();
                 fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
                 break;
@@ -1145,5 +1147,21 @@ public class StoryViewerFragment extends Fragment {
             currentFeedStoryIndex = backward ? (currentFeedStoryIndex - 1) : (currentFeedStoryIndex + 1);
             resetView();
         }
+    }
+
+    /**
+     * Parses the Story's media ID. For user stories this is a number, but for archive stories
+     * this is "archiveDay:" plus a number.
+     */
+    private static String parseStoryMediaId(String rawId) {
+        final String regex = "(?:archiveDay:)?(.+)";
+        final Pattern pattern = Pattern.compile(regex);
+        final Matcher matcher = pattern.matcher(rawId);
+
+        if (matcher.matches() && matcher.groupCount() >= 1) {
+            return matcher.group(1);
+        }
+
+        return rawId;
     }
 }
