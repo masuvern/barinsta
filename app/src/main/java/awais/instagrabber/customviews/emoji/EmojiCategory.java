@@ -18,6 +18,10 @@ public class EmojiCategory {
         this.type = type;
     }
 
+    public EmojiCategory() {
+        this.type = null;
+    }
+
     public EmojiCategoryType getType() {
         return type;
     }
@@ -72,5 +76,10 @@ public class EmojiCategory {
     @Override
     public int hashCode() {
         return Objects.hash(type);
+    }
+
+    @Override
+    public String toString() {
+        return "EmojiCategory {TYPE=" + type + ", EMOJIS=" + emojis + "}";
     }
 }

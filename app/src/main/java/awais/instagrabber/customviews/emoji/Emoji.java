@@ -35,7 +35,7 @@ public class Emoji {
     }
 
     public GoogleCompatEmojiDrawable getDrawable() {
-        if (drawable == null) {
+        if (drawable == null && unicode != null) {
             drawable = new GoogleCompatEmojiDrawable(unicode);
         }
         return drawable;
@@ -60,6 +60,7 @@ public class Emoji {
         return "Emoji{" +
                 "unicode='" + unicode + '\'' +
                 ", name='" + name + '\'' +
+                ", variants=" + variants +
                 '}';
     }
 }

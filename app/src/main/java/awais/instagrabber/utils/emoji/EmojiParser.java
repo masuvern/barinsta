@@ -68,7 +68,7 @@ public final class EmojiParser {
                                            .build()
                                            .stream())
                                    .collect(Collectors.toMap(Emoji::getUnicode, Function.identity()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "EmojiParser: ", e);
         }
     }
