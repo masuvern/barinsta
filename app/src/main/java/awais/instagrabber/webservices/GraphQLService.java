@@ -394,9 +394,9 @@ public class GraphQLService extends BaseService {
                     callback.onSuccess(new Hashtag(
                             body.getString(Constants.EXTRAS_ID),
                             body.getString("name"),
-                            body.getString("profile_pic_url"),
                             timelineMedia.getLong("count"),
-                            body.optBoolean("is_following") ? FollowingType.FOLLOWING : FollowingType.NOT_FOLLOWING));
+                            body.optBoolean("is_following") ? FollowingType.FOLLOWING : FollowingType.NOT_FOLLOWING,
+                            null));
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
                     if (callback != null) {
