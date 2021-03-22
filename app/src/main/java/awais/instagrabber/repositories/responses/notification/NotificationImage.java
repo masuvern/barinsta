@@ -1,4 +1,4 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses.notification;
 
 public class NotificationImage {
     private final String id;

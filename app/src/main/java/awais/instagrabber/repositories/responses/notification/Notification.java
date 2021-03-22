@@ -1,4 +1,4 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses.notification;
 
 import awais.instagrabber.models.enums.NotificationType;
 

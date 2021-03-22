@@ -1,4 +1,4 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses.notification;
 
 import androidx.annotation.NonNull;
 

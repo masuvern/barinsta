@@ -1,8 +1,10 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses.feed;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+
+import awais.instagrabber.repositories.responses.Media;
 
 public class EndOfFeedGroup implements Serializable {
     private final String id;
