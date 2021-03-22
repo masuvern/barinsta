@@ -11,7 +11,6 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.webservices.FeedService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.utils.KeywordsFilterUtils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -43,12 +42,7 @@ public class FeedPostFetchService implements PostFetcher.PostFetchService {
                 hasNextPage = result.hasNextPage();
 
                 final List<Media> mediaResults = result.getFeedModels();
-                if(settingsHelper.getBoolean(Constants.TOGGLE_KEYWORD_FILTER)){
-                    final ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(Constants.KEYWORD_FILTERS));
-                    feedModels.addAll(new KeywordsFilterUtils(items).filter(mediaResults));
-                }else{
-                    feedModels.addAll(mediaResults);
-                }
+                feedModels.addAll(mediaResults);
 
                 if (fetchListener != null) {
                     // if (feedModels.size() < 15 && hasNextPage) {

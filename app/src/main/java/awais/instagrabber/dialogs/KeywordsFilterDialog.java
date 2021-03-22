@@ -1,10 +1,12 @@
 package awais.instagrabber.dialogs;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -22,17 +24,27 @@ import awais.instagrabber.adapters.KeywordsFilterAdapter;
 import awais.instagrabber.databinding.DialogKeywordsFilterBinding;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.SettingsHelper;
+import awais.instagrabber.utils.Utils;
 
 public final class KeywordsFilterDialog extends DialogFragment {
 
     @Override
+    public void onStart() {
+        super.onStart();
+        final Dialog dialog = getDialog();
+        if (dialog == null) return;
+        final Window window = dialog.getWindow();
+        if (window == null) return;
+        final int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        final int width = (int) (Utils.displayMetrics.widthPixels * 0.8);
+        window.setLayout(width, height);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final DialogKeywordsFilterBinding dialogKeywordsFilterBinding = DialogKeywordsFilterBinding.inflate(inflater, container, false);
-
         init(dialogKeywordsFilterBinding, getContext());
-
         dialogKeywordsFilterBinding.btnOK.setOnClickListener(view -> this.dismiss());
-
         return dialogKeywordsFilterBinding.getRoot();
     }
 
@@ -55,10 +67,10 @@ public final class KeywordsFilterDialog extends DialogFragment {
                 editText.setText("");
                 return;
             }
-            items.add(s);
+            items.add(s.toLowerCase());
             settingsHelper.putStringSet(Constants.KEYWORD_FILTERS, new HashSet<>(items));
             adapter.notifyItemInserted(items.size());
-            final String message = context.getString(R.string.added_keywords).replace("{0}", s);
+            final String message = context.getString(R.string.added_keywords, s);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             editText.setText("");
         });
