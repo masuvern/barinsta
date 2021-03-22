@@ -3,7 +3,6 @@ package awais.instagrabber.fragments;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.SpannableStringBuilder;
@@ -95,7 +94,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private Hashtag hashtagModel = null;
     private ActionMode actionMode;
     private StoriesService storiesService;
-    private AsyncTask<?, ?, ?> currentlyExecuting;
     private boolean isLoggedIn;
     private TagsService tagsService;
     private GraphQLService graphQLService;
