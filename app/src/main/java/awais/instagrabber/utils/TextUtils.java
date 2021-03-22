@@ -1,64 +1,29 @@
 package awais.instagrabber.utils;
 
+import android.content.Context;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.text.style.URLSpan;
+import android.util.Patterns;
 
 import androidx.annotation.NonNull;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import awais.instagrabber.customviews.CommentMentionClickSpan;
 
 public final class TextUtils {
-    @NonNull
-    public static CharSequence getMentionText(@NonNull final CharSequence text) {
-        final int commentLength = text.length();
-        final SpannableStringBuilder stringBuilder = new SpannableStringBuilder(text, 0, commentLength);
-
-        for (int i = 0; i < commentLength; ++i) {
-            char currChar = text.charAt(i);
-
-            if (currChar == '@' || currChar == '#') {
-                final int startLen = i;
-
-                do {
-                    if (++i == commentLength) break;
-                    currChar = text.charAt(i);
-
-                    if (currChar == '.' && i + 1 < commentLength) {
-                        final char nextChar = text.charAt(i + 1);
-                        if (nextChar == '.' || nextChar == ' ' || nextChar == '#' || nextChar == '@' || nextChar == '/'
-                                || nextChar == '\r' || nextChar == '\n') {
-                            break;
-                        }
-                    } else if (currChar == '.')
-                        break;
-
-                    // for merged hashtags
-                    if (currChar == '#') {
-                        --i;
-                        break;
-                    }
-                } while (currChar != ' ' && currChar != '\r' && currChar != '\n' && currChar != '>' && currChar != '<'
-                        && currChar != ':' && currChar != ';' && currChar != '\'' && currChar != '"' && currChar != '['
-                        && currChar != ']' && currChar != '\\' && currChar != '=' && currChar != '-' && currChar != '!'
-                        && currChar != '$' && currChar != '%' && currChar != '^' && currChar != '&' && currChar != '*'
-                        && currChar != '(' && currChar != ')' && currChar != '{' && currChar != '}' && currChar != '/'
-                        && currChar != '|' && currChar != '?' && currChar != '`' && currChar != '~'
-                );
-
-                final int endLen = currChar != '#' ? i : i + 1; // for merged hashtags
-                stringBuilder.setSpan(new CommentMentionClickSpan(), startLen,
-                                      Math.min(commentLength, endLen), // fixed - crash when end index is greater than comment length ( @kernoeb )
-                                      Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-        }
-
-        return stringBuilder;
-    }
-
     // extracted from String class
     public static int indexOfChar(@NonNull final CharSequence sequence, final int ch, final int startIndex) {
         final int max = sequence.length();
@@ -73,11 +38,6 @@ public final class TextUtils {
             }
         }
         return -1;
-    }
-
-    public static boolean hasMentions(final CharSequence text) {
-        if (isEmpty(text)) return false;
-        return indexOfChar(text, '@', 0) != -1 || indexOfChar(text, '#', 0) != -1;
     }
 
     public static CharSequence getSpannableUrl(final String url) {
@@ -128,5 +88,29 @@ public final class TextUtils {
             return String.format(Locale.ENGLISH, "%02d:%02d:%02d", 0, min, sec);
         }
         return String.format(Locale.ENGLISH, "%02d:%02d", min, sec);
+    }
+
+    public static String getRelativeDateTimeString(final Context context, final long from) {
+        final Date now = new Date();
+        final Date then = new Date(from);
+        int days = daysBetween(from, now.getTime());
+        if (days == 0) {
+            return DateFormat.getTimeFormat(context).format(then);
+        }
+        return DateFormat.getDateFormat(context).format(then);
+    }
+
+    private static int daysBetween(long d1, long d2) {
+        return (int) ((d2 - d1) / DateUtils.DAY_IN_MILLIS);
+    }
+
+    public static List<String> extractUrls(final String text) {
+        if (isEmpty(text)) return Collections.emptyList();
+        final Matcher matcher = Patterns.WEB_URL.matcher(text);
+        final List<String> urls = new ArrayList<>();
+        while (matcher.find()) {
+            urls.add(matcher.group());
+        }
+        return urls;
     }
 }

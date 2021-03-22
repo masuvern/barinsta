@@ -57,9 +57,9 @@ public class VideoPlayerViewHelper implements Player.EventListener {
     private final DefaultDataSourceFactory dataSourceFactory;
     private SimpleExoPlayer player;
     private PopupMenu speedPopup;
-    private Runnable positionChecker;
+    private PositionCheckRunnable positionChecker;
+    private Handler positionUpdateHandler;
 
-    private final Handler positionUpdateHandler = new Handler();
     private final Player.EventListener listener = new Player.EventListener() {
         @Override
         public void onPlaybackStateChanged(final int state) {
@@ -79,6 +79,11 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         @Override
         public void onPlayWhenReadyChanged(final boolean playWhenReady, final int reason) {
             updatePlayPauseDrawable(playWhenReady);
+            if (positionUpdateHandler == null || positionChecker == null) return;
+            if (playWhenReady) {
+                positionUpdateHandler.removeCallbacks(positionChecker);
+                positionUpdateHandler.postDelayed(positionChecker, INITIAL_DELAY);
+            }
         }
     };
     private final AudioListener audioListener = new AudioListener() {
@@ -191,6 +196,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         player = new SimpleExoPlayer.Builder(context)
                 .setLooper(Looper.getMainLooper())
                 .build();
+        positionUpdateHandler = new Handler();
         positionChecker = new PositionCheckRunnable(positionUpdateHandler,
                                                     player,
                                                     controlsBinding.timeline,
@@ -353,19 +359,30 @@ public class VideoPlayerViewHelper implements Player.EventListener {
     // }
 
     public void releasePlayer() {
-        if (player == null) return;
-        player.release();
-        player = null;
-        if (positionUpdateHandler != null && positionChecker != null) {
-            positionUpdateHandler.removeCallbacks(positionChecker);
+        if (videoPlayerCallback != null) {
+            videoPlayerCallback.onRelease();
+        }
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+        if (positionUpdateHandler != null) {
+            if (positionChecker != null) {
+                positionUpdateHandler.removeCallbacks(positionChecker);
+                positionChecker = null;
+            }
+            positionUpdateHandler = null;
         }
     }
 
     public void pause() {
-        if (player == null) return;
-        player.pause();
-        if (positionUpdateHandler != null && positionChecker != null) {
-            positionUpdateHandler.removeCallbacks(positionChecker);
+        if (player != null) {
+            player.pause();
+        }
+        if (positionUpdateHandler != null) {
+            if (positionChecker != null) {
+                positionUpdateHandler.removeCallbacks(positionChecker);
+            }
         }
     }
 
@@ -412,6 +429,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
 
         @Override
         public void run() {
+            if (positionUpdateHandler == null) return;
             positionUpdateHandler.removeCallbacks(this);
             if (player == null) return;
             final long currentPosition = player.getCurrentPosition();
@@ -438,5 +456,7 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         void onPlay();
 
         void onPause();
+
+        void onRelease();
     }
 }

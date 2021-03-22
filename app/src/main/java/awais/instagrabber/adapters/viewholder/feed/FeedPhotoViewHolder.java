@@ -16,7 +16,8 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.databinding.ItemFeedPhotoBinding;
-import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
 
 public class FeedPhotoViewHolder extends FeedItemViewHolder {
@@ -30,7 +31,7 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
         super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
         this.feedItemCallback = feedItemCallback;
-        binding.itemFeedBottom.tvVideoViews.setVisibility(View.GONE);
+        binding.itemFeedBottom.btnViews.setVisibility(View.GONE);
         // binding.itemFeedBottom.btnMute.setVisibility(View.GONE);
         binding.imageViewer.setAllowTouchInterceptionWhileZoomed(false);
         final GenericDraweeHierarchy hierarchy = new GenericDraweeHierarchyBuilder(itemView.getContext().getResources())
@@ -40,14 +41,12 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
     }
 
     @Override
-    public void bindItem(final FeedModel feedModel) {
-        if (feedModel == null) {
-            return;
-        }
+    public void bindItem(final Media media) {
+        if (media == null) return;
         binding.getRoot().post(() -> {
-            setDimensions(feedModel);
-            final String thumbnailUrl = feedModel.getThumbnailUrl();
-            String url = feedModel.getDisplayUrl();
+            setDimensions(media);
+            final String thumbnailUrl = ResponseBodyUtils.getThumbUrl(media);
+            String url = ResponseBodyUtils.getImageUrl(media);
             if (TextUtils.isEmpty(url)) url = thumbnailUrl;
             final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
                                                                    // .setLocalThumbnailPreviewsEnabled(true)
@@ -62,7 +61,7 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
                 @Override
                 public boolean onSingleTapConfirmed(final MotionEvent e) {
                     if (feedItemCallback != null) {
-                        feedItemCallback.onPostClick(feedModel, binding.itemFeedTop.ivProfilePic, binding.imageViewer);
+                        feedItemCallback.onPostClick(media, binding.itemFeedTop.ivProfilePic, binding.imageViewer);
                         return true;
                     }
                     return false;
@@ -71,8 +70,8 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
         });
     }
 
-    private void setDimensions(final FeedModel feedModel) {
-        final float aspectRatio = (float) feedModel.getImageWidth() / feedModel.getImageHeight();
+    private void setDimensions(final Media feedModel) {
+        final float aspectRatio = (float) feedModel.getOriginalWidth() / feedModel.getOriginalHeight();
         binding.imageViewer.setAspectRatio(aspectRatio);
     }
 }

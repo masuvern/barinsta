@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.Preference;
@@ -32,39 +33,39 @@ import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
-import awais.instagrabber.repositories.responses.UserInfo;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
+import awais.instagrabber.webservices.UserService;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class MorePreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = "MorePreferencesFragment";
 
-    private final AccountRepository accountRepository;
+    private AccountRepository accountRepository;
 
     public MorePreferencesFragment() {
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
     }
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != null;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
         if (context == null) return;
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);
         screen.addPreference(accountCategory);
         if (isLoggedIn) {
             accountCategory.setSummary(R.string.account_hint);
-            accountCategory.addPreference(getAccountSwitcherPreference(cookie));
+            accountCategory.addPreference(getAccountSwitcherPreference(cookie, context));
             accountCategory.addPreference(getPreference(R.string.logout, R.string.logout_summary, R.drawable.ic_logout_24, preference -> {
                 if (getContext() == null) return false;
                 CookieUtils.setupCookies("LOGOUT");
@@ -79,7 +80,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             public void onSuccess(@NonNull final List<Account> accounts) {
                 if (!isLoggedIn) {
                     if (accounts.size() > 0) {
-                        accountCategory.addPreference(getAccountSwitcherPreference(null));
+                        accountCategory.addPreference(getAccountSwitcherPreference(null, context));
                     }
                     // Need to show something to trigger login activity
                     accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
@@ -132,43 +133,58 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         // generalCategory.setIconSpaceReserved(false);
         // screen.addPreference(generalCategory);
         screen.addPreference(getDivider(context));
+        final NavController navController = NavHostFragment.findNavController(this);
         if (isLoggedIn) {
             screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
-                NavHostFragment.findNavController(this).navigate(navDirections);
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
+                    navController.navigate(navDirections);
+                }
                 return true;
             }));
             screen.addPreference(getPreference(R.string.action_ayml, R.drawable.ic_suggested_users, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml");
-                NavHostFragment.findNavController(this).navigate(navDirections);
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml");
+                    navController.navigate(navDirections);
+                }
                 return true;
             }));
             screen.addPreference(getPreference(R.string.action_archive, R.drawable.ic_archive, preference -> {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalStoryListViewerFragment("archive");
-                NavHostFragment.findNavController(this).navigate(navDirections);
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalStoryListViewerFragment("archive");
+                    navController.navigate(navDirections);
+                }
                 return true;
             }));
         }
         screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
 
         screen.addPreference(getDivider(context));
         screen.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToSettingsPreferencesFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
         screen.addPreference(getPreference(R.string.backup_and_restore, R.drawable.ic_settings_backup_restore_24, preference -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToBackupPreferencesFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToBackupPreferencesFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
         screen.addPreference(getPreference(R.string.action_about, R.drawable.ic_outline_info_24, preference1 -> {
-            final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToAboutFragment();
-            NavHostFragment.findNavController(this).navigate(navDirections);
+            if (isSafeToNavigate(navController)) {
+                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToAboutFragment();
+                navController.navigate(navDirections);
+            }
             return true;
         }));
 
@@ -187,6 +203,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(reminderPreference);
     }
 
+    private boolean isSafeToNavigate(final NavController navController) {
+        return navController.getCurrentDestination() != null
+                && navController.getCurrentDestination().getId() == R.id.morePreferencesFragment;
+    }
+
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
         if (resultCode == Constants.LOGIN_RESULT_CODE) {
@@ -198,11 +219,11 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             // Toast.makeText(getContext(), R.string.login_success_loading_cookies, Toast.LENGTH_SHORT).show();
 
             // adds cookies to database for quick access
-            final String uid = CookieUtils.getUserIdFromCookie(cookie);
-            final ProfileService profileService = ProfileService.getInstance();
-            profileService.getUserInfo(uid, new ServiceCallback<UserInfo>() {
+            final long uid = CookieUtils.getUserIdFromCookie(cookie);
+            final UserService userService = UserService.getInstance();
+            userService.getUserInfo(uid, new ServiceCallback<User>() {
                 @Override
-                public void onSuccess(final UserInfo result) {
+                public void onSuccess(final User result) {
                     // Log.d(TAG, "adding userInfo: " + result);
                     if (result != null) {
                         accountRepository.insertOrUpdateAccount(
@@ -235,8 +256,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         }
     }
 
-    private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie) {
-        final Context context = getContext();
+    private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie, final Context context) {
         if (context == null) return null;
         return new AccountSwitcherPreference(context, cookie, accountRepository, v -> showAccountSwitcherDialog());
     }
@@ -321,8 +341,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             final View root = holder.itemView;
             if (onClickListener != null) root.setOnClickListener(onClickListener);
             final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
-            final String uid = CookieUtils.getUserIdFromCookie(cookie);
-            if (uid == null) return;
+            final long uid = CookieUtils.getUserIdFromCookie(cookie);
+            if (uid <= 0) return;
             accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
                 @Override
                 public void onSuccess(final Account account) {

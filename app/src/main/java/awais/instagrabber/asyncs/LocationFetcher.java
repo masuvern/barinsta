@@ -16,17 +16,17 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.LocationModel;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NetworkUtils;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
-import static awais.instagrabber.utils.Utils.logCollector;
+//import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> {
     private static final String TAG = "LocationFetcher";
 
     private final FetchListener<LocationModel> fetchListener;
-    private final String id;
+    private final long id;
 
-    public LocationFetcher(final String id, final FetchListener<LocationModel> fetchListener) {
+    public LocationFetcher(final long id, final FetchListener<LocationModel> fetchListener) {
         // idSlug = id + "/" + slug UPDATE: slug can be ignored tbh
         this.id = id;
         this.fetchListener = fetchListener;
@@ -52,8 +52,7 @@ public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> 
                 //     final JSONArray edges = timelineMedia.getJSONArray("edges");
                 // }
                 result = new LocationModel(
-                        location.getString(Constants.EXTRAS_ID),
-                        location.getString("slug"),
+                        location.getLong(Constants.EXTRAS_ID),
                         location.getString("name"),
                         location.getString("blurb"),
                         location.getString("website"),
@@ -66,8 +65,8 @@ public final class LocationFetcher extends AsyncTask<Void, Void, LocationModel> 
 
             conn.disconnect();
         } catch (final Exception e) {
-            if (logCollector != null)
-                logCollector.appendException(e, LogCollector.LogFile.ASYNC_LOCATION_FETCHER, "doInBackground");
+//            if (logCollector != null)
+//                logCollector.appendException(e, LogCollector.LogFile.ASYNC_LOCATION_FETCHER, "doInBackground");
             if (BuildConfig.DEBUG) {
                 Log.e(TAG, "", e);
             }

@@ -45,11 +45,26 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/isVerified"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:paddingEnd="16dp"
+        android:paddingRight="16dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/tvComment"
+        app:layout_constraintEnd_toStartOf="@id/ivPreviewPic"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/verified"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvComment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:linksClickable="true"
+        android:linksClickable="false"
         android:paddingStart="16dp"
         android:paddingLeft="16dp"
         android:paddingEnd="16dp"
@@ -62,13 +77,13 @@
         app:layout_constraintTop_toBottomOf="@id/tvUsername"
         tools:text="comment comment comment comment comment comment comment comment comment comment comment comment comment " />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvSubComment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:autoLink="web|email"
         android:ellipsize="end"
-        android:linksClickable="true"
+        android:linksClickable="false"
         android:paddingStart="16dp"
         android:paddingLeft="16dp"
         android:paddingEnd="8dp"

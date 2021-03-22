@@ -18,9 +18,10 @@ import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.asyncs.GetActivityAsyncTask.NotificationCounts;
-import awais.instagrabber.asyncs.GetActivityAsyncTask.OnTaskCompleteListener;
+import awais.instagrabber.repositories.responses.NotificationCounts;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.webservices.NewsService;
+import awais.instagrabber.webservices.ServiceCallback;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -30,14 +31,13 @@ public class ActivityCheckerService extends Service {
     private static final int DELAY_MILLIS = 60000;
 
     private Handler handler;
-    private OnTaskCompleteListener onTaskCompleteListener;
+    private NewsService newsService;
+    private ServiceCallback<NotificationCounts> cb;
     private NotificationManagerCompat notificationManager;
 
     private final IBinder binder = new LocalBinder();
     private final Runnable runnable = () -> {
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        // final GetActivityAsyncTask activityAsyncTask = new GetActivityAsyncTask(onTaskCompleteListener);
-        // activityAsyncTask.execute(cookie);
+        newsService.fetchActivityCounts(cb);
     };
 
     public class LocalBinder extends Binder {
@@ -49,33 +49,30 @@ public class ActivityCheckerService extends Service {
     @Override
     public void onCreate() {
         notificationManager = NotificationManagerCompat.from(getApplicationContext());
+        newsService = NewsService.getInstance();
         handler = new Handler();
-        onTaskCompleteListener = result -> {
-            // Log.d(TAG, "onTaskCompleteListener: result: " + result);
-            try {
-                if (result == null) return;
-                final String notification = getNotificationString(result);
-                if (notification == null) return;
-                final String notificationString = getString(R.string.activity_count_prefix) + " " + notification + ".";
-                showNotification(notificationString);
-            } finally {
-                handler.postDelayed(runnable, DELAY_MILLIS);
+        cb = new ServiceCallback<NotificationCounts>() {
+            @Override
+            public void onSuccess(final NotificationCounts result) {
+                try {
+                    if (result == null) return;
+                    final String notification = getNotificationString(result);
+                    if (notification == null) return;
+                    final String notificationString = getString(R.string.activity_count_prefix) + " " + notification + ".";
+                    showNotification(notificationString);
+                } finally {
+                    handler.postDelayed(runnable, DELAY_MILLIS);
+                }
             }
+
+            @Override
+            public void onFailure(final Throwable t) {}
         };
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         startChecking();
-        // Uncomment to test notifications
-        // final String notificationString = getNotificationString(new NotificationCounts(
-        //         1,
-        //         2,
-        //         3,
-        //         4,
-        //         5
-        // ));
-        // showNotification(notificationString);
         return binder;
     }
 
@@ -98,8 +95,14 @@ public class ActivityCheckerService extends Service {
         if (result.getRelationshipsCount() != 0) {
             list.add(getString(R.string.activity_count_relationship, result.getRelationshipsCount()));
         }
+        if (result.getRequestsCount() != 0) {
+            list.add(getString(R.string.activity_count_requests, result.getRequestsCount()));
+        }
         if (result.getUserTagsCount() != 0) {
             list.add(getString(R.string.activity_count_usertags, result.getUserTagsCount()));
+        }
+        if (result.getPOYCount() != 0) {
+            list.add(getString(R.string.activity_count_poy, result.getPOYCount()));
         }
         if (result.getCommentsCount() != 0) {
             list.add(getString(R.string.activity_count_comments, result.getCommentsCount()));
@@ -133,6 +136,6 @@ public class ActivityCheckerService extends Service {
         final Intent intent = new Intent(getApplicationContext(), MainActivity.class)
                 .setAction(Constants.ACTION_SHOW_ACTIVITY)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        return PendingIntent.getActivity(getApplicationContext(), 1738, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getActivity(getApplicationContext(), Constants.SHOW_ACTIVITY_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

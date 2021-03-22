@@ -20,4 +20,24 @@
         android:title="@string/restrict"
         android:visible="false"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/chaining"
+        android:title="@string/action_ayml"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/mute_stories"
+        android:icon="@drawable/ic_highlight_off_24"
+        android:title="@string/mute_stories"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/mute_posts"
+        android:icon="@drawable/ic_highlight_off_24"
+        android:title="@string/mute_posts"
+        android:visible="false"
+        app:showAsAction="never" />
 </menu>

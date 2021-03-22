@@ -37,13 +37,29 @@
                 tools:text="690000" />
         </LinearLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvVideoViews"
+        <LinearLayout
+            android:id="@+id/btnViews"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:textAppearance="?attr/textAppearanceCaption"
-            tools:text="690000 views" />
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                app:srcCompat="@drawable/ic_outline_views_24"
+                app:tint="?android:textColorPrimary" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvVideoViews"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:textAppearance="?attr/textAppearanceButton"
+                tools:text="690000" />
+        </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvPostDate"

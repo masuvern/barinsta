@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.databinding.ItemFeedBottomBinding;
 import awais.instagrabber.databinding.ItemFeedTopBinding;
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.Caption;
+import awais.instagrabber.repositories.responses.Location;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.TextUtils;
 
 import static android.text.TextUtils.TruncateAt.END;
@@ -35,52 +37,60 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         this.feedItemCallback = feedItemCallback;
     }
 
-    public void bind(final FeedModel feedModel) {
-        if (feedModel == null) {
+    public void bind(final Media media) {
+        if (media == null) {
             return;
         }
-        setupProfilePic(feedModel);
-        setupLocation(feedModel);
-        bottomBinding.tvPostDate.setText(feedModel.getPostDate());
-        setupComments(feedModel);
-        setupCaption(feedModel);
-        if (feedModel.getItemType() != MediaItemType.MEDIA_TYPE_SLIDER) {
-            bottomBinding.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(feedModel, -1));
+        setupProfilePic(media);
+        setupLocation(media);
+        bottomBinding.tvPostDate.setText(media.getDate());
+        setupComments(media);
+        setupCaption(media);
+        if (media.getMediaType() != MediaItemType.MEDIA_TYPE_SLIDER) {
+            bottomBinding.btnDownload.setOnClickListener(v -> feedItemCallback.onDownloadClick(media, -1));
         }
-        bindItem(feedModel);
+        bindItem(media);
     }
 
-    private void setupComments(final FeedModel feedModel) {
-        final long commentsCount = feedModel.getCommentsCount();
+    private void setupComments(@NonNull final Media feedModel) {
+        final long commentsCount = feedModel.getCommentCount();
         bottomBinding.commentsCount.setText(String.valueOf(commentsCount));
         bottomBinding.commentsCount.setOnClickListener(v -> feedItemCallback.onCommentsClick(feedModel));
     }
 
-    private void setupProfilePic(final FeedModel feedModel) {
-        final ProfileModel profileModel = feedModel.getProfileModel();
-        if (profileModel != null) {
-            topBinding.ivProfilePic.setOnClickListener(v -> feedItemCallback.onProfilePicClick(feedModel, topBinding.ivProfilePic));
-            topBinding.ivProfilePic.setImageURI(profileModel.getSdProfilePic());
-            setupTitle(feedModel);
+    private void setupProfilePic(@NonNull final Media media) {
+        final User user = media.getUser();
+        if (user == null) {
+            topBinding.ivProfilePic.setVisibility(View.GONE);
+            topBinding.title.setVisibility(View.GONE);
+            return;
         }
+        topBinding.ivProfilePic.setOnClickListener(v -> feedItemCallback.onProfilePicClick(media, topBinding.ivProfilePic));
+        topBinding.ivProfilePic.setImageURI(user.getProfilePicUrl());
+        setupTitle(media);
     }
 
-    private void setupTitle(final FeedModel feedModel) {
+    private void setupTitle(@NonNull final Media media) {
         // final int titleLen = profileModel.getUsername().length() + 1;
         // final SpannableString spannableString = new SpannableString();
         // spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
-        final ProfileModel profileModel = feedModel.getProfileModel();
-        final String title = "@" + profileModel.getUsername();
+        final User user = media.getUser();
+        final String title = "@" + user.getUsername();
         topBinding.title.setText(title);
-        topBinding.title.setOnClickListener(v -> feedItemCallback.onNameClick(feedModel, topBinding.ivProfilePic));
+        topBinding.title.setOnClickListener(v -> feedItemCallback.onNameClick(media, topBinding.ivProfilePic));
     }
 
-    private void setupCaption(final FeedModel feedModel) {
+    private void setupCaption(final Media media) {
         bottomBinding.viewerCaption.clearOnMentionClickListeners();
         bottomBinding.viewerCaption.clearOnHashtagClickListeners();
         bottomBinding.viewerCaption.clearOnURLClickListeners();
         bottomBinding.viewerCaption.clearOnEmailClickListeners();
-        final CharSequence postCaption = feedModel.getPostCaption();
+        final Caption caption = media.getCaption();
+        if (caption == null) {
+            bottomBinding.viewerCaption.setVisibility(View.GONE);
+            return;
+        }
+        final CharSequence postCaption = caption.getText();
         final boolean captionEmpty = TextUtils.isEmpty(postCaption);
         bottomBinding.viewerCaption.setVisibility(captionEmpty ? View.GONE : View.VISIBLE);
         if (captionEmpty) return;
@@ -103,22 +113,31 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         bottomBinding.viewerCaption.addOnURLClickListener(autoLinkItem -> feedItemCallback.onURLClick(autoLinkItem.getOriginalText()));
     }
 
-    private void setupLocation(final FeedModel feedModel) {
-        final String locationName = feedModel.getLocationName();
-        if (TextUtils.isEmpty(locationName)) {
+    private void setupLocation(@NonNull final Media media) {
+        final Location location = media.getLocation();
+        if (location == null) {
             topBinding.location.setVisibility(View.GONE);
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
             ));
-        } else {
-            topBinding.location.setVisibility(View.VISIBLE);
-            topBinding.location.setText(locationName);
-            topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
-            ));
-            topBinding.location.setOnClickListener(v -> feedItemCallback.onLocationClick(feedModel));
+        }
+        else {
+            final String locationName = location.getName();
+            if (TextUtils.isEmpty(locationName)) {
+                topBinding.location.setVisibility(View.GONE);
+                topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
+                ));
+            } else {
+                topBinding.location.setVisibility(View.VISIBLE);
+                topBinding.location.setText(locationName);
+                topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT
+                ));
+                topBinding.location.setOnClickListener(v -> feedItemCallback.onLocationClick(media));
+            }
         }
     }
 
-    public abstract void bindItem(final FeedModel feedModel);
+    public abstract void bindItem(final Media media);
 }

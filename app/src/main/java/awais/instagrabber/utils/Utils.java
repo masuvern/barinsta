@@ -8,7 +8,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Handler;
 import android.provider.Browser;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -16,50 +23,61 @@ import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
+import com.google.common.io.Files;
 
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+//import javax.crypto.Mac;
+//import javax.crypto.spec.SecretKeySpec;
 
 import awais.instagrabber.R;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
 public final class Utils {
     private static final String TAG = "Utils";
     private static final int VIDEO_CACHE_MAX_BYTES = 10 * 1024 * 1024;
 
-    public static LogCollector logCollector;
+//    public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
     public static boolean sessionVolumeFull = false;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+    public static final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static ClipboardManager clipboardManager;
-    public static DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
     private static int statusBarHeight;
     private static int actionBarHeight;
+    public static Handler applicationHandler;
+    public static String cacheDir;
+    private static int defaultStatusBarColor;
 
     public static int convertDpToPx(final float dp) {
-        if (displayMetrics == null)
-            displayMetrics = Resources.getSystem().getDisplayMetrics();
-        return Math.round((dp * displayMetrics.densityDpi) / 160.0f);
+        return Math.round((dp * displayMetrics.densityDpi) / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     public static void copyText(@NonNull final Context context, final CharSequence string) {
@@ -75,52 +93,50 @@ public final class Utils {
     }
 
     public static Map<String, String> sign(final Map<String, Object> form) {
-        final String signed = sign(new JSONObject(form).toString());
-        if (signed == null) {
-            return null;
-        }
+//        final String signed = sign(Constants.SIGNATURE_KEY, new JSONObject(form).toString());
+//        if (signed == null) {
+//            return null;
+//        }
         final Map<String, String> map = new HashMap<>();
-        map.put("ig_sig_key_version", Constants.SIGNATURE_VERSION);
-        map.put("signed_body", signed.split("&signed_body=")[1]);
+//        map.put("ig_sig_key_version", Constants.SIGNATURE_VERSION);
+//        map.put("signed_body", signed);
+        map.put("signed_body", "SIGNATURE." + new JSONObject(form).toString());
         return map;
     }
 
-    public static String sign(final String message) {
-        return sign(Constants.SIGNATURE_KEY, message);
-    }
+//    public static String sign(final String key, final String message) {
+//        try {
+//            final Mac hasher = Mac.getInstance("HmacSHA256");
+//            hasher.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
+//            byte[] hash = hasher.doFinal(message.getBytes());
+//            final StringBuilder hexString = new StringBuilder();
+//            for (byte b : hash) {
+//                final String hex = Integer.toHexString(0xff & b);
+//                if (hex.length() == 1) hexString.append('0');
+//                hexString.append(hex);
+//            }
+//            return hexString.toString() + "." + message;
+//        } catch (Exception e) {
+//            Log.e(TAG, "Error signing", e);
+//            return null;
+//        }
+//    }
 
-    public static String sign(final String key, final String message) {
-        try {
-            final Mac hasher = Mac.getInstance("HmacSHA256");
-            hasher.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
-            byte[] hash = hasher.doFinal(message.getBytes());
-            final StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                final String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return "ig_sig_key_version=" + Constants.SIGNATURE_VERSION + "&signed_body=" + hexString.toString() + "." + message;
-        } catch (Exception e) {
-            Log.e(TAG, "Error signing", e);
-            return null;
-        }
-    }
-
-    public static boolean isImage(final Uri itemUri, final ContentResolver contentResolver) {
+    public static String getMimeType(@NonNull final Uri uri, final ContentResolver contentResolver) {
         String mimeType;
-        if (itemUri == null) return false;
-        final String scheme = itemUri.getScheme();
-        if (TextUtils.isEmpty(scheme))
-            mimeType = mimeTypeMap.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
-        else
-            mimeType = scheme.equals(ContentResolver.SCHEME_CONTENT) ? contentResolver.getType(itemUri)
-                                                                     : mimeTypeMap.getMimeTypeFromExtension
-                                                                             (MimeTypeMap.getFileExtensionFromUrl(itemUri.toString()).toLowerCase());
-
-        if (TextUtils.isEmpty(mimeType)) return true;
-        mimeType = mimeType.toLowerCase();
-        return mimeType.startsWith("image");
+        final String scheme = uri.getScheme();
+        final String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (TextUtils.isEmpty(scheme)) {
+            mimeType = mimeTypeMap.getMimeTypeFromExtension(fileExtension.toLowerCase());
+        } else {
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+                mimeType = contentResolver.getType(uri);
+            } else {
+                mimeType = mimeTypeMap.getMimeTypeFromExtension(fileExtension.toLowerCase());
+            }
+        }
+        if (mimeType == null) return null;
+        return mimeType.toLowerCase();
     }
 
     public static SimpleCache getSimpleCacheInstance(final Context context) {
@@ -213,5 +229,146 @@ public final class Utils {
             settingsHelper.putString(layoutPreferenceKey, layoutPreferences.getJson());
         }
         return layoutPreferences;
+    }
+
+    private static Field mAttachInfoField;
+    private static Field mStableInsetsField;
+
+    public static int getViewInset(View view) {
+        if (view == null
+                || view.getHeight() == displayMetrics.heightPixels
+                || view.getHeight() == displayMetrics.widthPixels - getStatusBarHeight(view.getContext())) {
+            return 0;
+        }
+        try {
+            if (mAttachInfoField == null) {
+                //noinspection JavaReflectionMemberAccess
+                mAttachInfoField = View.class.getDeclaredField("mAttachInfo");
+                mAttachInfoField.setAccessible(true);
+            }
+            Object mAttachInfo = mAttachInfoField.get(view);
+            if (mAttachInfo != null) {
+                if (mStableInsetsField == null) {
+                    mStableInsetsField = mAttachInfo.getClass().getDeclaredField("mStableInsets");
+                    mStableInsetsField.setAccessible(true);
+                }
+                Rect insets = (Rect) mStableInsetsField.get(mAttachInfo);
+                if (insets == null) {
+                    return 0;
+                }
+                return insets.bottom;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getViewInset", e);
+        }
+        return 0;
+    }
+
+    public static int getThemeAccentColor(Context context) {
+        int colorAttr;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            colorAttr = android.R.attr.colorAccent;
+        } else {
+            //Get colorAccent defined for AppCompat
+            colorAttr = context.getResources().getIdentifier("colorAccent", "attr", context.getPackageName());
+        }
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(colorAttr, outValue, true);
+        return outValue.data;
+    }
+
+    public static void transparentStatusBar(final Activity activity,
+                                            final boolean enable,
+                                            final boolean fullscreen) {
+        if (activity == null) return;
+        final ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
+        final Window window = activity.getWindow();
+        final View decorView = window.getDecorView();
+        if (enable) {
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                defaultStatusBarColor = window.getStatusBarColor();
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                // FOR TRANSPARENT NAVIGATION BAR
+                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+                window.setStatusBarColor(Color.TRANSPARENT);
+                Log.d(TAG, "Setting Color Transparent " + Color.TRANSPARENT + " Default Color " + defaultStatusBarColor);
+                return;
+            }
+            Log.d(TAG, "Setting Color Trans " + Color.TRANSPARENT);
+            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            return;
+        }
+        if (fullscreen) {
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+            return;
+        }
+        if (actionBar != null) {
+            actionBar.show();
+        }
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            window.setStatusBarColor(defaultStatusBarColor);
+            return;
+        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+    }
+
+    public static void mediaScanFile(@NonNull final Context context,
+                                     @NonNull File file,
+                                     @NonNull final OnScanCompletedListener callback) {
+        //noinspection UnstableApiUsage
+        final String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Files.getFileExtension(file.getName()));
+        MediaScannerConnection.scanFile(
+                context,
+                new String[]{file.getAbsolutePath()},
+                new String[]{mimeType},
+                callback
+        );
+    }
+
+    public static void hideKeyboard(final View view) {
+        if (view == null) return;
+        final Context context = view.getContext();
+        if (context == null) return;
+        try {
+            final InputMethodManager manager = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            if (manager == null) return;
+            manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        } catch (Exception e) {
+            Log.e(TAG, "hideKeyboard: ", e);
+        }
+    }
+
+    public static Drawable getAnimatableDrawable(@NonNull final Context context,
+                                                 @DrawableRes final int drawableResId) {
+        final Drawable drawable;
+        if (Build.VERSION.SDK_INT >= 24) {
+            drawable = ContextCompat.getDrawable(context, drawableResId);
+        } else {
+            drawable = AnimatedVectorDrawableCompat.create(context, drawableResId);
+        }
+        return drawable;
+    }
+
+    public static void enabledKeepScreenOn(@NonNull final Activity activity) {
+        final Window window = activity.getWindow();
+        if (window == null) return;
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    public static void disableKeepScreenOn(@NonNull final Activity activity) {
+        final Window window = activity.getWindow();
+        if (window == null) return;
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 }

@@ -5,23 +5,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum NotificationType implements Serializable {
-    // web
-    LIKE("GraphLikeAggregatedStory"),
-    FOLLOW("GraphFollowAggregatedStory"),
-    COMMENT("GraphCommentMediaStory"),
-    MENTION("GraphMentionStory"),
-    TAGGED("GraphUserTaggedStory"),
-    // app story_type
-    COMMENT_LIKE("13"),
-    TAGGED_COMMENT("14"),
-    RESPONDED_STORY("213"),
-    // efr - random value
-    REQUEST("REQUEST"),
-    // ayml - random value
-    AYML("AYML");
+    // story_type
+    LIKE(60),
+    FOLLOW(101),
+    COMMENT(12), // NOT TESTED
+    COMMENT_MENTION(66),
+    TAGGED(102), // NOT TESTED
+    COMMENT_LIKE(13),
+    TAGGED_COMMENT(14),
+    RESPONDED_STORY(213),
+    REQUEST(75),
+    // aymf - arbitrary, misspelled as ayml but eh
+    AYML(9999);
 
-    private final String itemType;
-    private static final Map<String, NotificationType> map = new HashMap<>();
+    private final int itemType;
+    private static final Map<Integer, NotificationType> map = new HashMap<>();
 
     static {
         for (NotificationType type : NotificationType.values()) {
@@ -29,15 +27,15 @@ public enum NotificationType implements Serializable {
         }
     }
 
-    NotificationType(final String itemType) {
+    NotificationType(final int itemType) {
         this.itemType = itemType;
     }
 
-    public String getItemType() {
+    public int getItemType() {
         return itemType;
     }
 
-    public static NotificationType valueOfType(final String itemType) {
+    public static NotificationType valueOfType(final int itemType) {
         return map.get(itemType);
     }
 }

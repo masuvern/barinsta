@@ -9,18 +9,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.models.NotificationModel;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
+import awais.instagrabber.repositories.responses.AymlResponse;
+import awais.instagrabber.repositories.responses.AymlUser;
+import awais.instagrabber.repositories.responses.NotificationCounts;
+import awais.instagrabber.repositories.responses.UserSearchResponse;
+import awais.instagrabber.repositories.responses.NewsInboxResponse;
+import awais.instagrabber.repositories.responses.Notification;
+import awais.instagrabber.repositories.responses.NotificationArgs;
+import awais.instagrabber.repositories.responses.NotificationImage;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,156 +57,54 @@ public class NewsService extends BaseService {
     }
 
     public void fetchAppInbox(final boolean markAsSeen,
-                              final ServiceCallback<List<NotificationModel>> callback) {
-        final List<NotificationModel> result = new ArrayList<>();
-        final Call<String> request = repository.appInbox(markAsSeen);
-        request.enqueue(new Callback<String>() {
+                              final ServiceCallback<List<Notification>> callback) {
+        final Call<NewsInboxResponse> request = repository.appInbox(markAsSeen, Constants.X_IG_APP_ID);
+        request.enqueue(new Callback<NewsInboxResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String body = response.body();
+            public void onResponse(@NonNull final Call<NewsInboxResponse> call, @NonNull final Response<NewsInboxResponse> response) {
+                final NewsInboxResponse body = response.body();
                 if (body == null) {
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final JSONObject jsonObject = new JSONObject(body);
-                    final JSONArray oldStories = jsonObject.getJSONArray("old_stories"),
-                                    newStories = jsonObject.getJSONArray("new_stories");
-
-                    for (int j = 0; j < newStories.length(); ++j) {
-                        final NotificationModel newsItem = parseNewsItem(newStories.getJSONObject(j));
-                        if (newsItem != null) result.add(newsItem);
-                    }
-
-                    for (int i = 0; i < oldStories.length(); ++i) {
-                        final NotificationModel newsItem = parseNewsItem(oldStories.getJSONObject(i));
-                        if (newsItem != null) result.add(newsItem);
-                    }
-
-                    callback.onSuccess(result);
-                } catch (JSONException e) {
-                    callback.onFailure(e);
-                }
+                final List<Notification> result = new ArrayList<>();
+                result.addAll(body.getNewStories());
+                result.addAll(body.getOldStories());
+                callback.onSuccess(result);
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull final Call<NewsInboxResponse> call, @NonNull final Throwable t) {
                 callback.onFailure(t);
                 // Log.e(TAG, "onFailure: ", t);
             }
         });
     }
 
-    public void fetchWebInbox(final boolean markAsSeen,
-                              final ServiceCallback<List<NotificationModel>> callback) {
-        final Call<String> request = repository.webInbox();
-        request.enqueue(new Callback<String>() {
+    public void fetchActivityCounts(final ServiceCallback<NotificationCounts> callback) {
+        final Call<NewsInboxResponse> request = repository.appInbox(false, null);
+        request.enqueue(new Callback<NewsInboxResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String body = response.body();
+            public void onResponse(@NonNull final Call<NewsInboxResponse> call, @NonNull final Response<NewsInboxResponse> response) {
+                final NewsInboxResponse body = response.body();
                 if (body == null) {
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final List<NotificationModel> result = new ArrayList<>();
-                    final JSONObject page = new JSONObject(body)
-                            .getJSONObject("graphql")
-                            .getJSONObject("user");
-                    final JSONObject ewaf = page.getJSONObject("activity_feed")
-                            .optJSONObject("edge_web_activity_feed");
-                    final JSONObject efr = page.optJSONObject("edge_follow_requests");
-                    JSONObject data;
-                    JSONArray media;
-                    if (ewaf != null
-                            && (media = ewaf.optJSONArray("edges")) != null
-                            && media.length() > 0
-                            && media.optJSONObject(0).optJSONObject("node") != null) {
-                        for (int i = 0; i < media.length(); ++i) {
-                            data = media.optJSONObject(i).optJSONObject("node");
-                            if (data == null) continue;
-                            final String type = data.getString("__typename");
-                            final NotificationType notificationType = NotificationType.valueOfType(type);
-                            if (notificationType == null) continue;
-                            final JSONObject user = data.getJSONObject("user");
-                            result.add(new NotificationModel(
-                                    data.getString(Constants.EXTRAS_ID),
-                                    data.optString("text"), // comments or mentions
-                                    data.getLong("timestamp"),
-                                    user.getString("id"),
-                                    user.getString("username"),
-                                    user.getString("profile_pic_url"),
-                                    !data.isNull("media") ? data.getJSONObject("media").getString("id") : null,
-                                    !data.isNull("media") ? data.getJSONObject("media").getString("thumbnail_src") : null, notificationType));
-                        }
-                    }
-
-                    if (efr != null
-                            && (media = efr.optJSONArray("edges")) != null
-                            && media.length() > 0
-                            && media.optJSONObject(0).optJSONObject("node") != null) {
-                        for (int i = 0; i < media.length(); ++i) {
-                            data = media.optJSONObject(i).optJSONObject("node");
-                            if (data == null) continue;
-                            result.add(new NotificationModel(
-                                    data.getString(Constants.EXTRAS_ID),
-                                    data.optString("full_name"),
-                                    0L,
-                                    data.getString(Constants.EXTRAS_ID),
-                                    data.getString("username"),
-                                    data.getString("profile_pic_url"),
-                                    null,
-                                    null, NotificationType.REQUEST));
-                        }
-                    }
-                    callback.onSuccess(result);
-                } catch (JSONException e) {
-                    callback.onFailure(e);
-                }
+                callback.onSuccess(body.getCounts());
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull final Call<NewsInboxResponse> call, @NonNull final Throwable t) {
                 callback.onFailure(t);
                 // Log.e(TAG, "onFailure: ", t);
             }
         });
-    }
-
-    private NotificationModel parseNewsItem(final JSONObject itemJson) throws JSONException {
-        if (itemJson == null) return null;
-        final String type = itemJson.getString("story_type");
-        final NotificationType notificationType = NotificationType.valueOfType(type);
-        if (notificationType == null) {
-            if (BuildConfig.DEBUG) Log.d("austin_debug", "unhandled news type: "+itemJson);
-            return null;
-        }
-        final JSONObject data = itemJson.getJSONObject("args");
-        return new NotificationModel(
-                data.getString("tuuid"),
-                data.has("text") ? data.getString("text") : cleanRichText(data.optString("rich_text", "")),
-                data.getLong("timestamp"),
-                data.getString("profile_id"),
-                data.getString("profile_name"),
-                data.getString("profile_image"),
-                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("id") : null,
-                !data.isNull("media") ? data.getJSONArray("media").getJSONObject(0).getString("image") : null,
-                notificationType);
-    }
-
-    private String cleanRichText(final String raw) {
-        final Matcher matcher = Pattern.compile("\\{[\\p{L}\\d._]+\\|000000\\|1\\|user\\?id=\\d+\\}").matcher(raw);
-        String result = raw;
-        while (matcher.find()) {
-            final String richObject = raw.substring(matcher.start(), matcher.end());
-            final String username = richObject.split("\\|")[0].substring(1);
-            result = result.replace(richObject, username);
-        }
-        return result;
     }
 
     public void fetchSuggestions(final String csrfToken,
-                                 final ServiceCallback<List<NotificationModel>> callback) {
+                                 final String deviceUuid,
+                                 final ServiceCallback<List<Notification>> callback) {
         final Map<String, String> form = new HashMap<>();
         form.put("_uuid", UUID.randomUUID().toString());
         form.put("_csrftoken", csrfToken);
@@ -205,57 +112,94 @@ public class NewsService extends BaseService {
         form.put("device_id", UUID.randomUUID().toString());
         form.put("module", "discover_people");
         form.put("paginate", "false");
-        final Call<String> request = repository.getAyml(form);
-        request.enqueue(new Callback<String>() {
+        final Call<AymlResponse> request = repository.getAyml(form);
+        request.enqueue(new Callback<AymlResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String body = response.body();
+            public void onResponse(@NonNull final Call<AymlResponse> call, @NonNull final Response<AymlResponse> response) {
+                final AymlResponse body = response.body();
                 if (body == null) {
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final List<NotificationModel> result = new ArrayList<>();
-                    final JSONObject jsonObject = new JSONObject(body);
-                    final JSONArray oldStories = jsonObject.getJSONObject("suggested_users").getJSONArray("suggestions"),
-                            newStories = jsonObject.getJSONObject("new_suggested_users").getJSONArray("suggestions");
-
-                    for (int j = 0; j < newStories.length(); ++j) {
-                        final NotificationModel newsItem = parseAymlItem(newStories.getJSONObject(j));
-                        if (newsItem != null) result.add(newsItem);
-                    }
-
-                    for (int i = 0; i < oldStories.length(); ++i) {
-                        final NotificationModel newsItem = parseAymlItem(oldStories.getJSONObject(i));
-                        if (newsItem != null) result.add(newsItem);
-                    }
-
-                    callback.onSuccess(result);
-                } catch (JSONException e) {
-                    callback.onFailure(e);
+                final List<AymlUser> aymlUsers = new ArrayList<AymlUser>();
+                final List<AymlUser> newSuggestions = body.getNewSuggestedUsers().getSuggestions();
+                if (newSuggestions != null) {
+                    aymlUsers.addAll(newSuggestions);
                 }
+                final List<AymlUser> oldSuggestions = body.getSuggestedUsers().getSuggestions();
+                if (oldSuggestions != null) {
+                    aymlUsers.addAll(oldSuggestions);
+                }
+
+                final List<Notification> newsItems = aymlUsers.stream()
+                        .map(i -> {
+                            final User u = i.getUser();
+                            return new Notification(
+                                    new NotificationArgs(
+                                            i.getSocialContext(),
+                                            i.getAlgorithm(),
+                                            u.getPk(),
+                                            u.getProfilePicUrl(),
+                                            null,
+                                            0L,
+                                            u.getUsername(),
+                                            u.getFullName(),
+                                            u.isVerified()
+                                    ),
+                                    9999,
+                                    i.getUuid()
+                            );
+                        })
+                        .collect(Collectors.toList());
+                callback.onSuccess(newsItems);
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull final Call<AymlResponse> call, @NonNull final Throwable t) {
                 callback.onFailure(t);
                 // Log.e(TAG, "onFailure: ", t);
             }
         });
     }
 
-    private NotificationModel parseAymlItem(final JSONObject itemJson) throws JSONException {
-        if (itemJson == null) return null;
-        final JSONObject data = itemJson.getJSONObject("user");
-        return new NotificationModel(
-                itemJson.getString("uuid"),
-                itemJson.getString("social_context"),
-                0L,
-                data.getString("pk"),
-                data.getString("username"),
-                data.getString("profile_pic_url"),
-                data.getString("full_name"), // just borrowing this field
-                null,
-                NotificationType.AYML);
+    public void fetchChaining(final long targetId, final ServiceCallback<List<Notification>> callback) {
+        final Call<UserSearchResponse> request = repository.getChaining(targetId);
+        request.enqueue(new Callback<UserSearchResponse>() {
+            @Override
+            public void onResponse(@NonNull final Call<UserSearchResponse> call, @NonNull final Response<UserSearchResponse> response) {
+                final UserSearchResponse body = response.body();
+                if (body == null) {
+                    callback.onSuccess(null);
+                    return;
+                }
+
+                final List<Notification> newsItems = body.getUsers().stream()
+                        .map(u -> {
+                            return new Notification(
+                                    new NotificationArgs(
+                                            u.getSocialContext(),
+                                            null,
+                                            u.getPk(),
+                                            u.getProfilePicUrl(),
+                                            null,
+                                            0L,
+                                            u.getUsername(),
+                                            u.getFullName(),
+                                            u.isVerified()
+                                    ),
+                                    9999,
+                                    u.getProfilePicId() // placeholder
+                            );
+                        })
+                        .collect(Collectors.toList());
+                callback.onSuccess(newsItems);
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<UserSearchResponse> call, @NonNull final Throwable t) {
+                callback.onFailure(t);
+                // Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 }

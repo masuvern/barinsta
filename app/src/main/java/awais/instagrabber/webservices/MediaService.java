@@ -5,22 +5,28 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONArray;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
-import awais.instagrabber.models.FeedModel;
-import awais.instagrabber.models.ProfileModel;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.MediaRepository;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.repositories.requests.UploadFinishOptions;
+import awais.instagrabber.repositories.responses.LikersResponse;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.MediaInfoResponse;
+import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.DateUtils;
+import awais.instagrabber.utils.MediaUploadHelper;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,48 +35,68 @@ import retrofit2.Retrofit;
 
 public class MediaService extends BaseService {
     private static final String TAG = "MediaService";
+    private static final List<MediaItemType> DELETABLE_ITEMS_TYPES = ImmutableList.of(MediaItemType.MEDIA_TYPE_IMAGE,
+                                                                                      MediaItemType.MEDIA_TYPE_VIDEO,
+                                                                                      MediaItemType.MEDIA_TYPE_SLIDER);
 
     private final MediaRepository repository;
+    private final String deviceUuid, csrfToken;
+    private final long userId;
 
     private static MediaService instance;
 
-    private MediaService() {
+    private MediaService(final String deviceUuid,
+                         final String csrfToken,
+                         final long userId) {
+        this.deviceUuid = deviceUuid;
+        this.csrfToken = csrfToken;
+        this.userId = userId;
         final Retrofit retrofit = getRetrofitBuilder()
                 .baseUrl("https://i.instagram.com")
                 .build();
         repository = retrofit.create(MediaRepository.class);
     }
 
-    public static MediaService getInstance() {
-        if (instance == null) {
-            instance = new MediaService();
+    public String getCsrfToken() {
+        return csrfToken;
+    }
+
+    public String getDeviceUuid() {
+        return deviceUuid;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public static MediaService getInstance(final String deviceUuid, final String csrfToken, final long userId) {
+        if (instance == null
+                || !Objects.equals(instance.getCsrfToken(), csrfToken)
+                || !Objects.equals(instance.getDeviceUuid(), deviceUuid)
+                || !Objects.equals(instance.getUserId(), userId)) {
+            instance = new MediaService(deviceUuid, csrfToken, userId);
         }
         return instance;
     }
 
-    public void fetch(final String mediaId,
-                      final ServiceCallback<FeedModel> callback) {
-        final Call<String> request = repository.fetch(mediaId);
-        request.enqueue(new Callback<String>() {
+    public void fetch(final long mediaId,
+                      final ServiceCallback<Media> callback) {
+        final Call<MediaInfoResponse> request = repository.fetch(mediaId);
+        request.enqueue(new Callback<MediaInfoResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call,
-                                   @NonNull final Response<String> response) {
+            public void onResponse(@NonNull final Call<MediaInfoResponse> call,
+                                   @NonNull final Response<MediaInfoResponse> response) {
                 if (callback == null) return;
-                final String body = response.body();
-                if (body == null) {
+                final MediaInfoResponse mediaInfoResponse = response.body();
+                if (mediaInfoResponse == null || mediaInfoResponse.getItems() == null || mediaInfoResponse.getItems().isEmpty()) {
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final JSONObject itemJson = new JSONObject(body).getJSONArray("items").getJSONObject(0);
-                    callback.onSuccess(ResponseBodyUtils.parseItem(itemJson));
-                } catch (JSONException e) {
-                    callback.onFailure(e);
-                }
+                callback.onSuccess(mediaInfoResponse.getItems().get(0));
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call,
+            public void onFailure(@NonNull final Call<MediaInfoResponse> call,
                                   @NonNull final Throwable t) {
                 if (callback != null) {
                     callback.onFailure(t);
@@ -80,44 +106,38 @@ public class MediaService extends BaseService {
     }
 
     public void like(final String mediaId,
-                     final String userId,
-                     final String csrfToken,
                      final ServiceCallback<Boolean> callback) {
-        action(mediaId, userId, "like", csrfToken, callback);
+        action(mediaId, "like", null, callback);
     }
 
     public void unlike(final String mediaId,
-                       final String userId,
-                       final String csrfToken,
                        final ServiceCallback<Boolean> callback) {
-        action(mediaId, userId, "unlike", csrfToken, callback);
+        action(mediaId, "unlike", null, callback);
     }
 
     public void save(final String mediaId,
-                     final String userId,
-                     final String csrfToken,
+                     final String collection,
                      final ServiceCallback<Boolean> callback) {
-        action(mediaId, userId, "save", csrfToken, callback);
+        action(mediaId, "save", collection, callback);
     }
 
     public void unsave(final String mediaId,
-                       final String userId,
-                       final String csrfToken,
                        final ServiceCallback<Boolean> callback) {
-        action(mediaId, userId, "unsave", csrfToken, callback);
+        action(mediaId, "unsave", null, callback);
     }
 
     private void action(final String mediaId,
-                        final String userId,
                         final String action,
-                        final String csrfToken,
+                        final String collection,
                         final ServiceCallback<Boolean> callback) {
-        final Map<String, Object> form = new HashMap<>(4);
+        final Map<String, Object> form = new HashMap<>();
         form.put("media_id", mediaId);
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         // form.put("radio_type", "wifi-none");
+        if (action.equals("save") && !TextUtils.isEmpty(collection)) form.put("added_collection_ids", "[" + collection + "]");
+        // there also exists "removed_collection_ids" which can be used with "save" and "unsave"
         final Map<String, String> signedForm = Utils.sign(form);
         final Call<String> request = repository.action(action, mediaId, signedForm);
         request.enqueue(new Callback<String>() {
@@ -151,9 +171,7 @@ public class MediaService extends BaseService {
 
     public void comment(@NonNull final String mediaId,
                         @NonNull final String comment,
-                        @NonNull final String userId,
                         final String replyToCommentId,
-                        final String csrfToken,
                         @NonNull final ServiceCallback<Boolean> callback) {
         final String module = "self_comments_v2";
         final Map<String, Object> form = new HashMap<>();
@@ -161,10 +179,10 @@ public class MediaService extends BaseService {
         form.put("idempotence_token", UUID.randomUUID().toString());
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("comment_text", comment);
         form.put("containermodule", module);
-        if (!awais.instagrabber.utils.TextUtils.isEmpty(replyToCommentId)) {
+        if (!TextUtils.isEmpty(replyToCommentId)) {
             form.put("replied_to_comment_id", replyToCommentId);
         }
         final Map<String, String> signedForm = Utils.sign(form);
@@ -196,23 +214,19 @@ public class MediaService extends BaseService {
     }
 
     public void deleteComment(final String mediaId,
-                              final String userId,
                               final String commentId,
-                              final String csrfToken,
                               @NonNull final ServiceCallback<Boolean> callback) {
-        deleteComments(mediaId, userId, Collections.singletonList(commentId), csrfToken, callback);
+        deleteComments(mediaId, Collections.singletonList(commentId), callback);
     }
 
     public void deleteComments(final String mediaId,
-                               final String userId,
                                final List<String> commentIds,
-                               final String csrfToken,
                                @NonNull final ServiceCallback<Boolean> callback) {
         final Map<String, Object> form = new HashMap<>();
         form.put("comment_ids_to_delete", TextUtils.join(",", commentIds));
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         final Map<String, String> signedForm = Utils.sign(form);
         final Call<String> bulkDeleteRequest = repository.commentsBulkDelete(mediaId, signedForm);
         bulkDeleteRequest.enqueue(new Callback<String>() {
@@ -243,12 +257,11 @@ public class MediaService extends BaseService {
     }
 
     public void commentLike(@NonNull final String commentId,
-                            @NonNull final String csrfToken,
                             @NonNull final ServiceCallback<Boolean> callback) {
         final Map<String, Object> form = new HashMap<>();
         form.put("_csrftoken", csrfToken);
         // form.put("_uid", userId);
-        // form.put("_uuid", UUID.randomUUID().toString());
+        // form.put("_uuid", deviceUuid);
         final Map<String, String> signedForm = Utils.sign(form);
         final Call<String> commentLikeRequest = repository.commentLike(commentId, signedForm);
         commentLikeRequest.enqueue(new Callback<String>() {
@@ -279,12 +292,11 @@ public class MediaService extends BaseService {
     }
 
     public void commentUnlike(final String commentId,
-                              @NonNull final String csrfToken,
                               @NonNull final ServiceCallback<Boolean> callback) {
         final Map<String, Object> form = new HashMap<>();
         form.put("_csrftoken", csrfToken);
         // form.put("_uid", userId);
-        // form.put("_uuid", UUID.randomUUID().toString());
+        // form.put("_uuid", deviceUuid);
         final Map<String, String> signedForm = Utils.sign(form);
         final Call<String> commentUnlikeRequest = repository.commentUnlike(commentId, signedForm);
         commentUnlikeRequest.enqueue(new Callback<String>() {
@@ -315,14 +327,12 @@ public class MediaService extends BaseService {
     }
 
     public void editCaption(final String postId,
-                            final String userId,
                             final String newCaption,
-                            @NonNull final String csrfToken,
                             @NonNull final ServiceCallback<Boolean> callback) {
         final Map<String, Object> form = new HashMap<>();
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
-        form.put("_uuid", UUID.randomUUID().toString());
+        form.put("_uuid", deviceUuid);
         form.put("igtv_feed_preview", "false");
         form.put("media_id", postId);
         form.put("caption_text", newCaption);
@@ -357,43 +367,22 @@ public class MediaService extends BaseService {
 
     public void fetchLikes(final String mediaId,
                            final boolean isComment,
-                           @NonNull final ServiceCallback<List<ProfileModel>> callback) {
-        final Call<String> likesRequest = repository.fetchLikes(mediaId, isComment ? "comment_likers" : "likers");
-        likesRequest.enqueue(new Callback<String>() {
+                           @NonNull final ServiceCallback<List<User>> callback) {
+        final Call<LikersResponse> likesRequest = repository.fetchLikes(mediaId, isComment ? "comment_likers" : "likers");
+        likesRequest.enqueue(new Callback<LikersResponse>() {
             @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String body = response.body();
-                if (body == null) {
-                    Log.e(TAG, "Error occurred while fetching likes of "+mediaId);
+            public void onResponse(@NonNull final Call<LikersResponse> call, @NonNull final Response<LikersResponse> response) {
+                final LikersResponse likersResponse = response.body();
+                if (likersResponse == null) {
+                    Log.e(TAG, "Error occurred while fetching likes of " + mediaId);
                     callback.onSuccess(null);
                     return;
                 }
-                try {
-                    final JSONObject data = new JSONObject(body);
-                    final JSONArray users = data.getJSONArray("users");
-                    final int usersLen = users.length();
-                    final List<ProfileModel> userModels = new ArrayList<>();
-                    for (int j = 0; j < usersLen; ++j) {
-                        final JSONObject userObject = users.getJSONObject(j);
-                        userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
-                                false,
-                                userObject.optBoolean("is_verified"),
-                                String.valueOf(userObject.get("pk")),
-                                userObject.getString("username"),
-                                userObject.optString("full_name"),
-                                null, null,
-                                userObject.getString("profile_pic_url"),
-                                null, 0, 0, 0, false, false, false, false, false));
-                    }
-                    callback.onSuccess(userModels);
-                } catch (JSONException e) {
-                    // Log.e(TAG, "Error parsing body", e);
-                    callback.onFailure(e);
-                }
+                callback.onSuccess(likersResponse.getUsers());
             }
 
             @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+            public void onFailure(@NonNull final Call<LikersResponse> call, @NonNull final Throwable t) {
                 Log.e(TAG, "Error getting likes", t);
                 callback.onFailure(t);
             }
@@ -404,7 +393,7 @@ public class MediaService extends BaseService {
                           final String type, // 1 caption 2 comment 3 bio
                           @NonNull final ServiceCallback<String> callback) {
         final Map<String, String> form = new HashMap<>();
-        form.put("id", id);
+        form.put("id", String.valueOf(id));
         form.put("type", type);
         final Call<String> request = repository.translate(form);
         request.enqueue(new Callback<String>() {
@@ -432,5 +421,59 @@ public class MediaService extends BaseService {
                 callback.onFailure(t);
             }
         });
+    }
+
+    public Call<String> uploadFinish(@NonNull final UploadFinishOptions options) {
+        if (options.getVideoOptions() != null) {
+            final UploadFinishOptions.VideoOptions videoOptions = options.getVideoOptions();
+            if (videoOptions.getClips() == null) {
+                videoOptions.setClips(Collections.singletonList(
+                        new UploadFinishOptions.Clip()
+                                .setLength(videoOptions.getLength())
+                                .setSourceType(options.getSourceType())
+                ));
+            }
+        }
+        final String timezoneOffset = String.valueOf(DateUtils.getTimezoneOffset());
+        final ImmutableMap.Builder<String, Object> formBuilder = ImmutableMap.<String, Object>builder()
+                .put("timezone_offset", timezoneOffset)
+                .put("_csrftoken", csrfToken)
+                .put("source_type", options.getSourceType())
+                .put("_uid", String.valueOf(userId))
+                .put("_uuid", deviceUuid)
+                .put("upload_id", options.getUploadId());
+        if (options.getVideoOptions() != null) {
+            formBuilder.putAll(options.getVideoOptions().getMap());
+        }
+        final Map<String, String> queryMap = options.getVideoOptions() != null ? ImmutableMap.of("video", "1") : Collections.emptyMap();
+        final Map<String, String> signedForm = Utils.sign(formBuilder.build());
+        return repository.uploadFinish(MediaUploadHelper.getRetryContextString(), queryMap, signedForm);
+    }
+
+    public Call<String> delete(@NonNull final String postId,
+                               @NonNull final MediaItemType type) {
+        if (!DELETABLE_ITEMS_TYPES.contains(type)) return null;
+        final Map<String, Object> form = new HashMap<>();
+        form.put("_csrftoken", csrfToken);
+        form.put("_uid", userId);
+        form.put("_uuid", deviceUuid);
+        form.put("igtv_feed_preview", "false");
+        form.put("media_id", postId);
+        final Map<String, String> signedForm = Utils.sign(form);
+        final String mediaType;
+        switch (type) {
+            case MEDIA_TYPE_IMAGE:
+                mediaType = "PHOTO";
+                break;
+            case MEDIA_TYPE_VIDEO:
+                mediaType = "VIDEO";
+                break;
+            case MEDIA_TYPE_SLIDER:
+                mediaType = "CAROUSEL";
+                break;
+            default:
+                return null;
+        }
+        return repository.delete(postId, mediaType, signedForm);
     }
 }

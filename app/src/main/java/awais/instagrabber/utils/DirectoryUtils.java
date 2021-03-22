@@ -1,5 +1,6 @@
 package awais.instagrabber.utils;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 
@@ -9,12 +10,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import awais.instagrabber.R;
+
 public class DirectoryUtils {
     private static final Pattern DIR_SEPORATOR = Pattern.compile("/");
 
     /**
      * From: https://stackoverflow.com/a/18871043/1436766
-     *
+     * <p>
      * Returns all available SD-Cards in the system (include emulated)
      * <p>
      * Warning: Hack! Based on Android source code of version 4.3 (API 18)
@@ -44,20 +47,16 @@ public class DirectoryUtils {
             // Device has emulated storage; external storage paths should have
             // userId burned into them.
             final String rawUserId;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                rawUserId = "";
-            } else {
-                final String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-                final String[] folders = DIR_SEPORATOR.split(path);
-                final String lastFolder = folders[folders.length - 1];
-                boolean isDigit = false;
-                try {
-                    Integer.valueOf(lastFolder);
-                    isDigit = true;
-                } catch (NumberFormatException ignored) {
-                }
-                rawUserId = isDigit ? lastFolder : "";
+            final String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+            final String[] folders = DIR_SEPORATOR.split(path);
+            final String lastFolder = folders[folders.length - 1];
+            boolean isDigit = false;
+            try {
+                Integer.valueOf(lastFolder);
+                isDigit = true;
+            } catch (NumberFormatException ignored) {
             }
+            rawUserId = isDigit ? lastFolder : "";
             // /storage/emulated/0[1,2,...]
             if (TextUtils.isEmpty(rawUserId)) {
                 rv.add(rawEmulatedStorageTarget);
@@ -72,5 +71,24 @@ public class DirectoryUtils {
             Collections.addAll(rv, rawSecondaryStorages);
         }
         return rv;
+    }
+
+    public static File getOutputMediaDirectory(final Context context, final String... dirs) {
+        if (context == null) return null;
+        final File[] externalMediaDirs = context.getExternalMediaDirs();
+        if (externalMediaDirs == null || externalMediaDirs.length == 0) return context.getFilesDir();
+        final File externalMediaDir = externalMediaDirs[0];
+        File subDir = new File(externalMediaDir, context.getString(R.string.app_name));
+        if (dirs != null) {
+            for (final String dir : dirs) {
+                subDir = new File(subDir, dir);
+                //noinspection ResultOfMethodCallIgnored
+                subDir.mkdirs();
+            }
+        }
+        if (!subDir.exists()) {
+            return context.getFilesDir();
+        }
+        return subDir;
     }
 }

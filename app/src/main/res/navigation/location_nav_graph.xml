@@ -20,8 +20,7 @@
             app:nullable="false" />
         <argument
             android:name="postUserId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
 
     <include app:graph="@navigation/likes_nav_graph" />
@@ -37,6 +36,16 @@
             android:name="isComment"
             app:argType="boolean"
             app:nullable="false" />
+    </action>
+
+    <include app:graph="@navigation/saved_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_savedCollectionsFragment"
+        app:destination="@id/saved_nav_graph">
+        <argument
+            android:name="isSaving"
+            app:argType="boolean" />
     </action>
 
     <action
@@ -64,8 +73,7 @@
         tools:layout="@layout/fragment_location">
         <argument
             android:name="locationId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
         <action
             android:id="@+id/action_locationFragment_to_storyViewerFragment"
             app:destination="@id/storyViewerFragment" />
@@ -75,8 +83,7 @@
         app:destination="@id/locationFragment">
         <argument
             android:name="locationId"
-            app:argType="string"
-            app:nullable="false" />
+            app:argType="long" />
     </action>
     <fragment
         android:id="@+id/storyViewerFragment"
@@ -84,34 +91,7 @@
         android:label="StoryViewerFragment"
         tools:layout="@layout/fragment_story_viewer">
         <argument
-            android:name="feedStoryIndex"
-            app:argType="integer"
-            app:nullable="false" />
-        <argument
-            android:name="highlight"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isHashtag"
-            app:argType="boolean" />
-        <argument
-            android:name="isLoc"
-            app:argType="boolean" />
-        <argument
-            android:name="profileId"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="username"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isArchive"
-            app:argType="boolean"
-            app:nullable="false" />
-        <argument
-            android:name="isNotification"
-            app:argType="boolean"
-            app:nullable="false" />
+            android:name="options"
+            app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
 </navigation>

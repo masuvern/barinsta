@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.DownloadUtils;
 
-public final class DownloadedCheckerAsyncTask extends AsyncTask<FeedModel, Void, Map<String, List<Boolean>>> {
+public final class DownloadedCheckerAsyncTask extends AsyncTask<Media, Void, Map<String, List<Boolean>>> {
     private static final String TAG = "DownloadedCheckerAsyncTask";
 
     private final OnCheckResultListener listener;
@@ -19,13 +19,13 @@ public final class DownloadedCheckerAsyncTask extends AsyncTask<FeedModel, Void,
     }
 
     @Override
-    protected Map<String, List<Boolean>> doInBackground(final FeedModel... feedModels) {
+    protected Map<String, List<Boolean>> doInBackground(final Media... feedModels) {
         if (feedModels == null) {
             return null;
         }
         final Map<String, List<Boolean>> map = new HashMap<>();
-        for (final FeedModel feedModel : feedModels) {
-            map.put(feedModel.getPostId(), DownloadUtils.checkDownloaded(feedModel));
+        for (final Media media : feedModels) {
+            map.put(media.getPk(), DownloadUtils.checkDownloaded(media));
         }
         return map;
     }

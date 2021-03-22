@@ -50,11 +50,12 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentTopicPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.main.DiscoverFragmentDirections;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.TopicCluster;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.DiscoverService;
 
@@ -71,8 +72,8 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     private boolean shouldRefresh = true;
     private TopicCluster topicCluster;
     private ActionMode actionMode;
-    private Set<FeedModel> selectedFeedModels;
-    private FeedModel downloadFeedModel;
+    private Set<Media> selectedFeedModels;
+    private Media downloadFeedModel;
     private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_TOPIC_POSTS_LAYOUT);
 
@@ -108,27 +109,27 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final FeedModel feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
             openPostDialog(feedModel, profilePicView, mainPostImage, -1);
         }
 
         @Override
-        public void onSliderClick(final FeedModel feedModel, final int position) {
+        public void onSliderClick(final Media feedModel, final int position) {
             openPostDialog(feedModel, null, null, position);
         }
 
         @Override
-        public void onCommentsClick(final FeedModel feedModel) {
+        public void onCommentsClick(final Media feedModel) {
             final NavDirections commentsAction = DiscoverFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getShortCode(),
-                    feedModel.getPostId(),
-                    feedModel.getProfileModel().getId()
+                    feedModel.getCode(),
+                    feedModel.getPk(),
+                    feedModel.getUser().getPk()
             );
             NavHostFragment.findNavController(TopicPostsFragment.this).navigate(commentsAction);
         }
 
         @Override
-        public void onDownloadClick(final FeedModel feedModel, final int childPosition) {
+        public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
             if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
@@ -147,8 +148,8 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
         }
 
         @Override
-        public void onLocationClick(final FeedModel feedModel) {
-            final NavDirections action = DiscoverFragmentDirections.actionGlobalLocationFragment(feedModel.getLocationId());
+        public void onLocationClick(final Media feedModel) {
+            final NavDirections action = DiscoverFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
             NavHostFragment.findNavController(TopicPostsFragment.this).navigate(action);
         }
 
@@ -158,13 +159,13 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
         }
 
         @Override
-        public void onNameClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onNameClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final FeedModel feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getProfileModel().getUsername());
+        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
@@ -177,7 +178,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final FeedModel feedModel,
+        private void openPostDialog(final Media feedModel,
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
@@ -208,7 +209,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
         }
 
         @Override
-        public void onSelectionChange(final Set<FeedModel> selectedFeedModels) {
+        public void onSelectionChange(final Set<Media> selectedFeedModels) {
             final String title = getString(R.string.number_selected, selectedFeedModels.size());
             if (actionMode != null) {
                 actionMode.setTitle(title);
@@ -370,7 +371,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     private void setupCover() {
-        final String coverUrl = topicCluster.getCoverMedia().getDisplayUrl();
+        final String coverUrl = ResponseBodyUtils.getImageUrl(topicCluster.getCoverMedia());
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())

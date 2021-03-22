@@ -7,11 +7,8 @@
 
 package awais.instagrabber.customviews.drawee;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Matrix;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
@@ -53,46 +50,47 @@ public class DraggableZoomableDraweeView extends ZoomableDraweeView {
     private int lastNewPointerCount;
     private boolean wasTransformCorrected;
 
-    @Override
-    protected void onTransformEnd(final Matrix transform) {
-        super.onTransformEnd(transform);
-        final AnimatedZoomableController zoomableController = (AnimatedZoomableController) getZoomableController();
-        final TransformGestureDetector detector = zoomableController.getDetector();
-        lastNewPointerCount = detector.getNewPointerCount();
-        lastPointerCount = detector.getPointerCount();
-    }
+    // @Override
+    // protected void onTransformEnd(final Matrix transform) {
+    //     super.onTransformEnd(transform);
+    //     final AnimatedZoomableController zoomableController = (AnimatedZoomableController) getZoomableController();
+    //     final TransformGestureDetector detector = zoomableController.getDetector();
+    //     lastNewPointerCount = detector.getNewPointerCount();
+    //     lastPointerCount = detector.getPointerCount();
+    // }
+    //
+    // @Override
+    // protected void onTranslationLimited(final float offsetLeft, final float offsetTop) {
+    //     super.onTranslationLimited(offsetLeft, offsetTop);
+    //     wasTransformCorrected = offsetTop != 0;
+    // }
 
-    @Override
-    protected void onTranslationLimited(final float offsetLeft, final float offsetTop) {
-        super.onTranslationLimited(offsetLeft, offsetTop);
-        wasTransformCorrected = offsetTop != 0;
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public boolean onTouchEvent(final MotionEvent event) {
-        boolean superResult = false;
-        if (verticalDragHelper.isDragging()) {
-            final boolean onDragTouch = verticalDragHelper.onDragTouch(event);
-            if (onDragTouch) {
-                return true;
-            }
-        }
-        if (!verticalDragHelper.isDragging()) {
-            superResult = super.onTouchEvent(event);
-            if (wasTransformCorrected
-                    && (lastPointerCount == 1 || lastPointerCount == 0)
-                    && (lastNewPointerCount == 1 || lastNewPointerCount == 0)) {
-                final boolean onDragTouch = verticalDragHelper.onDragTouch(event);
-                if (onDragTouch) {
-                    return true;
-                }
-            }
-        }
-        final boolean gestureListenerResult = verticalDragHelper.onGestureTouchEvent(event);
-        if (gestureListenerResult) {
-            return true;
-        }
-        return superResult;
-    }
+    // @SuppressLint("ClickableViewAccessibility")
+    // @Override
+    // public boolean onTouchEvent(final MotionEvent event) {
+    //     boolean superResult = false;
+    //     superResult = super.onTouchEvent(event);
+    // if (verticalDragHelper.isDragging()) {
+    //     final boolean onDragTouch = verticalDragHelper.onDragTouch(event);
+    //     if (onDragTouch) {
+    //         return true;
+    //     }
+    // }
+    // if (!verticalDragHelper.isDragging()) {
+    //     superResult = super.onTouchEvent(event);
+    //     if (wasTransformCorrected
+    //             && (lastPointerCount == 1 || lastPointerCount == 0)
+    //             && (lastNewPointerCount == 1 || lastNewPointerCount == 0)) {
+    //         final boolean onDragTouch = verticalDragHelper.onDragTouch(event);
+    //         if (onDragTouch) {
+    //             return true;
+    //         }
+    //     }
+    // }
+    // final boolean gestureListenerResult = verticalDragHelper.onGestureTouchEvent(event);
+    // if (gestureListenerResult) {
+    //     return true;
+    // }
+    // return superResult;
+    // }
 }

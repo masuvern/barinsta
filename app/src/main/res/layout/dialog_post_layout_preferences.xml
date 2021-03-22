@@ -312,7 +312,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            app:constraint_referenced_ids="label_col_count,col_count_toggle,label_show_avatar_toggle,show_avatar_toggle,label_show_names_toggle,show_names_toggle"
+            app:constraint_referenced_ids="label_col_count,col_count_toggle,label_show_avatar_toggle,show_avatar_toggle,label_show_names_toggle,show_names_toggle,label_avatar_size,avatar_size_toggle"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

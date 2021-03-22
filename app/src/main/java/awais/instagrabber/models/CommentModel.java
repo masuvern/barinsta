@@ -5,10 +5,11 @@ import androidx.annotation.NonNull;
 import java.util.Date;
 import java.util.List;
 
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Utils;
 
 public class CommentModel {
-    private final ProfileModel profileModel;
+    private final User profileModel;
     private final String id;
     private final String text;
     private long likes;
@@ -22,7 +23,7 @@ public class CommentModel {
                         final long timestamp,
                         final long likes,
                         final boolean liked,
-                        final ProfileModel profileModel) {
+                        final User profileModel) {
         this.id = id;
         this.text = text;
         this.likes = likes;
@@ -57,7 +58,7 @@ public class CommentModel {
         this.liked = liked;
     }
 
-    public ProfileModel getProfileModel() {
+    public User getProfileModel() {
         return profileModel;
     }
 

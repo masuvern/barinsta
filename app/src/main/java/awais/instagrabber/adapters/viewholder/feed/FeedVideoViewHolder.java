@@ -12,13 +12,17 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 
+import java.util.List;
+
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.ItemFeedVideoBinding;
-import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NumberUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -32,7 +36,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     private final DefaultDataSourceFactory dataSourceFactory;
 
     private CacheDataSourceFactory cacheDataSourceFactory;
-    private FeedModel feedModel;
+    private Media media;
 
     // private final Runnable loadRunnable = new Runnable() {
     //     @Override
@@ -46,7 +50,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
         super(binding.getRoot(), binding.itemFeedTop, binding.itemFeedBottom, feedItemCallback);
         this.binding = binding;
         this.feedItemCallback = feedItemCallback;
-        binding.itemFeedBottom.tvVideoViews.setVisibility(View.VISIBLE);
+        binding.itemFeedBottom.btnViews.setVisibility(View.VISIBLE);
         handler = new Handler(Looper.getMainLooper());
         final Context context = binding.getRoot().getContext();
         dataSourceFactory = new DefaultDataSourceFactory(context, "instagram");
@@ -57,68 +61,55 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
     }
 
     @Override
-    public void bindItem(final FeedModel feedModel) {
+    public void bindItem(final Media media) {
         // Log.d(TAG, "Binding post: " + feedModel.getPostId());
-        this.feedModel = feedModel;
-        binding.itemFeedBottom.tvVideoViews.setText(String.valueOf(feedModel.getViewCount()));
-        // showOrHideDetails(false);
+        this.media = media;
+        binding.itemFeedBottom.tvVideoViews.setText(String.valueOf(media.getViewCount()));
         final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
 
             @Override
             public void onThumbnailClick() {
-                feedItemCallback.onPostClick(feedModel, binding.itemFeedTop.ivProfilePic, binding.videoPost.thumbnail);
+                feedItemCallback.onPostClick(media, binding.itemFeedTop.ivProfilePic, binding.videoPost.thumbnail);
             }
 
             @Override
             public void onPlayerViewLoaded() {
-                // binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
                 final ViewGroup.LayoutParams layoutParams = binding.videoPost.playerView.getLayoutParams();
                 final int requiredWidth = Utils.displayMetrics.widthPixels;
-                final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
+                final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, media.getOriginalHeight(), media.getOriginalWidth());
                 layoutParams.width = requiredWidth;
                 layoutParams.height = resultingHeight;
                 binding.videoPost.playerView.requestLayout();
-                setMuteIcon(vol == 0f && Utils.sessionVolumeFull ? 1f : vol);
             }
         };
-        // final DataSource.Factory factory = cacheDataSourceFactory != null ? cacheDataSourceFactory : dataSourceFactory;
-        // final ProgressiveMediaSource.Factory sourceFactory = new ProgressiveMediaSource.Factory(factory);
-        // final Uri uri = Uri.parse(feedModel.getDisplayUrl());
-        // final MediaItem mediaItem = MediaItem.fromUri(uri);
-        // final ProgressiveMediaSource mediaSource = sourceFactory.createMediaSource(mediaItem);
-        final float aspectRatio = (float) feedModel.getImageWidth() / feedModel.getImageHeight();
+        final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();
+        String videoUrl = null;
+        final List<VideoVersion> videoVersions = media.getVideoVersions();
+        if (videoVersions != null && !videoVersions.isEmpty()) {
+            final VideoVersion videoVersion = videoVersions.get(0);
+            videoUrl = videoVersion.getUrl();
+        }
         final VideoPlayerViewHelper videoPlayerViewHelper = new VideoPlayerViewHelper(binding.getRoot().getContext(),
                                                                                       binding.videoPost,
-                                                                                      feedModel.getDisplayUrl(),
+                                                                                      videoUrl,
                                                                                       vol,
                                                                                       aspectRatio,
-                                                                                      feedModel.getThumbnailUrl(),
+                                                                                      ResponseBodyUtils.getThumbUrl(media),
                                                                                       false,
                                                                                       null,
                                                                                       videoPlayerCallback);
         binding.videoPost.thumbnail.post(() -> {
-            if (feedModel.getImageHeight() > 0.8 * Utils.displayMetrics.heightPixels) {
+            if (media.getOriginalHeight() > 0.8 * Utils.displayMetrics.heightPixels) {
                 final ViewGroup.LayoutParams layoutParams = binding.videoPost.thumbnail.getLayoutParams();
                 layoutParams.height = (int) (0.8 * Utils.displayMetrics.heightPixels);
                 binding.videoPost.thumbnail.requestLayout();
             }
         });
-        // binding.itemFeedBottom.btnMute.setOnClickListener(v -> {
-        //     final float newVol = videoPlayerViewHelper.toggleMute();
-        //     setMuteIcon(newVol);
-        //     Utils.sessionVolumeFull = newVol == 1f;
-        // });
-        // binding.videoPost.playerView.setOnClickListener(v -> videoPlayerViewHelper.togglePlayback());
     }
 
-
-    private void setMuteIcon(final float vol) {
-        // binding.itemFeedBottom.btnMute.setImageResource(vol == 0f ? R.drawable.ic_volume_up_24 : R.drawable.ic_volume_off_24);
-    }
-
-    public FeedModel getCurrentFeedModel() {
-        return feedModel;
+    public Media getCurrentFeedModel() {
+        return media;
     }
 
     // public void stopPlaying() {

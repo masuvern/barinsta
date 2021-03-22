@@ -29,7 +29,7 @@
         android:visibility="gone"
         app:counterEnabled="true"
         app:counterMaxLength="2200"
-        app:endIconDrawable="@drawable/ic_send_24"
+        app:endIconDrawable="@drawable/ic_round_send_24"
         app:endIconMode="custom"
         app:startIconDrawable="@drawable/ic_close_24">
 

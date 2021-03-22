@@ -1,24 +1,24 @@
 package awais.instagrabber.models;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.Date;
 
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Utils;
 
 public final class FeedStoryModel implements Serializable {
     private final String storyMediaId;
-    private final ProfileModel profileModel;
+    private final User profileModel;
     private final StoryModel firstStoryModel;
     private Boolean fullyRead;
     private final boolean isLive, isBestie;
     private final long timestamp;
     private final int mediaCount;
+    private boolean isShown = true;
 
-    public FeedStoryModel(final String storyMediaId, final ProfileModel profileModel, final boolean fullyRead,
+    public FeedStoryModel(final String storyMediaId, final User profileModel, final boolean fullyRead,
                           final long timestamp, final StoryModel firstStoryModel, final int mediaCount,
                           final boolean isLive, final boolean isBestie) {
         this.storyMediaId = storyMediaId;
@@ -48,13 +48,13 @@ public final class FeedStoryModel implements Serializable {
         return mediaCount;
     }
 
-    public ProfileModel getProfileModel() {
+    public User getProfileModel() {
         return profileModel;
     }
 
-//    public void setFirstStoryModel(final StoryModel firstStoryModel) {
-//        this.firstStoryModel = firstStoryModel;
-//    }
+    //    public void setFirstStoryModel(final StoryModel firstStoryModel) {
+    //        this.firstStoryModel = firstStoryModel;
+    //    }
 
     public StoryModel getFirstStoryModel() {
         return firstStoryModel;
@@ -74,5 +74,13 @@ public final class FeedStoryModel implements Serializable {
 
     public boolean isBestie() {
         return isBestie;
+    }
+
+    public boolean isShown() {
+        return isShown;
+    }
+
+    public void setShown(final boolean shown) {
+        isShown = shown;
     }
 }

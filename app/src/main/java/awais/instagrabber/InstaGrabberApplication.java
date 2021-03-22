@@ -3,6 +3,7 @@ package awais.instagrabber;
 import android.app.Application;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -15,13 +16,16 @@ import java.util.UUID;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
+import awais.instagrabber.utils.TextUtils;
 import awaisomereport.CrashReporter;
-import awaisomereport.LogCollector;
+//import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
+import static awais.instagrabber.utils.Utils.applicationHandler;
+import static awais.instagrabber.utils.Utils.cacheDir;
 import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.datetimeParser;
-import static awais.instagrabber.utils.Utils.logCollector;
+//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class InstaGrabberApplication extends Application {
@@ -52,12 +56,20 @@ public final class InstaGrabberApplication extends Application {
         }
 
         if (!BuildConfig.DEBUG) CrashReporter.get(this).start();
-        logCollector = new LogCollector(this);
+//        logCollector = new LogCollector(this);
 
         CookieHandler.setDefault(NET_COOKIE_MANAGER);
 
         if (settingsHelper == null)
             settingsHelper = new SettingsHelper(this);
+
+        if (applicationHandler == null) {
+            applicationHandler = new Handler(getApplicationContext().getMainLooper());
+        }
+
+        if (cacheDir == null) {
+            cacheDir = getCacheDir().getAbsolutePath();
+        }
 
         LocaleUtils.setLocale(getBaseContext());
 
@@ -70,6 +82,8 @@ public final class InstaGrabberApplication extends Application {
                     settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT) :
                     settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
 
-        settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
+        if (TextUtils.isEmpty(settingsHelper.getString(Constants.DEVICE_UUID))) {
+            settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
+        }
     }
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import awais.instagrabber.adapters.viewholder.FeedGridItemViewHolder;
@@ -22,43 +23,45 @@ import awais.instagrabber.databinding.ItemFeedGridBinding;
 import awais.instagrabber.databinding.ItemFeedPhotoBinding;
 import awais.instagrabber.databinding.ItemFeedSliderBinding;
 import awais.instagrabber.databinding.ItemFeedVideoBinding;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.repositories.responses.Caption;
+import awais.instagrabber.repositories.responses.Media;
 
-public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.ViewHolder> {
+public final class FeedAdapterV2 extends ListAdapter<Media, RecyclerView.ViewHolder> {
     private static final String TAG = "FeedAdapterV2";
 
     private final FeedItemCallback feedItemCallback;
     private final SelectionModeCallback selectionModeCallback;
     private final Set<Integer> selectedPositions = new HashSet<>();
-    private final Set<FeedModel> selectedFeedModels = new HashSet<>();
+    private final Set<Media> selectedFeedModels = new HashSet<>();
 
     private PostsLayoutPreferences layoutPreferences;
     private boolean selectionModeActive = false;
 
 
-    private static final DiffUtil.ItemCallback<FeedModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<FeedModel>() {
+    private static final DiffUtil.ItemCallback<Media> DIFF_CALLBACK = new DiffUtil.ItemCallback<Media>() {
         @Override
-        public boolean areItemsTheSame(@NonNull final FeedModel oldItem, @NonNull final FeedModel newItem) {
-            return oldItem.getPostId().equals(newItem.getPostId());
+        public boolean areItemsTheSame(@NonNull final Media oldItem, @NonNull final Media newItem) {
+            return Objects.equals(oldItem.getPk(), newItem.getPk());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull final FeedModel oldItem, @NonNull final FeedModel newItem) {
-            boolean result = oldItem.getPostId().equals(newItem.getPostId());
-            if (TextUtils.isEmpty(oldItem.getPostCaption())) {
-                return result ? TextUtils.isEmpty(newItem.getPostCaption()) : false;
-            }
-            else {
-                return result ? oldItem.getPostCaption().equals(newItem.getPostCaption()) : false;
-            }
+        public boolean areContentsTheSame(@NonNull final Media oldItem, @NonNull final Media newItem) {
+            final Caption oldItemCaption = oldItem.getCaption();
+            final Caption newItemCaption = newItem.getCaption();
+            return Objects.equals(oldItem.getPk(), newItem.getPk())
+                    && Objects.equals(getCaptionText(oldItemCaption), getCaptionText(newItemCaption));
+        }
+
+        private String getCaptionText(final Caption caption) {
+            if (caption == null) return null;
+            return caption.getText();
         }
     };
     private final AdapterSelectionCallback adapterSelectionCallback = new AdapterSelectionCallback() {
         @Override
-        public boolean onPostLongClick(final int position, final FeedModel feedModel) {
+        public boolean onPostLongClick(final int position, final Media feedModel) {
             if (!selectionModeActive) {
                 selectionModeActive = true;
                 notifyDataSetChanged();
@@ -76,7 +79,7 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
         }
 
         @Override
-        public void onPostClick(final int position, final FeedModel feedModel) {
+        public void onPostClick(final int position, final Media feedModel) {
             if (!selectionModeActive) return;
             if (selectedPositions.contains(position)) {
                 selectedPositions.remove(position);
@@ -147,7 +150,7 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder viewHolder, final int position) {
-        final FeedModel feedModel = getItem(position);
+        final Media feedModel = getItem(position);
         if (feedModel == null) return;
         switch (layoutPreferences.getType()) {
             case LINEAR:
@@ -168,7 +171,7 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
 
     @Override
     public int getItemViewType(final int position) {
-        return getItem(position).getItemType().getId();
+        return getItem(position).getMediaType().getId();
     }
 
     public void setLayoutPreferences(@NonNull final PostsLayoutPreferences layoutPreferences) {
@@ -205,43 +208,43 @@ public final class FeedAdapterV2 extends ListAdapter<FeedModel, RecyclerView.Vie
     // }
 
     public interface FeedItemCallback {
-        void onPostClick(final FeedModel feedModel,
+        void onPostClick(final Media feedModel,
                          final View profilePicView,
                          final View mainPostImage);
 
-        void onProfilePicClick(final FeedModel feedModel,
+        void onProfilePicClick(final Media feedModel,
                                final View profilePicView);
 
-        void onNameClick(final FeedModel feedModel,
+        void onNameClick(final Media feedModel,
                          final View profilePicView);
 
-        void onLocationClick(final FeedModel feedModel);
+        void onLocationClick(final Media feedModel);
 
         void onMentionClick(final String mention);
 
         void onHashtagClick(final String hashtag);
 
-        void onCommentsClick(final FeedModel feedModel);
+        void onCommentsClick(final Media feedModel);
 
-        void onDownloadClick(final FeedModel feedModel, final int childPosition);
+        void onDownloadClick(final Media feedModel, final int childPosition);
 
         void onEmailClick(final String emailId);
 
         void onURLClick(final String url);
 
-        void onSliderClick(FeedModel feedModel, int position);
+        void onSliderClick(Media feedModel, int position);
     }
 
     public interface AdapterSelectionCallback {
-        boolean onPostLongClick(final int position, FeedModel feedModel);
+        boolean onPostLongClick(final int position, Media feedModel);
 
-        void onPostClick(final int position, FeedModel feedModel);
+        void onPostClick(final int position, Media feedModel);
     }
 
     public interface SelectionModeCallback {
         void onSelectionStart();
 
-        void onSelectionChange(final Set<FeedModel> selectedFeedModels);
+        void onSelectionChange(final Set<Media> selectedFeedModels);
 
         void onSelectionEnd();
     }

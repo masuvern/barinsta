@@ -83,35 +83,26 @@
         app:layout_constraintTop_toBottomOf="@id/mainLocationImage"
         tools:text="OUR HOUSE" />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <awais.instagrabber.customviews.RamboTextViewV2
         android:id="@+id/locationBiography"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/locationFullName"
+        android:padding="8dp"
         android:background="?android:selectableItemBackground"
-        android:paddingStart="8dp"
-        android:paddingLeft="8dp"
-        android:paddingEnd="8dp"
-        android:paddingRight="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/locationUrl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/locationFullName"
-        tools:text="IN THE MIDDLE OF OUR STREET"
-        tools:visibility="visible" />
+        tools:text="IN THE MIDDLE OF OUR STREET" />
 
-    <awais.instagrabber.customviews.RamboTextView
+    <awais.instagrabber.customviews.RamboTextViewV2
         android:id="@+id/locationUrl"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/locationBiography"
         android:ellipsize="marquee"
-        android:paddingStart="8dp"
-        android:paddingLeft="8dp"
-        android:paddingEnd="8dp"
-        android:paddingRight="8dp"
+        android:padding="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -119,5 +110,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/locationBiography"
         tools:text="https://austinhuang.me/"
+        tools:textColor="@android:color/holo_blue_dark"
         tools:visibility="visible" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

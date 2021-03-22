@@ -1,9 +1,13 @@
 package awais.instagrabber.adapters.viewholder;
 
 import android.annotation.SuppressLint;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+
+import java.util.List;
 
 import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.customviews.VerticalDragHelper;
@@ -11,9 +15,11 @@ import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.LayoutExoCustomControlsBinding;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
-import awais.instagrabber.models.PostChild;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NumberUtils;
+import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -24,6 +30,14 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     private final LayoutVideoPlayerWithThumbnailBinding binding;
     private final LayoutExoCustomControlsBinding controlsBinding;
     private final boolean loadVideoOnItemClick;
+    private final GestureDetector.OnGestureListener videoPlayerViewGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onSingleTapConfirmed(final MotionEvent e) {
+            binding.playerView.performClick();
+            return true;
+        }
+    };
+
     private VideoPlayerViewHelper videoPlayerViewHelper;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -35,29 +49,27 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
         this.binding = binding;
         this.controlsBinding = controlsBinding;
         this.loadVideoOnItemClick = loadVideoOnItemClick;
-        if (onVerticalDragListener != null) {
-            final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
-            final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
-            thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-            playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-            binding.thumbnailParent.setOnTouchListener((v, event) -> {
-                final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
-                if (onDragTouch) {
-                    return true;
-                }
-                return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
-            });
-            binding.playerView.setOnTouchListener((v, event) -> {
-                final boolean onDragTouch = playerVerticalDragHelper.onDragTouch(event);
-                if (onDragTouch) {
-                    return true;
-                }
-                return playerVerticalDragHelper.onGestureTouchEvent(event);
-            });
-        }
+        // if (onVerticalDragListener != null) {
+        //     final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
+        //     final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
+        //     thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
+        //     playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
+        //     binding.thumbnailParent.setOnTouchListener((v, event) -> {
+        //         final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
+        //         if (onDragTouch) {
+        //             return true;
+        //         }
+        //         return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
+        //     });
+        // }
+        final GestureDetector gestureDetector = new GestureDetector(itemView.getContext(), videoPlayerViewGestureListener);
+        binding.playerView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
     }
 
-    public void bind(@NonNull final PostChild model,
+    public void bind(@NonNull final Media media,
                      final int position,
                      final SliderItemsAdapter.SliderCallback sliderCallback) {
         final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
@@ -82,7 +94,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                 // binding.itemFeedBottom.btnMute.setVisibility(View.VISIBLE);
                 final ViewGroup.LayoutParams layoutParams = binding.playerView.getLayoutParams();
                 final int requiredWidth = Utils.displayMetrics.widthPixels;
-                final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, model.getHeight(), model.getWidth());
+                final int resultingHeight = NumberUtils.getResultingHeight(requiredWidth, media.getOriginalHeight(), media.getOriginalWidth());
                 layoutParams.width = requiredWidth;
                 layoutParams.height = resultingHeight;
                 binding.playerView.requestLayout();
@@ -102,14 +114,30 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                     sliderCallback.onPlayerPause(position);
                 }
             }
+
+            @Override
+            public void onRelease() {
+                if (sliderCallback != null) {
+                    sliderCallback.onPlayerRelease(position);
+                }
+            }
         };
-        final float aspectRatio = (float) model.getWidth() / model.getHeight();
+        final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();
+        String videoUrl = null;
+        final List<VideoVersion> videoVersions = media.getVideoVersions();
+        if (videoVersions != null && !videoVersions.isEmpty()) {
+            final VideoVersion videoVersion = videoVersions.get(0);
+            if (videoVersion != null) {
+                videoUrl = videoVersion.getUrl();
+            }
+        }
+        if (videoUrl == null) return;
         videoPlayerViewHelper = new VideoPlayerViewHelper(binding.getRoot().getContext(),
                                                           binding,
-                                                          model.getDisplayUrl(),
+                                                          videoUrl,
                                                           vol,
                                                           aspectRatio,
-                                                          model.getThumbnailUrl(),
+                                                          ResponseBodyUtils.getThumbUrl(media),
                                                           loadVideoOnItemClick,
                                                           controlsBinding,
                                                           videoPlayerCallback);

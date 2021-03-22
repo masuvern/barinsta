@@ -4,8 +4,7 @@ import java.io.Serializable;
 
 public final class LocationModel implements Serializable {
     private final long postCount;
-    private final String id;
-    private final String slug;
+    private final long id;
     private final String name;
     private final String bio;
     private final String url;
@@ -13,8 +12,7 @@ public final class LocationModel implements Serializable {
     private final String lat;
     private final String lng;
 
-    public LocationModel(final String id,
-                         final String slug,
+    public LocationModel(final long id,
                          final String name,
                          final String bio,
                          final String url,
@@ -23,7 +21,6 @@ public final class LocationModel implements Serializable {
                          final String lat,
                          final String lng) {
         this.id = id;
-        this.slug = slug;
         this.name = name;
         this.bio = bio;
         this.url = url;
@@ -33,12 +30,8 @@ public final class LocationModel implements Serializable {
         this.lng = lng;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
-    }
-
-    public String getSlug() {
-        return slug;
     }
 
     public String getName() {

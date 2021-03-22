@@ -19,6 +19,7 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.DiscoverTopicsAdapter;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.databinding.FragmentDiscoverBinding;
+import awais.instagrabber.repositories.responses.discover.TopicalExploreFeedResponse;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.TopicClusterViewModel;
 import awais.instagrabber.webservices.DiscoverService;
@@ -88,9 +89,9 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private void fetchTopics() {
         binding.swipeRefreshLayout.setRefreshing(true);
-        discoverService.topicalExplore(new DiscoverService.TopicalExploreRequest(), new ServiceCallback<DiscoverService.TopicalExploreResponse>() {
+        discoverService.topicalExplore(new DiscoverService.TopicalExploreRequest(), new ServiceCallback<TopicalExploreFeedResponse>() {
             @Override
-            public void onSuccess(final DiscoverService.TopicalExploreResponse result) {
+            public void onSuccess(final TopicalExploreFeedResponse result) {
                 if (result == null) return;
                 topicClusterViewModel.getList().postValue(result.getClusters());
                 binding.swipeRefreshLayout.setRefreshing(false);

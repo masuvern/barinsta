@@ -47,7 +47,10 @@ public abstract class SharedElementTransitionDialogFragment extends DialogFragme
         final int key = destView.hashCode();
         startViews.put(key, startView);
         destViews.put(key, destView);
-        initialBoundsHandler.post(() -> setupInitialBounds(startView, destView));
+        setupInitialBounds(startView, destView);
+        // final View view = getView();
+        // if (view == null) return;
+        // view.post(() -> {});
     }
 
     public void startPostponedEnterTransition() {

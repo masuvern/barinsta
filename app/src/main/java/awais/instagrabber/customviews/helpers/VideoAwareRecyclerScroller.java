@@ -12,7 +12,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.feed.FeedVideoViewHolder;
-import awais.instagrabber.models.FeedModel;
+import awais.instagrabber.repositories.responses.Media;
 
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
@@ -75,8 +75,8 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
                 }
                 return;
             }
-            if (currentlyPlayingViewHolder != null && currentlyPlayingViewHolder.getCurrentFeedModel().getPostId()
-                                                                                .equals(videoHolder.getCurrentFeedModel().getPostId())) {
+            if (currentlyPlayingViewHolder != null && currentlyPlayingViewHolder.getCurrentFeedModel().getPk()
+                                                                                .equals(videoHolder.getCurrentFeedModel().getPk())) {
                 return;
             }
             if (currentlyPlayingViewHolder != null) {
@@ -203,10 +203,10 @@ public class VideoAwareRecyclerScroller extends RecyclerView.OnScrollListener {
                 final boolean result = viewSwitcher.getGlobalVisibleRect(visibleItemRect, offset);
                 if (!result) continue;
                 final FeedVideoViewHolder viewHolder = (FeedVideoViewHolder) recyclerView.getChildViewHolder(view);
-                final FeedModel currentFeedModel = viewHolder.getCurrentFeedModel();
+                final Media currentFeedModel = viewHolder.getCurrentFeedModel();
                 visibleItemRect.offset(-offset.x, -offset.y);
                 final int visibleHeight = visibleItemRect.height();
-                if (visibleHeight < currentFeedModel.getImageHeight()) {
+                if (visibleHeight < currentFeedModel.getOriginalHeight()) {
                     continue;
                 }
                 // Log.d(TAG, "post:" + currentFeedModel.getPostId() + ", visibleHeight: " + visibleHeight + ", post height: " + currentFeedModel.getImageHeight());

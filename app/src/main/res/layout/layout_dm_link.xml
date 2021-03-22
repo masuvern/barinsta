@@ -1,45 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/link_container"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <awais.instagrabber.customviews.RamboTextView
-        android:id="@+id/tvMessage"
+    <awais.instagrabber.customviews.RamboTextViewV2
+        android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|fill_horizontal"
-        android:padding="8dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="?android:textColorPrimary" />
+        android:paddingStart="@dimen/dm_message_card_radius"
+        android:paddingTop="@dimen/dm_message_card_radius_small"
+        android:paddingEnd="@dimen/dm_message_card_radius"
+        android:paddingBottom="@dimen/dm_message_card_radius_small"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        tools:text="Some message" />
 
     <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/ivLinkPreview"
+        android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dm_link_image_size"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        tools:background="@mipmap/ic_launcher"
+        tools:layout_width="300dp" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvLinkTitle"
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|fill_horizontal"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:paddingStart="@dimen/dm_message_card_radius"
+        android:paddingTop="@dimen/dm_message_card_radius_small"
+        android:paddingEnd="@dimen/dm_message_card_radius"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        tools:text="Title of the website" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:paddingStart="@dimen/dm_message_card_radius"
+        android:paddingTop="@dimen/dm_message_card_radius_small"
+        android:paddingEnd="@dimen/dm_message_card_radius"
+        tools:text="Some summary of the website" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
-        android:paddingStart="4dp"
-        android:paddingLeft="4dp"
-        android:paddingEnd="4dp"
-        android:paddingRight="4dp"
-        android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="?android:textColorPrimary" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvLinkSummary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|fill_horizontal"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:padding="4dp" />
+        android:paddingStart="@dimen/dm_message_card_radius"
+        android:paddingTop="@dimen/dm_message_card_radius_small"
+        android:paddingEnd="@dimen/dm_message_card_radius"
+        android:paddingBottom="@dimen/dm_message_card_radius_small"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        tools:text="test.com" />
 </LinearLayout>

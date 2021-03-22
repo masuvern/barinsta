@@ -47,6 +47,7 @@ public final class ProfilePicView extends CircularImageView {
                           final int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         parseAttrs(context, attrs);
+        updateLayout();
     }
 
     private void parseAttrs(final Context context, final AttributeSet attrs) {
@@ -92,6 +93,11 @@ public final class ProfilePicView extends CircularImageView {
         // requestLayout();
     }
 
+    public void setSize(final Size size) {
+        this.size = size;
+        updateLayout();
+    }
+
     public void setStoriesBorder() {
         // private final int borderSize = 8;
         final int color = Color.GREEN;
@@ -110,7 +116,7 @@ public final class ProfilePicView extends CircularImageView {
         LARGE(3);
 
         private final int value;
-        private static Map<Integer, Size> map = new HashMap<>();
+        private static final Map<Integer, Size> map = new HashMap<>();
 
         static {
             for (Size size : Size.values()) {

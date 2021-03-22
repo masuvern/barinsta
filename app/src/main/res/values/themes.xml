@@ -115,6 +115,9 @@
         <item name="android:dropDownListViewStyle">@style/Widget.AppCompat.ListView.DropDown.Dark.Black</item>
         <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.Black</item>
         <item name="appBarLayoutStyle">@style/Widget.MaterialComponents.AppBarLayout.Primary</item>
+        <item name="dmIncomingBgColor">@color/grey_600</item>
+        <item name="dmOutgoingBgColor">@color/deep_purple_400</item>
+        <item name="dmDateHeaderBgColor">@color/deep_purple_600</item>
     </style>
 
     <style name="AppTheme.Dark.MaterialDark" parent="AppTheme.Dark">
@@ -122,8 +125,9 @@
         <item name="colorPrimaryVariant">@color/purple_600</item>
         <item name="colorSecondary">@color/green_500</item>
         <item name="colorSecondaryVariant">@color/green_200</item>
-        <item name="android:colorBackground">@color/black</item>
-        <item name="colorSurface">@color/black_800</item>
+        <item name="android:windowBackground">@color/grey_900</item>
+        <item name="android:colorBackground">@color/grey_900</item>
+        <item name="colorSurface">@color/grey_900</item>
         <item name="colorError">@color/red_200</item>
         <item name="colorOnPrimary">@color/black</item>
         <item name="colorOnSecondary">@color/black</item>
@@ -132,5 +136,12 @@
         <item name="colorOnError">@color/black</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
         <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.MaterialDark</item>
+        <item name="dmIncomingBgColor">@color/grey_600</item>
+        <item name="dmOutgoingBgColor">@color/deep_purple_400</item>
+        <item name="dmDateHeaderBgColor">@color/deep_purple_600</item>
+    </style>
+
+    <style name="AppTheme.Launcher" parent="AppTheme.Dark">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
     </style>
 </resources>

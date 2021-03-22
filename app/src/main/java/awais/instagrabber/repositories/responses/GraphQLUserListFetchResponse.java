@@ -5,17 +5,16 @@ import androidx.annotation.NonNull;
 import java.util.List;
 import java.util.Objects;
 
-import awais.instagrabber.models.ProfileModel;
 import awais.instagrabber.utils.TextUtils;
 
 public class GraphQLUserListFetchResponse {
     private String nextMaxId;
     private String status;
-    private List<ProfileModel> items;
+    private List<User> items;
 
     public GraphQLUserListFetchResponse(final String nextMaxId,
                                         final String status,
-                                        final List<ProfileModel> items) {
+                                        final List<User> items) {
         this.nextMaxId = nextMaxId;
         this.status = status;
         this.items = items;
@@ -43,11 +42,11 @@ public class GraphQLUserListFetchResponse {
         return this;
     }
 
-    public List<ProfileModel> getItems() {
+    public List<User> getItems() {
         return items;
     }
 
-    public GraphQLUserListFetchResponse setItems(final List<ProfileModel> items) {
+    public GraphQLUserListFetchResponse setItems(final List<User> items) {
         this.items = items;
         return this;
     }

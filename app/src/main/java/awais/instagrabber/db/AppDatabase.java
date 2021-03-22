@@ -20,14 +20,16 @@ import java.util.Date;
 import java.util.List;
 
 import awais.instagrabber.db.dao.AccountDao;
+import awais.instagrabber.db.dao.DMLastNotifiedDao;
 import awais.instagrabber.db.dao.FavoriteDao;
 import awais.instagrabber.db.entities.Account;
+import awais.instagrabber.db.entities.DMLastNotified;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.Utils;
 
-@Database(entities = {Account.class, Favorite.class},
-          version = 4)
+@Database(entities = {Account.class, Favorite.class, DMLastNotified.class},
+          version = 5)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = AppDatabase.class.getSimpleName();
@@ -38,12 +40,14 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FavoriteDao favoriteDao();
 
+    public abstract DMLastNotifiedDao dmLastNotifiedDao();
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "cookiebox.db")
-                                   .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                                   .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                                    .build();
                 }
             }
@@ -137,6 +141,18 @@ public abstract class AppDatabase extends RoomDatabase {
             db.execSQL("DROP TABLE " + Favorite.TABLE_NAME);
             // Rename favorite_backup to favorites
             db.execSQL("ALTER TABLE " + Favorite.TABLE_NAME + "_backup RENAME TO " + Favorite.TABLE_NAME);
+        }
+    };
+
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull final SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `dm_last_notified` (" +
+                                     "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                     "`thread_id` TEXT, " +
+                                     "`last_notified_msg_ts` INTEGER, " +
+                                     "`last_notified_at` INTEGER)");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_dm_last_notified_thread_id` ON `dm_last_notified` (`thread_id`)");
         }
     };
 

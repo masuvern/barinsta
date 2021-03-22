@@ -1,10 +1,15 @@
 package awais.instagrabber.fragments.directmessages;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -12,78 +17,59 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.List;
 
-import awais.instagrabber.BuildConfig;
+import awais.instagrabber.R;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.DirectMessageInboxAdapter;
-import awais.instagrabber.asyncs.direct_messages.InboxFetcher;
-import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
+import awais.instagrabber.broadcasts.DMRefreshBroadcastReceiver;
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
 import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding;
-import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.direct_messages.InboxModel;
-import awais.instagrabber.models.direct_messages.InboxThreadModel;
-import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.viewmodels.DirectInboxViewModel;
 
 public class DirectMessageInboxFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "DirectMessagesInboxFrag";
 
-    private FragmentActivity fragmentActivity;
     private CoordinatorLayout root;
-    private RecyclerView inboxList;
-    private RecyclerLazyLoader lazyLoader;
-    private LinearLayoutManager layoutManager;
-    private String endCursor;
-    private AsyncTask<Void, Void, InboxModel> currentlyRunning;
-    private InboxThreadModelListViewModel listViewModel;
-    public static boolean refreshPlease = false;
+    private RecyclerLazyLoaderAtEdge lazyLoader;
+    private DirectInboxViewModel viewModel;
     private boolean shouldRefresh = true;
-
-    private final FetchListener<InboxModel> fetchListener = new FetchListener<InboxModel>() {
-        @Override
-        public void doBefore() {
-            binding.swipeRefreshLayout.setRefreshing(true);
-        }
-
-        @Override
-        public void onResult(final InboxModel inboxModel) {
-            if (inboxModel != null) {
-                endCursor = inboxModel.getOldestCursor();
-                if ("MINCURSOR".equals(endCursor) || "MAXCURSOR".equals(endCursor))
-                    endCursor = null;
-                // todo get request / unseen count from inboxModel
-                final InboxThreadModel[] threads = inboxModel.getThreads();
-                if (threads != null && threads.length > 0) {
-                    List<InboxThreadModel> list = listViewModel.getList().getValue();
-                    list = list != null ? new LinkedList<>(list) : new LinkedList<>();
-                    // final int oldSize = list != null ? list.size() : 0;
-                    final List<InboxThreadModel> newList = Arrays.asList(threads);
-                    list.addAll(newList);
-                    listViewModel.getList().postValue(list);
-                }
-            }
-            binding.swipeRefreshLayout.setRefreshing(false);
-            stopCurrentExecutor();
-        }
-    };
     private FragmentDirectMessagesInboxBinding binding;
+    private DMRefreshBroadcastReceiver receiver;
+    private DirectMessageInboxAdapter inboxAdapter;
+    private MainActivity fragmentActivity;
+    private boolean scrollToTop = false;
+    private boolean navigating;
+    private Observer<List<DirectThread>> threadsObserver;
+    private MenuItem pendingRequestsMenuItem;
+    private BadgeDrawable pendingRequestTotalBadgeDrawable;
+    private boolean isPendingRequestTotalBadgeAttached;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fragmentActivity = requireActivity();
+        fragmentActivity = (MainActivity) getActivity();
+        if (fragmentActivity != null) {
+            final NavController navController = NavHostFragment.findNavController(this);
+            final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
+            viewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
+        }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -96,85 +82,208 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         }
         binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
         root = binding.getRoot();
-        binding.swipeRefreshLayout.setOnRefreshListener(this);
-        inboxList = binding.inboxList;
-        inboxList.setHasFixedSize(true);
-        final Context context = getContext();
-        if (context == null) return root;
-        layoutManager = new LinearLayoutManager(context);
-        inboxList.setLayoutManager(layoutManager);
-        final DirectMessageInboxAdapter inboxAdapter = new DirectMessageInboxAdapter(inboxThreadModel -> {
-            final NavDirections action = DirectMessageInboxFragmentDirections
-                    .actionDMInboxFragmentToDMThreadFragment(inboxThreadModel.getThreadId(), inboxThreadModel.getThreadTitle());
-            NavHostFragment.findNavController(this).navigate(action);
-        });
-        inboxList.setAdapter(inboxAdapter);
-        listViewModel = new ViewModelProvider(this).get(InboxThreadModelListViewModel.class);
-        listViewModel.getList().observe(fragmentActivity, inboxAdapter::submitList);
         return root;
     }
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         if (!shouldRefresh) return;
-        initData();
+        init();
     }
 
     @Override
     public void onRefresh() {
-        endCursor = null;
         lazyLoader.resetState();
-        listViewModel.getList().postValue(Collections.emptyList());
-        stopCurrentExecutor();
-        currentlyRunning = new InboxFetcher(null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        scrollToTop = true;
+        if (viewModel != null) {
+            viewModel.refresh();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (refreshPlease) {
-            onRefresh();
-            refreshPlease = false;
+        setupObservers();
+        final Context context = getContext();
+        if (context == null) return;
+        receiver = new DMRefreshBroadcastReceiver(() -> {
+            Log.d(TAG, "onResume: broadcast received");
+            // refreshInbox = true;
+        });
+        context.registerReceiver(receiver, new IntentFilter(DMRefreshBroadcastReceiver.ACTION_REFRESH_DM));
+    }
+
+    @SuppressLint("UnsafeExperimentalUsageError")
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unregisterReceiver();
+        isPendingRequestTotalBadgeAttached = false;
+        if (pendingRequestTotalBadgeDrawable != null) {
+            BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            pendingRequestTotalBadgeDrawable = null;
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        pendingRequestsMenuItem = menu.add(Menu.NONE, R.id.pending_requests, Menu.NONE, "Pending requests");
+        pendingRequestsMenuItem.setIcon(R.drawable.ic_account_clock_24)
+                               .setVisible(false)
+                               .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        attachPendingRequestsBadge(viewModel.getPendingRequestsTotal().getValue());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        if (item.getItemId() == R.id.pending_requests) {
+            final NavDirections directions = DirectMessageInboxFragmentDirections.actionInboxToPendingInbox();
+            NavHostFragment.findNavController(this).navigate(directions);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void unregisterReceiver() {
+        if (receiver == null) return;
+        final Context context = getContext();
+        if (context == null) return;
+        context.unregisterReceiver(receiver);
+        receiver = null;
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull final Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        init();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (listViewModel != null) {
-            listViewModel.getList().postValue(Collections.emptyList());
-        }
+        removeViewModelObservers();
+        viewModel.onDestroy();
     }
 
-    private void initData() {
-        lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!TextUtils.isEmpty(endCursor))
-                currentlyRunning = new InboxFetcher(endCursor, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            endCursor = null;
+    private void setupObservers() {
+        removeViewModelObservers();
+        threadsObserver = list -> {
+            if (inboxAdapter == null) return;
+            inboxAdapter.submitList(list, () -> {
+                if (!scrollToTop) return;
+                binding.inboxList.smoothScrollToPosition(0);
+                scrollToTop = false;
+            });
+        };
+        viewModel.getThreads().observe(fragmentActivity, threadsObserver);
+        viewModel.getInbox().observe(getViewLifecycleOwner(), inboxResource -> {
+            if (inboxResource == null) return;
+            switch (inboxResource.status) {
+                case SUCCESS:
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case ERROR:
+                    if (inboxResource.message != null) {
+                        Snackbar.make(binding.getRoot(), inboxResource.message, Snackbar.LENGTH_LONG).show();
+                    }
+                    if (inboxResource.resId != 0) {
+                        Snackbar.make(binding.getRoot(), inboxResource.resId, Snackbar.LENGTH_LONG).show();
+                    }
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    break;
+                case LOADING:
+                    binding.swipeRefreshLayout.setRefreshing(true);
+                    break;
+            }
         });
-        inboxList.addOnScrollListener(lazyLoader);
-        stopCurrentExecutor();
-        currentlyRunning = new InboxFetcher(null, fetchListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        viewModel.getUnseenCount().observe(getViewLifecycleOwner(), unseenCountResource -> {
+            if (unseenCountResource == null) return;
+            final Integer unseenCount = unseenCountResource.data;
+            setBottomNavBarBadge(unseenCount == null ? 0 : unseenCount);
+        });
+        viewModel.getPendingRequestsTotal().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
     }
 
-    private void stopCurrentExecutor() {
-        if (currentlyRunning != null) {
-            try {
-                currentlyRunning.cancel(true);
-            } catch (final Exception e) {
-                if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-            }
+    @SuppressLint("UnsafeExperimentalUsageError")
+    private void attachPendingRequestsBadge(@Nullable final Integer count) {
+        if (pendingRequestsMenuItem == null) return;
+        if (pendingRequestTotalBadgeDrawable == null) {
+            final Context context = getContext();
+            if (context == null) return;
+            pendingRequestTotalBadgeDrawable = BadgeDrawable.create(context);
+        }
+        if (count == null || count == 0) {
+            BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            isPendingRequestTotalBadgeAttached = false;
+            pendingRequestTotalBadgeDrawable.setNumber(0);
+            pendingRequestsMenuItem.setVisible(false);
+            return;
+        }
+        pendingRequestsMenuItem.setVisible(true);
+        if (pendingRequestTotalBadgeDrawable.getNumber() == count) return;
+        pendingRequestTotalBadgeDrawable.setNumber(count);
+        if (!isPendingRequestTotalBadgeAttached) {
+            BadgeUtils.attachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            isPendingRequestTotalBadgeAttached = true;
         }
     }
 
-    public static class InboxThreadModelListViewModel extends ViewModel {
-        private MutableLiveData<List<InboxThreadModel>> list;
-
-        public MutableLiveData<List<InboxThreadModel>> getList() {
-            if (list == null) {
-                list = new MutableLiveData<>();
-            }
-            return list;
+    private void removeViewModelObservers() {
+        if (viewModel == null) return;
+        if (threadsObserver != null) {
+            viewModel.getThreads().removeObserver(threadsObserver);
         }
+        // no need to explicitly remove observers whose lifecycle owner is getViewLifecycleOwner
+    }
+
+    private void init() {
+        final Context context = getContext();
+        if (context == null) return;
+        setupObservers();
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
+        binding.inboxList.setHasFixedSize(true);
+        binding.inboxList.setItemViewCacheSize(20);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        binding.inboxList.setLayoutManager(layoutManager);
+        inboxAdapter = new DirectMessageInboxAdapter(thread -> {
+            if (navigating) return;
+            navigating = true;
+            if (isAdded()) {
+                final DirectMessageInboxFragmentDirections.ActionInboxToThread directions = DirectMessageInboxFragmentDirections
+                        .actionInboxToThread(thread.getThreadId(), thread.getThreadTitle());
+                NavHostFragment.findNavController(this).navigate(directions);
+            }
+            navigating = false;
+        });
+        inboxAdapter.setHasStableIds(true);
+        binding.inboxList.setAdapter(inboxAdapter);
+        lazyLoader = new RecyclerLazyLoaderAtEdge(layoutManager, page -> {
+            if (viewModel == null) return;
+            viewModel.fetchInbox();
+        });
+        binding.inboxList.addOnScrollListener(lazyLoader);
+    }
+
+    private void setBottomNavBarBadge(final int unseenCount) {
+        final BottomNavigationView bottomNavView = fragmentActivity.getBottomNavView();
+        final BadgeDrawable badge = bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);
+        if (badge == null) return;
+        if (unseenCount == 0) {
+            badge.setVisible(false);
+            badge.clearNumber();
+            return;
+        }
+        if (badge.getVerticalOffset() != 10) {
+            badge.setVerticalOffset(10);
+        }
+        badge.setNumber(unseenCount);
+        badge.setVisible(true);
     }
 }

@@ -4,8 +4,8 @@ import java.util.List;
 
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.interfaces.FetchListener;
-import awais.instagrabber.models.FeedModel;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ProfileService;
@@ -14,23 +14,25 @@ import awais.instagrabber.webservices.ServiceCallback;
 public class SavedPostFetchService implements PostFetcher.PostFetchService {
     private final ProfileService profileService;
     private final GraphQLService graphQLService;
-    private final String profileId;
+    private final long profileId;
     private final PostItemType type;
     private final boolean isLoggedIn;
 
     private String nextMaxId;
+    private final String collectionId;
     private boolean moreAvailable;
 
-    public SavedPostFetchService(final String profileId, final PostItemType type, final boolean isLoggedIn) {
+    public SavedPostFetchService(final long profileId, final PostItemType type, final boolean isLoggedIn, final String collectionId) {
         this.profileId = profileId;
         this.type = type;
         this.isLoggedIn = isLoggedIn;
+        this.collectionId = collectionId;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 
     @Override
-    public void fetch(final FetchListener<List<FeedModel>> fetchListener) {
+    public void fetch(final FetchListener<List<Media>> fetchListener) {
         final ServiceCallback<PostsFetchResponse> callback = new ServiceCallback<PostsFetchResponse>() {
             @Override
             public void onSuccess(final PostsFetchResponse result) {
@@ -58,10 +60,12 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
                 if (isLoggedIn) profileService.fetchTagged(profileId, nextMaxId, callback);
                 else graphQLService.fetchTaggedPosts(profileId, 30, nextMaxId, callback);
                 break;
+            case COLLECTION:
             case SAVED:
-            default:
-                profileService.fetchSaved(nextMaxId, callback);
+                profileService.fetchSaved(nextMaxId, collectionId, callback);
                 break;
+            default:
+                callback.onFailure(null);
         }
     }
 

@@ -43,6 +43,24 @@
       ]
     },
     {
+      "login": "Zopieux",
+      "name": "Alexandre Macabies",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81353?v=4",
+      "profile": "https://github.com/Zopieux",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "MeLlamoPablo",
+      "name": "Pablo Rodríguez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11708035?v=4",
+      "profile": "https://github.com/MeLlamoPablo",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
       "login": "AwaisKing",
       "name": "AWAiS",
       "avatar_url": "https://avatars3.githubusercontent.com/u/5278488",
@@ -55,7 +73,7 @@
       "login": "snajdovski",
       "name": "Stefan Najdovski",
       "avatar_url": "https://avatars2.githubusercontent.com/u/42580385?v=4",
-      "profile": "https://stefannajdovski.com/",
+      "profile": "https://snajdovski.github.io",
       "contributions": [
         "design",
         "translation"
@@ -92,16 +110,6 @@
       ]
     },
     {
-      "login": "alin-1",
-      "name": "ALIN",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/13281020?v=4",
-      "profile": "https://alin.atwebpages.com/",
-      "contributions": [
-        "bug",
-        "ideas"
-      ]
-    },
-    {
       "login": "RickyM7",
       "name": "Ricardo",
       "avatar_url": "https://avatars3.githubusercontent.com/u/24703825?v=4",
@@ -132,10 +140,28 @@
       ]
     },
     {
+      "login": "avtkal",
+      "name": "avtkal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/63205014?v=4",
+      "profile": "https://github.com/avtkal",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
       "login": "cizordj",
       "name": "Cézar Augusto",
       "avatar_url": "https://avatars2.githubusercontent.com/u/32869222?v=4",
       "profile": "https://github.com/cizordj",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "dimitrist19",
+      "name": "Dimitris T",
+      "avatar_url": "https://avatars.githubusercontent.com/u/56406468?v=4",
+      "profile": "https://github.com/dimitrist19",
       "contributions": [
         "translation"
       ]
@@ -190,6 +216,15 @@
       "name": "Jakub Janek",
       "avatar_url": "https://avatars3.githubusercontent.com/u/8365659?v=4",
       "profile": "https://janek.xyz/",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "GenosseFlosse",
+      "name": "GenosseFlosse",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59205524?v=4",
+      "profile": "https://github.com/GenosseFlosse",
       "contributions": [
         "translation"
       ]
@@ -276,6 +311,15 @@
       ]
     },
     {
+      "login": "sandboiii",
+      "name": "Alexey Peschany",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17468894?v=4",
+      "profile": "https://gitlab.com/sandboiii",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
       "login": "Still34",
       "name": "Still Hsu",
       "avatar_url": "https://avatars2.githubusercontent.com/u/5843208?v=4",
@@ -303,10 +347,28 @@
       ]
     },
     {
+      "login": "wokija",
+      "name": "wokija",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14982166?v=4",
+      "profile": "https://github.com/wokija",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
       "login": "ysakamoto",
       "name": "ysakamoto",
       "avatar_url": "https://avatars3.githubusercontent.com/u/1331642?v=4",
       "profile": "https://github.com/ysakamoto",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "ZDVokoun",
+      "name": "ZDVokoun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/76393152?v=4",
+      "profile": "https://github.com/ZDVokoun",
       "contributions": [
         "translation"
       ]
