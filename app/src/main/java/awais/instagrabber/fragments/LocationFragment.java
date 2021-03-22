@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -90,7 +89,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private StoriesService storiesService;
     private GraphQLService graphQLService;
     private LocationService locationService;
-    private AsyncTask<?, ?, ?> currentlyExecuting;
     private boolean isLoggedIn;
     private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
@@ -577,18 +575,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                             storiesFetching = false;
                         }
                     });
-        }
-    }
-
-    private void stopCurrentExecutor() {
-        if (currentlyExecuting != null) {
-            try {
-                currentlyExecuting.cancel(true);
-            } catch (final Exception e) {
-//                if (logCollector != null) logCollector.appendException(
-//                        e, LogCollector.LogFile.MAIN_HELPER, "stopCurrentExecutor");
-                Log.e(TAG, "", e);
-            }
         }
     }
 
