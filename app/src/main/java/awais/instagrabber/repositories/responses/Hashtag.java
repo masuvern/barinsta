@@ -9,16 +9,13 @@ public final class Hashtag implements Serializable {
     private final long mediaCount;
     private final String id;
     private final String name;
-    private final String profilePicUrl; // on app API this is always null (property exists)
 
     public Hashtag(final String id,
                    final String name,
-                   final String profilePicUrl,
                    final long mediaCount,
                    final FollowingType following) {
         this.id = id;
         this.name = name;
-        this.profilePicUrl = profilePicUrl;
         this.mediaCount = mediaCount;
         this.following = following;
     }
@@ -29,10 +26,6 @@ public final class Hashtag implements Serializable {
 
     public String getName() {
         return name;
-    }
-
-    public String getProfilePicUrl() {
-        return profilePicUrl;
     }
 
     public Long getMediaCount() {

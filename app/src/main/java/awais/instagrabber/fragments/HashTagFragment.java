@@ -474,7 +474,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         hashtag,
                         FavoriteType.HASHTAG,
                         hashtagModel.getName(),
-                        hashtagModel.getProfilePicUrl(),
+                        "res:/" + R.drawable.ic_hashtag,
                         result.getDateAdded()
                 ), new RepositoryCallback<Void>() {
                     @Override
@@ -518,7 +518,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 hashtag,
                                 FavoriteType.HASHTAG,
                                 hashtagModel.getName(),
-                                hashtagModel.getProfilePicUrl(),
+                                "res:/" + R.drawable.ic_hashtag,
                                 new Date()
                         ), new RepositoryCallback<Void>() {
                             @Override
@@ -533,7 +533,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         });
                     }
                 }));
-        hashtagDetailsBinding.mainHashtagImage.setImageURI(hashtagModel.getProfilePicUrl());
+        hashtagDetailsBinding.mainHashtagImage.setImageURI("res:/" + R.drawable.ic_hashtag);
         final String postCount = String.valueOf(hashtagModel.getMediaCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
                                                                                                         hashtagModel.getMediaCount() > 2000000000L
