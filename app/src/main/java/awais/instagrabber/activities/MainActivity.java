@@ -83,6 +83,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
+import awais.instagrabber.webservices.RetrofitFactory;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -138,6 +139,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        RetrofitFactory.setup(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         CookieUtils.setupCookies(cookie);

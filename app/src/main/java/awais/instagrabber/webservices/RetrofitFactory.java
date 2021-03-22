@@ -1,7 +1,5 @@
 package awais.instagrabber.webservices;
 
-import android.app.Application;
-
 import androidx.annotation.NonNull;
 
 import com.google.gson.FieldNamingPolicy;
@@ -11,9 +9,11 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 
 import awais.instagrabber.BuildConfig;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.interceptors.AddCookiesInterceptor;
+import awais.instagrabber.webservices.interceptors.IgErrorsInterceptor;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -25,7 +25,7 @@ public final class RetrofitFactory {
 
     private static RetrofitFactory instance;
 
-    private final Application application;
+    private final MainActivity mainActivity;
     private final int cacheSize = 10 * 1024 * 1024; // 10 MB
     private final Cache cache = new Cache(new File(Utils.cacheDir), cacheSize);
 
@@ -33,11 +33,11 @@ public final class RetrofitFactory {
     private Retrofit retrofit;
     private Retrofit retrofitWeb;
 
-    public static void setup(@NonNull final Application application) {
+    public static void setup(@NonNull final MainActivity mainActivity) {
         if (instance == null) {
             synchronized (LOCK) {
                 if (instance == null) {
-                    instance = new RetrofitFactory(application);
+                    instance = new RetrofitFactory(mainActivity);
                 }
             }
         }
@@ -50,20 +50,21 @@ public final class RetrofitFactory {
         return instance;
     }
 
-    private RetrofitFactory(@NonNull final Application application) {
-        this.application = application;
+    private RetrofitFactory(@NonNull final MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 
     private Retrofit.Builder getRetrofitBuilder() {
         if (builder == null) {
             final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                    .addInterceptor(new AddCookiesInterceptor())
                     .followRedirects(false)
                     .followSslRedirects(false)
                     .cache(cache);
             if (BuildConfig.DEBUG) {
                 // clientBuilder.addInterceptor(new LoggingInterceptor());
             }
+            clientBuilder.addInterceptor(new AddCookiesInterceptor())
+                         .addInterceptor(new IgErrorsInterceptor(mainActivity));
             final Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .registerTypeAdapter(Caption.class, new Caption.CaptionDeserializer())

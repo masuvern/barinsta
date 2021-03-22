@@ -17,7 +17,6 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.RetrofitFactory;
 import awaisomereport.CrashReporter;
 
 import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
@@ -87,7 +86,5 @@ public final class InstaGrabberApplication extends Application {
         if (TextUtils.isEmpty(settingsHelper.getString(Constants.DEVICE_UUID))) {
             settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
         }
-
-        RetrofitFactory.setup(this);
     }
 }
