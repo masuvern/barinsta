@@ -21,6 +21,7 @@
     <string name="title_comments">Комментарии</string>
     <string name="title_notifications">Активность</string>
     <string name="update_check">Проверять наличие обновлений при запуске</string>
+    <string name="flag_secure">Block screenshots &amp; app preview</string>
     <string name="download_user_folder">Скачать публикации в папки с именем пользователя</string>
     <string name="mark_as_seen_setting">Отметить истории как увиденные после просмотра</string>
     <string name="mark_as_seen_setting_summary">Автор истории узнает, что вы просмотрели её</string>
@@ -467,4 +468,11 @@
     <string name="generic_null_response">Ответ пуст!</string>
     <string name="generic_not_ok_response">Ответный статус не в порядке!</string>
     <string name="generic_failed_request">Запрос не удался!</string>
+    <string name="hint_keyword">Keyword</string>
+    <string name="toggle_keyword_filter">Enable keyword filter</string>
+    <string name="edit_keyword_filter">Edit keyword filters</string>
+    <string name="added_keywords">Added keyword: %s to filter list</string>
+    <string name="removed_keywords">Removed keyword: %s from filter list</string>
+    <string name="marked_as_seen">Marked as seen</string>
+    <string name="delete_unsuccessful">Delete unsuccessful</string>
 </resources>

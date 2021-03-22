@@ -21,6 +21,7 @@
     <string name="title_comments">Comentários</string>
     <string name="title_notifications">Atividade</string>
     <string name="update_check">Verificar se há atualizações ao iniciar</string>
+    <string name="flag_secure">Block screenshots &amp; app preview</string>
     <string name="download_user_folder">Baixar publicações para pastas com o nome de usuário</string>
     <string name="mark_as_seen_setting">Marcar stories como vistos após a visualização</string>
     <string name="mark_as_seen_setting_summary">O autor do story saberá que você viu</string>
@@ -109,7 +110,7 @@
     <string name="unbookmark">Remover</string>
     <string name="follow">Seguir</string>
     <string name="unfollow">Deixar de seguir</string>
-    <string name="favorite_short" comment="Adjective, not verb">Favoritar</string>
+    <string name="favorite_short" comment="Adjective, not verb">Favorito</string>
     <string name="block">Bloquear</string>
     <string name="unblock">Desbloquear</string>
     <string name="restrict">Restringir</string>
@@ -178,7 +179,7 @@
     <string name="dms_inbox_raven_media_suggested">Sugerido</string>
     <string name="dms_inbox_raven_media_screenshot">Capturado</string>
     <string name="dms_inbox_raven_media_cant_deliver">Não pode ser entregue</string>
-    <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
+    <string name="dms_inbox_error_null_count">Resposta do contador de não lidas é nula!</string>
     <string name="dms_thread_message_hint">Mensagem...</string>
     <string name="dms_thread_audio_hint">Aperte e segure para gravar um áudio</string>
     <string name="dms_thread_updating">Atualizando...</string>
@@ -186,9 +187,9 @@
     <string name="dms_action_leave_question">Sair deste chat?</string>
     <string name="dms_action_kick">Expulsar</string>
     <string name="dms_left_users">Usuários que saíram</string>
-    <string name="dms_ERROR_INVALID_USER">Invalid user</string>
-    <string name="dms_ERROR_VIDEO_TOO_LONG">Instagram does not allow uploading videos longer than 60 secs for DM.</string>
-    <string name="dms_ERROR_AUDIO_TOO_LONG">Instagram does not allow uploading audio longer than 60 secs.</string>
+    <string name="dms_ERROR_INVALID_USER">Usuário inválido</string>
+    <string name="dms_ERROR_VIDEO_TOO_LONG">O Instagram não permite o upload de vídeos com mais de 60 segundos para DM.</string>
+    <string name="dms_ERROR_AUDIO_TOO_LONG">O Instagram não permite o upload de áudios com mais de 60 segundos.</string>
     <string name="direct_download">Baixar diretamente</string>
     <string name="direct_download_desc">Baixar as publicações diretamente no telefone!</string>
     <string name="direct_download_loading">Buscando publicação(ões)</string>
@@ -391,7 +392,7 @@
     <string name="message">Mensagem</string>
     <string name="reply">Responder</string>
     <string name="tap_to_remove">Toque para remover</string>
-    <string name="forward">Avançar</string>
+    <string name="forward">Encaminhar</string>
     <string name="forward_outgoing">Você encaminhou uma mensagem</string>
     <string name="forward_incoming">Encaminhou uma mensagem</string>
     <string name="add">Adicionar</string>
@@ -448,7 +449,14 @@
     <string name="secs">segs</string>
     <string name="mins">mins</string>
     <string name="search_giphy">Buscar GIPHY</string>
-    <string name="generic_null_response">Response is null!</string>
-    <string name="generic_not_ok_response">Response status is not ok!</string>
-    <string name="generic_failed_request">Request failed!</string>
+    <string name="generic_null_response">A resposta é nula!</string>
+    <string name="generic_not_ok_response">O estado da resposta não está correto!</string>
+    <string name="generic_failed_request">A solicitação falhou!</string>
+    <string name="hint_keyword">Keyword</string>
+    <string name="toggle_keyword_filter">Enable keyword filter</string>
+    <string name="edit_keyword_filter">Edit keyword filters</string>
+    <string name="added_keywords">Added keyword: %s to filter list</string>
+    <string name="removed_keywords">Removed keyword: %s from filter list</string>
+    <string name="marked_as_seen">Marked as seen</string>
+    <string name="delete_unsuccessful">Delete unsuccessful</string>
 </resources>
