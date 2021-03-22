@@ -675,7 +675,8 @@ public final class ResponseBodyUtils {
     //     return feedModelBuilder.build();
     // }
 
-    public static Media parseGraphQLItem(final JSONObject itemJson) throws JSONException {
+    // the "user" argument can be null, it's used because instagram redacts user details from responses
+    public static Media parseGraphQLItem(final JSONObject itemJson, final User backup) throws JSONException {
         if (itemJson == null) {
             return null;
         }
@@ -728,41 +729,28 @@ public final class ResponseBodyUtils {
             width = dimensions.optInt("width");
         }
         String thumbnailUrl = null;
-        try {
-            thumbnailUrl = feedItem.getJSONArray("display_resources")
-                                   .getJSONObject(0)
-                                   .getString("src");
-        } catch (JSONException ignored) {}
-        // final FeedModel.Builder feedModelBuilder = new FeedModel.Builder()
-        //         .setProfileModel(profileModel)
-        //         .setItemType(isVideo ? MediaItemType.MEDIA_TYPE_VIDEO
-        //                              : MediaItemType.MEDIA_TYPE_IMAGE)
-        //         .setViewCount(videoViews)
-        //         .setPostId(feedItem.getString(Constants.EXTRAS_ID))
-        //         .setDisplayUrl(resourceUrl)
-        //         .setThumbnailUrl(thumbnailUrl != null ? thumbnailUrl : displayUrl)
-        //         .setShortCode(feedItem.getString(Constants.EXTRAS_SHORTCODE))
-        //         .setPostCaption(captionText)
-        //         .setCommentsCount(commentsCount)
-        //         .setTimestamp(feedItem.optLong("taken_at_timestamp", -1))
-        //         .setLiked(feedItem.optBoolean("viewer_has_liked"))
-        //         .setBookmarked(feedItem.optBoolean("viewer_has_saved"))
-        //         .setLikesCount(likesCount)
-        //         .setLocationName(locationName)
-        //         .setLocationId(String.valueOf(locationId))
-        //         .setImageHeight(height)
-        //         .setImageWidth(width);
+        final JSONArray displayResources = feedItem.getJSONArray("display_resources");
+        final List<MediaCandidate> candidates = new ArrayList<MediaCandidate>();
+        for (int i = 0; i < displayResources.length(); i++) {
+            final JSONObject displayResource = displayResources.getJSONObject(i);
+            candidates.add(new MediaCandidate(
+                    displayResource.getInt("config_width"),
+                    displayResource.getInt("config_height"),
+                    displayResource.getString("src")
+            ));
+        }
+        final ImageVersions2 imageVersions2 = new ImageVersions2(candidates);
 
-        User user = null;
+        User user = backup;
         long userId = -1;
-        if (feedItem.has("owner")) {
+        if (feedItem.has("owner") && user == null) {
             final JSONObject owner = feedItem.getJSONObject("owner");
             final FriendshipStatus friendshipStatus = new FriendshipStatus(
                     false,
                     false,
                     false,
                     false,
-                    owner.optBoolean("is_private"),
+                    false,
                     false,
                     false,
                     false,
@@ -774,7 +762,7 @@ public final class ResponseBodyUtils {
                     userId,
                     owner.optString(Constants.EXTRAS_USERNAME),
                     owner.optString("full_name"),
-                    owner.optBoolean("is_private"),
+                    false,
                     owner.optString("profile_pic_url"),
                     null,
                     friendshipStatus,
@@ -783,13 +771,6 @@ public final class ResponseBodyUtils {
                     null, null, null, null);
         }
         final String id = feedItem.getString(Constants.EXTRAS_ID);
-        final ImageVersions2 imageVersions2 = new ImageVersions2(
-                Collections.singletonList(new MediaCandidate(
-                        width,
-                        height,
-                        isVideo ? thumbnailUrl : resourceUrl
-                ))
-        );
         VideoVersion videoVersion = null;
         if (isVideo) {
             videoVersion = new VideoVersion(
@@ -821,7 +802,7 @@ public final class ResponseBodyUtils {
                     for (int i = 0; i < children.length(); i++) {
                         final JSONObject child = children.optJSONObject(i);
                         if (child == null) continue;
-                        final Media media = parseGraphQLItem(child);
+                        final Media media = parseGraphQLItem(child, null);
                         media.setIsSidecarChild(true);
                         childItems.add(media);
                     }
