@@ -25,10 +25,11 @@ public final class RetrofitFactory {
 
     private static RetrofitFactory instance;
 
-    private final MainActivity mainActivity;
     private final int cacheSize = 10 * 1024 * 1024; // 10 MB
     private final Cache cache = new Cache(new File(Utils.cacheDir), cacheSize);
 
+    private IgErrorsInterceptor igErrorsInterceptor;
+    private MainActivity mainActivity;
     private Retrofit.Builder builder;
     private Retrofit retrofit;
     private Retrofit retrofitWeb;
@@ -56,6 +57,7 @@ public final class RetrofitFactory {
 
     private Retrofit.Builder getRetrofitBuilder() {
         if (builder == null) {
+            igErrorsInterceptor = new IgErrorsInterceptor(mainActivity);
             final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                     .followRedirects(false)
                     .followSslRedirects(false)
@@ -64,7 +66,7 @@ public final class RetrofitFactory {
                 // clientBuilder.addInterceptor(new LoggingInterceptor());
             }
             clientBuilder.addInterceptor(new AddCookiesInterceptor())
-                         .addInterceptor(new IgErrorsInterceptor(mainActivity));
+                         .addInterceptor(igErrorsInterceptor);
             final Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .registerTypeAdapter(Caption.class, new Caption.CaptionDeserializer())
@@ -94,5 +96,17 @@ public final class RetrofitFactory {
                     .build();
         }
         return retrofitWeb;
+    }
+
+    public void destroy() {
+        if (igErrorsInterceptor != null) {
+            igErrorsInterceptor.destroy();
+        }
+        igErrorsInterceptor = null;
+        mainActivity = null;
+        retrofit = null;
+        retrofitWeb = null;
+        builder = null;
+        instance = null;
     }
 }

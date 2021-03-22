@@ -22,7 +22,7 @@ import okhttp3.ResponseBody;
 public class IgErrorsInterceptor implements Interceptor {
     private static final String TAG = IgErrorsInterceptor.class.getSimpleName();
 
-    private final MainActivity mainActivity;
+    private MainActivity mainActivity;
 
     public IgErrorsInterceptor(@NonNull final MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -94,6 +94,7 @@ public class IgErrorsInterceptor implements Interceptor {
     }
 
     private void showErrorDialog(@StringRes final int messageResId) {
+        if (mainActivity == null) return;
         if (messageResId == 0) return;
         final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
                 Constants.GLOBAL_NETWORK_ERROR_DIALOG_REQUEST_CODE,
@@ -104,5 +105,9 @@ public class IgErrorsInterceptor implements Interceptor {
                 0
         );
         dialogFragment.show(mainActivity.getSupportFragmentManager(), "network_error_dialog");
+    }
+
+    public void destroy() {
+        mainActivity = null;
     }
 }

@@ -248,6 +248,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             Log.e(TAG, "onDestroy: ", e);
         }
         unbindActivityCheckerService();
+         RetrofitFactory.getInstance().destroy();
     }
 
     @Override
