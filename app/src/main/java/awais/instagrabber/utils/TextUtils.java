@@ -69,7 +69,7 @@ public final class TextUtils {
             str = str.trim();
             return "".equals(str) || "null".equals(str) || str.isEmpty();
         }
-        return "null".contentEquals(charSequence) || "".contentEquals(charSequence) || charSequence.length() < 1;
+        return "null".contentEquals(charSequence) || "".contentEquals(charSequence);
     }
 
     public static String millisToTimeString(final long millis) {
