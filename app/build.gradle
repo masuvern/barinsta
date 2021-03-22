@@ -132,6 +132,6 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 
     githubImplementation 'io.sentry:sentry-android:4.3.0'
-
+    
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 }

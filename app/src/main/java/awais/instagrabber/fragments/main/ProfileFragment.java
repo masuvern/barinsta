@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -57,7 +56,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
 import awais.instagrabber.asyncs.CreateThreadAction;
-import awais.instagrabber.asyncs.ProfileFetcher;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
@@ -73,7 +71,6 @@ import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
-import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
@@ -93,11 +90,14 @@ import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
+import awais.instagrabber.webservices.UserService;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
@@ -120,6 +120,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private FriendshipService friendshipService;
     private StoriesService storiesService;
     private MediaService mediaService;
+    private UserService userService;
+    private GraphQLService graphQLService;
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
     private HighlightsAdapter highlightsAdapter;
@@ -304,6 +306,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private LayoutProfileDetailsBinding profileDetailsBinding;
     private AccountRepository accountRepository;
     private FavoriteRepository favoriteRepository;
+    private AppStateViewModel appStateViewModel;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -317,8 +320,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, myId) : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
+        userService = isLoggedIn ? UserService.getInstance() : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
+        appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -601,31 +607,66 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (usernameTemp.startsWith("@")) {
             usernameTemp = usernameTemp.substring(1);
         }
-        new ProfileFetcher(TextUtils.isEmpty(username) ? null : usernameTemp, myId, isLoggedIn, new FetchListener<User>() {
-            @Override
-            public void onResult(final User user) {
-                if (getContext() == null) return;
-                if (TextUtils.isEmpty(username)) {
-                    username = user.getUsername();
-                    setUsernameDelayed();
+        if (TextUtils.isEmpty(usernameTemp)) {
+            profileModel = appStateViewModel.getCurrentUser();
+            username = profileModel.getUsername();
+            setUsernameDelayed();
+            setProfileDetails();
+        }
+        else if (isLoggedIn) {
+            userService.getUsernameInfo(usernameTemp, new ServiceCallback<User>() {
+                @Override
+                public void onSuccess(final User user) {
+                    userService.getUserFriendship(user.getPk(), new ServiceCallback<FriendshipStatus>() {
+                        @Override
+                        public void onSuccess(final FriendshipStatus status) {
+                            user.setFriendshipStatus(status);
+                            profileModel = user;
+                            setProfileDetails();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            Log.e(TAG, "Error fetching profile relationship", t);
+                            final Context context = getContext();
+                            try {
+                                if (t == null) Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
+                                else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            } catch (final Throwable ignored) {}
+                        }
+                    });
                 }
-                profileModel = user;
-                setProfileDetails();
-            }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error fetching profile", t);
-                final Context context = getContext();
-                try {
-                    if (t == null) Toast.makeText(context,
-                                                  isLoggedIn ? R.string.error_loading_profile_loggedin : R.string.error_loading_profile,
-                                                  Toast.LENGTH_LONG).show();
-                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (final Throwable ignored) {}
-            }
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error fetching profile", t);
+                    final Context context = getContext();
+                    try {
+                        if (t == null) Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
+                        else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    } catch (final Throwable ignored) {}
+                }
+            });
+        }
+        else {
+            graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
+                @Override
+                public void onSuccess(final User user) {
+                    profileModel = user;
+                    setProfileDetails();
+                }
 
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                @Override
+                public void onFailure(final Throwable t) {
+                    Log.e(TAG, "Error fetching profile", t);
+                    final Context context = getContext();
+                    try {
+                        if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
+                        else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    } catch (final Throwable ignored) {}
+                }
+            });
+        }
     }
 
     private void setProfileDetails() {

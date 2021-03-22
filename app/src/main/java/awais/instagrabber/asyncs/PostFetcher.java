@@ -133,7 +133,7 @@ public final class PostFetcher extends AsyncTask<Void, Void, Media> {
                 //     feedModelBuilder.setSliderItems(postModels);
                 // }
                 // return feedModelBuilder.build();
-                return ResponseBodyUtils.parseGraphQLItem(media);
+                return ResponseBodyUtils.parseGraphQLItem(media, null);
             }
         } catch (Exception e) {
 //            if (logCollector != null) {

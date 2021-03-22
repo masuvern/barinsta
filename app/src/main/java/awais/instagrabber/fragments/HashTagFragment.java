@@ -378,6 +378,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (getArguments() == null) return;
         final HashTagFragmentArgs fragmentArgs = HashTagFragmentArgs.fromBundle(getArguments());
         hashtag = fragmentArgs.getHashtag();
+        if (hashtag.charAt(0) == '#') hashtag = hashtag.substring(1);
         fetchHashtagModel();
     }
 

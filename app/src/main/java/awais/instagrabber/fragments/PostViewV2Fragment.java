@@ -925,7 +925,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     }
 
     private void setupLocation(final Location location) {
-        if (location == null) {
+        if (location == null || !detailsVisible) {
             binding.location.setVisibility(View.GONE);
             return;
         }
