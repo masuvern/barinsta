@@ -68,7 +68,6 @@ import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDir
 import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.repositories.responses.search.SearchItem;
 import awais.instagrabber.repositories.responses.search.SearchResponse;
@@ -316,7 +315,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final Bundle bundle = new Bundle();
             switch (type) {
                 case TYPE_LOCATION:
-                    bundle.putString("locationId", query);
+                    bundle.putLong("locationId", Long.valueOf(query));
                     navController.navigate(R.id.action_global_locationFragment, bundle);
                     break;
                 case TYPE_HASHTAG:
@@ -744,7 +743,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final NavController navController = currentNavControllerLiveData.getValue();
         if (navController == null) return;
         final Bundle bundle = new Bundle();
-        bundle.putString("locationId", locationId);
+        bundle.putLong("locationId", Long.valueOf(locationId));
         navController.navigate(R.id.action_global_locationFragment, bundle);
     }
 

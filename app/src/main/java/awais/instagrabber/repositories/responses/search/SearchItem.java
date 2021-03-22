@@ -1,8 +1,7 @@
 package awais.instagrabber.repositories.responses.search;
 
-import java.util.List;
-
 import awais.instagrabber.repositories.responses.Hashtag;
+import awais.instagrabber.repositories.responses.Place;
 import awais.instagrabber.repositories.responses.User;
 
 public class SearchItem {

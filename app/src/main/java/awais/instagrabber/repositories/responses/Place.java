@@ -1,21 +1,24 @@
-package awais.instagrabber.repositories.responses.search;
-
-import awais.instagrabber.repositories.responses.Location;
+package awais.instagrabber.repositories.responses;
 
 public class Place {
     private final Location location;
+    // for search
     private final String title; // those are repeated within location
     private final String subtitle; // address
     private final String slug; // browser only; for end of address
+    // for location info
+    private final String status;
 
     public Place(final Location location,
                  final String title,
                  final String subtitle,
-                 final String slug) {
+                 final String slug,
+                 final String status) {
         this.location = location;
         this.title = title;
         this.subtitle = subtitle;
         this.slug = slug;
+        this.status = status;
     }
 
     public Location getLocation() {
@@ -32,5 +35,9 @@ public class Place {
 
     public String getSlug() {
         return slug;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }
