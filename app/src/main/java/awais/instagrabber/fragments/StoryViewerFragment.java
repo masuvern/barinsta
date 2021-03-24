@@ -65,6 +65,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -304,11 +306,18 @@ public class StoryViewerFragment extends Fragment {
         // isNotification = fragmentArgs.getIsNotification();
         final Type type = options.getType();
         if (currentFeedStoryIndex >= 0) {
-            viewModel = type == Type.HIGHLIGHT
-                        ? type == Type.STORY_ARCHIVE
-                          ? new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class)
-                          : new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class)
-                        : new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+            switch (type) {
+                case HIGHLIGHT:
+                    viewModel = new ViewModelProvider(fragmentActivity).get(HighlightsViewModel.class);
+                    break;
+                case STORY_ARCHIVE:
+                    viewModel = new ViewModelProvider(fragmentActivity).get(ArchivesViewModel.class);
+                    break;
+                default:
+                case FEED_STORY_POSITION:
+                    viewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
+                    break;
+            }
         }
         setupStories();
     }
@@ -728,9 +737,9 @@ public class StoryViewerFragment extends Fragment {
                     return;
                 }
                 final HighlightModel model = models.get(currentFeedStoryIndex);
-                currentStoryMediaId = model.getId();
+                currentStoryMediaId = parseStoryMediaId(model.getId());
                 currentStoryUsername = model.getTitle();
-                fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
+                fetchOptions = StoryViewerOptions.forStoryArchive(model.getId());
                 break;
             }
         }
@@ -1138,5 +1147,21 @@ public class StoryViewerFragment extends Fragment {
             currentFeedStoryIndex = backward ? (currentFeedStoryIndex - 1) : (currentFeedStoryIndex + 1);
             resetView();
         }
+    }
+
+    /**
+     * Parses the Story's media ID. For user stories this is a number, but for archive stories
+     * this is "archiveDay:" plus a number.
+     */
+    private static String parseStoryMediaId(String rawId) {
+        final String regex = "(?:archiveDay:)?(.+)";
+        final Pattern pattern = Pattern.compile(regex);
+        final Matcher matcher = pattern.matcher(rawId);
+
+        if (matcher.matches() && matcher.groupCount() >= 1) {
+            return matcher.group(1);
+        }
+
+        return rawId;
     }
 }
