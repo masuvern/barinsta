@@ -27,6 +27,7 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
 import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.entities.Account;
@@ -157,13 +158,24 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 return true;
             }));
         }
-        screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
-            if (isSafeToNavigate(navController)) {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
-                navController.navigate(navDirections);
-            }
-            return true;
-        }));
+
+        // Check if favorites has been added as a tab. And if so, do not add in this list
+        boolean showFavorites = true;
+        final MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && activity.getCurrentTabs() != null) {
+            showFavorites = activity.getCurrentTabs()
+                                    .stream()
+                                    .noneMatch(tab -> tab.getNavigationRootId() == R.id.favorites_nav_graph);
+        }
+        if (showFavorites) {
+            screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
+                    navController.navigate(navDirections);
+                }
+                return true;
+            }));
+        }
 
         screen.addPreference(getDivider(context));
         screen.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {

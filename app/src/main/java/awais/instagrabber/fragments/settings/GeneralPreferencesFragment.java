@@ -2,7 +2,6 @@ package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.preference.ListPreference;
@@ -13,6 +12,7 @@ import androidx.preference.SwitchPreferenceCompat;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.dialogs.ConfirmDialogFragment;
 import awais.instagrabber.dialogs.TabOrderPreferenceDialogFragment;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -34,9 +34,10 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
         }
         screen.addPreference(getUpdateCheckPreference(context));
         screen.addPreference(getFlagSecurePreference(context));
-        final List<Preference> preferences = FlavorSettings.getInstance().getPreferences(context,
-                                                                                         getChildFragmentManager(),
-                                                                                         SettingCategory.GENERAL);
+        final List<Preference> preferences = FlavorSettings.getInstance()
+                                                           .getPreferences(context,
+                                                                           getChildFragmentManager(),
+                                                                           SettingCategory.GENERAL);
         if (preferences != null) {
             for (final Preference preference : preferences) {
                 screen.addPreference(preference);
@@ -101,7 +102,15 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
 
     @Override
     public void onSave(final boolean orderHasChanged) {
-        Log.d("", "onSave: " + orderHasChanged);
+        if (!orderHasChanged) return;
+        final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
+                111,
+                0,
+                R.string.tab_order_start_next_launch,
+                R.string.ok,
+                0,
+                0);
+        dialogFragment.show(getChildFragmentManager(), "tab_order_set_dialog");
     }
 
     @Override

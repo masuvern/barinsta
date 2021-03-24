@@ -116,6 +116,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private boolean isBackStackEmpty = false;
     private boolean isLoggedIn;
     private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
+    private List<Tab> currentTabs;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -357,12 +358,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                     }
                     final List<SearchItem> result = new ArrayList<>();
                     if (isLoggedIn) {
-                        if (body.getList() != null) result.addAll(searchHash ? body.getList()
-                                .stream()
-                                .filter(i -> i.getUser() == null)
-                                .collect(Collectors.toList()) : body.getList());
-                    }
-                    else {
+                        if (body.getList() != null) {
+                            result.addAll(searchHash ? body.getList()
+                                                           .stream()
+                                                           .filter(i -> i.getUser() == null)
+                                                           .collect(Collectors.toList())
+                                                     : body.getList());
+                        }
+                    } else {
                         if (body.getUsers() != null && !searchHash) result.addAll(body.getUsers());
                         if (body.getHashtags() != null) result.addAll(body.getHashtags());
                         if (body.getPlaces() != null) result.addAll(body.getPlaces());
@@ -431,7 +434,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                     }
                     prevSuggestionAsync = searchService.search(isLoggedIn,
                                                                searchUser || searchHash ? currentSearchQuery.substring(1)
-                                                                    : currentSearchQuery,
+                                                                                        : currentSearchQuery,
                                                                searchUser ? "user" : (searchHash ? "hashtag" : "blended"));
                     suggestionAdapter.changeCursor(null);
                     prevSuggestionAsync.enqueue(cb);
@@ -462,13 +465,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     }
 
     private void setupBottomNavigationBar(final boolean setDefaultTabFromSettings) {
-        final List<Tab> tabs = !isLoggedIn ? setupAnonBottomNav() : setupMainBottomNav();
+        currentTabs = !isLoggedIn ? setupAnonBottomNav() : setupMainBottomNav();
 
-        final List<Integer> mainNavList = tabs.stream()
-                                              .map(Tab::getNavigationResId)
-                                              .collect(Collectors.toList());
+        final List<Integer> mainNavList = currentTabs.stream()
+                                                     .map(Tab::getNavigationResId)
+                                                     .collect(Collectors.toList());
         if (setDefaultTabFromSettings) {
-            setSelectedTab(tabs);
+            setSelectedTab(currentTabs);
         }
         final LiveData<NavController> navControllerLiveData = setupWithNavController(
                 binding.bottomNavView,
@@ -874,5 +877,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public Toolbar getToolbar() {
         return binding.toolbar;
+    }
+
+    public List<Tab> getCurrentTabs() {
+        return currentTabs;
     }
 }

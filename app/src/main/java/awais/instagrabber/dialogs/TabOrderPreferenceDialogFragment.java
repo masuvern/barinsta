@@ -92,7 +92,15 @@ public class TabOrderPreferenceDialogFragment extends DialogFragment {
             setSaveButtonState(newOrderTabs);
             // submit these tab lists to adapter
             if (adapter == null) return;
-            adapter.submitList(newOrderTabs, newOtherTabs, () -> list.postDelayed(() -> adapter.notifyDataSetChanged(), 500));
+            adapter.submitList(newOrderTabs, newOtherTabs, () -> list.postDelayed(() -> {
+                adapter.notifyDataSetChanged();
+                if (tab.getNavigationRootId() == R.id.direct_messages_nav_graph) {
+                    final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
+                            111, 0, R.string.dm_remove_warning, R.string.ok, 0, 0
+                    );
+                    dialogFragment.show(getChildFragmentManager(), "dm_warning_dialog");
+                }
+            }, 500));
         }
 
         private void setSaveButtonState(final List<Tab> newOrderTabs) {
