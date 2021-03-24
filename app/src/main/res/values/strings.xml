@@ -473,4 +473,6 @@
     <string name="removed_keywords">Removed keyword: %s from filter list</string>
     <string name="marked_as_seen">Marked as seen</string>
     <string name="delete_unsuccessful">Delete unsuccessful</string>
+    <string name="tab_order">Screen order</string>
+    <string name="other_tabs">Other tabs</string>
 </resources>

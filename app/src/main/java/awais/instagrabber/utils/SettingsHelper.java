@@ -15,6 +15,7 @@ import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_D
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_NOTIFICATIONS;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_TAB_ORDER;
 import static awais.instagrabber.utils.Constants.APP_LANGUAGE;
 import static awais.instagrabber.utils.Constants.APP_THEME;
 import static awais.instagrabber.utils.Constants.APP_UA;
@@ -36,12 +37,12 @@ import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
 import static awais.instagrabber.utils.Constants.FLAG_SECURE;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
+import static awais.instagrabber.utils.Constants.KEYWORD_FILTERS;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
 import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
 import static awais.instagrabber.utils.Constants.PREF_EMOJI_VARIANTS;
 import static awais.instagrabber.utils.Constants.PREF_HASHTAG_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.KEYWORD_FILTERS;
 import static awais.instagrabber.utils.Constants.PREF_LIGHT_THEME;
 import static awais.instagrabber.utils.Constants.PREF_LIKED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_LOCATION_POSTS_LAYOUT;
@@ -150,7 +151,7 @@ public final class SettingsHelper {
                     CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME,
                     PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT,
                     PREF_LOCATION_POSTS_LAYOUT, PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT,
-                    STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT})
+                    STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT, PREF_TAB_ORDER})
     public @interface StringSettings {}
 
     @StringDef({DOWNLOAD_USER_FOLDER, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
