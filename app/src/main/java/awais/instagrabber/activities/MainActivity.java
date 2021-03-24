@@ -53,6 +53,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,14 +93,6 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class MainActivity extends BaseLanguageActivity implements FragmentManager.OnBackStackChangedListener {
     private static final String TAG = "MainActivity";
-
-    private static final List<Integer> SHOW_BOTTOM_VIEW_DESTINATIONS = ImmutableList.of(
-            R.id.directMessagesInboxFragment,
-            R.id.feedFragment,
-            R.id.profileFragment,
-            R.id.discoverFragment,
-            R.id.morePreferencesFragment,
-            R.id.favoritesFragment);
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
 
     private ActivityMainBinding binding;
@@ -117,6 +110,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private boolean isLoggedIn;
     private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
     private List<Tab> currentTabs;
+    private List<Integer> showBottomViewDestinations = Collections.emptyList();
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -470,6 +464,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final List<Integer> mainNavList = currentTabs.stream()
                                                      .map(Tab::getNavigationResId)
                                                      .collect(Collectors.toList());
+        showBottomViewDestinations = currentTabs.stream()
+                                                .map(Tab::getStartDestinationFragmentId)
+                                                .collect(Collectors.toList());
         if (setDefaultTabFromSettings) {
             setSelectedTab(currentTabs);
         }
@@ -522,16 +519,17 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                                        false,
                                        "profile_nav_graph",
                                        R.navigation.profile_nav_graph,
-                                       R.id.profile_nav_graph);
+                                       R.id.profile_nav_graph,
+                                       R.id.profileFragment);
         final Tab moreTab = new Tab(R.drawable.ic_more_horiz_24,
                                     getString(R.string.more),
                                     false,
                                     "more_nav_graph",
                                     R.navigation.more_nav_graph,
-                                    R.id.more_nav_graph);
+                                    R.id.more_nav_graph,
+                                    R.id.morePreferencesFragment);
         final Menu menu = binding.bottomNavView.getMenu();
         menu.clear();
-        // binding.bottomNavView.inflateMenu(R.menu.logged_out_bottom_navigation_menu);
         menu.add(0, profileTab.getNavigationRootId(), 0, profileTab.getTitle()).setIcon(profileTab.getIconResId());
         menu.add(0, moreTab.getNavigationRootId(), 0, moreTab.getTitle()).setIcon(moreTab.getIconResId());
         if (selectedItemId != R.id.profile_nav_graph && selectedItemId != R.id.more_nav_graph) {
@@ -589,7 +587,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final int destinationId = destination.getId();
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
-            final boolean contains = SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId);
+            final boolean contains = showBottomViewDestinations.contains(destinationId);
             binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
             if (contains && behavior != null) {
                 behavior.slideUp(binding.bottomNavView);
@@ -771,7 +769,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final NavController navController = currentNavControllerLiveData.getValue();
         if (navController == null) return;
         final Bundle bundle = new Bundle();
-        bundle.putLong("locationId", Long.valueOf(locationId));
+        bundle.putLong("locationId", Long.parseLong(locationId));
         navController.navigate(R.id.action_global_locationFragment, bundle);
     }
 
@@ -881,5 +879,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public List<Tab> getCurrentTabs() {
         return currentTabs;
+    }
+
+    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
+        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
     }
 }

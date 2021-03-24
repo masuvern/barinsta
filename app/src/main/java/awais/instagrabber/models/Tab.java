@@ -30,18 +30,25 @@ public class Tab {
      */
     private final int navigationRootId;
 
+    /**
+     * This is the start destination of the nav graph
+     */
+    private final int startDestinationFragmentId;
+
     public Tab(@DrawableRes final int iconResId,
                @NonNull final String title,
                final boolean removable,
                @NonNull final String graphName,
                @NavigationRes final int navigationResId,
-               @IdRes final int navigationRootId) {
+               @IdRes final int navigationRootId,
+               @IdRes final int startDestinationFragmentId) {
         this.iconResId = iconResId;
         this.title = title;
         this.removable = removable;
         this.graphName = graphName;
         this.navigationResId = navigationResId;
         this.navigationRootId = navigationRootId;
+        this.startDestinationFragmentId = startDestinationFragmentId;
     }
 
     public int getIconResId() {
@@ -68,6 +75,10 @@ public class Tab {
         return navigationRootId;
     }
 
+    public int getStartDestinationFragmentId() {
+        return startDestinationFragmentId;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -77,13 +88,14 @@ public class Tab {
                 removable == tab.removable &&
                 navigationResId == tab.navigationResId &&
                 navigationRootId == tab.navigationRootId &&
+                startDestinationFragmentId == tab.startDestinationFragmentId &&
                 Objects.equals(title, tab.title) &&
                 Objects.equals(graphName, tab.graphName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(iconResId, title, removable, graphName, navigationResId, navigationRootId);
+        return Objects.hash(iconResId, title, removable, graphName, navigationResId, navigationRootId, startDestinationFragmentId);
     }
 
     @NonNull

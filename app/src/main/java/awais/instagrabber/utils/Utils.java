@@ -425,6 +425,16 @@ public final class Utils {
         }
         typedArray.recycle();
 
+        typedArray = resources.obtainTypedArray(R.array.main_nav_start_dest_frag_ids);
+        length = typedArray.length();
+        final int[] startDestFragIds = new int[length];
+        for (int i = 0; i < length; i++) {
+            final int resourceId = typedArray.getResourceId(i, 0);
+            if (resourceId == 0) continue;
+            startDestFragIds[i] = resourceId;
+        }
+        typedArray.recycle();
+
         final List<String> currentOrderGraphNames = getCurrentOrderOfGraphNamesFromPref(navGraphNames);
 
         if (titleArray.length != iconIds.length || titleArray.length != navGraphNames.length) {
@@ -441,7 +451,8 @@ public final class Utils {
                                     !NON_REMOVABLE_NAV_ROOT_IDS.contains(navRootId),
                                     navGraphName,
                                     navigationResIds[i],
-                                    navRootId);
+                                    navRootId,
+                                    startDestFragIds[i]);
             if (!currentOrderGraphNames.contains(navGraphName)) {
                 otherTabs.add(tab);
                 continue;

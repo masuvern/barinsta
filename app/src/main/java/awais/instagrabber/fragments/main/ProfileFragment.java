@@ -581,9 +581,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void init() {
-        disableDm = fragmentActivity.getCurrentTabs()
-                                    .stream()
-                                    .noneMatch(tab -> tab.getNavigationRootId() == R.id.direct_messages_nav_graph);
+        disableDm = !fragmentActivity.isNavRootInCurrentTabs(R.id.directMessagesInboxFragment);
         if (getArguments() != null) {
             final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
             username = fragmentArgs.getUsername();

@@ -56,6 +56,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
+        final MainActivity activity = (MainActivity) getActivity();
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
         if (context == null) return;
@@ -136,13 +137,19 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(getDivider(context));
         final NavController navController = NavHostFragment.findNavController(this);
         if (isLoggedIn) {
-            screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
-                if (isSafeToNavigate(navController)) {
-                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
-                    navController.navigate(navDirections);
-                }
-                return true;
-            }));
+            boolean showActivity = true;
+            if (activity != null) {
+                showActivity = !activity.isNavRootInCurrentTabs(R.id.notificationsViewer);
+            }
+            if (showActivity) {
+                screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
+                    if (isSafeToNavigate(navController)) {
+                        final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
+                        navController.navigate(navDirections);
+                    }
+                    return true;
+                }));
+            }
             screen.addPreference(getPreference(R.string.action_ayml, R.drawable.ic_suggested_users, preference -> {
                 if (isSafeToNavigate(navController)) {
                     final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml");
@@ -161,11 +168,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
         // Check if favorites has been added as a tab. And if so, do not add in this list
         boolean showFavorites = true;
-        final MainActivity activity = (MainActivity) getActivity();
-        if (activity != null && activity.getCurrentTabs() != null) {
-            showFavorites = activity.getCurrentTabs()
-                                    .stream()
-                                    .noneMatch(tab -> tab.getNavigationRootId() == R.id.favorites_nav_graph);
+        if (activity != null) {
+            showFavorites = !activity.isNavRootInCurrentTabs(R.id.favoritesFragment);
         }
         if (showFavorites) {
             screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
