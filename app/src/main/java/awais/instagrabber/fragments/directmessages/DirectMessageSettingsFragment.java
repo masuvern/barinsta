@@ -186,7 +186,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     R.string.admin_approval_required_description,
                     R.string.ok,
                     R.string.cancel,
-                    -1
+                    0
             );
             confirmDialogFragment.show(getChildFragmentManager(), "approval_required_dialog");
             return;
@@ -272,10 +272,10 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
                     LEAVE_THREAD_REQUEST_CODE,
                     R.string.dms_action_leave_question,
-                    -1,
+                    0,
                     R.string.yes,
                     R.string.no,
-                    -1
+                    0
             );
             confirmDialogFragment.show(getChildFragmentManager(), "leave_thread_confirmation_dialog");
         });
@@ -290,7 +290,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                         R.string.dms_action_end_description,
                         R.string.yes,
                         R.string.no,
-                        -1
+                        0
                 );
                 confirmDialogFragment.show(getChildFragmentManager(), "end_thread_confirmation_dialog");
             });

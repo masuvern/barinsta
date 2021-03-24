@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: "androidx.navigation.safeargs"
+apply from: 'sentry.gradle'
 
 android {
     compileSdkVersion 29
@@ -48,8 +49,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-}
 
+    flavorDimensions "repo"
+
+    productFlavors {
+        github {
+            dimension "repo"
+            versionNameSuffix "-github"
+            buildConfigField("String", "dsn", SENTRY_DSN)
+        }
+
+        fdroid {
+            dimension "repo"
+            versionNameSuffix "-fdroid"
+        }
+    }
+}
 
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -81,7 +96,7 @@ dependencies {
     implementation 'androidx.palette:palette:1.0.0'
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
 
-    implementation 'com.google.guava:guava:27.1-jre'
+    implementation 'com.google.guava:guava:27.0.1-android'
 
     // Room
     def room_version = "2.2.6"
@@ -116,6 +131,7 @@ dependencies {
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 
-
+    githubImplementation 'io.sentry:sentry-android:4.3.0'
+    
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 }

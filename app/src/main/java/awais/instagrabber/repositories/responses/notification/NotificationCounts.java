@@ -1,6 +1,4 @@
-package awais.instagrabber.repositories.responses;
-
-import androidx.annotation.NonNull;
+package awais.instagrabber.repositories.responses.notification;
 
 public class NotificationCounts {
     private final int commentLikes;

@@ -1,35 +1,24 @@
 package awais.instagrabber.webservices;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import awais.instagrabber.BuildConfig;
-import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.NewsRepository;
 import awais.instagrabber.repositories.responses.AymlResponse;
 import awais.instagrabber.repositories.responses.AymlUser;
-import awais.instagrabber.repositories.responses.NotificationCounts;
-import awais.instagrabber.repositories.responses.UserSearchResponse;
 import awais.instagrabber.repositories.responses.NewsInboxResponse;
-import awais.instagrabber.repositories.responses.Notification;
-import awais.instagrabber.repositories.responses.NotificationArgs;
-import awais.instagrabber.repositories.responses.NotificationImage;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.UserSearchResponse;
+import awais.instagrabber.repositories.responses.notification.Notification;
+import awais.instagrabber.repositories.responses.notification.NotificationArgs;
+import awais.instagrabber.repositories.responses.notification.NotificationCounts;
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

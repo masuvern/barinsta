@@ -18,14 +18,12 @@ import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
 import awais.instagrabber.utils.TextUtils;
 import awaisomereport.CrashReporter;
-//import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
 import static awais.instagrabber.utils.Utils.applicationHandler;
 import static awais.instagrabber.utils.Utils.cacheDir;
 import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.datetimeParser;
-//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class InstaGrabberApplication extends Application {
@@ -34,16 +32,16 @@ public final class InstaGrabberApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        // final Set<RequestListener> requestListeners = new HashSet<>();
-        // requestListeners.add(new RequestLoggingListener());
-        final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
-                .newBuilder(this)
-                // .setMainDiskCacheConfig(diskCacheConfig)
-                // .setRequestListeners(requestListeners)
-                .setDownsampleEnabled(true)
-                .build();
-        Fresco.initialize(this, imagePipelineConfig);
-        // FLog.setMinimumLoggingLevel(FLog.VERBOSE);
+        CookieHandler.setDefault(NET_COOKIE_MANAGER);
+
+        if (settingsHelper == null) {
+            settingsHelper = new SettingsHelper(this);
+        }
+
+        if (!BuildConfig.DEBUG) {
+            CrashReporter.get(this).start();
+        }
+        // logCollector = new LogCollector(this);
 
         if (BuildConfig.DEBUG) {
             try {
@@ -55,13 +53,16 @@ public final class InstaGrabberApplication extends Application {
             }
         }
 
-        if (!BuildConfig.DEBUG) CrashReporter.get(this).start();
-//        logCollector = new LogCollector(this);
-
-        CookieHandler.setDefault(NET_COOKIE_MANAGER);
-
-        if (settingsHelper == null)
-            settingsHelper = new SettingsHelper(this);
+        // final Set<RequestListener> requestListeners = new HashSet<>();
+        // requestListeners.add(new RequestLoggingListener());
+        final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
+                .newBuilder(this)
+                // .setMainDiskCacheConfig(diskCacheConfig)
+                // .setRequestListeners(requestListeners)
+                .setDownsampleEnabled(true)
+                .build();
+        Fresco.initialize(this, imagePipelineConfig);
+        // FLog.setMinimumLoggingLevel(FLog.VERBOSE);
 
         if (applicationHandler == null) {
             applicationHandler = new Handler(getApplicationContext().getMainLooper());

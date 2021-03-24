@@ -10,6 +10,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 
+import java.util.List;
+
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.TabOrderPreferenceDialogFragment;
 import awais.instagrabber.utils.Constants;
@@ -32,6 +34,14 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
         }
         screen.addPreference(getUpdateCheckPreference(context));
         screen.addPreference(getFlagSecurePreference(context));
+        final List<Preference> preferences = FlavorSettings.getInstance().getPreferences(context,
+                                                                                         getChildFragmentManager(),
+                                                                                         SettingCategory.GENERAL);
+        if (preferences != null) {
+            for (final Preference preference : preferences) {
+                screen.addPreference(preference);
+            }
+        }
     }
 
     private Preference getDefaultTabPreference(@NonNull final Context context) {

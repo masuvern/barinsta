@@ -1,6 +1,8 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses.feed;
 
 import java.util.List;
+
+import awais.instagrabber.repositories.responses.Media;
 
 public class FeedFetchResponse {
     private final List<Media> items;

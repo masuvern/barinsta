@@ -1,4 +1,4 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses.feed;
 
 import java.io.Serializable;
 import java.util.List;
