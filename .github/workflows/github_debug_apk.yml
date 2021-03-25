@@ -1,4 +1,4 @@
-name: Build
+name: Github debug build
 
 on: workflow_dispatch
 #   push:
