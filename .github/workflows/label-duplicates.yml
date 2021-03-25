@@ -14,5 +14,5 @@ jobs:
         with:
           actions: 'add-labels'
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
+          issue-number: ${{ github.event.comment.body }}
           labels: 'duplicate'
