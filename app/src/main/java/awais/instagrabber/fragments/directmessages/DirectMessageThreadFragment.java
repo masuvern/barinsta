@@ -1227,7 +1227,10 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (!isEmojiPickerShown) {
             binding.emojiPicker.setAlpha(0);
         }
-        imm.showSoftInput(binding.input, InputMethodManager.SHOW_IMPLICIT);
+        final boolean shown = imm.showSoftInput(binding.input, InputMethodManager.SHOW_IMPLICIT);
+        if (!shown) {
+            Log.e(TAG, "showKeyboard: System did not display the keyboard");
+        }
         if (!isEmojiPickerShown) {
             animatePan(keyboardHeight);
         }
