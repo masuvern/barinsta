@@ -300,7 +300,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final Bundle bundle = new Bundle();
             switch (type) {
                 case TYPE_LOCATION:
-                    bundle.putLong("locationId", Long.valueOf(query));
+                    bundle.putLong("locationId", Long.parseLong(query));
                     navController.navigate(R.id.action_global_locationFragment, bundle);
                     break;
                 case TYPE_HASHTAG:
@@ -404,9 +404,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
                 @Override
                 public void onFailure(@NonNull final Call<SearchResponse> call,
-                                      Throwable t) {
-                    if (!call.isCanceled() && t != null)
+                                      @NonNull Throwable t) {
+                    if (!call.isCanceled()) {
                         Log.e(TAG, "Exception on search:", t);
+                    }
                 }
             };
 
@@ -498,14 +499,15 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             if (!TextUtils.isEmpty(defaultTabResNameString)) {
                 navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
             }
-            final int navGraph = isLoggedIn ? R.navigation.feed_nav_graph : R.navigation.profile_nav_graph;
+            final int navGraph = isLoggedIn ? R.navigation.feed_nav_graph
+                                            : R.navigation.profile_nav_graph;
             final int defaultNavId = navId <= 0 ? navGraph : navId;
             int index = Iterators.indexOf(tabs.iterator(), tab -> {
                 if (tab == null) return false;
                 return tab.getNavigationResId() == defaultNavId;
             });
-            if (index >= 0) firstFragmentGraphIndex = index;
             if (index < 0 || index >= tabs.size()) index = 0;
+            if (index >= 0) firstFragmentGraphIndex = index;
             setBottomNavSelectedTab(tabs.get(index));
         } catch (Exception e) {
             Log.e(TAG, "Error parsing id", e);

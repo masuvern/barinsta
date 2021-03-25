@@ -1,7 +1,7 @@
 package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.preference.ListPreference;
@@ -14,9 +14,11 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.ConfirmDialogFragment;
 import awais.instagrabber.dialogs.TabOrderPreferenceDialogFragment;
+import awais.instagrabber.models.Tab;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -48,19 +50,18 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
     private Preference getDefaultTabPreference(@NonNull final Context context) {
         final ListPreference preference = new ListPreference(context);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
-        final TypedArray mainNavGraphs = getResources().obtainTypedArray(R.array.main_nav_graphs);
-        final int length = mainNavGraphs.length();
-        final String[] navGraphFileNames = new String[length];
-        for (int i = 0; i < length; i++) {
-            final int resourceId = mainNavGraphs.getResourceId(i, -1);
-            if (resourceId < 0) continue;
-            navGraphFileNames[i] = getResources().getResourceEntryName(resourceId);
-        }
-        mainNavGraphs.recycle();
+        final Pair<List<Tab>, List<Tab>> listPair = Utils.getNavTabList(context);
+        final List<Tab> tabs = listPair.first;
+        final String[] titles = tabs.stream()
+                                    .map(Tab::getTitle)
+                                    .toArray(String[]::new);
+        final String[] navGraphFileNames = tabs.stream()
+                                               .map(Tab::getGraphName)
+                                               .toArray(String[]::new);
         preference.setKey(Constants.DEFAULT_TAB);
         preference.setTitle(R.string.pref_start_screen);
         preference.setDialogTitle(R.string.pref_start_screen);
-        preference.setEntries(R.array.main_nav_titles);
+        preference.setEntries(titles);
         preference.setEntryValues(navGraphFileNames);
         preference.setIconSpaceReserved(false);
         return preference;
