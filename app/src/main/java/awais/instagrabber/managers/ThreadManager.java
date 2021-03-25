@@ -264,7 +264,10 @@ public final class ThreadManager {
     }
 
     private List<User> getUsersWithCurrentUser(final DirectThread t) {
-        final ImmutableList.Builder<User> builder = ImmutableList.<User>builder().add(currentUser);
+        final ImmutableList.Builder<User> builder = ImmutableList.<User>builder();
+        if (currentUser != null) {
+            builder.add(currentUser);
+        }
         final List<User> users = t.getUsers();
         if (users != null) {
             builder.addAll(users);
