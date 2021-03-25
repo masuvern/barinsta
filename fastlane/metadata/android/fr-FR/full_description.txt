@@ -9,7 +9,7 @@ Avantages supplémentaires :
 * Permet de visionner à votre rythme : pas besoin de «tenir» une story ou de scroller sans fin ! Zoomez quand vous le souhaitez !
 * Ce n'est pas un mod : absolument AUCUNE dépendance de l'application Instagram réelle.
 * Logiciel libre et open source : avec le code source de l'application ouvert pour inspection, pas besoin de s'inquiéter d'affaires louches !
-* Protège votre vie privée de vos amis : Barinsta vous permet de lire des DM et des stories en privé, sans que vos amis le sachent !
+* Protège votre vie privée de vos amis : Barinsta vous permet de lire des messages et des stories secrètement, sans que vos amis le sachent !
 * Protège votre vie privée d'Instagram : l'application ne demande que ce dont elle a besoin pour vous montrer le contenu et ce que vous avez choisi dans les paramètres. Aucune communication avec des endpoints inutiles et seules des données minimales sont envoyées à Instagram.
 *** S'il vous plait, utilisez cette application de manière responsable. ***
 
