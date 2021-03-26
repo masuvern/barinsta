@@ -24,11 +24,22 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build Github debug apk
-      run: ./gradlew assembleGithubDebug --stacktrace
+      run: ./gradlew assembleGithubRelease --stacktrace
+      
+    - name: Sign APK
+      uses: r0adkll/sign-android-release@v1
+      # ID used to access action output
+      id: sign_app
+      with:
+        releaseDirectory: app/github/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
     
     # Create artifact    
     - name: Create apk artifact
       uses: actions/upload-artifact@v2
       with:
-        name: app
-        path: app/build/outputs/apk/github/debug/app-github-debug.apk
+        name: app-github-release.apk
+        path: ${{steps.sign_app.outputs.signedReleaseFile}}
