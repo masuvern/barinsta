@@ -37,9 +37,13 @@ jobs:
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
     
+    - name: Get current date and time
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
+    
     # Create artifact    
     - name: Create apk artifact
       uses: actions/upload-artifact@v2
       with:
-        name: app-github-release.apk
+        name: barinsta-hotfix-${{ steps.date.outputs.date }}
         path: ${{steps.sign_app.outputs.signedReleaseFile}}
