@@ -1,4 +1,4 @@
-name: Github pre-release build
+name: Github pre-release
 
 on: workflow_dispatch
 #   push:
