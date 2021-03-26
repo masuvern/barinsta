@@ -48,11 +48,21 @@ jobs:
         name: barinsta_pre-release_${{ steps.date.outputs.date }}
         path: ${{steps.sign_app.outputs.signedReleaseFile}}
         
-    # Send Telegram notification
-    - name: Send Telegram notification
+    # Send success notification
+    - name: Send success Telegram notification
+      if: ${{ success() }}
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_BUILDS_CHANNEL_TO }}
         token: ${{ secrets.TELEGRAM_BUILDS_BOT_TOKEN }}
-        message: Build successful
+        message: "${{ github.workflow }} ${{ github.job }} #${{ github.run_number }} completed successfully.\nURL: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
         document: ${{steps.sign_app.outputs.signedReleaseFile}}
+    
+    # Send failure notification
+    - name: Send failure Telegram notification
+      if: ${{ failure() }}
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_BUILDS_CHANNEL_TO }}
+        token: ${{ secrets.TELEGRAM_BUILDS_BOT_TOKEN }}
+        message: "${{ github.workflow }} ${{ github.job }} #${{ github.run_number }} failed.\nURL: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
