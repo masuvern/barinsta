@@ -28,7 +28,7 @@ jobs:
     
     # Create artifact    
     - name: Create apk artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: app
         path: app/build/outputs/apk/github/debug/app-github-debug.apk
