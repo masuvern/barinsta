@@ -47,3 +47,12 @@ jobs:
       with:
         name: barinsta_pre-release_${{ steps.date.outputs.date }}
         path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        
+    # Send Telegram notification
+    - name: Send Telegram notification
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_BUILDS_CHANNEL_TO }}
+        token: ${{ secrets.TELEGRAM_BUILDS_BOT_TOKEN }}
+        message: Build successful
+        document: ${{steps.sign_app.outputs.signedReleaseFile}}
