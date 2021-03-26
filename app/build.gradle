@@ -64,6 +64,18 @@ android {
             versionNameSuffix "-fdroid"
         }
     }
+
+    android.applicationVariants.all { variant ->
+        if (variant.flavorName != "github") return
+        variant.outputs.all { output ->
+            def builtType = variant.buildType.name
+            def versionName = variant.versionName
+            // def versionCode = variant.versionCode
+            // def flavor = variant.flavorName
+            // flavor is already appended to versionName due to versionNameSuffix
+            outputFileName = "barinsta_${versionName}_${builtType}.apk"
+        }
+    }
 }
 
 configurations.all {
