@@ -1,4 +1,4 @@
-name: Github release build
+name: Github pre-release build
 
 on: workflow_dispatch
 #   push:
@@ -23,8 +23,8 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
-    - name: Build Github unsigned release apk
-      run: ./gradlew assembleGithubRelease --stacktrace
+    - name: Build Github unsigned pre-release apk
+      run: ./gradlew assembleGithubRelease --stacktrace --project-prop pre
       
     - name: Sign APK
       uses: r0adkll/sign-android-release@v1
@@ -45,5 +45,5 @@ jobs:
     - name: Create apk artifact
       uses: actions/upload-artifact@v2
       with:
-        name: barinsta-hotfix-${{ steps.date.outputs.date }}
+        name: barinsta_pre-release_${{ steps.date.outputs.date }}
         path: ${{steps.sign_app.outputs.signedReleaseFile}}
