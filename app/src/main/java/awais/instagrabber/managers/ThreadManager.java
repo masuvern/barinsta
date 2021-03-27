@@ -179,6 +179,9 @@ public final class ThreadManager {
                 return null;
             }
             final DirectInbox inbox = inboxResource.data;
+            if (inbox == null) {
+                return null;
+            }
             final List<DirectThread> threads = inbox.getThreads();
             if (threads == null || threads.isEmpty()) {
                 return null;
@@ -264,7 +267,7 @@ public final class ThreadManager {
     }
 
     private List<User> getUsersWithCurrentUser(final DirectThread t) {
-        final ImmutableList.Builder<User> builder = ImmutableList.<User>builder();
+        final ImmutableList.Builder<User> builder = ImmutableList.builder();
         if (currentUser != null) {
             builder.add(currentUser);
         }
