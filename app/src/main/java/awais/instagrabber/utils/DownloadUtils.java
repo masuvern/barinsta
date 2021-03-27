@@ -1,10 +1,8 @@
 package awais.instagrabber.utils;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -13,8 +11,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.NetworkType;
@@ -90,17 +86,17 @@ public final class DownloadUtils {
         return dir;
     }
 
-//    public static void dmDownload(@NonNull final Context context,
-//                                  @Nullable final String username,
-//                                  final String modelId,
-//                                  final String url) {
-//        if (url == null) return;
-//        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-//            dmDownloadImpl(context, username, modelId, url);
-//        } else if (context instanceof Activity) {
-//            ActivityCompat.requestPermissions((Activity) context, PERMS, 8020);
-//        }
-//    }
+    //    public static void dmDownload(@NonNull final Context context,
+    //                                  @Nullable final String username,
+    //                                  final String modelId,
+    //                                  final String url) {
+    //        if (url == null) return;
+    //        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+    //            dmDownloadImpl(context, username, modelId, url);
+    //        } else if (context instanceof Activity) {
+    //            ActivityCompat.requestPermissions((Activity) context, PERMS, 8020);
+    //        }
+    //    }
 
     private static void dmDownloadImpl(@NonNull final Context context,
                                        @Nullable final String username,
@@ -294,7 +290,8 @@ public final class DownloadUtils {
                                  final int childPositionIfSingle) {
         final Map<String, String> map = new HashMap<>();
         for (final Media media : feedModels) {
-            final File downloadDir = getDownloadDir(context, "@" + media.getUser().getUsername());
+            final User mediaUser = media.getUser();
+            final File downloadDir = getDownloadDir(context, mediaUser == null ? "" : "@" + mediaUser.getUsername());
             if (downloadDir == null) return;
             switch (media.getMediaType()) {
                 case MEDIA_TYPE_IMAGE:
@@ -307,9 +304,8 @@ public final class DownloadUtils {
                 case MEDIA_TYPE_VOICE: {
                     final String url = getUrlOfType(media);
                     String fileName = media.getId();
-                    final User user = media.getUser();
-                    if (user != null) {
-                        fileName = user.getUsername() + "_" + fileName;
+                    if (mediaUser != null) {
+                        fileName = mediaUser.getUsername() + "_" + fileName;
                     }
                     final File file = getDownloadSaveFile(downloadDir, fileName, url);
                     map.put(url, file.getAbsolutePath());

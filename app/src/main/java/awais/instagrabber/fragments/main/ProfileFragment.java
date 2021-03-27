@@ -592,10 +592,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.swipeRefreshLayout.setEnabled(false);
             binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
-            final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.privatePage.getLayoutParams();
-            layoutParams.topMargin = 0;
-            layoutParams.gravity = Gravity.CENTER;
-            binding.privatePage.setLayoutParams(layoutParams);
             binding.privatePage.setVisibility(View.VISIBLE);
             return;
         }
@@ -685,6 +681,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.postsRecyclerView.refresh();
         }
         profileDetailsBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
+        profileDetailsBinding.isPrivate.setVisibility(profileModel.isPrivate() ? View.VISIBLE : View.GONE);
         final long profileId = profileModel.getPk();
         if (isLoggedIn) {
             fetchStoryAndHighlights(profileId);
@@ -919,11 +916,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             profileDetailsBinding.mainFollowers.setClickable(false);
             profileDetailsBinding.mainFollowing.setClickable(false);
-            // error
             binding.privatePage1.setImageResource(R.drawable.lock);
             binding.privatePage2.setText(R.string.priv_acc);
             binding.privatePage.setVisibility(View.VISIBLE);
             binding.postsRecyclerView.setVisibility(View.GONE);
+            binding.swipeRefreshLayout.setRefreshing(false);
         }
     }
 
@@ -1210,7 +1207,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateSwipeRefreshState() {
-        Log.d("austin_debug", "usrs: " + binding.postsRecyclerView.isFetching());
         binding.swipeRefreshLayout.setRefreshing(binding.postsRecyclerView.isFetching());
     }
 

@@ -181,6 +181,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
                             MediaUtils.getVoiceInfo(contentResolver, uri, new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
                                 @Override
                                 public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
+                                    if (videoInfo == null) return;
                                     threadManager.sendVoice(data,
                                                             uri,
                                                             result.getWaveform(),

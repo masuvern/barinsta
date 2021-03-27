@@ -140,6 +140,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         viewModel.isViewerAdmin().observe(getViewLifecycleOwner(), this::setApprovalRelatedUI);
         viewModel.getApprovalRequiredToJoin().observe(getViewLifecycleOwner(), required -> binding.approvalRequired.setChecked(required));
         viewModel.getPendingRequests().observe(getViewLifecycleOwner(), this::setPendingRequests);
+        viewModel.isGroup().observe(getViewLifecycleOwner(), this::setupSettings);
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
@@ -207,13 +208,11 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
     }
 
     private void init() {
-        setupSettings();
+        // setupSettings();
         setupMembers();
     }
 
-    private void setupSettings() {
-        Boolean isGroup = viewModel.isGroup().getValue();
-        if (isGroup == null) isGroup = false;
+    private void setupSettings(final boolean isGroup) {
         binding.groupSettings.setVisibility(isGroup ? View.VISIBLE : View.GONE);
         binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
         binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
