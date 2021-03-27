@@ -2,6 +2,15 @@ apply plugin: 'com.android.application'
 apply plugin: "androidx.navigation.safeargs"
 apply from: 'sentry.gradle'
 
+def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
 android {
     compileSdkVersion 29
 
@@ -55,13 +64,32 @@ android {
     productFlavors {
         github {
             dimension "repo"
-            versionNameSuffix "-github"
+            // versionNameSuffix "-github" // appended in assemble task
             buildConfigField("String", "dsn", SENTRY_DSN)
         }
 
         fdroid {
             dimension "repo"
             versionNameSuffix "-fdroid"
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        if (variant.flavorName != "github") return
+        variant.outputs.all { output ->
+            def builtType = variant.buildType.name
+            def versionName = variant.versionName
+            // def versionCode = variant.versionCode
+            def flavor = variant.flavorName
+
+            def suffix = "${versionName}-${flavor}_${builtType}" // eg. 19.1.0-github_debug or release
+            if (builtType.toString() == 'release' && project.hasProperty("pre")) {
+                // append latest commit short hash for pre-release
+                suffix = "${versionName}.${getGitHash()}-${flavor}" // eg. 19.1.0.b123456-github
+            }
+
+            output.versionNameOverride = suffix
+            outputFileName = "barinsta_${suffix}.apk"
         }
     }
 }
@@ -129,9 +157,9 @@ dependencies {
     implementation 'com.github.ammargitham:uCrop:2.3-native-beta-2'
     implementation 'com.github.ammargitham:android-gpuimage:2.1.1-beta4'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     githubImplementation 'io.sentry:sentry-android:4.3.0'
-    
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 }
