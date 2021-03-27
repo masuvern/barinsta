@@ -64,6 +64,7 @@
         <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.Barinsta</item>
         <item name="android:textColorPrimary">@color/barinstaPrimaryTextColor</item>
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
+        <item name="dmInputTextColor">@color/black</item>
     </style>
 
     <style name="AppTheme.Light.Bibliogram" parent="AppTheme.Light">
@@ -79,6 +80,7 @@
         <item name="bottomNavigationStyle">@style/Widget.BottomNavigationView.Light.Barinsta</item>
         <item name="android:textColorPrimary">@color/bibliogramPrimaryTextColor</item>
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
+        <item name="dmInputTextColor">@color/black</item>
     </style>
 
 
