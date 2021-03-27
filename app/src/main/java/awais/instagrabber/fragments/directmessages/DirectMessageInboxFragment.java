@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -104,6 +105,11 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     public void onPause() {
         super.onPause();
         unregisterReceiver();
+        isPendingRequestTotalBadgeAttached = false;
+        if (pendingRequestTotalBadgeDrawable != null) {
+            BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            pendingRequestTotalBadgeDrawable = null;
+        }
     }
 
     @Override
@@ -124,21 +130,13 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     public void onDestroyView() {
         super.onDestroyView();
         unregisterReceiver();
-        isPendingRequestTotalBadgeAttached = false;
-        if (pendingRequestTotalBadgeDrawable != null) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
-            pendingRequestTotalBadgeDrawable = null;
-        }
     }
 
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        pendingRequestsMenuItem = menu.add(Menu.NONE, R.id.pending_requests, Menu.NONE, "Pending requests");
-        pendingRequestsMenuItem.setIcon(R.drawable.ic_account_clock_24)
-                               .setVisible(false)
-                               .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        attachPendingRequestsBadge(viewModel.getPendingRequestsTotal().getValue());
+        inflater.inflate(R.menu.dm_inbox_menu, menu);
+        pendingRequestsMenuItem = menu.findItem(R.id.pending_requests);
+        pendingRequestsMenuItem.setVisible(isPendingRequestTotalBadgeAttached);
     }
 
     @Override
@@ -213,7 +211,16 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
 
     @SuppressLint("UnsafeExperimentalUsageError")
     private void attachPendingRequestsBadge(@Nullable final Integer count) {
-        if (pendingRequestsMenuItem == null) return;
+        if (pendingRequestsMenuItem == null) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    attachPendingRequestsBadge(count);
+                }
+            }, 500);
+            return;
+        }
         if (pendingRequestTotalBadgeDrawable == null) {
             final Context context = getContext();
             if (context == null) return;

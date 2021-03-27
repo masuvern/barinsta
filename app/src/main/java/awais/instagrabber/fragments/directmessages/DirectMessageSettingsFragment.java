@@ -140,6 +140,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
         viewModel.isViewerAdmin().observe(getViewLifecycleOwner(), this::setApprovalRelatedUI);
         viewModel.getApprovalRequiredToJoin().observe(getViewLifecycleOwner(), required -> binding.approvalRequired.setChecked(required));
         viewModel.getPendingRequests().observe(getViewLifecycleOwner(), this::setPendingRequests);
+        viewModel.isGroup().observe(getViewLifecycleOwner(), this::setupSettings);
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
@@ -186,7 +187,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     R.string.admin_approval_required_description,
                     R.string.ok,
                     R.string.cancel,
-                    -1
+                    0
             );
             confirmDialogFragment.show(getChildFragmentManager(), "approval_required_dialog");
             return;
@@ -207,13 +208,11 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
     }
 
     private void init() {
-        setupSettings();
+        // setupSettings();
         setupMembers();
     }
 
-    private void setupSettings() {
-        Boolean isGroup = viewModel.isGroup().getValue();
-        if (isGroup == null) isGroup = false;
+    private void setupSettings(final boolean isGroup) {
         binding.groupSettings.setVisibility(isGroup ? View.VISIBLE : View.GONE);
         binding.muteMessagesLabel.setOnClickListener(v -> binding.muteMessages.toggle());
         binding.muteMessages.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -272,10 +271,10 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
             final ConfirmDialogFragment confirmDialogFragment = ConfirmDialogFragment.newInstance(
                     LEAVE_THREAD_REQUEST_CODE,
                     R.string.dms_action_leave_question,
-                    -1,
+                    0,
                     R.string.yes,
                     R.string.no,
-                    -1
+                    0
             );
             confirmDialogFragment.show(getChildFragmentManager(), "leave_thread_confirmation_dialog");
         });
@@ -290,7 +289,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                         R.string.dms_action_end_description,
                         R.string.yes,
                         R.string.no,
-                        -1
+                        0
                 );
                 confirmDialogFragment.show(getChildFragmentManager(), "end_thread_confirmation_dialog");
             });

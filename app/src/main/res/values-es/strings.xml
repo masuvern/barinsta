@@ -21,6 +21,7 @@
     <string name="title_comments">Comentarios</string>
     <string name="title_notifications">Actividad</string>
     <string name="update_check">Buscar actualizaciones al inicio</string>
+    <string name="flag_secure">Bloquea capturas de pantalla &amp; vista previa de aplicaciones</string>
     <string name="download_user_folder">Usar subcarpetas con el nombre de usuario</string>
     <string name="mark_as_seen_setting">Marcar historias como vistas después de verlas</string>
     <string name="mark_as_seen_setting_summary">El autor de la historia sabrá que lo has visto</string>
@@ -451,4 +452,11 @@
     <string name="generic_null_response">¡La respuesta es nula!</string>
     <string name="generic_not_ok_response">¡El estado de la respuesta no es correcto!</string>
     <string name="generic_failed_request">¡Solicitud fallida!</string>
+    <string name="hint_keyword">Palabra clave</string>
+    <string name="toggle_keyword_filter">Activar filtro de palabras clave</string>
+    <string name="edit_keyword_filter">Editar filtros de palabras clave</string>
+    <string name="added_keywords">Palabra clave añadida: %s a la lista de filtros</string>
+    <string name="removed_keywords">Se eliminó la palabra clave: %s de la lista de filtros</string>
+    <string name="marked_as_seen">Marcado como visto</string>
+    <string name="delete_unsuccessful">Eliminación fallida</string>
 </resources>

@@ -24,6 +24,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemVisual
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
+import awais.instagrabber.utils.TextUtils;
 
 public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
 
@@ -48,7 +49,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         if (media == null) return;
         setExpiryInfo(visualMedia);
         setPreview(visualMedia, messageDirection);
-        final boolean expired = media.getPk() == null;
+        final boolean expired = TextUtils.isEmpty(media.getId());
         if (expired) return;
         itemView.setOnClickListener(v -> openMedia(media));
         /*final boolean isExpired = visualMedia == null || (mediaModel = visualMedia.getMedia()) == null ||
@@ -118,7 +119,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         final RavenMediaViewMode viewMode = visualMedia.getViewMode();
         if (viewMode != RavenMediaViewMode.PERMANENT) {
             final MediaItemType mediaType = media.getMediaType();
-            final boolean expired = media.getPk() == null;
+            final boolean expired = TextUtils.isEmpty(media.getId());
             final int info;
             switch (mediaType) {
                 case MEDIA_TYPE_IMAGE:
@@ -153,7 +154,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
     private void setPreview(final DirectItemVisualMedia visualMedia,
                             final MessageDirection messageDirection) {
         final Media media = visualMedia.getMedia();
-        final boolean expired = media.getPk() == null;
+        final boolean expired = TextUtils.isEmpty(media.getId());
         if (expired) {
             binding.preview.setVisibility(View.GONE);
             binding.typeIcon.setVisibility(View.GONE);

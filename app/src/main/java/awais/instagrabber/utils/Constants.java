@@ -1,6 +1,8 @@
 package awais.instagrabber.utils;
 
 public final class Constants {
+    public static final String CRASH_REPORT_EMAIL = "barinsta@austinhuang.me";
+
     // string prefs
     public static final String FOLDER_PATH = "custom_path";
     public static final String DATE_TIME_FORMAT = "date_time_format";

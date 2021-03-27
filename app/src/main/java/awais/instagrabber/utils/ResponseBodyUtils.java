@@ -729,15 +729,19 @@ public final class ResponseBodyUtils {
             width = dimensions.optInt("width");
         }
         String thumbnailUrl = null;
-        final JSONArray displayResources = feedItem.getJSONArray("display_resources");
         final List<MediaCandidate> candidates = new ArrayList<MediaCandidate>();
-        for (int i = 0; i < displayResources.length(); i++) {
-            final JSONObject displayResource = displayResources.getJSONObject(i);
-            candidates.add(new MediaCandidate(
-                    displayResource.getInt("config_width"),
-                    displayResource.getInt("config_height"),
-                    displayResource.getString("src")
-            ));
+        if (feedItem.has("display_resources") || feedItem.has("thumbnail_resources")) {
+            final JSONArray displayResources = feedItem.has("display_resources")
+                    ? feedItem.getJSONArray("display_resources")
+                    : feedItem.getJSONArray("thumbnail_resources");
+            for (int i = 0; i < displayResources.length(); i++) {
+                final JSONObject displayResource = displayResources.getJSONObject(i);
+                candidates.add(new MediaCandidate(
+                        displayResource.getInt("config_width"),
+                        displayResource.getInt("config_height"),
+                        displayResource.getString("src")
+                ));
+            }
         }
         final ImageVersions2 imageVersions2 = new ImageVersions2(candidates);
 
@@ -943,8 +947,7 @@ public final class ResponseBodyUtils {
     // }
 
     public static StoryModel parseStoryItem(final JSONObject data,
-                                            final boolean isLoc,
-                                            final boolean isHashtag,
+                                            final boolean isLocOrHashtag,
                                             final String username) throws JSONException {
         final boolean isVideo = data.has("video_duration");
         final StoryModel model = new StoryModel(data.getString("id"),
@@ -952,9 +955,7 @@ public final class ResponseBodyUtils {
                                                     .getString("url"), null,
                                                 isVideo ? MediaItemType.MEDIA_TYPE_VIDEO : MediaItemType.MEDIA_TYPE_IMAGE,
                                                 data.optLong("taken_at", 0),
-                                                (isLoc || isHashtag)
-                                                ? data.getJSONObject("user").getString("username")
-                                                : username,
+                                                isLocOrHashtag ? data.getJSONObject("user").getString("username") : username,
                                                 data.getJSONObject("user").getLong("pk"),
                                                 data.optBoolean("can_reply"));
 

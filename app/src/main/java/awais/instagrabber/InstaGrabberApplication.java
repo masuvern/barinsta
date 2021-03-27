@@ -35,16 +35,16 @@ public final class InstaGrabberApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        // final Set<RequestListener> requestListeners = new HashSet<>();
-        // requestListeners.add(new RequestLoggingListener());
-        final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
-                .newBuilder(this)
-                // .setMainDiskCacheConfig(diskCacheConfig)
-                // .setRequestListeners(requestListeners)
-                .setDownsampleEnabled(true)
-                .build();
-        Fresco.initialize(this, imagePipelineConfig);
-        // FLog.setMinimumLoggingLevel(FLog.VERBOSE);
+        CookieHandler.setDefault(NET_COOKIE_MANAGER);
+
+        if (settingsHelper == null) {
+            settingsHelper = new SettingsHelper(this);
+        }
+
+        if (!BuildConfig.DEBUG) {
+            CrashReporter.get(this).start();
+        }
+        // logCollector = new LogCollector(this);
 
         if (BuildConfig.DEBUG) {
             try {
@@ -55,14 +55,17 @@ public final class InstaGrabberApplication extends Application {
                 Log.e(TAG, "Error", e);
             }
         }
-
-        if (!BuildConfig.DEBUG) CrashReporter.get(this).start();
-        // logCollector = new LogCollector(this);
-
-        CookieHandler.setDefault(NET_COOKIE_MANAGER);
-
-        if (settingsHelper == null)
-            settingsHelper = new SettingsHelper(this);
+      
+        // final Set<RequestListener> requestListeners = new HashSet<>();
+        // requestListeners.add(new RequestLoggingListener());
+        final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
+                .newBuilder(this)
+                // .setMainDiskCacheConfig(diskCacheConfig)
+                // .setRequestListeners(requestListeners)
+                .setDownsampleEnabled(true)
+                .build();
+        Fresco.initialize(this, imagePipelineConfig);
+        // FLog.setMinimumLoggingLevel(FLog.VERBOSE);
 
         if (applicationHandler == null) {
             applicationHandler = new Handler(getApplicationContext().getMainLooper());

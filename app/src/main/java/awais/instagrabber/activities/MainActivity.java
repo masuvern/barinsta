@@ -11,7 +11,6 @@ import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,21 +56,21 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
-import awais.instagrabber.asyncs.SuggestionsFetcher;
 import awais.instagrabber.customviews.emoji.EmojiVariantManager;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDirections;
 import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
-import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.SuggestionModel;
 import awais.instagrabber.models.enums.SuggestionType;
+import awais.instagrabber.repositories.responses.search.SearchItem;
+import awais.instagrabber.repositories.responses.search.SearchResponse;
 import awais.instagrabber.services.ActivityCheckerService;
 import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
@@ -84,6 +83,10 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.webservices.RetrofitFactory;
+import awais.instagrabber.webservices.SearchService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -106,6 +109,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private SuggestionsAdapter suggestionAdapter;
     private AutoCompleteTextView searchAutoComplete;
     private SearchView searchView;
+    private SearchService searchService;
     private boolean showSearch = true;
     private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
@@ -173,10 +177,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         // Initialise the internal map
         AppExecutors.getInstance().tasksThread().execute(() -> {
-            EmojiParser.getInstance();
+            EmojiParser.setup(this);
             EmojiVariantManager.getInstance();
         });
         initEmojiCompat();
+        searchService = SearchService.getInstance();
         // initDmService();
     }
 
@@ -313,7 +318,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final Bundle bundle = new Bundle();
             switch (type) {
                 case TYPE_LOCATION:
-                    bundle.putString("locationId", query);
+                    bundle.putLong("locationId", Long.valueOf(query));
                     navController.navigate(R.id.action_global_locationFragment, bundle);
                     break;
                 case TYPE_HASHTAG:
@@ -341,50 +346,83 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             private boolean searchUser;
             private boolean searchHash;
-            private AsyncTask<?, ?, ?> prevSuggestionAsync;
+            private Call<SearchResponse> prevSuggestionAsync;
             private final String[] COLUMNS = {
                     BaseColumns._ID,
                     Constants.EXTRAS_USERNAME,
                     Constants.EXTRAS_NAME,
                     Constants.EXTRAS_TYPE,
+                    "query",
                     "pfp",
                     "verified"
             };
             private String currentSearchQuery;
 
-            private final FetchListener<SuggestionModel[]> fetchListener = new FetchListener<SuggestionModel[]>() {
+            private final Callback<SearchResponse> cb = new Callback<SearchResponse>() {
                 @Override
-                public void doBefore() {
-                    suggestionAdapter.changeCursor(null);
-                }
-
-                @Override
-                public void onResult(final SuggestionModel[] result) {
+                public void onResponse(@NonNull final Call<SearchResponse> call,
+                                       @NonNull final Response<SearchResponse> response) {
                     final MatrixCursor cursor;
-                    if (result == null) cursor = null;
+                    final SearchResponse body = response.body();
+                    if (body == null) {
+                        cursor = null;
+                        return;
+                    }
+                    final List<SearchItem> result = new ArrayList<SearchItem>();
+                    if (isLoggedIn) {
+                        if (body.getList() != null) result.addAll(searchHash ? body.getList()
+                                .stream()
+                                .filter(i -> i.getUser() == null)
+                                .collect(Collectors.toList()) : body.getList());
+                    }
                     else {
-                        cursor = new MatrixCursor(COLUMNS, 0);
-                        for (int i = 0; i < result.length; i++) {
-                            final SuggestionModel suggestionModel = result[i];
-                            if (suggestionModel != null) {
-                                final SuggestionType suggestionType = suggestionModel.getSuggestionType();
-                                final Object[] objects = {
-                                        i,
-                                        suggestionType == SuggestionType.TYPE_LOCATION ? suggestionModel.getName() : suggestionModel.getUsername(),
-                                        suggestionType == SuggestionType.TYPE_LOCATION ? suggestionModel.getUsername() : suggestionModel.getName(),
-                                        suggestionType,
-                                        suggestionModel.getProfilePic(),
-                                        suggestionModel.isVerified()};
-                                if (!searchHash && !searchUser) cursor.addRow(objects);
-                                else {
-                                    final boolean isCurrHash = suggestionType == SuggestionType.TYPE_HASHTAG;
-                                    if (searchHash && isCurrHash || !searchHash && !isCurrHash)
-                                        cursor.addRow(objects);
-                                }
-                            }
+                        if (body.getUsers() != null && !searchHash) result.addAll(body.getUsers());
+                        if (body.getHashtags() != null) result.addAll(body.getHashtags());
+                        if (body.getPlaces() != null) result.addAll(body.getPlaces());
+                    }
+                    cursor = new MatrixCursor(COLUMNS, 0);
+                    for (int i = 0; i < result.size(); i++) {
+                        final SearchItem suggestionModel = result.get(i);
+                        if (suggestionModel != null) {
+                            Object[] objects = null;
+                            if (suggestionModel.getUser() != null)
+                                objects = new Object[]{
+                                        suggestionModel.getPosition(),
+                                        suggestionModel.getUser().getUsername(),
+                                        suggestionModel.getUser().getFullName(),
+                                        SuggestionType.TYPE_USER,
+                                        suggestionModel.getUser().getUsername(),
+                                        suggestionModel.getUser().getProfilePicUrl(),
+                                        suggestionModel.getUser().isVerified()};
+                            else if (suggestionModel.getHashtag() != null)
+                                objects = new Object[]{
+                                        suggestionModel.getPosition(),
+                                        suggestionModel.getHashtag().getName(),
+                                        suggestionModel.getHashtag().getSubtitle(),
+                                        SuggestionType.TYPE_HASHTAG,
+                                        suggestionModel.getHashtag().getName(),
+                                        "res:/" + R.drawable.ic_hashtag,
+                                        false};
+                            else if (suggestionModel.getPlace() != null)
+                                objects = new Object[]{
+                                        suggestionModel.getPosition(),
+                                        suggestionModel.getPlace().getTitle(),
+                                        suggestionModel.getPlace().getSubtitle(),
+                                        SuggestionType.TYPE_LOCATION,
+                                        suggestionModel.getPlace().getLocation().getPk(),
+                                        "res:/" + R.drawable.ic_location,
+                                        false};
+                            cursor.addRow(objects);
                         }
                     }
                     suggestionAdapter.changeCursor(cursor);
+                }
+
+                @Override
+                public void onFailure(@NonNull final Call<SearchResponse> call,
+                                      Throwable t) {
+                    if (!call.isCanceled() && t != null)
+                        Log.e(TAG, "Exception on search:", t);
                 }
             };
 
@@ -404,17 +442,19 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                     if (searchAutoComplete != null) {
                         searchAutoComplete.setThreshold(1);
                     }
-                    prevSuggestionAsync = new SuggestionsFetcher(fetchListener).executeOnExecutor(
-                            AsyncTask.THREAD_POOL_EXECUTOR,
-                            searchUser || searchHash ? currentSearchQuery.substring(1)
-                                                     : currentSearchQuery);
+                    prevSuggestionAsync = searchService.search(isLoggedIn,
+                                                               searchUser || searchHash ? currentSearchQuery.substring(1)
+                                                                    : currentSearchQuery,
+                                                               searchUser ? "user" : (searchHash ? "hashtag" : "blended"));
+                    suggestionAdapter.changeCursor(null);
+                    prevSuggestionAsync.enqueue(cb);
                 }
             };
 
             private void cancelSuggestionsAsync() {
                 if (prevSuggestionAsync != null)
                     try {
-                        prevSuggestionAsync.cancel(true);
+                        prevSuggestionAsync.cancel();
                     } catch (final Exception ignored) {}
             }
 
@@ -706,7 +746,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final NavController navController = currentNavControllerLiveData.getValue();
         if (navController == null) return;
         final Bundle bundle = new Bundle();
-        bundle.putString("locationId", locationId);
+        bundle.putLong("locationId", Long.valueOf(locationId));
         navController.navigate(R.id.action_global_locationFragment, bundle);
     }
 

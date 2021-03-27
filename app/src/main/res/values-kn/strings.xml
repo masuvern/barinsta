@@ -21,6 +21,7 @@
     <string name="title_comments">Comments</string>
     <string name="title_notifications">Activity</string>
     <string name="update_check">Check for updates at startup</string>
+    <string name="flag_secure">Block screenshots &amp; app preview</string>
     <string name="download_user_folder">Download posts to username folders</string>
     <string name="mark_as_seen_setting">Mark stories as seen after viewing</string>
     <string name="mark_as_seen_setting_summary">Story author will know you viewed it</string>
@@ -451,4 +452,5 @@
     <string name="generic_null_response">Response is null!</string>
     <string name="generic_not_ok_response">Response status is not ok!</string>
     <string name="generic_failed_request">Request failed!</string>
+    <string name="marked_as_seen">Marked as seen</string>
 </resources>
