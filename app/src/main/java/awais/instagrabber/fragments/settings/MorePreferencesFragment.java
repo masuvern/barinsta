@@ -193,7 +193,9 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                            BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")",
                                            -1,
                                            preference -> {
-                                               FlavorTown.updateCheck((AppCompatActivity) requireActivity(), true);
+                                               final AppCompatActivity activity = (AppCompatActivity) getActivity();
+                                               if (activity == null) return true;
+                                               FlavorTown.updateCheck(activity, true);
                                                return true;
                                            }));
         screen.addPreference(getDivider(context));
