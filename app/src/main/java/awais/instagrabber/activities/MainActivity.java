@@ -94,6 +94,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class MainActivity extends BaseLanguageActivity implements FragmentManager.OnBackStackChangedListener {
     private static final String TAG = "MainActivity";
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
+    private static final String LAST_SELECT_NAV_MENU_ID = "lastSelectedNavMenuId";
 
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
@@ -105,6 +106,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private boolean showSearch = true;
     private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
+    private int lastSelectedNavMenuId;
     private boolean isActivityCheckerServiceBound = false;
     private boolean isBackStackEmpty = false;
     private boolean isLoggedIn;
@@ -201,6 +203,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     @Override
     protected void onSaveInstanceState(@NonNull final Bundle outState) {
         outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
+        outState.putString(LAST_SELECT_NAV_MENU_ID, String.valueOf(binding.bottomNavView.getSelectedItemId()));
         super.onSaveInstanceState(outState);
     }
 
@@ -211,6 +214,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (key != null) {
             try {
                 firstFragmentGraphIndex = Integer.parseInt(key);
+            } catch (NumberFormatException ignored) { }
+        }
+        final String lastSelected = (String) savedInstanceState.get(LAST_SELECT_NAV_MENU_ID);
+        if (lastSelected != null) {
+            try {
+                lastSelectedNavMenuId = Integer.parseInt(lastSelected);
             } catch (NumberFormatException ignored) { }
         }
         setupBottomNavigationBar(false);
@@ -461,7 +470,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     private void setupBottomNavigationBar(final boolean setDefaultTabFromSettings) {
         currentTabs = !isLoggedIn ? setupAnonBottomNav() : setupMainBottomNav();
-
         final List<Integer> mainNavList = currentTabs.stream()
                                                      .map(Tab::getNavigationResId)
                                                      .collect(Collectors.toList());
@@ -470,6 +478,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                                                 .collect(Collectors.toList());
         if (setDefaultTabFromSettings) {
             setSelectedTab(currentTabs);
+        } else {
+            binding.bottomNavView.setSelectedItemId(lastSelectedNavMenuId);
         }
         final LiveData<NavController> navControllerLiveData = setupWithNavController(
                 binding.bottomNavView,
@@ -507,7 +517,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 return tab.getNavigationResId() == defaultNavId;
             });
             if (index < 0 || index >= tabs.size()) index = 0;
-            if (index >= 0) firstFragmentGraphIndex = index;
+            firstFragmentGraphIndex = index;
             setBottomNavSelectedTab(tabs.get(index));
         } catch (Exception e) {
             Log.e(TAG, "Error parsing id", e);
