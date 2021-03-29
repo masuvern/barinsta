@@ -34,6 +34,7 @@ import awais.instagrabber.adapters.viewholder.directmessages.DirectItemTextViewH
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemVideoCallEventViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemVoiceMediaViewHolder;
+import awais.instagrabber.adapters.viewholder.directmessages.DirectItemXmaViewHolder;
 import awais.instagrabber.customviews.emoji.Emoji;
 import awais.instagrabber.databinding.LayoutDmActionLogBinding;
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
@@ -146,12 +147,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     @NonNull
     private DirectItemViewHolder getItemViewHolder(final LayoutInflater layoutInflater,
                                                    final LayoutDmBaseBinding baseBinding,
-                                                   final DirectItemType directItemType) {
-        if (directItemType == null) {
-            // For unknown dm types
-            final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
-            return new DirectItemDefaultViewHolder(baseBinding, binding, currentUser, thread, callback);
-        }
+                                                   @NonNull final DirectItemType directItemType) {
         switch (directItemType) {
             case TEXT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
@@ -212,6 +208,11 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
                 final LayoutDmRavenMediaBinding binding = LayoutDmRavenMediaBinding.inflate(layoutInflater, baseBinding.message, false);
                 return new DirectItemRavenMediaViewHolder(baseBinding, binding, currentUser, thread, callback);
             }
+            case XMA: {
+                final LayoutDmAnimatedMediaBinding binding = LayoutDmAnimatedMediaBinding.inflate(layoutInflater, baseBinding.message, false);
+                return new DirectItemXmaViewHolder(baseBinding, binding, currentUser, thread, callback);
+            }
+            case UNKNOWN:
             default: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
                 return new DirectItemDefaultViewHolder(baseBinding, binding, currentUser, thread, callback);
