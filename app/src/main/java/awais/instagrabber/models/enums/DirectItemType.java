@@ -1,5 +1,7 @@
 package awais.instagrabber.models.enums;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -59,7 +61,9 @@ public enum DirectItemType implements Serializable {
         return id;
     }
 
+    @Nullable
     public static DirectItemType valueOf(final int id) {
+        if (!map.containsKey(id)) return null;
         return map.get(id);
     }
 

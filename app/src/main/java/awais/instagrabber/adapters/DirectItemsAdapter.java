@@ -146,7 +146,12 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     @NonNull
     private DirectItemViewHolder getItemViewHolder(final LayoutInflater layoutInflater,
                                                    final LayoutDmBaseBinding baseBinding,
-                                                   @NonNull final DirectItemType directItemType) {
+                                                   final DirectItemType directItemType) {
+        if (directItemType == null) {
+            // For unknown dm types
+            final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
+            return new DirectItemDefaultViewHolder(baseBinding, binding, currentUser, thread, callback);
+        }
         switch (directItemType) {
             case TEXT: {
                 final LayoutDmTextBinding binding = LayoutDmTextBinding.inflate(layoutInflater, baseBinding.message, false);
@@ -240,7 +245,11 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         if (itemOrHeader.isHeader()) {
             return -1;
         }
-        return itemOrHeader.item.getItemType().getId();
+        final DirectItemType itemType = itemOrHeader.item.getItemType();
+        if (itemType == null) {
+            return 0;
+        }
+        return itemType.getId();
     }
 
     @Override
