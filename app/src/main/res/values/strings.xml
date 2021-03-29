@@ -476,4 +476,5 @@
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
     <string name="skip_update">Skip this update</string>
+    <string name="on_latest_version">You\'re already on the latest version</string>
 </resources>

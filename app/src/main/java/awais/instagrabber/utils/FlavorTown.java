@@ -1,12 +1,16 @@
 package awais.instagrabber.utils;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -16,6 +20,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public final class FlavorTown {
     private static final String TAG = "FlavorTown";
     private static final UpdateChecker UPDATE_CHECKER = UpdateChecker.getInstance();
+    private static final Pattern VERSION_NAME_PATTERN = Pattern.compile("v?(\\d+\\.\\d+\\.\\d+)(?:_?)(\\w*)(?:-?)(\\w*)");
 
     private static boolean checking = false;
 
@@ -28,19 +33,40 @@ public final class FlavorTown {
         if (checking) return;
         checking = true;
         AppExecutors.getInstance().networkIO().execute(() -> {
-            final String version = UPDATE_CHECKER.getLatestVersion();
-            if (version == null) return;
-            if (force && version.equals(BuildConfig.VERSION_NAME)) {
-                Toast.makeText(context, "You're already on the latest version", Toast.LENGTH_SHORT).show();
+            final String onlineVersionName = UPDATE_CHECKER.getLatestVersion();
+            if (onlineVersionName == null) return;
+            final String onlineVersion = getVersion(onlineVersionName);
+            final String localVersion = getVersion(BuildConfig.VERSION_NAME);
+            if (Objects.equals(onlineVersion, localVersion)) {
+                if (force) {
+                    AppExecutors.getInstance().mainThread().execute(() -> {
+                        final Context applicationContext = context.getApplicationContext();
+                        // Check if app was closed or crashed before reaching here
+                        if (applicationContext == null) return;
+                        // Show toast if version number preference was tapped
+                        Toast.makeText(applicationContext, R.string.on_latest_version, Toast.LENGTH_SHORT).show();
+                    });
+                }
                 return;
             }
-            final boolean shouldShowDialog = UpdateCheckCommon.shouldShowUpdateDialog(force, version);
+            final boolean shouldShowDialog = UpdateCheckCommon.shouldShowUpdateDialog(force, onlineVersionName);
             if (!shouldShowDialog) return;
-            UpdateCheckCommon.showUpdateDialog(context, version, (dialog, which) -> {
+            UpdateCheckCommon.showUpdateDialog(context, onlineVersionName, (dialog, which) -> {
                 UPDATE_CHECKER.onDownload(context);
                 dialog.dismiss();
             });
         });
+    }
+
+    private static String getVersion(@NonNull final String versionName) {
+        final Matcher matcher = VERSION_NAME_PATTERN.matcher(versionName);
+        if (!matcher.matches()) return versionName;
+        try {
+            return matcher.group(1);
+        } catch (Exception e) {
+            Log.e(TAG, "getVersion: ", e);
+        }
+        return versionName;
     }
 
     public static void changelogCheck(@NonNull final Context context) {

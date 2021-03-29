@@ -17,8 +17,7 @@ public final class UpdateCheckCommon {
     public static boolean shouldShowUpdateDialog(final boolean force,
                                                  @NonNull final String version) {
         final String skippedVersion = settingsHelper.getString(Constants.SKIPPED_VERSION);
-        return force || (!version.equals(BuildConfig.VERSION_NAME) && !BuildConfig.DEBUG && !skippedVersion
-                .equals(version));
+        return force || (!BuildConfig.DEBUG && !skippedVersion.equals(version));
     }
 
     public static void showUpdateDialog(@NonNull final Context context,
