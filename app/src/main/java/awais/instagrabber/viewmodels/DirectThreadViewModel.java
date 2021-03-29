@@ -241,6 +241,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         if (users != null && users.getValue() != null) {
             final List<User> userList = users.getValue();
             match = userList.stream()
+                            .filter(Objects::nonNull)
                             .filter(user -> user.getPk() == userId)
                             .findFirst()
                             .orElse(null);
@@ -250,6 +251,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
             if (leftUsers != null && leftUsers.getValue() != null) {
                 final List<User> userList = leftUsers.getValue();
                 match = userList.stream()
+                                .filter(Objects::nonNull)
                                 .filter(user -> user.getPk() == userId)
                                 .findFirst()
                                 .orElse(null);
