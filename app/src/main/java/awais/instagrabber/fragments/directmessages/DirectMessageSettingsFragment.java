@@ -85,7 +85,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                 args.getPending(),
                 appStateViewModel.getCurrentUser()
         );
-        viewModel = new ViewModelProvider(fragmentActivity, viewModelFactory).get(DirectSettingsViewModel.class);
+        viewModel = new ViewModelProvider(this, viewModelFactory).get(DirectSettingsViewModel.class);
     }
 
     @NonNull

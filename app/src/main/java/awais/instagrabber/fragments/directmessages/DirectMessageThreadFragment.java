@@ -58,6 +58,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import awais.instagrabber.ProfileNavGraphDirections;
 import awais.instagrabber.R;
@@ -258,7 +259,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
 
         @Override
-        public void onOptionSelect(final DirectItem item, final int itemId) {
+        public void onOptionSelect(final DirectItem item, final int itemId, final Function<DirectItem, Void> cb) {
             if (itemId == R.id.unsend) {
                 handleSentMessage(viewModel.unsend(item));
                 return;
@@ -275,21 +276,17 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 final NavController navController = NavHostFragment.findNavController(DirectMessageThreadFragment.this);
                 navController.navigate(actionGlobalUserSearch);
             }
-            if (itemId == R.id.detail) {
-                final Context context = getContext();
-                if (context == null) return;
-                final DirectItemType itemType = item.getItemType();
-                switch (itemType) {
-                    case ANIMATED_MEDIA:
-                        Utils.openURL(context, "https://giphy.com/gifs/" + item.getAnimatedMedia().getId());
-                        break;
-                    case VOICE_MEDIA:
-                        downloadItem(item.getVoiceMedia() == null ? null : item.getVoiceMedia().getMedia(), context);
-                        break;
-                }
+            if (itemId == R.id.download) {
+                downloadItem(item);
+                return;
+            }
+            // otherwise call callback if present
+            if (cb != null) {
+                cb.apply(item);
             }
         }
     };
+
     private final DirectItemLongClickListener directItemLongClickListener = position -> {
         // viewModel.setSelectedPosition(position);
     };
@@ -319,6 +316,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
     private MenuItem markAsSeenMenuItem;
+    private Media tempMedia;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -335,7 +333,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 fragmentArgs.getPending(),
                 appStateViewModel.getCurrentUser()
         );
-        viewModel = new ViewModelProvider(fragmentActivity, viewModelFactory).get(DirectThreadViewModel.class);
+        viewModel = new ViewModelProvider(this, viewModelFactory).get(DirectThreadViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -456,7 +454,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final Context context = getContext();
         if (context == null) return;
         if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            // downloadItem(context);
+            if (tempMedia == null) return;
+            downloadItem(context, tempMedia);
+            return;
         }
         if (requestCode == AUDIO_RECORD_PERM_REQUEST_CODE) {
             if (PermissionUtils.hasAudioRecordPerms(context)) {
@@ -1319,18 +1319,31 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         appExecutors.mainThread().execute(prevTitleRunnable, 1000);
     }
 
+    private void downloadItem(final DirectItem item) {
+        final Context context = getContext();
+        if (context == null) return;
+        final DirectItemType itemType = item.getItemType();
+        //noinspection SwitchStatementWithTooFewBranches
+        switch (itemType) {
+            case VOICE_MEDIA:
+                downloadItem(context, item.getVoiceMedia() == null ? null : item.getVoiceMedia().getMedia());
+                break;
+        }
+    }
+
     // currently ONLY for voice
-    private void downloadItem(final Media media, final Context context) {
+    private void downloadItem(@NonNull final Context context, final Media media) {
         if (media == null) {
             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-        } else {
-            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-                DownloadUtils.download(context, media);
-            } else {
-                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
-            }
-            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+            return;
         }
+        if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+            DownloadUtils.download(context, media);
+            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        tempMedia = media;
+        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
     }
 
     @NonNull

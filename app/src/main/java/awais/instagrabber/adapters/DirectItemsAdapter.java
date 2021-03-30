@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemActionLogViewHolder;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemAnimatedMediaViewHolder;
@@ -404,7 +405,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
 
         void onReactionClick(DirectItem item, int position);
 
-        void onOptionSelect(DirectItem item, @IdRes int itemId);
+        void onOptionSelect(DirectItem item, @IdRes int itemId, final Function<DirectItem, Void> callback);
     }
 
     public interface DirectItemInternalLongClickListener {
