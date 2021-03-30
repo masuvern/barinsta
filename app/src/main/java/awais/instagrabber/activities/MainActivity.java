@@ -142,8 +142,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         RetrofitFactory.setup(this);
+        super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         CookieUtils.setupCookies(cookie);
@@ -253,7 +253,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             Log.e(TAG, "onDestroy: ", e);
         }
         unbindActivityCheckerService();
-         RetrofitFactory.getInstance().destroy();
+        RetrofitFactory.getInstance().destroy();
     }
 
     @Override
@@ -852,5 +852,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public Toolbar getToolbar() {
         return binding.toolbar;
+    }
+
+    public View getRootView() {
+        return binding.getRoot();
     }
 }

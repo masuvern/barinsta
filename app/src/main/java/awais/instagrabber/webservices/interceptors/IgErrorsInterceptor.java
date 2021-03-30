@@ -1,9 +1,12 @@
 package awais.instagrabber.webservices.interceptors;
 
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONObject;
 
@@ -51,6 +54,16 @@ public class IgErrorsInterceptor implements Interceptor {
                 // show dialog?
                 Log.e(TAG, "Network error: " + getMessage(errorCode, "The request start-line and/or headers are too large to process."));
                 return;
+            case 404:
+                showErrorDialog(R.string.not_found);
+                return;
+            case 302: // redirect
+                final String location = response.header("location");
+                if (location.equals("https://www.instagram.com/accounts/login/")) {
+                    // rate limited
+                    showErrorDialog(R.string.rate_limit);
+                }
+                return;
         }
         final ResponseBody body = response.body();
         if (body == null) return;
@@ -67,9 +80,13 @@ public class IgErrorsInterceptor implements Interceptor {
                     case "login_required":
                         showErrorDialog(R.string.login_required);
                         return;
+                    case "execution failure":
+                        showSnackbar(message);
+                        return;
                     case "not authorized to view user": // Do we handle this in profile view fragment?
                     case "challenge_required": // Since we make users login using browser, we should not be getting this error in api requests
                     default:
+                        showSnackbar(message);
                         Log.e(TAG, "checkError: " + bodyString);
                         return;
                 }
@@ -86,6 +103,12 @@ public class IgErrorsInterceptor implements Interceptor {
         } catch (Exception e) {
             Log.e(TAG, "checkError: ", e);
         }
+    }
+
+    private void showSnackbar(final String message) {
+        final View view = mainActivity.getRootView();
+        if (view == null) return;
+        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
     }
 
     @NonNull
