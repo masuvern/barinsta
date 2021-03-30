@@ -134,7 +134,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             containerLayoutParams.setMarginStart(0);
             containerLayoutParams.setMarginEnd(0);
         }
-        if (itemType == DirectItemType.TEXT || itemType == DirectItemType.LINK) {
+        if (itemType == DirectItemType.TEXT || itemType == DirectItemType.LINK || itemType == DirectItemType.UNKNOWN) {
             binding.messageInfo.setPadding(0, 0, dmRadius, dmRadiusSmall);
         } else {
             if (showMessageInfo()) {
