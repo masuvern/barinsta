@@ -329,11 +329,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final Bundle arguments = getArguments();
         if (arguments == null) return;
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
-        viewModel = new ViewModelProvider(this, new DirectThreadViewModelFactory(fragmentActivity.getApplication(),
-                                                                                 fragmentArgs.getThreadId(),
-                                                                                 fragmentArgs.getPending(),
-                                                                                 appStateViewModel.getCurrentUser()))
-                .get(DirectThreadViewModel.class);
+        final DirectThreadViewModelFactory viewModelFactory = new DirectThreadViewModelFactory(
+                fragmentActivity.getApplication(),
+                fragmentArgs.getThreadId(),
+                fragmentArgs.getPending(),
+                appStateViewModel.getCurrentUser()
+        );
+        viewModel = new ViewModelProvider(fragmentActivity, viewModelFactory).get(DirectThreadViewModel.class);
         setHasOptionsMenu(true);
     }
 
