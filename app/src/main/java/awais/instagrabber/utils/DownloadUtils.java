@@ -277,8 +277,8 @@ public final class DownloadUtils {
                            : storyModel.getStoryUrl();
         final String baseFileName = storyModel.getStoryMediaId() + "_"
                 + storyModel.getTimestamp() + DownloadUtils.getFileExtensionFromUrl(url);
-        String usernamePrepend = (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
-                && storyModel.getUsername() != null) ? "@" + storyModel.getUsername() + "_" : "";
+        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
+                && storyModel.getUsername() != null ? "@" + storyModel.getUsername() + "_" : "";
         final File saveFile = new File(downloadDir,
                  usernamePrepend + baseFileName);
         download(context, url, saveFile.getAbsolutePath());
