@@ -12,7 +12,6 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -604,12 +603,16 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             usernameTemp = usernameTemp.substring(1);
         }
         if (TextUtils.isEmpty(usernameTemp)) {
-            profileModel = appStateViewModel.getCurrentUser();
-            username = profileModel.getUsername();
-            setUsernameDelayed();
-            setProfileDetails();
+            appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
+                if (user == null) return;
+                profileModel = user;
+                username = profileModel.getUsername();
+                setUsernameDelayed();
+                setProfileDetails();
+            });
+            return;
         }
-        else if (isLoggedIn) {
+        if (isLoggedIn) {
             userService.getUsernameInfo(usernameTemp, new ServiceCallback<User>() {
                 @Override
                 public void onSuccess(final User user) {
@@ -643,26 +646,25 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     } catch (final Throwable ignored) {}
                 }
             });
+            return;
         }
-        else {
-            graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User user) {
-                    profileModel = user;
-                    setProfileDetails();
-                }
+        graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
+            @Override
+            public void onSuccess(final User user) {
+                profileModel = user;
+                setProfileDetails();
+            }
 
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error fetching profile", t);
-                    final Context context = getContext();
-                    try {
-                        if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
-                        else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    } catch (final Throwable ignored) {}
-                }
-            });
-        }
+            @Override
+            public void onFailure(final Throwable t) {
+                Log.e(TAG, "Error fetching profile", t);
+                final Context context = getContext();
+                try {
+                    if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
+                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                } catch (final Throwable ignored) {}
+            }
+        });
     }
 
     private void setProfileDetails() {
@@ -987,6 +989,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateAccountInfo() {
+        if (profileModel == null) return;
         accountRepository.insertOrUpdateAccount(
                 profileModel.getPk(),
                 profileModel.getUsername(),
