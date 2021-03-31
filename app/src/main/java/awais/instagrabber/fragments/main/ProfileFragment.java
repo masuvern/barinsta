@@ -604,10 +604,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             usernameTemp = usernameTemp.substring(1);
         }
         if (TextUtils.isEmpty(usernameTemp)) {
-            profileModel = appStateViewModel.getCurrentUser();
-            username = profileModel.getUsername();
-            setUsernameDelayed();
-            setProfileDetails();
+                profileModel = appStateViewModel.getCurrentUser();
+            if (profileModel != null) {
+                username = profileModel.getUsername();
+                setUsernameDelayed();
+                setProfileDetails();
+            }
         }
         else if (isLoggedIn) {
             userService.getUsernameInfo(usernameTemp, new ServiceCallback<User>() {
