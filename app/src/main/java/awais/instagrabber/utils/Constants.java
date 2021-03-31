@@ -20,6 +20,7 @@ public final class Constants {
     // boolean prefs
     public static final String DOWNLOAD_USER_FOLDER = "download_user_folder";
     public static final String TOGGLE_KEYWORD_FILTER = "toggle_keyword_filter";
+    public static final String DOWNLOAD_PREPEND_USER_NAME = "download_user_name";
     // deprecated: public static final String BOTTOM_TOOLBAR = "bottom_toolbar";
     public static final String FOLDER_SAVE_TO = "saved_to";
     public static final String AUTOPLAY_VIDEOS = "autoplay_videos";
