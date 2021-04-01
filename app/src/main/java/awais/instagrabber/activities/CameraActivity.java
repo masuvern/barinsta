@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import awais.instagrabber.databinding.ActivityCameraBinding;
-import awais.instagrabber.utils.DirectoryUtils;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.PermissionUtils;
 import awais.instagrabber.utils.Utils;
 
@@ -74,7 +74,7 @@ public class CameraActivity extends BaseLanguageActivity {
         setContentView(binding.getRoot());
         Utils.transparentStatusBar(this, true, false);
         displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-        outputDirectory = DirectoryUtils.getOutputMediaDirectory(this, "Camera");
+        outputDirectory = DownloadUtils.getCameraDir();
         cameraExecutor = Executors.newSingleThreadExecutor();
         displayManager.registerDisplayListener(displayListener, null);
         binding.viewFinder.post(() -> {

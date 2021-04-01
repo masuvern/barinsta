@@ -41,26 +41,54 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.workers.DownloadWorker;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
-
 public final class DownloadUtils {
-    private static final String TAG = "DownloadUtils";
+    private static final String TAG = DownloadUtils.class.getSimpleName();
 
     public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    public static final String DIR_BARINSTA = "Barinsta";
+    public static final String DIR_DOWNLOADS = "Downloads";
+    public static final String DIR_CAMERA = "Camera";
+    public static final String DIR_EDIT = "Edit";
 
-    @NonNull
-    private static File getDownloadDir() {
-        File dir = new File(Environment.getExternalStorageDirectory(), "Download");
-
-        if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-            final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
-            if (!TextUtils.isEmpty(customPath)) {
-                dir = new File(customPath);
+    public static File getDownloadDir(final String... dirs) {
+        final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
+        File subDir = new File(parent, DIR_BARINSTA);
+        if (dirs != null) {
+            for (final String dir : dirs) {
+                subDir = new File(subDir, dir);
+                //noinspection ResultOfMethodCallIgnored
+                subDir.mkdirs();
             }
         }
-        return dir;
+        return subDir;
+    }
+
+    @NonNull
+    public static File getDownloadDir() {
+        // final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
+        // final File dir = new File(new File(parent, "barinsta"), "downloads");
+        // if (!dir.exists()) {
+        //     final boolean mkdirs = dir.mkdirs();
+        //     if (!mkdirs) {
+        //         Log.e(TAG, "getDownloadDir: failed to create dir");
+        //     }
+        // }
+        // if (Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
+        //     final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
+        //     if (!TextUtils.isEmpty(customPath)) {
+        //         dir = new File(customPath);
+        //     }
+        // }
+        return getDownloadDir(DIR_DOWNLOADS);
+    }
+
+    public static File getCameraDir() {
+        return getDownloadDir(DIR_CAMERA);
+    }
+
+    public static File getImageEditDir(final String sessionId) {
+        return getDownloadDir(DIR_EDIT, sessionId);
     }
 
     @Nullable

@@ -991,7 +991,7 @@ public final class ThreadManager {
                            @NonNull final Uri uri) {
         try {
             final Pair<Integer, Integer> dimensions = BitmapUtils.decodeDimensions(contentResolver, uri);
-            if (dimensions == null) {
+            if (dimensions == null || dimensions.first == null || dimensions.second == null) {
                 data.postValue(Resource.error("Decoding dimensions failed", null));
                 return;
             }

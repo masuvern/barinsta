@@ -2,8 +2,11 @@ package awais.instagrabber.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,27 +17,25 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentTransaction;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import awais.instagrabber.databinding.DialogCreateBackupBinding;
-import awais.instagrabber.utils.DirectoryChooser;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.ExportImportUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.DownloadUtils.PERMS;
+import static android.app.Activity.RESULT_OK;
 
 public class CreateBackupDialogFragment extends DialogFragment {
+    private static final String TAG = CreateBackupDialogFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final SimpleDateFormat BACKUP_FILE_DATE_TIME_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
+    private static final int CREATE_FILE_REQUEST_CODE = 1;
 
     private final OnResultListener onResultListener;
     private DialogCreateBackupBinding binding;
@@ -113,59 +114,112 @@ public class CreateBackupDialogFragment extends DialogFragment {
             imm.hideSoftInputFromWindow(binding.etPassword.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         });
         binding.btnSaveTo.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-                showChooser(context);
-            } else {
-                requestPermissions(PERMS, STORAGE_PERM_REQUEST_CODE);
-            }
+            createFile();
+            // if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+            //     showChooser(context);
+            // } else {
+            //     requestPermissions(PERMS, STORAGE_PERM_REQUEST_CODE);
+            // }
         });
     }
 
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            final Context context = getContext();
-            if (context == null) return;
-            showChooser(context);
-        }
+        // if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        //     final Context context = getContext();
+        //     if (context == null) return;
+        //     showChooser(context);
+        // }
     }
 
-    private void showChooser(@NonNull final Context context) {
-        final String folderPath = Utils.settingsHelper.getString(FOLDER_PATH);
+    @Override
+    public void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+        if (data == null || data.getData() == null) return;
+        if (resultCode != RESULT_OK || requestCode != CREATE_FILE_REQUEST_CODE) return;
+        final Context context = getContext();
+        if (context == null) return;
         final Editable passwordText = binding.etPassword.getText();
         final String password = binding.cbPassword.isChecked()
                                         && passwordText != null
                                         && !TextUtils.isEmpty(passwordText.toString())
                                 ? passwordText.toString().trim()
                                 : null;
-        final DirectoryChooser directoryChooser = new DirectoryChooser()
-                .setInitialDirectory(folderPath)
-                .setInteractionListener(path -> {
-                    final Date now = new Date();
-                    final File file = new File(path, String.format("barinsta_%s.backup", BACKUP_FILE_DATE_TIME_FORMAT.format(now)));
-                    int flags = 0;
-                    if (binding.cbExportFavorites.isChecked()) {
-                        flags |= ExportImportUtils.FLAG_FAVORITES;
-                    }
-                    if (binding.cbExportSettings.isChecked()) {
-                        flags |= ExportImportUtils.FLAG_SETTINGS;
-                    }
-                    if (binding.cbExportLogins.isChecked()) {
-                        flags |= ExportImportUtils.FLAG_COOKIES;
-                    }
-                    ExportImportUtils.exportData(context, flags, file, password, result -> {
-                        if (onResultListener != null) {
-                            onResultListener.onResult(result);
-                        }
-                        dismiss();
-                    });
-
-                });
-        directoryChooser.setEnterTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        directoryChooser.setExitTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        directoryChooser.show(getChildFragmentManager(), "directory_chooser");
+        int flags = 0;
+        if (binding.cbExportFavorites.isChecked()) {
+            flags |= ExportImportUtils.FLAG_FAVORITES;
+        }
+        if (binding.cbExportSettings.isChecked()) {
+            flags |= ExportImportUtils.FLAG_SETTINGS;
+        }
+        if (binding.cbExportLogins.isChecked()) {
+            flags |= ExportImportUtils.FLAG_COOKIES;
+        }
+        ExportImportUtils.exportData(context, flags, data.getData(), password, result -> {
+            if (onResultListener != null) {
+                onResultListener.onResult(result);
+            }
+            dismiss();
+        });
+        // try (final OutputStream stream = context.getContentResolver().openOutputStream(data.getData())) {
+        // } catch (Exception e) {
+        //     Log.e(TAG, "onActivityResult: ", e);
+        // }
     }
+
+    // private void showChooser(@NonNull final Context context) {
+    //     final String folderPath = Utils.settingsHelper.getString(FOLDER_PATH);
+    //     final Editable passwordText = binding.etPassword.getText();
+    //     final String password = binding.cbPassword.isChecked()
+    //                                     && passwordText != null
+    //                                     && !TextUtils.isEmpty(passwordText.toString())
+    //                             ? passwordText.toString().trim()
+    //                             : null;
+    //     final DirectoryChooser directoryChooser = new DirectoryChooser()
+    //             .setInitialDirectory(folderPath)
+    //             .setInteractionListener(path -> {
+    //                 final Date now = new Date();
+    //                 final File file = new File(path, String.format("barinsta_%s.backup", BACKUP_FILE_DATE_TIME_FORMAT.format(now)));
+    //                 int flags = 0;
+    //                 if (binding.cbExportFavorites.isChecked()) {
+    //                     flags |= ExportImportUtils.FLAG_FAVORITES;
+    //                 }
+    //                 if (binding.cbExportSettings.isChecked()) {
+    //                     flags |= ExportImportUtils.FLAG_SETTINGS;
+    //                 }
+    //                 if (binding.cbExportLogins.isChecked()) {
+    //                     flags |= ExportImportUtils.FLAG_COOKIES;
+    //                 }
+    //                 ExportImportUtils.exportData(context, flags, file, password, result -> {
+    //                     if (onResultListener != null) {
+    //                         onResultListener.onResult(result);
+    //                     }
+    //                     dismiss();
+    //                 });
+    //
+    //             });
+    //     directoryChooser.setEnterTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+    //     directoryChooser.setExitTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+    //     directoryChooser.show(getChildFragmentManager(), "directory_chooser");
+    // }
+
+    private void createFile() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/octet-stream");
+        final Date now = new Date();
+        final String fileName = String.format("barinsta_%s.backup", BACKUP_FILE_DATE_TIME_FORMAT.format(now));
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+
+        // Optionally, specify a URI for the directory that should be opened in
+        // the system file picker when your app creates the document.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.fromFile(DownloadUtils.getDownloadDir()));
+        }
+
+        startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);
+    }
+
 
     public interface OnResultListener {
         void onResult(boolean result);

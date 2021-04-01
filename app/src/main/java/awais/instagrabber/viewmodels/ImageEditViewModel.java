@@ -24,7 +24,7 @@ import awais.instagrabber.fragments.imageedit.filters.filters.Filter;
 import awais.instagrabber.fragments.imageedit.filters.properties.Property;
 import awais.instagrabber.models.SavedImageEditState;
 import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.DirectoryUtils;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.SerializablePair;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
@@ -56,7 +56,7 @@ public class ImageEditViewModel extends AndroidViewModel {
     public ImageEditViewModel(final Application application) {
         super(application);
         sessionId = SIMPLE_DATE_FORMAT.format(new Date());
-        outputDir = DirectoryUtils.getOutputMediaDirectory(application, "Edit", sessionId);
+        outputDir = DownloadUtils.getImageEditDir(sessionId);
         destinationFile = new File(outputDir, RESULT + ".jpg");
         destinationUri = Uri.fromFile(destinationFile);
         cropDestinationUri = Uri.fromFile(new File(outputDir, CROP + ".jpg"));

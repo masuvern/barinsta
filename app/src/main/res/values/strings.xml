@@ -477,4 +477,6 @@
     <string name="crash_report_title">Select an email app to send crash logs</string>
     <string name="copy_caption">Copy caption</string>
     <string name="copy_reply">Copy reply</string>
+    <string name="restore">Restore</string>
+    <string name="backup">Backup</string>
 </resources>

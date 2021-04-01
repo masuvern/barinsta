@@ -34,7 +34,7 @@ import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.repositories.responses.giphy.GiphyGif;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DirectoryUtils;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.MediaController;
 import awais.instagrabber.utils.MediaUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -72,7 +72,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
             throw new IllegalArgumentException("User is not logged in!");
         }
         contentResolver = application.getContentResolver();
-        recordingsDir = DirectoryUtils.getOutputMediaDirectory(application, "Recordings");
+        recordingsDir = DownloadUtils.getDownloadDir("Recordings");
         final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
         threadManager = messagesManager.getThreadManager(threadId, pending, currentUser, contentResolver);
         threadManager.fetchPendingRequests();

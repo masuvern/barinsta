@@ -74,9 +74,6 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-//import awaisomereport.LogCollector;
-//import static awais.instagrabber.utils.Utils.logCollector;
-
 public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "HashTagFragment";
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;

@@ -12,13 +12,13 @@ def getGitHash = { ->
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId 'me.austinhuang.instagrabber'
 
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
 
         versionCode 60
         versionName '19.1.0'

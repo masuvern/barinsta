@@ -50,19 +50,15 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-//import javax.crypto.Mac;
-//import javax.crypto.spec.SecretKeySpec;
-
 import awais.instagrabber.R;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
-//import awaisomereport.LogCollector;
 
 public final class Utils {
     private static final String TAG = "Utils";
     private static final int VIDEO_CACHE_MAX_BYTES = 10 * 1024 * 1024;
 
-//    public static LogCollector logCollector;
+    //    public static LogCollector logCollector;
     public static SettingsHelper settingsHelper;
     public static boolean sessionVolumeFull = false;
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
@@ -93,34 +89,34 @@ public final class Utils {
     }
 
     public static Map<String, String> sign(final Map<String, Object> form) {
-//        final String signed = sign(Constants.SIGNATURE_KEY, new JSONObject(form).toString());
-//        if (signed == null) {
-//            return null;
-//        }
+        // final String signed = sign(Constants.SIGNATURE_KEY, new JSONObject(form).toString());
+        // if (signed == null) {
+        //     return null;
+        // }
         final Map<String, String> map = new HashMap<>();
-//        map.put("ig_sig_key_version", Constants.SIGNATURE_VERSION);
-//        map.put("signed_body", signed);
+        // map.put("ig_sig_key_version", Constants.SIGNATURE_VERSION);
+        // map.put("signed_body", signed);
         map.put("signed_body", "SIGNATURE." + new JSONObject(form).toString());
         return map;
     }
 
-//    public static String sign(final String key, final String message) {
-//        try {
-//            final Mac hasher = Mac.getInstance("HmacSHA256");
-//            hasher.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
-//            byte[] hash = hasher.doFinal(message.getBytes());
-//            final StringBuilder hexString = new StringBuilder();
-//            for (byte b : hash) {
-//                final String hex = Integer.toHexString(0xff & b);
-//                if (hex.length() == 1) hexString.append('0');
-//                hexString.append(hex);
-//            }
-//            return hexString.toString() + "." + message;
-//        } catch (Exception e) {
-//            Log.e(TAG, "Error signing", e);
-//            return null;
-//        }
-//    }
+    // public static String sign(final String key, final String message) {
+    //     try {
+    //         final Mac hasher = Mac.getInstance("HmacSHA256");
+    //         hasher.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
+    //         byte[] hash = hasher.doFinal(message.getBytes());
+    //         final StringBuilder hexString = new StringBuilder();
+    //         for (byte b : hash) {
+    //             final String hex = Integer.toHexString(0xff & b);
+    //             if (hex.length() == 1) hexString.append('0');
+    //             hexString.append(hex);
+    //         }
+    //         return hexString.toString() + "." + message;
+    //     } catch (Exception e) {
+    //         Log.e(TAG, "Error signing", e);
+    //         return null;
+    //     }
+    // }
 
     public static String getMimeType(@NonNull final Uri uri, final ContentResolver contentResolver) {
         String mimeType;

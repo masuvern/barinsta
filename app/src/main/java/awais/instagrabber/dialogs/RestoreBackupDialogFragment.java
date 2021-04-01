@@ -1,12 +1,18 @@
 package awais.instagrabber.dialogs;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,30 +21,28 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentTransaction;
-
-import java.io.File;
 
 import awais.instagrabber.databinding.DialogRestoreBackupBinding;
-import awais.instagrabber.utils.DirectoryChooser;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.ExportImportUtils;
 import awais.instagrabber.utils.PasswordUtils.IncorrectPasswordException;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.DownloadUtils.PERMS;
+import static android.app.Activity.RESULT_OK;
 
 public class RestoreBackupDialogFragment extends DialogFragment {
+    private static final String TAG = RestoreBackupDialogFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
+    private static final int OPEN_FILE_REQUEST_CODE = 1;
 
     private OnResultListener onResultListener;
 
     private DialogRestoreBackupBinding binding;
-    private File file;
+    // private File file;
     private boolean isEncrypted;
+    private Uri uri;
 
     public RestoreBackupDialogFragment() {}
 
@@ -83,18 +87,62 @@ public class RestoreBackupDialogFragment extends DialogFragment {
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            showChooser();
+        // if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        //     showChooser();
+        // }
+    }
+
+    @Override
+    public void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+        if (data == null || data.getData() == null) return;
+        if (resultCode != RESULT_OK || requestCode != OPEN_FILE_REQUEST_CODE) return;
+        final Context context = getContext();
+        if (context == null) return;
+        isEncrypted = ExportImportUtils.isEncrypted(context, data.getData());
+        if (isEncrypted) {
+            binding.passwordGroup.setVisibility(View.VISIBLE);
+            binding.passwordGroup.post(() -> {
+                binding.etPassword.requestFocus();
+                binding.etPassword.post(() -> {
+                    final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm == null) return;
+                    imm.showSoftInput(binding.etPassword, InputMethodManager.SHOW_IMPLICIT);
+                });
+                binding.btnRestore.setEnabled(!TextUtils.isEmpty(binding.etPassword.getText()));
+            });
+        } else {
+            binding.passwordGroup.setVisibility(View.GONE);
+            binding.btnRestore.setEnabled(true);
         }
+        uri = data.getData();
+        AppExecutors.getInstance().mainThread().execute(() -> {
+            Cursor c = null;
+            try {
+                String[] projection = {MediaStore.Files.FileColumns.DISPLAY_NAME};
+                final ContentResolver contentResolver = context.getContentResolver();
+                c = contentResolver.query(uri, projection, null, null, null);
+                if (c != null) {
+                    while (c.moveToNext()) {
+                        final String displayName = c.getString(0);
+                        binding.filePath.setText(displayName);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "onActivityResult: ", e);
+            } finally {
+                if (c != null) {
+                    c.close();
+                }
+            }
+        });
     }
 
     private void init() {
         final Context context = getContext();
-        if (context == null) {
-            return;
-        }
+        if (context == null) return;
         binding.btnRestore.setEnabled(false);
-        binding.btnRestore.setOnClickListener(v -> new Handler().post(() -> {
+        binding.btnRestore.setOnClickListener(v -> new Handler(Looper.getMainLooper()).post(() -> {
+            if (uri == null) return;
             int flags = 0;
             if (binding.cbFavorites.isChecked()) {
                 flags |= ExportImportUtils.FLAG_FAVORITES;
@@ -111,7 +159,7 @@ public class RestoreBackupDialogFragment extends DialogFragment {
                 ExportImportUtils.importData(
                         context,
                         flags,
-                        file,
+                        uri,
                         !isEncrypted ? null : text.toString(),
                         result -> {
                             if (onResultListener != null) {
@@ -137,45 +185,55 @@ public class RestoreBackupDialogFragment extends DialogFragment {
             @Override
             public void afterTextChanged(final Editable s) {}
         });
-        if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-            showChooser();
-            return;
-        }
-        requestPermissions(PERMS, STORAGE_PERM_REQUEST_CODE);
+        // if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+        //     showChooser();
+        //     return;
+        // }
+        // requestPermissions(PERMS, STORAGE_PERM_REQUEST_CODE);
+        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        // intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        // intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+        //         "application/pdf", // .pdf
+        //         "application/vnd.oasis.opendocument.text", // .odt
+        //         "text/plain" // .txt
+        // });
+        startActivityForResult(intent, OPEN_FILE_REQUEST_CODE);
+
     }
 
-    private void showChooser() {
-        final String folderPath = Utils.settingsHelper.getString(FOLDER_PATH);
-        final Context context = getContext();
-        if (context == null) return;
-        final DirectoryChooser directoryChooser = new DirectoryChooser()
-                .setInitialDirectory(folderPath)
-                .setShowBackupFiles(true)
-                .setInteractionListener(file -> {
-                    isEncrypted = ExportImportUtils.isEncrypted(file);
-                    if (isEncrypted) {
-                        binding.passwordGroup.setVisibility(View.VISIBLE);
-                        binding.passwordGroup.post(() -> {
-                            binding.etPassword.requestFocus();
-                            binding.etPassword.post(() -> {
-                                final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if (imm == null) return;
-                                imm.showSoftInput(binding.etPassword, InputMethodManager.SHOW_IMPLICIT);
-                            });
-                            binding.btnRestore.setEnabled(!TextUtils.isEmpty(binding.etPassword.getText()));
-                        });
-                    } else {
-                        binding.passwordGroup.setVisibility(View.GONE);
-                        binding.btnRestore.setEnabled(true);
-                    }
-                    this.file = file;
-                    binding.filePath.setText(file.getAbsolutePath());
-                });
-        directoryChooser.setEnterTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        directoryChooser.setExitTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        directoryChooser.setOnCancelListener(this::dismiss);
-        directoryChooser.show(getChildFragmentManager(), "directory_chooser");
-    }
+    // private void showChooser() {
+    //     final String folderPath = Utils.settingsHelper.getString(FOLDER_PATH);
+    //     final Context context = getContext();
+    //     if (context == null) return;
+    //     final DirectoryChooser directoryChooser = new DirectoryChooser()
+    //             .setInitialDirectory(folderPath)
+    //             .setShowBackupFiles(true)
+    //             .setInteractionListener(file -> {
+    //                 isEncrypted = ExportImportUtils.isEncrypted(file);
+    //                 if (isEncrypted) {
+    //                     binding.passwordGroup.setVisibility(View.VISIBLE);
+    //                     binding.passwordGroup.post(() -> {
+    //                         binding.etPassword.requestFocus();
+    //                         binding.etPassword.post(() -> {
+    //                             final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+    //                             if (imm == null) return;
+    //                             imm.showSoftInput(binding.etPassword, InputMethodManager.SHOW_IMPLICIT);
+    //                         });
+    //                         binding.btnRestore.setEnabled(!TextUtils.isEmpty(binding.etPassword.getText()));
+    //                     });
+    //                 } else {
+    //                     binding.passwordGroup.setVisibility(View.GONE);
+    //                     binding.btnRestore.setEnabled(true);
+    //                 }
+    //                 this.file = file;
+    //                 binding.filePath.setText(file.getAbsolutePath());
+    //             });
+    //     directoryChooser.setEnterTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+    //     directoryChooser.setExitTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+    //     directoryChooser.setOnCancelListener(this::dismiss);
+    //     directoryChooser.show(getChildFragmentManager(), "directory_chooser");
+    // }
 
     public interface OnResultListener {
         void onResult(boolean result);

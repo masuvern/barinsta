@@ -2,7 +2,6 @@ package awais.instagrabber.utils;
 
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -76,10 +75,10 @@ public final class ResponseBodyUtils {
             if (lastIndexMain >= 0) return sources[lastIndexMain];
             else if (lastIndexBase >= 0) return sources[lastIndexBase];
         } catch (final Exception e) {
-//            if (Utils.logCollector != null)
-//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
-//                                                   new Pair<>("resourcesNull", resources == null),
-//                                                   new Pair<>("isVideo", isVideo));
+            // if (Utils.logCollector != null)
+            //     Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
+            //                                        new Pair<>("resourcesNull", resources == null),
+            //                                        new Pair<>("isVideo", isVideo));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return null;
@@ -94,9 +93,9 @@ public final class ResponseBodyUtils {
                 src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, false);
             if (src == null) return resources.getString("display_url");
         } catch (final Exception e) {
-//            if (Utils.logCollector != null)
-//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
-//                                                   new Pair<>("resourcesNull", resources == null));
+            // if (Utils.logCollector != null)
+            //     Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
+            //                                        new Pair<>("resourcesNull", resources == null));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return src;
@@ -732,8 +731,8 @@ public final class ResponseBodyUtils {
         final List<MediaCandidate> candidates = new ArrayList<MediaCandidate>();
         if (feedItem.has("display_resources") || feedItem.has("thumbnail_resources")) {
             final JSONArray displayResources = feedItem.has("display_resources")
-                    ? feedItem.getJSONArray("display_resources")
-                    : feedItem.getJSONArray("thumbnail_resources");
+                                               ? feedItem.getJSONArray("display_resources")
+                                               : feedItem.getJSONArray("thumbnail_resources");
             for (int i = 0; i < displayResources.length(); i++) {
                 final JSONObject displayResource = displayResources.getJSONObject(i);
                 candidates.add(new MediaCandidate(
@@ -1090,9 +1089,10 @@ public final class ResponseBodyUtils {
         if (imageVersions2 == null) return null;
         final List<MediaCandidate> candidates = imageVersions2.getCandidates();
         if (candidates == null || candidates.isEmpty()) return null;
-        final List<MediaCandidate> sortedCandidates = candidates.stream()
+        final List<MediaCandidate> sortedCandidates = candidates
+                .stream()
                 .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
-                .filter(c -> c.getWidth() < type.getValue())
+                // .filter(c -> c.getWidth() < type.getValue())
                 .collect(Collectors.toList());
         final MediaCandidate candidate = sortedCandidates.get(0);
         if (candidate == null) return null;

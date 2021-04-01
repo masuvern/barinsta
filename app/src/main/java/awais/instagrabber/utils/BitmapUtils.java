@@ -236,10 +236,15 @@ public final class BitmapUtils {
                                                           @NonNull final Uri uri) throws FileNotFoundException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(contentResolver.openInputStream(uri), null, options);
-        return (options.outWidth == -1 || options.outHeight == -1)
-               ? null
-               : new Pair<>(options.outWidth, options.outHeight);
+        try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
+            BitmapFactory.decodeStream(inputStream, null, options);
+            return (options.outWidth == -1 || options.outHeight == -1)
+                   ? null
+                   : new Pair<>(options.outWidth, options.outHeight);
+        } catch (IOException e) {
+            Log.e(TAG, "decodeDimensions: ", e);
+        }
+        return null;
     }
 
     public static File convertToJpegAndSaveToFile(@NonNull final Bitmap bitmap, @Nullable final File file) throws IOException {
