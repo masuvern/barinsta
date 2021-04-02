@@ -65,12 +65,13 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.LocationService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
-//import awaisomereport.LogCollector;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
+
+//import awaisomereport.LogCollector;
+//import static awais.instagrabber.utils.Utils.logCollector;
 
 public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "LocationFragment";

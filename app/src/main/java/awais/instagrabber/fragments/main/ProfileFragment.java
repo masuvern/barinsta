@@ -12,7 +12,6 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -307,6 +306,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private AccountRepository accountRepository;
     private FavoriteRepository favoriteRepository;
     private AppStateViewModel appStateViewModel;
+    private boolean disableDm = false;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -322,8 +322,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         userService = isLoggedIn ? UserService.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
-        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
+        final Context context = getContext();
+        if (context == null) return;
+        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
         setHasOptionsMenu(true);
     }
@@ -578,6 +580,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void init() {
+        disableDm = !Utils.isNavRootInCurrentTabs("direct_messages_nav_graph");
         if (getArguments() != null) {
             final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
             username = fragmentArgs.getUsername();
@@ -604,12 +607,16 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             usernameTemp = usernameTemp.substring(1);
         }
         if (TextUtils.isEmpty(usernameTemp)) {
-            profileModel = appStateViewModel.getCurrentUser();
-            username = profileModel.getUsername();
-            setUsernameDelayed();
-            setProfileDetails();
+            appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
+                if (user == null) return;
+                profileModel = user;
+                username = profileModel.getUsername();
+                setUsernameDelayed();
+                setProfileDetails();
+            });
+            return;
         }
-        else if (isLoggedIn) {
+        if (isLoggedIn) {
             userService.getUsernameInfo(usernameTemp, new ServiceCallback<User>() {
                 @Override
                 public void onSuccess(final User user) {
@@ -643,26 +650,25 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     } catch (final Throwable ignored) {}
                 }
             });
+            return;
         }
-        else {
-            graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User user) {
-                    profileModel = user;
-                    setProfileDetails();
-                }
+        graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
+            @Override
+            public void onSuccess(final User user) {
+                profileModel = user;
+                setProfileDetails();
+            }
 
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error fetching profile", t);
-                    final Context context = getContext();
-                    try {
-                        if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
-                        else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    } catch (final Throwable ignored) {}
-                }
-            });
-        }
+            @Override
+            public void onFailure(final Throwable t) {
+                Log.e(TAG, "Error fetching profile", t);
+                final Context context = getContext();
+                try {
+                    if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
+                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                } catch (final Throwable ignored) {}
+            }
+        });
     }
 
     private void setProfileDetails() {
@@ -936,7 +942,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             profileDetailsBinding.btnSaved.setVisibility(View.GONE);
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
-            profileDetailsBinding.btnDM.setVisibility(View.VISIBLE);
+            profileDetailsBinding.btnDM.setVisibility(disableDm ? View.GONE : View.VISIBLE);
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
@@ -987,6 +993,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateAccountInfo() {
+        if (profileModel == null) return;
         accountRepository.insertOrUpdateAccount(
                 profileModel.getPk(),
                 profileModel.getUsername(),
@@ -1113,23 +1120,25 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                                                                                               PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
-        profileDetailsBinding.btnDM.setOnClickListener(v -> {
-            profileDetailsBinding.btnDM.setEnabled(false);
-            new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
-                if (thread == null) {
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+        if (!disableDm) {
+            profileDetailsBinding.btnDM.setOnClickListener(v -> {
+                profileDetailsBinding.btnDM.setEnabled(false);
+                new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
+                    if (thread == null) {
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                        profileDetailsBinding.btnDM.setEnabled(true);
+                        return;
+                    }
+                    final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
+                    if (!inboxManager.containsThread(thread.getThreadId())) {
+                        thread.setTemp(true);
+                        inboxManager.addThread(thread, 0);
+                    }
+                    fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
                     profileDetailsBinding.btnDM.setEnabled(true);
-                    return;
-                }
-                final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
-                if (!inboxManager.containsThread(thread.getThreadId())) {
-                    thread.setTemp(true);
-                    inboxManager.addThread(thread, 0);
-                }
-                fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
-                profileDetailsBinding.btnDM.setEnabled(true);
-            }).execute();
-        });
+                }).execute();
+            });
+        }
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {
             if (!hasStories) {
                 // show profile pic

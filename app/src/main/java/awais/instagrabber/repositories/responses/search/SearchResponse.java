@@ -2,8 +2,6 @@ package awais.instagrabber.repositories.responses.search;
 
 import java.util.List;
 
-import awais.instagrabber.repositories.responses.User;
-
 public class SearchResponse {
     // app
     private final List<SearchItem> list;

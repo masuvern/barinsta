@@ -27,6 +27,7 @@ import java.util.List;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
 import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.entities.Account;
@@ -38,6 +39,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.UserService;
 
@@ -55,8 +57,10 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
+        final MainActivity activity = (MainActivity) getActivity();
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
+        final Resources resources = context.getResources();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
@@ -135,13 +139,30 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         screen.addPreference(getDivider(context));
         final NavController navController = NavHostFragment.findNavController(this);
         if (isLoggedIn) {
-            screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
-                if (isSafeToNavigate(navController)) {
-                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
-                    navController.navigate(navDirections);
-                }
-                return true;
-            }));
+            boolean showActivity = true;
+            boolean showExplore = false;
+            if (activity != null) {
+                showActivity = !Utils.isNavRootInCurrentTabs("notification_viewer_nav_graph");
+                showExplore = !Utils.isNavRootInCurrentTabs("discover_nav_graph");
+            }
+            if (showActivity) {
+                screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
+                    if (isSafeToNavigate(navController)) {
+                        final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("notif");
+                        navController.navigate(navDirections);
+                    }
+                    return true;
+                }));
+            }
+            if (showExplore) {
+                screen.addPreference(getPreference(R.string.title_discover, R.drawable.ic_explore_24, preference -> {
+                    if (isSafeToNavigate(navController)) {
+                        navController.navigate(R.id.discover_nav_graph);
+                    }
+                    return true;
+                }));
+            }
+
             screen.addPreference(getPreference(R.string.action_ayml, R.drawable.ic_suggested_users, preference -> {
                 if (isSafeToNavigate(navController)) {
                     final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml");
@@ -157,13 +178,21 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 return true;
             }));
         }
-        screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
-            if (isSafeToNavigate(navController)) {
-                final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
-                navController.navigate(navDirections);
-            }
-            return true;
-        }));
+
+        // Check if favorites has been added as a tab. And if so, do not add in this list
+        boolean showFavorites = true;
+        if (activity != null) {
+            showFavorites = !Utils.isNavRootInCurrentTabs("favorites_nav_graph");
+        }
+        if (showFavorites) {
+            screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {
+                if (isSafeToNavigate(navController)) {
+                    final NavDirections navDirections = MorePreferencesFragmentDirections.actionMorePreferencesFragmentToFavoritesFragment();
+                    navController.navigate(navDirections);
+                }
+                return true;
+            }));
+        }
 
         screen.addPreference(getDivider(context));
         screen.addPreference(getPreference(R.string.action_settings, R.drawable.ic_outline_settings_24, preference -> {

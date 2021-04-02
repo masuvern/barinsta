@@ -16,7 +16,6 @@ import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmRavenMediaBinding;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.enums.RavenMediaViewMode;
-import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;

@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.cursoradapter.widget.CursorAdapter;
 
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.ItemSuggestionBinding;
 import awais.instagrabber.models.enums.SuggestionType;
 
