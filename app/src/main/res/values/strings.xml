@@ -483,4 +483,6 @@
     <string name="crash_report_title">Select an email app to send crash logs</string>
     <string name="not_found">Not found!</string>
     <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
+    <string name="copy_caption">Copy caption</string>
+    <string name="copy_reply">Copy reply</string>
 </resources>
