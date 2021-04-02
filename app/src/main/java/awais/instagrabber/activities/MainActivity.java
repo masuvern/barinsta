@@ -47,6 +47,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.common.collect.ImmutableList;
@@ -83,6 +84,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
+import awais.instagrabber.viewmodels.DirectInboxViewModel;
 import awais.instagrabber.webservices.SearchService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -170,6 +172,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         initEmojiCompat();
         searchService = SearchService.getInstance();
         // initDmService();
+        initDmUnreadCount();
     }
 
     private void initDmService() {
@@ -177,6 +180,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final boolean enabled = settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH);
         if (!enabled) return;
         DMSyncAlarmReceiver.setAlarm(this);
+    }
+
+    private void initDmUnreadCount() {
+        if (!isLoggedIn) return;
+        final DirectInboxViewModel directInboxViewModel = new ViewModelProvider(this).get(DirectInboxViewModel.class);
+        directInboxViewModel.getUnseenCount().observe(this, unseenCountResource -> {
+            if (unseenCountResource == null) return;
+            final Integer unseenCount = unseenCountResource.data;
+            setNavBarDMUnreadCountBadge(unseenCount == null ? 0 : unseenCount);
+        });
     }
 
     @Override
@@ -895,5 +908,20 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
         return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
+    }
+
+    private void setNavBarDMUnreadCountBadge(final int unseenCount) {
+        final BadgeDrawable badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);
+        if (badge == null) return;
+        if (unseenCount == 0) {
+            badge.setVisible(false);
+            badge.clearNumber();
+            return;
+        }
+        if (badge.getVerticalOffset() != 10) {
+            badge.setVerticalOffset(10);
+        }
+        badge.setNumber(unseenCount);
+        badge.setVisible(true);
     }
 }

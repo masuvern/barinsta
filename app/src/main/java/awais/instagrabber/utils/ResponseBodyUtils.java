@@ -729,15 +729,19 @@ public final class ResponseBodyUtils {
             width = dimensions.optInt("width");
         }
         String thumbnailUrl = null;
-        final JSONArray displayResources = feedItem.getJSONArray("display_resources");
         final List<MediaCandidate> candidates = new ArrayList<MediaCandidate>();
-        for (int i = 0; i < displayResources.length(); i++) {
-            final JSONObject displayResource = displayResources.getJSONObject(i);
-            candidates.add(new MediaCandidate(
-                    displayResource.getInt("config_width"),
-                    displayResource.getInt("config_height"),
-                    displayResource.getString("src")
-            ));
+        if (feedItem.has("display_resources") || feedItem.has("thumbnail_resources")) {
+            final JSONArray displayResources = feedItem.has("display_resources")
+                    ? feedItem.getJSONArray("display_resources")
+                    : feedItem.getJSONArray("thumbnail_resources");
+            for (int i = 0; i < displayResources.length(); i++) {
+                final JSONObject displayResource = displayResources.getJSONObject(i);
+                candidates.add(new MediaCandidate(
+                        displayResource.getInt("config_width"),
+                        displayResource.getInt("config_height"),
+                        displayResource.getString("src")
+                ));
+            }
         }
         final ImageVersions2 imageVersions2 = new ImageVersions2(candidates);
 

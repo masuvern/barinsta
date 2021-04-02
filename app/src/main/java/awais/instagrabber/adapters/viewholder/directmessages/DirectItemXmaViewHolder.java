@@ -8,33 +8,25 @@ import androidx.core.util.Pair;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.google.common.collect.ImmutableList;
 
-import java.util.List;
-
-import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
-import awais.instagrabber.customviews.DirectItemContextMenu;
 import awais.instagrabber.databinding.LayoutDmAnimatedMediaBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
-import awais.instagrabber.repositories.responses.AnimatedMediaFixedHeight;
-import awais.instagrabber.repositories.responses.AnimatedMediaImages;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemXma;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.NumberUtils;
-import awais.instagrabber.utils.Utils;
 
-public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
+public class DirectItemXmaViewHolder extends DirectItemViewHolder {
 
     private final LayoutDmAnimatedMediaBinding binding;
 
-    public DirectItemAnimatedMediaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
-                                             @NonNull final LayoutDmAnimatedMediaBinding binding,
-                                             final User currentUser,
-                                             final DirectThread thread,
-                                             final DirectItemCallback callback) {
+    public DirectItemXmaViewHolder(@NonNull final LayoutDmBaseBinding baseBinding,
+                                   @NonNull final LayoutDmAnimatedMediaBinding binding,
+                                   final User currentUser,
+                                   final DirectThread thread,
+                                   final DirectItemCallback callback) {
         super(baseBinding, currentUser, thread, callback);
         this.binding = binding;
         setItemView(binding.getRoot());
@@ -42,15 +34,18 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
 
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
-        final DirectItemAnimatedMedia animatedMediaModel = item.getAnimatedMedia();
-        final AnimatedMediaImages images = animatedMediaModel.getImages();
-        if (images == null) return;
-        final AnimatedMediaFixedHeight fixedHeight = images.getFixedHeight();
-        if (fixedHeight == null) return;
-        final String url = fixedHeight.getWebp();
+        final DirectItemXma xma = item.getXma();
+        final DirectItemXma.XmaUrlInfo playableUrlInfo = xma.getPlayableUrlInfo();
+        final DirectItemXma.XmaUrlInfo previewUrlInfo = xma.getPreviewUrlInfo();
+        if (playableUrlInfo == null && previewUrlInfo == null) {
+            binding.ivAnimatedMessage.setController(null);
+            return;
+        }
+        final DirectItemXma.XmaUrlInfo urlInfo = playableUrlInfo != null ? playableUrlInfo : previewUrlInfo;
+        final String url = urlInfo.getUrl();
         final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
-                fixedHeight.getHeight(),
-                fixedHeight.getWidth(),
+                urlInfo.getHeight(),
+                urlInfo.getWidth(),
                 mediaImageMaxHeight,
                 mediaImageMaxWidth
         );
@@ -70,15 +65,5 @@ public class DirectItemAnimatedMediaViewHolder extends DirectItemViewHolder {
     @Override
     public int getSwipeDirection() {
         return ItemTouchHelper.ACTION_STATE_IDLE;
-    }
-
-    @Override
-    protected List<DirectItemContextMenu.MenuItem> getLongClickOptions() {
-        return ImmutableList.of(
-                new DirectItemContextMenu.MenuItem(R.id.detail, R.string.dms_inbox_giphy, item -> {
-                    Utils.openURL(itemView.getContext(), "https://giphy.com/gifs/" + item.getAnimatedMedia().getId());
-                    return null;
-                })
-        );
     }
 }
