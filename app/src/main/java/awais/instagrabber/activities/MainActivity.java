@@ -59,6 +59,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
@@ -154,8 +155,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             setupBottomNavigationBar(true);
         }
         setupSuggestions();
-        final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
-        if (checkUpdates) FlavorTown.updateCheck(this);
+        if (!BuildConfig.isPre) {
+            final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
+            if (checkUpdates) FlavorTown.updateCheck(this);
+        }
         FlavorTown.changelogCheck(this);
         new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
