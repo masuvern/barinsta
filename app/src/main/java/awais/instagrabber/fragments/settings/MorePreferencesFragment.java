@@ -223,8 +223,6 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                            -1,
                                            preference -> {
                                                if (BuildConfig.isPre) return true;
-                                               final AppCompatActivity activity = (AppCompatActivity) getActivity();
-                                               if (activity == null) return true;
                                                FlavorTown.updateCheck(activity, true);
                                                return true;
                                            }));
