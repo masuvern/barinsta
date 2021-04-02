@@ -53,7 +53,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
     private Preference getPrependUsernameToFilenamePreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.DOWNLOAD_PREPEND_USER_NAME);
-        preference.setTitle("Prepend Username to Filename");
+        preference.setTitle(R.string.download_prepend_username);
         preference.setIconSpaceReserved(false);
         return preference;
     }

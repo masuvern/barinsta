@@ -142,7 +142,7 @@ public final class DownloadUtils {
                                             final String sliderPostfix,
                                             final String displayUrl,
                                             final String username) {
-        final String usernamePrepend = "".equals(username) ? "" : "@" + username + "_";
+        final String usernamePrepend = TextUtils.isEmpty(username) ? "" : "@" + username + "_";
         final String fileName = usernamePrepend + postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
     }
@@ -228,7 +228,7 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, username);
+                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, usernamePrepend);
                     checkList.add(file.exists());
                 }
                 break;
