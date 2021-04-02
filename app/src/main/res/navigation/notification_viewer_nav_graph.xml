@@ -13,7 +13,8 @@
         <argument
             android:name="type"
             app:argType="string"
-            app:nullable="false" />
+            app:nullable="false"
+            android:defaultValue="notif"/>
         <argument
             android:name="targetId"
             android:defaultValue="0L"
@@ -22,6 +23,17 @@
             android:id="@+id/action_notificationsViewerFragment_to_storyViewerFragment"
             app:destination="@id/storyViewerFragment" />
     </fragment>
+
+    <include app:graph="@navigation/profile_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profile_nav_graph">
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="true" />
+    </action>
 
     <action
         android:id="@+id/action_global_notificationsViewerFragment"

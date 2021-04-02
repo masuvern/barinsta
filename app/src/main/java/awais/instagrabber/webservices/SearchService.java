@@ -1,15 +1,10 @@
 package awais.instagrabber.webservices;
 
-import androidx.annotation.NonNull;
-
 import com.google.common.collect.ImmutableMap;
 
 import awais.instagrabber.repositories.SearchRepository;
 import awais.instagrabber.repositories.responses.search.SearchResponse;
-import awais.instagrabber.utils.TextUtils;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class SearchService extends BaseService {

@@ -1090,11 +1090,19 @@ public final class ResponseBodyUtils {
         if (imageVersions2 == null) return null;
         final List<MediaCandidate> candidates = imageVersions2.getCandidates();
         if (candidates == null || candidates.isEmpty()) return null;
+        final boolean isSquare = Integer.compare(media.getOriginalWidth(), media.getOriginalHeight()) == 0;
         final List<MediaCandidate> sortedCandidates = candidates.stream()
                 .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
-                .filter(c -> c.getWidth() < type.getValue())
                 .collect(Collectors.toList());
-        final MediaCandidate candidate = sortedCandidates.get(0);
+        if (sortedCandidates.size() == 1) return sortedCandidates.get(0).getUrl();
+        final List<MediaCandidate> filteredCandidates = sortedCandidates.stream()
+                .filter(c ->
+                        c.getWidth() <= media.getOriginalWidth()
+                                && c.getWidth() <= type.getValue()
+                                && (isSquare || Integer.compare(c.getWidth(), c.getHeight()) != 0)
+                )
+                .collect(Collectors.toList());
+        final MediaCandidate candidate = filteredCandidates.get(0);
         if (candidate == null) return null;
         return candidate.getUrl();
     }

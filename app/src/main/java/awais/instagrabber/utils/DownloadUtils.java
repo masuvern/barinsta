@@ -98,19 +98,19 @@ public final class DownloadUtils {
     //        }
     //    }
 
-    private static void dmDownloadImpl(@NonNull final Context context,
-                                       @Nullable final String username,
-                                       final String modelId,
-                                       final String url) {
-        final File dir = getDownloadDir(context, username);
-        if (dir.exists() || dir.mkdirs()) {
-            download(context,
-                     url,
-                     getDownloadSaveFile(dir, modelId, url).getAbsolutePath());
-            return;
-        }
-        Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
-    }
+//    private static void dmDownloadImpl(@NonNull final Context context,
+//                                       @Nullable final String username,
+//                                       final String modelId,
+//                                       final String url) {
+//        final File dir = getDownloadDir(context, username);
+//        if (dir.exists() || dir.mkdirs()) {
+//            download(context,
+//                     url,
+//                     getDownloadSaveFile(dir, modelId, url).getAbsolutePath());
+//            return;
+//        }
+//        Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
+//    }
 
     @NonNull
     private static File getDownloadSaveFile(final File finalDir,
@@ -312,12 +312,17 @@ public final class DownloadUtils {
                 case MEDIA_TYPE_IMAGE:
                 case MEDIA_TYPE_VIDEO: {
                     final String url = getUrlOfType(media);
-                    File file;
-                    if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
-                        file = getDownloadSaveFile(downloadDir, media.getCode(), url, mediaUser.getUsername());
-                    } else {
-                        file = getDownloadSaveFile(downloadDir, media.getCode(), url);
+                    String fileName = media.getId();
+                    if (mediaUser != null && TextUtils.isEmpty(media.getCode())) {
+                        fileName = mediaUser.getUsername() + "_" + fileName;
                     }
+                    if (!TextUtils.isEmpty(media.getCode())) {
+                        fileName = media.getCode();
+                        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
+                            fileName = mediaUser.getUsername() + "_" + fileName;
+                        }
+                    }
+                    final File file = getDownloadSaveFile(downloadDir, fileName, url);
                     map.put(url, file.getAbsolutePath());
                     break;
                 }
