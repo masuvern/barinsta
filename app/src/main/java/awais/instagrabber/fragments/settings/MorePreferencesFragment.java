@@ -39,6 +39,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.UserService;
 
@@ -59,6 +60,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         final MainActivity activity = (MainActivity) getActivity();
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
+        final Resources resources = context.getResources();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
@@ -138,8 +140,10 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         final NavController navController = NavHostFragment.findNavController(this);
         if (isLoggedIn) {
             boolean showActivity = true;
+            boolean showExplore = false;
             if (activity != null) {
-                showActivity = !activity.isNavRootInCurrentTabs(R.id.notificationsViewer);
+                showActivity = !Utils.isNavRootInCurrentTabs("notification_viewer_nav_graph");
+                showExplore = !Utils.isNavRootInCurrentTabs("discover_nav_graph");
             }
             if (showActivity) {
                 screen.addPreference(getPreference(R.string.action_notif, R.drawable.ic_not_liked, preference -> {
@@ -150,6 +154,15 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                     return true;
                 }));
             }
+            if (showExplore) {
+                screen.addPreference(getPreference(R.string.title_discover, R.drawable.ic_explore_24, preference -> {
+                    if (isSafeToNavigate(navController)) {
+                        navController.navigate(R.id.discover_nav_graph);
+                    }
+                    return true;
+                }));
+            }
+
             screen.addPreference(getPreference(R.string.action_ayml, R.drawable.ic_suggested_users, preference -> {
                 if (isSafeToNavigate(navController)) {
                     final NavDirections navDirections = MorePreferencesFragmentDirections.actionGlobalNotificationsViewerFragment("ayml");
@@ -169,7 +182,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         // Check if favorites has been added as a tab. And if so, do not add in this list
         boolean showFavorites = true;
         if (activity != null) {
-            showFavorites = !activity.isNavRootInCurrentTabs(R.id.favoritesFragment);
+            showFavorites = !Utils.isNavRootInCurrentTabs("favorites_nav_graph");
         }
         if (showFavorites) {
             screen.addPreference(getPreference(R.string.title_favorites, R.drawable.ic_star_24, preference -> {

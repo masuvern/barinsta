@@ -906,9 +906,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return currentTabs;
     }
 
-    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
-        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
-    }
+//    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
+//        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
+//    }
 
     private void setNavBarDMUnreadCountBadge(final int unseenCount) {
         final BadgeDrawable badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);

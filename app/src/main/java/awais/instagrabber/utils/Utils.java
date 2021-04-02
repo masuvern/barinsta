@@ -31,6 +31,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -80,6 +81,7 @@ public final class Utils {
     private static int actionBarHeight;
     public static Handler applicationHandler;
     public static String cacheDir;
+    public static String tabOrderString;
     private static int defaultStatusBarColor;
 
     public static int convertDpToPx(final float dp) {
@@ -468,7 +470,7 @@ public final class Utils {
 
     @NonNull
     private static List<String> getCurrentOrderOfGraphNamesFromPref(@NonNull final String[] navGraphNames) {
-        final String tabOrderString = settingsHelper.getString(PreferenceKeys.PREF_TAB_ORDER);
+        tabOrderString = settingsHelper.getString(PreferenceKeys.PREF_TAB_ORDER);
         final List<String> navGraphNameList = Arrays.asList(navGraphNames);
         if (TextUtils.isEmpty(tabOrderString)) {
             // Use top 5 entries for default list
@@ -484,5 +486,9 @@ public final class Utils {
             return navGraphNameList.subList(0, 5);
         }
         return orderGraphNames;
+    }
+
+    public static boolean isNavRootInCurrentTabs(final String navRootString) {
+        return tabOrderString.contains(navRootString);
     }
 }
