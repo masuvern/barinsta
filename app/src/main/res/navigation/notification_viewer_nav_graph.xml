@@ -13,7 +13,8 @@
         <argument
             android:name="type"
             app:argType="string"
-            app:nullable="false" />
+            app:nullable="false"
+            android:defaultValue="notif"/>
         <argument
             android:name="targetId"
             android:defaultValue="0L"

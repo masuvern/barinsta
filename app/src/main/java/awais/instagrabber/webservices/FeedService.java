@@ -12,12 +12,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import awais.instagrabber.repositories.FeedRepository;
+import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.feed.EndOfFeedDemarcator;
 import awais.instagrabber.repositories.responses.feed.EndOfFeedGroup;
 import awais.instagrabber.repositories.responses.feed.EndOfFeedGroupSet;
 import awais.instagrabber.repositories.responses.feed.FeedFetchResponse;
-import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.utils.TextUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
