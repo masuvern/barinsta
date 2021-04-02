@@ -212,14 +212,13 @@ public final class DownloadUtils {
             username = user.getUsername();
         }
         final File downloadDir = getDownloadDir(null, "@" + username, true);
-        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
-                && user != null ? username : "";
         switch (media.getMediaType()) {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
                 final String url = ResponseBodyUtils.getImageUrl(media);
-                final File file = getDownloadSaveFile(downloadDir, media.getCode(), url, usernamePrepend);
-                checkList.add(file.exists());
+                final File file = getDownloadSaveFile(downloadDir, media.getCode(), url, "");
+                final File usernamePrependedFile = getDownloadSaveFile(downloadDir, media.getCode(), url, username);
+                checkList.add(file.exists() || usernamePrependedFile.exists());
                 break;
             }
             case MEDIA_TYPE_SLIDER:
@@ -228,8 +227,9 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, usernamePrepend);
-                    checkList.add(file.exists());
+                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, "");
+                    final File usernamePrependedFile = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, username);
+                    checkList.add(file.exists() || usernamePrependedFile.exists());
                 }
                 break;
             default:
