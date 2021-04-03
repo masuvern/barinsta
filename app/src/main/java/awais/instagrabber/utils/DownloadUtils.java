@@ -1,9 +1,11 @@
 package awais.instagrabber.utils;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Environment;
+import android.net.Uri;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
@@ -11,6 +13,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.util.Pair;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.NetworkType;
@@ -21,9 +25,9 @@ import androidx.work.WorkRequest;
 import com.google.gson.Gson;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,31 +45,50 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.workers.DownloadWorker;
 
+import static awais.instagrabber.utils.Constants.FOLDER_PATH;
+
 public final class DownloadUtils {
     private static final String TAG = DownloadUtils.class.getSimpleName();
 
     public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    public static final String DIR_BARINSTA = "Barinsta";
-    public static final String DIR_DOWNLOADS = "Downloads";
-    public static final String DIR_CAMERA = "Camera";
-    public static final String DIR_EDIT = "Edit";
+    private static final String DIR_BARINSTA = "Barinsta";
+    private static final String DIR_DOWNLOADS = "Downloads";
+    private static final String DIR_CAMERA = "Camera";
+    private static final String DIR_EDIT = "Edit";
+    private static final String TEMP_DIR = "Temp";
 
-    public static File getDownloadDir(final String... dirs) {
-        final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
-        File subDir = new File(parent, DIR_BARINSTA);
+    private static DocumentFile root;
+
+    public static void init(@NonNull final Context context) {
+        // if (!Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) return;
+        final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
+        if (TextUtils.isEmpty(customPath)) return;
+        // dir = new File(customPath);
+        root = DocumentFile.fromTreeUri(context, Uri.parse(customPath));
+        Log.d(TAG, "init: " + root);
+        // final File parent = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        // final DocumentFile documentFile = DocumentFile.fromFile(parent);
+        // Log.d(TAG, "init: " + documentFile);
+    }
+
+    public static DocumentFile getDownloadDir(final String... dirs) {
+        // final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
+        // File subDir = new File(parent, DIR_BARINSTA);
+        DocumentFile subDir = root;
         if (dirs != null) {
             for (final String dir : dirs) {
-                subDir = new File(subDir, dir);
-                //noinspection ResultOfMethodCallIgnored
-                subDir.mkdirs();
+                final DocumentFile subDirFile = subDir.findFile(dir);
+                if (subDirFile == null) {
+                    subDir = subDir.createDirectory(dir);
+                }
             }
         }
         return subDir;
     }
 
     @NonNull
-    public static File getDownloadDir() {
+    public static DocumentFile getDownloadDir() {
         // final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
         // final File dir = new File(new File(parent, "barinsta"), "downloads");
         // if (!dir.exists()) {
@@ -83,35 +106,61 @@ public final class DownloadUtils {
         return getDownloadDir(DIR_DOWNLOADS);
     }
 
-    public static File getCameraDir() {
+    public static DocumentFile getCameraDir() {
         return getDownloadDir(DIR_CAMERA);
     }
 
-    public static File getImageEditDir(final String sessionId) {
+    public static DocumentFile getImageEditDir(final String sessionId) {
         return getDownloadDir(DIR_EDIT, sessionId);
     }
 
-    @Nullable
-    private static File getDownloadDir(@NonNull final Context context, @Nullable final String username) {
-        return getDownloadDir(context, username, false);
-    }
+    // @Nullable
+    // private static DocumentFile getDownloadDir(@NonNull final Context context, @Nullable final String username) {
+    //     return getDownloadDir(context, username, false);
+    // }
 
     @Nullable
-    private static File getDownloadDir(final Context context,
-                                       @Nullable final String username,
-                                       final boolean skipCreateDir) {
-        File dir = getDownloadDir();
-
-        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(username)) {
-            final String finaleUsername = username.startsWith("@") ? username.substring(1) : username;
-            dir = new File(dir, finaleUsername);
+    private static DocumentFile getDownloadDir(final Context context,
+                                               @Nullable final String username) {
+        final List<String> userFolderPaths = getSubPathForUserFolder(username);
+        DocumentFile dir = root;
+        for (final String dirName : userFolderPaths) {
+            final DocumentFile file = dir.findFile(dirName);
+            if (file != null) {
+                dir = file;
+                continue;
+            }
+            dir = dir.createDirectory(dirName);
+            if (dir == null) break;
         }
-
-        if (context != null && !skipCreateDir && !dir.exists() && !dir.mkdirs()) {
+        // final String joined = android.text.TextUtils.join("/", userFolderPaths);
+        // final Uri userFolderUri = DocumentsContract.buildDocumentUriUsingTree(root.getUri(), joined);
+        // final DocumentFile userFolder = DocumentFile.fromSingleUri(context, userFolderUri);
+        if (context != null && (dir == null || !dir.exists())) {
             Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
             return null;
         }
         return dir;
+    }
+
+    private static List<String> getSubPathForUserFolder(final String username) {
+        final List<String> list = new ArrayList<>();
+        if (!Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) || TextUtils.isEmpty(username)) {
+            list.add(DIR_DOWNLOADS);
+            return list;
+        }
+        final String finalUsername = username.startsWith("@") ? username.substring(1) : username;
+        list.add(DIR_DOWNLOADS);
+        list.add(finalUsername);
+        return list;
+    }
+
+    private static DocumentFile getTempDir() {
+        DocumentFile file = root.findFile(TEMP_DIR);
+        if (file == null) {
+            file = root.createDirectory(TEMP_DIR);
+        }
+        return file;
     }
 
     //    public static void dmDownload(@NonNull final Context context,
@@ -126,59 +175,71 @@ public final class DownloadUtils {
     //        }
     //    }
 
-    private static void dmDownloadImpl(@NonNull final Context context,
-                                       @Nullable final String username,
-                                       final String modelId,
-                                       final String url) {
-        final File dir = getDownloadDir(context, username);
-        if (dir.exists() || dir.mkdirs()) {
-            download(context,
-                     url,
-                     getDownloadSaveFile(dir, modelId, url).getAbsolutePath());
-            return;
-        }
-        Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
-    }
+    // private static void dmDownloadImpl(@NonNull final Context context,
+    //                                    @Nullable final String username,
+    //                                    final String modelId,
+    //                                    final String url) {
+    //     final DocumentFile dir = getDownloadDir(context, username);
+    //     if (dir != null && dir.exists()) {
+    //         download(context, url, getDownloadSavePaths(dir, modelId, url));
+    //         return;
+    //     }
+    //     Toast.makeText(context, R.string.error_creating_folders, Toast.LENGTH_SHORT).show();
+    // }
 
     @NonNull
-    private static File getDownloadSaveFile(final File finalDir,
-                                            final String postId,
-                                            final String displayUrl) {
-        return getDownloadSaveFile(finalDir, postId, "", displayUrl);
+    private static Pair<List<String>, String> getDownloadSavePaths(final List<String> paths,
+                                                                   final String postId,
+                                                                   final String displayUrl) {
+        return getDownloadSavePaths(paths, postId, "", displayUrl);
     }
 
-    private static File getDownloadChildSaveFile(final File downloadDir,
-                                                 final String postId,
-                                                 final int childPosition,
-                                                 final String url) {
+    private static Pair<List<String>, String> getDownloadChildSaveFile(final List<String> paths,
+                                                                       final String postId,
+                                                                       final int childPosition,
+                                                                       final String url) {
         final String sliderPostfix = "_slide_" + childPosition;
-        return getDownloadSaveFile(downloadDir, postId, sliderPostfix, url);
+        return getDownloadSavePaths(paths, postId, sliderPostfix, url);
     }
 
-    @NonNull
-    private static File getDownloadSaveFile(final File finalDir,
-                                            final String postId,
-                                            final String sliderPostfix,
-                                            final String displayUrl) {
-        final String fileName = postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
-        return new File(finalDir, fileName);
+    @Nullable
+    private static Pair<List<String>, String> getDownloadSavePaths(final List<String> paths,
+                                                                   final String postId,
+                                                                   final String sliderPostfix,
+                                                                   final String displayUrl) {
+        if (paths == null) return null;
+        final String extension = getFileExtensionFromUrl(displayUrl);
+        final String fileName = postId + sliderPostfix + extension;
+        // return new File(finalDir, fileName);
+        // DocumentFile file = finalDir.findFile(fileName);
+        // if (file == null) {
+        final String mimeType = Utils.mimeTypeMap.getMimeTypeFromExtension(extension.startsWith(".") ? extension.substring(1) : extension);
+        // file = finalDir.createFile(mimeType, fileName);
+        // }
+        paths.add(fileName);
+        return new Pair<>(paths, mimeType);
     }
 
-    @NonNull
-    public static File getTempFile() {
+    public static DocumentFile getTempFile() {
         return getTempFile(null, null);
     }
 
-    public static File getTempFile(final String fileName, final String extension) {
-        final File dir = getDownloadDir();
+    public static DocumentFile getTempFile(final String fileName, final String extension) {
+        final DocumentFile dir = getTempDir();
         String name = fileName;
         if (TextUtils.isEmpty(name)) {
             name = UUID.randomUUID().toString();
         }
+        String mimeType = "application/octet-stream";
         if (!TextUtils.isEmpty(extension)) {
             name += "." + extension;
+            mimeType = Utils.mimeTypeMap.getMimeTypeFromExtension(extension);
         }
-        return new File(dir, name);
+        DocumentFile file = dir.findFile(name);
+        if (file == null) {
+            file = dir.createFile(mimeType, name);
+        }
+        return file;
     }
 
     /**
@@ -221,20 +282,21 @@ public final class DownloadUtils {
         return "";
     }
 
-    public static List<Boolean> checkDownloaded(@NonNull final Media media) {
+    public static List<Boolean> checkDownloaded(@NonNull final Context context,
+                                                @NonNull final Media media) {
         final List<Boolean> checkList = new LinkedList<>();
         final User user = media.getUser();
         String username = "username";
         if (user != null) {
             username = user.getUsername();
         }
-        final File downloadDir = getDownloadDir(null, "@" + username, true);
+        final List<String> userFolderPaths = getSubPathForUserFolder(username);
         switch (media.getMediaType()) {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
                 final String url = ResponseBodyUtils.getImageUrl(media);
-                final File file = getDownloadSaveFile(downloadDir, media.getCode(), url);
-                checkList.add(file.exists());
+                final Pair<List<String>, String> pair = getDownloadSavePaths(userFolderPaths, media.getCode(), url);
+                checkList.add(checkPathExists(context, pair.first));
                 break;
             }
             case MEDIA_TYPE_SLIDER:
@@ -243,13 +305,21 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url);
-                    checkList.add(file.exists());
+                    final Pair<List<String>, String> pair = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url);
+                    checkList.add(checkPathExists(context, pair.first));
                 }
                 break;
             default:
         }
         return checkList;
+    }
+
+    private static boolean checkPathExists(@NonNull final Context context,
+                                           @NonNull final List<String> paths) {
+        final String joined = android.text.TextUtils.join("/", paths);
+        final Uri userFolderUri = DocumentsContract.buildDocumentUriUsingTree(root.getUri(), joined);
+        final DocumentFile userFolder = DocumentFile.fromSingleUri(context, userFolderUri);
+        return userFolder != null && userFolder.exists();
     }
 
     public static void showDownloadDialog(@NonNull Context context,
@@ -286,15 +356,20 @@ public final class DownloadUtils {
 
     public static void download(@NonNull final Context context,
                                 @NonNull final StoryModel storyModel) {
-        final File downloadDir = getDownloadDir(context, "@" + storyModel.getUsername());
+        final DocumentFile downloadDir = getDownloadDir(context, "@" + storyModel.getUsername());
         final String url = storyModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
                            ? storyModel.getVideoUrl()
                            : storyModel.getStoryUrl();
-        final File saveFile = new File(downloadDir,
-                                       storyModel.getStoryMediaId()
-                                               + "_" + storyModel.getTimestamp()
-                                               + DownloadUtils.getFileExtensionFromUrl(url));
-        download(context, url, saveFile.getAbsolutePath());
+        final String extension = DownloadUtils.getFileExtensionFromUrl(url);
+        final String fileName = storyModel.getStoryMediaId() + "_" + storyModel.getTimestamp() + extension;
+        DocumentFile saveFile = downloadDir.findFile(fileName);
+        if (saveFile == null) {
+            saveFile = downloadDir.createFile(
+                    Utils.mimeTypeMap.getMimeTypeFromExtension(extension.startsWith(".") ? extension.substring(1) : extension),
+                    fileName);
+        }
+        // final File saveFile = new File(downloadDir, fileName);
+        download(context, url, saveFile);
     }
 
     public static void download(@NonNull final Context context,
@@ -316,17 +391,19 @@ public final class DownloadUtils {
     private static void download(@NonNull final Context context,
                                  @NonNull final List<Media> feedModels,
                                  final int childPositionIfSingle) {
-        final Map<String, String> map = new HashMap<>();
+        final Map<String, DocumentFile> map = new HashMap<>();
         for (final Media media : feedModels) {
             final User mediaUser = media.getUser();
-            final File downloadDir = getDownloadDir(context, mediaUser == null ? "" : "@" + mediaUser.getUsername());
-            if (downloadDir == null) return;
+            final List<String> userFolderPaths = getSubPathForUserFolder(mediaUser == null ? "" : "@" + mediaUser.getUsername());
+            // final DocumentFile downloadDir = getDownloadDir(context, mediaUser == null ? "" : "@" + mediaUser.getUsername());
             switch (media.getMediaType()) {
                 case MEDIA_TYPE_IMAGE:
                 case MEDIA_TYPE_VIDEO: {
                     final String url = getUrlOfType(media);
-                    final File file = getDownloadSaveFile(downloadDir, media.getCode(), url);
-                    map.put(url, file.getAbsolutePath());
+                    final Pair<List<String>, String> pair = getDownloadSavePaths(userFolderPaths, media.getCode(), url);
+                    final DocumentFile file = createFile(pair);
+                    if (file == null) continue;
+                    map.put(url, file);
                     break;
                 }
                 case MEDIA_TYPE_VOICE: {
@@ -335,26 +412,46 @@ public final class DownloadUtils {
                     if (mediaUser != null) {
                         fileName = mediaUser.getUsername() + "_" + fileName;
                     }
-                    final File file = getDownloadSaveFile(downloadDir, fileName, url);
-                    map.put(url, file.getAbsolutePath());
+                    final Pair<List<String>, String> pair = getDownloadSavePaths(userFolderPaths, fileName, url);
+                    final DocumentFile file = createFile(pair);
+                    if (file == null) continue;
+                    map.put(url, file);
                     break;
                 }
                 case MEDIA_TYPE_SLIDER:
                     final List<Media> sliderItems = media.getCarouselMedia();
                     for (int i = 0; i < sliderItems.size(); i++) {
-                        if (childPositionIfSingle >= 0 && feedModels.size() == 1 && i != childPositionIfSingle) {
-                            continue;
-                        }
+                        if (childPositionIfSingle >= 0 && feedModels.size() == 1 && i != childPositionIfSingle) continue;
                         final Media child = sliderItems.get(i);
                         final String url = getUrlOfType(child);
-                        final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url);
-                        map.put(url, file.getAbsolutePath());
+                        final Pair<List<String>, String> pair = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url);
+                        final DocumentFile file = createFile(pair);
+                        if (file == null) continue;
+                        map.put(url, file);
                     }
                     break;
                 default:
             }
         }
+        if (map.isEmpty()) return;
         download(context, map);
+    }
+
+    private static DocumentFile createFile(@NonNull final Pair<List<String>, String> pair) {
+        if (pair.first == null || pair.second == null) return null;
+        DocumentFile dir = root;
+        final List<String> first = pair.first;
+        for (int i = 0; i < first.size(); i++) {
+            final String name = first.get(i);
+            final DocumentFile file = dir.findFile(name);
+            if (file != null) {
+                dir = file;
+                continue;
+            }
+            dir = i == first.size() - 1 ? dir.createFile(pair.second, name) : dir.createDirectory(name);
+            if (dir == null) break;
+        }
+        return dir;
     }
 
     @Nullable
@@ -388,12 +485,13 @@ public final class DownloadUtils {
 
     public static void download(final Context context,
                                 final String url,
-                                final String filePath) {
+                                final DocumentFile filePath) {
         if (context == null || url == null || filePath == null) return;
         download(context, Collections.singletonMap(url, filePath));
     }
 
-    private static void download(final Context context, final Map<String, String> urlFilePathMap) {
+    private static void download(final Context context, final Map<String, DocumentFile> urlFilePathMap) {
+        if (context == null) return;
         final Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
@@ -401,19 +499,25 @@ public final class DownloadUtils {
                                                                                      .setUrlToFilePathMap(urlFilePathMap)
                                                                                      .build();
         final String requestJson = new Gson().toJson(request);
-        final File tempFile = getTempFile();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+        final DocumentFile tempFile = getTempFile(null, "json");
+        if (tempFile == null) {
+            Log.e(TAG, "download: temp file is null");
+            return;
+        }
+        final Uri uri = tempFile.getUri();
+        final ContentResolver contentResolver = context.getContentResolver();
+        if (contentResolver == null) return;
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(contentResolver.openOutputStream(uri)))) {
             writer.write(requestJson);
         } catch (IOException e) {
             Log.e(TAG, "download: Error writing request to file", e);
-            //noinspection ResultOfMethodCallIgnored
             tempFile.delete();
             return;
         }
         final WorkRequest downloadWorkRequest = new OneTimeWorkRequest.Builder(DownloadWorker.class)
                 .setInputData(
                         new Data.Builder()
-                                .putString(DownloadWorker.KEY_DOWNLOAD_REQUEST_JSON, tempFile.getAbsolutePath())
+                                .putString(DownloadWorker.KEY_DOWNLOAD_REQUEST_JSON, tempFile.getUri().toString())
                                 .build()
                 )
                 .setConstraints(constraints)

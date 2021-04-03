@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -24,15 +24,13 @@ import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.image.ImageInfo;
 
-import java.io.File;
-
-import awais.instagrabber.R;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.UserService;
 
@@ -182,14 +180,18 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void downloadProfilePicture() {
         if (url == null) return;
-        final File dir = new File(Environment.getExternalStorageDirectory(), "Download");
+        // final File dir = new File(Environment.getExternalStorageDirectory(), "Download");
         final Context context = getContext();
         if (context == null) return;
-        if (dir.exists() || dir.mkdirs()) {
-            final File saveFile = new File(dir, name + '_' + System.currentTimeMillis() + ".jpg");
-            DownloadUtils.download(context, url, saveFile.getAbsolutePath());
-            return;
-        }
-        Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
+        // if (dir.exists() || dir.mkdirs()) {
+        //
+        // }
+        final String fileName = name + '_' + System.currentTimeMillis() + ".jpg";
+        // final File saveFile = new File(dir, fileName);
+        final DocumentFile downloadDir = DownloadUtils.getDownloadDir();
+        final DocumentFile saveFile = downloadDir.createFile(Utils.mimeTypeMap.getMimeTypeFromExtension("jpg"), fileName);
+        DownloadUtils.download(context, url, saveFile);
+        // return;
+        // Toast.makeText(context, R.string.downloader_error_creating_folder, Toast.LENGTH_SHORT).show();
     }
 }

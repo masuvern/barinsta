@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,11 +18,13 @@ import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 
-import com.google.common.io.Files;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -45,7 +44,7 @@ public class CameraActivity extends BaseLanguageActivity {
 
     private ActivityCameraBinding binding;
     private ImageCapture imageCapture;
-    private File outputDirectory;
+    private DocumentFile outputDirectory;
     private ExecutorService cameraExecutor;
     private int displayId = -1;
 
@@ -113,7 +112,13 @@ public class CameraActivity extends BaseLanguageActivity {
     }
 
     private void updateUi() {
-        binding.cameraCaptureButton.setOnClickListener(v -> takePhoto());
+        binding.cameraCaptureButton.setOnClickListener(v -> {
+            try {
+                takePhoto();
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "updateUi: ", e);
+            }
+        });
         // Disable the button until the camera is set up
         binding.switchCamera.setEnabled(false);
         // Listener for button used to switch cameras. Only called if the button is enabled
@@ -200,37 +205,44 @@ public class CameraActivity extends BaseLanguageActivity {
         preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
     }
 
-    private void takePhoto() {
+    private void takePhoto() throws FileNotFoundException {
         if (imageCapture == null) return;
-        final File photoFile = new File(outputDirectory, SIMPLE_DATE_FORMAT.format(System.currentTimeMillis()) + ".jpg");
-        final ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+        final String extension = "jpg";
+        final String fileName = SIMPLE_DATE_FORMAT.format(System.currentTimeMillis()) + "." + extension;
+        // final File photoFile = new File(outputDirectory, fileName);
+        final String mimeType = Utils.mimeTypeMap.getMimeTypeFromExtension(extension);
+        final DocumentFile photoFile = outputDirectory.createFile(mimeType, fileName);
+        final OutputStream outputStream = getContentResolver().openOutputStream(photoFile.getUri());
+        final ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(outputStream).build();
         imageCapture.takePicture(
                 outputFileOptions,
                 cameraExecutor,
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull final ImageCapture.OutputFileResults outputFileResults) {
-                        final Uri uri = Uri.fromFile(photoFile);
-                        //noinspection UnstableApiUsage
-                        final String mimeType = MimeTypeMap.getSingleton()
-                                                           .getMimeTypeFromExtension(Files.getFileExtension(photoFile.getName()));
-                        MediaScannerConnection.scanFile(
-                                CameraActivity.this,
-                                new String[]{photoFile.getAbsolutePath()},
-                                new String[]{mimeType},
-                                (path, uri1) -> {
-                                    Log.d(TAG, "onImageSaved: scan complete");
-                                    final Intent intent = new Intent();
-                                    intent.setData(uri1);
-                                    setResult(Activity.RESULT_OK, intent);
-                                    finish();
-                                });
-                        Log.d(TAG, "onImageSaved: " + uri);
+                        if (outputStream != null) {
+                            try { outputStream.close(); } catch (IOException ignored) {}
+                        }
+                        // final Uri uri = Uri.fromFile(photoFile);
+                        // final String mimeType = MimeTypeMap.getSingleton()
+                        //                                    .getMimeTypeFromExtension(Files.getFileExtension(photoFile.getName()));
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, photoFile.getUri()));
+                        Utils.scanDocumentFile(CameraActivity.this, photoFile, (path, uri1) -> {
+                            Log.d(TAG, "onImageSaved: scan complete");
+                            final Intent intent = new Intent();
+                            intent.setData(uri1);
+                            setResult(Activity.RESULT_OK, intent);
+                            finish();
+                        });
+                        Log.d(TAG, "onImageSaved: " + photoFile.getUri());
                     }
 
                     @Override
                     public void onError(@NonNull final ImageCaptureException exception) {
                         Log.e(TAG, "onError: ", exception);
+                        if (outputStream != null) {
+                            try { outputStream.close(); } catch (IOException ignored) {}
+                        }
                     }
                 }
         );

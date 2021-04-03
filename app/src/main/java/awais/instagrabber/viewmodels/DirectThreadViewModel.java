@@ -2,18 +2,17 @@ package awais.instagrabber.viewmodels;
 
 import android.app.Application;
 import android.content.ContentResolver;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +37,7 @@ import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.MediaController;
 import awais.instagrabber.utils.MediaUtils;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.VoiceRecorder;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -47,7 +47,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
     // private static final String ERROR_INVALID_THREAD = "Invalid thread";
 
     private final ContentResolver contentResolver;
-    private final File recordingsDir;
+    private final DocumentFile recordingsDir;
     private final Application application;
     private final long viewerId;
     private final String threadId;
@@ -166,37 +166,32 @@ public class DirectThreadViewModel extends AndroidViewModel {
             @Override
             public void onComplete(final VoiceRecorder.VoiceRecordingResult result) {
                 Log.d(TAG, "onComplete: recording complete. Scanning file...");
-                MediaScannerConnection.scanFile(
-                        application,
-                        new String[]{result.getFile().getAbsolutePath()},
-                        new String[]{result.getMimeType()},
-                        (path, uri) -> {
-                            if (uri == null) {
-                                final String msg = "Scan failed!";
-                                Log.e(TAG, msg);
-                                data.postValue(Resource.error(msg, null));
-                                return;
-                            }
-                            Log.d(TAG, "onComplete: scan complete");
-                            MediaUtils.getVoiceInfo(contentResolver, uri, new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
-                                @Override
-                                public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
-                                    if (videoInfo == null) return;
-                                    threadManager.sendVoice(data,
-                                                            uri,
-                                                            result.getWaveform(),
-                                                            result.getSamplingFreq(),
-                                                            videoInfo == null ? 0 : videoInfo.duration,
-                                                            videoInfo == null ? 0 : videoInfo.size);
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable t) {
-                                    data.postValue(Resource.error(t.getMessage(), null));
-                                }
-                            });
+                Utils.scanDocumentFile(application, result.getFile(), (path, uri) -> {
+                    if (uri == null) {
+                        final String msg = "Scan failed!";
+                        Log.e(TAG, msg);
+                        data.postValue(Resource.error(msg, null));
+                        return;
+                    }
+                    Log.d(TAG, "onComplete: scan complete");
+                    MediaUtils.getVoiceInfo(contentResolver, uri, new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
+                        @Override
+                        public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
+                            if (videoInfo == null) return;
+                            threadManager.sendVoice(data,
+                                                    uri,
+                                                    result.getWaveform(),
+                                                    result.getSamplingFreq(),
+                                                    videoInfo == null ? 0 : videoInfo.duration,
+                                                    videoInfo == null ? 0 : videoInfo.size);
                         }
-                );
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            data.postValue(Resource.error(t.getMessage(), null));
+                        }
+                    });
+                });
             }
 
             @Override
@@ -204,7 +199,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
             }
         });
-        voiceRecorder.startRecording();
+        voiceRecorder.startRecording(application);
         return data;
     }
 

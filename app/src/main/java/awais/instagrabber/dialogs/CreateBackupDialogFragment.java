@@ -3,7 +3,6 @@ package awais.instagrabber.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
@@ -214,7 +213,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
         // Optionally, specify a URI for the directory that should be opened in
         // the system file picker when your app creates the document.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.fromFile(DownloadUtils.getDownloadDir()));
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, DownloadUtils.getDownloadDir().getUri());
         }
 
         startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);

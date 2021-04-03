@@ -5,6 +5,7 @@ import android.graphics.RectF;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -26,6 +27,7 @@ import awais.instagrabber.models.SavedImageEditState;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.SerializablePair;
+import awais.instagrabber.utils.Utils;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
@@ -35,6 +37,7 @@ public class ImageEditViewModel extends AndroidViewModel {
     private static final String RESULT = "result";
     private static final String FILE_FORMAT = "yyyyMMddHHmmssSSS";
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(FILE_FORMAT, Locale.US);
+    private static final String MIME_TYPE = Utils.mimeTypeMap.getMimeTypeFromExtension("jpg");
 
     private Uri originalUri;
     private SavedImageEditState savedImageEditState;
@@ -48,18 +51,18 @@ public class ImageEditViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isCropped = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> isTuned = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> isFiltered = new MutableLiveData<>(false);
-    private final File outputDir;
+    private final DocumentFile outputDir;
     private List<Filter<? extends GPUImageFilter>> tuningFilters;
     private Filter<? extends GPUImageFilter> appliedFilter;
-    private final File destinationFile;
+    private final DocumentFile destinationFile;
 
     public ImageEditViewModel(final Application application) {
         super(application);
         sessionId = SIMPLE_DATE_FORMAT.format(new Date());
         outputDir = DownloadUtils.getImageEditDir(sessionId);
-        destinationFile = new File(outputDir, RESULT + ".jpg");
-        destinationUri = Uri.fromFile(destinationFile);
-        cropDestinationUri = Uri.fromFile(new File(outputDir, CROP + ".jpg"));
+        destinationFile = outputDir.createFile(MIME_TYPE, RESULT + ".jpg");
+        destinationUri = destinationFile.getUri();
+        cropDestinationUri = outputDir.createFile(MIME_TYPE, CROP + ".jpg").getUri();
     }
 
     public String getSessionId() {
@@ -159,16 +162,15 @@ public class ImageEditViewModel extends AndroidViewModel {
         delete(outputDir);
     }
 
-    private void delete(@NonNull final File file) {
+    private void delete(@NonNull final DocumentFile file) {
         if (file.isDirectory()) {
-            final File[] files = file.listFiles();
+            final DocumentFile[] files = file.listFiles();
             if (files != null) {
-                for (File f : files) {
+                for (DocumentFile f : files) {
                     delete(f);
                 }
             }
         }
-        //noinspection ResultOfMethodCallIgnored
         file.delete();
     }
 
@@ -206,9 +208,9 @@ public class ImageEditViewModel extends AndroidViewModel {
         return new SerializablePair<>(type, propertyValueMap);
     }
 
-    public File getDestinationFile() {
-        return destinationFile;
-    }
+    // public File getDestinationFile() {
+    //     return destinationFile;
+    // }
 
     public enum Tab {
         RESULT,

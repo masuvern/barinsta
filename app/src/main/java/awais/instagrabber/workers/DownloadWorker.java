@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -18,7 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.work.Data;
 import androidx.work.ForegroundInfo;
 import androidx.work.Worker;
@@ -30,10 +29,8 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.imaging.formats.jpeg.iptc.JpegIptcRewriter;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
@@ -44,6 +41,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -52,10 +50,11 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-//import awaisomereport.LogCollector;
 
 import static awais.instagrabber.utils.Constants.DOWNLOAD_CHANNEL_ID;
 import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
+
+//import awaisomereport.LogCollector;
 //import static awais.instagrabber.utils.Utils.logCollector;
 
 public class DownloadWorker extends Worker {
@@ -85,8 +84,21 @@ public class DownloadWorker extends Worker {
                                           .build());
         }
         final String downloadRequestString;
-        final File requestFile = new File(downloadRequestFilePath);
-        try (Scanner scanner = new Scanner(requestFile)) {
+        // final File requestFile = new File(downloadRequestFilePath);
+        final Uri requestFile = Uri.parse(downloadRequestFilePath);
+        if (requestFile == null) {
+            return Result.failure(new Data.Builder()
+                                          .putString("error", "requestFile is null")
+                                          .build());
+        }
+        final Context context = getApplicationContext();
+        final ContentResolver contentResolver = context.getContentResolver();
+        if (contentResolver == null) {
+            return Result.failure(new Data.Builder()
+                                          .putString("error", "contentResolver is null")
+                                          .build());
+        }
+        try (Scanner scanner = new Scanner(contentResolver.openInputStream(requestFile))) {
             downloadRequestString = scanner.useDelimiter("\\A").next();
         } catch (Exception e) {
             Log.e(TAG, "doWork: ", e);
@@ -116,7 +128,7 @@ public class DownloadWorker extends Worker {
         final Map<String, String> urlToFilePathMap = downloadRequest.getUrlToFilePathMap();
         download(urlToFilePathMap);
         new Handler(Looper.getMainLooper()).postDelayed(() -> showSummary(urlToFilePathMap), 500);
-        final boolean deleted = requestFile.delete();
+        final boolean deleted = DocumentFile.fromSingleUri(context, requestFile).delete();
         if (!deleted) {
             Log.w(TAG, "doWork: requestFile not deleted!");
         }
@@ -131,7 +143,9 @@ public class DownloadWorker extends Worker {
         for (final Map.Entry<String, String> urlAndFilePath : entries) {
             final String url = urlAndFilePath.getKey();
             updateDownloadProgress(notificationId, count, total, 0);
-            download(notificationId, count, total, url, urlAndFilePath.getValue());
+            final String uriString = urlAndFilePath.getValue();
+            final DocumentFile file = DocumentFile.fromSingleUri(getApplicationContext(), Uri.parse(uriString));
+            download(notificationId, count, total, url, file);
             count++;
         }
     }
@@ -144,17 +158,24 @@ public class DownloadWorker extends Worker {
                           final int position,
                           final int total,
                           final String url,
-                          final String filePath) {
-        final boolean isJpg = filePath.endsWith("jpg");
+                          final DocumentFile filePath) {
+        final Context context = getApplicationContext();
+        if (context == null) return;
+        final ContentResolver contentResolver = context.getContentResolver();
+        if (contentResolver == null) return;
+        final String filePathType = filePath.getType();
+        if (filePathType == null) return;
+        // final String extension = Utils.mimeTypeMap.getExtensionFromMimeType(filePathType);
+        final boolean isJpg = filePathType.startsWith("image"); // extension.endsWith("jpg");
         // using temp file approach to remove IPTC so that download progress can be reported
-        final File outFile = isJpg ? DownloadUtils.getTempFile() : new File(filePath);
+        final DocumentFile outFile = isJpg ? DownloadUtils.getTempFile(null, "jpg") : filePath;
         try {
             final URLConnection urlConnection = new URL(url).openConnection();
             final long fileSize = Build.VERSION.SDK_INT >= 24 ? urlConnection.getContentLengthLong() :
                                   urlConnection.getContentLength();
             float totalRead = 0;
             try (final BufferedInputStream bis = new BufferedInputStream(urlConnection.getInputStream());
-                 final FileOutputStream fos = new FileOutputStream(outFile)) {
+                 final OutputStream fos = contentResolver.openOutputStream(outFile.getUri())) {
                 final byte[] buffer = new byte[0x2000];
                 int count;
                 while ((count = bis.read(buffer, 0, 0x2000)) != -1) {
@@ -167,18 +188,17 @@ public class DownloadWorker extends Worker {
                 }
                 fos.flush();
             } catch (final Exception e) {
-                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.getAbsolutePath(), e);
+                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.getName(), e);
             }
             if (isJpg) {
-                final File finalFile = new File(filePath);
-                try (FileInputStream fis = new FileInputStream(outFile);
-                     FileOutputStream fos = new FileOutputStream(finalFile)) {
+                try (final InputStream fis = contentResolver.openInputStream(outFile.getUri());
+                     final OutputStream fos = contentResolver.openOutputStream(filePath.getUri())) {
                     final JpegIptcRewriter jpegIptcRewriter = new JpegIptcRewriter();
                     jpegIptcRewriter.removeIPTC(fis, fos);
                 } catch (Exception e) {
                     Log.e(TAG, "Error while removing iptc: url: " + url
-                            + ", tempFile: " + outFile.getAbsolutePath()
-                            + ", finalFile: " + finalFile.getAbsolutePath(), e);
+                            + ", tempFile: " + outFile
+                            + ", finalFile: " + filePath, e);
                 }
                 final boolean deleted = outFile.delete();
                 if (!deleted) {
@@ -243,57 +263,56 @@ public class DownloadWorker extends Worker {
 
     private void showSummary(final Map<String, String> urlToFilePathMap) {
         final Context context = getApplicationContext();
-        final Collection<String> filePaths = urlToFilePathMap.values();
+        final Collection<DocumentFile> filePaths = urlToFilePathMap.values()
+                                                                   .stream()
+                                                                   .map(s -> DocumentFile.fromSingleUri(context, Uri.parse(s)))
+                                                                   .collect(Collectors.toList());
         final List<NotificationCompat.Builder> notifications = new LinkedList<>();
         final List<Integer> notificationIds = new LinkedList<>();
         int count = 1;
-        for (final String filePath : filePaths) {
-            final File file = new File(filePath);
-            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-            MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, null, null);
-            final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+        for (final DocumentFile filePath : filePaths) {
+            // final File file = new File(filePath);
+            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, filePath.getUri()));
+            Utils.scanDocumentFile(context, filePath, (path, uri) -> {});
+            // final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
             final ContentResolver contentResolver = context.getContentResolver();
             Bitmap bitmap = null;
-            final String mimeType = Utils.getMimeType(uri, contentResolver);
+            final String mimeType = filePath.getType(); // Utils.getMimeType(uri, contentResolver);
             if (!TextUtils.isEmpty(mimeType)) {
                 if (mimeType.startsWith("image")) {
-                    try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
+                    try (final InputStream inputStream = contentResolver.openInputStream(filePath.getUri())) {
                         bitmap = BitmapFactory.decodeStream(inputStream);
                     } catch (final Exception e) {
-//                        if (logCollector != null)
-//                            logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
                         if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                     }
                 } else if (mimeType.startsWith("video")) {
                     final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                     try {
                         try {
-                            retriever.setDataSource(context, uri);
+                            retriever.setDataSource(context, filePath.getUri());
                         } catch (final Exception e) {
-                            retriever.setDataSource(file.getAbsolutePath());
+                            // retriever.setDataSource(file.getAbsolutePath());
+                            Log.e(TAG, "showSummary: ", e);
                         }
                         bitmap = retriever.getFrameAtTime();
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                             try {
                                 retriever.close();
                             } catch (final Exception e) {
-//                                if (logCollector != null)
-//                                    logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_2");
+                                Log.e(TAG, "showSummary: ", e);
                             }
                     } catch (final Exception e) {
-                        if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-//                        if (logCollector != null)
-//                            logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_3");
+                        Log.e(TAG, "", e);
                     }
                 }
             }
             final String downloadComplete = context.getString(R.string.downloader_complete);
-            final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
+            final Intent intent = new Intent(Intent.ACTION_VIEW, filePath.getUri())
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                                       | Intent.FLAG_FROM_BACKGROUND
                                       | Intent.FLAG_GRANT_READ_URI_PERMISSION
                                       | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    .putExtra(Intent.EXTRA_STREAM, uri);
+                    .putExtra(Intent.EXTRA_STREAM, filePath.getUri());
             final PendingIntent pendingIntent = PendingIntent.getActivity(
                     context,
                     DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE,
@@ -357,16 +376,22 @@ public class DownloadWorker extends Worker {
         public static class Builder {
             private Map<String, String> urlToFilePathMap;
 
-            public Builder setUrlToFilePathMap(final Map<String, String> urlToFilePathMap) {
-                this.urlToFilePathMap = urlToFilePathMap;
+            public Builder setUrlToFilePathMap(final Map<String, DocumentFile> urlToFilePathMap) {
+                if (urlToFilePathMap == null) {
+                    return this;
+                }
+                this.urlToFilePathMap = urlToFilePathMap.entrySet()
+                                                        .stream()
+                                                        .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                  o -> o.getValue().getUri().toString()));
                 return this;
             }
 
-            public Builder addUrl(@NonNull final String url, @NonNull final String filePath) {
+            public Builder addUrl(@NonNull final String url, @NonNull final DocumentFile filePath) {
                 if (urlToFilePathMap == null) {
                     urlToFilePathMap = new HashMap<>();
                 }
-                urlToFilePathMap.put(url, filePath);
+                urlToFilePathMap.put(url, filePath.getUri().toString());
                 return this;
             }
 

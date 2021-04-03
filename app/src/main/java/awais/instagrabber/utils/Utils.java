@@ -15,8 +15,11 @@ import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.storage.StorageManager;
 import android.provider.Browser;
+import android.provider.DocumentsContract;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -35,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
@@ -46,6 +50,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +77,7 @@ public final class Utils {
     public static Handler applicationHandler;
     public static String cacheDir;
     private static int defaultStatusBarColor;
+    private static Object[] volumes;
 
     public static int convertDpToPx(final float dp) {
         return Math.round((dp * displayMetrics.densityDpi) / DisplayMetrics.DENSITY_DEFAULT);
@@ -366,5 +373,52 @@ public final class Utils {
         final Window window = activity.getWindow();
         if (window == null) return;
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    public static void scanDocumentFile(@NonNull final Context context,
+                                        @NonNull final DocumentFile documentFile,
+                                        @NonNull final OnScanCompletedListener callback) {
+        if (!documentFile.isFile()) return;
+        File file = null;
+        try {
+            file = getDocumentFileRealPath(context, documentFile);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            Log.e(TAG, "scanDocumentFile: ", e);
+        }
+        if (file == null) return;
+        MediaScannerConnection.scanFile(context,
+                                        new String[]{file.getAbsolutePath()},
+                                        new String[]{documentFile.getType()},
+                                        callback);
+    }
+
+    private static File getDocumentFileRealPath(Context context, DocumentFile documentFile)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final String docId = DocumentsContract.getDocumentId(documentFile.getUri());
+        final String[] split = docId.split(":");
+        final String type = split[0];
+
+        if (type.equalsIgnoreCase("primary")) {
+            return new File(Environment.getExternalStorageDirectory(), split[1]);
+        } else {
+            if (volumes == null) {
+                StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+                Method getVolumeListMethod = sm.getClass().getMethod("getVolumeList");
+                volumes = (Object[]) getVolumeListMethod.invoke(sm);
+            }
+
+            for (Object volume : volumes) {
+                Method getUuidMethod = volume.getClass().getMethod("getUuid");
+                String uuid = (String) getUuidMethod.invoke(volume);
+
+                if (uuid != null && uuid.equalsIgnoreCase(type)) {
+                    Method getPathMethod = volume.getClass().getMethod("getPath");
+                    String path = (String) getPathMethod.invoke(volume);
+                    return new File(path, split[1]);
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -6,11 +6,10 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -45,7 +44,7 @@ public final class MediaUploader {
                     listener.onFailure(new RuntimeException("Bitmap result was null"));
                     return;
                 }
-                uploadPhoto(bitmap, listener);
+                uploadPhoto(contentResolver, bitmap, listener);
             }
 
             @Override
@@ -55,13 +54,14 @@ public final class MediaUploader {
         });
     }
 
-    private static void uploadPhoto(@NonNull final Bitmap bitmap,
+    private static void uploadPhoto(@NonNull final ContentResolver contentResolver,
+                                    @NonNull final Bitmap bitmap,
                                     @NonNull final OnMediaUploadCompleteListener listener) {
         appExecutors.tasksThread().submit(() -> {
-            final File file;
+            final DocumentFile file;
             final long byteLength;
             try {
-                file = BitmapUtils.convertToJpegAndSaveToFile(bitmap, null);
+                file = BitmapUtils.convertToJpegAndSaveToFile(contentResolver, bitmap, null);
                 byteLength = file.length();
             } catch (Exception e) {
                 listener.onFailure(e);
@@ -71,12 +71,11 @@ public final class MediaUploader {
             final Map<String, String> headers = MediaUploadHelper.getUploadPhotoHeaders(options);
             final String url = HOST + "/rupload_igphoto/" + options.getName() + "/";
             appExecutors.networkIO().execute(() -> {
-                try (FileInputStream input = new FileInputStream(file)) {
+                try (InputStream input = contentResolver.openInputStream(file.getUri())) {
                     upload(input, url, headers, listener);
                 } catch (IOException e) {
                     listener.onFailure(e);
                 } finally {
-                    //noinspection ResultOfMethodCallIgnored
                     file.delete();
                 }
             });

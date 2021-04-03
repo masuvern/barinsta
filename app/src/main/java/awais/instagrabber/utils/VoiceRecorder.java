@@ -1,14 +1,16 @@
 package awais.instagrabber.utils;
 
+import android.app.Application;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,20 +29,20 @@ public class VoiceRecorder {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(FILE_FORMAT, Locale.US);
 
     private final List<Float> waveform = new ArrayList<>();
-    private final File recordingsDir;
+    private final DocumentFile recordingsDir;
     private final VoiceRecorderCallback callback;
 
     private MediaRecorder recorder;
-    private File audioTempFile;
+    private DocumentFile audioTempFile;
     private MaxAmpHandler maxAmpHandler;
     private boolean stopped;
 
-    public VoiceRecorder(@NonNull final File recordingsDir, final VoiceRecorderCallback callback) {
+    public VoiceRecorder(@NonNull final DocumentFile recordingsDir, final VoiceRecorderCallback callback) {
         this.recordingsDir = recordingsDir;
         this.callback = callback;
     }
 
-    public void startRecording() {
+    public void startRecording(final Application application) {
         stopped = false;
         try {
             recorder = new MediaRecorder();
@@ -48,7 +50,8 @@ public class VoiceRecorder {
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             deleteTempAudioFile();
             audioTempFile = getAudioRecordFile();
-            recorder.setOutputFile(audioTempFile.getAbsolutePath());
+            final ParcelFileDescriptor parcelFileDescriptor = application.getContentResolver().openFileDescriptor(audioTempFile.getUri(), "rwt");
+            recorder.setOutputFile(parcelFileDescriptor.getFileDescriptor());
             recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
             recorder.setAudioEncodingBitRate(AUDIO_BIT_RATE);
             recorder.setAudioSamplingRate(AUDIO_SAMPLE_RATE);
@@ -140,9 +143,9 @@ public class VoiceRecorder {
     // }
 
     @NonNull
-    private File getAudioRecordFile() {
+    private DocumentFile getAudioRecordFile() {
         final String name = String.format("%s-%s.%s", FILE_PREFIX, SIMPLE_DATE_FORMAT.format(new Date()), EXTENSION);
-        return new File(recordingsDir, name);
+        return recordingsDir.createFile(MIME_TYPE, name);
     }
 
     private void deleteTempAudioFile() {
@@ -160,11 +163,11 @@ public class VoiceRecorder {
 
     public static class VoiceRecordingResult {
         private final String mimeType;
-        private final File file;
+        private final DocumentFile file;
         private final List<Float> waveform;
         private final int samplingFreq = 10;
 
-        public VoiceRecordingResult(final String mimeType, final File file, final List<Float> waveform) {
+        public VoiceRecordingResult(final String mimeType, final DocumentFile file, final List<Float> waveform) {
             this.mimeType = mimeType;
             this.file = file;
             this.waveform = waveform;
@@ -174,7 +177,7 @@ public class VoiceRecorder {
             return mimeType;
         }
 
-        public File getFile() {
+        public DocumentFile getFile() {
             return file;
         }
 

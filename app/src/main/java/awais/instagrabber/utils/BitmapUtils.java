@@ -11,14 +11,13 @@ import android.util.LruCache;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -247,12 +246,14 @@ public final class BitmapUtils {
         return null;
     }
 
-    public static File convertToJpegAndSaveToFile(@NonNull final Bitmap bitmap, @Nullable final File file) throws IOException {
-        File tempFile = file;
+    public static DocumentFile convertToJpegAndSaveToFile(@NonNull final ContentResolver contentResolver,
+                                                          @NonNull final Bitmap bitmap,
+                                                          @Nullable final DocumentFile file) throws IOException {
+        DocumentFile tempFile = file;
         if (file == null) {
-            tempFile = DownloadUtils.getTempFile();
+            tempFile = DownloadUtils.getTempFile(null, "jpg");
         }
-        try (OutputStream output = new FileOutputStream(tempFile)) {
+        try (OutputStream output = contentResolver.openOutputStream(tempFile.getUri())) {
             final boolean compressResult = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);
             if (!compressResult) {
                 throw new RuntimeException("Compression failed!");

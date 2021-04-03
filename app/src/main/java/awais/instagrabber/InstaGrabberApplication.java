@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
 import awais.instagrabber.utils.TextUtils;
@@ -86,5 +87,6 @@ public final class InstaGrabberApplication extends Application {
         if (TextUtils.isEmpty(settingsHelper.getString(Constants.DEVICE_UUID))) {
             settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
         }
+        DownloadUtils.init(this);
     }
 }
