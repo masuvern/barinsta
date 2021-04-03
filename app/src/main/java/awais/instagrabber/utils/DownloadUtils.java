@@ -116,23 +116,34 @@ public final class DownloadUtils {
     private static File getDownloadSaveFile(final File finalDir,
                                             final String postId,
                                             final String displayUrl) {
-        return getDownloadSaveFile(finalDir, postId, "", displayUrl);
+        return getDownloadSaveFile(finalDir, postId, "", displayUrl, "");
+    }
+
+    @NonNull
+    private static File getDownloadSaveFile(final File finalDir,
+                                            final String postId,
+                                            final String displayUrl,
+                                            final String username) {
+        return getDownloadSaveFile(finalDir, postId, "", displayUrl, username);
     }
 
     private static File getDownloadChildSaveFile(final File downloadDir,
                                                  final String postId,
                                                  final int childPosition,
-                                                 final String url) {
+                                                 final String url,
+                                                 final String username) {
         final String sliderPostfix = "_slide_" + childPosition;
-        return getDownloadSaveFile(downloadDir, postId, sliderPostfix, url);
+        return getDownloadSaveFile(downloadDir, postId, sliderPostfix, url, username);
     }
 
     @NonNull
     private static File getDownloadSaveFile(final File finalDir,
                                             final String postId,
                                             final String sliderPostfix,
-                                            final String displayUrl) {
-        final String fileName = postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
+                                            final String displayUrl,
+                                            final String username) {
+        final String usernamePrepend = TextUtils.isEmpty(username) ? "" : (username + "_");
+        final String fileName = usernamePrepend + postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
     }
 
@@ -205,8 +216,9 @@ public final class DownloadUtils {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
                 final String url = ResponseBodyUtils.getImageUrl(media);
-                final File file = getDownloadSaveFile(downloadDir, media.getCode(), url);
-                checkList.add(file.exists());
+                final File file = getDownloadSaveFile(downloadDir, media.getCode(), url, "");
+                final File usernamePrependedFile = getDownloadSaveFile(downloadDir, media.getCode(), url, username);
+                checkList.add(file.exists() || usernamePrependedFile.exists());
                 break;
             }
             case MEDIA_TYPE_SLIDER:
@@ -215,8 +227,9 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url);
-                    checkList.add(file.exists());
+                    final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, "");
+                    final File usernamePrependedFile = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, username);
+                    checkList.add(file.exists() || usernamePrependedFile.exists());
                 }
                 break;
             default:
@@ -262,10 +275,12 @@ public final class DownloadUtils {
         final String url = storyModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
                            ? storyModel.getVideoUrl()
                            : storyModel.getStoryUrl();
+        final String baseFileName = storyModel.getStoryMediaId() + "_"
+                + storyModel.getTimestamp() + DownloadUtils.getFileExtensionFromUrl(url);
+        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
+                && storyModel.getUsername() != null ? storyModel.getUsername() + "_" : "";
         final File saveFile = new File(downloadDir,
-                                       storyModel.getStoryMediaId()
-                                               + "_" + storyModel.getTimestamp()
-                                               + DownloadUtils.getFileExtensionFromUrl(url));
+                 usernamePrepend + baseFileName);
         download(context, url, saveFile.getAbsolutePath());
     }
 
@@ -291,18 +306,21 @@ public final class DownloadUtils {
         final Map<String, String> map = new HashMap<>();
         for (final Media media : feedModels) {
             final User mediaUser = media.getUser();
-            final File downloadDir = getDownloadDir(context, mediaUser == null ? "" : "@" + mediaUser.getUsername());
+            final File downloadDir = getDownloadDir(context, mediaUser == null ? "" : mediaUser.getUsername());
             if (downloadDir == null) return;
             switch (media.getMediaType()) {
                 case MEDIA_TYPE_IMAGE:
                 case MEDIA_TYPE_VIDEO: {
                     final String url = getUrlOfType(media);
                     String fileName = media.getId();
-                    if (mediaUser != null) {
+                    if (mediaUser != null && TextUtils.isEmpty(media.getCode())) {
                         fileName = mediaUser.getUsername() + "_" + fileName;
                     }
                     if (!TextUtils.isEmpty(media.getCode())) {
                         fileName = media.getCode();
+                        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
+                            fileName = mediaUser.getUsername() + "_" + fileName;
+                        }
                     }
                     final File file = getDownloadSaveFile(downloadDir, fileName, url);
                     map.put(url, file.getAbsolutePath());
@@ -326,7 +344,8 @@ public final class DownloadUtils {
                         }
                         final Media child = sliderItems.get(i);
                         final String url = getUrlOfType(child);
-                        final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url);
+                        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null ? mediaUser.getUsername() : "";
+                        final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, usernamePrepend);
                         map.put(url, file.getAbsolutePath());
                     }
                     break;
