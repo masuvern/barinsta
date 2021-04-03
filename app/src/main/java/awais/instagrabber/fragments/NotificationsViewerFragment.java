@@ -78,8 +78,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             try {
                 binding.swipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-            catch(Throwable ignored) {}
+            } catch (Throwable ignored) {}
         }
     };
 
@@ -95,7 +94,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             final long mediaId = Long.parseLong(notificationImage.getId().split("_")[0]);
             if (model.getType() == NotificationType.RESPONDED_STORY) {
                 final NavDirections action = NotificationsViewerFragmentDirections
-                        .actionNotificationsViewerFragmentToStoryViewerFragment(
+                        .actionNotificationsToStory(
                                 StoryViewerOptions.forStory(
                                         mediaId,
                                         model.getArgs().getUsername()));

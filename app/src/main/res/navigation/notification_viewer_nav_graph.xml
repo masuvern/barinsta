@@ -97,7 +97,7 @@
             android:defaultValue="0L"
             app:argType="long" />
         <action
-            android:id="@+id/action_notificationsViewerFragment_to_storyViewerFragment"
+            android:id="@+id/action_notifications_to_story"
             app:destination="@id/storyViewerFragment" />
     </fragment>
 </navigation>
