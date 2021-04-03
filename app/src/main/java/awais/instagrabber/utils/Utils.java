@@ -80,7 +80,6 @@ public final class Utils {
     private static int actionBarHeight;
     public static Handler applicationHandler;
     public static String cacheDir;
-    public static String tabOrderString;
     private static int defaultStatusBarColor;
 
     public static int convertDpToPx(final float dp) {
@@ -469,7 +468,7 @@ public final class Utils {
 
     @NonNull
     private static List<String> getCurrentOrderOfGraphNamesFromPref(@NonNull final String[] navGraphNames) {
-        tabOrderString = settingsHelper.getString(PreferenceKeys.PREF_TAB_ORDER);
+        final String tabOrderString = settingsHelper.getString(PreferenceKeys.PREF_TAB_ORDER);
         final List<String> navGraphNameList = Arrays.asList(navGraphNames);
         if (TextUtils.isEmpty(tabOrderString)) {
             // Use top 5 entries for default list
@@ -491,6 +490,7 @@ public final class Utils {
     }
 
     public static boolean isNavRootInCurrentTabs(final String navRootString) {
+        final String tabOrderString = settingsHelper.getString(PreferenceKeys.PREF_TAB_ORDER);
         if (navRootString == null || tabOrderString == null) return false;
         return tabOrderString.contains(navRootString);
     }
