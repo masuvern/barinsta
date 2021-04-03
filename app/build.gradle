@@ -76,6 +76,27 @@ android {
         }
     }
 
+    splits {
+        // Configures multiple APKs based on ABI.
+        abi {
+            // Enables building multiple APKs per ABI.
+            enable true
+
+            // By default all ABIs are included, so use reset() and include to specify that we only
+            // want APKs for x86 and x86_64.
+
+            // Resets the list of ABIs that Gradle should create APKs for to none.
+            reset()
+
+            // Specifies a list of ABIs that Gradle should create APKs for.
+            include "x86", "x86_64", "arm64-v8a", "armeabi-v7a"
+
+            // Specifies that we want to also generate a universal APK that includes all ABIs.
+            universalApk true
+        }
+    }
+
+
     android.applicationVariants.all { variant ->
         if (variant.flavorName != "github") return
         variant.outputs.all { output ->
@@ -84,15 +105,32 @@ android {
             // def versionCode = variant.versionCode
             def flavor = variant.flavorName
 
-            def suffix = "${versionName}-${flavor}_${builtType}" // eg. 19.1.0-github_debug or release
+            def flavorBuiltType = "${flavor}_${builtType}"
+            def suffix
+            // For x86 and x86_64, the versionNames are already overridden
+            if (versionName.contains(flavorBuiltType)) {
+                suffix = "${versionName}"
+            } else {
+                suffix = "${versionName}-${flavorBuiltType}" // eg. 19.1.0-github_debug or release
+            }
             if (builtType.toString() == 'release' && project.hasProperty("pre")) {
                 buildConfigField("boolean", "isPre", "true")
-                // append latest commit short hash for pre-release
-                suffix = "${versionName}.${getGitHash()}-${flavor}" // eg. 19.1.0.b123456-github
+
+                flavorBuiltType = "${getGitHash()}-${flavor}"
+
+                // For x86 and x86_64, the versionNames are already overridden
+                if (versionName.contains(flavorBuiltType)) {
+                    suffix = "${versionName}"
+                } else {
+                    // append latest commit short hash for pre-release
+                    suffix = "${versionName}.${flavorBuiltType}" // eg. 19.1.0.b123456-github
+                }
             }
 
             output.versionNameOverride = suffix
-            outputFileName = "barinsta_${suffix}.apk"
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)
+            // println(abi + ", " + versionName + ", " + flavor + ", " + builtType + ", " + suffix)
+            outputFileName = abi == null ? "barinsta_${suffix}.apk" : "barinsta_${suffix}_${abi}.apk"
         }
     }
 }
