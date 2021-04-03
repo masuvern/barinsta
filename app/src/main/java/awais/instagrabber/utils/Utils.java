@@ -31,7 +31,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -474,7 +473,10 @@ public final class Utils {
         final List<String> navGraphNameList = Arrays.asList(navGraphNames);
         if (TextUtils.isEmpty(tabOrderString)) {
             // Use top 5 entries for default list
-            return navGraphNameList.subList(0, 5);
+            final List<String> top5navGraphNames = navGraphNameList.subList(0, 5);
+            final String newOrderString = android.text.TextUtils.join(",", top5navGraphNames);
+            Utils.settingsHelper.putString(PreferenceKeys.PREF_TAB_ORDER, newOrderString);
+            return top5navGraphNames;
         }
         // Make sure that the list from preference does not contain any invalid values
         final List<String> orderGraphNames = Arrays.stream(tabOrderString.split(","))
@@ -489,6 +491,7 @@ public final class Utils {
     }
 
     public static boolean isNavRootInCurrentTabs(final String navRootString) {
+        if (navRootString == null || tabOrderString == null) return false;
         return tabOrderString.contains(navRootString);
     }
 }

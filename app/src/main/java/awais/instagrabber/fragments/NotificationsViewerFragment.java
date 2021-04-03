@@ -79,7 +79,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                 binding.swipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
-            catch(Throwable e) {}
+            catch(Throwable ignored) {}
         }
     };
 
@@ -92,7 +92,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         @Override
         public void onPreviewClick(final Notification model) {
             final NotificationImage notificationImage = model.getArgs().getMedia().get(0);
-            final long mediaId = Long.valueOf(notificationImage.getId().split("_")[0]);
+            final long mediaId = Long.parseLong(notificationImage.getId().split("_")[0]);
             if (model.getType() == NotificationType.RESPONDED_STORY) {
                 final NavDirections action = NotificationsViewerFragmentDirections
                         .actionNotificationsViewerFragmentToStoryViewerFragment(
@@ -277,8 +277,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     }
 
     private void openProfile(final String username) {
-        final NavDirections action = NotificationsViewerFragmentDirections
-                .actionGlobalProfileFragment("@" + username);
+        final NavDirections action = NotificationsViewerFragmentDirections.actionGlobalProfileFragment("@" + username);
         NavHostFragment.findNavController(this).navigate(action);
     }
 }
