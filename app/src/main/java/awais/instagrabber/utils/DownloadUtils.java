@@ -142,7 +142,7 @@ public final class DownloadUtils {
                                             final String sliderPostfix,
                                             final String displayUrl,
                                             final String username) {
-        final String usernamePrepend = TextUtils.isEmpty(username) ? "" : "@" + username + "_";
+        final String usernamePrepend = TextUtils.isEmpty(username) ? "" : (username + "_");
         final String fileName = usernamePrepend + postId + sliderPostfix + getFileExtensionFromUrl(displayUrl);
         return new File(finalDir, fileName);
     }
@@ -278,7 +278,7 @@ public final class DownloadUtils {
         final String baseFileName = storyModel.getStoryMediaId() + "_"
                 + storyModel.getTimestamp() + DownloadUtils.getFileExtensionFromUrl(url);
         final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
-                && storyModel.getUsername() != null ? "@" + storyModel.getUsername() + "_" : "";
+                && storyModel.getUsername() != null ? storyModel.getUsername() + "_" : "";
         final File saveFile = new File(downloadDir,
                  usernamePrepend + baseFileName);
         download(context, url, saveFile.getAbsolutePath());
@@ -306,7 +306,7 @@ public final class DownloadUtils {
         final Map<String, String> map = new HashMap<>();
         for (final Media media : feedModels) {
             final User mediaUser = media.getUser();
-            final File downloadDir = getDownloadDir(context, mediaUser == null ? "" : "@" + mediaUser.getUsername());
+            final File downloadDir = getDownloadDir(context, mediaUser == null ? "" : mediaUser.getUsername());
             if (downloadDir == null) return;
             switch (media.getMediaType()) {
                 case MEDIA_TYPE_IMAGE:
