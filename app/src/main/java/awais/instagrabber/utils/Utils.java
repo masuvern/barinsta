@@ -476,6 +476,7 @@ public final class Utils {
             final List<String> top5navGraphNames = navGraphNameList.subList(0, 5);
             final String newOrderString = android.text.TextUtils.join(",", top5navGraphNames);
             Utils.settingsHelper.putString(PreferenceKeys.PREF_TAB_ORDER, newOrderString);
+            tabOrderString = newOrderString;
             return top5navGraphNames;
         }
         // Make sure that the list from preference does not contain any invalid values
