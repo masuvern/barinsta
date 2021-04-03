@@ -11,8 +11,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -35,9 +33,11 @@ import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
+import awais.instagrabber.utils.ProcessPhoenix;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -71,11 +71,15 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             accountCategory.setSummary(R.string.account_hint);
             accountCategory.addPreference(getAccountSwitcherPreference(cookie, context));
             accountCategory.addPreference(getPreference(R.string.logout, R.string.logout_summary, R.drawable.ic_logout_24, preference -> {
-                if (getContext() == null) return false;
+                final Context context1 = getContext();
+                if (context1 == null) return false;
                 CookieUtils.setupCookies("LOGOUT");
-                shouldRecreate();
-                Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
+                // shouldRecreate();
+                Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                 settingsHelper.putString(Constants.COOKIE, "");
+                AppExecutors.getInstance().mainThread().execute(() -> {
+                    ProcessPhoenix.triggerRebirth(context1);
+                }, 200);
                 return true;
             }));
         }
@@ -103,9 +107,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                             CookieUtils.removeAllAccounts(context, new RepositoryCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(final Void result) {
-                                                    shouldRecreate();
-                                                    Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
+                                                    // shouldRecreate();
+                                                    final Context context1 = getContext();
+                                                    if (context1 == null) return;
+                                                    Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                                                     settingsHelper.putString(Constants.COOKIE, "");
+                                                    AppExecutors.getInstance().mainThread().execute(() -> {
+                                                        ProcessPhoenix.triggerRebirth(context1);
+                                                    }, 200);
                                                 }
 
                                                 @Override
@@ -265,9 +274,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                 new RepositoryCallback<Account>() {
                                     @Override
                                     public void onSuccess(final Account result) {
-                                        final FragmentActivity activity = getActivity();
-                                        if (activity == null) return;
-                                        activity.recreate();
+                                        // final FragmentActivity activity = getActivity();
+                                        // if (activity == null) return;
+                                        // activity.recreate();
+                                        AppExecutors.getInstance().mainThread().execute(() -> {
+                                            final Context context = getContext();
+                                            if (context == null) return;
+                                            ProcessPhoenix.triggerRebirth(context);
+                                        }, 200);
                                     }
 
                                     @Override
