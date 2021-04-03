@@ -31,7 +31,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.NotificationsAdapter;
 import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListener;
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
-import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
@@ -79,8 +78,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             try {
                 binding.swipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-            catch(Throwable e) {}
+            } catch (Throwable ignored) {}
         }
     };
 
@@ -93,10 +91,10 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         @Override
         public void onPreviewClick(final Notification model) {
             final NotificationImage notificationImage = model.getArgs().getMedia().get(0);
-            final long mediaId = Long.valueOf(notificationImage.getId().split("_")[0]);
+            final long mediaId = Long.parseLong(notificationImage.getId().split("_")[0]);
             if (model.getType() == NotificationType.RESPONDED_STORY) {
                 final NavDirections action = NotificationsViewerFragmentDirections
-                        .actionNotificationsViewerFragmentToStoryViewerFragment(
+                        .actionNotificationsToStory(
                                 StoryViewerOptions.forStory(
                                         mediaId,
                                         model.getArgs().getUsername()));
@@ -278,8 +276,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     }
 
     private void openProfile(final String username) {
-        final NavDirections action = MorePreferencesFragmentDirections
-                .actionGlobalProfileFragment("@" + username);
+        final NavDirections action = NotificationsViewerFragmentDirections.actionGlobalProfileFragment("@" + username);
         NavHostFragment.findNavController(this).navigate(action);
     }
 }

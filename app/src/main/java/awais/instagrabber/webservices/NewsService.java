@@ -54,9 +54,11 @@ public class NewsService extends BaseService {
                     callback.onSuccess(null);
                     return;
                 }
-                final List<Notification> result = new ArrayList<>();
-                result.addAll(body.getNewStories());
-                result.addAll(body.getOldStories());
+                final List<Notification> result = new ArrayList<Notification>();
+                final List<Notification> newStories = body.getNewStories();
+                if (newStories != null) result.addAll(newStories);
+                final List<Notification> oldStories = body.getOldStories();
+                if (oldStories != null) result.addAll(oldStories);
                 callback.onSuccess(result);
             }
 

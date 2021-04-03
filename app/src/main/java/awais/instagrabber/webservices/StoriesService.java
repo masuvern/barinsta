@@ -135,7 +135,7 @@ public class StoriesService extends BaseService {
             final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
                 final JSONObject node = feedStoriesReel.getJSONObject(i);
-                if (node.optBoolean("hide_from_feed_unit")) continue;
+                if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(Constants.HIDE_MUTED_REELS)) continue;
                 final JSONObject userJson = node.getJSONObject(node.has("user") ? "user" : "owner");
                 try {
                     final User user = new User(userJson.getLong("pk"),
@@ -177,18 +177,24 @@ public class StoriesService extends BaseService {
                                                null,
                                                null
                     );
-                    final String id = node.getString("id");
                     final long timestamp = node.getLong("latest_reel_media");
-                    final int mediaCount = node.getInt("media_count");
                     final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
                     final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").optJSONObject(0) : null;
-                    final boolean isBestie = node.optBoolean("has_besties_media", false);
                     StoryModel firstStoryModel = null;
                     if (itemJson != null) {
                         firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, null);
                     }
-                    feedStoryModels.add(new FeedStoryModel(id, user, fullyRead, timestamp, firstStoryModel, mediaCount, false, isBestie));
-                } catch (Exception e) {} // to cover promotional reels with non-long user pk's
+                    feedStoryModels.add(new FeedStoryModel(
+                            node.getString("id"),
+                            user,
+                            fullyRead,
+                            timestamp,
+                            firstStoryModel,
+                            node.getInt("media_count"),
+                            false,
+                            node.optBoolean("has_besties_media")));
+                }
+                catch (Exception e) {} // to cover promotional reels with non-long user pk's
             }
             final JSONArray broadcasts = new JSONObject(body).getJSONArray("broadcasts");
             for (int i = 0; i < broadcasts.length(); ++i) {
@@ -239,13 +245,16 @@ public class StoriesService extends BaseService {
                                            null,
                                            null
                 );
-                final String id = node.getString("id");
-                final long timestamp = node.getLong("published_time");
-                // final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").getJSONObject(0) : null;
-                final StoryModel firstStoryModel = ResponseBodyUtils.parseBroadcastItem(node);
-                // if (itemJson != null) {
-                // }
-                feedStoryModels.add(new FeedStoryModel(id, user, false, timestamp, firstStoryModel, 1, true, false));
+                feedStoryModels.add(new FeedStoryModel(
+                        node.getString("id"),
+                        user,
+                        false,
+                        node.getLong("published_time"),
+                        ResponseBodyUtils.parseBroadcastItem(node),
+                        1,
+                        true,
+                        false
+                ));
             }
             callback.onSuccess(sort(feedStoryModels));
         } catch (JSONException e) {
