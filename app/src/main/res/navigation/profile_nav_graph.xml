@@ -56,7 +56,6 @@
         app:destination="@id/profile_nav_graph">
         <argument
             android:name="username"
-            android:defaultValue=""
             app:argType="string"
             app:nullable="false" />
     </action>
@@ -82,6 +81,9 @@
             android:name="targetId"
             android:defaultValue="0L"
             app:argType="long" />
+        <action
+            android:id="@+id/action_notifications_to_story"
+            app:destination="@id/storyViewerFragment" />
     </action>
 
     <fragment

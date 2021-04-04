@@ -1447,8 +1447,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
     private void navigateToUser(@NonNull final String username) {
         final ProfileNavGraphDirections.ActionGlobalProfileFragment direction = ProfileNavGraphDirections
-                .actionGlobalProfileFragment()
-                .setUsername("@" + username);
+                .actionGlobalProfileFragment("@" + username);
         NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(direction);
     }
 
