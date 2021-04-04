@@ -66,11 +66,13 @@ android {
             dimension "repo"
             // versionNameSuffix "-github" // appended in assemble task
             buildConfigField("String", "dsn", SENTRY_DSN)
+            buildConfigField("boolean", "isPre", "false")
         }
 
         fdroid {
             dimension "repo"
             versionNameSuffix "-fdroid"
+            buildConfigField("boolean", "isPre", "false")
         }
     }
 
@@ -84,6 +86,7 @@ android {
 
             def suffix = "${versionName}-${flavor}_${builtType}" // eg. 19.1.0-github_debug or release
             if (builtType.toString() == 'release' && project.hasProperty("pre")) {
+                buildConfigField("boolean", "isPre", "true")
                 // append latest commit short hash for pre-release
                 suffix = "${versionName}.${getGitHash()}-${flavor}" // eg. 19.1.0.b123456-github
             }

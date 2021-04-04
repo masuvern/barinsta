@@ -326,6 +326,7 @@
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/highlights_barrier"
         android:layout_width="wrap_content"
+        app:constraint_referenced_ids="mainPostCount, mainFollowers, mainFollowing"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom" />
 

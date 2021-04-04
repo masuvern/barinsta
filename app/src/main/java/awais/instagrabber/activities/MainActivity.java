@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.res.TypedArray;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Build;
@@ -24,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -50,15 +50,16 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
@@ -69,6 +70,7 @@ import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDir
 import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.IntentModel;
+import awais.instagrabber.models.Tab;
 import awais.instagrabber.models.enums.SuggestionType;
 import awais.instagrabber.repositories.responses.search.SearchItem;
 import awais.instagrabber.repositories.responses.search.SearchResponse;
@@ -84,6 +86,7 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
+import awais.instagrabber.webservices.RetrofitFactory;
 import awais.instagrabber.webservices.SearchService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -94,15 +97,8 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class MainActivity extends BaseLanguageActivity implements FragmentManager.OnBackStackChangedListener {
     private static final String TAG = "MainActivity";
-
-    private static final List<Integer> SHOW_BOTTOM_VIEW_DESTINATIONS = Arrays.asList(
-            R.id.directMessagesInboxFragment,
-            R.id.feedFragment,
-            R.id.profileFragment,
-            R.id.discoverFragment,
-            R.id.morePreferencesFragment);
-    private static final Map<Integer, Integer> NAV_TO_MENU_ID_MAP = new HashMap<>();
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
+    private static final String LAST_SELECT_NAV_MENU_ID = "lastSelectedNavMenuId";
 
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
@@ -114,10 +110,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private boolean showSearch = true;
     private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
+    private int lastSelectedNavMenuId;
     private boolean isActivityCheckerServiceBound = false;
     private boolean isBackStackEmpty = false;
     private boolean isLoggedIn;
     private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
+    private List<Tab> currentTabs;
+    private List<Integer> showBottomViewDestinations = Collections.emptyList();
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -133,16 +132,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
     };
 
-    static {
-        NAV_TO_MENU_ID_MAP.put(R.navigation.direct_messages_nav_graph, R.id.direct_messages_nav_graph);
-        NAV_TO_MENU_ID_MAP.put(R.navigation.feed_nav_graph, R.id.feed_nav_graph);
-        NAV_TO_MENU_ID_MAP.put(R.navigation.profile_nav_graph, R.id.profile_nav_graph);
-        NAV_TO_MENU_ID_MAP.put(R.navigation.discover_nav_graph, R.id.discover_nav_graph);
-        NAV_TO_MENU_ID_MAP.put(R.navigation.more_nav_graph, R.id.more_nav_graph);
-    }
-
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        RetrofitFactory.setup(this);
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         final String cookie = settingsHelper.getString(Constants.COOKIE);
@@ -165,8 +157,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             setupBottomNavigationBar(true);
         }
         setupSuggestions();
-        final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
-        if (checkUpdates) FlavorTown.updateCheck(this);
+        if (!BuildConfig.isPre) {
+            final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
+            if (checkUpdates) FlavorTown.updateCheck(this);
+        }
         FlavorTown.changelogCheck(this);
         new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
@@ -227,6 +221,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     @Override
     protected void onSaveInstanceState(@NonNull final Bundle outState) {
         outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
+        outState.putString(LAST_SELECT_NAV_MENU_ID, String.valueOf(binding.bottomNavView.getSelectedItemId()));
         super.onSaveInstanceState(outState);
     }
 
@@ -237,6 +232,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (key != null) {
             try {
                 firstFragmentGraphIndex = Integer.parseInt(key);
+            } catch (NumberFormatException ignored) { }
+        }
+        final String lastSelected = (String) savedInstanceState.get(LAST_SELECT_NAV_MENU_ID);
+        if (lastSelected != null) {
+            try {
+                lastSelectedNavMenuId = Integer.parseInt(lastSelected);
             } catch (NumberFormatException ignored) { }
         }
         setupBottomNavigationBar(false);
@@ -264,6 +265,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             Log.e(TAG, "onDestroy: ", e);
         }
         unbindActivityCheckerService();
+        RetrofitFactory.getInstance().destroy();
     }
 
     @Override
@@ -273,9 +275,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final NavController navController = currentNavControllerLiveData.getValue();
             if (navController != null) {
                 @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
-                if (backStack != null) {
-                    currentNavControllerBackStack = backStack.size();
-                }
+                currentNavControllerBackStack = backStack.size();
             }
         }
         if (isTaskRoot() && isBackStackEmpty && currentNavControllerBackStack == 2) {
@@ -328,7 +328,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final Bundle bundle = new Bundle();
             switch (type) {
                 case TYPE_LOCATION:
-                    bundle.putLong("locationId", Long.valueOf(query));
+                    bundle.putLong("locationId", Long.parseLong(query));
                     navController.navigate(R.id.action_global_locationFragment, bundle);
                     break;
                 case TYPE_HASHTAG:
@@ -378,14 +378,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                         cursor = null;
                         return;
                     }
-                    final List<SearchItem> result = new ArrayList<SearchItem>();
+                    final List<SearchItem> result = new ArrayList<>();
                     if (isLoggedIn) {
-                        if (body.getList() != null) result.addAll(searchHash ? body.getList()
-                                .stream()
-                                .filter(i -> i.getUser() == null)
-                                .collect(Collectors.toList()) : body.getList());
-                    }
-                    else {
+                        if (body.getList() != null) {
+                            result.addAll(searchHash ? body.getList()
+                                                           .stream()
+                                                           .filter(i -> i.getUser() == null)
+                                                           .collect(Collectors.toList())
+                                                     : body.getList());
+                        }
+                    } else {
                         if (body.getUsers() != null && !searchHash) result.addAll(body.getUsers());
                         if (body.getHashtags() != null) result.addAll(body.getHashtags());
                         if (body.getPlaces() != null) result.addAll(body.getPlaces());
@@ -430,9 +432,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
                 @Override
                 public void onFailure(@NonNull final Call<SearchResponse> call,
-                                      Throwable t) {
-                    if (!call.isCanceled() && t != null)
+                                      @NonNull Throwable t) {
+                    if (!call.isCanceled()) {
                         Log.e(TAG, "Exception on search:", t);
+                    }
                 }
             };
 
@@ -454,7 +457,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                     }
                     prevSuggestionAsync = searchService.search(isLoggedIn,
                                                                searchUser || searchHash ? currentSearchQuery.substring(1)
-                                                                    : currentSearchQuery,
+                                                                                        : currentSearchQuery,
                                                                searchUser ? "user" : (searchHash ? "hashtag" : "blended"));
                     suggestionAdapter.changeCursor(null);
                     prevSuggestionAsync.enqueue(cb);
@@ -484,36 +487,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return true;
     }
 
-    private void setupBottomNavigationBar(final boolean setDefaultFromSettings) {
-        int main_nav_ids = R.array.main_nav_ids;
-        if (!isLoggedIn) {
-            main_nav_ids = R.array.logged_out_main_nav_ids;
-            final int selectedItemId = binding.bottomNavView.getSelectedItemId();
-            binding.bottomNavView.getMenu().clear();
-            binding.bottomNavView.inflateMenu(R.menu.logged_out_bottom_navigation_menu);
-            if (selectedItemId == R.id.profile_nav_graph
-                    || selectedItemId == R.id.more_nav_graph) {
-                binding.bottomNavView.setSelectedItemId(selectedItemId);
-            } else {
-                setBottomNavSelectedItem(R.navigation.profile_nav_graph);
-            }
-        }
-        final List<Integer> mainNavList = getMainNavList(main_nav_ids);
-        if (setDefaultFromSettings) {
-            final String defaultTabResNameString = settingsHelper.getString(Constants.DEFAULT_TAB);
-            try {
-                int navId = 0;
-                if (!TextUtils.isEmpty(defaultTabResNameString)) {
-                    navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
-                }
-                final int defaultNavId = navId <= 0 ? R.navigation.profile_nav_graph
-                                                    : navId;
-                final int index = mainNavList.indexOf(defaultNavId);
-                if (index >= 0) firstFragmentGraphIndex = index;
-                setBottomNavSelectedItem(defaultNavId);
-            } catch (NumberFormatException e) {
-                Log.e(TAG, "Error parsing id", e);
-            }
+    private void setupBottomNavigationBar(final boolean setDefaultTabFromSettings) {
+        currentTabs = !isLoggedIn ? setupAnonBottomNav() : setupMainBottomNav();
+        final List<Integer> mainNavList = currentTabs.stream()
+                                                     .map(Tab::getNavigationResId)
+                                                     .collect(Collectors.toList());
+        showBottomViewDestinations = currentTabs.stream()
+                                                .map(Tab::getStartDestinationFragmentId)
+                                                .collect(Collectors.toList());
+        if (setDefaultTabFromSettings) {
+            setSelectedTab(currentTabs);
+        } else {
+            binding.bottomNavView.setSelectedItemId(lastSelectedNavMenuId);
         }
         final LiveData<NavController> navControllerLiveData = setupWithNavController(
                 binding.bottomNavView,
@@ -536,26 +521,85 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         });
     }
 
-    private void setBottomNavSelectedItem(final int navId) {
-        final Integer menuId = NAV_TO_MENU_ID_MAP.get(navId);
-        if (menuId != null) {
-            binding.bottomNavView.setSelectedItemId(menuId);
+    private void setSelectedTab(final List<Tab> tabs) {
+        final String defaultTabResNameString = settingsHelper.getString(Constants.DEFAULT_TAB);
+        try {
+            int navId = 0;
+            if (!TextUtils.isEmpty(defaultTabResNameString)) {
+                navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
+            }
+            final int navGraph = isLoggedIn ? R.navigation.feed_nav_graph
+                                            : R.navigation.profile_nav_graph;
+            final int defaultNavId = navId <= 0 ? navGraph : navId;
+            int index = Iterators.indexOf(tabs.iterator(), tab -> {
+                if (tab == null) return false;
+                return tab.getNavigationResId() == defaultNavId;
+            });
+            if (index < 0 || index >= tabs.size()) index = 0;
+            firstFragmentGraphIndex = index;
+            setBottomNavSelectedTab(tabs.get(index));
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing id", e);
         }
     }
 
-    @NonNull
-    private List<Integer> getMainNavList(final int main_nav_ids) {
-        final TypedArray navIds = getResources().obtainTypedArray(main_nav_ids);
-        final List<Integer> mainNavList = new ArrayList<>(navIds.length());
-        final int length = navIds.length();
-        for (int i = 0; i < length; i++) {
-            final int resourceId = navIds.getResourceId(i, -1);
-            if (resourceId < 0) continue;
-            mainNavList.add(resourceId);
+    private List<Tab> setupAnonBottomNav() {
+        final int selectedItemId = binding.bottomNavView.getSelectedItemId();
+        final Tab profileTab = new Tab(R.drawable.ic_person_24,
+                                       getString(R.string.profile),
+                                       false,
+                                       "profile_nav_graph",
+                                       R.navigation.profile_nav_graph,
+                                       R.id.profile_nav_graph,
+                                       R.id.profileFragment);
+        final Tab moreTab = new Tab(R.drawable.ic_more_horiz_24,
+                                    getString(R.string.more),
+                                    false,
+                                    "more_nav_graph",
+                                    R.navigation.more_nav_graph,
+                                    R.id.more_nav_graph,
+                                    R.id.morePreferencesFragment);
+        final Menu menu = binding.bottomNavView.getMenu();
+        menu.clear();
+        menu.add(0, profileTab.getNavigationRootId(), 0, profileTab.getTitle()).setIcon(profileTab.getIconResId());
+        menu.add(0, moreTab.getNavigationRootId(), 0, moreTab.getTitle()).setIcon(moreTab.getIconResId());
+        if (selectedItemId != R.id.profile_nav_graph && selectedItemId != R.id.more_nav_graph) {
+            setBottomNavSelectedTab(profileTab);
         }
-        navIds.recycle();
-        return mainNavList;
+        return ImmutableList.of(profileTab, moreTab);
     }
+
+    private List<Tab> setupMainBottomNav() {
+        final Menu menu = binding.bottomNavView.getMenu();
+        menu.clear();
+        final List<Tab> navTabList = Utils.getNavTabList(this).first;
+        for (final Tab tab : navTabList) {
+            menu.add(0, tab.getNavigationRootId(), 0, tab.getTitle()).setIcon(tab.getIconResId());
+        }
+        return navTabList;
+    }
+
+    private void setBottomNavSelectedTab(@NonNull final Tab tab) {
+        binding.bottomNavView.setSelectedItemId(tab.getNavigationRootId());
+    }
+
+    private void setBottomNavSelectedTab(@SuppressWarnings("SameParameterValue") @IdRes final int navGraphRootId) {
+        binding.bottomNavView.setSelectedItemId(navGraphRootId);
+    }
+
+    // @NonNull
+    // private List<Integer> getMainNavList(final int main_nav_ids) {
+    //     final TypedArray navIds = getResources().obtainTypedArray(main_nav_ids);
+    //     final List<Integer> mainNavList = new ArrayList<>(navIds.length());
+    //     final int length = navIds.length();
+    //     for (int i = 0; i < length; i++) {
+    //         final int resourceId = navIds.getResourceId(i, -1);
+    //         if (resourceId < 0) continue;
+    //         mainNavList.add(resourceId);
+    //     }
+    //     navIds.recycle();
+    //     return mainNavList;
+    // }
 
     private void setupNavigation(final Toolbar toolbar, final NavController navController) {
         if (navController == null) return;
@@ -574,7 +618,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             final int destinationId = destination.getId();
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
-            final boolean contains = SHOW_BOTTOM_VIEW_DESTINATIONS.contains(destinationId);
+            final boolean contains = showBottomViewDestinations.contains(destinationId);
             binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
             if (contains && behavior != null) {
                 behavior.slideUp(binding.bottomNavView);
@@ -684,7 +728,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         });
         final int selectedItemId = binding.bottomNavView.getSelectedItemId();
         if (selectedItemId != R.navigation.direct_messages_nav_graph) {
-            setBottomNavSelectedItem(R.navigation.direct_messages_nav_graph);
+            setBottomNavSelectedTab(R.id.direct_messages_nav_graph);
         }
     }
 
@@ -756,7 +800,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         final NavController navController = currentNavControllerLiveData.getValue();
         if (navController == null) return;
         final Bundle bundle = new Bundle();
-        bundle.putLong("locationId", Long.valueOf(locationId));
+        bundle.putLong("locationId", Long.parseLong(locationId));
         navController.navigate(R.id.action_global_locationFragment, bundle);
     }
 
@@ -863,6 +907,18 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     public Toolbar getToolbar() {
         return binding.toolbar;
     }
+
+    public View getRootView() {
+        return binding.getRoot();
+    }
+
+    public List<Tab> getCurrentTabs() {
+        return currentTabs;
+    }
+
+//    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
+//        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
+//    }
 
     private void setNavBarDMUnreadCountBadge(final int unseenCount) {
         final BadgeDrawable badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);

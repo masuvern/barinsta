@@ -23,6 +23,7 @@
     <string name="update_check">Kiểm tra cập nhật khi khởi động</string>
     <string name="flag_secure">Block screenshots &amp; app preview</string>
     <string name="download_user_folder">Tải bài viết xuống theo thư mục tên người dùng trong Downloads</string>
+    <string name="download_prepend_username">Prepend Username to Filename</string>
     <string name="mark_as_seen_setting">Đánh dấu story là đã xem sau khi xem</string>
     <string name="mark_as_seen_setting_summary">Người đăng story sẽ biết bạn đã xem nó</string>
     <string name="dm_mark_as_seen_setting">Đánh dấu DM là đã xem sau khi xem</string>
