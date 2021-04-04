@@ -77,6 +77,12 @@ public class AboutFragment extends BasePreferencesFragment {
         ));
         thirdPartyCategory.addPreference(get3ptPreference(
                 context,
+                "Process Phoenix",
+                "Copyright (C) 2015 Jake Wharton. Apache 2.0.",
+                "https://github.com/JakeWharton/ProcessPhoenix"
+        ));
+        thirdPartyCategory.addPreference(get3ptPreference(
+                context,
                 "Retrofit",
                 "Copyright 2013 Square, Inc. Apache 2.0.",
                 "https://square.github.io/retrofit/"
