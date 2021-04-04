@@ -191,25 +191,36 @@ public final class DownloadUtils {
     private static Pair<List<String>, String> getDownloadSavePaths(final List<String> paths,
                                                                    final String postId,
                                                                    final String displayUrl) {
-        return getDownloadSavePaths(paths, postId, "", displayUrl);
+        return getDownloadSavePaths(paths, postId, "", displayUrl, "");
+    }
+
+    @NonNull
+    private static Pair<List<String>, String> getDownloadSavePaths(final List<String> paths,
+                                                                   final String postId,
+                                                                   final String displayUrl,
+                                                                   final String username) {
+        return getDownloadSavePaths(paths, postId, "", displayUrl, username);
     }
 
     private static Pair<List<String>, String> getDownloadChildSaveFile(final List<String> paths,
                                                                        final String postId,
                                                                        final int childPosition,
-                                                                       final String url) {
+                                                                       final String url,
+                                                                       final String username) {
         final String sliderPostfix = "_slide_" + childPosition;
-        return getDownloadSavePaths(paths, postId, sliderPostfix, url);
+        return getDownloadSavePaths(paths, postId, sliderPostfix, url, username);
     }
 
     @Nullable
     private static Pair<List<String>, String> getDownloadSavePaths(final List<String> paths,
                                                                    final String postId,
                                                                    final String sliderPostfix,
-                                                                   final String displayUrl) {
+                                                                   final String displayUrl,
+                                                                   final String username) {
         if (paths == null) return null;
         final String extension = getFileExtensionFromUrl(displayUrl);
-        final String fileName = postId + sliderPostfix + extension;
+        final String usernamePrepend = TextUtils.isEmpty(username) ? "" : (username + "_");
+        final String fileName = usernamePrepend + postId + sliderPostfix + extension;
         // return new File(finalDir, fileName);
         // DocumentFile file = finalDir.findFile(fileName);
         // if (file == null) {
@@ -295,8 +306,9 @@ public final class DownloadUtils {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
                 final String url = ResponseBodyUtils.getImageUrl(media);
-                final Pair<List<String>, String> pair = getDownloadSavePaths(userFolderPaths, media.getCode(), url);
-                checkList.add(checkPathExists(context, pair.first));
+                final Pair<List<String>, String> file = getDownloadSavePaths(userFolderPaths, media.getCode(), url, "");
+                final Pair<List<String>, String> usernameFile = getDownloadSavePaths(userFolderPaths, media.getCode(), url, username);
+                checkList.add(checkPathExists(context, file.first) || checkPathExists(context, usernameFile.first));
                 break;
             }
             case MEDIA_TYPE_SLIDER:
@@ -305,8 +317,9 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final Pair<List<String>, String> pair = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url);
-                    checkList.add(checkPathExists(context, pair.first));
+                    final Pair<List<String>, String> file = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url, "");
+                    final Pair<List<String>, String> usernameFile = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url, username);
+                    checkList.add(checkPathExists(context, file.first) || checkPathExists(context, usernameFile.first));
                 }
                 break;
             default:
@@ -356,12 +369,16 @@ public final class DownloadUtils {
 
     public static void download(@NonNull final Context context,
                                 @NonNull final StoryModel storyModel) {
-        final DocumentFile downloadDir = getDownloadDir(context, "@" + storyModel.getUsername());
+        final DocumentFile downloadDir = getDownloadDir(context, storyModel.getUsername());
         final String url = storyModel.getItemType() == MediaItemType.MEDIA_TYPE_VIDEO
                            ? storyModel.getVideoUrl()
                            : storyModel.getStoryUrl();
         final String extension = DownloadUtils.getFileExtensionFromUrl(url);
-        final String fileName = storyModel.getStoryMediaId() + "_" + storyModel.getTimestamp() + extension;
+        final String baseFileName = storyModel.getStoryMediaId() + "_"
+                + storyModel.getTimestamp() + extension;
+        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
+                                               && storyModel.getUsername() != null ? storyModel.getUsername() + "_" : "";
+        final String fileName = usernamePrepend + baseFileName;
         DocumentFile saveFile = downloadDir.findFile(fileName);
         if (saveFile == null) {
             saveFile = downloadDir.createFile(
@@ -394,13 +411,24 @@ public final class DownloadUtils {
         final Map<String, DocumentFile> map = new HashMap<>();
         for (final Media media : feedModels) {
             final User mediaUser = media.getUser();
-            final List<String> userFolderPaths = getSubPathForUserFolder(mediaUser == null ? "" : "@" + mediaUser.getUsername());
-            // final DocumentFile downloadDir = getDownloadDir(context, mediaUser == null ? "" : "@" + mediaUser.getUsername());
+            final String username = mediaUser == null ? "" : mediaUser.getUsername();
+            final List<String> userFolderPaths = getSubPathForUserFolder(username);
+            // final DocumentFile downloadDir = getDownloadDir(context, mediaUser == null ? "" : mediaUser.getUsername());
             switch (media.getMediaType()) {
                 case MEDIA_TYPE_IMAGE:
                 case MEDIA_TYPE_VIDEO: {
                     final String url = getUrlOfType(media);
-                    final Pair<List<String>, String> pair = getDownloadSavePaths(userFolderPaths, media.getCode(), url);
+                    String fileName = media.getId();
+                    if (mediaUser != null && TextUtils.isEmpty(media.getCode())) {
+                        fileName = mediaUser.getUsername() + "_" + fileName;
+                    }
+                    if (!TextUtils.isEmpty(media.getCode())) {
+                        fileName = media.getCode();
+                        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
+                            fileName = mediaUser.getUsername() + "_" + fileName;
+                        }
+                    }
+                    final Pair<List<String>, String> pair = getDownloadSavePaths(userFolderPaths, fileName, url);
                     final DocumentFile file = createFile(pair);
                     if (file == null) continue;
                     map.put(url, file);
@@ -424,7 +452,11 @@ public final class DownloadUtils {
                         if (childPositionIfSingle >= 0 && feedModels.size() == 1 && i != childPositionIfSingle) continue;
                         final Media child = sliderItems.get(i);
                         final String url = getUrlOfType(child);
-                        final Pair<List<String>, String> pair = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url);
+                        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null
+                                                       ? mediaUser.getUsername()
+                                                       : "";
+                        final Pair<List<String>, String> pair = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url,
+                                                                                         usernamePrepend);
                         final DocumentFile file = createFile(pair);
                         if (file == null) continue;
                         map.put(url, file);
