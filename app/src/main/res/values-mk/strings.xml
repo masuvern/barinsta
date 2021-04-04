@@ -26,6 +26,7 @@
     <string name="download_prepend_username">Prepend Username to Filename</string>
     <string name="mark_as_seen_setting">Означи ги приказните како видени</string>
     <string name="mark_as_seen_setting_summary">Авторот на приказната ќе знае дека сте ја погледнале приказната</string>
+    <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
     <string name="dm_mark_as_seen_setting">Означи порака како видена</string>
     <string name="dm_mark_as_seen_setting_summary">Другите членови ќе знаат дека сте ја виделе содржината на пораката</string>
     <string name="activity_setting">Овозможи нотификации</string>
@@ -460,4 +461,22 @@
     <string name="removed_keywords">Removed keyword: %s from filter list</string>
     <string name="marked_as_seen">Marked as seen</string>
     <string name="delete_unsuccessful">Delete unsuccessful</string>
+    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
+    <string name="error">Error</string>
+    <string name="account_logged_out">This account has been logged out.</string>
+    <string name="login_required">Login required!</string>
+    <string name="sentry_block">Sentry block.</string>
+    <string name="inactive_user">User is inactive!</string>
+    <string name="crash_report_subject">Barinsta Crash Report</string>
+    <string name="crash_report_title">Select an email app to send crash logs</string>
+    <string name="not_found">Not found!</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
+    <string name="skip_update">Skip this update</string>
+    <string name="on_latest_version">You\'re already on the latest version</string>
+    <string name="tab_order">Screen order</string>
+    <string name="other_tabs">Other tabs</string>
+    <string name="tab_order_start_next_launch">The tab order will be reflected on next launch</string>
+    <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
+    <string name="copy_caption">Copy caption</string>
+    <string name="copy_reply">Copy reply</string>
 </resources>

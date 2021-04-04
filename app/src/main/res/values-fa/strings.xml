@@ -26,6 +26,7 @@
     <string name="download_prepend_username">Prepend Username to Filename</string>
     <string name="mark_as_seen_setting">نشان کرد استوری ها به عنوان دیده شده بعد از دیدن</string>
     <string name="mark_as_seen_setting_summary">نویسنده استوری می داند که شما آن را دیده اید</string>
+    <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
     <string name="dm_mark_as_seen_setting">نشان کردن پیام خصوصی بعنوان دیده شده بعد از دیدن</string>
     <string name="dm_mark_as_seen_setting_summary">کاربران دیگر خواهند فهمید شما این را دیده اید</string>
     <string name="activity_setting">روشن کردن آگهداد فعالیت ها</string>
@@ -46,8 +47,8 @@
         <item quantity="other">%s\nPosts</item>
     </plurals>
     <plurals name="main_posts_count_inline">
-        <item quantity="one">%s Post</item>
-        <item quantity="other">%s Posts</item>
+        <item quantity="one">%s فرسته</item>
+        <item quantity="other">%s فرسته</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nFollower</item>
@@ -76,7 +77,7 @@
         <item quantity="one">%d response averaging %s</item>
         <item quantity="other">%d responses averaging %s</item>
     </plurals>
-    <string name="slider_answer">Your answer: %s</string>
+    <string name="slider_answer">پاسخ شما: %s</string>
     <string name="reply_story">پاسخ به استوری</string>
     <string name="reply_hint">پاسخ…</string>
     <string name="story_quiz">نظرسنجی</string>
@@ -182,7 +183,7 @@
     <string name="dms_inbox_raven_media_screenshot">اسکرین شات گرفته شده</string>
     <string name="dms_inbox_raven_media_cant_deliver">نمیتواند ارسال شود</string>
     <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
-    <string name="dms_thread_message_hint">Message...</string>
+    <string name="dms_thread_message_hint">پیام...</string>
     <string name="dms_thread_audio_hint">Press and hold to record audio</string>
     <string name="dms_thread_updating">Updating...</string>
     <string name="dms_action_leave">Leave chat</string>
@@ -208,7 +209,7 @@
     <string name="comment_viewer_reply_comment">پاسخ به دیدگاه</string>
     <string name="comment_viewer_like_comment">پسندیدن دیدگاه</string>
     <string name="comment_viewer_unlike_comment">نپسندیدن دیدگاه</string>
-    <string name="comment_viewer_translate_comment">Translate comment</string>
+    <string name="comment_viewer_translate_comment">گرداندن دیدگاه</string>
     <string name="comment_viewer_delete_comment">هذف دیدگاه</string>
     <string name="comment_send_empty_comment">بدون دیدگاه تهی!</string>
     <string name="comment_view_mention_user_search">ایا میخواهید نام کاربری جستوجو کنید ؟</string>
@@ -338,8 +339,8 @@
     <string name="no_external_app_url">No app found which opens urls</string>
     <string name="gallery">Gallery</string>
     <string name="camera">فرتورانداز</string>
-    <string name="all_photos">All Photos</string>
-    <string name="all_media">All Media</string>
+    <string name="all_photos">همۀ فرتورها</string>
+    <string name="all_media">همۀ رسانه‌ها</string>
     <string name="all_videos">All Videos</string>
     <string name="brightness">Brightness</string>
     <string name="contrast">Contrast</string>
@@ -356,7 +357,7 @@
     <string name="box_blur">Box blur</string>
     <string name="sepia">Sepia</string>
     <string name="clarendon">Clarendon</string>
-    <string name="one977">1977</string>
+    <string name="one977">۱۹۹۷</string>
     <string name="aden">Aden</string>
     <string name="reset">Reset</string>
     <string name="crop">Crop</string>
@@ -391,7 +392,7 @@
     <string name="dms_action_make_admin">Make Admin</string>
     <string name="dms_action_remove_admin">Remove as Admin</string>
     <string name="edit_unsuccessful">Edit was unsuccessful</string>
-    <string name="message">Message</string>
+    <string name="message">پیام</string>
     <string name="reply">Reply</string>
     <string name="tap_to_remove">Tap to remove</string>
     <string name="forward">Forward</string>
@@ -421,7 +422,7 @@
     <string name="raven_msg_info">Message will expire when seen</string>
     <string name="story_share">\@%s\'s story</string>
     <string name="story_share_highlight">\@%s\'s story highlight</string>
-    <string name="photo">Photo</string>
+    <string name="photo">فرتور</string>
     <string name="video">Video</string>
     <string name="voice_message">Voice message</string>
     <string name="post">فرسته</string>
@@ -442,9 +443,9 @@
     <string name="no_pending_requests">No pending requests</string>
     <string name="checking_for_new_messages">Checking for new messages</string>
     <string name="pref_category_stories">Stories</string>
-    <string name="pref_category_dm">DM</string>
-    <string name="pref_category_notifications">Notifications</string>
-    <string name="pref_category_post">Post</string>
+    <string name="pref_category_dm">پیام سرراست</string>
+    <string name="pref_category_notifications">آگهداد</string>
+    <string name="pref_category_post">فرسته</string>
     <string name="enable_dm_notifications">Enable DM notifications</string>
     <string name="enable_dm_auto_refesh">Auto refresh messages</string>
     <string name="auto_refresh_every">Auto refresh every</string>
@@ -461,4 +462,22 @@
     <string name="removed_keywords">Removed keyword: %s from filter list</string>
     <string name="marked_as_seen">Marked as seen</string>
     <string name="delete_unsuccessful">Delete unsuccessful</string>
+    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
+    <string name="error">Error</string>
+    <string name="account_logged_out">This account has been logged out.</string>
+    <string name="login_required">Login required!</string>
+    <string name="sentry_block">Sentry block.</string>
+    <string name="inactive_user">User is inactive!</string>
+    <string name="crash_report_subject">Barinsta Crash Report</string>
+    <string name="crash_report_title">Select an email app to send crash logs</string>
+    <string name="not_found">Not found!</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
+    <string name="skip_update">Skip this update</string>
+    <string name="on_latest_version">You\'re already on the latest version</string>
+    <string name="tab_order">Screen order</string>
+    <string name="other_tabs">Other tabs</string>
+    <string name="tab_order_start_next_launch">The tab order will be reflected on next launch</string>
+    <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
+    <string name="copy_caption">Copy caption</string>
+    <string name="copy_reply">Copy reply</string>
 </resources>
