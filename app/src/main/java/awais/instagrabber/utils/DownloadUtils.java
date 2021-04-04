@@ -1,9 +1,9 @@
 package awais.instagrabber.utils;
 
-import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.UriPermission;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
@@ -49,32 +49,65 @@ import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 
 public final class DownloadUtils {
     private static final String TAG = DownloadUtils.class.getSimpleName();
-
-    public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-    public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    private static final String DIR_BARINSTA = "Barinsta";
+    // private static final String DIR_BARINSTA = "Barinsta";
     private static final String DIR_DOWNLOADS = "Downloads";
     private static final String DIR_CAMERA = "Camera";
     private static final String DIR_EDIT = "Edit";
-    private static final String TEMP_DIR = "Temp";
+    private static final String DIR_RECORDINGS = "Recordings";
+    private static final String DIR_TEMP = "Temp";
+    private static final String DIR_BACKUPS = "Backups";
+
+    // public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    // public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private static DocumentFile root;
+    // private static DocumentFile DOWNLOADS_DIR_FILE;
 
-    public static void init(@NonNull final Context context) {
-        // if (!Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) return;
+    public static void init(@NonNull final Context context) throws ReselectDocumentTreeException {
+        // if (DOWNLOADS_DIR_FILE == null) {
+        //     final Uri uri = Utils.getSafUris(context, new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS))[0];
+        //     DOWNLOADS_DIR_FILE = DocumentFile.fromTreeUri(context, uri);
+        // }
+        // if (!Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
+        //     root = DOWNLOADS_DIR_FILE; // DocumentFile.fromFile(DOWNLOADS_DIR_FILE);
+        //     return;
+        // }
         final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
-        if (TextUtils.isEmpty(customPath)) return;
-        // dir = new File(customPath);
-        root = DocumentFile.fromTreeUri(context, Uri.parse(customPath));
+        if (TextUtils.isEmpty(customPath)) {
+            throw new ReselectDocumentTreeException();
+            // root = DOWNLOADS_DIR_FILE; // DocumentFile.fromFile(DOWNLOADS_DIR_FILE);
+            // return;
+        }
+        if (!customPath.startsWith("content")) {
+            // if (customPath.equals(DOWNLOADS_DIR_FILE.getAbsolutePath())) {
+            //     throw new ReselectDocumentTreeException();
+            // }
+            // reselect the folder in selector view
+            throw new ReselectDocumentTreeException(Uri.parse(customPath));
+        }
+        final Uri uri = Uri.parse(customPath);
+        final List<UriPermission> existingPermissions = context.getContentResolver().getPersistedUriPermissions();
+        if (existingPermissions.isEmpty()) {
+            // reselect the folder in selector view
+            throw new ReselectDocumentTreeException(uri);
+        }
+        final boolean anyMatch = existingPermissions.stream().anyMatch(uriPermission -> uriPermission.getUri().equals(uri));
+        if (!anyMatch) {
+            // reselect the folder in selector view
+            throw new ReselectDocumentTreeException(uri);
+        }
+        root = DocumentFile.fromTreeUri(context, uri);
         Log.d(TAG, "init: " + root);
         // final File parent = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         // final DocumentFile documentFile = DocumentFile.fromFile(parent);
         // Log.d(TAG, "init: " + documentFile);
     }
 
+    @Nullable
     public static DocumentFile getDownloadDir(final String... dirs) {
-        // final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
-        // File subDir = new File(parent, DIR_BARINSTA);
+        if (root == null) {
+            return null;
+        }
         DocumentFile subDir = root;
         if (dirs != null) {
             for (final String dir : dirs) {
@@ -87,7 +120,7 @@ public final class DownloadUtils {
         return subDir;
     }
 
-    @NonNull
+    @Nullable
     public static DocumentFile getDownloadDir() {
         // final File parent = new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS);
         // final File dir = new File(new File(parent, "barinsta"), "downloads");
@@ -106,12 +139,24 @@ public final class DownloadUtils {
         return getDownloadDir(DIR_DOWNLOADS);
     }
 
+    @Nullable
     public static DocumentFile getCameraDir() {
         return getDownloadDir(DIR_CAMERA);
     }
 
+    @Nullable
     public static DocumentFile getImageEditDir(final String sessionId) {
         return getDownloadDir(DIR_EDIT, sessionId);
+    }
+
+    @Nullable
+    public static DocumentFile getRecordingsDir() {
+        return getDownloadDir(DIR_RECORDINGS);
+    }
+
+    @Nullable
+    public static DocumentFile getBackupsDir() {
+        return getDownloadDir(DIR_BACKUPS);
     }
 
     // @Nullable
@@ -156,9 +201,9 @@ public final class DownloadUtils {
     }
 
     private static DocumentFile getTempDir() {
-        DocumentFile file = root.findFile(TEMP_DIR);
+        DocumentFile file = root.findFile(DIR_TEMP);
         if (file == null) {
-            file = root.createDirectory(TEMP_DIR);
+            file = root.createDirectory(DIR_TEMP);
         }
         return file;
     }
@@ -202,11 +247,11 @@ public final class DownloadUtils {
         return getDownloadSavePaths(paths, postId, "", displayUrl, username);
     }
 
-    private static Pair<List<String>, String> getDownloadChildSaveFile(final List<String> paths,
-                                                                       final String postId,
-                                                                       final int childPosition,
-                                                                       final String url,
-                                                                       final String username) {
+    private static Pair<List<String>, String> getDownloadChildSavePaths(final List<String> paths,
+                                                                        final String postId,
+                                                                        final int childPosition,
+                                                                        final String url,
+                                                                        final String username) {
         final String sliderPostfix = "_slide_" + childPosition;
         return getDownloadSavePaths(paths, postId, sliderPostfix, url, username);
     }
@@ -231,9 +276,9 @@ public final class DownloadUtils {
         return new Pair<>(paths, mimeType);
     }
 
-    public static DocumentFile getTempFile() {
-        return getTempFile(null, null);
-    }
+    // public static DocumentFile getTempFile() {
+    //     return getTempFile(null, null);
+    // }
 
     public static DocumentFile getTempFile(final String fileName, final String extension) {
         final DocumentFile dir = getTempDir();
@@ -317,8 +362,8 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final Pair<List<String>, String> file = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url, "");
-                    final Pair<List<String>, String> usernameFile = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url, username);
+                    final Pair<List<String>, String> file = getDownloadChildSavePaths(userFolderPaths, media.getCode(), i + 1, url, "");
+                    final Pair<List<String>, String> usernameFile = getDownloadChildSavePaths(userFolderPaths, media.getCode(), i + 1, url, username);
                     checkList.add(checkPathExists(context, file.first) || checkPathExists(context, usernameFile.first));
                 }
                 break;
@@ -329,6 +374,7 @@ public final class DownloadUtils {
 
     private static boolean checkPathExists(@NonNull final Context context,
                                            @NonNull final List<String> paths) {
+        if (root == null) return false;
         final String joined = android.text.TextUtils.join("/", paths);
         final Uri userFolderUri = DocumentsContract.buildDocumentUriUsingTree(root.getUri(), joined);
         final DocumentFile userFolder = DocumentFile.fromSingleUri(context, userFolderUri);
@@ -455,8 +501,8 @@ public final class DownloadUtils {
                         final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null
                                                        ? mediaUser.getUsername()
                                                        : "";
-                        final Pair<List<String>, String> pair = getDownloadChildSaveFile(userFolderPaths, media.getCode(), i + 1, url,
-                                                                                         usernamePrepend);
+                        final Pair<List<String>, String> pair = getDownloadChildSavePaths(userFolderPaths, media.getCode(), i + 1, url,
+                                                                                          usernamePrepend);
                         final DocumentFile file = createFile(pair);
                         if (file == null) continue;
                         map.put(url, file);
@@ -469,7 +515,9 @@ public final class DownloadUtils {
         download(context, map);
     }
 
+    @Nullable
     private static DocumentFile createFile(@NonNull final Pair<List<String>, String> pair) {
+        if (root == null) return null;
         if (pair.first == null || pair.second == null) return null;
         DocumentFile dir = root;
         final List<String> first = pair.first;
@@ -557,5 +605,22 @@ public final class DownloadUtils {
                 .build();
         WorkManager.getInstance(context)
                    .enqueue(downloadWorkRequest);
+    }
+
+
+    public static class ReselectDocumentTreeException extends Exception {
+        private final Uri initialUri;
+
+        public ReselectDocumentTreeException() {
+            initialUri = null;
+        }
+
+        public ReselectDocumentTreeException(final Uri initialUri) {
+            this.initialUri = initialUri;
+        }
+
+        public Uri getInitialUri() {
+            return initialUri;
+        }
     }
 }

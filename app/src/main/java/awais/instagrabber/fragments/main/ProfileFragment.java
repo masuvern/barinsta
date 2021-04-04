@@ -28,7 +28,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -98,9 +97,7 @@ import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.UserService;
 
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 
 public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "ProfileFragment";
@@ -164,13 +161,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         if (ProfileFragment.this.selectedFeedModels == null) return false;
                         final Context context = getContext();
                         if (context == null) return false;
-                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                            DownloadUtils.download(context, ImmutableList.copyOf(ProfileFragment.this.selectedFeedModels));
-                            binding.postsRecyclerView.endSelection();
-                            return true;
-                        }
-                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                        DownloadUtils.download(context, ImmutableList.copyOf(ProfileFragment.this.selectedFeedModels));
+                        binding.postsRecyclerView.endSelection();
                         return true;
+                        // }
+                        // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        // return true;
                     }
                     return false;
                 }
@@ -200,13 +197,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = childPosition;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
+            // return;
+            // }
+            // downloadFeedModel = feedModel;
+            // downloadChildPosition = childPosition;
+            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override

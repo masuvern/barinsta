@@ -1,6 +1,5 @@
 package awais.instagrabber.activities;
 
-import android.Manifest;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
@@ -14,10 +13,8 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 
 import awais.instagrabber.R;
 import awais.instagrabber.asyncs.PostFetcher;
@@ -74,11 +71,11 @@ public final class DirectDownload extends AppCompatActivity {
     }
 
     private synchronized void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            doDownload();
-            return;
-        }
-        ActivityCompat.requestPermissions(this, DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+        // if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        doDownload();
+        // return;
+        // }
+        // ActivityCompat.requestPermissions(this, DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
     }
 
     @Override

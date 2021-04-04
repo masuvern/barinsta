@@ -79,6 +79,7 @@ import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.IntentUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -92,6 +93,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static awais.instagrabber.utils.Constants.EXTRA_INITIAL_URI;
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -134,6 +136,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        try {
+            DownloadUtils.init(this);
+        } catch (DownloadUtils.ReselectDocumentTreeException e) {
+            super.onCreate(savedInstanceState);
+            final Intent intent = new Intent(this, DirectorySelectActivity.class);
+            intent.putExtra(EXTRA_INITIAL_URI, e.getInitialUri());
+            startActivity(intent);
+            finish();
+            return;
+        }
         RetrofitFactory.setup(this);
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -221,7 +233,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     @Override
     protected void onSaveInstanceState(@NonNull final Bundle outState) {
         outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
-        outState.putString(LAST_SELECT_NAV_MENU_ID, String.valueOf(binding.bottomNavView.getSelectedItemId()));
+        if (binding != null) {
+            outState.putString(LAST_SELECT_NAV_MENU_ID, String.valueOf(binding.bottomNavView.getSelectedItemId()));
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -265,7 +279,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             Log.e(TAG, "onDestroy: ", e);
         }
         unbindActivityCheckerService();
-        RetrofitFactory.getInstance().destroy();
+        try {
+            RetrofitFactory.getInstance().destroy();
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -916,9 +932,9 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return currentTabs;
     }
 
-//    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
-//        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
-//    }
+    //    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
+    //        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
+    //    }
 
     private void setNavBarDMUnreadCountBadge(final int unseenCount) {
         final BadgeDrawable badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);

@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
 import awais.instagrabber.utils.TextUtils;
@@ -27,8 +26,6 @@ import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.datetimeParser;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-//import awaisomereport.LogCollector;
-//import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class InstaGrabberApplication extends Application {
     private static final String TAG = "InstaGrabberApplication";
@@ -56,7 +53,7 @@ public final class InstaGrabberApplication extends Application {
                 Log.e(TAG, "Error", e);
             }
         }
-      
+
         // final Set<RequestListener> requestListeners = new HashSet<>();
         // requestListeners.add(new RequestLoggingListener());
         final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
@@ -90,6 +87,5 @@ public final class InstaGrabberApplication extends Application {
         if (TextUtils.isEmpty(settingsHelper.getString(Constants.DEVICE_UUID))) {
             settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
         }
-        DownloadUtils.init(this);
     }
 }

@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 
@@ -109,11 +108,11 @@ public class ProfilePicDialogFragment extends DialogFragment {
         binding.download.setOnClickListener(v -> {
             final Context context = getContext();
             if (context == null) return;
-            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-                downloadProfilePicture();
-                return;
-            }
-            requestPermissions(DownloadUtils.PERMS, 8020);
+            // if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+            downloadProfilePicture();
+            // return;
+            // }
+            // requestPermissions(DownloadUtils.PERMS, 8020);
         });
     }
 

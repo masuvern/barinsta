@@ -1,13 +1,11 @@
 package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.documentfile.provider.DocumentFile;
@@ -21,15 +19,14 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import awais.instagrabber.R;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
+import awais.instagrabber.utils.Utils;
 
-import static android.app.Activity.RESULT_OK;
 import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DownloadsPreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = DownloadsPreferencesFragment.class.getSimpleName();
-    private static final int SELECT_DIR_REQUEST_CODE = 1;
     private SaveToCustomFolderPreference.ResultCallback resultCallback;
 
     @Override
@@ -37,7 +34,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
         final Context context = getContext();
         if (context == null) return;
         screen.addPreference(getDownloadUserFolderPreference(context));
-        screen.addPreference(getSaveToCustomFolderPreference(context));
+        // screen.addPreference(getSaveToCustomFolderPreference(context));
         screen.addPreference(getPrependUsernameToFilenamePreference(context));
     }
 
@@ -49,41 +46,63 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
         return preference;
     }
 
-    private Preference getSaveToCustomFolderPreference(@NonNull final Context context) {
-        return new SaveToCustomFolderPreference(context, (resultCallback) -> {
-            // Choose a directory using the system's file picker.
-            final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            startActivityForResult(intent, SELECT_DIR_REQUEST_CODE);
-            this.resultCallback = resultCallback;
+    // private Preference getSaveToCustomFolderPreference(@NonNull final Context context) {
+    //     return new SaveToCustomFolderPreference(context, checked -> {
+    //         try {
+    //             DownloadUtils.init(context);
+    //         } catch (DownloadUtils.ReselectDocumentTreeException e) {
+    //             if (!checked) return;
+    //             startDocumentSelector(e.getInitialUri());
+    //         } catch (Exception e) {
+    //             Log.e(TAG, "getSaveToCustomFolderPreference: ", e);
+    //         }
+    //     }, (resultCallback) -> {
+    //         // Choose a directory using the system's file picker.
+    //         startDocumentSelector(null);
+    //         this.resultCallback = resultCallback;
+    //
+    //         // new DirectoryChooser()
+    //         //         .setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
+    //         //         .setInteractionListener(file -> {
+    //         //             settingsHelper.putString(FOLDER_PATH, file.getAbsolutePath());
+    //         //             resultCallback.onResult(file.getAbsolutePath());
+    //         //         })
+    //         //         .show(getParentFragmentManager(), null);
+    //     });
+    // }
 
-            // new DirectoryChooser()
-            //         .setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
-            //         .setInteractionListener(file -> {
-            //             settingsHelper.putString(FOLDER_PATH, file.getAbsolutePath());
-            //             resultCallback.onResult(file.getAbsolutePath());
-            //         })
-            //         .show(getParentFragmentManager(), null);
-        });
-    }
+    // private void startDocumentSelector(final Uri initialUri) {
+    //     final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+    //     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && initialUri != null) {
+    //         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, initialUri);
+    //     }
+    //     startActivityForResult(intent, SELECT_DIR_REQUEST_CODE);
+    // }
 
-    @Override
-    public void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
-        if (data == null || data.getData() == null) return;
-        if (resultCode != RESULT_OK || requestCode != SELECT_DIR_REQUEST_CODE) return;
-        final Context context = getContext();
-        if (context == null) return;
-        final Uri dirUri = data.getData();
-        Log.d(TAG, "onActivityResult: " + dirUri);
-        final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        context.getContentResolver().takePersistableUriPermission(dirUri, takeFlags);
-        final DocumentFile root = DocumentFile.fromTreeUri(context, dirUri);
-        settingsHelper.putString(FOLDER_PATH, data.getData().toString());
-        if (resultCallback != null) {
-            resultCallback.onResult(root.getName());
-            resultCallback = null;
-        }
-        // Log.d(TAG, "onActivityResult: " + root);
-    }
+    // @Override
+    // public void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+    //     if (requestCode != SELECT_DIR_REQUEST_CODE) return;
+    //     final Context context = getContext();
+    //     if (context == null) return;
+    //     if (resultCode != RESULT_OK) {
+    //         try {
+    //             DownloadUtils.init(context, true);
+    //         } catch (Exception ignored) {}
+    //         return;
+    //     }
+    //     if (data == null || data.getData() == null) return;
+    //     Utils.setupSelectedDir(context, data);
+    //     if (resultCallback != null) {
+    //         try {
+    //             final DocumentFile root = DocumentFile.fromTreeUri(context, data.getData());
+    //             resultCallback.onResult(Utils.getDocumentFileRealPath(context, root).getAbsolutePath());
+    //         } catch (Exception e) {
+    //             Log.e(TAG, "onActivityResult: ", e);
+    //         }
+    //         resultCallback = null;
+    //     }
+    //     // Log.d(TAG, "onActivityResult: " + root);
+    // }
 
     private Preference getPrependUsernameToFilenamePreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
@@ -95,11 +114,15 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
 
     public static class SaveToCustomFolderPreference extends Preference {
         private AppCompatTextView customPathTextView;
+        private final OnSaveToChangeListener onSaveToChangeListener;
         private final OnSelectFolderButtonClickListener onSelectFolderButtonClickListener;
         private final String key;
 
-        public SaveToCustomFolderPreference(final Context context, final OnSelectFolderButtonClickListener onSelectFolderButtonClickListener) {
+        public SaveToCustomFolderPreference(final Context context,
+                                            final OnSaveToChangeListener onSaveToChangeListener,
+                                            final OnSelectFolderButtonClickListener onSelectFolderButtonClickListener) {
             super(context);
+            this.onSaveToChangeListener = onSaveToChangeListener;
             this.onSelectFolderButtonClickListener = onSelectFolderButtonClickListener;
             key = FOLDER_SAVE_TO;
             setLayoutResource(R.layout.pref_custom_folder);
@@ -117,8 +140,21 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
             cbSaveTo.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 settingsHelper.putBoolean(FOLDER_SAVE_TO, isChecked);
                 buttonContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-                final String customPath = settingsHelper.getString(FOLDER_PATH);
+                final Context context = getContext();
+                String customPath = settingsHelper.getString(FOLDER_PATH);
+                if (!TextUtils.isEmpty(customPath) && customPath.startsWith("content") && context != null) {
+                    final Uri uri = Uri.parse(customPath);
+                    final DocumentFile documentFile = DocumentFile.fromSingleUri(context, uri);
+                    try {
+                        customPath = Utils.getDocumentFileRealPath(context, documentFile).getAbsolutePath();
+                    } catch (Exception e) {
+                        Log.e(TAG, "onBindViewHolder: ", e);
+                    }
+                }
                 customPathTextView.setText(customPath);
+                if (onSaveToChangeListener != null) {
+                    onSaveToChangeListener.onChange(isChecked);
+                }
             });
             final boolean savedToEnabled = settingsHelper.getBoolean(key);
             holder.itemView.setOnClickListener(v -> cbSaveTo.toggle());
@@ -140,6 +176,10 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
 
         public interface OnSelectFolderButtonClickListener {
             void onClick(ResultCallback resultCallback);
+        }
+
+        public interface OnSaveToChangeListener {
+            void onChange(boolean checked);
         }
     }
 }

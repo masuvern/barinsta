@@ -19,7 +19,6 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -54,9 +53,6 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
-
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 
 public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "FeedFragment";
@@ -123,13 +119,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = childPosition;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
+            // return;
+            // }
+            // downloadFeedModel = feedModel;
+            // downloadChildPosition = childPosition;
+            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override
@@ -204,13 +200,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         if (FeedFragment.this.selectedFeedModels == null) return false;
                         final Context context = getContext();
                         if (context == null) return false;
-                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                            DownloadUtils.download(context, ImmutableList.copyOf(FeedFragment.this.selectedFeedModels));
-                            binding.feedRecyclerView.endSelection();
-                            return true;
-                        }
-                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                        DownloadUtils.download(context, ImmutableList.copyOf(FeedFragment.this.selectedFeedModels));
+                        binding.feedRecyclerView.endSelection();
                         return true;
+                        // }
+                        // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        // return true;
                     }
                     return false;
                 }

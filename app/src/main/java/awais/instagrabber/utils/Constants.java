@@ -70,15 +70,15 @@ public final class Constants {
     public static final int DM_CHECK_NOTIFICATION_ID = 11;
 
     // see https://github.com/dilame/instagram-private-api/blob/master/src/core/constants.ts
-//    public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
-//            " \"13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0," +
-//            "32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0,51.0," +
-//            "52.0,53.0,54.0,55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0\" }, { \"name\": \"FACE_TRACKER_VERSION\", " +
-//            "\"value\": 12 }, { \"name\": \"segmentation\", \"value\": \"segmentation_enabled\" }, { \"name\": \"COMPRESSION\", " +
-//            "\"value\": \"ETC2_COMPRESSION\" }, { \"name\": \"world_tracker\", \"value\": \"world_tracker_enabled\" }, { \"name\": " +
-//            "\"gyroscope\", \"value\": \"gyroscope_enabled\" } ]";
-//    public static final String SIGNATURE_VERSION = "4";
-//    public static final String SIGNATURE_KEY = "9193488027538fd3450b83b7d05286d4ca9599a0f7eeed90d8c85925698a05dc";
+    //    public static final String SUPPORTED_CAPABILITIES = "[ { \"name\": \"SUPPORTED_SDK_VERSIONS\", \"value\":" +
+    //            " \"13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0," +
+    //            "32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0,51.0," +
+    //            "52.0,53.0,54.0,55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0\" }, { \"name\": \"FACE_TRACKER_VERSION\", " +
+    //            "\"value\": 12 }, { \"name\": \"segmentation\", \"value\": \"segmentation_enabled\" }, { \"name\": \"COMPRESSION\", " +
+    //            "\"value\": \"ETC2_COMPRESSION\" }, { \"name\": \"world_tracker\", \"value\": \"world_tracker_enabled\" }, { \"name\": " +
+    //            "\"gyroscope\", \"value\": \"gyroscope_enabled\" } ]";
+    //    public static final String SIGNATURE_VERSION = "4";
+    //    public static final String SIGNATURE_KEY = "9193488027538fd3450b83b7d05286d4ca9599a0f7eeed90d8c85925698a05dc";
     public static final String BREADCRUMB_KEY = "iN4$aGr0m";
     public static final int LOGIN_RESULT_CODE = 5000;
     public static final String SKIPPED_VERSION = "skipped_version";
@@ -123,4 +123,6 @@ public final class Constants {
     public static final String DM_THREAD_ACTION_EXTRA_THREAD_TITLE = "thread_title";
 
     public static final String X_IG_APP_ID = "936619743392459";
+
+    public static final String EXTRA_INITIAL_URI = "initial_uri";
 }

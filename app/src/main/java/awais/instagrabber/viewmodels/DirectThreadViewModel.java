@@ -72,7 +72,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
             throw new IllegalArgumentException("User is not logged in!");
         }
         contentResolver = application.getContentResolver();
-        recordingsDir = DownloadUtils.getDownloadDir("Recordings");
+        recordingsDir = DownloadUtils.getRecordingsDir();
         final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
         threadManager = messagesManager.getThreadManager(threadId, pending, currentUser, contentResolver);
         threadManager.fetchPendingRequests();

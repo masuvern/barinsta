@@ -43,7 +43,6 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
@@ -100,9 +99,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.PostViewV2ViewModel;
 
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class PostViewV2Fragment extends SharedElementTransitionDialogFragment implements EditTextDialogFragment.EditTextDialogFragmentCallback {
@@ -622,11 +619,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
 
     private void setupDownload() {
         binding.download.setOnClickListener(v -> {
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition);
-                return;
-            }
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+            DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition);
+            // return;
+            // }
+            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         });
         binding.download.setOnLongClickListener(v -> {
             Utils.displayToastAboveView(context, v, getString(R.string.action_download));

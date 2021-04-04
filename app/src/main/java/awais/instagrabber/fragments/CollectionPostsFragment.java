@@ -27,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -64,9 +63,6 @@ import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.CollectionService;
 import awais.instagrabber.webservices.ServiceCallback;
-
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 
 public class CollectionPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "CollectionPostsFragment";
@@ -105,12 +101,12 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                 if (CollectionPostsFragment.this.selectedFeedModels == null) return false;
                 final Context context = getContext();
                 if (context == null) return false;
-                if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                    DownloadUtils.download(context, ImmutableList.copyOf(CollectionPostsFragment.this.selectedFeedModels));
-                    binding.posts.endSelection();
-                    return true;
-                }
-                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                DownloadUtils.download(context, ImmutableList.copyOf(CollectionPostsFragment.this.selectedFeedModels));
+                binding.posts.endSelection();
+                // return true;
+                // }
+                // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
             }
             return false;
         }
@@ -140,13 +136,13 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = -1;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
+            // return;
+            // }
+            // downloadFeedModel = feedModel;
+            // downloadChildPosition = -1;
+            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override
@@ -288,8 +284,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         if (item.getItemId() == R.id.layout) {
             showPostsLayoutPreferences();
             return true;
-        }
-        else if (item.getItemId() == R.id.delete) {
+        } else if (item.getItemId() == R.id.delete) {
             final Context context = getContext();
             new AlertDialog.Builder(context)
                     .setTitle(R.string.delete_collection)
@@ -309,15 +304,13 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                                         Log.e(TAG, "Error deleting collection", t);
                                         try {
                                             Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                        }
-                                        catch(final Throwable e) {}
+                                        } catch (final Throwable e) {}
                                     }
                                 });
                     })
                     .setNegativeButton(R.string.cancel, null)
                     .show();
-        }
-        else if (item.getItemId() == R.id.edit) {
+        } else if (item.getItemId() == R.id.edit) {
             final Context context = getContext();
             final EditText input = new EditText(context);
             new AlertDialog.Builder(context)
@@ -339,8 +332,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                                         Log.e(TAG, "Error editing collection", t);
                                         try {
                                             Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                        }
-                                        catch(final Throwable e) {}
+                                        } catch (final Throwable e) {}
                                     }
                                 });
                     })
@@ -443,8 +435,8 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     private void setupCover() {
         final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMedias() == null
-                ? savedCollection.getCoverMedia()
-                : savedCollection.getCoverMedias().get(0));
+                                                              ? savedCollection.getCoverMedia()
+                                                              : savedCollection.getCoverMedias().get(0));
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())

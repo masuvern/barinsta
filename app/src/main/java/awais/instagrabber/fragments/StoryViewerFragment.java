@@ -29,8 +29,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
@@ -210,10 +208,10 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return false;
         int itemId = item.getItemId();
         if (itemId == R.id.action_download) {
-            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-                downloadStory();
-            else
-                ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
+            // if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
+            downloadStory();
+            // else
+            //     ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
             return true;
         }
         if (itemId == R.id.action_dms) {
@@ -415,10 +413,10 @@ public class StoryViewerFragment extends Fragment {
                         return true;
                     }
                 } catch (final Exception e) {
-//                    if (logCollector != null)
-//                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-//                                                     new Pair<>("swipeEvent", swipeEvent),
-//                                                     new Pair<>("diffX", diffX));
+                    //                    if (logCollector != null)
+                    //                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
+                    //                                                     new Pair<>("swipeEvent", swipeEvent),
+                    //                                                     new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;

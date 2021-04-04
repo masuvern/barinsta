@@ -24,7 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -70,8 +69,6 @@ import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.TagsService;
 
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -121,13 +118,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         if (HashTagFragment.this.selectedFeedModels == null) return false;
                         final Context context = getContext();
                         if (context == null) return false;
-                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                            DownloadUtils.download(context, ImmutableList.copyOf(HashTagFragment.this.selectedFeedModels));
-                            binding.posts.endSelection();
-                            return true;
-                        }
-                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                        DownloadUtils.download(context, ImmutableList.copyOf(HashTagFragment.this.selectedFeedModels));
+                        binding.posts.endSelection();
                         return true;
+                        // }
+                        // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        // return true;
                     }
                     return false;
                 }
@@ -157,13 +154,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = childPosition;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
+            // return;
+            // }
+            // downloadFeedModel = feedModel;
+            // downloadChildPosition = childPosition;
+            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override
@@ -400,8 +397,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             try {
                 Toast.makeText(getContext(), R.string.error_loading_hashtag, Toast.LENGTH_SHORT).show();
                 binding.swipeRefreshLayout.setEnabled(false);
-            }
-            catch (Exception ignored) {}
+            } catch (Exception ignored) {}
             return;
         }
         setTitle();
@@ -428,31 +424,32 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                              userId,
                                              deviceUuid,
                                              new ServiceCallback<Boolean>() {
-                        @Override
-                        public void onSuccess(final Boolean result) {
-                            hashtagDetailsBinding.btnFollowTag.setClickable(true);
-                            if (!result) {
-                                Log.e(TAG, "onSuccess: result is false");
-                                Snackbar.make(root, R.string.downloader_unknown_error, BaseTransientBottomBar.LENGTH_LONG)
-                                        .show();
-                                return;
-                            }
-                            hashtagDetailsBinding.btnFollowTag.setText(R.string.unfollow);
-                            hashtagDetailsBinding.btnFollowTag.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
-                        }
+                                                 @Override
+                                                 public void onSuccess(final Boolean result) {
+                                                     hashtagDetailsBinding.btnFollowTag.setClickable(true);
+                                                     if (!result) {
+                                                         Log.e(TAG, "onSuccess: result is false");
+                                                         Snackbar.make(root, R.string.downloader_unknown_error, BaseTransientBottomBar.LENGTH_LONG)
+                                                                 .show();
+                                                         return;
+                                                     }
+                                                     hashtagDetailsBinding.btnFollowTag.setText(R.string.unfollow);
+                                                     hashtagDetailsBinding.btnFollowTag
+                                                             .setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
+                                                 }
 
-                        @Override
-                        public void onFailure(@NonNull final Throwable t) {
-                            hashtagDetailsBinding.btnFollowTag.setClickable(true);
-                            Log.e(TAG, "onFailure: ", t);
-                            final String message = t.getMessage();
-                            Snackbar.make(root,
-                                          message != null ? message
-                                                          : getString(R.string.downloader_unknown_error),
-                                          BaseTransientBottomBar.LENGTH_LONG)
-                                    .show();
-                        }
-                    });
+                                                 @Override
+                                                 public void onFailure(@NonNull final Throwable t) {
+                                                     hashtagDetailsBinding.btnFollowTag.setClickable(true);
+                                                     Log.e(TAG, "onFailure: ", t);
+                                                     final String message = t.getMessage();
+                                                     Snackbar.make(root,
+                                                                   message != null ? message
+                                                                                   : getString(R.string.downloader_unknown_error),
+                                                                   BaseTransientBottomBar.LENGTH_LONG)
+                                                             .show();
+                                                 }
+                                             });
                     return;
                 }
             });
