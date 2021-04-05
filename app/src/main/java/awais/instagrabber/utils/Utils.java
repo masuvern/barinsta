@@ -509,7 +509,11 @@ public final class Utils {
     public static void scanDocumentFile(@NonNull final Context context,
                                         @NonNull final DocumentFile documentFile,
                                         @NonNull final OnScanCompletedListener callback) {
-        if (!documentFile.isFile()) return;
+        if (!documentFile.isFile() || !documentFile.exists()) {
+            Log.d(TAG, "scanDocumentFile: " + documentFile);
+            callback.onScanCompleted(null, null);
+            return;
+        }
         File file = null;
         try {
             file = getDocumentFileRealPath(context, documentFile);
@@ -532,6 +536,8 @@ public final class Utils {
 
         if (type.equalsIgnoreCase("primary")) {
             return new File(Environment.getExternalStorageDirectory(), split[1]);
+        } else if (type.equalsIgnoreCase("raw")) {
+            return new File(split[1]);
         } else {
             if (volumes == null) {
                 final StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);

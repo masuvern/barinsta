@@ -11,6 +11,7 @@ import android.webkit.MimeTypeMap;
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,13 +45,14 @@ public class VoiceRecorder {
 
     public void startRecording(final Application application) {
         stopped = false;
+        ParcelFileDescriptor parcelFileDescriptor = null;
         try {
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             deleteTempAudioFile();
             audioTempFile = getAudioRecordFile();
-            final ParcelFileDescriptor parcelFileDescriptor = application.getContentResolver().openFileDescriptor(audioTempFile.getUri(), "rwt");
+            parcelFileDescriptor = application.getContentResolver().openFileDescriptor(audioTempFile.getUri(), "rwt");
             recorder.setOutputFile(parcelFileDescriptor.getFileDescriptor());
             recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
             recorder.setAudioEncodingBitRate(AUDIO_BIT_RATE);
@@ -66,6 +68,12 @@ public class VoiceRecorder {
         } catch (Exception e) {
             Log.e(TAG, "Audio recording failed", e);
             deleteTempAudioFile();
+        } finally {
+            if (parcelFileDescriptor != null) {
+                try {
+                    parcelFileDescriptor.close();
+                } catch (IOException ignored) {}
+            }
         }
     }
 
@@ -145,7 +153,11 @@ public class VoiceRecorder {
     @NonNull
     private DocumentFile getAudioRecordFile() {
         final String name = String.format("%s-%s.%s", FILE_PREFIX, SIMPLE_DATE_FORMAT.format(new Date()), EXTENSION);
-        return recordingsDir.createFile(MIME_TYPE, name);
+        DocumentFile file = recordingsDir.findFile(name);
+        if (file == null || !file.exists()) {
+            file = recordingsDir.createFile(MIME_TYPE, name);
+        }
+        return file;
     }
 
     private void deleteTempAudioFile() {

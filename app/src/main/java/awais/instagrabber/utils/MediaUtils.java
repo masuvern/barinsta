@@ -2,12 +2,16 @@ package awais.instagrabber.utils;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.io.FileDescriptor;
 
 public final class MediaUtils {
     private static final String TAG = MediaUtils.class.getSimpleName();
@@ -64,34 +68,24 @@ public final class MediaUtils {
                                     @NonNull final Uri uri,
                                     @NonNull final OnInfoLoadListener<VideoInfo> listener) {
         AppExecutors.getInstance().tasksThread().submit(() -> {
-            try (Cursor cursor = MediaStore.Video.query(contentResolver, uri, PROJECTION_AUDIO)) {
-                if (cursor == null) {
-                    if (listener != null) {
-                        listener.onLoad(null);
-                    }
-                    return;
-                }
-                int durationColumn = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
-                int sizeColumn = cursor.getColumnIndex(MediaStore.Audio.Media.SIZE);
-                if (cursor.moveToNext()) {
-                    if (listener != null) {
-                        listener.onLoad(new VideoInfo(
-                                cursor.getLong(durationColumn),
-                                0,
-                                0,
-                                cursor.getLong(sizeColumn)
-                        ));
-                    }
+            try (ParcelFileDescriptor parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "r")) {
+                final FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+                final MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                mediaMetadataRetriever.setDataSource(fileDescriptor);
+                final String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                if (listener != null) {
+                    listener.onLoad(new VideoInfo(
+                            Long.parseLong(duration),
+                            0,
+                            0,
+                            0
+                    ));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "getVoiceInfo: ", e);
                 if (listener != null) {
                     listener.onFailure(e);
                 }
-                return;
-            }
-            if (listener != null) {
-                listener.onLoad(null);
             }
         });
     }

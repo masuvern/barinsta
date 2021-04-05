@@ -174,16 +174,16 @@ public class DirectThreadViewModel extends AndroidViewModel {
                         return;
                     }
                     Log.d(TAG, "onComplete: scan complete");
-                    MediaUtils.getVoiceInfo(contentResolver, uri, new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
+                    MediaUtils.getVoiceInfo(contentResolver, result.getFile().getUri(), new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
                         @Override
                         public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
                             if (videoInfo == null) return;
                             threadManager.sendVoice(data,
-                                                    uri,
+                                                    result.getFile().getUri(),
                                                     result.getWaveform(),
                                                     result.getSamplingFreq(),
                                                     videoInfo == null ? 0 : videoInfo.duration,
-                                                    videoInfo == null ? 0 : videoInfo.size);
+                                                    result.getFile().length());
                         }
 
                         @Override

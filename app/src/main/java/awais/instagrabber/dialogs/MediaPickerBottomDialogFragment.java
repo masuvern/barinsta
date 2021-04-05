@@ -26,7 +26,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.MediaItemsAdapter;
 import awais.instagrabber.databinding.LayoutMediaPickerBinding;
 import awais.instagrabber.utils.MediaController;
-import awais.instagrabber.utils.PermissionUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.MediaPickerViewModel;
 
@@ -121,10 +120,10 @@ public class MediaPickerBottomDialogFragment extends BottomSheetDialogFragment {
         if (requestCode == ATTACH_MEDIA_REQUEST_CODE) {
             final Context context = getContext();
             if (context == null) return;
-            final boolean hasAttachMediaPerms = PermissionUtils.hasAttachMediaPerms(context);
-            if (hasAttachMediaPerms) {
-                viewModel.loadMedia(context);
-            }
+            // final boolean hasAttachMediaPerms = PermissionUtils.hasAttachMediaPerms(context);
+            // if (hasAttachMediaPerms) {
+            viewModel.loadMedia(context);
+            // }
         }
     }
 
@@ -133,10 +132,10 @@ public class MediaPickerBottomDialogFragment extends BottomSheetDialogFragment {
         setupAlbumPicker();
         final Context context = getContext();
         if (context == null) return;
-        if (!PermissionUtils.hasAttachMediaPerms(context)) {
-            PermissionUtils.requestAttachMediaPerms(this, ATTACH_MEDIA_REQUEST_CODE);
-            return;
-        }
+        // if (!PermissionUtils.hasAttachMediaPerms(context)) {
+        //     PermissionUtils.requestAttachMediaPerms(this, ATTACH_MEDIA_REQUEST_CODE);
+        //     return;
+        // }
         viewModel.loadMedia(context);
     }
 

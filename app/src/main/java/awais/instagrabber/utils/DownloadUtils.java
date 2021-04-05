@@ -52,7 +52,7 @@ public final class DownloadUtils {
     private static final String DIR_DOWNLOADS = "Downloads";
     private static final String DIR_CAMERA = "Camera";
     private static final String DIR_EDIT = "Edit";
-    private static final String DIR_RECORDINGS = "Recordings";
+    private static final String DIR_RECORDINGS = "Sent Recordings";
     private static final String DIR_TEMP = "Temp";
     private static final String DIR_BACKUPS = "Backups";
 
@@ -96,7 +96,7 @@ public final class DownloadUtils {
             throw new ReselectDocumentTreeException(uri);
         }
         root = DocumentFile.fromTreeUri(context, uri);
-        Log.d(TAG, "init: " + root);
+        // Log.d(TAG, "init: " + root);
         // final File parent = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         // final DocumentFile documentFile = DocumentFile.fromFile(parent);
         // Log.d(TAG, "init: " + documentFile);
@@ -111,9 +111,8 @@ public final class DownloadUtils {
         if (dirs != null) {
             for (final String dir : dirs) {
                 final DocumentFile subDirFile = subDir.findFile(dir);
-                if (subDirFile == null) {
-                    subDir = subDir.createDirectory(dir);
-                }
+                final boolean exists = subDirFile != null && subDirFile.exists();
+                subDir = exists ? subDirFile : subDir.createDirectory(dir);
             }
         }
         return subDir;
