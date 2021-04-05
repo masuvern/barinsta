@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.UriPermission;
 import android.net.Uri;
-import android.provider.DocumentsContract;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
@@ -338,8 +337,7 @@ public final class DownloadUtils {
         return "";
     }
 
-    public static List<Boolean> checkDownloaded(@NonNull final Context context,
-                                                @NonNull final Media media) {
+    public static List<Boolean> checkDownloaded(@NonNull final Media media) {
         final List<Boolean> checkList = new LinkedList<>();
         final User user = media.getUser();
         String username = "username";
@@ -351,9 +349,10 @@ public final class DownloadUtils {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
                 final String url = ResponseBodyUtils.getImageUrl(media);
-                final Pair<List<String>, String> file = getDownloadSavePaths(userFolderPaths, media.getCode(), url, "");
-                final Pair<List<String>, String> usernameFile = getDownloadSavePaths(userFolderPaths, media.getCode(), url, username);
-                checkList.add(checkPathExists(context, file.first) || checkPathExists(context, usernameFile.first));
+                final Pair<List<String>, String> file = getDownloadSavePaths(new ArrayList<>(userFolderPaths), media.getCode(), url, "");
+                final Pair<List<String>, String> usernameFile = getDownloadSavePaths(new ArrayList<>(userFolderPaths), media.getCode(), url,
+                                                                                     username);
+                checkList.add(checkPathExists(file.first) || checkPathExists(usernameFile.first));
                 break;
             }
             case MEDIA_TYPE_SLIDER:
@@ -362,9 +361,11 @@ public final class DownloadUtils {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
                     final String url = ResponseBodyUtils.getImageUrl(child);
-                    final Pair<List<String>, String> file = getDownloadChildSavePaths(userFolderPaths, media.getCode(), i + 1, url, "");
-                    final Pair<List<String>, String> usernameFile = getDownloadChildSavePaths(userFolderPaths, media.getCode(), i + 1, url, username);
-                    checkList.add(checkPathExists(context, file.first) || checkPathExists(context, usernameFile.first));
+                    final Pair<List<String>, String> file = getDownloadChildSavePaths(new ArrayList<>(userFolderPaths), media.getCode(), i + 1, url,
+                                                                                      "");
+                    final Pair<List<String>, String> usernameFile = getDownloadChildSavePaths(new ArrayList<>(userFolderPaths), media.getCode(),
+                                                                                              i + 1, url, username);
+                    checkList.add(checkPathExists(file.first) || checkPathExists(usernameFile.first));
                 }
                 break;
             default:
@@ -372,13 +373,16 @@ public final class DownloadUtils {
         return checkList;
     }
 
-    private static boolean checkPathExists(@NonNull final Context context,
-                                           @NonNull final List<String> paths) {
+    private static boolean checkPathExists(@NonNull final List<String> paths) {
         if (root == null) return false;
-        final String joined = android.text.TextUtils.join("/", paths);
-        final Uri userFolderUri = DocumentsContract.buildDocumentUriUsingTree(root.getUri(), joined);
-        final DocumentFile userFolder = DocumentFile.fromSingleUri(context, userFolderUri);
-        return userFolder != null && userFolder.exists();
+        DocumentFile dir = root;
+        for (final String path : paths) {
+            dir = dir.findFile(path);
+            if (dir == null || !dir.exists()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void showDownloadDialog(@NonNull Context context,
@@ -501,7 +505,8 @@ public final class DownloadUtils {
                         final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null
                                                        ? mediaUser.getUsername()
                                                        : "";
-                        final Pair<List<String>, String> pair = getDownloadChildSavePaths(userFolderPaths, media.getCode(), i + 1, url,
+                        final Pair<List<String>, String> pair = getDownloadChildSavePaths(new ArrayList<>(userFolderPaths), media.getCode(), i + 1,
+                                                                                          url,
                                                                                           usernamePrepend);
                         final DocumentFile file = createFile(pair);
                         if (file == null) continue;

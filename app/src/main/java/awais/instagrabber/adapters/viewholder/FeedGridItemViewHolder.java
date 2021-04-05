@@ -102,7 +102,7 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
             binding.typeIcon.setVisibility(View.VISIBLE);
             binding.typeIcon.setImageResource(typeIconRes);
         }
-        final DownloadedCheckerAsyncTask task = new DownloadedCheckerAsyncTask(itemView.getContext(), result -> {
+        final DownloadedCheckerAsyncTask task = new DownloadedCheckerAsyncTask(result -> {
             final List<Boolean> checkList = result.get(media.getPk());
             if (checkList == null || checkList.isEmpty()) {
                 return;

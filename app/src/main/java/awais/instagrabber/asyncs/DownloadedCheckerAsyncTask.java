@@ -1,9 +1,7 @@
 package awais.instagrabber.asyncs;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +12,9 @@ import awais.instagrabber.utils.DownloadUtils;
 public final class DownloadedCheckerAsyncTask extends AsyncTask<Media, Void, Map<String, List<Boolean>>> {
     private static final String TAG = "DownloadedCheckerAsyncTask";
 
-    private final WeakReference<Context> context;
     private final OnCheckResultListener listener;
 
-    public DownloadedCheckerAsyncTask(final Context context,
-                                      final OnCheckResultListener listener) {
-        this.context = new WeakReference<>(context);
+    public DownloadedCheckerAsyncTask(final OnCheckResultListener listener) {
         this.listener = listener;
     }
 
@@ -30,9 +25,7 @@ public final class DownloadedCheckerAsyncTask extends AsyncTask<Media, Void, Map
         }
         final Map<String, List<Boolean>> map = new HashMap<>();
         for (final Media media : feedModels) {
-            final Context context = this.context.get();
-            if (context == null) return map;
-            map.put(media.getPk(), DownloadUtils.checkDownloaded(context, media));
+            map.put(media.getPk(), DownloadUtils.checkDownloaded(media));
         }
         return map;
     }
