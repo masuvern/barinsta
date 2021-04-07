@@ -157,7 +157,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     implementation 'org.apache.commons:commons-imaging:1.0-alpha2'
-    implementation 'com.github.ammargitham:uCrop:2.3-native-beta-2'
+    implementation 'com.github.ammargitham:uCrop:2.3-beta'
     implementation 'com.github.ammargitham:android-gpuimage:2.1.1-beta4'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'

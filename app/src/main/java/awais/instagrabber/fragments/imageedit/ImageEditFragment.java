@@ -225,6 +225,11 @@ public class ImageEditFragment extends Fragment {
             @Override
             public void onCropFinish(final UCropFragment.UCropResult result) {
                 Log.d(TAG, "onCropFinish: " + result.mResultCode);
+                if (result.mResultCode == UCrop.RESULT_ERROR) {
+                    final Throwable t = UCrop.getError(result.mResultData);
+                    Log.e(TAG, "onCropFinish: ", t);
+                    return;
+                }
                 if (result.mResultCode == AppCompatActivity.RESULT_OK) {
                     final Intent resultData = result.mResultData;
                     final Bundle extras = resultData.getExtras();
