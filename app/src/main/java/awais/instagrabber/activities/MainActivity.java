@@ -282,6 +282,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         try {
             RetrofitFactory.getInstance().destroy();
         } catch (Exception ignored) {}
+        DownloadUtils.destroy();
     }
 
     @Override
