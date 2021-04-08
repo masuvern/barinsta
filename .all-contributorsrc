@@ -33,6 +33,24 @@
       ]
     },
     {
+      "login": "zerrium",
+      "name": "Zerrium",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58355441?v=4",
+      "profile": "https://github.com/zerrium",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "junhuicoding",
+      "name": "Chua Jun Hui",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54289027?v=4",
+      "profile": "https://github.com/junhuicoding",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
       "login": "andersonvom",
       "name": "Anderson Mesquita",
       "avatar_url": "https://avatars3.githubusercontent.com/u/69922?v=4",
@@ -40,6 +58,16 @@
       "contributions": [
         "code",
         "bug"
+      ]
+    },
+    {
+      "login": "vojta-horanek",
+      "name": "Vojtěch Hořánek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12630566?v=4",
+      "profile": "https://vojtechh.eu/",
+      "contributions": [
+        "code",
+        "translation"
       ]
     },
     {
@@ -255,15 +283,15 @@
         "translation"
       ]
     },
-     {
-       "login": "Pyrobauve",
-       "name": "Pyrobauve",
-       "avatar_url": "https://avatars.githubusercontent.com/u/48654473?v=4",
-       "profile": "https://github.com/Pyrobauve",
-       "contributions": [
-         "translation"
-       ]
-     },
+    {
+      "login": "Pyrobauve",
+      "name": "Pyrobauve",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48654473?v=4",
+      "profile": "https://github.com/Pyrobauve",
+      "contributions": [
+        "translation"
+      ]
+    },
     {
       "login": "RAMAR-RAR",
       "name": "RAMAR-RAR",

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>InstaGrabber</name>
+	<name>Barinsta</name>
 	<comment>Project instagrabber created by Buildship.</comment>
 	<projects>
 	</projects>
@@ -16,7 +16,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1600117114918</id>
+			<id>0</id>
 			<name></name>
 			<type>30</type>
 			<matcher>

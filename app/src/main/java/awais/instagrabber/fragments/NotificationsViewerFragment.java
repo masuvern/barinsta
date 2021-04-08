@@ -93,12 +93,12 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             final NotificationImage notificationImage = model.getArgs().getMedia().get(0);
             final long mediaId = Long.parseLong(notificationImage.getId().split("_")[0]);
             if (model.getType() == NotificationType.RESPONDED_STORY) {
-                final NavDirections action = NotificationsViewerFragmentDirections
-                        .actionNotificationsToStory(
-                                StoryViewerOptions.forStory(
+                final StoryViewerOptions options = StoryViewerOptions.forStory(
                                         mediaId,
-                                        model.getArgs().getUsername()));
-                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(action);
+                                        model.getArgs().getUsername());
+                final Bundle bundle = new Bundle();
+                bundle.putSerializable("options", options);
+                NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(R.id.action_notifications_to_story, bundle);
             } else {
                 final AlertDialog alertDialog = new AlertDialog.Builder(context)
                         .setCancelable(false)
