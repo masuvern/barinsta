@@ -49,7 +49,6 @@ import awais.instagrabber.services.DeleteImageIntentService;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Constants.DOWNLOAD_CHANNEL_ID;
 import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
@@ -272,8 +271,8 @@ public class DownloadWorker extends Worker {
         int count = 1;
         for (final DocumentFile filePath : filePaths) {
             // final File file = new File(filePath);
-            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, filePath.getUri()));
-            Utils.scanDocumentFile(context, filePath, (path, uri) -> {});
+            // context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, filePath.getUri()));
+            // Utils.scanDocumentFile(context, filePath, (path, uri) -> {});
             // final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
             final ContentResolver contentResolver = context.getContentResolver();
             Bitmap bitmap = null;

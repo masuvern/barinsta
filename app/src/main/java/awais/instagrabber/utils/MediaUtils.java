@@ -32,9 +32,7 @@ public final class MediaUtils {
         AppExecutors.getInstance().tasksThread().submit(() -> {
             try (Cursor cursor = MediaStore.Video.query(contentResolver, uri, PROJECTION_VIDEO)) {
                 if (cursor == null) {
-                    if (listener != null) {
-                        listener.onLoad(null);
-                    }
+                    listener.onLoad(null);
                     return;
                 }
                 int durationColumn = cursor.getColumnIndex(MediaStore.Video.Media.DURATION);
@@ -42,24 +40,16 @@ public final class MediaUtils {
                 int heightColumn = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT);
                 int sizeColumn = cursor.getColumnIndex(MediaStore.Video.Media.SIZE);
                 if (cursor.moveToNext()) {
-                    if (listener != null) {
-                        listener.onLoad(new VideoInfo(
-                                cursor.getLong(durationColumn),
-                                cursor.getInt(widthColumn),
-                                cursor.getInt(heightColumn),
-                                cursor.getLong(sizeColumn)
-                        ));
-                    }
+                    listener.onLoad(new VideoInfo(
+                            cursor.getLong(durationColumn),
+                            cursor.getInt(widthColumn),
+                            cursor.getInt(heightColumn),
+                            cursor.getLong(sizeColumn)
+                    ));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "getVideoInfo: ", e);
-                if (listener != null) {
-                    listener.onFailure(e);
-                }
-                return;
-            }
-            if (listener != null) {
-                listener.onLoad(null);
+                listener.onFailure(e);
             }
         });
     }
@@ -69,23 +59,24 @@ public final class MediaUtils {
                                     @NonNull final OnInfoLoadListener<VideoInfo> listener) {
         AppExecutors.getInstance().tasksThread().submit(() -> {
             try (ParcelFileDescriptor parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "r")) {
+                if (parcelFileDescriptor == null) {
+                    listener.onLoad(null);
+                    return;
+                }
                 final FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
                 final MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                 mediaMetadataRetriever.setDataSource(fileDescriptor);
-                final String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-                if (listener != null) {
-                    listener.onLoad(new VideoInfo(
-                            Long.parseLong(duration),
-                            0,
-                            0,
-                            0
-                    ));
-                }
+                String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                if (TextUtils.isEmpty(duration)) duration = "0";
+                listener.onLoad(new VideoInfo(
+                        Long.parseLong(duration),
+                        0,
+                        0,
+                        0
+                ));
             } catch (Exception e) {
                 Log.e(TAG, "getVoiceInfo: ", e);
-                if (listener != null) {
-                    listener.onFailure(e);
-                }
+                listener.onFailure(e);
             }
         });
     }

@@ -3,7 +3,6 @@ package awais.instagrabber.viewmodels;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,7 +36,6 @@ import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.MediaController;
 import awais.instagrabber.utils.MediaUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.VoiceRecorder;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -165,39 +163,28 @@ public class DirectThreadViewModel extends AndroidViewModel {
 
             @Override
             public void onComplete(final VoiceRecorder.VoiceRecordingResult result) {
-                Log.d(TAG, "onComplete: recording complete. Scanning file...");
-                Utils.scanDocumentFile(application, result.getFile(), (path, uri) -> {
-                    if (uri == null) {
-                        final String msg = "Scan failed!";
-                        Log.e(TAG, msg);
-                        data.postValue(Resource.error(msg, null));
-                        return;
+                // Log.d(TAG, "onComplete: recording complete. Scanning file...");
+                MediaUtils.getVoiceInfo(contentResolver, result.getFile().getUri(), new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
+                    @Override
+                    public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
+                        if (videoInfo == null) return;
+                        threadManager.sendVoice(data,
+                                                result.getFile().getUri(),
+                                                result.getWaveform(),
+                                                result.getSamplingFreq(),
+                                                videoInfo.duration,
+                                                result.getFile().length());
                     }
-                    Log.d(TAG, "onComplete: scan complete");
-                    MediaUtils.getVoiceInfo(contentResolver, result.getFile().getUri(), new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
-                        @Override
-                        public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
-                            if (videoInfo == null) return;
-                            threadManager.sendVoice(data,
-                                                    result.getFile().getUri(),
-                                                    result.getWaveform(),
-                                                    result.getSamplingFreq(),
-                                                    videoInfo == null ? 0 : videoInfo.duration,
-                                                    result.getFile().length());
-                        }
 
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            data.postValue(Resource.error(t.getMessage(), null));
-                        }
-                    });
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        data.postValue(Resource.error(t.getMessage(), null));
+                    }
                 });
             }
 
             @Override
-            public void onCancel() {
-
-            }
+            public void onCancel() {}
         });
         voiceRecorder.startRecording(application);
         return data;

@@ -22,7 +22,6 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -115,7 +114,7 @@ public class CameraActivity extends BaseLanguageActivity {
         binding.cameraCaptureButton.setOnClickListener(v -> {
             try {
                 takePhoto();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "updateUi: ", e);
             }
         });
@@ -205,14 +204,19 @@ public class CameraActivity extends BaseLanguageActivity {
         preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
     }
 
-    private void takePhoto() throws FileNotFoundException {
+    private void takePhoto() throws IOException {
         if (imageCapture == null) return;
         final String extension = "jpg";
         final String fileName = SIMPLE_DATE_FORMAT.format(System.currentTimeMillis()) + "." + extension;
         // final File photoFile = new File(outputDirectory, fileName);
-        final String mimeType = Utils.mimeTypeMap.getMimeTypeFromExtension(extension);
+        final String mimeType = "image/jpg";
         final DocumentFile photoFile = outputDirectory.createFile(mimeType, fileName);
+        if (photoFile == null) {
+            Log.e(TAG, "takePhoto: photoFile is null!");
+            return;
+        }
         final OutputStream outputStream = getContentResolver().openOutputStream(photoFile.getUri());
+        if (outputStream == null) return;
         final ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(outputStream).build();
         imageCapture.takePicture(
                 outputFileOptions,
@@ -220,29 +224,18 @@ public class CameraActivity extends BaseLanguageActivity {
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull final ImageCapture.OutputFileResults outputFileResults) {
-                        if (outputStream != null) {
-                            try { outputStream.close(); } catch (IOException ignored) {}
-                        }
-                        // final Uri uri = Uri.fromFile(photoFile);
-                        // final String mimeType = MimeTypeMap.getSingleton()
-                        //                                    .getMimeTypeFromExtension(Files.getFileExtension(photoFile.getName()));
-                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, photoFile.getUri()));
-                        Utils.scanDocumentFile(CameraActivity.this, photoFile, (path, uri1) -> {
-                            Log.d(TAG, "onImageSaved: scan complete");
-                            final Intent intent = new Intent();
-                            intent.setData(uri1);
-                            setResult(Activity.RESULT_OK, intent);
-                            finish();
-                        });
+                        try { outputStream.close(); } catch (IOException ignored) {}
+                        final Intent intent = new Intent();
+                        intent.setData(photoFile.getUri());
+                        setResult(Activity.RESULT_OK, intent);
+                        finish();
                         Log.d(TAG, "onImageSaved: " + photoFile.getUri());
                     }
 
                     @Override
                     public void onError(@NonNull final ImageCaptureException exception) {
                         Log.e(TAG, "onError: ", exception);
-                        if (outputStream != null) {
-                            try { outputStream.close(); } catch (IOException ignored) {}
-                        }
+                        try { outputStream.close(); } catch (IOException ignored) {}
                     }
                 }
         );

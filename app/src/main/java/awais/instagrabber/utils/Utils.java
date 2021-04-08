@@ -12,8 +12,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -36,7 +34,6 @@ import android.widget.Toast;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -48,7 +45,6 @@ import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvicto
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
-import com.google.common.io.Files;
 
 import org.json.JSONObject;
 
@@ -340,18 +336,18 @@ public final class Utils {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     }
 
-    public static void mediaScanFile(@NonNull final Context context,
-                                     @NonNull File file,
-                                     @NonNull final OnScanCompletedListener callback) {
-        //noinspection UnstableApiUsage
-        final String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Files.getFileExtension(file.getName()));
-        MediaScannerConnection.scanFile(
-                context,
-                new String[]{file.getAbsolutePath()},
-                new String[]{mimeType},
-                callback
-        );
-    }
+    // public static void mediaScanFile(@NonNull final Context context,
+    //                                  @NonNull File file,
+    //                                  @NonNull final OnScanCompletedListener callback) {
+    //     //noinspection UnstableApiUsage
+    //     final String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Files.getFileExtension(file.getName()));
+    //     MediaScannerConnection.scanFile(
+    //             context,
+    //             new String[]{file.getAbsolutePath()},
+    //             new String[]{mimeType},
+    //             callback
+    //     );
+    // }
 
     public static void hideKeyboard(final View view) {
         if (view == null) return;
@@ -506,26 +502,26 @@ public final class Utils {
         return tabOrderString.contains(navRootString);
     }
 
-    public static void scanDocumentFile(@NonNull final Context context,
-                                        @NonNull final DocumentFile documentFile,
-                                        @NonNull final OnScanCompletedListener callback) {
-        if (!documentFile.isFile() || !documentFile.exists()) {
-            Log.d(TAG, "scanDocumentFile: " + documentFile);
-            callback.onScanCompleted(null, null);
-            return;
-        }
-        File file = null;
-        try {
-            file = getDocumentFileRealPath(context, documentFile);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            Log.e(TAG, "scanDocumentFile: ", e);
-        }
-        if (file == null) return;
-        MediaScannerConnection.scanFile(context,
-                                        new String[]{file.getAbsolutePath()},
-                                        new String[]{documentFile.getType()},
-                                        callback);
-    }
+    // public static void scanDocumentFile(@NonNull final Context context,
+    //                                     @NonNull final DocumentFile documentFile,
+    //                                     @NonNull final OnScanCompletedListener callback) {
+    //     if (!documentFile.isFile() || !documentFile.exists()) {
+    //         Log.d(TAG, "scanDocumentFile: " + documentFile);
+    //         callback.onScanCompleted(null, null);
+    //         return;
+    //     }
+    //     File file = null;
+    //     try {
+    //         file = getDocumentFileRealPath(context, documentFile);
+    //     } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+    //         Log.e(TAG, "scanDocumentFile: ", e);
+    //     }
+    //     if (file == null) return;
+    //     MediaScannerConnection.scanFile(context,
+    //                                     new String[]{file.getAbsolutePath()},
+    //                                     new String[]{documentFile.getType()},
+    //                                     callback);
+    // }
 
     public static File getDocumentFileRealPath(@NonNull final Context context,
                                                @NonNull final DocumentFile documentFile)
@@ -571,61 +567,5 @@ public final class Utils {
         settingsHelper.putString(FOLDER_PATH, dirUri.toString());
         // re-init DownloadUtils
         DownloadUtils.init(context);
-    }
-
-    /**
-     * Ing.N.Nyerges 2019 V2.0
-     * <p>
-     * Storage Access Framework(SAF) Uri's creator from File (java.IO),
-     * for removable external storages
-     *
-     * @param context Application Context
-     * @param file    File path + file name
-     * @return Uri[]:
-     * uri[0] = SAF TREE Uri
-     * uri[1] = SAF DOCUMENT Uri
-     */
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static Uri[] getSafUris(Context context, File file) {
-
-        Uri[] uri = new Uri[2];
-        String scheme = "content";
-        String authority = "com.android.externalstorage.documents";
-
-        // Separate each element of the File path
-        // File format: "/storage/XXXX-XXXX/sub-folder1/sub-folder2..../filename"
-        // (XXXX-XXXX is external removable number
-        String[] ele = file.getPath().split(File.separator);
-        //  ele[0] = not used (empty)
-        //  ele[1] = not used (storage name)
-        //  ele[2] = storage number
-        //  ele[3 to (n-1)] = folders
-        //  ele[n] = file name
-
-        // Construct folders strings using SAF format
-        StringBuilder folders = new StringBuilder();
-        if (ele.length > 4) {
-            folders.append(ele[3]);
-            for (int i = 4; i < ele.length - 1; ++i) folders.append("%2F").append(ele[i]);
-        }
-
-        String common = ele[2] + "%3A" + folders.toString();
-
-        // Construct TREE Uri
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme(scheme);
-        builder.authority(authority);
-        builder.encodedPath("/tree/" + common);
-        uri[0] = builder.build();
-
-        // Construct DOCUMENT Uri
-        builder = new Uri.Builder();
-        builder.scheme(scheme);
-        builder.authority(authority);
-        if (ele.length > 4) common = common + "%2F";
-        builder.encodedPath("/document/" + common + file.getName());
-        uri[1] = builder.build();
-
-        return uri;
     }
 }

@@ -34,7 +34,6 @@ import com.yalantis.ucrop.UCropActivity;
 import com.yalantis.ucrop.UCropFragment;
 import com.yalantis.ucrop.UCropFragmentCallback;
 
-import java.io.File;
 import java.util.List;
 
 import awais.instagrabber.R;
@@ -42,7 +41,6 @@ import awais.instagrabber.databinding.FragmentImageEditBinding;
 import awais.instagrabber.fragments.imageedit.filters.filters.Filter;
 import awais.instagrabber.models.SavedImageEditState;
 import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.ImageEditViewModel;
 
 public class ImageEditFragment extends Fragment {
@@ -183,11 +181,12 @@ public class ImageEditFragment extends Fragment {
             if (context == null) return;
             final Uri resultUri = viewModel.getResultUri().getValue();
             if (resultUri == null) return;
-            Utils.mediaScanFile(context, new File(resultUri.toString()), (path, uri) -> AppExecutors.getInstance().mainThread().execute(() -> {
+            AppExecutors.getInstance().mainThread().execute(() -> {
                 final NavController navController = NavHostFragment.findNavController(this);
                 setNavControllerResult(navController, resultUri);
                 navController.navigateUp();
-            }));
+            });
+            // Utils.mediaScanFile(context, new File(resultUri.toString()), (path, uri) -> );
         });
     }
 
