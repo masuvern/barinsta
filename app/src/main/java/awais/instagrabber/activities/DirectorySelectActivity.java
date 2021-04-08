@@ -1,102 +1,64 @@
 package awais.instagrabber.activities;
 
 import android.content.Intent;
-import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.util.Log;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.ViewModelProvider;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
+import awais.instagrabber.R;
 import awais.instagrabber.databinding.ActivityDirectorySelectBinding;
+import awais.instagrabber.dialogs.ConfirmDialogFragment;
 import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.viewmodels.DirectorySelectActivityViewModel;
 
 public class DirectorySelectActivity extends BaseLanguageActivity {
     private static final String TAG = DirectorySelectActivity.class.getSimpleName();
-
-    public static final int SELECT_DIR_REQUEST_CODE = 1090;
+    public static final int SELECT_DIR_REQUEST_CODE = 0x01;
+    private static final int ERROR_REQUEST_CODE = 0x02;
 
     private Uri initialUri;
     private ActivityDirectorySelectBinding binding;
+    private DirectorySelectActivityViewModel viewModel;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityDirectorySelectBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        viewModel = new ViewModelProvider(this).get(DirectorySelectActivityViewModel.class);
+        setupObservers();
         binding.selectDir.setOnClickListener(v -> openDirectoryChooser());
-        setInitialUri();
+        AppExecutors.getInstance().mainThread().execute(() -> viewModel.setInitialUri(getIntent()));
     }
 
-    private void setInitialUri() {
-        AppExecutors.getInstance().mainThread().execute(() -> {
-            final Intent intent = getIntent();
-            if (intent == null) {
-                setMessage();
+    private void setupObservers() {
+        viewModel.getMessage().observe(this, message -> binding.message.setText(message));
+        viewModel.getPrevUri().observe(this, prevUri -> {
+            if (prevUri == null) {
+                binding.prevUri.setVisibility(View.GONE);
+                binding.message2.setVisibility(View.GONE);
                 return;
             }
-            final Parcelable initialUriParcelable = intent.getParcelableExtra(Constants.EXTRA_INITIAL_URI);
-            if (!(initialUriParcelable instanceof Uri)) {
-                setMessage();
-                return;
-            }
-            initialUri = (Uri) initialUriParcelable;
-            setMessage();
+            binding.prevUri.setText(prevUri);
+            binding.prevUri.setVisibility(View.VISIBLE);
+            binding.message2.setVisibility(View.VISIBLE);
         });
-    }
-
-    private void setMessage() {
-        if (initialUri == null) {
-            // default message
-            binding.message.setText("Select a directory which Barinsta will use for downloads and temp files");
-            return;
-        }
-
-        if (!initialUri.toString().startsWith("content")) {
-            final String message = String.format("Android has changed the way apps can access files and directories on storage.\n\n" +
-                                                         "Please re-select the directory '%s' after clicking the button below",
-                                                 initialUri.toString());
-            binding.message.setText(message);
-            return;
-        }
-
-        final List<UriPermission> existingPermissions = getContentResolver().getPersistedUriPermissions();
-        final boolean anyMatch = existingPermissions.stream().anyMatch(uriPermission -> uriPermission.getUri().equals(initialUri));
-        if (!anyMatch) {
-            // permission revoked message
-            final String message = "Permissions for the previously selected directory '%s' were revoked by the system.\n\n" +
-                    "Re-select the directory or select a new directory.";
-            final DocumentFile documentFile = DocumentFile.fromSingleUri(this, initialUri);
-            String path;
-            try {
-                path = URLDecoder.decode(initialUri.toString(), StandardCharsets.UTF_8.toString());
-            } catch (UnsupportedEncodingException e) {
-                path = initialUri.toString();
-            }
-            if (documentFile != null) {
-                try {
-                    final File file = Utils.getDocumentFileRealPath(this, documentFile);
-                    if (file != null) {
-                        path = file.getAbsolutePath();
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "setMessage: ", e);
-                }
-            }
-            binding.message.setText(String.format(message, path));
-        }
+        viewModel.getDirSuccess().observe(this, success -> binding.selectDir.setVisibility(success ? View.GONE : View.VISIBLE));
+        viewModel.isLoading().observe(this, loading -> {
+            binding.message.setVisibility(loading ? View.GONE : View.VISIBLE);
+            binding.loadingIndicator.setVisibility(loading ? View.VISIBLE : View.GONE);
+        });
     }
 
     private void openDirectoryChooser() {
@@ -112,17 +74,42 @@ public class DirectorySelectActivity extends BaseLanguageActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != SELECT_DIR_REQUEST_CODE) return;
         if (resultCode != RESULT_OK) {
-            // Show error
+            showErrorDialog(getString(R.string.select_a_folder));
             return;
         }
         if (data == null || data.getData() == null) {
-            // show error
+            showErrorDialog(getString(R.string.select_a_folder));
             return;
         }
-        try {
-            Utils.setupSelectedDir(this, data);
-        } catch (Exception e) {
-            // show error
-        }
+        AppExecutors.getInstance().mainThread().execute(() -> {
+            try {
+                viewModel.setupSelectedDir(data);
+                final Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            } catch (Exception e) {
+                // Should not come to this point.
+                // If it does, we have to show this error to the user so that they can report it.
+                try (final StringWriter sw = new StringWriter();
+                     final PrintWriter pw = new PrintWriter(sw)) {
+                    e.printStackTrace(pw);
+                    showErrorDialog("Please report this error to the developers:\n\n" + sw.toString());
+                } catch (IOException ioException) {
+                    Log.e(TAG, "onActivityResult: ", ioException);
+                }
+            }
+        }, 500);
+    }
+
+    private void showErrorDialog(@NonNull final String message) {
+        final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
+                ERROR_REQUEST_CODE,
+                R.string.error,
+                message,
+                R.string.ok,
+                0,
+                0
+        );
+        dialogFragment.show(getSupportFragmentManager(), ConfirmDialogFragment.class.getSimpleName());
     }
 }

@@ -69,7 +69,7 @@ public final class DownloadUtils {
         // }
         final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
         if (TextUtils.isEmpty(customPath)) {
-            throw new ReselectDocumentTreeException();
+            throw new ReselectDocumentTreeException("folder path is null or empty");
             // root = DOWNLOADS_DIR_FILE; // DocumentFile.fromFile(DOWNLOADS_DIR_FILE);
             // return;
         }
@@ -92,6 +92,10 @@ public final class DownloadUtils {
             throw new ReselectDocumentTreeException(uri);
         }
         root = DocumentFile.fromTreeUri(context, uri);
+        if (root == null || !root.exists() || root.lastModified() == 0) {
+            root = null;
+            throw new ReselectDocumentTreeException(uri);
+        }
         // Log.d(TAG, "init: " + root);
         // final File parent = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         // final DocumentFile documentFile = DocumentFile.fromFile(parent);
@@ -622,10 +626,20 @@ public final class DownloadUtils {
                    .enqueue(downloadWorkRequest);
     }
 
+    @Nullable
+    public static Uri getRootDirUri() {
+        return root != null ? root.getUri() : null;
+    }
+
     public static class ReselectDocumentTreeException extends Exception {
         private final Uri initialUri;
 
         public ReselectDocumentTreeException() {
+            initialUri = null;
+        }
+
+        public ReselectDocumentTreeException(final String message) {
+            super(message);
             initialUri = null;
         }
 

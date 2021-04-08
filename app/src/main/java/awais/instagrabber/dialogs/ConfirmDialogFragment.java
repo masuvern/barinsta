@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -28,13 +29,37 @@ public class ConfirmDialogFragment extends DialogFragment {
                                                     @StringRes final int positiveText,
                                                     @StringRes final int negativeText,
                                                     @StringRes final int neutralText) {
+        return newInstance(requestCode, title, (Integer) message, positiveText, negativeText, neutralText);
+    }
+
+    @NonNull
+    public static ConfirmDialogFragment newInstance(final int requestCode,
+                                                    @StringRes final int title,
+                                                    final String message,
+                                                    @StringRes final int positiveText,
+                                                    @StringRes final int negativeText,
+                                                    @StringRes final int neutralText) {
+        return newInstance(requestCode, title, (Object) message, positiveText, negativeText, neutralText);
+    }
+
+    @NonNull
+    private static ConfirmDialogFragment newInstance(final int requestCode,
+                                                     @StringRes final int title,
+                                                     final Object message,
+                                                     @StringRes final int positiveText,
+                                                     @StringRes final int negativeText,
+                                                     @StringRes final int neutralText) {
         Bundle args = new Bundle();
         args.putInt("requestCode", requestCode);
         if (title != 0) {
             args.putInt("title", title);
         }
-        if (message != 0) {
-            args.putInt("message", message);
+        if (message != null) {
+            if (message instanceof Integer) {
+                args.putInt("message", (int) message);
+            } else if (message instanceof String) {
+                args.putString("message", (String) message);
+            }
         }
         if (positiveText != 0) {
             args.putInt("positive", positiveText);
@@ -48,6 +73,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
         fragment.setArguments(args);
         return fragment;
+
     }
 
     public ConfirmDialogFragment() {}
@@ -55,11 +81,16 @@ public class ConfirmDialogFragment extends DialogFragment {
     @Override
     public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
+        this.context = context;
         final Fragment parentFragment = getParentFragment();
         if (parentFragment instanceof ConfirmDialogFragmentCallback) {
             callback = (ConfirmDialogFragmentCallback) parentFragment;
+            return;
         }
-        this.context = context;
+        final FragmentActivity fragmentActivity = getActivity();
+        if (fragmentActivity instanceof ConfirmDialogFragmentCallback) {
+            callback = (ConfirmDialogFragmentCallback) fragmentActivity;
+        }
     }
 
     @NonNull
@@ -67,7 +98,7 @@ public class ConfirmDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable final Bundle savedInstanceState) {
         final Bundle arguments = getArguments();
         int title = 0;
-        int message = 0;
+        String message = null;
         int neutralButtonText = 0;
         int negativeButtonText = 0;
 
@@ -75,7 +106,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         final int requestCode;
         if (arguments != null) {
             title = arguments.getInt("title", 0);
-            message = arguments.getInt("message", 0);
+            message = getMessage(arguments);
             positiveButtonText = arguments.getInt("positive", defaultPositiveButtonText);
             negativeButtonText = arguments.getInt("negative", 0);
             neutralButtonText = arguments.getInt("neutral", 0);
@@ -92,7 +123,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         if (title != 0) {
             builder.setTitle(title);
         }
-        if (message != 0) {
+        if (message != null) {
             builder.setMessage(message);
         }
         if (negativeButtonText != 0) {
@@ -108,6 +139,19 @@ public class ConfirmDialogFragment extends DialogFragment {
             });
         }
         return builder.create();
+    }
+
+    private String getMessage(@NonNull final Bundle arguments) {
+        String message = null;
+        final Object messageObject = arguments.get("message");
+        if (messageObject != null) {
+            if (messageObject instanceof Integer) {
+                message = getString((int) messageObject);
+            } else if (messageObject instanceof String) {
+                message = (String) messageObject;
+            }
+        }
+        return message;
     }
 
     public interface ConfirmDialogFragmentCallback {
