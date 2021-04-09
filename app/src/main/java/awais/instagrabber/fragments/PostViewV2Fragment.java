@@ -1022,6 +1022,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         // binding.postImage.setOnClickListener(v -> toggleDetails());
         final AnimatedZoomableController zoomableController = AnimatedZoomableController.newInstance();
         zoomableController.setMaxScaleFactor(3f);
+        zoomableController.setGestureZoomEnabled(true);
+        zoomableController.setEnabled(true);
         binding.postImage.setZoomableController(zoomableController);
         binding.postImage.setTapListener(new GestureDetector.SimpleOnGestureListener() {
             @Override
