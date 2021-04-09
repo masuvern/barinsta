@@ -112,6 +112,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
     }
 
     public void bind(final int position, final DirectItem item) {
+        if (item == null) return;
         this.item = item;
         messageDirection = isSelf(item) ? MessageDirection.OUTGOING : MessageDirection.INCOMING;
         // Asynchronous binding causes some weird behaviour
@@ -123,7 +124,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         setupLongClickListener(position, messageDirection);
     }
 
-    private void bindBase(final DirectItem item, final MessageDirection messageDirection, final int position) {
+    private void bindBase(@NonNull final DirectItem item, final MessageDirection messageDirection, final int position) {
         final FrameLayout.LayoutParams containerLayoutParams = (FrameLayout.LayoutParams) binding.container.getLayoutParams();
         final DirectItemType itemType = item.getItemType();
         setMessageDirectionGravity(messageDirection, containerLayoutParams);
@@ -188,7 +189,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         containerLayoutParams.gravity = Gravity.CENTER;
     }
 
-    private void setMessageInfo(final DirectItem item, final MessageDirection messageDirection) {
+    private void setMessageInfo(@NonNull final DirectItem item, final MessageDirection messageDirection) {
         if (showMessageInfo()) {
             binding.messageInfo.setVisibility(View.VISIBLE);
             binding.deliveryStatus.setVisibility(messageDirection == MessageDirection.OUTGOING ? View.VISIBLE : View.GONE);

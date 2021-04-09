@@ -23,18 +23,21 @@ import awais.instagrabber.repositories.responses.directmessages.DirectThreadLast
 import awais.instagrabber.repositories.responses.directmessages.RavenExpiringMediaActionSummary;
 
 public final class DMUtils {
-    public static boolean isRead(final DirectItem item,
+    public static boolean isRead(@NonNull final DirectItem item,
                                  @NonNull final Map<Long, DirectThreadLastSeenAt> lastSeenAt,
-                                 final List<Long> userIdsToCheck) {
+                                 @NonNull final List<Long> userIdsToCheck) {
         // Further check if directStory exists
         // if (read && directStory != null) {
         //     read = false;
         // }
+        if (item == null) return false;
         return lastSeenAt.entrySet()
                          .stream()
                          .filter(entry -> userIdsToCheck.contains(entry.getKey()))
                          .anyMatch(entry -> {
-                             final String userLastSeenTsString = entry.getValue().getTimestamp();
+                             final DirectThreadLastSeenAt threadLastSeenAt = entry.getValue();
+                             if (threadLastSeenAt == null) return false;
+                             final String userLastSeenTsString = threadLastSeenAt.getTimestamp();
                              if (userLastSeenTsString == null) return false;
                              final long userTs = Long.parseLong(userLastSeenTsString);
                              final long itemTs = item.getTimestamp();
