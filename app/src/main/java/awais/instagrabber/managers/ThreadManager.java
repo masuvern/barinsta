@@ -156,9 +156,9 @@ public final class ThreadManager {
         viewerId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
-            throw new IllegalArgumentException("User is not logged in!");
-        }
+        // if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
+        //     throw new IllegalArgumentException("User is not logged in!");
+        // }
         service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
         mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId);
         friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, viewerId);
