@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
@@ -149,9 +150,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         RetrofitFactory.setup(this);
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        CookieUtils.setupCookies(cookie);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
+        setupCookie();
         if (settingsHelper.getBoolean(Constants.FLAG_SECURE))
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(binding.getRoot());
@@ -177,7 +176,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
         handleIntent(intent);
-        if (!TextUtils.isEmpty(cookie) && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
+        if (isLoggedIn && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
             bindActivityCheckerService();
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);
@@ -190,6 +189,26 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         searchService = SearchService.getInstance();
         // initDmService();
         initDmUnreadCount();
+    }
+
+    private void setupCookie() {
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        long userId = 0;
+        String csrfToken = null;
+        if (!TextUtils.isEmpty(cookie)) {
+            userId = CookieUtils.getUserIdFromCookie(cookie);
+            csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        }
+        if (TextUtils.isEmpty(cookie) || userId == 0 || TextUtils.isEmpty(csrfToken)) {
+            isLoggedIn = false;
+            return;
+        }
+        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        if (TextUtils.isEmpty(deviceUuid)) {
+            settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
+        }
+        CookieUtils.setupCookies(cookie);
+        isLoggedIn = true;
     }
 
     private void initDmService() {

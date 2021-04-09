@@ -82,8 +82,12 @@ public final class InboxManager {
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || userId <= 0 || TextUtils.isEmpty(deviceUuid)) {
-            throw new IllegalArgumentException("User is not logged in!");
+        if (TextUtils.isEmpty(csrfToken)) {
+            throw new IllegalArgumentException("csrfToken is empty!");
+        } else if (userId == 0) {
+            throw new IllegalArgumentException("user id invalid");
+        } else if (TextUtils.isEmpty(deviceUuid)) {
+            throw new IllegalArgumentException("device uuid is empty!");
         }
         service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
 

@@ -413,10 +413,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                         case SUCCESS:
                             Toast.makeText(context, R.string.marked_as_seen, Toast.LENGTH_SHORT).show();
                         case LOADING:
-                            item.setEnabled(false);
+                            if (item != null) {
+                                item.setEnabled(false);
+                            }
                             break;
                         case ERROR:
-                            item.setEnabled(true);
+                            if (item != null) {
+                                item.setEnabled(true);
+                            }
                             if (resource.message != null) {
                                 Snackbar.make(context, binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                                 return;
@@ -955,7 +959,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
             final DirectThread thread = threadLiveData.getValue();
             if (thread == null) return;
-            markAsSeenMenuItem.setEnabled(!DMUtils.isRead(thread));
+            if (markAsSeenMenuItem != null) {
+                markAsSeenMenuItem.setEnabled(!DMUtils.isRead(thread));
+            }
         });
         if (itemsAdapter == null) return;
         itemsAdapter.submitList(items, () -> {

@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
@@ -98,8 +99,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                     final Context context = getContext();
                     Toast.makeText(context, R.string.empty_list, Toast.LENGTH_SHORT).show();
                 } catch (Exception ignored) {}
-            }
-            else {
+            } else {
                 endCursor = result.getNextCursor();
                 final List<HighlightModel> models = archivesViewModel.getList().getValue();
                 final List<HighlightModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
@@ -198,7 +198,13 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
             adapter = new FeedStoriesListAdapter(clickListener);
             binding.rvStories.setLayoutManager(layoutManager);
             binding.rvStories.setAdapter(adapter);
-            feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
+            feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), list -> {
+                if (list == null) {
+                    adapter.submitList(Collections.emptyList());
+                    return;
+                }
+                adapter.submitList(list);
+            });
         } else {
             if (actionBar != null) actionBar.setTitle(R.string.action_archive);
             final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
