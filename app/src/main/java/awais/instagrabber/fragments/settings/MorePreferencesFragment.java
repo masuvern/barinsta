@@ -88,13 +88,17 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             public void onSuccess(@NonNull final List<Account> accounts) {
                 if (!isLoggedIn) {
                     if (accounts.size() > 0) {
-                        accountCategory.addPreference(getAccountSwitcherPreference(null, context));
+                        final AccountSwitcherPreference preference = getAccountSwitcherPreference(null, context);
+                        if (preference == null) return;
+                        accountCategory.addPreference(preference);
                     }
                     // Need to show something to trigger login activity
-                    accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                    final Preference preference1 = getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
                         startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
                         return true;
-                    }));
+                    });
+                    if (preference1 == null) return;
+                    accountCategory.addPreference(preference1);
                 }
                 if (accounts.size() > 0) {
                     accountCategory
