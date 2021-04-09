@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -564,6 +565,7 @@ public final class ThreadManager {
     private List<DirectItemEmojiReaction> addEmoji(final List<DirectItemEmojiReaction> reactionList,
                                                    final String emoji,
                                                    final boolean shouldReplaceIfAlreadyReacted) {
+        if (currentUser == null) return reactionList;
         final List<DirectItemEmojiReaction> temp = reactionList == null ? new ArrayList<>() : new ArrayList<>(reactionList);
         int index = -1;
         for (int i = 0; i < temp.size(); i++) {
@@ -1311,6 +1313,7 @@ public final class ThreadManager {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final Call<DirectThreadDetailsChangeResponse> addUsersRequest = service.addUsers(threadId,
                                                                                          users.stream()
+                                                                                              .filter(Objects::nonNull)
                                                                                               .map(User::getPk)
                                                                                               .collect(Collectors.toList()));
         handleDetailsChangeRequest(data, addUsersRequest);
@@ -1319,6 +1322,10 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> removeMember(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) {
+            data.postValue(Resource.error("user is null!", null));
+            return data;
+        }
         final Call<String> request = service.removeUsers(threadId, Collections.singleton(user.getPk()));
         request.enqueue(new Callback<String>() {
             @Override
@@ -1337,6 +1344,7 @@ public final class ThreadManager {
                     leftUsersValue = Collections.emptyList();
                 }
                 final List<User> updatedActiveUsers = activeUsers.stream()
+                                                                 .filter(Objects::nonNull)
                                                                  .filter(u -> u.getPk() != user.getPk())
                                                                  .collect(Collectors.toList());
                 final ImmutableList.Builder<User> updatedLeftUsersBuilder = ImmutableList.<User>builder().addAll(leftUsersValue);
@@ -1357,12 +1365,14 @@ public final class ThreadManager {
     }
 
     public boolean isAdmin(final User user) {
+        if (user == null) return false;
         final List<Long> adminUserIdsValue = adminUserIds.getValue();
         return adminUserIdsValue != null && adminUserIdsValue.contains(user.getPk());
     }
 
     public LiveData<Resource<Object>> makeAdmin(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) return data;
         if (isAdmin(user)) return data;
         final Call<String> request = service.addAdmins(threadId, Collections.singleton(user.getPk()));
         request.enqueue(new Callback<String>() {
@@ -1399,6 +1409,7 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> removeAdmin(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) return data;
         if (!isAdmin(user)) return data;
         final Call<String> request = service.removeAdmins(threadId, Collections.singleton(user.getPk()));
         request.enqueue(new Callback<String>() {
@@ -1411,6 +1422,7 @@ public final class ThreadManager {
                 final List<Long> currentAdmins = adminUserIds.getValue();
                 if (currentAdmins == null) return;
                 final List<Long> updatedAdminUserIds = currentAdmins.stream()
+                                                                    .filter(Objects::nonNull)
                                                                     .filter(userId1 -> userId1 != user.getPk())
                                                                     .collect(Collectors.toList());
                 final DirectThread currentThread = ThreadManager.this.thread.getValue();
@@ -1583,6 +1595,7 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> blockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) return data;
         friendshipService.block(user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
             @Override
             public void onSuccess(final FriendshipChangeResponse result) {
@@ -1600,6 +1613,7 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> unblockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) return data;
         friendshipService.unblock(user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
             @Override
             public void onSuccess(final FriendshipChangeResponse result) {
@@ -1617,6 +1631,7 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> restrictUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) return data;
         friendshipService.toggleRestrict(user.getPk(), true, new ServiceCallback<FriendshipRestrictResponse>() {
             @Override
             public void onSuccess(final FriendshipRestrictResponse result) {
@@ -1634,6 +1649,7 @@ public final class ThreadManager {
 
     public LiveData<Resource<Object>> unRestrictUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (user == null) return data;
         friendshipService.toggleRestrict(user.getPk(), false, new ServiceCallback<FriendshipRestrictResponse>() {
             @Override
             public void onSuccess(final FriendshipRestrictResponse result) {
@@ -1654,7 +1670,10 @@ public final class ThreadManager {
         data.postValue(Resource.loading(null));
         final Call<DirectThreadDetailsChangeResponse> approveUsersRequest = service
                 .approveParticipantRequests(threadId,
-                                            users.stream().map(User::getPk).collect(Collectors.toList()));
+                                            users.stream()
+                                                 .filter(Objects::nonNull)
+                                                 .map(User::getPk)
+                                                 .collect(Collectors.toList()));
         handleDetailsChangeRequest(data, approveUsersRequest, () -> pendingUserApproveDenySuccessAction(users));
         return data;
     }
@@ -1811,6 +1830,7 @@ public final class ThreadManager {
             @Override
             public void onResponse(@NonNull final Call<DirectItemSeenResponse> call,
                                    @NonNull final Response<DirectItemSeenResponse> response) {
+                if (currentUser == null) return;
                 if (!response.isSuccessful()) {
                     handleErrorBody(call, response, data);
                     return;
