@@ -7,4 +7,5 @@ public final class PreferenceKeys {
     public static final String PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER = "enable_dm_auto_refresh_freq_number";
     public static final String PREF_ENABLE_SENTRY = "enable_sentry";
     public static final String PREF_TAB_ORDER = "tab_order";
+    public static final String PREF_BARINSTA_DIR_URI = "barinsta_dir_uri";
 }

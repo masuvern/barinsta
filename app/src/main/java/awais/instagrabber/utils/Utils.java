@@ -67,7 +67,7 @@ import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.Tab;
 import awais.instagrabber.models.enums.FavoriteType;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_BARINSTA_DIR_URI;
 
 public final class Utils {
     private static final String TAG = "Utils";
@@ -564,7 +564,7 @@ public final class Utils {
         if (dirUri == null) return;
         final int takeFlags = intent.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         context.getContentResolver().takePersistableUriPermission(dirUri, takeFlags);
-        settingsHelper.putString(FOLDER_PATH, dirUri.toString());
+        settingsHelper.putString(PREF_BARINSTA_DIR_URI, dirUri.toString());
         // re-init DownloadUtils
         DownloadUtils.init(context);
     }

@@ -30,8 +30,8 @@ import awais.instagrabber.utils.Utils;
 
 import static android.app.Activity.RESULT_OK;
 import static awais.instagrabber.activities.DirectorySelectActivity.SELECT_DIR_REQUEST_CODE;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_BARINSTA_DIR_URI;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_USER_FOLDER;
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DownloadsPreferencesFragment extends BasePreferencesFragment {
@@ -57,11 +57,11 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getSaveToCustomFolderPreference(@NonNull final Context context) {
         final Preference preference = new Preference(context);
-        preference.setKey(FOLDER_PATH);
+        preference.setKey(PREF_BARINSTA_DIR_URI);
         preference.setIconSpaceReserved(false);
         preference.setTitle(R.string.barinsta_folder);
         preference.setSummaryProvider(p -> {
-            final String currentValue = settingsHelper.getString(FOLDER_PATH);
+            final String currentValue = settingsHelper.getString(PREF_BARINSTA_DIR_URI);
             if (TextUtils.isEmpty(currentValue)) return "";
             String path;
             try {

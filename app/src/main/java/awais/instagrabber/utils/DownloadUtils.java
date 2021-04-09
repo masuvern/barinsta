@@ -44,7 +44,7 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.workers.DownloadWorker;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_BARINSTA_DIR_URI;
 
 public final class DownloadUtils {
     private static final String TAG = DownloadUtils.class.getSimpleName();
@@ -59,28 +59,15 @@ public final class DownloadUtils {
     private static DocumentFile root;
 
     public static void init(@NonNull final Context context) throws ReselectDocumentTreeException {
-        // if (DOWNLOADS_DIR_FILE == null) {
-        //     final Uri uri = Utils.getSafUris(context, new File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_DOWNLOADS))[0];
-        //     DOWNLOADS_DIR_FILE = DocumentFile.fromTreeUri(context, uri);
-        // }
-        // if (!Utils.settingsHelper.getBoolean(FOLDER_SAVE_TO)) {
-        //     root = DOWNLOADS_DIR_FILE; // DocumentFile.fromFile(DOWNLOADS_DIR_FILE);
-        //     return;
-        // }
-        final String customPath = Utils.settingsHelper.getString(FOLDER_PATH);
-        if (TextUtils.isEmpty(customPath)) {
+        final String barinstaDirUri = Utils.settingsHelper.getString(PREF_BARINSTA_DIR_URI);
+        if (TextUtils.isEmpty(barinstaDirUri)) {
             throw new ReselectDocumentTreeException("folder path is null or empty");
-            // root = DOWNLOADS_DIR_FILE; // DocumentFile.fromFile(DOWNLOADS_DIR_FILE);
-            // return;
         }
-        if (!customPath.startsWith("content")) {
-            // if (customPath.equals(DOWNLOADS_DIR_FILE.getAbsolutePath())) {
-            //     throw new ReselectDocumentTreeException();
-            // }
+        if (!barinstaDirUri.startsWith("content")) {
             // reselect the folder in selector view
-            throw new ReselectDocumentTreeException(Uri.parse(customPath));
+            throw new ReselectDocumentTreeException(Uri.parse(barinstaDirUri));
         }
-        final Uri uri = Uri.parse(customPath);
+        final Uri uri = Uri.parse(barinstaDirUri);
         final List<UriPermission> existingPermissions = context.getContentResolver().getPersistedUriPermissions();
         if (existingPermissions.isEmpty()) {
             // reselect the folder in selector view
@@ -96,10 +83,6 @@ public final class DownloadUtils {
             root = null;
             throw new ReselectDocumentTreeException(uri);
         }
-        // Log.d(TAG, "init: " + root);
-        // final File parent = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        // final DocumentFile documentFile = DocumentFile.fromFile(parent);
-        // Log.d(TAG, "init: " + documentFile);
     }
 
     public static void destroy() {

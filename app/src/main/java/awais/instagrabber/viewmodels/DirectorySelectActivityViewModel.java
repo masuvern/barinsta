@@ -21,6 +21,7 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
 public class DirectorySelectActivityViewModel extends AndroidViewModel {
@@ -66,14 +67,15 @@ public class DirectorySelectActivityViewModel extends AndroidViewModel {
 
     private void setMessage(@Nullable final Uri initialUri) {
         if (initialUri == null) {
-            // default message
-            message.postValue(getApplication().getString(R.string.dir_select_default_message));
-            prevUri.postValue(null);
-            return;
-        }
-        if (!initialUri.toString().startsWith("content")) {
+            final String prevVersionFolderPath = Utils.settingsHelper.getString(Constants.FOLDER_PATH);
+            if (TextUtils.isEmpty(prevVersionFolderPath)) {
+                // default message
+                message.postValue(getApplication().getString(R.string.dir_select_default_message));
+                prevUri.postValue(null);
+                return;
+            }
             message.postValue(getApplication().getString(R.string.dir_select_reselect_message));
-            prevUri.postValue(initialUri.toString());
+            prevUri.postValue(prevVersionFolderPath);
             return;
         }
         final List<UriPermission> existingPermissions = getApplication().getContentResolver().getPersistedUriPermissions();
