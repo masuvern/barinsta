@@ -20,8 +20,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
 
-        versionCode 61
-        versionName '19.2.0'
+        versionCode 62
+        versionName '19.2.1'
 
         multiDexEnabled true
 
