@@ -564,6 +564,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     private List<Tab> setupAnonBottomNav() {
         final int selectedItemId = binding.bottomNavView.getSelectedItemId();
+        final Tab favoriteTab = new Tab(R.drawable.ic_star_24,
+                                       getString(R.string.title_favorites),
+                                       false,
+                                       "favorites_nav_graph",
+                                       R.navigation.favorites_nav_graph,
+                                       R.id.favorites_nav_graph,
+                                       R.id.favoritesFragment);
         final Tab profileTab = new Tab(R.drawable.ic_person_24,
                                        getString(R.string.profile),
                                        false,
@@ -580,12 +587,15 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                                     R.id.morePreferencesFragment);
         final Menu menu = binding.bottomNavView.getMenu();
         menu.clear();
+        menu.add(0, favoriteTab.getNavigationRootId(), 0, favoriteTab.getTitle()).setIcon(favoriteTab.getIconResId());
         menu.add(0, profileTab.getNavigationRootId(), 0, profileTab.getTitle()).setIcon(profileTab.getIconResId());
         menu.add(0, moreTab.getNavigationRootId(), 0, moreTab.getTitle()).setIcon(moreTab.getIconResId());
-        if (selectedItemId != R.id.profile_nav_graph && selectedItemId != R.id.more_nav_graph) {
+        if (selectedItemId != R.id.profile_nav_graph
+                && selectedItemId != R.id.more_nav_graph
+                && selectedItemId != R.id.favorites_nav_graph) {
             setBottomNavSelectedTab(profileTab);
         }
-        return ImmutableList.of(profileTab, moreTab);
+        return ImmutableList.of(favoriteTab, profileTab, moreTab);
     }
 
     private List<Tab> setupMainBottomNav() {
