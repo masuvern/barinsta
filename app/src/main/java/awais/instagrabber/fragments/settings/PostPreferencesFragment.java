@@ -36,7 +36,7 @@ public class PostPreferencesFragment extends BasePreferencesFragment {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
         preference.setKey(Constants.PLAY_IN_BACKGROUND);
         preference.setTitle(R.string.post_viewer_background_play);
-        preference.setTitle(R.string.post_viewer_background_play_summary);
+        preference.setSummary(R.string.post_viewer_background_play_summary);
         preference.setIconSpaceReserved(false);
         return preference;
     }
