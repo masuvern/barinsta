@@ -17,16 +17,26 @@ public class PostPreferencesFragment extends BasePreferencesFragment {
         final Context context = getContext();
         if (context == null) return;
         // generalCategory.addPreference(getAutoPlayVideosPreference(context));
+        screen.addPreference(getBackgroundPlayPreference(context));
         screen.addPreference(getAlwaysMuteVideosPreference(context));
         screen.addPreference(getShowCaptionPreference(context));
         screen.addPreference(getToggleKeywordFilterPreference(context));
         screen.addPreference(getEditKeywordFilterPreference(context));
     }
 
-    private Preference getAutoPlayVideosPreference(@NonNull final Context context) {
+//    private Preference getAutoPlayVideosPreference(@NonNull final Context context) {
+//        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
+//        preference.setKey(Constants.AUTOPLAY_VIDEOS);
+//        preference.setTitle(R.string.post_viewer_autoplay_video);
+//        preference.setIconSpaceReserved(false);
+//        return preference;
+//    }
+
+    private Preference getBackgroundPlayPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.AUTOPLAY_VIDEOS);
-        preference.setTitle(R.string.post_viewer_autoplay_video);
+        preference.setKey(Constants.PLAY_IN_BACKGROUND);
+        preference.setTitle(R.string.post_viewer_background_play);
+        preference.setTitle(R.string.post_viewer_background_play_summary);
         preference.setIconSpaceReserved(false);
         return preference;
     }

@@ -334,6 +334,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         if (bottomSheetBehavior != null) {
             captionState = bottomSheetBehavior.getState();
         }
+        if (settingsHelper.getBoolean(Constants.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
         if (media == null) return;
         switch (media.getMediaType()) {
