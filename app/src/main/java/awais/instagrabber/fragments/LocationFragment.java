@@ -24,6 +24,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -56,6 +57,7 @@ import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -204,7 +206,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                                     final View mainPostImage,
                                     final int position) {
             if (opening) return;
-            if (TextUtils.isEmpty(feedModel.getUser().getUsername())) {
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
                 new PostFetcher(feedModel.getCode(), newFeedModel -> {
                     opening = false;
@@ -223,7 +227,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 builder.setSharedProfilePicElement(profilePicView)
                        .setSharedMainPostElement(mainPostImage);
             }
-            builder.build().show(getChildFragmentManager(), "post_view");
+            final FragmentManager fragmentManager = getChildFragmentManager();
+            if (fragmentManager.isDestroyed()) return;
+            builder.build().show(fragmentManager, "post_view");
             opening = false;
         }
     };
@@ -399,8 +405,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             try {
                 Toast.makeText(getContext(), R.string.error_loading_location, Toast.LENGTH_SHORT).show();
                 binding.swipeRefreshLayout.setEnabled(false);
-            }
-            catch (Exception ignored) {}
+            } catch (Exception ignored) {}
             return;
         }
         setTitle();
@@ -409,16 +414,16 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final long locationId = locationModel.getPk();
         // binding.swipeRefreshLayout.setRefreshing(true);
         locationDetailsBinding.mainLocationImage.setImageURI("res:/" + R.drawable.ic_location);
-//        final String postCount = String.valueOf(locationModel.getCount());
-//        final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
-//                                                                                                        locationModel.getPostCount() > 2000000000L
-//                                                                                                        ? 2000000000
-//                                                                                                        : locationModel.getPostCount().intValue(),
-//                                                                                                        postCount));
-//        span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
-//        span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
-//        locationDetailsBinding.mainLocPostCount.setText(span);
-//        locationDetailsBinding.mainLocPostCount.setVisibility(View.VISIBLE);
+        // final String postCount = String.valueOf(locationModel.getCount());
+        // final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
+        //                                                                                                 locationModel.getPostCount() > 2000000000L
+        //                                                                                                 ? 2000000000
+        //                                                                                                 : locationModel.getPostCount().intValue(),
+        //                                                                                                 postCount));
+        // span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
+        // span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
+        // locationDetailsBinding.mainLocPostCount.setText(span);
+        // locationDetailsBinding.mainLocPostCount.setVisibility(View.VISIBLE);
         locationDetailsBinding.locationFullName.setText(locationModel.getName());
         CharSequence biography = locationModel.getAddress() + "\n" + locationModel.getCity();
         // binding.locationBiography.setCaptionIsExpandable(true);
@@ -431,22 +436,22 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         } else {
             locationDetailsBinding.locationBiography.setVisibility(View.VISIBLE);
             locationDetailsBinding.locationBiography.setText(biography);
-//            locationDetailsBinding.locationBiography.addOnHashtagListener(autoLinkItem -> {
-//                final NavController navController = NavHostFragment.findNavController(this);
-//                final Bundle bundle = new Bundle();
-//                final String originalText = autoLinkItem.getOriginalText().trim();
-//                bundle.putString(ARG_HASHTAG, originalText);
-//                navController.navigate(R.id.action_global_hashTagFragment, bundle);
-//            });
-//            locationDetailsBinding.locationBiography.addOnMentionClickListener(autoLinkItem -> {
-//                final String originalText = autoLinkItem.getOriginalText().trim();
-//                navigateToProfile(originalText);
-//            });
-//            locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(context,
-//                                                                                                                    autoLinkItem.getOriginalText()
-//                                                                                                                                .trim()));
-//            locationDetailsBinding.locationBiography
-//                    .addOnURLClickListener(autoLinkItem -> Utils.openURL(context, autoLinkItem.getOriginalText().trim()));
+            // locationDetailsBinding.locationBiography.addOnHashtagListener(autoLinkItem -> {
+            //     final NavController navController = NavHostFragment.findNavController(this);
+            //     final Bundle bundle = new Bundle();
+            //     final String originalText = autoLinkItem.getOriginalText().trim();
+            //     bundle.putString(ARG_HASHTAG, originalText);
+            //     navController.navigate(R.id.action_global_hashTagFragment, bundle);
+            // });
+            // locationDetailsBinding.locationBiography.addOnMentionClickListener(autoLinkItem -> {
+            //     final String originalText = autoLinkItem.getOriginalText().trim();
+            //     navigateToProfile(originalText);
+            // });
+            // locationDetailsBinding.locationBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(context,
+            //                                                                                                         autoLinkItem.getOriginalText()
+            //                                                                                                                     .trim()));
+            // locationDetailsBinding.locationBiography
+            //         .addOnURLClickListener(autoLinkItem -> Utils.openURL(context, autoLinkItem.getOriginalText().trim()));
             locationDetailsBinding.locationBiography.setOnLongClickListener(v -> {
                 Utils.copyText(context, biography);
                 return true;
