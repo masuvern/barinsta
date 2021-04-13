@@ -5,6 +5,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -59,7 +60,7 @@ public class IgErrorsInterceptor implements Interceptor {
                 return;
             case 302: // redirect
                 final String location = response.header("location");
-                if (location.equals("https://www.instagram.com/accounts/login/")) {
+                if (location != null && location.equals("https://www.instagram.com/accounts/login/")) {
                     // rate limited
                     showErrorDialog(R.string.rate_limit);
                 }
@@ -70,7 +71,7 @@ public class IgErrorsInterceptor implements Interceptor {
         try {
             final String bodyString = body.string();
             final JSONObject jsonObject = new JSONObject(bodyString);
-            String message = jsonObject.optString("message", null);
+            String message = jsonObject.optString("message");
             if (!TextUtils.isEmpty(message)) {
                 message = message.toLowerCase();
                 switch (message) {
@@ -91,7 +92,7 @@ public class IgErrorsInterceptor implements Interceptor {
                         return;
                 }
             }
-            final String errorType = jsonObject.optString("error_type", null);
+            final String errorType = jsonObject.optString("error_type");
             if (TextUtils.isEmpty(errorType)) return;
             if (errorType.equals("sentry_block")) {
                 showErrorDialog(R.string.sentry_block);
@@ -127,7 +128,9 @@ public class IgErrorsInterceptor implements Interceptor {
                 0,
                 0
         );
-        dialogFragment.show(mainActivity.getSupportFragmentManager(), "network_error_dialog");
+        final FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        if (fragmentManager.isStateSaved()) return;
+        dialogFragment.show(fragmentManager, "network_error_dialog");
     }
 
     public void destroy() {
