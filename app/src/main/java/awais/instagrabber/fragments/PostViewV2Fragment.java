@@ -334,6 +334,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         if (bottomSheetBehavior != null) {
             captionState = bottomSheetBehavior.getState();
         }
+        if (settingsHelper.getBoolean(Constants.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
         if (media == null) return;
         switch (media.getMediaType()) {
@@ -1022,6 +1023,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         // binding.postImage.setOnClickListener(v -> toggleDetails());
         final AnimatedZoomableController zoomableController = AnimatedZoomableController.newInstance();
         zoomableController.setMaxScaleFactor(3f);
+        zoomableController.setGestureZoomEnabled(true);
+        zoomableController.setEnabled(true);
         binding.postImage.setZoomableController(zoomableController);
         binding.postImage.setTapListener(new GestureDetector.SimpleOnGestureListener() {
             @Override

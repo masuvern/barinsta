@@ -56,6 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\nAbonnements</string>
     <string name="post_viewer_autoplay_video">Lecture automatique des vidéos</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Toujours couper le son des vidéos</string>
     <string name="post_viewer_show_captions">Toujours afficher les sous-titres de publication</string>
     <string name="post_viewer_download_dialog_title">Sélectionnez ce que vous souhaitez télécharger</string>
@@ -461,7 +463,7 @@
     <string name="removed_keywords">Mot-clé supprimé : %s de la liste de filtres</string>
     <string name="marked_as_seen">Marqué comme vu</string>
     <string name="delete_unsuccessful">Suppression non réussie</string>
-    <string name="throttle_error">Propulsé par Instagram à cause d\'un trop grand nombre de requêtes API. Attendez un certain temps avant de réessayer.</string>
+    <string name="throttle_error">Limité par Instagram en raison d\'un trop grand nombre de requêtes API. Attendez un certain temps avant de réessayer.</string>
     <string name="error">Erreur</string>
     <string name="account_logged_out">Ce compte a été déconnecté.</string>
     <string name="login_required">Connexion requise!</string>

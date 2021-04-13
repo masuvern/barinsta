@@ -23,16 +23,16 @@
     <string name="update_check">Έλεγχος για ενημερώσεις κατά την εκκίνηση</string>
     <string name="flag_secure">Παρεμπόδιση στιγμιοτύπων οθόνης &amp; προεπισκόπησης εφαρμογής</string>
     <string name="download_user_folder">Λήψη δημοσιεύσεων σε φακέλους ονομάτων χρηστών</string>
-    <string name="download_prepend_username">Prepend Username to Filename</string>
+    <string name="download_prepend_username">Προσθέστε το όνομα χρήστη πριν από το όνομα του αρχείου</string>
     <string name="mark_as_seen_setting">Επισήμανση ιστοριών ως προβληθέντων μετά την προβολή</string>
     <string name="mark_as_seen_setting_summary">Ο δημιουργός της ιστορίας θα γνωρίζει ότι προβλήθηκε</string>
-    <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
+    <string name="hide_muted_reels_setting">Απόκρυψη ιστοριών που βρίσκονται σε σίγαση από τη ροή</string>
     <string name="dm_mark_as_seen_setting">Επισήμανση μηνυμάτων ως αναγνωσμένων μετά την προβολή</string>
     <string name="dm_mark_as_seen_setting_summary">Τα υπόλοιπα μέλη θα γνωρίζουν ότι προβλήθηκε</string>
     <string name="activity_setting">Ενεργοποίηση ειδοποιήσεων δραστηριότητας</string>
     <string name="story_sort_setting">Ταξινόμηση ροής ιστορίων</string>
     <string name="error_loading_profile">Σφάλμα κατά τη φόρτωση προφίλ! Είναι το όνομα χρήστη έγκυρο; Αν ναι, μπορεί να είστε περιορισμένος.</string>
-    <string name="error_loading_profile_loggedin">Σφάλμα κατά τη φόρτωση λογαριασμού! Είναι το όνομα χρήστη έγκυρο; Μήπως σας έχει μπλοκάρει;</string>
+    <string name="error_loading_profile_loggedin">Σφάλμα κατά τη φόρτωση λογαριασμού! Είναι το όνομα χρήστη έγκυρο; Μήπως ο χρήστης σας έχει μπλοκάρει;</string>
     <string name="error_loading_hashtag">Σφάλμα κατά τη φόρτωση hashtag! Είναι το όνομα έγκυρο;</string>
     <string name="error_loading_location">Σφάλμα κατά την φόρτωση τοποθεσίας! Είναι η διεύθυνση έγκυρη;</string>
     <string name="error_creating_folders">Σφάλμα κατά τη δημιουργία φακέλου/-ων λήψης.</string>
@@ -56,6 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\nΑκολουθείτε</string>
     <string name="post_viewer_autoplay_video">Αυτόματη αναπαραγωγή των βίντεο</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Μόνιμη σίγαση των βίντεο</string>
     <string name="post_viewer_show_captions">Μόνιμη εμφάνιση των λεζαντών των δημοσιεύσεων</string>
     <string name="post_viewer_download_dialog_title">Επιλογή δημοσιεύσεων για λήψη</string>
@@ -93,7 +95,7 @@
     <string name="logout">Αποσύνδεση</string>
     <string name="logout_summary">Ανώνυμη περιήγηση στο Instagram</string>
     <string name="remove_all_acc">Αφαίρεση όλων των λογαριασμών</string>
-    <string name="remove_all_acc_warning">Αυτό θα αφαιρέσει όλους τους λογαριασμούς που έχουν προστεθεί στην εφαρμογή!\nΓια να αφαιρέσετε μόνο έναν λογαριασμό, πατήστε παρατεταμένα τον λογαριασμό από τον διάλογο εναλλαγής λογαριασμών.\nΘέλετε να συνεχίσετε;</string>
+    <string name="remove_all_acc_warning">Έτσι, θα αφαιρεθούν όλοι οι λογαριασμοί που έχουν προστεθεί στην εφαρμογή!\nΓια να αφαιρέσετε μόνο έναν λογαριασμό, πατήστε τον παρατεταμένα από τον διάλογο εναλλαγής λογαριασμών.\nΘέλετε να συνεχίσετε;</string>
     <string name="time_settings">Μορφή ημερομηνίας</string>
     <string name="saved_create_collection">Δημιουργία νέας συλλογής</string>
     <string name="edit_collection">Επεξεργασία ονόματος συλλογής</string>
@@ -102,9 +104,9 @@
     <string name="delete_collection_note">Όλα τα πολυμέσα που περιέχονται θα παραμείνουν σε άλλες συλλογές.</string>
     <string name="add_to_collection">Προσθήκη στη συλλογή...</string>
     <string name="remove_from_collection">Αφαίρεση από τη συλλογή</string>
-    <string name="liked">Επισημασμένο ως \"Μου αρέσει\"</string>
+    <string name="liked">Μ\'αρέσουν</string>
     <string name="saved">Αποθηκευμένα</string>
-    <string name="tagged">Σε αυτήν τη φωτογραφία</string>
+    <string name="tagged">Ετικέτες</string>
     <string name="dm_person">Μήνυμα</string>
     <string name="like_without_count">Μου αρέσει</string>
     <string name="unlike_without_count">Δε μου αρέσει</string>
@@ -240,7 +242,7 @@
     <string name="action_notif">Δραστηριότητα</string>
     <string name="action_archive">Αρχειοθήκη ιστοριών</string>
     <string name="action_ayml">Προτεινόμενοι χρήστες</string>
-    <string name="select_picture">Επιλέξτε Εικόνα</string>
+    <string name="select_picture">Επιλογή εικόνας</string>
     <string name="uploading">Μεταφόρτωση…</string>
     <string name="activity_count_prefix">Έχετε:</string>
     <string name="activity_count_relationship">%d ακόλουθοι</string>
@@ -255,7 +257,7 @@
     <string name="profile">Προφίλ</string>
     <string name="more">Λοιπά</string>
     <string name="title_dm">Μηνύματα</string>
-    <string name="number_selected">%d επιλέχθηκε</string>
+    <string name="number_selected">Επιλέχθηκαν %d</string>
     <string name="logout_success">Η αποσύνδεση ήταν επιτυχής!</string>
     <string name="dm_thread_info">Πληροφορίες</string>
     <string name="mark_as_seen">Σήμανση ως αναγνωσμένο</string>
@@ -283,7 +285,7 @@
     <string name="light_theme_settings">Φωτεινό θέμα</string>
     <string name="dark_theme_settings">Σκούρο θέμα</string>
     <string name="light_barinsta_theme" comment="Yes, this one is Barista (the theme), you can also substitute it with other coffee-related words">Κόκκοι καφέ</string>
-    <string name="dark_material_dark_theme">Ουσιώδες Σκούρο</string>
+    <string name="dark_material_dark_theme">Σκουρόχρωμο</string>
     <string name="added_to_favs">Προστέθηκε στα Αγαπημένα!</string>
     <string name="add_to_favorites">Στα αγαπημένα</string>
     <string name="accounts">Λογαριασμοί</string>
@@ -292,7 +294,7 @@
     <string name="unknown">Άγνωστο</string>
     <string name="removed_from_favs">Αφαίρεση από τα αγαπημένα!</string>
     <string name="backup_and_restore">Αντίγραφα ασφαλείας &amp; Επαναφορά</string>
-    <string name="backup_summary">Δημιουργία αντιγράφου ασφαλείας των ρυθμίσεων της εφαρμογής, των δεδομένων σύνδεσης λογαριασμού και/ή αγαπημένα σε απλό κείμενο ή κρυπτογραφημένο αρχείο για μεταγενέστερη επαναφορά.</string>
+    <string name="backup_summary">Δημιουργία αντιγράφου ασφαλείας των ρυθμίσεων της εφαρμογής, των δεδομένων σύνδεσης του λογαριασμού και/ή των αγαπημένων, σε ακρυπτογράφητο ή κρυπτογραφημένο αρχείο για μεταγενέστερη επαναφορά.</string>
     <string name="backup_warning">Αν δημιουργείτε αντίγραφα ασφαλείας των δεδομένων σύνδεσης λογαριασμού, αντιμετωπίστε το αρχείο ως απόρρητο και κρατήστε το σε ασφαλές μέρος!</string>
     <string name="create_backup">Δημιουργία νέου αρχείου αντιγράφου ασφαλείας</string>
     <string name="restore_backup">Επαναφορά από υπάρχον αρχείο αντιγράφου ασφαλείας</string>
@@ -327,8 +329,8 @@
     <string name="two">2</string>
     <string name="three">3</string>
     <string name="show_names">Εμφάνιση ονομάτων</string>
-    <string name="show_avatars">Εμφάνιση άβαταρ</string>
-    <string name="avatar_size">Μέγεθος άβαταρ</string>
+    <string name="show_avatars">Εμφάνιση εικόνας προφίλ</string>
+    <string name="avatar_size">Μέγεθος εικόνας προφίλ</string>
     <string name="corners">Γωνίες</string>
     <string name="show_grid_gap">Εμφάνιση κενού πλέγματος</string>
     <string name="disable_animation">Απενεργοποίηση κινουμένων σχεδίων</string>
@@ -461,22 +463,22 @@
     <string name="removed_keywords">Αφαιρέθηκε λέξη-κλειδί: %s στον κατάλογο φιλτραρίσματος</string>
     <string name="marked_as_seen">Επισήμανθηκε ως αναγνωσμένο</string>
     <string name="delete_unsuccessful">Η διαγραφή απέτυχε</string>
-    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
-    <string name="error">Error</string>
-    <string name="account_logged_out">This account has been logged out.</string>
-    <string name="login_required">Login required!</string>
-    <string name="sentry_block">Sentry block.</string>
-    <string name="inactive_user">User is inactive!</string>
+    <string name="throttle_error">Περιορίστηκατε από το Instagram λόγω υπερβολικών αιτήσεων API. Περιμένετε ορισμένη ώρα προτού προσπαθήσετε ξανά.</string>
+    <string name="error">Σφάλμα</string>
+    <string name="account_logged_out">Αυτός ο λογαριασμός έχει αποσυνδεθεί.</string>
+    <string name="login_required">Απαιτείται σύνδεση!</string>
+    <string name="sentry_block">Φραγή Sentry.</string>
+    <string name="inactive_user">Ο χρήστης είναι ανενεργός!</string>
     <string name="crash_report_subject">Αναφορά Κατάρρευσης Barinsta</string>
     <string name="crash_report_title">Επιλέξτε μια εφαρμογή ηλ. ταχυδρομείου για αποστολή αρχείων καταγραφής κατάρρευσης</string>
-    <string name="not_found">Not found!</string>
-    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
-    <string name="skip_update">Skip this update</string>
-    <string name="on_latest_version">You\'re already on the latest version</string>
-    <string name="tab_order">Screen order</string>
-    <string name="other_tabs">Other tabs</string>
-    <string name="tab_order_start_next_launch">The tab order will be reflected on next launch</string>
-    <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
+    <string name="not_found">Δε βρέθηκε!</string>
+    <string name="rate_limit">Η διεύθυνση IP σας έχει περιοριστεί από το Instagram. Περιμένετε για μία ώρα και μετά προσπαθήστε ξανά.</string>
+    <string name="skip_update">Παράλειψη της ενημέρωσης</string>
+    <string name="on_latest_version">Η εφαρμογή είναι ήδη στην τελευταία έκδοση</string>
+    <string name="tab_order">Σειρά της οθόνης</string>
+    <string name="other_tabs">Λοιπές καρτέλες</string>
+    <string name="tab_order_start_next_launch">Η σειρά των καρτελών θα ισχύσει από την επόμενη εκκίνηση</string>
+    <string name="dm_remove_warning">Εάν αποθηκευτεί, όλες οι λειτουργίες που είναι σχετικές με τα Μηνύματα, θα είναι απενεργοποιημένες στην επόμενη εκκίνηση</string>
     <string name="copy_caption">Αντιγραφή λεζάντας</string>
     <string name="copy_reply">Αντιγραφή απάντησης</string>
 </resources>
