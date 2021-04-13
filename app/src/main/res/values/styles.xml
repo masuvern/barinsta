@@ -225,4 +225,13 @@
         <item name="android:paddingEnd">0dp</item>
         <item name="iconPadding">0dp</item>
     </style>
+
+    <style name="TextAppearance.Design.Tab.RegularCaps" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.TabLayout.RegularCaps" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabTextAppearance">@style/TextAppearance.Design.Tab.RegularCaps</item>
+    </style>
 </resources>

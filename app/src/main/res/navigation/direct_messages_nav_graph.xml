@@ -96,6 +96,10 @@
         android:id="@+id/action_global_user_search"
         app:destination="@id/user_search_nav_graph" />
 
+    <action
+        android:id="@+id/action_global_search"
+        app:destination="@id/searchFragment" />
+
     <fragment
         android:id="@+id/directMessagesInboxFragment"
         android:name="awais.instagrabber.fragments.directmessages.DirectMessageInboxFragment"
@@ -187,4 +191,10 @@
             android:id="@+id/action_pending_inbox_to_thread"
             app:destination="@id/directMessagesThreadFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="awais.instagrabber.fragments.search.SearchFragment"
+        android:label="@string/search"
+        tools:layout="@layout/fragment_search" />
 </navigation>

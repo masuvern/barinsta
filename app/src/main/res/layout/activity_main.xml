@@ -32,7 +32,29 @@
                 android:background="?attr/colorSurface"
                 app:layout_collapseMode="pin"
                 app:title="@string/app_name"
-                tools:menu="@menu/main_menu" />
+                tools:menu="@menu/main_menu">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_input_layout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:boxStrokeColor="@null"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:endIconContentDescription="@string/clear"
+                    app:endIconDrawable="@drawable/ic_close_24"
+                    app:endIconMode="custom"
+                    app:hintEnabled="false"
+                    tools:visibility="visible">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/search" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

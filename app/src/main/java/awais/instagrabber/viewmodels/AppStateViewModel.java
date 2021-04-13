@@ -8,8 +8,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import awais.instagrabber.db.datasources.AccountDataSource;
-import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -23,20 +21,18 @@ public class AppStateViewModel extends AndroidViewModel {
     private static final String TAG = AppStateViewModel.class.getSimpleName();
 
     private final String cookie;
-    private final boolean isLoggedIn;
     private final MutableLiveData<User> currentUser = new MutableLiveData<>();
 
-    private AccountRepository accountRepository;
     private UserService userService;
 
     public AppStateViewModel(@NonNull final Application application) {
         super(application);
         // Log.d(TAG, "AppStateViewModel: constructor");
         cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
+        final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) return;
         userService = UserService.getInstance();
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(application));
+        // final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(application));
         fetchProfileDetails();
     }
 
@@ -50,6 +46,7 @@ public class AppStateViewModel extends AndroidViewModel {
 
     private void fetchProfileDetails() {
         final long uid = CookieUtils.getUserIdFromCookie(cookie);
+        if (userService == null) return;
         userService.getUserInfo(uid, new ServiceCallback<User>() {
             @Override
             public void onSuccess(final User user) {
