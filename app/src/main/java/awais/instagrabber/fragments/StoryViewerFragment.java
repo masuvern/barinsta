@@ -2,14 +2,12 @@ package awais.instagrabber.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -72,7 +70,6 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.CreateThreadAction;
-import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
@@ -105,7 +102,6 @@ import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
-//import awaisomereport.LogCollector;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -113,7 +109,6 @@ import retrofit2.Response;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
-//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class StoryViewerFragment extends Fragment {
@@ -417,10 +412,10 @@ public class StoryViewerFragment extends Fragment {
                         return true;
                     }
                 } catch (final Exception e) {
-//                    if (logCollector != null)
-//                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-//                                                     new Pair<>("swipeEvent", swipeEvent),
-//                                                     new Pair<>("diffX", diffX));
+                    // if (logCollector != null)
+                    //     logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
+                    //                                  new Pair<>("swipeEvent", swipeEvent),
+                    //                                  new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;
@@ -838,7 +833,7 @@ public class StoryViewerFragment extends Fragment {
         }
     }
 
-    private void refreshStory() {
+    private synchronized void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             if (storyModels != null && storyModels.size() > 0) {
