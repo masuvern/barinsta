@@ -285,8 +285,13 @@ public final class InboxManager {
             if (index < 0) return;
             final List<DirectThread> threads = inbox.getThreads();
             final DirectThread thread = threads.get(index);
-            thread.setItems(updatedItems);
-            setThread(inbox, index, thread);
+            try {
+                final DirectThread threadClone = (DirectThread) thread.clone();
+                threadClone.setItems(updatedItems);
+                setThread(inbox, index, threadClone);
+            } catch (Exception e) {
+                Log.e(TAG, "setItemsToThread: ", e);
+            }
         }
     }
 
