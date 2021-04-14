@@ -92,14 +92,14 @@ public final class ThreadManager {
     private final MutableLiveData<DirectThreadParticipantRequestsResponse> pendingRequests = new MutableLiveData<>(null);
 
     private final String threadId;
-    private final DirectMessagesService service;
     private final long viewerId;
     private final ThreadIdOrUserIds threadIdOrUserIds;
     private final User currentUser;
     private final ContentResolver contentResolver;
-    private final MediaService mediaService;
-    private final FriendshipService friendshipService;
 
+    private DirectMessagesService service;
+    private MediaService mediaService;
+    private FriendshipService friendshipService;
     private InboxManager inboxManager;
     private LiveData<DirectThread> thread;
     private LiveData<Integer> inputMode;
@@ -157,6 +157,7 @@ public final class ThreadManager {
         viewerId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        if (csrfToken == null) return;
         // if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
         //     throw new IllegalArgumentException("User is not logged in!");
         // }
