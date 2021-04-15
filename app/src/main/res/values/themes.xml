@@ -23,6 +23,7 @@
         <item name="dmIncomingBgColor">@color/grey_600</item>
         <item name="dmOutgoingBgColor">@color/deep_purple_400</item>
         <item name="dmDateHeaderBgColor">@color/deep_purple_600</item>
+        <item name="searchInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
     </style>
 
     <style name="AppTheme.Light.White" parent="AppTheme.Light">
@@ -33,8 +34,11 @@
         <item name="colorSecondaryVariant">@color/white</item>
         <item name="colorOnSecondary">@color/black</item>
         <item name="colorSurface">@color/white</item>
+        <item name="toolbarColor">?colorSurface</item>
         <item name="colorOnSurface">@color/black</item>
         <item name="colorAccent">@color/black</item>
+        <item name="colorControlActivated">@color/black</item>
+        <item name="android:colorControlActivated">@color/black</item>
         <item name="editTextColor">@color/black</item>
         <item name="android:editTextColor">@color/black</item>
         <item name="android:textColorPrimary">@color/black</item>
@@ -48,6 +52,7 @@
         <item name="dmWaveformBgColor">@color/grey_600</item>
         <item name="dmWaveformProgressColor">@color/blue_800</item>
         <item name="dmInputTextColor">@color/black</item>
+        <item name="tabStyle">@style/Widget.MaterialComponents.TabLayout.Light.White</item>
     </style>
 
     <style name="AppTheme.Light.Barinsta" parent="AppTheme.Light">
@@ -57,6 +62,7 @@
         <item name="colorSecondary">@color/barinstaColorSecondary</item>
         <item name="colorSecondaryVariant">@color/barinstaColorSecondaryDark</item>
         <item name="colorSurface">@color/grey_200</item>
+        <item name="toolbarColor">?colorPrimary</item>
         <item name="colorControlHighlight">@color/barinstaColorSecondaryDark</item>
         <item name="colorAccent">@color/barinstaColorSecondaryDark</item>
         <!--<item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar</item>-->
@@ -65,6 +71,7 @@
         <item name="android:textColorPrimary">@color/barinstaPrimaryTextColor</item>
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
         <item name="dmInputTextColor">@color/black</item>
+        <item name="searchInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Light.Barinsta</item>
     </style>
 
     <style name="AppTheme.Light.Bibliogram" parent="AppTheme.Light">
@@ -74,6 +81,7 @@
         <item name="colorSecondary">@color/bibliogramColorSecondary</item>
         <item name="colorSecondaryVariant">@color/bibliogramColorSecondaryDark</item>
         <item name="colorSurface">@color/grey_200</item>
+        <item name="toolbarColor">?colorPrimary</item>
         <item name="colorControlHighlight">@color/bibliogramColorSecondaryDark</item>
         <item name="colorAccent">@color/bibliogramColorSecondaryDark</item>
         <item name="android:windowBackground">?colorSurface</item>
@@ -81,6 +89,7 @@
         <item name="android:textColorPrimary">@color/bibliogramPrimaryTextColor</item>
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Light.Barinsta</item>
         <item name="dmInputTextColor">@color/black</item>
+        <item name="searchInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Light.Barinsta</item>
     </style>
 
 
@@ -103,6 +112,7 @@
         <item name="dmWaveformBgColor">@color/white</item>
         <item name="dmWaveformProgressColor">@color/blue_800</item>
         <item name="dmInputTextColor">@color/white</item>
+        <item name="searchInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
     </style>
 
     <style name="AppTheme.Dark.Black" parent="AppTheme.Dark">
@@ -114,9 +124,12 @@
         <item name="colorOnSecondary">@color/white</item>
         <item name="colorSecondaryVariant">@color/black</item>
         <item name="colorSurface">@color/black</item>
+        <item name="toolbarColor">?colorSurface</item>
         <item name="colorOnSurface">@color/white</item>
         <item name="colorAccent">@color/blue_A700</item>
         <item name="colorControlHighlight">@color/grey_600</item>
+        <item name="colorControlActivated">@color/white</item>
+        <item name="android:colorControlActivated">@color/white</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
         <item name="android:textColorHint">@color/grey_500</item>
@@ -132,6 +145,7 @@
         <item name="dmIncomingBgColor">@color/grey_600</item>
         <item name="dmOutgoingBgColor">@color/deep_purple_400</item>
         <item name="dmDateHeaderBgColor">@color/deep_purple_600</item>
+        <item name="tabStyle">@style/Widget.MaterialComponents.TabLayout.Dark.Black</item>
     </style>
 
     <style name="AppTheme.Dark.MaterialDark" parent="AppTheme.Dark">
@@ -142,6 +156,7 @@
         <item name="android:windowBackground">@color/grey_900</item>
         <item name="android:colorBackground">@color/grey_900</item>
         <item name="colorSurface">@color/grey_900</item>
+        <item name="toolbarColor">?colorSurface</item>
         <item name="colorError">@color/red_200</item>
         <item name="colorOnPrimary">@color/black</item>
         <item name="colorOnSecondary">@color/black</item>
