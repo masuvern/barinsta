@@ -34,7 +34,7 @@ public class Media implements Serializable {
     private final boolean hasAudio;
     private final double videoDuration;
     private final long viewCount;
-    private final Caption caption;
+    private Caption caption;
     private final boolean canViewerSave;
     private final Audio audio;
     private final String title;
@@ -271,7 +271,14 @@ public class Media implements Serializable {
     }
 
     public void setPostCaption(final String caption) {
-        final Caption caption1 = getCaption();
+        Caption caption1 = getCaption();
+        if (caption1 == null) {
+            final User user = getUser();
+            if (user == null) return;
+            caption1 = new Caption(user.getPk(), caption);
+            this.caption = caption1;
+            return;
+        }
         caption1.setText(caption);
     }
 

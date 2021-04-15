@@ -126,7 +126,7 @@
         <item name="android:dialogTheme">@style/Widget.Dialog.Dark.Black</item>
         <item name="alertDialogTheme">@style/Widget.AlertDialog.Dark.Black</item>
         <item name="switchStyle">@style/Widget.AppCompat.CompoundButton.Switch.Dark.Black</item>
-        <item name="android:dropDownListViewStyle">@style/Widget.AppCompat.ListView.DropDown.Dark.Black</item>
+        <!--<item name="android:dropDownListViewStyle">@style/Widget.AppCompat.ListView.DropDown.Dark.Black</item>-->
         <item name="preferenceFragmentCompatStyle">@style/PreferenceFragmentCompatStyle.Dark.Black</item>
         <item name="appBarLayoutStyle">@style/Widget.MaterialComponents.AppBarLayout.Primary</item>
         <item name="dmIncomingBgColor">@color/grey_600</item>
