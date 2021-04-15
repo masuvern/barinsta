@@ -213,6 +213,8 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
                     bundle.putLong("locationId", searchItem.getPlace().getLocation().getPk());
                     navController.navigate(R.id.action_global_locationFragment, bundle);
                     break;
+                default:
+                    break;
             }
         } catch (Exception e) {
             Log.e(TAG, "onSearchItemClick: ", e);
@@ -237,6 +239,7 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
                         liveData.removeObserver(this);
                         break;
                     case LOADING:
+                    default:
                         break;
                 }
             }

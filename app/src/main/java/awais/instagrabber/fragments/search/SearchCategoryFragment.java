@@ -169,6 +169,8 @@ public class SearchCategoryFragment extends Fragment {
                     swipeRefreshLayout.setRefreshing(true);
                 }
                 break;
+            default:
+                break;
         }
     }
 

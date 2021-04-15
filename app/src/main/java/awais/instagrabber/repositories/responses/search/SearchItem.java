@@ -148,48 +148,6 @@ public class SearchItem {
         return null;
     }
 
-    @NonNull
-    private static User getUser(@NonNull final RecentSearch recentSearch) {
-        return new User(
-                Long.parseLong(recentSearch.getIgId()),
-                recentSearch.getUsername(),
-                recentSearch.getName(),
-                false,
-                recentSearch.getPicUrl(),
-                null, null, false, false, false, false, false,
-                null, null, 0, 0, 0, 0, null, null,
-                0, null, null, null, null, null, null
-        );
-    }
-
-    @NonNull
-    private static Hashtag getHashtag(@NonNull final RecentSearch recentSearch) {
-        return new Hashtag(
-                recentSearch.getIgId(),
-                recentSearch.getName(),
-                0,
-                null,
-                null
-        );
-    }
-
-    @NonNull
-    private static Place getPlace(@NonNull final RecentSearch recentSearch) {
-        final Location location = new Location(
-                Long.parseLong(recentSearch.getIgId()),
-                recentSearch.getName(),
-                recentSearch.getName(),
-                null, null, 0, 0
-        );
-        return new Place(
-                location,
-                recentSearch.getName(),
-                null,
-                null,
-                null
-        );
-    }
-
     public static List<SearchItem> fromFavorite(final List<Favorite> favorites) {
         if (favorites == null) {
             return Collections.emptyList();
@@ -226,6 +184,20 @@ public class SearchItem {
     }
 
     @NonNull
+    private static User getUser(@NonNull final RecentSearch recentSearch) {
+        return new User(
+                Long.parseLong(recentSearch.getIgId()),
+                recentSearch.getUsername(),
+                recentSearch.getName(),
+                false,
+                recentSearch.getPicUrl(),
+                null, null, false, false, false, false, false,
+                null, null, 0, 0, 0, 0, null, null,
+                0, null, null, null, null, null, null
+        );
+    }
+
+    @NonNull
     private static User getUser(@NonNull final Favorite favorite) {
         return new User(
                 0,
@@ -240,11 +212,39 @@ public class SearchItem {
     }
 
     @NonNull
+    private static Hashtag getHashtag(@NonNull final RecentSearch recentSearch) {
+        return new Hashtag(
+                recentSearch.getIgId(),
+                recentSearch.getName(),
+                0,
+                null,
+                null
+        );
+    }
+
+    @NonNull
     private static Hashtag getHashtag(@NonNull final Favorite favorite) {
         return new Hashtag(
                 "0",
                 favorite.getQuery(),
                 0,
+                null,
+                null
+        );
+    }
+
+    @NonNull
+    private static Place getPlace(@NonNull final RecentSearch recentSearch) {
+        final Location location = new Location(
+                Long.parseLong(recentSearch.getIgId()),
+                recentSearch.getName(),
+                recentSearch.getName(),
+                null, null, 0, 0
+        );
+        return new Place(
+                location,
+                recentSearch.getName(),
+                null,
                 null,
                 null
         );
