@@ -55,7 +55,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
     private void setupComments(@NonNull final Media feedModel) {
         final long commentsCount = feedModel.getCommentCount();
         bottomBinding.commentsCount.setText(String.valueOf(commentsCount));
-        bottomBinding.commentsCount.setOnClickListener(v -> feedItemCallback.onCommentsClick(feedModel));
+        bottomBinding.btnComments.setOnClickListener(v -> feedItemCallback.onCommentsClick(feedModel));
     }
 
     private void setupProfilePic(@NonNull final Media media) {
@@ -75,6 +75,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
         // final SpannableString spannableString = new SpannableString();
         // spannableString.setSpan(new CommentMentionClickSpan(), 0, titleLen, 0);
         final User user = media.getUser();
+        if (user == null) return;
         final String title = "@" + user.getUsername();
         topBinding.title.setText(title);
         topBinding.title.setOnClickListener(v -> feedItemCallback.onNameClick(media, topBinding.ivProfilePic));
@@ -120,8 +121,7 @@ public abstract class FeedItemViewHolder extends RecyclerView.ViewHolder {
             topBinding.title.setLayoutParams(new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT
             ));
-        }
-        else {
+        } else {
             final String locationName = location.getName();
             if (TextUtils.isEmpty(locationName)) {
                 topBinding.location.setVisibility(View.GONE);

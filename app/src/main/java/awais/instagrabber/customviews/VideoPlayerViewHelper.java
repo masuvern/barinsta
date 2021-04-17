@@ -14,8 +14,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.PopupMenu;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
@@ -156,29 +156,33 @@ public class VideoPlayerViewHelper implements Player.EventListener {
 
     private void setThumbnail() {
         binding.thumbnail.setAspectRatio(thumbnailAspectRatio);
-        final ImageRequest thumbnailRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(thumbnailUrl))
-                                                                 .build();
-        final DraweeController controller = Fresco.newDraweeControllerBuilder()
-                                                  .setControllerListener(new BaseControllerListener<ImageInfo>() {
-                                                      @Override
-                                                      public void onFailure(final String id, final Throwable throwable) {
-                                                          if (videoPlayerCallback != null) {
-                                                              videoPlayerCallback.onThumbnailLoaded();
-                                                          }
-                                                      }
+        ImageRequest thumbnailRequest = null;
+        if (thumbnailUrl != null) {
+            thumbnailRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(thumbnailUrl)).build();
+        }
+        final PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
+                                                              .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                                                                  @Override
+                                                                  public void onFailure(final String id,
+                                                                                        final Throwable throwable) {
+                                                                      if (videoPlayerCallback != null) {
+                                                                          videoPlayerCallback.onThumbnailLoaded();
+                                                                      }
+                                                                  }
 
-                                                      @Override
-                                                      public void onFinalImageSet(final String id,
-                                                                                  final ImageInfo imageInfo,
-                                                                                  final Animatable animatable) {
-                                                          if (videoPlayerCallback != null) {
-                                                              videoPlayerCallback.onThumbnailLoaded();
-                                                          }
-                                                      }
-                                                  })
-                                                  .setImageRequest(thumbnailRequest)
-                                                  .build();
-        binding.thumbnail.setController(controller);
+                                                                  @Override
+                                                                  public void onFinalImageSet(final String id,
+                                                                                              final ImageInfo imageInfo,
+                                                                                              final Animatable animatable) {
+                                                                      if (videoPlayerCallback != null) {
+                                                                          videoPlayerCallback.onThumbnailLoaded();
+                                                                      }
+                                                                  }
+                                                              });
+        if (thumbnailRequest != null) {
+            builder.setImageRequest(thumbnailRequest);
+        }
+        binding.thumbnail.setController(builder.build());
     }
 
     private void loadPlayer() {

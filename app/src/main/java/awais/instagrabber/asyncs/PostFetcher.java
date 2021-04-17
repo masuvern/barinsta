@@ -12,9 +12,6 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.NetworkUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
-//import awaisomereport.LogCollector;
-
-//import static awais.instagrabber.utils.Utils.logCollector;
 
 public final class PostFetcher extends AsyncTask<Void, Void, Media> {
     private static final String TAG = "PostFetcher";
@@ -136,9 +133,9 @@ public final class PostFetcher extends AsyncTask<Void, Void, Media> {
                 return ResponseBodyUtils.parseGraphQLItem(media, null);
             }
         } catch (Exception e) {
-//            if (logCollector != null) {
-//                logCollector.appendException(e, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground");
-//            }
+            // if (logCollector != null) {
+            //     logCollector.appendException(e, LogCollector.LogFile.ASYNC_POST_FETCHER, "doInBackground");
+            // }
             Log.e(TAG, "Error fetching post", e);
         } finally {
             if (conn != null) {
