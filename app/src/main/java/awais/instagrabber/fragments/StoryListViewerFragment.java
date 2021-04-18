@@ -51,12 +51,15 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     private AppCompatActivity fragmentActivity;
     private FragmentStoryListViewerBinding binding;
     private SwipeRefreshLayout root;
-    private boolean shouldRefresh = true, firstRefresh = true;
+    private boolean shouldRefresh = true;
+    private boolean firstRefresh = true;
     private FeedStoriesViewModel feedStoriesViewModel;
     private ArchivesViewModel archivesViewModel;
     private StoriesService storiesService;
     private Context context;
-    private String type, currentQuery, endCursor = null;
+    private String type;
+    private String currentQuery;
+    private String endCursor = null;
     private FeedStoriesListAdapter adapter;
     private MenuItem menuSearch;
 
@@ -226,7 +229,10 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         binding.swipeRefreshLayout.setRefreshing(true);
         if (type.equals("feed") && firstRefresh) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            adapter.submitList(feedStoriesViewModel.getList().getValue());
+            final List<FeedStoryModel> value = feedStoriesViewModel.getList().getValue();
+            if (value != null) {
+                adapter.submitList(value);
+            }
             firstRefresh = false;
         } else if (type.equals("feed")) {
             storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
