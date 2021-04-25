@@ -1002,7 +1002,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             addSharedElement(sharedMainPostElement, binding.postImage);
         }
         final Media media = viewModel.getMedia();
-        final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(ResponseBodyUtils.getImageUrl(media)))
+        final String imageUrl = ResponseBodyUtils.getImageUrl(media);
+        if (TextUtils.isEmpty(imageUrl)) {
+            return;
+        }
+        final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(imageUrl))
                                                                .setLocalThumbnailPreviewsEnabled(true)
                                                                .build();
         final DraweeController controller = Fresco
