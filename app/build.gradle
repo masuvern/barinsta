@@ -146,8 +146,6 @@ dependencies {
     implementation "androidx.emoji:emoji:$emoji_compat_version"
     implementation "androidx.emoji:emoji-appcompat:$emoji_compat_version"
 
-    implementation 'me.austinhuang:AutoLinkTextViewV2:-SNAPSHOT'
-
     implementation 'com.facebook.fresco:fresco:2.3.0'
     implementation 'com.facebook.fresco:animated-webp:2.3.0'
     implementation 'com.facebook.fresco:webpsupport:2.3.0'
@@ -157,6 +155,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     implementation 'org.apache.commons:commons-imaging:1.0-alpha2'
+
+    implementation 'com.github.ammargitham:AutoLinkTextViewV2:v3.1.0'
     implementation 'com.github.ammargitham:uCrop:2.3-native-beta-2'
     implementation 'com.github.ammargitham:android-gpuimage:2.1.1-beta4'
 

@@ -57,6 +57,7 @@ public class RamboTextViewV2 extends AutoLinkTextView {
                 }
             }
         });
+        onAutoLinkLongClick(autoLinkItem -> {});
     }
 
     public void addOnMentionClickListener(final OnMentionClickListener onMentionClickListener) {
