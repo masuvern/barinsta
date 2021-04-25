@@ -613,7 +613,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             bundle.putString("shortCode", media.getCode());
             bundle.putString("postId", media.getPk());
             bundle.putLong("postUserId", user.getPk());
-            navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
+            try {
+                navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "setupComment: ", e);
+            }
         });
         binding.comment.setOnLongClickListener(v -> {
             Utils.displayToastAboveView(context, v, getString(R.string.comment));

@@ -456,7 +456,7 @@ public class StoryViewerFragment extends Fragment {
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            mediaService.fetch(Long.valueOf(mediaId), new ServiceCallback<Media>() {
+            mediaService.fetch(Long.parseLong(mediaId), new ServiceCallback<Media>() {
                 @Override
                 public void onSuccess(final Media feedModel) {
                     final PostViewV2Fragment fragment = PostViewV2Fragment
@@ -1135,7 +1135,6 @@ public class StoryViewerFragment extends Fragment {
             }
         });
     }
-
 
     private void openProfile(final String username) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
