@@ -56,8 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\nSiguiendo</string>
     <string name="post_viewer_autoplay_video">Autorreproducir vídeos</string>
-    <string name="post_viewer_background_play">Continue videos in background</string>
-    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
+    <string name="post_viewer_background_play">Continuar vídeos en segundo plano</string>
+    <string name="post_viewer_background_play_summary">No pausar vídeos cuando la aplicación está fuera de enfoque</string>
     <string name="post_viewer_muted_autoplay">Siempre silenciar vídeos</string>
     <string name="post_viewer_show_captions">Mostrar siempre subtítulos del post</string>
     <string name="post_viewer_download_dialog_title">Seleccionar qué descargar</string>
@@ -481,4 +481,7 @@
     <string name="dm_remove_warning">Si se guarda, todas las funcionalidades relacionadas con MDs se desactivarán en el próximo lanzamiento</string>
     <string name="copy_caption">Copiar título</string>
     <string name="copy_reply">Copiar respuesta</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
 </resources>
