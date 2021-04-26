@@ -19,7 +19,7 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.viewholder.FavoriteViewHolder;
 import awais.instagrabber.databinding.ItemFavSectionHeaderBinding;
-import awais.instagrabber.databinding.ItemSuggestionBinding;
+import awais.instagrabber.databinding.ItemSearchResultBinding;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.models.enums.FavoriteType;
 
@@ -73,7 +73,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             // header
             return new FavSectionViewHolder(ItemFavSectionHeaderBinding.inflate(inflater, parent, false));
         }
-        final ItemSuggestionBinding binding = ItemSuggestionBinding.inflate(inflater, parent, false);
+        final ItemSearchResultBinding binding = ItemSearchResultBinding.inflate(inflater, parent, false);
         return new FavoriteViewHolder(binding);
     }
 

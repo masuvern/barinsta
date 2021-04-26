@@ -41,7 +41,9 @@ public class FavoritesFragment extends Fragment {
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
+        final Context context = getContext();
+        if (context == null) return;
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
     }
 
     @NonNull

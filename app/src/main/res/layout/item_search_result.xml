@@ -13,7 +13,7 @@
     android:paddingBottom="8dp">
 
     <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/ivProfilePic"
+        android:id="@+id/profile_pic"
         android:layout_width="40dp"
         android:layout_height="40dp"
         app:actualImageScaleType="centerCrop"
@@ -23,46 +23,61 @@
         tools:background="@mipmap/ic_launcher" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvUsername"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:gravity="center_vertical"
+        android:maxLines="1"
         android:paddingStart="16dp"
         android:paddingEnd="4dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        app:layout_constraintBottom_toTopOf="@id/tvFullName"
-        app:layout_constraintEnd_toStartOf="@id/isVerified"
-        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+        app:layout_constraintBottom_toTopOf="@id/subtitle"
+        app:layout_constraintEnd_toStartOf="@id/verified"
+        app:layout_constraintStart_toEndOf="@id/profile_pic"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvFullName"
+        android:id="@+id/subtitle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center_vertical"
+        android:maxLines="1"
         android:paddingStart="16dp"
         android:paddingEnd="0dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-        app:layout_constraintTop_toBottomOf="@id/tvUsername"
+        app:layout_constraintEnd_toStartOf="@id/delete"
+        app:layout_constraintStart_toEndOf="@id/profile_pic"
+        app:layout_constraintTop_toBottomOf="@id/title"
         tools:text="full name"
         tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/isVerified"
+        android:id="@+id/verified"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_gravity="end"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:visibility="gone"
-        app:layout_constraintBaseline_toBaselineOf="@id/tvUsername"
-        app:layout_constraintBottom_toTopOf="@id/tvFullName"
-        app:layout_constraintStart_toEndOf="@id/tvUsername"
+        app:layout_constraintBaseline_toBaselineOf="@id/title"
+        app:layout_constraintBottom_toTopOf="@id/subtitle"
+        app:layout_constraintStart_toEndOf="@id/title"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/verified"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/ic_close_24"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

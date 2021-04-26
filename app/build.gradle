@@ -33,6 +33,12 @@ android {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     compileOptions {
@@ -94,6 +100,13 @@ android {
             output.versionNameOverride = suffix
             outputFileName = "barinsta_${suffix}.apk"
         }
+    }
+
+    packagingOptions {
+        // Exclude file to avoid
+        // Error: Duplicate files during packaging of APK
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/LICENSE-notice.md'
     }
 }
 
@@ -165,4 +178,11 @@ dependencies {
     githubImplementation 'io.sentry:sentry-android:4.3.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+
+    androidTestImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    androidTestImplementation 'androidx.test:core:1.3.0'
+    androidTestImplementation 'com.android.support:support-annotations:28.0.0'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation "androidx.room:room-testing:2.2.6"
+
 }
