@@ -44,6 +44,7 @@ import static awais.instagrabber.utils.Constants.HIDE_MUTED_REELS;
 import static awais.instagrabber.utils.Constants.KEYWORD_FILTERS;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Constants.MUTED_VIDEOS;
+import static awais.instagrabber.utils.Constants.PLAY_IN_BACKGROUND;
 import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
 import static awais.instagrabber.utils.Constants.PREF_EMOJI_VARIANTS;
 import static awais.instagrabber.utils.Constants.PREF_HASHTAG_POSTS_LAYOUT;
@@ -165,7 +166,7 @@ public final class SettingsHelper {
     @StringDef({DOWNLOAD_USER_FOLDER, DOWNLOAD_PREPEND_USER_NAME, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
                        SHOW_CAPTIONS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, CHECK_ACTIVITY,
                        CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED, PREF_ENABLE_DM_NOTIFICATIONS, PREF_ENABLE_DM_AUTO_REFRESH,
-                       FLAG_SECURE, TOGGLE_KEYWORD_FILTER, PREF_ENABLE_SENTRY, HIDE_MUTED_REELS})
+                       FLAG_SECURE, TOGGLE_KEYWORD_FILTER, PREF_ENABLE_SENTRY, HIDE_MUTED_REELS, PLAY_IN_BACKGROUND})
     public @interface BooleanSettings {}
 
     @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER})

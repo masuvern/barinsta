@@ -139,7 +139,11 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         if (item.getItemId() == R.id.pending_requests) {
             final NavDirections directions = DirectMessageInboxFragmentDirections.actionInboxToPendingInbox();
-            NavHostFragment.findNavController(this).navigate(directions);
+            try {
+                NavHostFragment.findNavController(this).navigate(directions);
+            } catch (Exception e) {
+                Log.e(TAG, "onOptionsItemSelected: ", e);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -251,7 +255,11 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             if (isAdded()) {
                 final DirectMessageInboxFragmentDirections.ActionInboxToThread directions = DirectMessageInboxFragmentDirections
                         .actionInboxToThread(thread.getThreadId(), thread.getThreadTitle());
-                NavHostFragment.findNavController(this).navigate(directions);
+                try {
+                    NavHostFragment.findNavController(this).navigate(directions);
+                } catch (Exception e) {
+                    Log.e(TAG, "init: ", e);
+                }
             }
             navigating = false;
         });

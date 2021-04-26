@@ -20,6 +20,9 @@
     <attr name="dmWaveformProgressColor" format="reference" />
     <attr name="dmInputTextColor" format="reference" />
 
+    <attr name="toolbarColor" format="reference" />
+    <attr name="searchInputStyle" format="reference" />
+
     <declare-styleable name="RecordView">
         <attr name="slide_to_cancel_text" format="string" />
         <attr name="slide_to_cancel_text_color" format="reference" />

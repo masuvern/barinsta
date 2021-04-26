@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -59,6 +60,7 @@ import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -207,7 +209,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                     final View mainPostImage,
                                     final int position) {
             if (opening) return;
-            if (TextUtils.isEmpty(feedModel.getUser().getUsername())) {
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
                 new PostFetcher(feedModel.getCode(), newFeedModel -> {
                     opening = false;
@@ -225,7 +229,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 builder.setSharedProfilePicElement(profilePicView)
                        .setSharedMainPostElement(mainPostImage);
             }
-            builder.build().show(getChildFragmentManager(), "post_view");
+            final FragmentManager fragmentManager = getChildFragmentManager();
+            if (fragmentManager.isDestroyed()) return;
+            builder.build().show(fragmentManager, "post_view");
             opening = false;
         }
     };

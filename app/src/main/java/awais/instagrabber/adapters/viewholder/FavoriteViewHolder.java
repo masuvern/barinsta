@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.adapters.FavoritesAdapter;
-import awais.instagrabber.databinding.ItemSuggestionBinding;
+import awais.instagrabber.databinding.ItemSearchResultBinding;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.Constants;
@@ -14,12 +14,12 @@ import awais.instagrabber.utils.Constants;
 public class FavoriteViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = "FavoriteViewHolder";
 
-    private final ItemSuggestionBinding binding;
+    private final ItemSearchResultBinding binding;
 
-    public FavoriteViewHolder(@NonNull final ItemSuggestionBinding binding) {
+    public FavoriteViewHolder(@NonNull final ItemSearchResultBinding binding) {
         super(binding.getRoot());
         this.binding = binding;
-        binding.isVerified.setVisibility(View.GONE);
+        binding.verified.setVisibility(View.GONE);
     }
 
     public void bind(final Favorite model,
@@ -36,12 +36,12 @@ public class FavoriteViewHolder extends RecyclerView.ViewHolder {
             return longClickListener.onLongClick(model);
         });
         if (model.getType() == FavoriteType.HASHTAG) {
-            binding.ivProfilePic.setImageURI(Constants.DEFAULT_HASH_TAG_PIC);
+            binding.profilePic.setImageURI(Constants.DEFAULT_HASH_TAG_PIC);
         } else {
-            binding.ivProfilePic.setImageURI(model.getPicUrl());
+            binding.profilePic.setImageURI(model.getPicUrl());
         }
-        binding.tvFullName.setText(model.getDisplayName());
-        binding.tvUsername.setVisibility(View.VISIBLE);
+        binding.title.setVisibility(View.VISIBLE);
+        binding.subtitle.setText(model.getDisplayName());
         String query = model.getQuery();
         switch (model.getType()) {
             case HASHTAG:
@@ -51,11 +51,11 @@ public class FavoriteViewHolder extends RecyclerView.ViewHolder {
                 query = "@" + query;
                 break;
             case LOCATION:
-                binding.tvUsername.setVisibility(View.GONE);
+                binding.title.setVisibility(View.GONE);
                 break;
             default:
                 // do nothing
         }
-        binding.tvUsername.setText(query);
+        binding.title.setText(query);
     }
 }

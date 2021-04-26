@@ -59,6 +59,8 @@
     </plurals>
     <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_autoplay_video">Autoplay videos</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Always mute videos</string>
     <string name="post_viewer_show_captions">Always show post captions</string>
     <string name="post_viewer_download_dialog_title">Select what to download</string>
@@ -503,4 +505,7 @@
     <string name="select_a_folder">No folder selected!</string>
     <string name="dir_select_success_message">Success! Please wait. Starting app…</string>
     <string name="barinsta_folder">Barinsta folder</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
 </resources>

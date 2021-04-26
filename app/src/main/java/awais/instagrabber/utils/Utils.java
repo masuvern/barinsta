@@ -94,13 +94,17 @@ public final class Utils {
     }
 
     public static void copyText(@NonNull final Context context, final CharSequence string) {
-        if (clipboardManager == null)
+        if (clipboardManager == null) {
             clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-
+        }
         int toastMessage = R.string.clipboard_error;
         if (clipboardManager != null) {
-            clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
-            toastMessage = R.string.clipboard_copied;
+            try {
+                clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
+                toastMessage = R.string.clipboard_copied;
+            } catch (Exception e) {
+                Log.e(TAG, "copyText: ", e);
+            }
         }
         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
     }

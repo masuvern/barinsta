@@ -413,10 +413,6 @@ public class StoryViewerFragment extends Fragment {
                         return true;
                     }
                 } catch (final Exception e) {
-                    //                    if (logCollector != null)
-                    //                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-                    //                                                     new Pair<>("swipeEvent", swipeEvent),
-                    //                                                     new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;
@@ -457,7 +453,7 @@ public class StoryViewerFragment extends Fragment {
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            mediaService.fetch(Long.valueOf(mediaId), new ServiceCallback<Media>() {
+            mediaService.fetch(Long.parseLong(mediaId), new ServiceCallback<Media>() {
                 @Override
                 public void onSuccess(final Media feedModel) {
                     final PostViewV2Fragment fragment = PostViewV2Fragment
@@ -834,7 +830,7 @@ public class StoryViewerFragment extends Fragment {
         }
     }
 
-    private void refreshStory() {
+    private synchronized void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             if (storyModels != null && storyModels.size() > 0) {
@@ -1136,7 +1132,6 @@ public class StoryViewerFragment extends Fragment {
             }
         });
     }
-
 
     private void openProfile(final String username) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();

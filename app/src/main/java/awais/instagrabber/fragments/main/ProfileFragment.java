@@ -261,7 +261,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 postViewV2Fragment.dismiss();
                 binding.postsRecyclerView.refresh();
             });
-            postViewV2Fragment.show(getChildFragmentManager(), "post_view");
+            final FragmentManager fragmentManager = getChildFragmentManager();
+            if (fragmentManager.isDestroyed() || fragmentManager.isStateSaved()) return;
+            postViewV2Fragment.show(fragmentManager, "post_view");
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {

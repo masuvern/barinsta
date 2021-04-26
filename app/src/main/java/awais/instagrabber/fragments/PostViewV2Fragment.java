@@ -331,6 +331,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         if (bottomSheetBehavior != null) {
             captionState = bottomSheetBehavior.getState();
         }
+        if (settingsHelper.getBoolean(Constants.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
         if (media == null) return;
         switch (media.getMediaType()) {
@@ -609,7 +610,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             bundle.putString("shortCode", media.getCode());
             bundle.putString("postId", media.getPk());
             bundle.putLong("postUserId", user.getPk());
-            navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
+            try {
+                navController.navigate(R.id.action_global_commentsViewerFragment, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "setupComment: ", e);
+            }
         });
         binding.comment.setOnLongClickListener(v -> {
             Utils.displayToastAboveView(context, v, getString(R.string.comment));
@@ -994,7 +999,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             addSharedElement(sharedMainPostElement, binding.postImage);
         }
         final Media media = viewModel.getMedia();
-        final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(ResponseBodyUtils.getImageUrl(media)))
+        final String imageUrl = ResponseBodyUtils.getImageUrl(media);
+        if (TextUtils.isEmpty(imageUrl)) {
+            return;
+        }
+        final ImageRequest requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(imageUrl))
                                                                .setLocalThumbnailPreviewsEnabled(true)
                                                                .build();
         final DraweeController controller = Fresco
@@ -1019,6 +1028,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         // binding.postImage.setOnClickListener(v -> toggleDetails());
         final AnimatedZoomableController zoomableController = AnimatedZoomableController.newInstance();
         zoomableController.setMaxScaleFactor(3f);
+        zoomableController.setGestureZoomEnabled(true);
+        zoomableController.setEnabled(true);
         binding.postImage.setZoomableController(zoomableController);
         binding.postImage.setTapListener(new GestureDetector.SimpleOnGestureListener() {
             @Override

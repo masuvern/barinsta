@@ -12,6 +12,9 @@ public final class IntentUtils {
 
     @Nullable
     public static IntentModel parseUrl(@NonNull String url) {
+        if (url.contains("instagr.am/")) {
+            url = url.replaceFirst("s?://(?:www\\.)?instagr\\.am/", "s://www.instagram.com/");
+        }
         final int wwwDel = url.contains("www.") ? 4 : 0;
         final boolean isHttps = url.startsWith("https");
 

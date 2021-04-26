@@ -65,6 +65,10 @@
             app:argType="long" />
     </action>
 
+    <action
+        android:id="@+id/action_global_search"
+        app:destination="@id/searchFragment" />
+
     <fragment
         android:id="@+id/hashTagFragment"
         android:name="awais.instagrabber.fragments.HashTagFragment"
@@ -87,6 +91,11 @@
             android:name="options"
             app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="awais.instagrabber.fragments.search.SearchFragment"
+        android:label="@string/search"
+        tools:layout="@layout/fragment_search" />
     <action
         android:id="@+id/action_global_hashTagFragment"
         app:destination="@id/hashTagFragment">

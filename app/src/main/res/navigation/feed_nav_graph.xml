@@ -106,6 +106,10 @@
             app:nullable="false" />
     </action>
 
+    <action
+        android:id="@+id/action_global_search"
+        app:destination="@id/searchFragment" />
+
     <fragment
         android:id="@+id/feedFragment"
         android:name="awais.instagrabber.fragments.main.FeedFragment"
@@ -115,7 +119,6 @@
             android:id="@+id/action_feedFragment_to_storyViewerFragment"
             app:destination="@id/storyViewerFragment" />
     </fragment>
-
     <fragment
         android:id="@+id/storyViewerFragment"
         android:name="awais.instagrabber.fragments.StoryViewerFragment"
@@ -125,4 +128,9 @@
             android:name="options"
             app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="awais.instagrabber.fragments.search.SearchFragment"
+        android:label="@string/search"
+        tools:layout="@layout/fragment_search" />
 </navigation>
