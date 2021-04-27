@@ -693,6 +693,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             fetchStoryAndHighlights(profileId);
         }
         setupButtons(profileId);
+        final boolean isNotMe = profileModel != null && !Objects.equals(profileId, myId);
+		profileDetailsBinding.favChip.setVisibility(isNotMe ? View.VISIBLE : View.GONE);
         profileDetailsBinding.favChip.setVisibility(View.VISIBLE);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
