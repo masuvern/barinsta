@@ -151,11 +151,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         @Override
         public void onNameClick(final Media feedModel, final View profilePicView) {
+            if (feedModel.getUser() == null) return;
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
         public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+            if (feedModel.getUser() == null) return;
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 

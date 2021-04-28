@@ -1,6 +1,8 @@
 package awais.instagrabber.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.util.Log;
 import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
@@ -10,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.NavGraph;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -18,13 +21,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.fragments.main.FeedFragment;
 
 /**
  * This is a Java rewrite of <a href="https://github.com/android/architecture-components-samples/blob/master/NavigationAdvancedSample/app/src/main/java/com/example/android/navigationadvancedsample/NavigationExtensions.kt">NavigationExtensions</a>
  * from architecture-components-samples. Some modifications have been done, check git history.
  */
 public class NavigationExtensions {
-
+    private static final String TAG = NavigationExtensions.class.getSimpleName();
     private static String selectedItemTag;
     private static boolean isOnFirstFragment;
 
@@ -105,7 +109,7 @@ public class NavigationExtensions {
             }
             return false;
         });
-        // setupItemReselected(bottomNavigationView, graphIdToTagMap, fragmentManager);
+        setupItemReselected(bottomNavigationView, graphIdToTagMap, fragmentManager);
         setupDeepLinks(bottomNavigationView, navGraphIds, fragmentManager, containerId, intent);
         final int finalFirstFragmentGraphId = firstFragmentGraphId;
         fragmentManager.addOnBackStackChangedListener(() -> {
@@ -160,6 +164,7 @@ public class NavigationExtensions {
                        .commitNow();
     }
 
+    @SuppressLint("RestrictedApi")
     private static void setupItemReselected(final BottomNavigationView bottomNavigationView,
                                             final SparseArray<String> graphIdToTagMap,
                                             final FragmentManager fragmentManager) {
@@ -168,12 +173,36 @@ public class NavigationExtensions {
             final Fragment fragmentByTag = fragmentManager.findFragmentByTag(newlySelectedItemTag);
             if (fragmentByTag == null) {
                 return;
-                // throw new NullPointerException("null cannot be cast to non-null type NavHostFragment");
             }
             final NavHostFragment selectedFragment = (NavHostFragment) fragmentByTag;
             final NavController navController = selectedFragment.getNavController();
             final NavGraph navControllerGraph = navController.getGraph();
-            navController.popBackStack(navControllerGraph.getStartDestination(), false);
+            final NavDestination currentDestination = navController.getCurrentDestination();
+            final int startDestination = navControllerGraph.getStartDestination();
+            int backStackSize = navController.getBackStack().size();
+            if (currentDestination != null && backStackSize == 2 && currentDestination.getId() == startDestination) {
+                // scroll to top
+                final List<Fragment> fragments = selectedFragment.getChildFragmentManager().getFragments();
+                if (fragments.isEmpty()) return;
+                final Fragment fragment = fragments.get(0);
+                if (fragment instanceof FeedFragment) {
+                    ((FeedFragment) fragment).scrollToTop();
+                }
+                return;
+            }
+            final boolean popped = navController.popBackStack(startDestination, false);
+            backStackSize = navController.getBackStack().size();
+            if (!popped || backStackSize > 2) {
+                try {
+                    // try loop pop
+                    do {
+                        navController.popBackStack();
+                        backStackSize = navController.getBackStack().size();
+                    } while (backStackSize > 2);
+                } catch (Exception e) {
+                    Log.e(TAG, "setupItemReselected: ", e);
+                }
+            }
         });
     }
 

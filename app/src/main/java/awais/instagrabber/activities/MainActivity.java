@@ -33,7 +33,6 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -66,7 +65,6 @@ import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDirections;
-import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.Tab;
@@ -404,16 +402,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 firstFragmentGraphIndex);
         navControllerLiveData.observe(this, navController -> setupNavigation(binding.toolbar, navController));
         currentNavControllerLiveData = navControllerLiveData;
-        binding.bottomNavView.setOnNavigationItemReselectedListener(item -> {
-            // Log.d(TAG, "setupBottomNavigationBar: item: " + item);
-            final Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.main_nav_host);
-            if (navHostFragment != null) {
-                final Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
-                if (fragment instanceof FeedFragment) {
-                    ((FeedFragment) fragment).scrollToTop();
-                }
-            }
-        });
     }
 
     private void setSelectedTab(final List<Tab> tabs) {
