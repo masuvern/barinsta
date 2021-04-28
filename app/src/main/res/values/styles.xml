@@ -260,4 +260,14 @@
     <style name="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox.Light.Barinsta" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
         <item name="colorPrimary">@color/white</item>
     </style>
+
+    <style name="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dark.Black" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox.Dark.Black</item>
+        <item name="hintTextColor">@color/white</item>
+        <item name="boxStrokeColor">@color/white</item>
+    </style>
+
+    <style name="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox.Dark.Black" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="colorPrimary">@color/white</item>
+    </style>
 </resources>

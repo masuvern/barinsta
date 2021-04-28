@@ -20,7 +20,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -61,14 +60,12 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
 
     private CommentsAdapter commentsAdapter;
     private FragmentCommentsBinding binding;
-    private LinearLayoutManager layoutManager;
     private RecyclerLazyLoader lazyLoader;
     private String shortCode;
     private long authorUserId, userIdFromCookie;
     private String endCursor = null;
     private Resources resources;
     private InputMethodManager imm;
-    private AppCompatActivity fragmentActivity;
     private LinearLayoutCompat root;
     private boolean shouldRefresh = true, hasNextPage = false;
     private MediaService mediaService;
@@ -167,7 +164,6 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fragmentActivity = (AppCompatActivity) getActivity();
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
@@ -236,7 +232,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         binding.swipeRefreshLayout.setRefreshing(true);
         commentsViewModel = new ViewModelProvider(this).get(CommentsViewModel.class);
-        layoutManager = new LinearLayoutManager(getContext());
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         binding.rvComments.setLayoutManager(layoutManager);
         commentsAdapter = new CommentsAdapter(commentCallback);
         binding.rvComments.setAdapter(commentsAdapter);
@@ -368,8 +364,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                                 Log.e(TAG, "Error liking comment", t);
                                 try {
                                     Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                                catch(final Throwable e) {}
+                                } catch (final Throwable ignored) {}
                             }
                         });
                         return;
@@ -389,8 +384,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                             Log.e(TAG, "Error unliking comment", t);
                             try {
                                 Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                            catch(final Throwable e) {}
+                            } catch (final Throwable ignored) {}
                         }
                     });
                     break;
@@ -414,8 +408,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                             Log.e(TAG, "Error translating comment", t);
                             try {
                                 Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                            catch(final Throwable e) {}
+                            } catch (final Throwable ignored) {}
                         }
                     });
                     break;
@@ -438,8 +431,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
                                     Log.e(TAG, "Error deleting comment", t);
                                     try {
                                         Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                    catch(final Throwable e) {}
+                                    } catch (final Throwable ignored) {}
                                 }
                             });
                     break;
@@ -469,8 +461,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment impl
             try {
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                 binding.swipeRefreshLayout.setRefreshing(false);
-            }
-            catch(Throwable e) {}
+            } catch (Throwable ignored) {}
         }
     }
 

@@ -31,7 +31,8 @@
         app:counterMaxLength="2200"
         app:endIconDrawable="@drawable/ic_round_send_24"
         app:endIconMode="custom"
-        app:startIconDrawable="@drawable/ic_close_24">
+        app:startIconDrawable="@drawable/ic_close_24"
+        tools:visibility="visible">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/commentText"
@@ -41,7 +42,8 @@
             android:inputType="textMultiLine"
             android:maxLength="2200"
             android:maxLines="10"
-            android:scrollHorizontally="false" />
+            android:scrollHorizontally="false"
+            tools:text="test" />
 
     </com.google.android.material.textfield.TextInputLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>
