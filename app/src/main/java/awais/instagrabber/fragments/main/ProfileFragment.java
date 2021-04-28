@@ -693,7 +693,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             fetchStoryAndHighlights(profileId);
         }
         setupButtons(profileId);
-        profileDetailsBinding.favChip.setVisibility(View.VISIBLE);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
             @Override
@@ -938,6 +937,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 profileDetailsBinding.btnSaved.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnLiked.setVisibility(View.VISIBLE);
                 profileDetailsBinding.btnDM.setVisibility(View.GONE);
+                profileDetailsBinding.favChip.setVisibility(View.GONE);
                 profileDetailsBinding.btnSaved.setText(R.string.saved);
                 if (!accountIsUpdated) updateAccountInfo();
                 return;
@@ -946,6 +946,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
             profileDetailsBinding.btnDM.setVisibility(disableDm ? View.GONE : View.VISIBLE);
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
+            profileDetailsBinding.favChip.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
             if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isFollowedBy()) {
