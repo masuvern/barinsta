@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -461,9 +462,16 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         if (!locationModel.getGeo().startsWith("geo:0.0,0.0?z=17")) {
             locationDetailsBinding.btnMap.setVisibility(View.VISIBLE);
             locationDetailsBinding.btnMap.setOnClickListener(v -> {
-                final Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(locationModel.getGeo()));
-                startActivity(intent);
+                try {
+                    final Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(locationModel.getGeo()));
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(context, R.string.no_external_map_app, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "setupLocationDetails: ", e);
+                } catch (Exception e) {
+                    Log.e(TAG, "setupLocationDetails: ", e);
+                }
             });
         } else {
             locationDetailsBinding.btnMap.setVisibility(View.GONE);
