@@ -22,7 +22,6 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,8 +43,6 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
     private FragmentSearchBinding binding;
     private LinearLayoutCompat root;
     private boolean shouldRefresh = true;
-    @Nullable
-    private TextInputLayout searchInputLayout;
     @Nullable
     private EditText searchInput;
     @Nullable
@@ -122,15 +119,14 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
         if (mainActivity != null) {
             mainActivity.showSearchView();
         }
-        if (searchInputLayout != null) {
-            searchInputLayout.requestFocus();
-        }
+        // if (searchInputLayout != null) {
+        //     searchInputLayout.requestFocus();
+        // }
     }
 
     private void init(@Nullable final Bundle savedInstanceState) {
         if (mainActivity == null) return;
-        searchInputLayout = mainActivity.showSearchView();
-        searchInput = searchInputLayout.getEditText();
+        searchInput = mainActivity.showSearchView().getEditText();
         setupObservers();
         setupViewPager();
         setupSearchInput(savedInstanceState);
@@ -151,7 +147,7 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
             searchInput.setText(savedQuery);
             triggerEmptyQuery = false;
         }
-        searchInput.requestFocus();
+        // searchInput.requestFocus();
         if (triggerEmptyQuery) {
             viewModel.submitQuery("");
         }
@@ -235,7 +231,7 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
                         liveData.removeObserver(this);
                         break;
                     case ERROR:
-                        Snackbar.make(binding.getRoot(), R.string.error, Snackbar.LENGTH_SHORT);
+                        Snackbar.make(binding.getRoot(), R.string.error, Snackbar.LENGTH_SHORT).show();
                         liveData.removeObserver(this);
                         break;
                     case LOADING:
