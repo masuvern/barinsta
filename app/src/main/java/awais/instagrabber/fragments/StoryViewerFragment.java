@@ -3,6 +3,7 @@ package awais.instagrabber.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.DialogInterface;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -442,10 +443,30 @@ public class StoryViewerFragment extends Fragment {
             }
         });
         binding.swipeUp.setOnClickListener(v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof CharSequence) {
-                Utils.openURL(context, tag.toString());
-            }
+			final Object tag = v.getTag();
+		    if (tag instanceof CharSequence) {
+				DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+		        @Override
+		        public void onClick(DialogInterface dialog, int which) {
+					switch (which){
+						case DialogInterface.BUTTON_POSITIVE:
+							//Yes button clicked
+		                    Utils.openURL(context, tag.toString());
+		                    break;
+
+		                case DialogInterface.BUTTON_NEGATIVE:
+		                    //No button clicked
+		                    dialog.dismiss();
+		                    break;
+		           	}
+		      	}
+		  		};
+
+		   		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		   		builder.setTitle("Are you sure you want to open this link?");
+		   		builder.setMessage(tag.toString()).setPositiveButton("Yes", dialogClickListener)
+		   			.setNegativeButton("No", dialogClickListener).show();
+		  	}
         });
         binding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
