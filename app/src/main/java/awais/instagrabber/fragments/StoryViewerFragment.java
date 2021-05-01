@@ -458,6 +458,10 @@ public class StoryViewerFragment extends Fragment {
 		                    //No button clicked
 		                    dialog.dismiss();
 		                    break;
+
+		               	default:
+		               		dialog.dismiss();
+		               		break;
 		           	}
 		      	}
 		  		};
