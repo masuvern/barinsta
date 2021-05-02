@@ -164,7 +164,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/caption_parent"
@@ -251,16 +251,16 @@
         </androidx.core.widget.NestedScrollView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <include
-        android:id="@+id/player_controls"
-        layout="@layout/layout_exo_custom_controls"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/bottom_bg_barrier"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="gone" />
+    <!--<include-->
+    <!--    android:id="@+id/player_controls"-->
+    <!--    layout="@layout/layout_exo_custom_controls"-->
+    <!--    android:layout_width="0dp"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:visibility="gone"-->
+    <!--    app:layout_constraintBottom_toTopOf="@id/bottom_bg_barrier"-->
+    <!--    app:layout_constraintEnd_toEndOf="parent"-->
+    <!--    app:layout_constraintStart_toStartOf="parent"-->
+    <!--    tools:visibility="gone" />-->
 
     <View
         android:id="@+id/bottom_bg"
@@ -396,29 +396,29 @@
         app:iconSize="24dp"
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/player_controls_toggle"
+        app:layout_constraintEnd_toStartOf="@id/save"
         app:layout_constraintStart_toEndOf="@id/like"
         app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/player_controls_toggle"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:visibility="gone"
-        app:icon="@drawable/ic_play_circle_outline_24"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="24dp"
-        app:iconTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/save"
-        app:layout_constraintStart_toEndOf="@id/comment"
-        app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
-        app:rippleColor="@color/grey_300"
-        tools:visibility="visible" />
+    <!--<com.google.android.material.button.MaterialButton-->
+    <!--    android:id="@+id/player_controls_toggle"-->
+    <!--    style="@style/Widget.MaterialComponents.Button.TextButton"-->
+    <!--    android:layout_width="0dp"-->
+    <!--    android:layout_height="48dp"-->
+    <!--    android:visibility="gone"-->
+    <!--    app:icon="@drawable/ic_play_circle_outline_24"-->
+    <!--    app:iconGravity="textStart"-->
+    <!--    app:iconPadding="0dp"-->
+    <!--    app:iconSize="24dp"-->
+    <!--    app:iconTint="@color/white"-->
+    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--    app:layout_constraintEnd_toStartOf="@id/save"-->
+    <!--    app:layout_constraintStart_toEndOf="@id/comment"-->
+    <!--    app:layout_constraintTop_toBottomOf="@id/buttons_barrier"-->
+    <!--    app:rippleColor="@color/grey_300"-->
+    <!--    tools:visibility="visible" />-->
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/save"
@@ -433,7 +433,7 @@
         app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/share"
-        app:layout_constraintStart_toEndOf="@id/player_controls_toggle"
+        app:layout_constraintStart_toEndOf="@id/comment"
         app:layout_constraintTop_toBottomOf="@id/buttons_barrier"
         app:rippleColor="@color/grey_300"
         tools:visibility="visible" />

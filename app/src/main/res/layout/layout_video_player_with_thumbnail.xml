@@ -25,11 +25,28 @@
             app:srcCompat="@drawable/ic_video_24" />
     </FrameLayout>
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
-        android:id="@+id/playerView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        app:resize_mode="fit"
-        app:show_timeout="1000" />
+        android:layout_height="match_parent">
+
+        <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            app:animation_enabled="false"
+            app:controller_layout_id="@layout/layout_exo_custom_controls"
+            app:resize_mode="fit"
+            app:show_timeout="1500"
+            app:use_controller="true" />
+
+        <!--<com.google.android.exoplayer2.ui.StyledPlayerControlView-->
+        <!--    android:id="@+id/controls"-->
+        <!--    android:layout_width="match_parent"-->
+        <!--    android:layout_height="match_parent"-->
+        <!--    app:controller_layout_id="@layout/layout_exo_custom_controls"-->
+        <!--    app:show_fastforward_button="false"-->
+        <!--    app:show_rewind_button="false"-->
+        <!--    app:show_timeout="3000" />-->
+    </FrameLayout>
 </ViewSwitcher>

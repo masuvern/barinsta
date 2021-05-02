@@ -12,7 +12,6 @@ import awais.instagrabber.adapters.viewholder.SliderPhotoViewHolder;
 import awais.instagrabber.adapters.viewholder.SliderVideoViewHolder;
 import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.databinding.ItemSliderPhotoBinding;
-import awais.instagrabber.databinding.LayoutExoCustomControlsBinding;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Media;
@@ -22,7 +21,7 @@ public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewH
     private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener;
     private final boolean loadVideoOnItemClick;
     private final SliderCallback sliderCallback;
-    private final LayoutExoCustomControlsBinding controlsBinding;
+    // private final LayoutExoCustomControlsBinding controlsBinding;
 
     private static final DiffUtil.ItemCallback<Media> DIFF_CALLBACK = new DiffUtil.ItemCallback<Media>() {
         @Override
@@ -37,14 +36,14 @@ public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewH
     };
 
     public SliderItemsAdapter(final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener,
-                              final LayoutExoCustomControlsBinding controlsBinding,
+                              // final LayoutExoCustomControlsBinding controlsBinding,
                               final boolean loadVideoOnItemClick,
                               final SliderCallback sliderCallback) {
         super(DIFF_CALLBACK);
         this.onVerticalDragListener = onVerticalDragListener;
         this.loadVideoOnItemClick = loadVideoOnItemClick;
         this.sliderCallback = sliderCallback;
-        this.controlsBinding = controlsBinding;
+        // this.controlsBinding = controlsBinding;
     }
 
     @NonNull
@@ -55,7 +54,7 @@ public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewH
         switch (mediaItemType) {
             case MEDIA_TYPE_VIDEO: {
                 final LayoutVideoPlayerWithThumbnailBinding binding = LayoutVideoPlayerWithThumbnailBinding.inflate(inflater, parent, false);
-                return new SliderVideoViewHolder(binding, onVerticalDragListener, controlsBinding, loadVideoOnItemClick);
+                return new SliderVideoViewHolder(binding, onVerticalDragListener, loadVideoOnItemClick);
             }
             case MEDIA_TYPE_IMAGE:
             default:

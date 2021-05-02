@@ -13,7 +13,6 @@ import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
-import awais.instagrabber.databinding.LayoutExoCustomControlsBinding;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.VideoVersion;
@@ -28,7 +27,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     private static final String TAG = "SliderVideoViewHolder";
 
     private final LayoutVideoPlayerWithThumbnailBinding binding;
-    private final LayoutExoCustomControlsBinding controlsBinding;
+    // private final LayoutExoCustomControlsBinding controlsBinding;
     private final boolean loadVideoOnItemClick;
     private final GestureDetector.OnGestureListener videoPlayerViewGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
@@ -43,11 +42,11 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     @SuppressLint("ClickableViewAccessibility")
     public SliderVideoViewHolder(@NonNull final LayoutVideoPlayerWithThumbnailBinding binding,
                                  final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener,
-                                 final LayoutExoCustomControlsBinding controlsBinding,
+                                 // final LayoutExoCustomControlsBinding controlsBinding,
                                  final boolean loadVideoOnItemClick) {
         super(binding.getRoot());
         this.binding = binding;
-        this.controlsBinding = controlsBinding;
+        // this.controlsBinding = controlsBinding;
         this.loadVideoOnItemClick = loadVideoOnItemClick;
         // if (onVerticalDragListener != null) {
         //     final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
@@ -139,7 +138,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                                                           aspectRatio,
                                                           ResponseBodyUtils.getThumbUrl(media),
                                                           loadVideoOnItemClick,
-                                                          controlsBinding,
+                                                          // controlsBinding,
                                                           videoPlayerCallback);
         // binding.itemFeedBottom.btnMute.setOnClickListener(v -> {
         //     final float newVol = videoPlayerViewHelper.toggleMute();
@@ -163,15 +162,15 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
         videoPlayerViewHelper.releasePlayer();
     }
 
-    public void resetPlayerTimeline() {
-        if (videoPlayerViewHelper == null) return;
-        videoPlayerViewHelper.resetTimeline();
-    }
-
-    public void removeCallbacks() {
-        if (videoPlayerViewHelper == null) return;
-        videoPlayerViewHelper.removeCallbacks();
-    }
+    // public void resetPlayerTimeline() {
+    //     if (videoPlayerViewHelper == null) return;
+    //     videoPlayerViewHelper.resetTimeline();
+    // }
+    //
+    // public void removeCallbacks() {
+    //     if (videoPlayerViewHelper == null) return;
+    //     videoPlayerViewHelper.removeCallbacks();
+    // }
 
     // private void setDimensions(final FeedModel feedModel, final int spanCount, final boolean animate) {
     //     final ViewGroup.LayoutParams layoutParams = binding.imageViewer.getLayoutParams();

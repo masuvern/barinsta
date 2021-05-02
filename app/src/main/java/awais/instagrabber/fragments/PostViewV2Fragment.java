@@ -27,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -44,7 +43,6 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
-import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
@@ -119,10 +117,11 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     // private MediaService mediaService;
     private Context context;
     private BottomSheetBehavior<NestedScrollView> bottomSheetBehavior;
-    private boolean detailsVisible = true, video;
+    private boolean detailsVisible = true;
+    private boolean video;
     private VideoPlayerViewHelper videoPlayerViewHelper;
     private SliderItemsAdapter sliderItemsAdapter;
-    private boolean wasControlsVisible;
+    // private boolean wasControlsVisible;
     private boolean wasPaused;
     private int captionState = BottomSheetBehavior.STATE_HIDDEN;
     private int sliderPosition = -1;
@@ -883,9 +882,9 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
             switch (bottomSheetBehavior.getState()) {
                 case BottomSheetBehavior.STATE_HIDDEN:
                     binding.captionParent.fullScroll(ScrollView.FOCUS_UP); // reset scroll position
-                    if (binding.playerControls.getRoot().getVisibility() == View.VISIBLE) {
-                        hidePlayerControls();
-                    }
+                    // if (binding.playerControls.getRoot().getVisibility() == View.VISIBLE) {
+                    //     hidePlayerControls();
+                    // }
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                     return;
                 case BottomSheetBehavior.STATE_COLLAPSED:
@@ -993,8 +992,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
     private void setupPostImage() {
         binding.videoPost.root.setVisibility(View.GONE);
         binding.sliderParent.setVisibility(View.GONE);
-        binding.playerControlsToggle.setVisibility(View.GONE);
-        binding.playerControls.getRoot().setVisibility(View.GONE);
+        // binding.playerControlsToggle.setVisibility(View.GONE);
+        // binding.playerControls.getRoot().setVisibility(View.GONE);
         binding.mediaCounter.setVisibility(View.GONE);
         binding.postImage.setVisibility(View.VISIBLE);
         if (!wasPaused && sharedMainPostElement != null) {
@@ -1049,8 +1048,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         final Media media = viewModel.getMedia();
         binding.postImage.setVisibility(View.GONE);
         binding.videoPost.root.setVisibility(View.GONE);
-        binding.playerControlsToggle.setVisibility(View.GONE);
-        binding.playerControls.getRoot().setVisibility(View.GONE);
+        // binding.playerControlsToggle.setVisibility(View.GONE);
+        // binding.playerControls.getRoot().setVisibility(View.GONE);
         binding.sliderParent.setVisibility(View.VISIBLE);
         binding.mediaCounter.setVisibility(View.VISIBLE);
         if (!wasPaused && sharedMainPostElement != null) {
@@ -1070,7 +1069,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 });
             }
         }
-        sliderItemsAdapter = new SliderItemsAdapter(null, binding.playerControls, true, new SliderCallbackAdapter() {
+        sliderItemsAdapter = new SliderItemsAdapter(null, true, new SliderCallbackAdapter() {
             @Override
             public void onThumbnailLoaded(final int position) {
                 if (position != 0) return;
@@ -1087,8 +1086,8 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 final FragmentActivity activity = getActivity();
                 if (activity == null) return;
                 Utils.enabledKeepScreenOn(activity);
-                if (!detailsVisible || hasBeenToggled) return;
-                showPlayerControls();
+                // if (!detailsVisible || hasBeenToggled) return;
+                // showPlayerControls();
             }
 
             @Override
@@ -1137,27 +1136,29 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 binding.mediaCounter.setText(text);
                 final Media childMedia = media.getCarouselMedia().get(position);
                 final View view = binding.sliderParent.getChildAt(0);
-                if (prevPosition != -1) {
-                    if (view instanceof RecyclerView) {
-                        final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(prevPosition);
-                        if (viewHolder instanceof SliderVideoViewHolder) {
-                            ((SliderVideoViewHolder) viewHolder).removeCallbacks();
-                        }
-                    }
-                }
+                // if (prevPosition != -1) {
+                // if (view instanceof RecyclerView) {
+                // final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(prevPosition);
+                // if (viewHolder instanceof SliderVideoViewHolder) {
+                //     ((SliderVideoViewHolder) viewHolder).removeCallbacks();
+                // }
+                // }
+                // }
+                video = false;
                 if (childMedia.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO) {
-                    if (view instanceof RecyclerView) {
-                        final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(position);
-                        if (viewHolder instanceof SliderVideoViewHolder) {
-                            ((SliderVideoViewHolder) viewHolder).resetPlayerTimeline();
-                        }
-                    }
-                    enablePlayerControls(true);
+                    // if (view instanceof RecyclerView) {
+                    // final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(position);
+                    // if (viewHolder instanceof SliderVideoViewHolder) {
+                    //     ((SliderVideoViewHolder) viewHolder).resetPlayerTimeline();
+                    // }
+                    // }
+                    // enablePlayerControls(true);
+                    video = true;
                     viewModel.setViewCount(childMedia.getViewCount());
                     return;
                 }
                 viewModel.setViewCount(null);
-                enablePlayerControls(false);
+                // enablePlayerControls(false);
             }
 
             private void pausePlayerAtPosition(final int position, final RecyclerView view) {
@@ -1196,6 +1197,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupVideo() {
+        video = true;
         final Media media = viewModel.getMedia();
         binding.postImage.setVisibility(View.GONE);
         binding.sliderParent.setVisibility(View.GONE);
@@ -1211,7 +1213,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
         // final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.videoPost.playerView);
         // thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
         // playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-        enablePlayerControls(true);
+        // enablePlayerControls(true);
         // binding.videoPost.thumbnailParent.setOnTouchListener((v, event) -> {
         //     final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
         //     if (onDragTouch) {
@@ -1293,96 +1295,96 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                     aspectRatio,
                     ResponseBodyUtils.getThumbUrl(media),
                     true,
-                    binding.playerControls,
+                    // /*binding.playerControls*/null,
                     videoPlayerCallback);
         }
     }
 
-    private void enablePlayerControls(final boolean enable) {
-        video = enable;
-        if (enable) {
-            binding.playerControlsToggle.setVisibility(View.VISIBLE);
-            binding.playerControlsToggle.setOnClickListener(v -> {
-                final int visibility = binding.playerControls.getRoot().getVisibility();
-                if (visibility == View.GONE) {
-                    showPlayerControls();
-                    return;
-                }
-                hidePlayerControls();
-            });
-            return;
-        }
-        binding.playerControlsToggle.setVisibility(View.GONE);
-        hidePlayerControls();
-    }
+    // private void enablePlayerControls(final boolean enable) {
+    //     video = enable;
+    //     if (enable) {
+    //         binding.playerControlsToggle.setVisibility(View.VISIBLE);
+    //         binding.playerControlsToggle.setOnClickListener(v -> {
+    //             final int visibility = binding.playerControls.getRoot().getVisibility();
+    //             if (visibility == View.GONE) {
+    //                 showPlayerControls();
+    //                 return;
+    //             }
+    //             hidePlayerControls();
+    //         });
+    //         return;
+    //     }
+    //     binding.playerControlsToggle.setVisibility(View.GONE);
+    //     hidePlayerControls();
+    // }
 
     private void hideCaption() {
         if (bottomSheetBehavior == null) return;
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
-    private void showPlayerControls() {
-        hideCaption();
-        // previously invisible view
-        View view = binding.playerControls.getRoot();
-        if (view.getVisibility() == View.VISIBLE) {
-            return;
-        }
-        if (!ViewCompat.isAttachedToWindow(view)) {
-            view.setVisibility(View.VISIBLE);
-            return;
-        }
-        // get the center for the clipping circle
-        int cx = view.getWidth() / 2;
-        // int cy = view.getHeight() / 2;
-        int cy = view.getHeight();
+    // private void showPlayerControls() {
+    //     hideCaption();
+    //     // previously invisible view
+    //     View view = binding.playerControls.getRoot();
+    //     if (view.getVisibility() == View.VISIBLE) {
+    //         return;
+    //     }
+    //     if (!ViewCompat.isAttachedToWindow(view)) {
+    //         view.setVisibility(View.VISIBLE);
+    //         return;
+    //     }
+    //     // get the center for the clipping circle
+    //     int cx = view.getWidth() / 2;
+    //     // int cy = view.getHeight() / 2;
+    //     int cy = view.getHeight();
+    //
+    //     // get the final radius for the clipping circle
+    //     float finalRadius = (float) Math.hypot(cx, cy);
+    //
+    //     // create the animator for this view (the start radius is zero)
+    //     Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0f, finalRadius);
+    //
+    //     // make the view visible and start the animation
+    //     view.setVisibility(View.VISIBLE);
+    //     anim.start();
+    //
+    // }
 
-        // get the final radius for the clipping circle
-        float finalRadius = (float) Math.hypot(cx, cy);
-
-        // create the animator for this view (the start radius is zero)
-        Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0f, finalRadius);
-
-        // make the view visible and start the animation
-        view.setVisibility(View.VISIBLE);
-        anim.start();
-
-    }
-
-    private void hidePlayerControls() {
-        // previously visible view
-        final View view = binding.playerControls.getRoot();
-        if (view.getVisibility() == View.GONE) {
-            return;
-        }
-        if (!ViewCompat.isAttachedToWindow(view)) {
-            view.setVisibility(View.GONE);
-            return;
-        }
-
-        // get the center for the clipping circle
-        int cx = view.getWidth() / 2;
-        // int cy = view.getHeight() / 2;
-        int cy = view.getHeight();
-
-        // get the initial radius for the clipping circle
-        float initialRadius = (float) Math.hypot(cx, cy);
-
-        // create the animation (the final radius is zero)
-        Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, initialRadius, 0f);
-
-        // make the view invisible when the animation is done
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                view.setVisibility(View.GONE);
-            }
-        });
-
-        // start the animation
-        anim.start();
-    }
+    // private void hidePlayerControls() {
+    //     // previously visible view
+    //     final View view = binding.playerControls.getRoot();
+    //     if (view.getVisibility() == View.GONE) {
+    //         return;
+    //     }
+    //     if (!ViewCompat.isAttachedToWindow(view)) {
+    //         view.setVisibility(View.GONE);
+    //         return;
+    //     }
+    //
+    //     // get the center for the clipping circle
+    //     int cx = view.getWidth() / 2;
+    //     // int cy = view.getHeight() / 2;
+    //     int cy = view.getHeight();
+    //
+    //     // get the initial radius for the clipping circle
+    //     float initialRadius = (float) Math.hypot(cx, cy);
+    //
+    //     // create the animation (the final radius is zero)
+    //     Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, initialRadius, 0f);
+    //
+    //     // make the view invisible when the animation is done
+    //     anim.addListener(new AnimatorListenerAdapter() {
+    //         @Override
+    //         public void onAnimationEnd(Animator animation) {
+    //             super.onAnimationEnd(animation);
+    //             view.setVisibility(View.GONE);
+    //         }
+    //     });
+    //
+    //     // start the animation
+    //     anim.start();
+    // }
 
     private void setupOptions(final Boolean show) {
         if (!show) {
@@ -1536,7 +1538,7 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 binding.date.setVisibility(View.GONE);
                 binding.comment.setVisibility(View.GONE);
                 binding.captionToggle.setVisibility(View.GONE);
-                binding.playerControlsToggle.setVisibility(View.GONE);
+                // binding.playerControlsToggle.setVisibility(View.GONE);
                 binding.like.setVisibility(View.GONE);
                 binding.save.setVisibility(View.GONE);
                 binding.share.setVisibility(View.GONE);
@@ -1547,10 +1549,10 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 if (options != null && !options.isEmpty()) {
                     binding.options.setVisibility(View.GONE);
                 }
-                wasControlsVisible = binding.playerControls.getRoot().getVisibility() == View.VISIBLE;
-                if (wasControlsVisible) {
-                    hidePlayerControls();
-                }
+                // wasControlsVisible = binding.playerControls.getRoot().getVisibility() == View.VISIBLE;
+                // if (wasControlsVisible) {
+                //     hidePlayerControls();
+                // }
                 return;
             }
             if (media.getUser() != null) {
@@ -1584,12 +1586,12 @@ public class PostViewV2Fragment extends SharedElementTransitionDialogFragment im
                 binding.save.setVisibility(View.VISIBLE);
             }
             if (video) {
-                binding.playerControlsToggle.setVisibility(View.VISIBLE);
+                // binding.playerControlsToggle.setVisibility(View.VISIBLE);
                 binding.viewsCount.setVisibility(View.VISIBLE);
             }
-            if (wasControlsVisible) {
-                showPlayerControls();
-            }
+            // if (wasControlsVisible) {
+            //     showPlayerControls();
+            // }
             if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
                 binding.mediaCounter.setVisibility(View.VISIBLE);
             }

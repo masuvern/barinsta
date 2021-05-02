@@ -97,7 +97,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
                                                                                       aspectRatio,
                                                                                       ResponseBodyUtils.getThumbUrl(media),
                                                                                       false,
-                                                                                      null,
+                                                                                      // null,
                                                                                       videoPlayerCallback);
         binding.videoPost.thumbnail.post(() -> {
             if (media.getOriginalHeight() > 0.8 * Utils.displayMetrics.heightPixels) {
