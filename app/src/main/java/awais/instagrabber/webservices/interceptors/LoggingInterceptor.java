@@ -12,7 +12,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-class LoggingInterceptor implements Interceptor {
+public class LoggingInterceptor implements Interceptor {
     private static final String TAG = "LoggingInterceptor";
 
     @NonNull
@@ -30,7 +30,11 @@ class LoggingInterceptor implements Interceptor {
         String content = "";
         if (body != null) {
             contentType = body.contentType();
-            content = body.string();
+            try {
+                content = body.string();
+            } catch (Exception e) {
+                Log.e(TAG, "intercept: ", e);
+            }
             Log.d(TAG, content);
         }
         final ResponseBody wrappedBody = ResponseBody.create(contentType, content);

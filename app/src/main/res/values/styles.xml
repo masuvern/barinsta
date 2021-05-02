@@ -261,13 +261,13 @@
         <item name="colorPrimary">@color/white</item>
     </style>
 
-    <style name="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dark.Black" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox.Dark.Black</item>
+    <style name="Widget.MaterialComponents.TextInputLayout.FilledBox.Dark.Black" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox.Dark.Black</item>
         <item name="hintTextColor">@color/white</item>
         <item name="boxStrokeColor">@color/white</item>
     </style>
 
-    <style name="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox.Dark.Black" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+    <style name="ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox.Dark.Black" parent="ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox">
         <item name="colorPrimary">@color/white</item>
     </style>
 </resources>

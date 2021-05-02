@@ -29,7 +29,7 @@
 
     <dialog
         android:id="@+id/commentsViewerFragment"
-        android:name="awais.instagrabber.fragments.CommentsViewerFragment"
+        android:name="awais.instagrabber.fragments.comments.CommentsViewerFragment"
         android:label="Comments"
         tools:layout="@layout/fragment_comments">
         <argument

@@ -111,12 +111,16 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = FeedFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getCode(),
-                    feedModel.getPk(),
-                    feedModel.getUser().getPk()
-            );
-            NavHostFragment.findNavController(FeedFragment.this).navigate(commentsAction);
+            try {
+                final NavDirections commentsAction = FeedFragmentDirections.actionGlobalCommentsViewerFragment(
+                        feedModel.getCode(),
+                        feedModel.getPk(),
+                        feedModel.getUser().getPk()
+                );
+                NavHostFragment.findNavController(FeedFragment.this).navigate(commentsAction);
+            } catch (Exception e) {
+                Log.e(TAG, "onCommentsClick: ", e);
+            }
         }
 
         @Override

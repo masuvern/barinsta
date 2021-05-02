@@ -1,12 +1,12 @@
 package awais.instagrabber.webservices;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import awais.instagrabber.models.Comment;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.MediaRepository;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
@@ -27,6 +28,7 @@ import awais.instagrabber.repositories.responses.MediaInfoResponse;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.DateUtils;
 import awais.instagrabber.utils.MediaUploadHelper;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -170,7 +172,7 @@ public class MediaService extends BaseService {
     public void comment(@NonNull final String mediaId,
                         @NonNull final String comment,
                         final String replyToCommentId,
-                        @NonNull final ServiceCallback<Boolean> callback) {
+                        @NonNull final ServiceCallback<Comment> callback) {
         final String module = "self_comments_v2";
         final Map<String, Object> form = new HashMap<>();
         // form.put("user_breadcrumb", userBreadcrumb(comment.length()));
@@ -191,15 +193,33 @@ public class MediaService extends BaseService {
                 final String body = response.body();
                 if (body == null) {
                     Log.e(TAG, "Error occurred while creating comment");
-                    callback.onSuccess(false);
+                    callback.onSuccess(null);
                     return;
                 }
                 try {
                     final JSONObject jsonObject = new JSONObject(body);
-                    final String status = jsonObject.optString("status");
-                    callback.onSuccess(status.equals("ok"));
-                } catch (JSONException e) {
-                    // Log.e(TAG, "Error parsing body", e);
+                    // final String status = jsonObject.optString("status");
+                    final JSONObject commentJsonObject = jsonObject.optJSONObject("comment");
+                    Comment comment = null;
+                    if (commentJsonObject != null) {
+                        final JSONObject userJsonObject = commentJsonObject.optJSONObject("user");
+                        if (userJsonObject != null) {
+                            final Gson gson = new Gson();
+                            final User user = gson.fromJson(userJsonObject.toString(), User.class);
+                            comment = new Comment(
+                                    commentJsonObject.optString("pk"),
+                                    commentJsonObject.optString("text"),
+                                    commentJsonObject.optLong("created_at"),
+                                    0,
+                                    false,
+                                    user,
+                                    0,
+                                    !TextUtils.isEmpty(replyToCommentId)
+                            );
+                        }
+                    }
+                    callback.onSuccess(comment);
+                } catch (Exception e) {
                     callback.onFailure(e);
                 }
             }
@@ -221,7 +241,7 @@ public class MediaService extends BaseService {
                                final List<String> commentIds,
                                @NonNull final ServiceCallback<Boolean> callback) {
         final Map<String, Object> form = new HashMap<>();
-        form.put("comment_ids_to_delete", TextUtils.join(",", commentIds));
+        form.put("comment_ids_to_delete", android.text.TextUtils.join(",", commentIds));
         form.put("_csrftoken", csrfToken);
         form.put("_uid", userId);
         form.put("_uuid", deviceUuid);

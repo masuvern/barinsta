@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -36,6 +37,7 @@ public class AppStateViewModel extends AndroidViewModel {
         fetchProfileDetails();
     }
 
+    @Nullable
     public User getCurrentUser() {
         return currentUser.getValue();
     }

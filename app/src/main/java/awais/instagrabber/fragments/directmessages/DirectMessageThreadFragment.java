@@ -514,7 +514,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         super.onDestroy();
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeOptInUsageError")
     private void cleanup() {
         if (prevTitleRunnable != null) {
             appExecutors.mainThread().cancel(prevTitleRunnable);
@@ -840,7 +840,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeOptInUsageError")
     private void attachPendingRequestsBadge(@Nullable final Integer count) {
         if (pendingRequestCountBadgeDrawable == null) {
             final Context context = getContext();

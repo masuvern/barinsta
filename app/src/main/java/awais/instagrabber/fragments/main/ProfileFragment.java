@@ -188,7 +188,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = FeedFragmentDirections.actionGlobalCommentsViewerFragment(
+            final NavDirections commentsAction = ProfileFragmentDirections.actionGlobalCommentsViewerFragment(
                     feedModel.getCode(),
                     feedModel.getPk(),
                     feedModel.getUser().getPk()
@@ -991,7 +991,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (chainingMenuItem != null) {
                 chainingMenuItem.setVisible(true);
             }
-            return;
         }
     }
 

@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -34,7 +35,7 @@ import awais.instagrabber.webservices.ServiceCallback;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class LikesViewerFragment extends BottomSheetDialogFragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final String TAG = "LikesViewerFragment";
+    private static final String TAG = LikesViewerFragment.class.getSimpleName();
 
     private FragmentLikesBinding binding;
     private RecyclerLazyLoader lazyLoader;
@@ -58,6 +59,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
             });
             binding.rvLikes.setAdapter(likesAdapter);
             binding.rvLikes.setLayoutManager(new LinearLayoutManager(getContext()));
+            binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
             binding.swipeRefreshLayout.setRefreshing(false);
         }
 
@@ -71,7 +73,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         }
     };
 
-    private final ServiceCallback<GraphQLUserListFetchResponse> acb = new ServiceCallback<GraphQLUserListFetchResponse>() {
+    private final ServiceCallback<GraphQLUserListFetchResponse> anonCb = new ServiceCallback<GraphQLUserListFetchResponse>() {
         @Override
         public void onSuccess(final GraphQLUserListFetchResponse result) {
             endCursor = result.getNextMaxId();
@@ -127,7 +129,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onRefresh() {
         if (isComment && !isLoggedIn) {
             lazyLoader.resetState();
-            graphQLService.fetchCommentLikers(postId, null, acb);
+            graphQLService.fetchCommentLikers(postId, null, anonCb);
         } else mediaService.fetchLikes(postId, isComment, cb);
     }
 
@@ -141,9 +143,10 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         if (isComment && !isLoggedIn) {
             final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
             binding.rvLikes.setLayoutManager(layoutManager);
+            binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
                 if (!TextUtils.isEmpty(endCursor))
-                    graphQLService.fetchCommentLikers(postId, endCursor, acb);
+                    graphQLService.fetchCommentLikers(postId, endCursor, anonCb);
                 endCursor = null;
             });
             binding.rvLikes.addOnScrollListener(lazyLoader);

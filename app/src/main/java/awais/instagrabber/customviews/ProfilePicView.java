@@ -70,6 +70,9 @@ public final class ProfilePicView extends CircularImageView {
             case SMALL:
                 dimenRes = R.dimen.profile_pic_size_small;
                 break;
+            case SMALLER:
+                dimenRes = R.dimen.profile_pic_size_smaller;
+                break;
             case TINY:
                 dimenRes = R.dimen.profile_pic_size_tiny;
                 break;
@@ -113,7 +116,8 @@ public final class ProfilePicView extends CircularImageView {
         TINY(0),
         SMALL(1),
         REGULAR(2),
-        LARGE(3);
+        LARGE(3),
+        SMALLER(4);
 
         private final int value;
         private static final Map<Integer, Size> map = new HashMap<>();
