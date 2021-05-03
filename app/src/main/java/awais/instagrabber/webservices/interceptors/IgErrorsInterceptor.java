@@ -1,13 +1,11 @@
 package awais.instagrabber.webservices.interceptors;
 
 import android.util.Log;
-import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.FragmentManager;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONObject;
 
@@ -105,9 +103,9 @@ public class IgErrorsInterceptor implements Interceptor {
     private void showSnackbar(final String message) {
         final MainActivity mainActivity = MainActivity.getInstance();
         if (mainActivity == null) return;
-        final View view = mainActivity.getRootView();
-        if (view == null) return;
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
+        // final View view = mainActivity.getRootView();
+        // if (view == null) return;
+        Toast.makeText(mainActivity.getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     @NonNull
