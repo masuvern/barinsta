@@ -26,11 +26,7 @@ import okhttp3.ResponseBody;
 public class IgErrorsInterceptor implements Interceptor {
     private static final String TAG = IgErrorsInterceptor.class.getSimpleName();
 
-    private MainActivity mainActivity;
-
-    public IgErrorsInterceptor(@NonNull final MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
-    }
+    public IgErrorsInterceptor() { }
 
     @NonNull
     @Override
@@ -107,6 +103,8 @@ public class IgErrorsInterceptor implements Interceptor {
     }
 
     private void showSnackbar(final String message) {
+        final MainActivity mainActivity = MainActivity.getInstance();
+        if (mainActivity == null) return;
         final View view = mainActivity.getRootView();
         if (view == null) return;
         Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
@@ -118,7 +116,10 @@ public class IgErrorsInterceptor implements Interceptor {
     }
 
     private void showErrorDialog(@StringRes final int messageResId) {
+        final MainActivity mainActivity = MainActivity.getInstance();
         if (mainActivity == null) return;
+        final FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        if (fragmentManager.isStateSaved()) return;
         if (messageResId == 0) return;
         final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
                 Constants.GLOBAL_NETWORK_ERROR_DIALOG_REQUEST_CODE,
@@ -128,12 +129,10 @@ public class IgErrorsInterceptor implements Interceptor {
                 0,
                 0
         );
-        final FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
-        if (fragmentManager.isStateSaved()) return;
         dialogFragment.show(fragmentManager, "network_error_dialog");
     }
 
     public void destroy() {
-        mainActivity = null;
+        // mainActivity = null;
     }
 }

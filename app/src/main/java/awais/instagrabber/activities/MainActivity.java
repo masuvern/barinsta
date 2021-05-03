@@ -99,6 +99,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             R.id.locationFragment
     );
 
+    private static MainActivity instance;
+
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
     private MenuItem searchMenuItem;
@@ -125,10 +127,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
     };
 
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        RetrofitFactory.setup(this);
         super.onCreate(savedInstanceState);
+        instance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setupCookie();
         if (settingsHelper.getBoolean(Constants.FLAG_SECURE))
@@ -429,12 +435,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private List<Tab> setupAnonBottomNav() {
         final int selectedItemId = binding.bottomNavView.getSelectedItemId();
         final Tab favoriteTab = new Tab(R.drawable.ic_star_24,
-                                       getString(R.string.title_favorites),
-                                       false,
-                                       "favorites_nav_graph",
-                                       R.navigation.favorites_nav_graph,
-                                       R.id.favorites_nav_graph,
-                                       R.id.favoritesFragment);
+                                        getString(R.string.title_favorites),
+                                        false,
+                                        "favorites_nav_graph",
+                                        R.navigation.favorites_nav_graph,
+                                        R.id.favorites_nav_graph,
+                                        R.id.favoritesFragment);
         final Tab profileTab = new Tab(R.drawable.ic_person_24,
                                        getString(R.string.profile),
                                        false,

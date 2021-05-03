@@ -1,7 +1,5 @@
 package awais.instagrabber.webservices;
 
-import androidx.annotation.NonNull;
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,7 +7,6 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.interceptors.AddCookiesInterceptor;
@@ -29,35 +26,24 @@ public final class RetrofitFactory {
     private final Cache cache = new Cache(new File(Utils.cacheDir), cacheSize);
 
     private IgErrorsInterceptor igErrorsInterceptor;
-    private MainActivity mainActivity;
     private Retrofit.Builder builder;
     private Retrofit retrofit;
     private Retrofit retrofitWeb;
 
-    public static void setup(@NonNull final MainActivity mainActivity) {
+    public static RetrofitFactory getInstance() {
         if (instance == null) {
             synchronized (LOCK) {
                 if (instance == null) {
-                    instance = new RetrofitFactory(mainActivity);
+                    instance = new RetrofitFactory();
                 }
             }
-        }
-    }
-
-    public static RetrofitFactory getInstance() {
-        if (instance == null) {
-            throw new RuntimeException("Setup not done!");
         }
         return instance;
     }
 
-    private RetrofitFactory(@NonNull final MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
-    }
-
     private Retrofit.Builder getRetrofitBuilder() {
         if (builder == null) {
-            igErrorsInterceptor = new IgErrorsInterceptor(mainActivity);
+            igErrorsInterceptor = new IgErrorsInterceptor();
             final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                     .followRedirects(false)
                     .followSslRedirects(false)
@@ -103,7 +89,6 @@ public final class RetrofitFactory {
             igErrorsInterceptor.destroy();
         }
         igErrorsInterceptor = null;
-        mainActivity = null;
         retrofit = null;
         retrofitWeb = null;
         builder = null;
