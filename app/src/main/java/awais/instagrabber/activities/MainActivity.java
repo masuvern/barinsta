@@ -613,6 +613,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (url == null) return;
         // Log.d(TAG, url);
         final IntentModel intentModel = IntentUtils.parseUrl(url);
+
+        // Temporarily log URLs that parse in a new way, then use the old parser result
+        final IntentModel intentModelOld = IntentUtils.parseUrlOld(url);
+        if (intentModelOld != null && (intentModel == null || (intentModelOld.getType() != intentModel.getType()) || (intentModelOld.getText() != intentModel.getText()))) {
+            Log.w(TAG, url);
+            intentModel = intentModelOld;
+        }
+
         if (intentModel == null) return;
         showView(intentModel);
     }
