@@ -15,11 +15,7 @@ public final class IntentUtils {
 
     @Nullable
     public static IntentModel parseUrl(@NonNull final String url) {
-        try {
-            final Uri parsedUrl = Uri.parse(url).normalizeScheme();
-        } catch (NullPointerException e) {
-            return null;
-        }
+        final Uri parsedUrl = Uri.parse(url).normalizeScheme();
 
         // final String domain = parsedUrl.getHost().replaceFirst("^www\\.", "");
         // final boolean isHttpsUri = "https".equals(parsedUrl.getScheme());
