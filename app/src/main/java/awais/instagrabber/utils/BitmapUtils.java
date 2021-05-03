@@ -127,47 +127,9 @@ public final class BitmapUtils {
                                    final boolean addToCache,
                                    final ThumbnailLoadCallback callback) {
         if (contentResolver == null || uri == null || callback == null) return;
-        final ListenableFuture<BitmapResult> future = appExecutors.tasksThread().submit(() -> {
-            BitmapFactory.Options bitmapOptions;
-            float actualReqWidth = reqWidth;
-            float actualReqHeight = reqHeight;
-            try (InputStream input = contentResolver.openInputStream(uri)) {
-                BitmapFactory.Options outBounds = new BitmapFactory.Options();
-                outBounds.inJustDecodeBounds = true;
-                outBounds.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                BitmapFactory.decodeStream(input, null, outBounds);
-                if ((outBounds.outWidth == -1) || (outBounds.outHeight == -1)) return null;
-                bitmapOptions = new BitmapFactory.Options();
-                if (maxDimenSize > 0) {
-                    // Raw height and width of image
-                    final int height = outBounds.outHeight;
-                    final int width = outBounds.outWidth;
-                    final float ratio = (float) width / height;
-                    if (height > width) {
-                        actualReqHeight = maxDimenSize;
-                        actualReqWidth = actualReqHeight * ratio;
-                    } else {
-                        actualReqWidth = maxDimenSize;
-                        actualReqHeight = actualReqWidth / ratio;
-                    }
-                }
-                bitmapOptions.inSampleSize = calculateInSampleSize(outBounds, actualReqWidth, actualReqHeight);
-            } catch (Exception e) {
-                Log.e(TAG, "loadBitmap: ", e);
-                return null;
-            }
-            try (InputStream input = contentResolver.openInputStream(uri)) {
-                bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
-                if (addToCache) {
-                    addBitmapToMemoryCache(uri.toString(), bitmap, true);
-                }
-                return new BitmapResult(bitmap, (int) actualReqWidth, (int) actualReqHeight);
-            } catch (Exception e) {
-                Log.e(TAG, "loadBitmap: ", e);
-            }
-            return null;
-        });
+        final ListenableFuture<BitmapResult> future = appExecutors
+                .tasksThread()
+                .submit(() -> getBitmapResult(contentResolver, uri, reqWidth, reqHeight, maxDimenSize, addToCache));
         Futures.addCallback(future, new FutureCallback<BitmapResult>() {
             @Override
             public void onSuccess(@Nullable final BitmapResult result) {
@@ -185,8 +147,56 @@ public final class BitmapUtils {
         }, callbackHandlers);
     }
 
-    private static class BitmapResult {
-        Bitmap bitmap;
+    @Nullable
+    public static BitmapResult getBitmapResult(final ContentResolver contentResolver,
+                                                final Uri uri,
+                                                final float reqWidth,
+                                                final float reqHeight,
+                                                final float maxDimenSize,
+                                                final boolean addToCache) {
+        BitmapFactory.Options bitmapOptions;
+        float actualReqWidth = reqWidth;
+        float actualReqHeight = reqHeight;
+        try (InputStream input = contentResolver.openInputStream(uri)) {
+            BitmapFactory.Options outBounds = new BitmapFactory.Options();
+            outBounds.inJustDecodeBounds = true;
+            outBounds.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            BitmapFactory.decodeStream(input, null, outBounds);
+            if ((outBounds.outWidth == -1) || (outBounds.outHeight == -1)) return null;
+            bitmapOptions = new BitmapFactory.Options();
+            if (maxDimenSize > 0) {
+                // Raw height and width of image
+                final int height = outBounds.outHeight;
+                final int width = outBounds.outWidth;
+                final float ratio = (float) width / height;
+                if (height > width) {
+                    actualReqHeight = maxDimenSize;
+                    actualReqWidth = actualReqHeight * ratio;
+                } else {
+                    actualReqWidth = maxDimenSize;
+                    actualReqHeight = actualReqWidth / ratio;
+                }
+            }
+            bitmapOptions.inSampleSize = calculateInSampleSize(outBounds, actualReqWidth, actualReqHeight);
+        } catch (Exception e) {
+            Log.e(TAG, "loadBitmap: ", e);
+            return null;
+        }
+        try (InputStream input = contentResolver.openInputStream(uri)) {
+            bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
+            if (addToCache) {
+                addBitmapToMemoryCache(uri.toString(), bitmap, true);
+            }
+            return new BitmapResult(bitmap, (int) actualReqWidth, (int) actualReqHeight);
+        } catch (Exception e) {
+            Log.e(TAG, "loadBitmap: ", e);
+        }
+        return null;
+    }
+
+    public static class BitmapResult {
+        public Bitmap bitmap;
         int width;
         int height;
 

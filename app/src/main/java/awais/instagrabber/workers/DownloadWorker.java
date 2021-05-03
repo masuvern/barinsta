@@ -6,7 +6,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -16,6 +15,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.FileProvider;
@@ -33,7 +33,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
@@ -48,14 +47,17 @@ import java.util.concurrent.ExecutionException;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.services.DeleteImageIntentService;
+import awais.instagrabber.utils.BitmapUtils;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-//import awaisomereport.LogCollector;
 
+import static awais.instagrabber.utils.BitmapUtils.THUMBNAIL_SIZE;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_CHANNEL_ID;
 import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
+
+//import awaisomereport.LogCollector;
 //import static awais.instagrabber.utils.Utils.logCollector;
 
 public class DownloadWorker extends Worker {
@@ -253,40 +255,7 @@ public class DownloadWorker extends Worker {
             MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, null, null);
             final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
             final ContentResolver contentResolver = context.getContentResolver();
-            Bitmap bitmap = null;
-            final String mimeType = Utils.getMimeType(uri, contentResolver);
-            if (!TextUtils.isEmpty(mimeType)) {
-                if (mimeType.startsWith("image")) {
-                    try (final InputStream inputStream = contentResolver.openInputStream(uri)) {
-                        bitmap = BitmapFactory.decodeStream(inputStream);
-                    } catch (final Exception e) {
-//                        if (logCollector != null)
-//                            logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_1");
-                        if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-                    }
-                } else if (mimeType.startsWith("video")) {
-                    final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                    try {
-                        try {
-                            retriever.setDataSource(context, uri);
-                        } catch (final Exception e) {
-                            retriever.setDataSource(file.getAbsolutePath());
-                        }
-                        bitmap = retriever.getFrameAtTime();
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                            try {
-                                retriever.close();
-                            } catch (final Exception e) {
-//                                if (logCollector != null)
-//                                    logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_2");
-                            }
-                    } catch (final Exception e) {
-                        if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-//                        if (logCollector != null)
-//                            logCollector.appendException(e, LogCollector.LogFile.ASYNC_DOWNLOADER, "onPostExecute::bitmap_3");
-                    }
-                }
-            }
+            final Bitmap bitmap = getThumbnail(context, file, uri, contentResolver);
             final String downloadComplete = context.getString(R.string.downloader_complete);
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -349,6 +318,40 @@ public class DownloadWorker extends Worker {
         if (summaryNotification != null) {
             notificationManager.notify(getNotificationId() + count, summaryNotification);
         }
+    }
+
+    @Nullable
+    private Bitmap getThumbnail(final Context context,
+                                final File file,
+                                final Uri uri,
+                                final ContentResolver contentResolver) {
+        final String mimeType = Utils.getMimeType(uri, contentResolver);
+        if (TextUtils.isEmpty(mimeType)) return null;
+        Bitmap bitmap = null;
+        if (mimeType.startsWith("image")) {
+            try {
+                final BitmapUtils.BitmapResult bitmapResult = BitmapUtils
+                        .getBitmapResult(context.getContentResolver(), uri, THUMBNAIL_SIZE, THUMBNAIL_SIZE, -1, true);
+                if (bitmapResult == null) return null;
+                bitmap = bitmapResult.bitmap;
+            } catch (final Exception e) {
+                Log.e(TAG, "", e);
+            }
+            return bitmap;
+        }
+        if (mimeType.startsWith("video")) {
+            try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+                try {
+                    retriever.setDataSource(context, uri);
+                } catch (final Exception e) {
+                    retriever.setDataSource(file.getAbsolutePath());
+                }
+                bitmap = retriever.getFrameAtTime();
+            } catch (final Exception e) {
+                Log.e(TAG, "", e);
+            }
+        }
+        return bitmap;
     }
 
     public static class DownloadRequest {
