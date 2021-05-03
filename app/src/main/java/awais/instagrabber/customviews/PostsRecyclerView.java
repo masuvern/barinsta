@@ -192,7 +192,12 @@ public class PostsRecyclerView extends RecyclerView {
     }
 
     private void initSelf() {
-        mediaViewModel = new ViewModelProvider(viewModelStoreOwner).get(MediaViewModel.class);
+        try {
+            mediaViewModel = new ViewModelProvider(viewModelStoreOwner).get(MediaViewModel.class);
+        } catch (Exception e) {
+            Log.e(TAG, "initSelf: ", e);
+        }
+        if (mediaViewModel == null) return;
         mediaViewModel.getList().observe(lifeCycleOwner, list -> {
             if (list.size() <= 0) return;
             feedAdapter.submitList(list, () -> {
