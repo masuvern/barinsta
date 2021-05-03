@@ -14,6 +14,7 @@ import java.io.IOException;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.dialogs.ConfirmDialogFragment;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
 import okhttp3.Interceptor;
@@ -105,7 +106,13 @@ public class IgErrorsInterceptor implements Interceptor {
         if (mainActivity == null) return;
         // final View view = mainActivity.getRootView();
         // if (view == null) return;
-        Toast.makeText(mainActivity.getApplicationContext(), message, Toast.LENGTH_LONG).show();
+        try {
+            AppExecutors.getInstance()
+                        .mainThread()
+                        .execute(() -> Toast.makeText(mainActivity.getApplicationContext(), message, Toast.LENGTH_LONG).show());
+        } catch (Exception e) {
+            Log.e(TAG, "showSnackbar: ", e);
+        }
     }
 
     @NonNull
