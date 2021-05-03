@@ -189,7 +189,7 @@ public final class ThreadManager {
                 return null;
             }
             final DirectThread thread = threads.stream()
-                                               .filter(t -> t.getThreadId().equals(threadId))
+                                               .filter(t -> Objects.equals(t.getThreadId(), threadId))
                                                .findFirst()
                                                .orElse(null);
             if (thread != null) {
