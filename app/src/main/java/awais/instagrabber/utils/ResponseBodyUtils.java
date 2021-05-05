@@ -2,7 +2,6 @@ package awais.instagrabber.utils;
 
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -1042,7 +1041,7 @@ public final class ResponseBodyUtils {
                         tappableObject.getString("question"),
                         tappableObject.getString("emoji"),
                         tappableObject.getBoolean("viewer_can_vote"),
-                        tappableObject.getDouble("slider_vote_average"),
+                        tappableObject.optDouble("slider_vote_average"),
                         tappableObject.getInt("slider_vote_count"),
                         tappableObject.optDouble("viewer_vote")
                 ));

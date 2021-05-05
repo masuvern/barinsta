@@ -57,9 +57,6 @@ import static awais.instagrabber.utils.BitmapUtils.THUMBNAIL_SIZE;
 import static awais.instagrabber.utils.Constants.DOWNLOAD_CHANNEL_ID;
 import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
 
-//import awaisomereport.LogCollector;
-//import static awais.instagrabber.utils.Utils.logCollector;
-
 public class DownloadWorker extends Worker {
     private static final String TAG = "DownloadWorker";
     private static final String DOWNLOAD_GROUP = "DOWNLOAD_GROUP";
@@ -340,13 +337,22 @@ public class DownloadWorker extends Worker {
             return bitmap;
         }
         if (mimeType.startsWith("video")) {
-            try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+            try {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                 try {
-                    retriever.setDataSource(context, uri);
-                } catch (final Exception e) {
-                    retriever.setDataSource(file.getAbsolutePath());
+                    try {
+                        retriever.setDataSource(context, uri);
+                    } catch (final Exception e) {
+                        retriever.setDataSource(file.getAbsolutePath());
+                    }
+                    bitmap = retriever.getFrameAtTime();
+                } finally {
+                    try {
+                        retriever.release();
+                    } catch (Exception e) {
+                        Log.e(TAG, "getThumbnail: ", e);
+                    }
                 }
-                bitmap = retriever.getFrameAtTime();
             } catch (final Exception e) {
                 Log.e(TAG, "", e);
             }
