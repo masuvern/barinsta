@@ -343,7 +343,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     }
                 }
                 if (username == null || !username.equals(this.username)) {
-                    fragmentActivity.setCollapsingView(profileDetailsBinding.getRoot());
                     shouldRefresh = true;
                     return root;
                 }
