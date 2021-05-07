@@ -224,8 +224,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 }
                 return;
             }
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(media);
-            builder.build().show(getChildFragmentManager(), "post_view");
+            final NavController navController = NavHostFragment.findNavController(DirectMessageThreadFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
+            }
         }
 
         @Override
@@ -327,11 +333,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final Bundle arguments = getArguments();
         if (arguments == null) return;
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
+        final User currentUser = appStateViewModel.getCurrentUser();
+        if (currentUser == null) return;
         final DirectThreadViewModelFactory viewModelFactory = new DirectThreadViewModelFactory(
                 fragmentActivity.getApplication(),
                 fragmentArgs.getThreadId(),
                 fragmentArgs.getPending(),
-                appStateViewModel.getCurrentUser()
+                currentUser
         );
         viewModel = new ViewModelProvider(this, viewModelFactory).get(DirectThreadViewModel.class);
         setHasOptionsMenu(true);
@@ -386,7 +394,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             final DirectMessageThreadFragmentDirections.ActionThreadToSettings directions = DirectMessageThreadFragmentDirections
                     .actionThreadToSettings(viewModel.getThreadId(), null);
             final Boolean pending = viewModel.isPending().getValue();
-            directions.setPending(pending == null ? false : pending);
+            directions.setPending(pending != null && pending);
             NavHostFragment.findNavController(this).navigate(directions);
             return true;
         }
@@ -414,14 +422,10 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                         case SUCCESS:
                             Toast.makeText(context, R.string.marked_as_seen, Toast.LENGTH_SHORT).show();
                         case LOADING:
-                            if (item != null) {
-                                item.setEnabled(false);
-                            }
+                            item.setEnabled(false);
                             break;
                         case ERROR:
-                            if (item != null) {
-                                item.setEnabled(true);
-                            }
+                            item.setEnabled(true);
                             if (resource.message != null) {
                                 Snackbar.make(context, binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                                 return;
@@ -1352,7 +1356,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
     }
 
-    @NonNull
+    @Nullable
     private User getUser(final long userId) {
         for (final User user : users) {
             if (userId != user.getPk()) continue;

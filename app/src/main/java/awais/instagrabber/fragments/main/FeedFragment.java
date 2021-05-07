@@ -18,7 +18,8 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.motion.widget.MotionScene;
 import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -29,7 +30,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
@@ -64,7 +64,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
-    private CoordinatorLayout root;
+    private MotionLayout root;
     private FragmentFeedBinding binding;
     private StoriesService storiesService;
     private boolean shouldRefresh = true;
@@ -179,15 +179,21 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            // ViewCompat.setTransitionName(profilePicView, "profile_pic");
+            // ViewCompat.setTransitionName(mainPostImage, "post_image");
+            // final FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+            //         .addSharedElement(profilePicView, "profile_pic")
+            //         .addSharedElement(mainPostImage, "post_image")
+            //         .build();
+            final NavController navController = NavHostFragment.findNavController(FeedFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
             }
-            if (!layoutPreferences.isAnimationDisabled()) {
-                builder.setSharedProfilePicElement(profilePicView)
-                       .setSharedMainPostElement(mainPostImage);
-            }
-            builder.build().show(getChildFragmentManager(), "post_view");
         }
     };
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
@@ -278,9 +284,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                              final Bundle savedInstanceState) {
         if (root != null) {
             shouldRefresh = false;
-            if (storiesRecyclerView != null) {
-                fragmentActivity.setCollapsingView(storiesRecyclerView);
-            }
             return root;
         }
         binding = FragmentFeedBinding.inflate(inflater, container, false);
@@ -381,6 +384,17 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 .setSelectionModeCallback(selectionModeCallback)
                                 .init();
         binding.feedSwipeRefreshLayout.setRefreshing(true);
+        binding.feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
+                final MotionScene.Transition transition = root.getTransition(R.id.transition);
+                if (transition != null) {
+                    transition.setEnable(!canScrollVertically);
+                }
+            }
+        });
         // if (shouldAutoPlay) {
         //     videoAwareRecyclerScroller = new VideoAwareRecyclerScroller();
         //     binding.feedRecyclerView.addOnScrollListener(videoAwareRecyclerScroller);
@@ -396,15 +410,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         final Context context = getContext();
         if (context == null) return;
-        storiesRecyclerView = new RecyclerView(context);
-        final CollapsingToolbarLayout.LayoutParams params = new CollapsingToolbarLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                                                                                     ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, Utils.getActionBarHeight(context), 0, 0);
-        storiesRecyclerView.setLayoutParams(params);
-        storiesRecyclerView.setClipToPadding(false);
+        storiesRecyclerView = binding.header;
         storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         storiesRecyclerView.setAdapter(feedStoriesAdapter);
-        fragmentActivity.setCollapsingView(storiesRecyclerView);
         feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), feedStoriesAdapter::submitList);
         fetchStories();
     }

@@ -27,7 +27,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.motion.widget.MotionScene;
 import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -108,7 +109,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
-    private CoordinatorLayout root;
+    private MotionLayout root;
     private FragmentProfileBinding binding;
     private boolean isLoggedIn;
     private String cookie;
@@ -250,23 +251,15 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
             }
-            if (!layoutPreferences.isAnimationDisabled()) {
-                builder.setSharedProfilePicElement(profilePicView)
-                       .setSharedMainPostElement(mainPostImage);
-            }
-            final PostViewV2Fragment postViewV2Fragment = builder.build();
-            postViewV2Fragment.setOnDeleteListener(() -> {
-                postViewV2Fragment.dismiss();
-                binding.postsRecyclerView.refresh();
-            });
-            final FragmentManager fragmentManager = getChildFragmentManager();
-            if (fragmentManager.isDestroyed() || fragmentManager.isStateSaved()) return;
-            postViewV2Fragment.show(fragmentManager, "post_view");
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
@@ -345,7 +338,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     final boolean isSame = ("@" + profileModelUsername).equals(this.username);
                     if (isSame) {
                         setUsernameDelayed();
-                        fragmentActivity.setCollapsingView(profileDetailsBinding.getRoot());
                         shouldRefresh = false;
                         return root;
                     }
@@ -357,14 +349,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 }
             }
             setUsernameDelayed();
-            fragmentActivity.setCollapsingView(profileDetailsBinding.getRoot());
             shouldRefresh = false;
             return root;
         }
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         root = binding.getRoot();
-        profileDetailsBinding = LayoutProfileDetailsBinding.inflate(inflater, fragmentActivity.getCollapsingToolbarView(), false);
-        fragmentActivity.setCollapsingView(profileDetailsBinding.getRoot());
+        profileDetailsBinding = binding.header;
         return root;
     }
 
@@ -555,14 +545,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (profileDetailsBinding != null) {
-            fragmentActivity.removeCollapsingView(profileDetailsBinding.getRoot());
-        }
-    }
-
-    @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
@@ -589,7 +571,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             setUsernameDelayed();
         }
         if (TextUtils.isEmpty(username) && !isLoggedIn) {
-            profileDetailsBinding.infoContainer.setVisibility(View.GONE);
+            binding.header.getRoot().setVisibility(View.GONE);
             binding.swipeRefreshLayout.setEnabled(false);
             binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24);
             binding.privatePage2.setText(R.string.no_acc);
@@ -1209,6 +1191,17 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                  .setFeedItemCallback(feedItemCallback)
                                  .setSelectionModeCallback(selectionModeCallback)
                                  .init();
+        binding.postsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
+                final MotionScene.Transition transition = root.getTransition(R.id.transition);
+                if (transition != null) {
+                    transition.setEnable(!canScrollVertically);
+                }
+            }
+        });
         binding.swipeRefreshLayout.setRefreshing(true);
         postsSetupDone = true;
     }

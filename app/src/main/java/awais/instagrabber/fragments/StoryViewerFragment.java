@@ -35,6 +35,7 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -459,11 +460,14 @@ public class StoryViewerFragment extends Fragment {
             mediaService.fetch(Long.parseLong(mediaId), new ServiceCallback<Media>() {
                 @Override
                 public void onSuccess(final Media feedModel) {
-                    final PostViewV2Fragment fragment = PostViewV2Fragment
-                            .builder(feedModel)
-                            .build();
-                    fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                    fragment.show(getChildFragmentManager(), "post_view");
+                    final NavController navController = NavHostFragment.findNavController(StoryViewerFragment.this);
+                    final Bundle bundle = new Bundle();
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                    try {
+                        navController.navigate(R.id.action_global_post_view, bundle);
+                    } catch (Exception e) {
+                        Log.e(TAG, "openPostDialog: ", e);
+                    }
                 }
 
                 @Override
@@ -478,18 +482,18 @@ public class StoryViewerFragment extends Fragment {
             if (tag instanceof PollModel) {
                 poll = (PollModel) tag;
                 if (poll.getMyChoice() > -1) {
-                    new AlertDialog.Builder(context).setTitle(R.string.voted_story_poll)
-                                                    .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1,
-                                                                                   new String[]{
-                                                                                           (poll.getMyChoice() == 0 ? "√ " : "") + poll
-                                                                                                   .getLeftChoice() + " (" + poll
-                                                                                                   .getLeftCount() + ")",
-                                                                                           (poll.getMyChoice() == 1 ? "√ " : "") + poll
-                                                                                                   .getRightChoice() + " (" + poll
-                                                                                                   .getRightCount() + ")"
-                                                                                   }), null)
-                                                    .setPositiveButton(R.string.ok, null)
-                                                    .show();
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.voted_story_poll)
+                            .setAdapter(new ArrayAdapter<>(
+                                                context,
+                                                android.R.layout.simple_list_item_1,
+                                                new String[]{
+                                                        (poll.getMyChoice() == 0 ? "√ " : "") + poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
+                                                        (poll.getMyChoice() == 1 ? "√ " : "") + poll.getRightChoice() + " (" + poll.getRightCount() + ")"
+                                                }),
+                                        null)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
                 } else {
                     new AlertDialog.Builder(context)
                             .setTitle(poll.getQuestion())

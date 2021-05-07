@@ -288,6 +288,12 @@ public final class Utils {
         return outValue.data;
     }
 
+    public static int getAttrValue(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.data;
+    }
+
     public static void transparentStatusBar(final Activity activity,
                                             final boolean enable,
                                             final boolean fullscreen) {

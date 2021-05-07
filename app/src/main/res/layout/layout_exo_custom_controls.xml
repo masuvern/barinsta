@@ -4,8 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!-- android:padding="8dp"
-    android:background="@color/black_a80"-->
 
     <View
         android:layout_width="0dp"
@@ -14,42 +12,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!--<androidx.constraintlayout.widget.Barrier-->
-    <!--    android:id="@+id/top_barrier"-->
-    <!--    android:layout_width="0dp"-->
-    <!--    android:layout_height="0dp"-->
-    <!--    app:barrierDirection="top" />-->
+        app:layout_constraintTop_toTopOf="@id/exo_position" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/exo_position"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="8dp"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/exo_progress"
         app:layout_constraintEnd_toStartOf="@id/exo_progress"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/exo_progress"
         tools:text="0:00" />
-
-    <!--<com.google.android.material.slider.Slider-->
-    <!--    android:id="@+id/timeline"-->
-    <!--    android:layout_width="0dp"-->
-    <!--    android:layout_height="wrap_content"-->
-    <!--    android:contentDescription="@string/player_timeline_desc"-->
-    <!--    android:enabled="false"-->
-    <!--    android:value="0"-->
-    <!--    android:valueFrom="0.0"-->
-    <!--    android:valueTo="1.0"-->
-    <!--    app:labelStyle="@style/Widget.MaterialComponents.Tooltip.ExoPlayer"-->
-    <!--    app:layout_constraintBottom_toTopOf="@id/play_pause"-->
-    <!--    app:layout_constraintEnd_toStartOf="@id/to_time"-->
-    <!--    app:layout_constraintStart_toEndOf="@id/from_time"-->
-    <!--    app:layout_constraintTop_toTopOf="parent"-->
-    <!--    app:thumbColor="@color/white"-->
-    <!--    app:trackColorActive="@color/white"-->
-    <!--    app:trackColorInactive="@color/grey_800" />-->
 
     <com.google.android.exoplayer2.ui.DefaultTimeBar
         android:id="@+id/exo_progress"
@@ -65,6 +40,7 @@
         android:id="@+id/exo_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="8dp"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/exo_progress"
         app:layout_constraintEnd_toEndOf="parent"
@@ -87,28 +63,23 @@
         app:icon="@drawable/ic_replay_5_24_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/bottom_barrier"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/exo_play_pause"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/progress_barrier"
         tools:enabled="false"
         tools:visibility="visible" />
 
-    <!--
-        style="@style/Widget.App.MaterialButton.IconOnly.BorderlessRipple"
-        app:icon="@drawable/ic_play_states"
-        app:iconSize="24dp"
-        app:iconTint="@color/white"
-     -->
-    <androidx.appcompat.widget.AppCompatImageView
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/exo_play_pause"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:background="@drawable/background_grey_ripple"
         android:contentDescription="@string/exo_controls_play_description"
-        android:padding="@dimen/exo_icon_padding"
+        android:padding="8dp"
         android:scaleType="fitCenter"
         android:src="@drawable/exo_styled_controls_play"
-        app:layout_constraintBottom_toTopOf="@id/bottom_barrier"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/exo_ffwd_with_amount"
         app:layout_constraintStart_toEndOf="@id/exo_rew_with_amount"
         app:layout_constraintTop_toBottomOf="@id/progress_barrier"
@@ -123,7 +94,7 @@
         app:icon="@drawable/ic_forward_5_24_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/bottom_barrier"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/mute"
         app:layout_constraintStart_toEndOf="@id/exo_play_pause"
         app:layout_constraintTop_toBottomOf="@id/progress_barrier"
@@ -138,7 +109,7 @@
         app:icon="@drawable/ic_volume_off_24_states"
         app:iconSize="24dp"
         app:iconTint="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/bottom_barrier"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/exo_settings"
         app:layout_constraintStart_toEndOf="@id/exo_ffwd_with_amount"
         app:layout_constraintTop_toBottomOf="@id/progress_barrier"
@@ -153,32 +124,10 @@
         app:icon="@drawable/exo_ic_settings"
         app:iconSize="24dp"
         app:iconTint="@color/white"
-        app:layout_constraintBottom_toTopOf="@id/bottom_barrier"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/mute"
         app:layout_constraintTop_toBottomOf="@id/progress_barrier"
         tools:enabled="false"
         tools:visibility="visible" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom_barrier"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_end="200dp" />
-
-    <!--<com.google.android.material.button.MaterialButton-->
-    <!--    android:id="@+id/speed"-->
-    <!--    style="@style/Widget.App.MaterialButton.IconOnly.BorderlessRipple"-->
-    <!--    android:layout_width="0dp"-->
-    <!--    android:layout_height="wrap_content"-->
-    <!--    android:text="@string/one_x"-->
-    <!--    android:textAllCaps="false"-->
-    <!--    android:textColor="@drawable/speed_text_color_states"-->
-    <!--    app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--    app:layout_constraintEnd_toEndOf="parent"-->
-    <!--    app:layout_constraintStart_toEndOf="@id/mute"-->
-    <!--    app:layout_constraintTop_toTopOf="parent"-->
-    <!--    tools:enabled="false"-->
-    <!--    tools:visibility="visible" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

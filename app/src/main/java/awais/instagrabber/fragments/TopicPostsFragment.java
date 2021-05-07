@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,8 +52,8 @@ import awais.instagrabber.databinding.FragmentTopicPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.main.DiscoverFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -63,6 +64,7 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 
 public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+    private static final String TAG = TopicPostsFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
@@ -182,16 +184,15 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            final NavController navController = NavHostFragment.findNavController(TopicPostsFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
             }
-            if (!layoutPreferences.isAnimationDisabled()) {
-                builder.setSharedProfilePicElement(profilePicView)
-                       .setSharedMainPostElement(mainPostImage);
-            }
-            builder.build().show(getChildFragmentManager(), "post_view");
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
