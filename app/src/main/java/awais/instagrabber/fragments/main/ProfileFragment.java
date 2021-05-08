@@ -690,7 +690,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         //Disable scrolling when profile has no posts
         if (profileModel.getMediaCount() == 0){
-            AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) fragmentActivity.getCollapsingToolbarView().getLayoutParams();
+            final AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) fragmentActivity.getCollapsingToolbarView().getLayoutParams();
             toolbarLayoutParams.setScrollFlags(0);
         }
 
