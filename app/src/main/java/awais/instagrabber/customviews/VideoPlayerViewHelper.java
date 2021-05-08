@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
@@ -22,11 +23,13 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioListener;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.material.button.MaterialButton;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
+import awais.instagrabber.utils.Utils;
 
 public class VideoPlayerViewHelper implements Player.EventListener {
     private static final String TAG = "VideoPlayerViewHelper";
@@ -149,25 +152,25 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         if (thumbnailUrl != null) {
             thumbnailRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(thumbnailUrl)).build();
         }
-        final PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
-                                                              .setControllerListener(new BaseControllerListener<ImageInfo>() {
-                                                                  @Override
-                                                                  public void onFailure(final String id,
-                                                                                        final Throwable throwable) {
-                                                                      if (videoPlayerCallback != null) {
-                                                                          videoPlayerCallback.onThumbnailLoaded();
-                                                                      }
-                                                                  }
+        final PipelineDraweeControllerBuilder builder = Fresco
+                .newDraweeControllerBuilder()
+                .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                    @Override
+                    public void onFailure(final String id, final Throwable throwable) {
+                        if (videoPlayerCallback != null) {
+                            videoPlayerCallback.onThumbnailLoaded();
+                        }
+                    }
 
-                                                                  @Override
-                                                                  public void onFinalImageSet(final String id,
-                                                                                              final ImageInfo imageInfo,
-                                                                                              final Animatable animatable) {
-                                                                      if (videoPlayerCallback != null) {
-                                                                          videoPlayerCallback.onThumbnailLoaded();
-                                                                      }
-                                                                  }
-                                                              });
+                    @Override
+                    public void onFinalImageSet(final String id,
+                                                final ImageInfo imageInfo,
+                                                final Animatable animatable) {
+                        if (videoPlayerCallback != null) {
+                            videoPlayerCallback.onThumbnailLoaded();
+                        }
+                    }
+                });
         if (thumbnailRequest != null) {
             builder.setImageRequest(thumbnailRequest);
         }
@@ -176,8 +179,8 @@ public class VideoPlayerViewHelper implements Player.EventListener {
 
     private void loadPlayer() {
         if (videoUrl == null) return;
-        if (binding.root.getDisplayedChild() == 0) {
-            binding.root.showNext();
+        if (binding.getRoot().getDisplayedChild() == 0) {
+            binding.getRoot().showNext();
         }
         if (videoPlayerCallback != null) {
             videoPlayerCallback.onPlayerViewLoaded();
@@ -185,6 +188,10 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         player = (SimpleExoPlayer) binding.playerView.getPlayer();
         if (player != null) {
             player.release();
+        }
+        final ViewGroup.LayoutParams playerViewLayoutParams = binding.playerView.getLayoutParams();
+        if (playerViewLayoutParams.height > Utils.displayMetrics.heightPixels * 0.8) {
+            playerViewLayoutParams.height = (int) (Utils.displayMetrics.heightPixels * 0.8);
         }
         player = new SimpleExoPlayer.Builder(context)
                 .setLooper(Looper.getMainLooper())
@@ -206,8 +213,11 @@ public class VideoPlayerViewHelper implements Player.EventListener {
         // setupControls();
         player.prepare();
         binding.playerView.setPlayer(player);
-        binding.playerView.setShowFastForwardButton(false);
-        binding.playerView.setShowRewindButton(false);
+        // binding.playerView.setShowFastForwardButton(false);
+        // binding.playerView.setShowRewindButton(false);
+        binding.playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT);
+        binding.playerView.setShowNextButton(false);
+        binding.playerView.setShowPreviousButton(false);
         // binding.controls.setPlayer(player);
         mute = binding.playerView.findViewById(R.id.mute);
         // mute = binding.controls.findViewById(R.id.mute);

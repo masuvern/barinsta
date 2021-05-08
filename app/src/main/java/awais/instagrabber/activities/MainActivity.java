@@ -504,11 +504,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             final boolean contains = showBottomViewDestinations.contains(destinationId);
-            binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
-            if (contains && behavior != null) {
-                behavior.slideUp(binding.bottomNavView);
-            }
-
+            binding.getRoot().post(() -> {
+                binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
+                if (contains && behavior != null) {
+                    behavior.slideUp(binding.bottomNavView);
+                }
+            });
             // explicitly hide keyboard when we navigate
             final View view = getCurrentFocus();
             Utils.hideKeyboard(view);
