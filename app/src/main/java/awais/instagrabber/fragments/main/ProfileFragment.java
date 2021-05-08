@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
@@ -686,6 +687,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         } else {
             binding.postsRecyclerView.refresh();
         }
+
+        //Disable scrolling when profile has no posts
+        if (profileModel.getMediaCount() == 0){
+            AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) fragmentActivity.getCollapsingToolbarView().getLayoutParams();
+            toolbarLayoutParams.setScrollFlags(0);
+        }
+
         profileDetailsBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         profileDetailsBinding.isPrivate.setVisibility(profileModel.isPrivate() ? View.VISIBLE : View.GONE);
         final long profileId = profileModel.getPk();
