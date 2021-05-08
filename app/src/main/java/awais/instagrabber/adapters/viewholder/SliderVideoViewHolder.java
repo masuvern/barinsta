@@ -7,10 +7,11 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.exoplayer2.ui.StyledPlayerView;
+
 import java.util.List;
 
 import awais.instagrabber.adapters.SliderItemsAdapter;
-import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
@@ -27,40 +28,23 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     private static final String TAG = "SliderVideoViewHolder";
 
     private final LayoutVideoPlayerWithThumbnailBinding binding;
-    // private final LayoutExoCustomControlsBinding controlsBinding;
     private final boolean loadVideoOnItemClick;
-    private final GestureDetector.OnGestureListener videoPlayerViewGestureListener = new GestureDetector.SimpleOnGestureListener() {
-        @Override
-        public boolean onSingleTapConfirmed(final MotionEvent e) {
-            binding.playerView.performClick();
-            return true;
-        }
-    };
 
     private VideoPlayerViewHelper videoPlayerViewHelper;
 
     @SuppressLint("ClickableViewAccessibility")
     public SliderVideoViewHolder(@NonNull final LayoutVideoPlayerWithThumbnailBinding binding,
-                                 final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener,
-                                 // final LayoutExoCustomControlsBinding controlsBinding,
                                  final boolean loadVideoOnItemClick) {
         super(binding.getRoot());
         this.binding = binding;
-        // this.controlsBinding = controlsBinding;
         this.loadVideoOnItemClick = loadVideoOnItemClick;
-        // if (onVerticalDragListener != null) {
-        //     final VerticalDragHelper thumbnailVerticalDragHelper = new VerticalDragHelper(binding.thumbnailParent);
-        //     final VerticalDragHelper playerVerticalDragHelper = new VerticalDragHelper(binding.playerView);
-        //     thumbnailVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-        //     playerVerticalDragHelper.setOnVerticalDragListener(onVerticalDragListener);
-        //     binding.thumbnailParent.setOnTouchListener((v, event) -> {
-        //         final boolean onDragTouch = thumbnailVerticalDragHelper.onDragTouch(event);
-        //         if (onDragTouch) {
-        //             return true;
-        //         }
-        //         return thumbnailVerticalDragHelper.onGestureTouchEvent(event);
-        //     });
-        // }
+        final GestureDetector.OnGestureListener videoPlayerViewGestureListener = new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(final MotionEvent e) {
+                binding.playerView.performClick();
+                return true;
+            }
+        };
         final GestureDetector gestureDetector = new GestureDetector(itemView.getContext(), videoPlayerViewGestureListener);
         binding.playerView.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
@@ -77,7 +61,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
             @Override
             public void onThumbnailClick() {
                 if (sliderCallback != null) {
-                    sliderCallback.onItemClicked(position);
+                    sliderCallback.onItemClicked(position, media, binding.getRoot());
                 }
             }
 
@@ -120,6 +104,21 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                     sliderCallback.onPlayerRelease(position);
                 }
             }
+
+            @Override
+            public void onFullScreenModeChanged(final boolean isFullScreen, final StyledPlayerView playerView) {
+                if (sliderCallback != null) {
+                    sliderCallback.onFullScreenModeChanged(isFullScreen, playerView);
+                }
+            }
+
+            @Override
+            public boolean isInFullScreen() {
+                if (sliderCallback != null) {
+                    return sliderCallback.isInFullScreen();
+                }
+                return false;
+            }
         };
         final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();
         String videoUrl = null;
@@ -138,16 +137,10 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
                                                           aspectRatio,
                                                           ResponseBodyUtils.getThumbUrl(media),
                                                           loadVideoOnItemClick,
-                                                          // controlsBinding,
                                                           videoPlayerCallback);
-        // binding.itemFeedBottom.btnMute.setOnClickListener(v -> {
-        //     final float newVol = videoPlayerViewHelper.toggleMute();
-        //     setMuteIcon(newVol);
-        //     Utils.sessionVolumeFull = newVol == 1f;
-        // });
         binding.playerView.setOnClickListener(v -> {
             if (sliderCallback != null) {
-                sliderCallback.onItemClicked(position);
+                sliderCallback.onItemClicked(position, media, binding.getRoot());
             }
         });
     }
@@ -161,62 +154,4 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
         if (videoPlayerViewHelper == null) return;
         videoPlayerViewHelper.releasePlayer();
     }
-
-    // public void resetPlayerTimeline() {
-    //     if (videoPlayerViewHelper == null) return;
-    //     videoPlayerViewHelper.resetTimeline();
-    // }
-    //
-    // public void removeCallbacks() {
-    //     if (videoPlayerViewHelper == null) return;
-    //     videoPlayerViewHelper.removeCallbacks();
-    // }
-
-    // private void setDimensions(final FeedModel feedModel, final int spanCount, final boolean animate) {
-    //     final ViewGroup.LayoutParams layoutParams = binding.imageViewer.getLayoutParams();
-    //     final int deviceWidth = Utils.displayMetrics.widthPixels;
-    //     final int spanWidth = deviceWidth / spanCount;
-    //     final int spanHeight = NumberUtils.getResultingHeight(spanWidth, feedModel.getImageHeight(), feedModel.getImageWidth());
-    //     final int width = spanWidth == 0 ? deviceWidth : spanWidth;
-    //     final int height = spanHeight == 0 ? deviceWidth + 1 : spanHeight;
-    //     if (animate) {
-    //         Animation animation = AnimationUtils.expand(
-    //                 binding.imageViewer,
-    //                 layoutParams.width,
-    //                 layoutParams.height,
-    //                 width,
-    //                 height,
-    //                 new Animation.AnimationListener() {
-    //                     @Override
-    //                     public void onAnimationStart(final Animation animation) {
-    //                         showOrHideDetails(spanCount);
-    //                     }
-    //
-    //                     @Override
-    //                     public void onAnimationEnd(final Animation animation) {
-    //                         // showOrHideDetails(spanCount);
-    //                     }
-    //
-    //                     @Override
-    //                     public void onAnimationRepeat(final Animation animation) {
-    //
-    //                     }
-    //                 });
-    //         binding.imageViewer.startAnimation(animation);
-    //     } else {
-    //         layoutParams.width = width;
-    //         layoutParams.height = height;
-    //         binding.imageViewer.requestLayout();
-    //     }
-    // }
-    //
-    // private void showOrHideDetails(final int spanCount) {
-    //     if (spanCount == 1) {
-    //         binding.itemFeedTop.getRoot().setVisibility(View.VISIBLE);
-    //         binding.itemFeedBottom.getRoot().setVisibility(View.VISIBLE);
-    //     } else {
-    //         binding.itemFeedTop.getRoot().setVisibility(View.GONE);
-    //         binding.itemFeedBottom.getRoot().setVisibility(View.GONE);
-    //     }
-    // }
 }

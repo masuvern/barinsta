@@ -45,9 +45,9 @@ public class FeedSliderViewHolder extends FeedItemViewHolder {
         final String text = "1/" + sliderItemLen;
         binding.mediaCounter.setText(text);
         binding.mediaList.setOffscreenPageLimit(1);
-        final SliderItemsAdapter adapter = new SliderItemsAdapter(null, false, new SliderCallbackAdapter() {
+        final SliderItemsAdapter adapter = new SliderItemsAdapter(false, new SliderCallbackAdapter() {
             @Override
-            public void onItemClicked(final int position) {
+            public void onItemClicked(final int position, final Media media, final View view) {
                 feedItemCallback.onSliderClick(feedModel, position);
             }
         });

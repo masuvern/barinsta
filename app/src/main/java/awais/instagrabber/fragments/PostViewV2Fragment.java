@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,15 +15,18 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
@@ -44,6 +48,8 @@ import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.skydoves.balloon.ArrowOrientation;
@@ -59,6 +65,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.SliderCallbackAdapter;
 import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.adapters.viewholder.SliderVideoViewHolder;
@@ -67,6 +74,7 @@ import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
 import awais.instagrabber.customviews.drawee.DoubleTapGestureListener;
+import awais.instagrabber.customviews.drawee.ZoomableController;
 import awais.instagrabber.customviews.drawee.ZoomableDraweeView;
 import awais.instagrabber.databinding.DialogPostViewBinding;
 import awais.instagrabber.databinding.LayoutPostViewBottomBinding;
@@ -117,6 +125,12 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     @Nullable
     private ViewPager2 sliderParent;
     private LayoutPostViewBottomBinding bottom;
+    private View postView;
+    private int originalHeight;
+    private int originalSystemUi;
+    private boolean isInFullScreenMode;
+    private StyledPlayerView playerView;
+    private int playerViewOriginalHeight;
 
     private final Observer<Object> backStackSavedStateObserver = result -> {
         if (result == null) return;
@@ -127,6 +141,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         // clear result
         backStackSavedStateResultLiveData.postValue(null);
     };
+    private Drawable originalRootBackground;
 
     public void setOnDeleteListener(final OnDeleteListener onDeleteListener) {
         if (onDeleteListener == null) return;
@@ -197,6 +212,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        showSystemUI();
         final Media media = viewModel.getMedia();
         if (media == null) return;
         switch (media.getMediaType()) {
@@ -753,7 +769,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     }
 
     private void setupPostImage() {
-        binding.mediaCounter.setVisibility(View.GONE);
+        // binding.mediaCounter.setVisibility(View.GONE);
         final Context context = getContext();
         if (context == null) return;
         final Resources resources = context.getResources();
@@ -762,12 +778,14 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         final String imageUrl = ResponseBodyUtils.getImageUrl(media);
         if (TextUtils.isEmpty(imageUrl)) return;
         final ZoomableDraweeView postImage = new ZoomableDraweeView(context);
+        postView = postImage;
         final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(media.getOriginalHeight(),
                                                                                             media.getOriginalWidth(),
                                                                                             (int) (Utils.displayMetrics.heightPixels * 0.8),
                                                                                             Utils.displayMetrics.widthPixels);
-        final int height = widthHeight.second;
-        final ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, height);
+        originalHeight = widthHeight.second;
+        final ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
+                                                                                             originalHeight);
         layoutParams.topToBottom = binding.topBarrier.getId();
         layoutParams.bottomToTop = bottom.buttonsTopBarrier.getId();
         layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
@@ -788,10 +806,22 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         zoomableController.setGestureZoomEnabled(true);
         zoomableController.setEnabled(true);
         postImage.setZoomingEnabled(true);
-        postImage.setTapListener(new DoubleTapGestureListener(postImage));
+        final DoubleTapGestureListener tapListener = new DoubleTapGestureListener(postImage) {
+            @Override
+            public boolean onSingleTapConfirmed(final MotionEvent e) {
+                if (!isInFullScreenMode) {
+                    zoomableController.reset();
+                    hideSystemUI();
+                } else {
+                    showSystemUI();
+                    binding.getRoot().postDelayed(zoomableController::reset, 500);
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+        };
+        postImage.setTapListener(tapListener);
+        // postImage.setAllowTouchInterceptionWhileZoomed(true);
         binding.contentRoot.addView(postImage, 0);
-        // binding.postImage.setAllowTouchInterceptionWhileZoomed(true);
-        // binding.postImage.setOnVerticalDragListener(onVerticalDragListener);
     }
 
     private void setupSlider() {
@@ -818,13 +848,15 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                                                                                             maxHW.second,
                                                                                             (int) (Utils.displayMetrics.heightPixels * 0.8),
                                                                                             Utils.displayMetrics.widthPixels);
+        originalHeight = widthHeight.second;
         final ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
-                                                                                             widthHeight.second);
+                                                                                             originalHeight);
         layoutParams.topToBottom = binding.topBarrier.getId();
         layoutParams.bottomToTop = bottom.buttonsTopBarrier.getId();
         layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
         layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
         sliderParent.setLayoutParams(layoutParams);
+        postView = sliderParent;
         binding.contentRoot.addView(sliderParent, 0);
 
         final boolean hasVideo = media.getCarouselMedia()
@@ -841,16 +873,23 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 });
             }
         }
-        sliderItemsAdapter = new SliderItemsAdapter(null, true, new SliderCallbackAdapter() {
+        sliderItemsAdapter = new SliderItemsAdapter(true, new SliderCallbackAdapter() {
             @Override
-            public void onThumbnailLoaded(final int position) {
-                if (position != 0) return;
-                startPostponedEnterTransition();
-            }
-
-            @Override
-            public void onItemClicked(final int position) {
-                // toggleDetails();
+            public void onItemClicked(final int position, final Media media, final View view) {
+                if (media == null
+                        || media.getMediaType() != MediaItemType.MEDIA_TYPE_IMAGE
+                        || !(view instanceof ZoomableDraweeView)) {
+                    return;
+                }
+                final ZoomableController zoomableController = ((ZoomableDraweeView) view).getZoomableController();
+                if (!(zoomableController instanceof AnimatedZoomableController)) return;
+                if (!isInFullScreenMode) {
+                    ((AnimatedZoomableController) zoomableController).reset();
+                    hideSystemUI();
+                    return;
+                }
+                showSystemUI();
+                binding.getRoot().postDelayed(((AnimatedZoomableController) zoomableController)::reset, 500);
             }
 
             @Override
@@ -876,6 +915,21 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 final FragmentActivity activity = getActivity();
                 if (activity == null) return;
                 Utils.disableKeepScreenOn(activity);
+            }
+
+            @Override
+            public void onFullScreenModeChanged(final boolean isFullScreen, final StyledPlayerView playerView) {
+                PostViewV2Fragment.this.playerView = playerView;
+                if (isFullScreen) {
+                    hideSystemUI();
+                    return;
+                }
+                showSystemUI();
+            }
+
+            @Override
+            public boolean isInFullScreen() {
+                return isInFullScreenMode;
             }
         });
         sliderParent.setAdapter(sliderItemsAdapter);
@@ -981,12 +1035,14 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                                                                                             (int) (Utils.displayMetrics.heightPixels * 0.8),
                                                                                             Utils.displayMetrics.widthPixels);
         layoutParams.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
-        layoutParams.height = widthHeight.second;
+        originalHeight = widthHeight.second;
+        layoutParams.height = originalHeight;
         layoutParams.topToBottom = binding.topBarrier.getId();
         layoutParams.bottomToTop = bottom.buttonsTopBarrier.getId();
         layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
         layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
-        binding.contentRoot.addView(videoPost.getRoot(), 0);
+        postView = videoPost.getRoot();
+        binding.contentRoot.addView(postView, 0);
 
         // final GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
         //     @Override
@@ -1041,6 +1097,16 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 if (activity == null) return;
                 Utils.disableKeepScreenOn(activity);
             }
+
+            @Override
+            public void onFullScreenModeChanged(final boolean isFullScreen, final StyledPlayerView playerView) {
+                PostViewV2Fragment.this.playerView = playerView;
+                if (isFullScreen) {
+                    hideSystemUI();
+                    return;
+                }
+                showSystemUI();
+            }
         };
         final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();
         String videoUrl = null;
@@ -1063,92 +1129,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                     videoPlayerCallback);
         }
     }
-
-    // private void enablePlayerControls(final boolean enable) {
-    //     video = enable;
-    //     if (enable) {
-    //         binding.playerControlsToggle.setVisibility(View.VISIBLE);
-    //         binding.playerControlsToggle.setOnClickListener(v -> {
-    //             final int visibility = binding.playerControls.getRoot().getVisibility();
-    //             if (visibility == View.GONE) {
-    //                 showPlayerControls();
-    //                 return;
-    //             }
-    //             hidePlayerControls();
-    //         });
-    //         return;
-    //     }
-    //     binding.playerControlsToggle.setVisibility(View.GONE);
-    //     hidePlayerControls();
-    // }
-
-    // private void hideCaption() {
-    //     if (bottomSheetBehavior == null) return;
-    //     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    // }
-
-    // private void showPlayerControls() {
-    //     hideCaption();
-    //     // previously invisible view
-    //     View view = binding.playerControls.getRoot();
-    //     if (view.getVisibility() == View.VISIBLE) {
-    //         return;
-    //     }
-    //     if (!ViewCompat.isAttachedToWindow(view)) {
-    //         view.setVisibility(View.VISIBLE);
-    //         return;
-    //     }
-    //     // get the center for the clipping circle
-    //     int cx = view.getWidth() / 2;
-    //     // int cy = view.getHeight() / 2;
-    //     int cy = view.getHeight();
-    //
-    //     // get the final radius for the clipping circle
-    //     float finalRadius = (float) Math.hypot(cx, cy);
-    //
-    //     // create the animator for this view (the start radius is zero)
-    //     Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, 0f, finalRadius);
-    //
-    //     // make the view visible and start the animation
-    //     view.setVisibility(View.VISIBLE);
-    //     anim.start();
-    //
-    // }
-
-    // private void hidePlayerControls() {
-    //     // previously visible view
-    //     final View view = binding.playerControls.getRoot();
-    //     if (view.getVisibility() == View.GONE) {
-    //         return;
-    //     }
-    //     if (!ViewCompat.isAttachedToWindow(view)) {
-    //         view.setVisibility(View.GONE);
-    //         return;
-    //     }
-    //
-    //     // get the center for the clipping circle
-    //     int cx = view.getWidth() / 2;
-    //     // int cy = view.getHeight() / 2;
-    //     int cy = view.getHeight();
-    //
-    //     // get the initial radius for the clipping circle
-    //     float initialRadius = (float) Math.hypot(cx, cy);
-    //
-    //     // create the animation (the final radius is zero)
-    //     Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, initialRadius, 0f);
-    //
-    //     // make the view invisible when the animation is done
-    //     anim.addListener(new AnimatorListenerAdapter() {
-    //         @Override
-    //         public void onAnimationEnd(Animator animation) {
-    //             super.onAnimationEnd(animation);
-    //             view.setVisibility(View.GONE);
-    //         }
-    //     });
-    //
-    //     // start the animation
-    //     anim.start();
-    // }
 
     private void setupOptions(final Boolean show) {
         if (!show) {
@@ -1282,29 +1262,49 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     }
 
     private void toggleDetails() {
-        // hasBeenToggled = true;
+        final boolean hasBeenToggled = true;
         final Media media = viewModel.getMedia();
         binding.getRoot().post(() -> {
             TransitionManager.beginDelayedTransition(binding.getRoot());
             if (detailsVisible) {
+                final Context context = getContext();
+                if (context == null) return;
+                originalRootBackground = binding.getRoot().getBackground();
+                final Resources resources = context.getResources();
+                if (resources == null) return;
+                final ColorDrawable colorDrawable = new ColorDrawable(resources.getColor(R.color.black));
+                binding.getRoot().setBackground(colorDrawable);
+                if (postView != null) {
+                    // Make post match parent
+                    final ViewGroup.LayoutParams layoutParams = postView.getLayoutParams();
+                    final int fullHeight = Utils.displayMetrics.heightPixels + Utils.getNavigationBarSize(context).y;
+                    layoutParams.height = fullHeight;
+                    binding.contentRoot.getLayoutParams().height = fullHeight;
+                    if (playerView != null) {
+                        playerViewOriginalHeight = playerView.getLayoutParams().height;
+                        playerView.getLayoutParams().height = fullHeight;
+                    }
+                }
                 detailsVisible = false;
                 if (media.getUser() != null) {
                     binding.profilePic.setVisibility(View.GONE);
                     binding.title.setVisibility(View.GONE);
                     binding.subtitle.setVisibility(View.GONE);
-                    // binding.topBg.setVisibility(View.GONE);
                 }
                 if (media.getLocation() != null) {
                     binding.location.setVisibility(View.GONE);
                 }
-                // bottom.bottomBg.setVisibility(View.GONE);
-                // bottom.likesCount.setVisibility(View.GONE);
-                // bottom.commentsCount.setVisibility(View.GONE);
+                if (media.getCaption() != null && !TextUtils.isEmpty(media.getCaption().getText())) {
+                    bottom.caption.setVisibility(View.GONE);
+                    bottom.translate.setVisibility(View.GONE);
+                }
+                bottom.likesCount.setVisibility(View.GONE);
+                bottom.commentsCount.setVisibility(View.GONE);
                 bottom.date.setVisibility(View.GONE);
                 bottom.comment.setVisibility(View.GONE);
                 bottom.like.setVisibility(View.GONE);
                 bottom.save.setVisibility(View.GONE);
-                // bottom.share.setVisibility(View.GONE);
+                bottom.share.setVisibility(View.GONE);
                 bottom.download.setVisibility(View.GONE);
                 binding.mediaCounter.setVisibility(View.GONE);
                 bottom.viewsCount.setVisibility(View.GONE);
@@ -1312,11 +1312,20 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 if (options != null && !options.isEmpty()) {
                     binding.options.setVisibility(View.GONE);
                 }
-                // wasControlsVisible = binding.playerControls.getRoot().getVisibility() == View.VISIBLE;
-                // if (wasControlsVisible) {
-                //     hidePlayerControls();
-                // }
                 return;
+            }
+            if (originalRootBackground != null) {
+                binding.getRoot().setBackground(originalRootBackground);
+            }
+            if (postView != null) {
+                // Make post height back to original
+                final ViewGroup.LayoutParams layoutParams = postView.getLayoutParams();
+                layoutParams.height = originalHeight;
+                binding.contentRoot.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                if (playerView != null) {
+                    playerView.getLayoutParams().height = playerViewOriginalHeight;
+                    playerView = null;
+                }
             }
             if (media.getUser() != null) {
                 binding.profilePic.setVisibility(View.VISIBLE);
@@ -1327,17 +1336,20 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             if (media.getLocation() != null) {
                 binding.location.setVisibility(View.VISIBLE);
             }
-            // bottom.bottomBg.setVisibility(View.VISIBLE);
+            if (media.getCaption() != null && !TextUtils.isEmpty(media.getCaption().getText())) {
+                bottom.caption.setVisibility(View.VISIBLE);
+                bottom.translate.setVisibility(View.VISIBLE);
+            }
             if (viewModel.hasPk()) {
-                // bottom.likesCount.setVisibility(View.VISIBLE);
+                bottom.likesCount.setVisibility(View.VISIBLE);
                 bottom.date.setVisibility(View.VISIBLE);
                 // binding.captionParent.setVisibility(View.VISIBLE);
                 // binding.captionToggle.setVisibility(View.VISIBLE);
-                // bottom.share.setVisibility(View.VISIBLE);
+                bottom.share.setVisibility(View.VISIBLE);
             }
             if (viewModel.hasPk() && !viewModel.getMedia().isCommentsDisabled()) {
                 bottom.comment.setVisibility(View.VISIBLE);
-                // bottom.commentsCount.setVisibility(View.VISIBLE);
+                bottom.commentsCount.setVisibility(View.VISIBLE);
             }
             bottom.download.setVisibility(View.VISIBLE);
             final List<Integer> options = viewModel.getOptions().getValue();
@@ -1360,6 +1372,64 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             }
             detailsVisible = true;
         });
+    }
+
+    private void hideSystemUI() {
+        if (detailsVisible) {
+            toggleDetails();
+        }
+        final MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+        final ActionBar actionBar = activity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+        final CollapsingToolbarLayout appbarLayout = activity.getCollapsingToolbarView();
+        if (appbarLayout != null) {
+            appbarLayout.setVisibility(View.GONE);
+        }
+        final Toolbar toolbar = activity.getToolbar();
+        if (toolbar != null) {
+            toolbar.setVisibility(View.GONE);
+        }
+        final View decorView = activity.getWindow().getDecorView();
+        originalSystemUi = decorView.getSystemUiVisibility();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+                        // Set the content to appear under the system bars so that the
+                        // content doesn't resize when the system bars hide and show.
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        // Hide the nav bar and status bar
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        isInFullScreenMode = true;
+    }
+
+    // Shows the system bars by removing all the flags
+    // except for the ones that make the content appear under the system bars.
+    private void showSystemUI() {
+        if (!detailsVisible) {
+            toggleDetails();
+        }
+        final MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+        final ActionBar actionBar = activity.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.show();
+        }
+        final CollapsingToolbarLayout appbarLayout = activity.getCollapsingToolbarView();
+        if (appbarLayout != null) {
+            appbarLayout.setVisibility(View.VISIBLE);
+        }
+        final Toolbar toolbar = activity.getToolbar();
+        if (toolbar != null) {
+            toolbar.setVisibility(View.VISIBLE);
+        }
+        final View decorView = activity.getWindow().getDecorView();
+        decorView.setSystemUiVisibility(originalSystemUi);
+        isInFullScreenMode = false;
     }
 
     private void navigateToProfile(final String username) {
