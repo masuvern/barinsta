@@ -335,6 +335,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ", e);
         }
+        instance = null;
     }
 
     @Override
