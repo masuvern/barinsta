@@ -8,7 +8,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.transition.ChangeBounds;
+import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
 
 import java.time.Duration;
 
@@ -17,15 +20,22 @@ import awais.instagrabber.utils.NumberUtils;
 
 public class FormattedNumberTextView extends AppCompatTextView {
     private static final String TAG = FormattedNumberTextView.class.getSimpleName();
-    private static final ChangeText TRANSITION = new ChangeText().setChangeBehavior(ChangeText.CHANGE_BEHAVIOR_OUT_IN);
+    private static final Transition TRANSITION;
 
     private long number = Long.MIN_VALUE;
     private boolean showAbbreviation = true;
-    private boolean animateChanges = true;
+    private boolean animateChanges = false;
     private boolean toggleOnClick = true;
     private boolean autoToggleToAbbreviation = true;
     private long autoToggleTimeoutMs = Duration.ofSeconds(2).toMillis();
     private boolean initDone = false;
+
+    static {
+        final TransitionSet transitionSet = new TransitionSet();
+        final ChangeText changeText = new ChangeText().setChangeBehavior(ChangeText.CHANGE_BEHAVIOR_OUT_IN);
+        transitionSet.addTransition(changeText).addTransition(new ChangeBounds());
+        TRANSITION = transitionSet;
+    }
 
 
     public FormattedNumberTextView(@NonNull final Context context) {
@@ -152,6 +162,4 @@ public class FormattedNumberTextView extends AppCompatTextView {
             }
         });
     }
-
-
 }

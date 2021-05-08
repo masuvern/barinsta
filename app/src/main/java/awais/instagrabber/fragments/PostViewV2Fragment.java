@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,6 +46,14 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import com.skydoves.balloon.ArrowOrientation;
+import com.skydoves.balloon.ArrowPositionRules;
+import com.skydoves.balloon.Balloon;
+import com.skydoves.balloon.BalloonAnimation;
+import com.skydoves.balloon.BalloonHighlightAnimation;
+import com.skydoves.balloon.BalloonSizeSpec;
+import com.skydoves.balloon.overlay.BalloonOverlayAnimation;
+import com.skydoves.balloon.overlay.BalloonOverlayCircle;
 
 import java.io.Serializable;
 import java.util.List;
@@ -81,6 +90,7 @@ import awais.instagrabber.viewmodels.PostViewV2ViewModel;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.getAttrValue;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -278,17 +288,16 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             bottom.date.setText(date);
         }));
         viewModel.getLikeCount().observe(getViewLifecycleOwner(), count -> {
-            bottom.likesCount.setAnimateChanges(false);
             bottom.likesCount.setNumber(getSafeCount(count));
-            // final String likesString = getResources().getQuantityString(R.plurals.likes_count, (int) safeCount, safeCount);
-            // bottom.likesCount.setText(likesString);
+            binding.getRoot().postDelayed(() -> bottom.likesCount.setAnimateChanges(true), 1000);
+            if (count > 1000 && !settingsHelper.getBoolean(PREF_SHOWN_COUNT_TOOLTIP)) {
+                binding.getRoot().postDelayed(this::showCountTooltip, 1000);
+            }
         });
         if (!viewModel.getMedia().isCommentsDisabled()) {
             viewModel.getCommentCount().observe(getViewLifecycleOwner(), count -> {
-                bottom.commentsCount.setAnimateChanges(false);
                 bottom.commentsCount.setNumber(getSafeCount(count));
-                // final String likesString = getResources().getQuantityString(R.plurals.comments_count, (int) safeCount, safeCount);
-                // bottom.commentsCount.setText(likesString);
+                binding.getRoot().postDelayed(() -> bottom.commentsCount.setAnimateChanges(true), 1000);
             });
         }
         viewModel.getViewCount().observe(getViewLifecycleOwner(), count -> {
@@ -308,6 +317,45 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             setupOptions(options != null && !options.isEmpty());
             createOptionsPopupMenu();
         }));
+    }
+
+    private void showCountTooltip() {
+        final Context context = getContext();
+        if (context == null) return;
+        final Rect rect = new Rect();
+        bottom.likesCount.getGlobalVisibleRect(rect);
+        final Balloon balloon = new Balloon.Builder(context)
+                .setArrowSize(8)
+                .setArrowOrientation(ArrowOrientation.TOP)
+                .setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
+                .setArrowPosition(0.5f)
+                .setWidth(BalloonSizeSpec.WRAP)
+                .setHeight(BalloonSizeSpec.WRAP)
+                .setPadding(4)
+                .setTextSize(16)
+                .setAlpha(0.9f)
+                .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                .setBalloonHighlightAnimation(BalloonHighlightAnimation.HEARTBEAT, 0)
+                .setIsVisibleOverlay(true)
+                .setOverlayColorResource(R.color.black_a50)
+                .setOverlayShape(new BalloonOverlayCircle((float) Math.max(
+                        bottom.likesCount.getMeasuredWidth(),
+                        bottom.likesCount.getMeasuredHeight()
+                ) / 2f))
+                .setBalloonOverlayAnimation(BalloonOverlayAnimation.FADE)
+                .setLifecycleOwner(getViewLifecycleOwner())
+                .setTextResource(R.string.click_to_show_full)
+                .setDismissWhenTouchOutside(false)
+                .setDismissWhenOverlayClicked(false)
+                .build();
+        balloon.showAlignBottom(bottom.likesCount);
+        settingsHelper.putBoolean(PREF_SHOWN_COUNT_TOOLTIP, true);
+        balloon.setOnBalloonOutsideTouchListener((view, motionEvent) -> {
+            if (rect.contains((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) {
+                bottom.likesCount.setShowAbbreviation(false);
+            }
+            balloon.dismiss();
+        });
     }
 
     @NonNull

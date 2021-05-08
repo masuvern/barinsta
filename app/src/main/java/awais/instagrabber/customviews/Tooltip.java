@@ -9,12 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.ViewUtils;
-
 
 public class Tooltip extends AppCompatTextView {
 
@@ -22,7 +22,7 @@ public class Tooltip extends AppCompatTextView {
     private ViewPropertyAnimator animator;
     private boolean showing;
 
-    private final AppExecutors appExecutors;
+    private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Runnable dismissRunnable = () -> {
         animator = animate().alpha(0).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -33,7 +33,7 @@ public class Tooltip extends AppCompatTextView {
         animator.start();
     };
 
-    public Tooltip(Context context, ViewGroup parentView, int backgroundColor, int textColor) {
+    public Tooltip(@NonNull Context context, @NonNull ViewGroup parentView, int backgroundColor, int textColor) {
         super(context);
         setBackgroundDrawable(ViewUtils.createRoundRectDrawable(Utils.convertDpToPx(3), backgroundColor));
         setTextColor(textColor);
@@ -43,7 +43,6 @@ public class Tooltip extends AppCompatTextView {
         parentView.addView(this, ViewUtils.createFrame(
                 ViewUtils.WRAP_CONTENT, ViewUtils.WRAP_CONTENT, Gravity.START | Gravity.TOP, 5, 0, 5, 3));
         setVisibility(GONE);
-        appExecutors = AppExecutors.getInstance();
     }
 
     @Override
