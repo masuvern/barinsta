@@ -51,4 +51,12 @@ public class DirectItemReactions implements Cloneable, Serializable {
     public int hashCode() {
         return Objects.hash(emojis, likes);
     }
+
+    @Override
+    public String toString() {
+        return "DirectItemReactions{" +
+                "emojis=" + emojis +
+                ", likes=" + likes +
+                '}';
+    }
 }

@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,7 +32,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -75,6 +73,8 @@ import awais.instagrabber.animations.CubicBezierInterpolator;
 import awais.instagrabber.customviews.RecordView;
 import awais.instagrabber.customviews.Tooltip;
 import awais.instagrabber.customviews.emoji.Emoji;
+import awais.instagrabber.customviews.emoji.EmojiBottomSheetDialog;
+import awais.instagrabber.customviews.emoji.EmojiPicker;
 import awais.instagrabber.customviews.helpers.HeaderItemDecoration;
 import awais.instagrabber.customviews.helpers.HeightProvider;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
@@ -114,7 +114,8 @@ import awais.instagrabber.viewmodels.factories.DirectThreadViewModelFactory;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 
-public class DirectMessageThreadFragment extends Fragment implements DirectReactionsAdapter.OnReactionClickListener {
+public class DirectMessageThreadFragment extends Fragment implements DirectReactionsAdapter.OnReactionClickListener,
+        EmojiPicker.OnEmojiClickListener {
     private static final String TAG = DirectMessageThreadFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int AUDIO_RECORD_PERM_REQUEST_CODE = 1000;
@@ -159,6 +160,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private LiveData<Integer> pendingRequestsCountLiveData;
     private LiveData<List<User>> usersLiveData;
     private boolean autoMarkAsSeen = false;
+    private MenuItem markAsSeenMenuItem;
+    private Media tempMedia;
+    private DirectItem addReactionItem;
 
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -291,6 +295,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 cb.apply(item);
             }
         }
+
+        @Override
+        public void onAddReactionListener(final DirectItem item) {
+            if (item == null) return;
+            addReactionItem = item;
+            final EmojiBottomSheetDialog emojiBottomSheetDialog = EmojiBottomSheetDialog.newInstance();
+            emojiBottomSheetDialog.show(getChildFragmentManager(), EmojiBottomSheetDialog.TAG);
+        }
     };
 
     private final DirectItemLongClickListener directItemLongClickListener = position -> {
@@ -321,8 +333,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         backStackSavedStateResultLiveData.postValue(null);
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
-    private MenuItem markAsSeenMenuItem;
-    private Media tempMedia;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -1461,25 +1471,12 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(direction);
     }
 
-    public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<User, DirectThread>> {
-        private User user;
-        private DirectThread thread;
-
-        public ItemsAdapterDataMerger(final LiveData<User> userLiveData,
-                                      final LiveData<DirectThread> threadLiveData) {
-            addSource(userLiveData, user -> {
-                this.user = user;
-                combine();
-            });
-            addSource(threadLiveData, thread -> {
-                this.thread = thread;
-                combine();
-            });
-        }
-
-        private void combine() {
-            if (user == null || thread == null) return;
-            setValue(new Pair<>(user, thread));
+    @Override
+    public void onClick(final View view, final Emoji emoji) {
+        if (addReactionItem == null) return;
+        final LiveData<Resource<Object>> resourceLiveData = viewModel.sendReaction(addReactionItem, emoji);
+        if (resourceLiveData != null) {
+            resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
         }
     }
 }

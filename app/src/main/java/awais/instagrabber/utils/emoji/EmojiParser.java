@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -77,7 +78,12 @@ public final class EmojiParser {
                                            .addAll(emoji.getVariants())
                                            .build()
                                            .stream())
-                                   .collect(Collectors.toMap(Emoji::getUnicode, Function.identity()));
+                                   .collect(Collectors.toMap(
+                                           Emoji::getUnicode,
+                                           Function.identity(),
+                                           (u, v) -> u,
+                                           LinkedHashMap::new
+                                   ));
         } catch (Exception e) {
             Log.e(TAG, "EmojiParser: ", e);
         }
