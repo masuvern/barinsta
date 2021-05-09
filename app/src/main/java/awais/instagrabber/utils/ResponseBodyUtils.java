@@ -2,7 +2,6 @@ package awais.instagrabber.utils;
 
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -1042,7 +1041,7 @@ public final class ResponseBodyUtils {
                         tappableObject.getString("question"),
                         tappableObject.getString("emoji"),
                         tappableObject.getBoolean("viewer_can_vote"),
-                        tappableObject.getDouble("slider_vote_average"),
+                        tappableObject.optDouble("slider_vote_average"),
                         tappableObject.getInt("slider_vote_count"),
                         tappableObject.optDouble("viewer_vote")
                 ));
@@ -1094,7 +1093,6 @@ public final class ResponseBodyUtils {
         final List<MediaCandidate> sortedCandidates = candidates.stream()
                 .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
                 .collect(Collectors.toList());
-        if (sortedCandidates.size() == 1) return sortedCandidates.get(0).getUrl();
         final List<MediaCandidate> filteredCandidates = sortedCandidates.stream()
                 .filter(c ->
                         c.getWidth() <= media.getOriginalWidth()
@@ -1102,6 +1100,7 @@ public final class ResponseBodyUtils {
                                 && (isSquare || Integer.compare(c.getWidth(), c.getHeight()) != 0)
                 )
                 .collect(Collectors.toList());
+        if (filteredCandidates.size() == 0) return sortedCandidates.get(0).getUrl();
         final MediaCandidate candidate = filteredCandidates.get(0);
         if (candidate == null) return null;
         return candidate.getUrl();

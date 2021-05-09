@@ -2,14 +2,12 @@ package awais.instagrabber.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,6 +35,7 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -72,7 +71,6 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
 import awais.instagrabber.asyncs.CreateThreadAction;
-import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
@@ -105,7 +103,6 @@ import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
-//import awaisomereport.LogCollector;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -113,7 +110,6 @@ import retrofit2.Response;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
 import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
-//import static awais.instagrabber.utils.Utils.logCollector;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class StoryViewerFragment extends Fragment {
@@ -137,14 +133,14 @@ public class StoryViewerFragment extends Fragment {
     private String[] mentions;
     private QuizModel quiz;
     private SliderModel slider;
-    private MenuItem menuDownload;
-    private MenuItem menuDm;
+    private MenuItem menuDownload, menuDm, menuProfile;
     private SimpleExoPlayer player;
     // private boolean isHashtag;
     // private boolean isLoc;
     // private String highlight;
-    private String actionBarTitle;
+    private String actionBarTitle, actionBarSubtitle;
     private boolean fetching = false, sticking = false, shouldRefresh = true;
+    private boolean downloadVisible = false, dmVisible = false, profileVisible = true;
     private int currentFeedStoryIndex;
     private double sliderValue;
     private StoriesViewModel storiesViewModel;
@@ -195,8 +191,10 @@ public class StoryViewerFragment extends Fragment {
         menuInflater.inflate(R.menu.story_menu, menu);
         menuDownload = menu.findItem(R.id.action_download);
         menuDm = menu.findItem(R.id.action_dms);
-        menuDownload.setVisible(false);
-        menuDm.setVisible(false);
+        menuProfile = menu.findItem(R.id.action_profile);
+        menuDownload.setVisible(downloadVisible);
+        menuDm.setVisible(dmVisible);
+        menuProfile.setVisible(profileVisible);
     }
 
     @Override
@@ -215,7 +213,8 @@ public class StoryViewerFragment extends Fragment {
             else
                 ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
             return true;
-        } else if (itemId == R.id.action_dms) {
+        }
+        if (itemId == R.id.action_dms) {
             final EditText input = new EditText(context);
             input.setHint(R.string.reply_hint);
             new AlertDialog.Builder(context)
@@ -259,6 +258,9 @@ public class StoryViewerFragment extends Fragment {
                     .show();
             return true;
         }
+        if (itemId == R.id.action_profile) {
+            openProfile("@" + currentStory.getUsername());
+        }
         return false;
     }
 
@@ -281,7 +283,9 @@ public class StoryViewerFragment extends Fragment {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(actionBarTitle);
+            actionBar.setSubtitle(actionBarSubtitle);
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -409,10 +413,10 @@ public class StoryViewerFragment extends Fragment {
                         return true;
                     }
                 } catch (final Exception e) {
-//                    if (logCollector != null)
-//                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-//                                                     new Pair<>("swipeEvent", swipeEvent),
-//                                                     new Pair<>("diffX", diffX));
+                    // if (logCollector != null)
+                    //     logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
+                    //                                  new Pair<>("swipeEvent", swipeEvent),
+                    //                                  new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;
@@ -453,14 +457,17 @@ public class StoryViewerFragment extends Fragment {
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            mediaService.fetch(Long.valueOf(mediaId), new ServiceCallback<Media>() {
+            mediaService.fetch(Long.parseLong(mediaId), new ServiceCallback<Media>() {
                 @Override
                 public void onSuccess(final Media feedModel) {
-                    final PostViewV2Fragment fragment = PostViewV2Fragment
-                            .builder(feedModel)
-                            .build();
-                    fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                    fragment.show(getChildFragmentManager(), "post_view");
+                    final NavController navController = NavHostFragment.findNavController(StoryViewerFragment.this);
+                    final Bundle bundle = new Bundle();
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                    try {
+                        navController.navigate(R.id.action_global_post_view, bundle);
+                    } catch (Exception e) {
+                        Log.e(TAG, "openPostDialog: ", e);
+                    }
                 }
 
                 @Override
@@ -475,18 +482,18 @@ public class StoryViewerFragment extends Fragment {
             if (tag instanceof PollModel) {
                 poll = (PollModel) tag;
                 if (poll.getMyChoice() > -1) {
-                    new AlertDialog.Builder(context).setTitle(R.string.voted_story_poll)
-                                                    .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1,
-                                                                                   new String[]{
-                                                                                           (poll.getMyChoice() == 0 ? "√ " : "") + poll
-                                                                                                   .getLeftChoice() + " (" + poll
-                                                                                                   .getLeftCount() + ")",
-                                                                                           (poll.getMyChoice() == 1 ? "√ " : "") + poll
-                                                                                                   .getRightChoice() + " (" + poll
-                                                                                                   .getRightCount() + ")"
-                                                                                   }), null)
-                                                    .setPositiveButton(R.string.ok, null)
-                                                    .show();
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.voted_story_poll)
+                            .setAdapter(new ArrayAdapter<>(
+                                                context,
+                                                android.R.layout.simple_list_item_1,
+                                                new String[]{
+                                                        (poll.getMyChoice() == 0 ? "√ " : "") + poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
+                                                        (poll.getMyChoice() == 1 ? "√ " : "") + poll.getRightChoice() + " (" + poll.getRightCount() + ")"
+                                                }),
+                                        null)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
                 } else {
                     new AlertDialog.Builder(context)
                             .setTitle(poll.getQuestion())
@@ -697,6 +704,10 @@ public class StoryViewerFragment extends Fragment {
         lastSlidePos = 0;
         if (menuDownload != null) menuDownload.setVisible(false);
         if (menuDm != null) menuDm.setVisible(false);
+        if (menuProfile != null) menuProfile.setVisible(false);
+        downloadVisible = false;
+        dmVisible = false;
+        profileVisible = false;
         binding.imageViewer.setController(null);
         releasePlayer();
         String currentStoryMediaId = null;
@@ -826,7 +837,7 @@ public class StoryViewerFragment extends Fragment {
         }
     }
 
-    private void refreshStory() {
+    private synchronized void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             if (storyModels != null && storyModels.size() > 0) {
@@ -846,7 +857,6 @@ public class StoryViewerFragment extends Fragment {
 
         final MediaItemType itemType = currentStory.getItemType();
 
-        if (menuDownload != null) menuDownload.setVisible(false);
         url = itemType == MediaItemType.MEDIA_TYPE_IMAGE ? currentStory.getStoryUrl() : currentStory.getVideoUrl();
 
         if (itemType != MediaItemType.MEDIA_TYPE_LIVE) {
@@ -900,9 +910,10 @@ public class StoryViewerFragment extends Fragment {
         else setupImage();
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        actionBarSubtitle = Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L));
         if (actionBar != null) {
             try {
-                actionBar.setSubtitle(Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L)));
+                actionBar.setSubtitle(actionBarSubtitle);
             } catch (Exception e) {
                 Log.e(TAG, "refreshStory: ", e);
             }
@@ -948,10 +959,16 @@ public class StoryViewerFragment extends Fragment {
                                                                                   final ImageInfo imageInfo,
                                                                                   final Animatable animatable) {
                                                           if (menuDownload != null) {
+                                                              downloadVisible = true;
                                                               menuDownload.setVisible(true);
                                                           }
                                                           if (currentStory.canReply() && menuDm != null) {
+                                                              dmVisible = true;
                                                               menuDm.setVisible(true);
+                                                          }
+                                                          if (!TextUtils.isEmpty(currentStory.getUsername())) {
+                                                              profileVisible = true;
+                                                              menuProfile.setVisible(true);
                                                           }
                                                           binding.progressView.setVisibility(View.GONE);
                                                       }
@@ -982,9 +999,18 @@ public class StoryViewerFragment extends Fragment {
                                         @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
                                         @NonNull final LoadEventInfo loadEventInfo,
                                         @NonNull final MediaLoadData mediaLoadData) {
-                if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null)
+                if (menuDownload != null) {
+                    downloadVisible = true;
+                    menuDownload.setVisible(true);
+                }
+                if (currentStory.canReply() && menuDm != null) {
+                    dmVisible = true;
                     menuDm.setVisible(true);
+                }
+                if (!TextUtils.isEmpty(currentStory.getUsername()) && menuProfile != null) {
+                    profileVisible = true;
+                    menuProfile.setVisible(true);
+                }
                 binding.progressView.setVisibility(View.GONE);
             }
 
@@ -993,9 +1019,18 @@ public class StoryViewerFragment extends Fragment {
                                       @Nullable final MediaSource.MediaPeriodId mediaPeriodId,
                                       @NonNull final LoadEventInfo loadEventInfo,
                                       @NonNull final MediaLoadData mediaLoadData) {
-                if (menuDownload != null) menuDownload.setVisible(true);
-                if (currentStory.canReply() && menuDm != null)
+                if (menuDownload != null) {
+                    downloadVisible = true;
+                    menuDownload.setVisible(true);
+                }
+                if (currentStory.canReply() && menuDm != null) {
+                    dmVisible = true;
                     menuDm.setVisible(true);
+                }
+                if (!TextUtils.isEmpty(currentStory.getUsername()) && menuProfile != null) {
+                    profileVisible = true;
+                    menuProfile.setVisible(true);
+                }
                 binding.progressView.setVisibility(View.VISIBLE);
             }
 
@@ -1014,8 +1049,18 @@ public class StoryViewerFragment extends Fragment {
                                     @NonNull final MediaLoadData mediaLoadData,
                                     @NonNull final IOException error,
                                     final boolean wasCanceled) {
-                if (menuDownload != null) menuDownload.setVisible(false);
-                if (menuDm != null) menuDm.setVisible(false);
+                if (menuDownload != null) {
+                    downloadVisible = false;
+                    menuDownload.setVisible(false);
+                }
+                if (menuDm != null) {
+                    dmVisible = false;
+                    menuDm.setVisible(false);
+                }
+                if (menuProfile != null) {
+                    profileVisible = false;
+                    menuProfile.setVisible(false);
+                }
                 binding.progressView.setVisibility(View.GONE);
             }
         });
@@ -1094,7 +1139,6 @@ public class StoryViewerFragment extends Fragment {
             }
         });
     }
-
 
     private void openProfile(final String username) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();

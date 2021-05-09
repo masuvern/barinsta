@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
@@ -14,11 +13,11 @@ import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmMediaBinding;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
@@ -53,16 +52,16 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER
                                        ? View.VISIBLE
                                        : View.GONE);
-        final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
+        final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
                 mediaImageMaxHeight,
                 mediaImageMaxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.mediaPreview.getLayoutParams();
-        final int width = widthHeight.first != null ? widthHeight.first : 0;
+        final int width = widthHeight.first;
         layoutParams.width = width;
-        layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
+        layoutParams.height = widthHeight.second;
         binding.mediaPreview.requestLayout();
         binding.bgTime.getLayoutParams().width = width;
         binding.bgTime.requestLayout();

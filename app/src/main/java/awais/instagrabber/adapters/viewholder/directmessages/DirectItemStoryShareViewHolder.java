@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.drawable.ScalingUtils;
@@ -17,12 +16,12 @@ import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemCallback;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.databinding.LayoutDmStoryShareBinding;
 import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.repositories.responses.ImageVersions2;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -76,15 +75,15 @@ public class DirectItemStoryShareViewHolder extends DirectItemViewHolder {
                                                     .setRoundingParams(roundingParams)
                                                     .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
                                                     .build());
-        final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
+        final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 storyShareMedia.getOriginalHeight(),
                 storyShareMedia.getOriginalWidth(),
                 mediaImageMaxHeight,
                 mediaImageMaxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.ivMediaPreview.getLayoutParams();
-        layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
-        layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
+        layoutParams.width = widthHeight.first;
+        layoutParams.height = widthHeight.second;
         binding.ivMediaPreview.requestLayout();
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(storyShareMedia);
         binding.ivMediaPreview.setImageURI(thumbUrl);

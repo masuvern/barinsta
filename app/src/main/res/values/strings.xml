@@ -26,6 +26,7 @@
     <string name="update_check">Check for updates at startup</string>
     <string name="flag_secure">Block screenshots &amp; app preview</string>
     <string name="download_user_folder">Download posts to username folders</string>
+    <string name="download_prepend_username">Prepend Username to Filename</string>
     <string name="mark_as_seen_setting">Mark stories as seen after viewing</string>
     <string name="mark_as_seen_setting_summary">Story author will know you viewed it</string>
     <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
@@ -58,6 +59,8 @@
     </plurals>
     <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_autoplay_video">Autoplay videos</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Always mute videos</string>
     <string name="post_viewer_show_captions">Always show post captions</string>
     <string name="post_viewer_download_dialog_title">Select what to download</string>
@@ -378,6 +381,10 @@
         <item quantity="one">%d like</item>
         <item quantity="other">%d likes</item>
     </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
+    </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
@@ -474,8 +481,16 @@
     <string name="removed_keywords">Removed keyword: %s from filter list</string>
     <string name="marked_as_seen">Marked as seen</string>
     <string name="delete_unsuccessful">Delete unsuccessful</string>
+    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
+    <string name="error">Error</string>
+    <string name="account_logged_out">This account has been logged out.</string>
+    <string name="login_required">Login required!</string>
+    <string name="sentry_block">Sentry block.</string>
+    <string name="inactive_user">User is inactive!</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
+    <string name="not_found">Not found!</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
     <string name="skip_update">Skip this update</string>
     <string name="on_latest_version">You\'re already on the latest version</string>
     <string name="tab_order">Screen order</string>
@@ -484,4 +499,9 @@
     <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
     <string name="copy_caption">Copy caption</string>
     <string name="copy_reply">Copy reply</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to view full count</string>
 </resources>

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
@@ -22,6 +23,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -88,13 +90,17 @@ public final class Utils {
     }
 
     public static void copyText(@NonNull final Context context, final CharSequence string) {
-        if (clipboardManager == null)
+        if (clipboardManager == null) {
             clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-
+        }
         int toastMessage = R.string.clipboard_error;
         if (clipboardManager != null) {
-            clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
-            toastMessage = R.string.clipboard_copied;
+            try {
+                clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
+                toastMessage = R.string.clipboard_copied;
+            } catch (Exception e) {
+                Log.e(TAG, "copyText: ", e);
+            }
         }
         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
     }
@@ -284,6 +290,18 @@ public final class Utils {
         return outValue.data;
     }
 
+    public static int getAttrValue(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.data;
+    }
+
+    public static int getAttrResId(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.resourceId;
+    }
+
     public static void transparentStatusBar(final Activity activity,
                                             final boolean enable,
                                             final boolean fullscreen) {
@@ -341,6 +359,18 @@ public final class Utils {
                 new String[]{mimeType},
                 callback
         );
+    }
+
+    public static void showKeyboard(@NonNull final View view) {
+        final Context context = view.getContext();
+        if (context == null) return;
+        final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null) return;
+        view.requestFocus();
+        final boolean shown = imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        if (!shown) {
+            Log.e(TAG, "showKeyboard: System did not display the keyboard");
+        }
     }
 
     public static void hideKeyboard(final View view) {
@@ -494,5 +524,42 @@ public final class Utils {
     public static boolean isNavRootInCurrentTabs(final String navRootString) {
         if (navRootString == null || tabOrderString == null) return false;
         return tabOrderString.contains(navRootString);
+    }
+
+    @NonNull
+    public static Point getNavigationBarSize(@NonNull Context context) {
+        Point appUsableSize = getAppUsableScreenSize(context);
+        Point realScreenSize = getRealScreenSize(context);
+
+        // navigation bar on the right
+        if (appUsableSize.x < realScreenSize.x) {
+            return new Point(realScreenSize.x - appUsableSize.x, appUsableSize.y);
+        }
+
+        // navigation bar at the bottom
+        if (appUsableSize.y < realScreenSize.y) {
+            return new Point(appUsableSize.x, realScreenSize.y - appUsableSize.y);
+        }
+
+        // navigation bar is not present
+        return new Point();
+    }
+
+    @NonNull
+    public static Point getAppUsableScreenSize(@NonNull Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
+    }
+
+    @NonNull
+    public static Point getRealScreenSize(@NonNull Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
+        return size;
     }
 }

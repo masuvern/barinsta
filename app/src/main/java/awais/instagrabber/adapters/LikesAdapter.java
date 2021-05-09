@@ -34,7 +34,7 @@ public final class LikesAdapter extends RecyclerView.Adapter<FollowsViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull final FollowsViewHolder holder, final int position) {
         final User model = profileModels.get(position);
-        holder.bind(model, null, onClickListener);
+        holder.bind(model, onClickListener);
     }
 
     @Override

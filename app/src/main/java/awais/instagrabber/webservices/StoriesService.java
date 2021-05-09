@@ -32,7 +32,6 @@ import awais.instagrabber.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class StoriesService extends BaseService {
     private static final String TAG = "StoriesService";
@@ -50,10 +49,9 @@ public class StoriesService extends BaseService {
         this.csrfToken = csrfToken;
         this.userId = userId;
         this.deviceUuid = deviceUuid;
-        final Retrofit retrofit = getRetrofitBuilder()
-                .baseUrl("https://i.instagram.com")
-                .build();
-        repository = retrofit.create(StoriesRepository.class);
+        repository = RetrofitFactory.getInstance()
+                                    .getRetrofit()
+                                    .create(StoriesRepository.class);
     }
 
     public String getCsrfToken() {
@@ -195,8 +193,7 @@ public class StoriesService extends BaseService {
                             node.getInt("media_count"),
                             false,
                             node.optBoolean("has_besties_media")));
-                }
-                catch (Exception e) {} // to cover promotional reels with non-long user pk's
+                } catch (Exception e) {} // to cover promotional reels with non-long user pk's
             }
             final JSONArray broadcasts = new JSONObject(body).getJSONArray("broadcasts");
             for (int i = 0; i < broadcasts.length(); ++i) {
@@ -373,7 +370,8 @@ public class StoriesService extends BaseService {
         final String url = buildUrl(options);
         final Call<String> userStoryCall = repository.getUserStory(url);
         final boolean isLocOrHashtag = options.getType() == StoryViewerOptions.Type.LOCATION || options.getType() == StoryViewerOptions.Type.HASHTAG;
-        final boolean isHighlight = options.getType() == StoryViewerOptions.Type.HIGHLIGHT || options.getType() == StoryViewerOptions.Type.STORY_ARCHIVE;
+        final boolean isHighlight = options.getType() == StoryViewerOptions.Type.HIGHLIGHT || options
+                .getType() == StoryViewerOptions.Type.STORY_ARCHIVE;
         userStoryCall.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -414,7 +412,7 @@ public class StoriesService extends BaseService {
                         callback.onSuccess(null);
                     }
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error parsing string");
+                    Log.e(TAG, "Error parsing string", e);
                 }
             }
 

@@ -4,6 +4,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +31,6 @@ import awais.instagrabber.utils.TextUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class GraphQLService extends BaseService {
     private static final String TAG = "GraphQLService";
@@ -40,10 +41,9 @@ public class GraphQLService extends BaseService {
     private static GraphQLService instance;
 
     private GraphQLService() {
-        final Retrofit retrofit = getRetrofitBuilder()
-                .baseUrl("https://www.instagram.com")
-                .build();
-        repository = retrofit.create(GraphQLRepository.class);
+        repository = RetrofitFactory.getInstance()
+                                    .getRetrofitWeb()
+                                    .create(GraphQLRepository.class);
     }
 
     public static GraphQLService getInstance() {
@@ -292,6 +292,20 @@ public class GraphQLService extends BaseService {
         });
     }
 
+    public Call<String> fetchComments(final String shortCodeOrCommentId,
+                                      final boolean root,
+                                      final String cursor) {
+        final Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("query_hash", root ? "bc3296d1ce80a24b1b6e40b1e72903f5" : "51fdd02b67508306ad4484ff574a0b62");
+        final Map<String, Object> variables = ImmutableMap.of(
+                root ? "shortcode" : "comment_id", shortCodeOrCommentId,
+                "first", 50,
+                "after", cursor == null ? "" : cursor
+        );
+        queryMap.put("variables", new JSONObject(variables).toString());
+        return repository.fetch(queryMap);
+    }
+
     public void fetchUser(final String username,
                           final ServiceCallback<User> callback) {
         final Call<String> request = repository.getUser(username);
@@ -307,7 +321,7 @@ public class GraphQLService extends BaseService {
                 try {
                     final JSONObject body = new JSONObject(rawBody);
                     final JSONObject userJson = body.getJSONObject("graphql")
-                            .getJSONObject(Constants.EXTRAS_USER);
+                                                    .getJSONObject(Constants.EXTRAS_USER);
 
                     boolean isPrivate = userJson.getBoolean("is_private");
                     final long id = userJson.optLong(Constants.EXTRAS_ID, 0);

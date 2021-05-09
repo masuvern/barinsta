@@ -8,19 +8,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.BaseColumns;
+import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
@@ -28,14 +27,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -50,30 +47,27 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.adapters.SuggestionsAdapter;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.emoji.EmojiVariantManager;
+import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDirections;
-import awais.instagrabber.fragments.main.FeedFragment;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.Tab;
-import awais.instagrabber.models.enums.SuggestionType;
-import awais.instagrabber.repositories.responses.search.SearchItem;
-import awais.instagrabber.repositories.responses.search.SearchResponse;
 import awais.instagrabber.services.ActivityCheckerService;
 import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
@@ -86,10 +80,7 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
-import awais.instagrabber.webservices.SearchService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import awais.instagrabber.webservices.RetrofitFactory;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -98,16 +89,21 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private static final String TAG = "MainActivity";
     private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
     private static final String LAST_SELECT_NAV_MENU_ID = "lastSelectedNavMenuId";
+    private static final List<Integer> SEARCH_VISIBLE_DESTINATIONS = ImmutableList.of(
+            R.id.feedFragment,
+            R.id.profileFragment,
+            R.id.directMessagesInboxFragment,
+            R.id.discoverFragment,
+            R.id.favoritesFragment,
+            R.id.hashTagFragment,
+            R.id.locationFragment
+    );
+
+    private static MainActivity instance;
 
     private ActivityMainBinding binding;
     private LiveData<NavController> currentNavControllerLiveData;
     private MenuItem searchMenuItem;
-    private SuggestionsAdapter suggestionAdapter;
-    private AutoCompleteTextView searchAutoComplete;
-    private SearchView searchView;
-    private SearchService searchService;
-    private boolean showSearch = true;
-    private Handler suggestionsFetchHandler;
     private int firstFragmentGraphIndex;
     private int lastSelectedNavMenuId;
     private boolean isActivityCheckerServiceBound = false;
@@ -131,13 +127,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
     };
 
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        CookieUtils.setupCookies(cookie);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
+        setupCookie();
         if (settingsHelper.getBoolean(Constants.FLAG_SECURE))
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(binding.getRoot());
@@ -154,7 +153,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (savedInstanceState == null) {
             setupBottomNavigationBar(true);
         }
-        setupSuggestions();
         if (!BuildConfig.isPre) {
             final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
             if (checkUpdates) FlavorTown.updateCheck(this);
@@ -163,7 +161,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
         handleIntent(intent);
-        if (!TextUtils.isEmpty(cookie) && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
+        if (isLoggedIn && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
             bindActivityCheckerService();
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);
@@ -173,9 +171,29 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             EmojiVariantManager.getInstance();
         });
         initEmojiCompat();
-        searchService = SearchService.getInstance();
         // initDmService();
         initDmUnreadCount();
+        initSearchInput();
+    }
+
+    private void setupCookie() {
+        final String cookie = settingsHelper.getString(Constants.COOKIE);
+        long userId = 0;
+        String csrfToken = null;
+        if (!TextUtils.isEmpty(cookie)) {
+            userId = CookieUtils.getUserIdFromCookie(cookie);
+            csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        }
+        if (TextUtils.isEmpty(cookie) || userId == 0 || TextUtils.isEmpty(csrfToken)) {
+            isLoggedIn = false;
+            return;
+        }
+        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        if (TextUtils.isEmpty(deviceUuid)) {
+            settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
+        }
+        CookieUtils.setupCookies(cookie);
+        isLoggedIn = true;
     }
 
     private void initDmService() {
@@ -195,25 +213,74 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         });
     }
 
+    private void initSearchInput() {
+        binding.searchInputLayout.setEndIconOnClickListener(v -> {
+            final EditText editText = binding.searchInputLayout.getEditText();
+            if (editText == null) return;
+            editText.setText("");
+        });
+        binding.searchInputLayout.addOnEditTextAttachedListener(textInputLayout -> {
+            textInputLayout.setEndIconVisible(false);
+            final EditText editText = textInputLayout.getEditText();
+            if (editText == null) return;
+            editText.addTextChangedListener(new TextWatcherAdapter() {
+                @Override
+                public void afterTextChanged(final Editable s) {
+                    binding.searchInputLayout.setEndIconVisible(!TextUtils.isEmpty(s));
+                }
+            });
+        });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         searchMenuItem = menu.findItem(R.id.search);
-        if (showSearch && currentNavControllerLiveData != null) {
-            final NavController navController = currentNavControllerLiveData.getValue();
-            if (navController != null) {
-                final NavDestination currentDestination = navController.getCurrentDestination();
-                if (currentDestination != null) {
-                    final int destinationId = currentDestination.getId();
-                    showSearch = destinationId == R.id.profileFragment;
-                }
+        final NavController navController = currentNavControllerLiveData.getValue();
+        if (navController != null) {
+            final NavDestination currentDestination = navController.getCurrentDestination();
+            if (currentDestination != null) {
+                @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
+                setupMenu(backStack.size(), currentDestination.getId());
             }
         }
-        if (!showSearch) {
-            searchMenuItem.setVisible(false);
-            return true;
+        // if (binding.searchInputLayout.getVisibility() == View.VISIBLE) {
+        //     searchMenuItem.setVisible(false).setEnabled(false);
+        //     return true;
+        // }
+        // searchMenuItem.setVisible(true).setEnabled(true);
+        // if (showSearch && currentNavControllerLiveData != null) {
+        //     final NavController navController = currentNavControllerLiveData.getValue();
+        //     if (navController != null) {
+        //         final NavDestination currentDestination = navController.getCurrentDestination();
+        //         if (currentDestination != null) {
+        //             final int destinationId = currentDestination.getId();
+        //             showSearch = destinationId == R.id.profileFragment;
+        //         }
+        //     }
+        // }
+        // if (!showSearch) {
+        //     searchMenuItem.setVisible(false);
+        //     return true;
+        // }
+        // return setupSearchView();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        if (item.getItemId() == R.id.search) {
+            final NavController navController = currentNavControllerLiveData.getValue();
+            if (navController == null) return false;
+            try {
+                navController.navigate(R.id.action_global_search);
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "onOptionsItemSelected: ", e);
+            }
+            return false;
         }
-        return setupSearchView();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -263,6 +330,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             Log.e(TAG, "onDestroy: ", e);
         }
         unbindActivityCheckerService();
+        try {
+            RetrofitFactory.getInstance().destroy();
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ", e);
+        }
+        instance = null;
     }
 
     @Override
@@ -314,176 +387,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         notificationManager.createNotificationChannel(silentNotificationChannel);
     }
 
-    private void setupSuggestions() {
-        suggestionsFetchHandler = new Handler();
-        suggestionAdapter = new SuggestionsAdapter(this, (type, query) -> {
-            if (searchMenuItem != null) searchMenuItem.collapseActionView();
-            if (searchView != null && !searchView.isIconified()) searchView.setIconified(true);
-            if (currentNavControllerLiveData == null) return;
-            final NavController navController = currentNavControllerLiveData.getValue();
-            if (navController == null) return;
-            final Bundle bundle = new Bundle();
-            switch (type) {
-                case TYPE_LOCATION:
-                    bundle.putLong("locationId", Long.parseLong(query));
-                    navController.navigate(R.id.action_global_locationFragment, bundle);
-                    break;
-                case TYPE_HASHTAG:
-                    bundle.putString("hashtag", query);
-                    navController.navigate(R.id.action_global_hashTagFragment, bundle);
-                    break;
-                case TYPE_USER:
-                    bundle.putString("username", query);
-                    navController.navigate(R.id.action_global_profileFragment, bundle);
-                    break;
-            }
-        });
-    }
-
-    private boolean setupSearchView() {
-        final View actionView = searchMenuItem.getActionView();
-        if (!(actionView instanceof SearchView)) return false;
-        searchView = (SearchView) actionView;
-        searchView.setSuggestionsAdapter(suggestionAdapter);
-        searchView.setMaxWidth(Integer.MAX_VALUE);
-        final View searchText = searchView.findViewById(R.id.search_src_text);
-        if (searchText instanceof AutoCompleteTextView) {
-            searchAutoComplete = (AutoCompleteTextView) searchText;
-        }
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            private boolean searchUser;
-            private boolean searchHash;
-            private Call<SearchResponse> prevSuggestionAsync;
-            private final String[] COLUMNS = {
-                    BaseColumns._ID,
-                    Constants.EXTRAS_USERNAME,
-                    Constants.EXTRAS_NAME,
-                    Constants.EXTRAS_TYPE,
-                    "query",
-                    "pfp",
-                    "verified"
-            };
-            private String currentSearchQuery;
-
-            private final Callback<SearchResponse> cb = new Callback<SearchResponse>() {
-                @Override
-                public void onResponse(@NonNull final Call<SearchResponse> call,
-                                       @NonNull final Response<SearchResponse> response) {
-                    final MatrixCursor cursor;
-                    final SearchResponse body = response.body();
-                    if (body == null) {
-                        cursor = null;
-                        return;
-                    }
-                    final List<SearchItem> result = new ArrayList<>();
-                    if (isLoggedIn) {
-                        if (body.getList() != null) {
-                            result.addAll(searchHash ? body.getList()
-                                                           .stream()
-                                                           .filter(i -> i.getUser() == null)
-                                                           .collect(Collectors.toList())
-                                                     : body.getList());
-                        }
-                    } else {
-                        if (body.getUsers() != null && !searchHash) result.addAll(body.getUsers());
-                        if (body.getHashtags() != null) result.addAll(body.getHashtags());
-                        if (body.getPlaces() != null) result.addAll(body.getPlaces());
-                    }
-                    cursor = new MatrixCursor(COLUMNS, 0);
-                    for (int i = 0; i < result.size(); i++) {
-                        final SearchItem suggestionModel = result.get(i);
-                        if (suggestionModel != null) {
-                            Object[] objects = null;
-                            if (suggestionModel.getUser() != null)
-                                objects = new Object[]{
-                                        suggestionModel.getPosition(),
-                                        suggestionModel.getUser().getUsername(),
-                                        suggestionModel.getUser().getFullName(),
-                                        SuggestionType.TYPE_USER,
-                                        suggestionModel.getUser().getUsername(),
-                                        suggestionModel.getUser().getProfilePicUrl(),
-                                        suggestionModel.getUser().isVerified()};
-                            else if (suggestionModel.getHashtag() != null)
-                                objects = new Object[]{
-                                        suggestionModel.getPosition(),
-                                        suggestionModel.getHashtag().getName(),
-                                        suggestionModel.getHashtag().getSubtitle(),
-                                        SuggestionType.TYPE_HASHTAG,
-                                        suggestionModel.getHashtag().getName(),
-                                        "res:/" + R.drawable.ic_hashtag,
-                                        false};
-                            else if (suggestionModel.getPlace() != null)
-                                objects = new Object[]{
-                                        suggestionModel.getPosition(),
-                                        suggestionModel.getPlace().getTitle(),
-                                        suggestionModel.getPlace().getSubtitle(),
-                                        SuggestionType.TYPE_LOCATION,
-                                        suggestionModel.getPlace().getLocation().getPk(),
-                                        "res:/" + R.drawable.ic_location,
-                                        false};
-                            cursor.addRow(objects);
-                        }
-                    }
-                    suggestionAdapter.changeCursor(cursor);
-                }
-
-                @Override
-                public void onFailure(@NonNull final Call<SearchResponse> call,
-                                      @NonNull Throwable t) {
-                    if (!call.isCanceled()) {
-                        Log.e(TAG, "Exception on search:", t);
-                    }
-                }
-            };
-
-            private final Runnable runnable = () -> {
-                cancelSuggestionsAsync();
-                if (TextUtils.isEmpty(currentSearchQuery)) {
-                    suggestionAdapter.changeCursor(null);
-                    return;
-                }
-                searchUser = currentSearchQuery.charAt(0) == '@';
-                searchHash = currentSearchQuery.charAt(0) == '#';
-                if (currentSearchQuery.length() == 1 && (searchHash || searchUser)) {
-                    if (searchAutoComplete != null) {
-                        searchAutoComplete.setThreshold(2);
-                    }
-                } else {
-                    if (searchAutoComplete != null) {
-                        searchAutoComplete.setThreshold(1);
-                    }
-                    prevSuggestionAsync = searchService.search(isLoggedIn,
-                                                               searchUser || searchHash ? currentSearchQuery.substring(1)
-                                                                                        : currentSearchQuery,
-                                                               searchUser ? "user" : (searchHash ? "hashtag" : "blended"));
-                    suggestionAdapter.changeCursor(null);
-                    prevSuggestionAsync.enqueue(cb);
-                }
-            };
-
-            private void cancelSuggestionsAsync() {
-                if (prevSuggestionAsync != null)
-                    try {
-                        prevSuggestionAsync.cancel();
-                    } catch (final Exception ignored) {}
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(final String query) {
-                return onQueryTextChange(query);
-            }
-
-            @Override
-            public boolean onQueryTextChange(final String query) {
-                suggestionsFetchHandler.removeCallbacks(runnable);
-                currentSearchQuery = query;
-                suggestionsFetchHandler.postDelayed(runnable, 800);
-                return true;
-            }
-        });
-        return true;
-    }
-
     private void setupBottomNavigationBar(final boolean setDefaultTabFromSettings) {
         currentTabs = !isLoggedIn ? setupAnonBottomNav() : setupMainBottomNav();
         final List<Integer> mainNavList = currentTabs.stream()
@@ -506,16 +409,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 firstFragmentGraphIndex);
         navControllerLiveData.observe(this, navController -> setupNavigation(binding.toolbar, navController));
         currentNavControllerLiveData = navControllerLiveData;
-        binding.bottomNavView.setOnNavigationItemReselectedListener(item -> {
-            // Log.d(TAG, "setupBottomNavigationBar: item: " + item);
-            final Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.main_nav_host);
-            if (navHostFragment != null) {
-                final Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
-                if (fragment instanceof FeedFragment) {
-                    ((FeedFragment) fragment).scrollToTop();
-                }
-            }
-        });
     }
 
     private void setSelectedTab(final List<Tab> tabs) {
@@ -542,6 +435,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     private List<Tab> setupAnonBottomNav() {
         final int selectedItemId = binding.bottomNavView.getSelectedItemId();
+        final Tab favoriteTab = new Tab(R.drawable.ic_star_24,
+                                        getString(R.string.title_favorites),
+                                        false,
+                                        "favorites_nav_graph",
+                                        R.navigation.favorites_nav_graph,
+                                        R.id.favorites_nav_graph,
+                                        R.id.favoritesFragment);
         final Tab profileTab = new Tab(R.drawable.ic_person_24,
                                        getString(R.string.profile),
                                        false,
@@ -558,12 +458,15 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                                     R.id.morePreferencesFragment);
         final Menu menu = binding.bottomNavView.getMenu();
         menu.clear();
+        menu.add(0, favoriteTab.getNavigationRootId(), 0, favoriteTab.getTitle()).setIcon(favoriteTab.getIconResId());
         menu.add(0, profileTab.getNavigationRootId(), 0, profileTab.getTitle()).setIcon(profileTab.getIconResId());
         menu.add(0, moreTab.getNavigationRootId(), 0, moreTab.getTitle()).setIcon(moreTab.getIconResId());
-        if (selectedItemId != R.id.profile_nav_graph && selectedItemId != R.id.more_nav_graph) {
+        if (selectedItemId != R.id.profile_nav_graph
+                && selectedItemId != R.id.more_nav_graph
+                && selectedItemId != R.id.favorites_nav_graph) {
             setBottomNavSelectedTab(profileTab);
         }
-        return ImmutableList.of(profileTab, moreTab);
+        return ImmutableList.of(favoriteTab, profileTab, moreTab);
     }
 
     private List<Tab> setupMainBottomNav() {
@@ -584,20 +487,6 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         binding.bottomNavView.setSelectedItemId(navGraphRootId);
     }
 
-    // @NonNull
-    // private List<Integer> getMainNavList(final int main_nav_ids) {
-    //     final TypedArray navIds = getResources().obtainTypedArray(main_nav_ids);
-    //     final List<Integer> mainNavList = new ArrayList<>(navIds.length());
-    //     final int length = navIds.length();
-    //     for (int i = 0; i < length; i++) {
-    //         final int resourceId = navIds.getResourceId(i, -1);
-    //         if (resourceId < 0) continue;
-    //         mainNavList.add(resourceId);
-    //     }
-    //     navIds.recycle();
-    //     return mainNavList;
-    // }
-
     private void setupNavigation(final Toolbar toolbar, final NavController navController) {
         if (navController == null) return;
         NavigationUI.setupWithNavController(toolbar, navController);
@@ -616,11 +505,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             final boolean contains = showBottomViewDestinations.contains(destinationId);
-            binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
-            if (contains && behavior != null) {
-                behavior.slideUp(binding.bottomNavView);
-            }
-
+            binding.getRoot().post(() -> {
+                binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
+                if (contains && behavior != null) {
+                    behavior.slideUp(binding.bottomNavView);
+                }
+            });
             // explicitly hide keyboard when we navigate
             final View view = getCurrentFocus();
             Utils.hideKeyboard(view);
@@ -629,12 +519,10 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
 
     private void setupMenu(final int backStackSize, final int destinationId) {
         if (searchMenuItem == null) return;
-        if (backStackSize >= 2 && destinationId == R.id.profileFragment) {
-            showSearch = true;
+        if (backStackSize >= 2 && SEARCH_VISIBLE_DESTINATIONS.contains(destinationId)) {
             searchMenuItem.setVisible(true);
             return;
         }
-        showSearch = false;
         searchMenuItem.setVisible(false);
     }
 
@@ -765,7 +653,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (navController == null) return;
         final Bundle bundle = new Bundle();
         bundle.putString("username", "@" + username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            navController.navigate(R.id.action_global_profileFragment, bundle);
+        } catch (Exception e) {
+            Log.e(TAG, "showProfileView: ", e);
+        }
     }
 
     private void showPostView(@NonNull final IntentModel intentModel) {
@@ -778,11 +670,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         alertDialog.show();
         new PostFetcher(shortCode, feedModel -> {
             if (feedModel != null) {
-                final PostViewV2Fragment fragment = PostViewV2Fragment
-                        .builder(feedModel)
-                        .build();
-                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                fragment.show(getSupportFragmentManager(), "post_view");
+                if (currentNavControllerLiveData == null) return;
+                final NavController navController = currentNavControllerLiveData.getValue();
+                if (navController == null) return;
+                final Bundle bundle = new Bundle();
+                bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                try {
+                    navController.navigate(R.id.action_global_post_view, bundle);
+                } catch (Exception e) {
+                    Log.e(TAG, "showPostView: ", e);
+                }
                 return;
             }
             Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
@@ -838,11 +735,19 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     }
 
     public void setCollapsingView(@NonNull final View view) {
-        binding.collapsingToolbarLayout.addView(view, 0);
+        try {
+            binding.collapsingToolbarLayout.addView(view, 0);
+        } catch (Exception e) {
+            Log.e(TAG, "setCollapsingView: ", e);
+        }
     }
 
     public void removeCollapsingView(@NonNull final View view) {
-        binding.collapsingToolbarLayout.removeView(view);
+        try {
+            binding.collapsingToolbarLayout.removeView(view);
+        } catch (Exception e) {
+            Log.e(TAG, "removeCollapsingView: ", e);
+        }
     }
 
     public void setToolbar(final Toolbar toolbar) {
@@ -905,13 +810,13 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         return binding.toolbar;
     }
 
+    public View getRootView() {
+        return binding.getRoot();
+    }
+
     public List<Tab> getCurrentTabs() {
         return currentTabs;
     }
-
-//    public boolean isNavRootInCurrentTabs(@IdRes final int navRootId) {
-//        return showBottomViewDestinations.stream().anyMatch(id -> id == navRootId);
-//    }
 
     private void setNavBarDMUnreadCountBadge(final int unseenCount) {
         final BadgeDrawable badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);
@@ -926,5 +831,15 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         }
         badge.setNumber(unseenCount);
         badge.setVisible(true);
+    }
+
+    @NonNull
+    public TextInputLayout showSearchView() {
+        binding.searchInputLayout.setVisibility(View.VISIBLE);
+        return binding.searchInputLayout;
+    }
+
+    public void hideSearchView() {
+        binding.searchInputLayout.setVisibility(View.GONE);
     }
 }

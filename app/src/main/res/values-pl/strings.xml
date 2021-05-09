@@ -23,8 +23,10 @@
     <string name="update_check">Sprawdź aktualizacje przy starcie</string>
     <string name="flag_secure">Blokuj zrzuty ekranu &amp; podgląd aplikacji</string>
     <string name="download_user_folder">Pobierz posty do folderów o nazwie użytkownika</string>
+    <string name="download_prepend_username">Dodaj nazwę użytkownika do nazwy pliku</string>
     <string name="mark_as_seen_setting">Oznacz relacje jako widoczne po wyświetleniu</string>
     <string name="mark_as_seen_setting_summary">Autor relacji będzie widział, że to wyświetliłeś</string>
+    <string name="hide_muted_reels_setting">Ukryj wyciszone relacje z kanału</string>
     <string name="dm_mark_as_seen_setting">Oznacz wiadomość jako przeczytaną</string>
     <string name="dm_mark_as_seen_setting_summary">Inni użytkownicy będą wiedzieli, że to wyświetliłeś</string>
     <string name="activity_setting">Włącz powiadomienia o aktywności</string>
@@ -60,6 +62,8 @@
     </plurals>
     <string name="main_posts_following">%s\nobserwowanych</string>
     <string name="post_viewer_autoplay_video">Automatyczne odtwarzanie filmów</string>
+    <string name="post_viewer_background_play">Kontynuuj wideo w tle</string>
+    <string name="post_viewer_background_play_summary">Nie wstrzymuj filmów, gdy aplikacja jest nieaktywna</string>
     <string name="post_viewer_muted_autoplay">Zawsze wyciszaj filmy</string>
     <string name="post_viewer_show_captions">Zawsze pokazuj napisy postów</string>
     <string name="post_viewer_download_dialog_title">Wybierz, co chcesz pobrać</string>
@@ -468,11 +472,32 @@
     <string name="generic_null_response">Odpowiedź jest pusta!</string>
     <string name="generic_not_ok_response">Status odpowiedzi nie jest OK!</string>
     <string name="generic_failed_request">Żądanie nie powiodło się!</string>
-    <string name="hint_keyword">Keyword</string>
-    <string name="toggle_keyword_filter">Enable keyword filter</string>
-    <string name="edit_keyword_filter">Edit keyword filters</string>
-    <string name="added_keywords">Added keyword: %s to filter list</string>
-    <string name="removed_keywords">Removed keyword: %s from filter list</string>
+    <string name="hint_keyword">Słowo kluczowe</string>
+    <string name="toggle_keyword_filter">Włącz filtr słów kluczowych</string>
+    <string name="edit_keyword_filter">Edytuj filtry słów kluczowych</string>
+    <string name="added_keywords">Dodano słowo kluczowe: %s do listy filtrów</string>
+    <string name="removed_keywords">Usunięto słowo kluczowe: %s z listy filtrów</string>
     <string name="marked_as_seen">Oznacz jako przeczytane</string>
     <string name="delete_unsuccessful">Usuwanie nie powiodło się</string>
+    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
+    <string name="error">Błąd</string>
+    <string name="account_logged_out">To konto zostało wylogowane.</string>
+    <string name="login_required">Wymagane logowanie!</string>
+    <string name="sentry_block">Sentry block.</string>
+    <string name="inactive_user">Użytkownik jest nieaktywny!</string>
+    <string name="crash_report_subject">Raport awarii Barinsta</string>
+    <string name="crash_report_title">Wybierz aplikację e-mail do wysyłania dzienników awarii</string>
+    <string name="not_found">Nie znaleziono!</string>
+    <string name="rate_limit">Twój adres IP został ograniczony przez Instagram. Poczekaj godzinę i spróbuj ponownie.</string>
+    <string name="skip_update">Pomiń tę aktualizację</string>
+    <string name="on_latest_version">Posiadasz aktualną wersję</string>
+    <string name="tab_order">Kolejność na ekranie</string>
+    <string name="other_tabs">Inne karty</string>
+    <string name="tab_order_start_next_launch">Kolejność zakładek zostanie odzwierciedlona przy następnym uruchomieniu</string>
+    <string name="dm_remove_warning">Po zapisaniu wszystkie funkcje związane z PW zostaną wyłączone przy następnym uruchomieniu</string>
+    <string name="copy_caption">Kopiuj podpis</string>
+    <string name="copy_reply">Kopiuj odpowiedź</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
 </resources>

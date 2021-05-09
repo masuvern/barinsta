@@ -11,8 +11,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -35,9 +33,11 @@ import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.FlavorTown;
+import awais.instagrabber.utils.ProcessPhoenix;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -60,7 +60,6 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         final MainActivity activity = (MainActivity) getActivity();
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
-        final Resources resources = context.getResources();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
@@ -71,11 +70,13 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             accountCategory.setSummary(R.string.account_hint);
             accountCategory.addPreference(getAccountSwitcherPreference(cookie, context));
             accountCategory.addPreference(getPreference(R.string.logout, R.string.logout_summary, R.drawable.ic_logout_24, preference -> {
-                if (getContext() == null) return false;
+                final Context context1 = getContext();
+                if (context1 == null) return false;
                 CookieUtils.setupCookies("LOGOUT");
-                shouldRecreate();
-                Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
+                // shouldRecreate();
+                Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                 settingsHelper.putString(Constants.COOKIE, "");
+                AppExecutors.getInstance().mainThread().execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
                 return true;
             }));
         }
@@ -84,28 +85,44 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             public void onSuccess(@NonNull final List<Account> accounts) {
                 if (!isLoggedIn) {
                     if (accounts.size() > 0) {
-                        accountCategory.addPreference(getAccountSwitcherPreference(null, context));
+                        final Context context1 = getContext();
+                        final AccountSwitcherPreference preference = getAccountSwitcherPreference(null, context1);
+                        if (preference == null) return;
+                        accountCategory.addPreference(preference);
                     }
                     // Need to show something to trigger login activity
-                    accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
-                        startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
+                    final Preference preference1 = getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                        final Context context1 = getContext();
+                        if (context1 == null) return false;
+                        startActivityForResult(new Intent(context1, Login.class), Constants.LOGIN_RESULT_CODE);
                         return true;
-                    }));
+                    });
+                    if (preference1 == null) return;
+                    accountCategory.addPreference(preference1);
                 }
                 if (accounts.size() > 0) {
-                    accountCategory
-                            .addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_account_multiple_remove_24, preference -> {
+                    final Preference preference1 = getPreference(
+                            R.string.remove_all_acc,
+                            null,
+                            R.drawable.ic_account_multiple_remove_24,
+                            preference -> {
                                 if (getContext() == null) return false;
                                 new AlertDialog.Builder(getContext())
                                         .setTitle(R.string.logout)
                                         .setMessage(R.string.remove_all_acc_warning)
                                         .setPositiveButton(R.string.yes, (dialog, which) -> {
-                                            CookieUtils.removeAllAccounts(context, new RepositoryCallback<Void>() {
+                                            final Context context1 = getContext();
+                                            if (context1 == null) return;
+                                            CookieUtils.removeAllAccounts(context1, new RepositoryCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(final Void result) {
-                                                    shouldRecreate();
-                                                    Toast.makeText(context, R.string.logout_success, Toast.LENGTH_SHORT).show();
+                                                    // shouldRecreate();
+                                                    final Context context1 = getContext();
+                                                    if (context1 == null) return;
+                                                    Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                                                     settingsHelper.putString(Constants.COOKIE, "");
+                                                    AppExecutors.getInstance().mainThread()
+                                                                .execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
                                                 }
 
                                                 @Override
@@ -115,7 +132,9 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                         .setNegativeButton(R.string.cancel, null)
                                         .show();
                                 return true;
-                            }));
+                            });
+                    if (preference1 == null) return;
+                    accountCategory.addPreference(preference1);
                 }
             }
 
@@ -223,12 +242,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                            -1,
                                            preference -> {
                                                if (BuildConfig.isPre) return true;
+                                               if (activity == null) return false;
                                                FlavorTown.updateCheck(activity, true);
                                                return true;
                                            }));
         screen.addPreference(getDivider(context));
 
         final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
+        if (reminderPreference == null) return;
         reminderPreference.setSelectable(false);
         screen.addPreference(reminderPreference);
     }
@@ -265,9 +286,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                 new RepositoryCallback<Account>() {
                                     @Override
                                     public void onSuccess(final Account result) {
-                                        final FragmentActivity activity = getActivity();
-                                        if (activity == null) return;
-                                        activity.recreate();
+                                        // final FragmentActivity activity = getActivity();
+                                        // if (activity == null) return;
+                                        // activity.recreate();
+                                        AppExecutors.getInstance().mainThread().execute(() -> {
+                                            final Context context = getContext();
+                                            if (context == null) return;
+                                            ProcessPhoenix.triggerRebirth(context);
+                                        }, 200);
                                     }
 
                                     @Override
@@ -286,6 +312,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         }
     }
 
+    @Nullable
     private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie, final Context context) {
         if (context == null) return null;
         return new AccountSwitcherPreference(context, cookie, accountRepository, v -> showAccountSwitcherDialog());
@@ -300,12 +327,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         dialogFragment.show(fragmentManager, "accountSwitcher");
     }
 
+    @Nullable
     private Preference getPreference(final int title,
                                      final int icon,
                                      final Preference.OnPreferenceClickListener clickListener) {
         return getPreference(title, -1, icon, clickListener);
     }
 
+    @Nullable
     private Preference getPreference(final int title,
                                      final int summary,
                                      final int icon,
@@ -321,6 +350,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         return getPreference(title, string, icon, clickListener);
     }
 
+    @Nullable
     private Preference getPreference(final int title,
                                      final String summary,
                                      final int icon,
@@ -338,15 +368,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         return preference;
     }
 
-
-    public static class MoreHeaderPreference extends Preference {
-
-        public MoreHeaderPreference(final Context context) {
-            super(context);
-            setLayoutResource(R.layout.pref_more_header);
-            setSelectable(false);
-        }
-    }
+    // public static class MoreHeaderPreference extends Preference {
+    //
+    //     public MoreHeaderPreference(final Context context) {
+    //         super(context);
+    //         setLayoutResource(R.layout.pref_more_header);
+    //         setSelectable(false);
+    //     }
+    // }
 
     public static class AccountSwitcherPreference extends Preference {
 

@@ -354,8 +354,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                     }
                     if (TextUtils.isEmpty(user.getUsername())) return;
                     final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
-                            .actionGlobalProfileFragment()
-                            .setUsername("@" + user.getUsername());
+                            .actionGlobalProfileFragment("@" + user.getUsername());
                     NavHostFragment.findNavController(this).navigate(directions);
                 },
                 (position, user) -> {
@@ -393,8 +392,7 @@ public class DirectMessageSettingsFragment extends Fragment implements ConfirmDi
                 @Override
                 public void onClick(final int position, final PendingUser pendingUser) {
                     final ProfileNavGraphDirections.ActionGlobalProfileFragment directions = ProfileNavGraphDirections
-                            .actionGlobalProfileFragment()
-                            .setUsername("@" + pendingUser.getUser().getUsername());
+                            .actionGlobalProfileFragment("@" + pendingUser.getUser().getUsername());
                     NavHostFragment.findNavController(DirectMessageSettingsFragment.this).navigate(directions);
                 }
 

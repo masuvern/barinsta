@@ -82,8 +82,12 @@ public final class InboxManager {
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
         final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || userId <= 0 || TextUtils.isEmpty(deviceUuid)) {
-            throw new IllegalArgumentException("User is not logged in!");
+        if (TextUtils.isEmpty(csrfToken)) {
+            throw new IllegalArgumentException("csrfToken is empty!");
+        } else if (userId == 0) {
+            throw new IllegalArgumentException("user id invalid");
+        } else if (TextUtils.isEmpty(deviceUuid)) {
+            throw new IllegalArgumentException("device uuid is empty!");
         }
         service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
 
@@ -281,8 +285,13 @@ public final class InboxManager {
             if (index < 0) return;
             final List<DirectThread> threads = inbox.getThreads();
             final DirectThread thread = threads.get(index);
-            thread.setItems(updatedItems);
-            setThread(inbox, index, thread);
+            try {
+                final DirectThread threadClone = (DirectThread) thread.clone();
+                threadClone.setItems(updatedItems);
+                setThread(inbox, index, threadClone);
+            } catch (Exception e) {
+                Log.e(TAG, "setItemsToThread: ", e);
+            }
         }
     }
 

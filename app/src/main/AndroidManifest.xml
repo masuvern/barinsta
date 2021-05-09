@@ -54,6 +54,8 @@
                 <data android:scheme="https" />
                 <data android:host="ig.me" />
                 <data android:host="www.ig.me" />
+                <data android:host="instagr.am" />
+                <data android:host="www.instagr.am" />
                 <data android:host="instagram.com" />
                 <data android:host="www.instagram.com" />
                 <data android:pathPrefix="/" />
@@ -130,6 +132,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
         </activity>
+        <activity
+            android:name=".utils.ProcessPhoenix"
+            android:theme="@style/Theme.AppCompat.Translucent" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

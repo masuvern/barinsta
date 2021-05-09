@@ -17,6 +17,7 @@ public class StoriesPreferencesFragment extends BasePreferencesFragment {
         final Context context = getContext();
         if (context == null) return;
         screen.addPreference(getStorySortPreference(context));
+        screen.addPreference(getHideMutedReelsPreference(context));
         screen.addPreference(getMarkStoriesSeenPreference(context));
     }
 

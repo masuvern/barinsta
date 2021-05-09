@@ -25,8 +25,9 @@
 
     <color name="dm_profile_button_color">#efefef</color>
 
-    <color name="comment_selected">#888888</color>
-    <color name="comment_liked">#40FF69B4</color>
+    <color name="parent_comment_dark_materialdark">#FF082654</color>
+    <color name="parent_comment_light_white">@color/grey_300</color>
+    <!--<color name="comment_liked">#40FF69B4</color>-->
 
     <color name="white">#FFFFFF</color>
     <color name="white_a50">#80FFFFFF</color>
@@ -62,6 +63,10 @@
     <color name="blue_A200">#448AFF</color>
     <color name="blue_A400">#2979FF</color>
     <color name="blue_A700">#2962FF</color>
+
+    <color name="light_blue_900">#01579b</color>
+
+    <color name="indigo_900">#1A237E</color>
 
     <color name="brown_50">#EFEBE9</color>
     <color name="brown_100">#D7CCC8</color>

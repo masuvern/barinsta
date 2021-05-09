@@ -22,14 +22,16 @@ import java.util.List;
 import awais.instagrabber.db.dao.AccountDao;
 import awais.instagrabber.db.dao.DMLastNotifiedDao;
 import awais.instagrabber.db.dao.FavoriteDao;
+import awais.instagrabber.db.dao.RecentSearchDao;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.entities.DMLastNotified;
 import awais.instagrabber.db.entities.Favorite;
+import awais.instagrabber.db.entities.RecentSearch;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.Utils;
 
-@Database(entities = {Account.class, Favorite.class, DMLastNotified.class},
-          version = 5)
+@Database(entities = {Account.class, Favorite.class, DMLastNotified.class, RecentSearch.class},
+          version = 6)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG = AppDatabase.class.getSimpleName();
@@ -42,12 +44,14 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract DMLastNotifiedDao dmLastNotifiedDao();
 
+    public abstract RecentSearchDao recentSearchDao();
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "cookiebox.db")
-                                   .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                                   .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                                    .build();
                 }
             }
@@ -153,6 +157,21 @@ public abstract class AppDatabase extends RoomDatabase {
                                      "`last_notified_msg_ts` INTEGER, " +
                                      "`last_notified_at` INTEGER)");
             database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_dm_last_notified_thread_id` ON `dm_last_notified` (`thread_id`)");
+        }
+    };
+
+    static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull final SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recent_searches` (" +
+                                     "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                     "`ig_id` TEXT NOT NULL, " +
+                                     "`name` TEXT NOT NULL, " +
+                                     "`username` TEXT, " +
+                                     "`pic_url` TEXT, " +
+                                     "`type` TEXT NOT NULL, " +
+                                     "`last_searched_on` INTEGER NOT NULL)");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recent_searches_ig_id_type` ON `recent_searches` (`ig_id`, `type`)");
         }
     };
 

@@ -229,7 +229,6 @@ public class DirectItem implements Cloneable, Serializable {
     public LocalDateTime getLocalDateTime() {
         if (localDateTime == null) {
             localDateTime = Instant.ofEpochMilli(timestamp / 1000).atZone(ZoneId.systemDefault()).toLocalDateTime();
-            ;
         }
         return localDateTime;
     }

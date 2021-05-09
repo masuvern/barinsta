@@ -1,5 +1,7 @@
 package awais.instagrabber.repositories.responses;
 
+import java.util.Objects;
+
 public class Place {
     private final Location location;
     // for search
@@ -39,5 +41,22 @@ public class Place {
 
     public String getStatus() {
         return status;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Place place = (Place) o;
+        return Objects.equals(location, place.location) &&
+                Objects.equals(title, place.title) &&
+                Objects.equals(subtitle, place.subtitle) &&
+                Objects.equals(slug, place.slug) &&
+                Objects.equals(status, place.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(location, title, subtitle, slug, status);
     }
 }

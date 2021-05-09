@@ -13,12 +13,17 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.R;
 import awais.instagrabber.models.Resource;
+import awais.instagrabber.repositories.responses.AnimatedMediaFixedHeight;
 import awais.instagrabber.repositories.responses.giphy.GiphyGif;
+import awais.instagrabber.repositories.responses.giphy.GiphyGifImages;
 import awais.instagrabber.repositories.responses.giphy.GiphyGifResponse;
 import awais.instagrabber.repositories.responses.giphy.GiphyGifResults;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.GifService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -92,10 +97,23 @@ public class GifPickerViewModel extends ViewModel {
         final GiphyGifResults results = giphyGifResponse.getResults();
         images.postValue(Resource.success(
                 ImmutableList.<GiphyGif>builder()
-                        .addAll(results.getGiphy() == null ? Collections.emptyList() : results.getGiphy())
-                        .addAll(results.getGiphyGifs() == null ? Collections.emptyList() : results.getGiphyGifs())
+                        .addAll(results.getGiphy() == null ? Collections.emptyList() : filterInvalid(results.getGiphy()))
+                        .addAll(results.getGiphyGifs() == null ? Collections.emptyList() : filterInvalid(results.getGiphyGifs()))
                         .build()
         ));
+    }
+
+    private List<GiphyGif> filterInvalid(@NonNull final List<GiphyGif> giphyGifs) {
+        return giphyGifs.stream()
+                        .filter(Objects::nonNull)
+                        .filter(giphyGif -> {
+                            final GiphyGifImages images = giphyGif.getImages();
+                            if (images == null) return false;
+                            final AnimatedMediaFixedHeight fixedHeight = images.getFixedHeight();
+                            if (fixedHeight == null) return false;
+                            return !TextUtils.isEmpty(fixedHeight.getWebp());
+                        })
+                        .collect(Collectors.toList());
     }
 
     // @NonNull
