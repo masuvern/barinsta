@@ -27,7 +27,7 @@ jobs:
       run: ./gradlew assembleGithubRelease --stacktrace --project-prop pre
 
     - name: Sign APK
-      uses: ammargitham/sign-android-release@v1.1
+      uses: ammargitham/sign-android-release@v1.1.1
       # ID used to access action output
       id: sign_app
       with:
