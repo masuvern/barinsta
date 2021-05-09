@@ -24,7 +24,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Github unsigned pre-release apk
-      run: ./gradlew assembleGithubRelease --stacktrace --project-prop pre
+      run: ./gradlew assembleGithubRelease --stacktrace --project-prop pre --project-prop split
 
     - name: Sign APK
       uses: ammargitham/sign-android-release@v1.1.1

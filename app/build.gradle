@@ -86,7 +86,7 @@ android {
         // Configures multiple APKs based on ABI.
         abi {
             // Enables building multiple APKs per ABI.
-            enable !project.hasProperty("noAbiSplits") && !gradle.startParameter.taskNames.isEmpty() && gradle.startParameter.taskNames.get(0).contains('Release')
+            enable project.hasProperty("split") && !gradle.startParameter.taskNames.isEmpty() && gradle.startParameter.taskNames.get(0).contains('Release')
 
             // By default all ABIs are included, so use reset() and include to specify that we only
             // want APKs for x86 and x86_64.
