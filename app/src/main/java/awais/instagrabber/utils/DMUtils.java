@@ -27,11 +27,6 @@ public final class DMUtils {
     public static boolean isRead(@NonNull final DirectItem item,
                                  @NonNull final Map<Long, DirectThreadLastSeenAt> lastSeenAt,
                                  @NonNull final List<Long> userIdsToCheck) {
-        // Further check if directStory exists
-        // if (read && directStory != null) {
-        //     read = false;
-        // }
-        if (item == null) return false;
         return lastSeenAt.entrySet()
                          .stream()
                          .filter(entry -> userIdsToCheck.contains(entry.getKey()))
