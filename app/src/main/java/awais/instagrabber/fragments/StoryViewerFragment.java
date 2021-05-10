@@ -467,7 +467,7 @@ public class StoryViewerFragment extends Fragment {
 		  		};
 
 		   		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		   		builder.setTitle("Are you sure you want to open this link?");
+		   		builder.setTitle(R.string.swipe_up_confirmation);
 		   		builder.setMessage(tag.toString()).setPositiveButton("Yes", dialogClickListener)
 		   			.setNegativeButton("No", dialogClickListener).show();
 		  	}
