@@ -13,6 +13,7 @@ import java.util.Optional;
 import awais.instagrabber.R;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
@@ -57,7 +58,7 @@ public final class DMUtils {
             read = true;
         } else {
             final Map<Long, DirectThreadLastSeenAt> lastSeenAtMap = thread.getLastSeenAt();
-            read = isRead(item, lastSeenAtMap, Collections.singletonList(viewerId));
+            read = item != null && isRead(item, lastSeenAtMap, Collections.singletonList(viewerId));
         }
         return read;
     }
@@ -88,7 +89,11 @@ public final class DMUtils {
                     message = item.getPlaceholder().getMessage();
                     break;
                 case MEDIA_SHARE:
-                    final User mediaShareUser = item.getMediaShare().getUser();
+                    final Media mediaShare = item.getMediaShare();
+                    User mediaShareUser = null;
+                    if (mediaShare != null) {
+                        mediaShareUser = mediaShare.getUser();
+                    }
                     subtitle = resources.getString(R.string.dms_inbox_shared_post,
                                                    username != null ? username : "",
                                                    mediaShareUser == null ? "" : mediaShareUser.getUsername());
@@ -120,7 +125,11 @@ public final class DMUtils {
                         final int format = reelType.equals("highlight_reel")
                                            ? R.string.dms_inbox_shared_highlight
                                            : R.string.dms_inbox_shared_story;
-                        final User storyShareMediaUser = item.getStoryShare().getMedia().getUser();
+                        final Media media = item.getStoryShare().getMedia();
+                        User storyShareMediaUser = null;
+                        if (media != null) {
+                            storyShareMediaUser = media.getUser();
+                        }
                         subtitle = resources.getString(format,
                                                        username != null ? username : "",
                                                        storyShareMediaUser == null ? "" : storyShareMediaUser.getUsername());
@@ -137,13 +146,21 @@ public final class DMUtils {
                     subtitle = item.getVideoCallEvent().getDescription();
                     break;
                 case CLIP:
-                    final User clipUser = item.getClip().getClip().getUser();
+                    final Media clip = item.getClip().getClip();
+                    User clipUser = null;
+                    if (clip != null) {
+                        clipUser = clip.getUser();
+                    }
                     subtitle = resources.getString(R.string.dms_inbox_shared_clip,
                                                    username != null ? username : "",
                                                    clipUser == null ? "" : clipUser.getUsername());
                     break;
                 case FELIX_SHARE:
-                    final User felixShareVideoUser = item.getFelixShare().getVideo().getUser();
+                    final Media video = item.getFelixShare().getVideo();
+                    User felixShareVideoUser = null;
+                    if (video != null) {
+                        felixShareVideoUser = video.getUser();
+                    }
                     subtitle = resources.getString(R.string.dms_inbox_shared_igtv,
                                                    username != null ? username : "",
                                                    felixShareVideoUser == null ? "" : felixShareVideoUser.getUsername());
