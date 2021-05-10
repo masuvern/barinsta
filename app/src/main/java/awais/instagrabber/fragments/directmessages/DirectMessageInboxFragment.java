@@ -96,7 +96,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         }
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint({"UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
     @Override
     public void onPause() {
         super.onPause();
@@ -176,7 +176,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             if (inboxAdapter == null) return;
             inboxAdapter.submitList(list, () -> {
                 if (!scrollToTop) return;
-                binding.inboxList.smoothScrollToPosition(0);
+                binding.inboxList.post(() -> binding.inboxList.smoothScrollToPosition(0));
                 scrollToTop = false;
             });
         };
@@ -204,7 +204,7 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         viewModel.getPendingRequestsTotal().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint({"UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
     private void attachPendingRequestsBadge(@Nullable final Integer count) {
         if (pendingRequestsMenuItem == null) {
             final Handler handler = new Handler();

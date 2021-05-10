@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,6 +51,7 @@ import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class SavedViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+    private static final String TAG = SavedViewerFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
@@ -171,16 +173,15 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            final NavController navController = NavHostFragment.findNavController(SavedViewerFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
             }
-            if (!layoutPreferences.isAnimationDisabled()) {
-                builder.setSharedProfilePicElement(profilePicView)
-                       .setSharedMainPostElement(mainPostImage);
-            }
-            builder.build().show(getChildFragmentManager(), "post_view");
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {

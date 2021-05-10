@@ -23,10 +23,10 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build Github unsigned apk
-      run: ./gradlew assembleGithubRelease --stacktrace --project-prop pre
+      run: ./gradlew assembleGithubRelease --stacktrace --project-prop pre --project-prop split
       
     - name: Sign APK
-      uses: r0adkll/sign-android-release@v1
+      uses: ammargitham/sign-android-release@v1.1.1
       # ID used to access action output
       id: sign_app
       with:
@@ -45,7 +45,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: barinsta_nightly_${{ steps.date.outputs.date }}
-        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        # path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        path: app/build/outputs/apk/github/release/*-signed.apk
         
     # Send success notification
     - name: Send success Telegram notification
@@ -55,7 +56,8 @@ jobs:
         to: ${{ secrets.TELEGRAM_BUILDS_CHANNEL_TO }}
         token: ${{ secrets.TELEGRAM_BUILDS_BOT_TOKEN }}
         message: "${{ github.workflow }} ${{ github.job }} #${{ github.run_number }} completed successfully.\nhttps://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-        document: ${{steps.sign_app.outputs.signedReleaseFile}}
+        # document: ${{steps.sign_app.outputs.signedReleaseFile}}
+        document: app/build/outputs/apk/github/release/*-signed.apk
     
     # Send failure notification
     - name: Send failure Telegram notification

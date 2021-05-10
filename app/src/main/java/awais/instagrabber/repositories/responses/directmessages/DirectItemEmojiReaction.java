@@ -47,4 +47,14 @@ public class DirectItemEmojiReaction implements Serializable {
     public int hashCode() {
         return Objects.hash(senderId, timestamp, emoji, superReactType);
     }
+
+    @Override
+    public String toString() {
+        return "DirectItemEmojiReaction{" +
+                "senderId=" + senderId +
+                ", timestamp=" + timestamp +
+                ", emoji='" + emoji + '\'' +
+                ", superReactType='" + superReactType + '\'' +
+                '}';
+    }
 }

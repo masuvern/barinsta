@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -16,6 +15,7 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemXma;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
 
 public class DirectItemXmaViewHolder extends DirectItemViewHolder {
@@ -43,7 +43,7 @@ public class DirectItemXmaViewHolder extends DirectItemViewHolder {
         }
         final DirectItemXma.XmaUrlInfo urlInfo = playableUrlInfo != null ? playableUrlInfo : previewUrlInfo;
         final String url = urlInfo.getUrl();
-        final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
+        final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 urlInfo.getHeight(),
                 urlInfo.getWidth(),
                 mediaImageMaxHeight,
@@ -51,8 +51,8 @@ public class DirectItemXmaViewHolder extends DirectItemViewHolder {
         );
         binding.ivAnimatedMessage.setVisibility(View.VISIBLE);
         final ViewGroup.LayoutParams layoutParams = binding.ivAnimatedMessage.getLayoutParams();
-        final int width = widthHeight.first != null ? widthHeight.first : 0;
-        final int height = widthHeight.second != null ? widthHeight.second : 0;
+        final int width = widthHeight.first;
+        final int height = widthHeight.second;
         layoutParams.width = width;
         layoutParams.height = height;
         binding.ivAnimatedMessage.requestLayout();

@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Pair;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.facebook.drawee.drawable.ScalingUtils;
@@ -31,6 +30,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemClip;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemFelixShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
@@ -103,15 +103,15 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
                                                   .setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP)
                                                   .setRoundingParams(roundingParams)
                                                   .build());
-        final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
+        final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
                 mediaImageMaxHeight,
                 mediaImageMaxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.mediaPreview.getLayoutParams();
-        layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
-        layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
+        layoutParams.width = widthHeight.first;
+        layoutParams.height = widthHeight.second;
         binding.mediaPreview.requestLayout();
         binding.mediaPreview.setTag(url);
         binding.mediaPreview.setImageURI(url);

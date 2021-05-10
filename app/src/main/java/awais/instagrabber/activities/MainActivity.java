@@ -335,6 +335,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ", e);
         }
+        instance = null;
     }
 
     @Override
@@ -504,11 +505,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             final boolean contains = showBottomViewDestinations.contains(destinationId);
-            binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
-            if (contains && behavior != null) {
-                behavior.slideUp(binding.bottomNavView);
-            }
-
+            binding.getRoot().post(() -> {
+                binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
+                if (contains && behavior != null) {
+                    behavior.slideUp(binding.bottomNavView);
+                }
+            });
             // explicitly hide keyboard when we navigate
             final View view = getCurrentFocus();
             Utils.hideKeyboard(view);
@@ -651,7 +653,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (navController == null) return;
         final Bundle bundle = new Bundle();
         bundle.putString("username", "@" + username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            navController.navigate(R.id.action_global_profileFragment, bundle);
+        } catch (Exception e) {
+            Log.e(TAG, "showProfileView: ", e);
+        }
     }
 
     private void showPostView(@NonNull final IntentModel intentModel) {
@@ -664,11 +670,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         alertDialog.show();
         new PostFetcher(shortCode, feedModel -> {
             if (feedModel != null) {
-                final PostViewV2Fragment fragment = PostViewV2Fragment
-                        .builder(feedModel)
-                        .build();
-                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                fragment.show(getSupportFragmentManager(), "post_view");
+                if (currentNavControllerLiveData == null) return;
+                final NavController navController = currentNavControllerLiveData.getValue();
+                if (navController == null) return;
+                final Bundle bundle = new Bundle();
+                bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                try {
+                    navController.navigate(R.id.action_global_post_view, bundle);
+                } catch (Exception e) {
+                    Log.e(TAG, "showPostView: ", e);
+                }
                 return;
             }
             Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
@@ -724,11 +735,19 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     }
 
     public void setCollapsingView(@NonNull final View view) {
-        binding.collapsingToolbarLayout.addView(view, 0);
+        try {
+            binding.collapsingToolbarLayout.addView(view, 0);
+        } catch (Exception e) {
+            Log.e(TAG, "setCollapsingView: ", e);
+        }
     }
 
     public void removeCollapsingView(@NonNull final View view) {
-        binding.collapsingToolbarLayout.removeView(view);
+        try {
+            binding.collapsingToolbarLayout.removeView(view);
+        } catch (Exception e) {
+            Log.e(TAG, "removeCollapsingView: ", e);
+        }
     }
 
     public void setToolbar(final Toolbar toolbar) {
