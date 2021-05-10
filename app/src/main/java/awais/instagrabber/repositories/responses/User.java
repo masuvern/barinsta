@@ -111,6 +111,9 @@ public class User implements Serializable {
     }
 
     public String getHDProfilePicUrl() {
+        if (hdProfilePicUrlInfo == null) {
+            return getProfilePicUrl();
+        }
         return hdProfilePicUrlInfo.getUrl();
     }
 

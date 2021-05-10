@@ -134,7 +134,14 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 @Override
                 public void onSuccess(final User result) {
                     if (result != null) {
-                        setupPhoto(result.getHDProfilePicUrl());
+                        final String url = result.getHDProfilePicUrl();
+                        if (url == null) {
+                            final Context context = getContext();
+                            if (context == null) return;
+                            Toast.makeText(context, R.string.no_profile_pic_found, Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        setupPhoto(url);
                     }
                 }
 
