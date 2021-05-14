@@ -338,6 +338,12 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        binding.getRoot().postDelayed(feedStoriesAdapter::notifyDataSetChanged, 1000);
+    }
+
+    @Override
     public void onRefresh() {
         binding.feedRecyclerView.refresh();
         fetchStories();
@@ -418,15 +424,16 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void fetchStories() {
+        if (storiesFetching) return;
         // final String cookie = settingsHelper.getString(Constants.COOKIE);
         storiesFetching = true;
         updateSwipeRefreshState();
         storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
             @Override
             public void onSuccess(final List<FeedStoryModel> result) {
+                storiesFetching = false;
                 feedStoriesViewModel.getList().postValue(result);
                 feedStoriesAdapter.submitList(result);
-                storiesFetching = false;
                 if (storyListMenu != null) storyListMenu.setVisible(true);
                 updateSwipeRefreshState();
             }

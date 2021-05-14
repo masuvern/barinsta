@@ -10,11 +10,11 @@
             motion:layout_constraintStart_toStartOf="parent"
             motion:layout_constraintTop_toTopOf="parent" />
         <Constraint
+            android:id="@+id/privatePage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
             android:layout_marginTop="@dimen/private_page_margins"
-            android:id="@+id/privatePage"
+            android:visibility="visible"
             motion:layout_constraintTop_toBottomOf="@+id/header" />
     </ConstraintSet>
     <ConstraintSet android:id="@+id/end">
