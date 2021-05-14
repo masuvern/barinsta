@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +30,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
@@ -1427,8 +1429,10 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (toolbar != null) {
             toolbar.setVisibility(View.VISIBLE);
         }
-        final View decorView = activity.getWindow().getDecorView();
+        final Window window = activity.getWindow();
+        final View decorView = window.getDecorView();
         decorView.setSystemUiVisibility(originalSystemUi);
+        WindowCompat.setDecorFitsSystemWindows(window, false);
         isInFullScreenMode = false;
     }
 
