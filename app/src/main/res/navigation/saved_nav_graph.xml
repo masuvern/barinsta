@@ -64,15 +64,27 @@
             app:nullable="false" />
     </action>
 
+    <action
+        android:id="@+id/action_global_post_view"
+        app:destination="@id/postViewFragment">
+        <argument
+            android:name="media"
+            app:argType="awais.instagrabber.repositories.responses.Media"
+            app:nullable="false" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
+    </action>
+
     <fragment
         android:id="@+id/savedCollectionsFragment"
         android:name="awais.instagrabber.fragments.SavedCollectionsFragment"
         android:label="@string/saved"
-        tools:layout="@layout/fragment_saved_collections" >
+        tools:layout="@layout/fragment_saved_collections">
         <argument
             android:name="isSaving"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_savedCollectionsFragment_to_collectionPostsFragment"
             app:destination="@id/collectionPostsFragment" />
@@ -93,4 +105,9 @@
             android:name="backgroundColor"
             app:argType="integer" />
     </fragment>
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewV2Fragment"
+        android:label="Post"
+        tools:layout="@layout/dialog_post_view" />
 </navigation>

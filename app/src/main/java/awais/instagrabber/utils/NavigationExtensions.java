@@ -21,6 +21,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.customviews.NavHostFragmentWithDefaultAnimations;
 import awais.instagrabber.fragments.main.FeedFragment;
 
 /**
@@ -139,7 +140,7 @@ public class NavigationExtensions {
         if (existingFragment != null) {
             return existingFragment;
         }
-        final NavHostFragment navHostFragment = NavHostFragment.create(navGraphId);
+        final NavHostFragment navHostFragment = NavHostFragmentWithDefaultAnimations.create(navGraphId);
         fragmentManager.beginTransaction()
                        .setReorderingAllowed(true)
                        .add(containerId, navHostFragment, fragmentTag)

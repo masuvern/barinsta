@@ -65,6 +65,7 @@ public class IgErrorsInterceptor implements Interceptor {
         if (body == null) return;
         try {
             final String bodyString = body.string();
+            Log.d(TAG, "checkError: " + bodyString);
             final JSONObject jsonObject = new JSONObject(bodyString);
             String message = jsonObject.optString("message");
             if (!TextUtils.isEmpty(message)) {

@@ -31,6 +31,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.provider.FontRequest;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.fragment.app.FragmentManager;
@@ -61,6 +64,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.emoji.EmojiVariantManager;
+import awais.instagrabber.customviews.helpers.RootViewDeferringInsetsCallback;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
@@ -137,11 +141,19 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         instance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setupCookie();
-        if (settingsHelper.getBoolean(Constants.FLAG_SECURE))
+        if (settingsHelper.getBoolean(Constants.FLAG_SECURE)) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+        final RootViewDeferringInsetsCallback deferringInsetsCallback = new RootViewDeferringInsetsCallback(
+                WindowInsetsCompat.Type.systemBars(),
+                WindowInsetsCompat.Type.ime()
+        );
+        ViewCompat.setWindowInsetsAnimationCallback(binding.getRoot(), deferringInsetsCallback);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), deferringInsetsCallback);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         createNotificationChannels();
         try {
             final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();
@@ -335,6 +347,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ", e);
         }
+        instance = null;
     }
 
     @Override
@@ -504,11 +517,12 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
             setupMenu(backStack.size(), destinationId);
             final boolean contains = showBottomViewDestinations.contains(destinationId);
-            binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
-            if (contains && behavior != null) {
-                behavior.slideUp(binding.bottomNavView);
-            }
-
+            binding.getRoot().post(() -> {
+                binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
+                if (contains && behavior != null) {
+                    behavior.slideUp(binding.bottomNavView);
+                }
+            });
             // explicitly hide keyboard when we navigate
             final View view = getCurrentFocus();
             Utils.hideKeyboard(view);
@@ -651,7 +665,11 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (navController == null) return;
         final Bundle bundle = new Bundle();
         bundle.putString("username", "@" + username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            navController.navigate(R.id.action_global_profileFragment, bundle);
+        } catch (Exception e) {
+            Log.e(TAG, "showProfileView: ", e);
+        }
     }
 
     private void showPostView(@NonNull final IntentModel intentModel) {
@@ -664,11 +682,16 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         alertDialog.show();
         new PostFetcher(shortCode, feedModel -> {
             if (feedModel != null) {
-                final PostViewV2Fragment fragment = PostViewV2Fragment
-                        .builder(feedModel)
-                        .build();
-                fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                fragment.show(getSupportFragmentManager(), "post_view");
+                if (currentNavControllerLiveData == null) return;
+                final NavController navController = currentNavControllerLiveData.getValue();
+                if (navController == null) return;
+                final Bundle bundle = new Bundle();
+                bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                try {
+                    navController.navigate(R.id.action_global_post_view, bundle);
+                } catch (Exception e) {
+                    Log.e(TAG, "showPostView: ", e);
+                }
                 return;
             }
             Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
@@ -724,11 +747,19 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     }
 
     public void setCollapsingView(@NonNull final View view) {
-        binding.collapsingToolbarLayout.addView(view, 0);
+        try {
+            binding.collapsingToolbarLayout.addView(view, 0);
+        } catch (Exception e) {
+            Log.e(TAG, "setCollapsingView: ", e);
+        }
     }
 
     public void removeCollapsingView(@NonNull final View view) {
-        binding.collapsingToolbarLayout.removeView(view);
+        try {
+            binding.collapsingToolbarLayout.removeView(view);
+        } catch (Exception e) {
+            Log.e(TAG, "removeCollapsingView: ", e);
+        }
     }
 
     public void setToolbar(final Toolbar toolbar) {

@@ -2,6 +2,7 @@ package awais.instagrabber.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,8 +103,13 @@ public class FavoritesFragment extends Fragment {
                     // Log.d(TAG, "locationId: " + locationId);
                     final NavController navController = NavHostFragment.findNavController(this);
                     final Bundle bundle = new Bundle();
-                    bundle.putString("locationId", locationId);
-                    navController.navigate(R.id.action_global_locationFragment, bundle);
+                    try {
+                        bundle.putLong("locationId", Long.parseLong(locationId));
+                        navController.navigate(R.id.action_global_locationFragment, bundle);
+                    } catch (Exception e) {
+                        Log.e(TAG, "init: ", e);
+                        return;
+                    }
                     break;
                 }
                 case HASHTAG: {

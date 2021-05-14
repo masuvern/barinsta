@@ -551,6 +551,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         menu.setOnDismissListener(() -> setSelected(false));
         menu.setOnReactionClickListener(emoji -> callback.onReaction(item, emoji));
         menu.setOnOptionSelectListener((itemId, cb) -> callback.onOptionSelect(item, itemId, cb));
+        menu.setOnAddReactionListener(() -> {
+            menu.dismiss();
+            itemView.postDelayed(() -> callback.onAddReactionListener(item), 300);
+        });
         menu.show(itemView, location);
     }
 

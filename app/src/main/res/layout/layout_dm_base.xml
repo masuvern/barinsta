@@ -139,7 +139,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:layout_height="200dp"
-                tools:layout_width="100dp" />
+                tools:layout_width="100dp">
+                <!--<include layout="@layout/layout_dm_text" />-->
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/message_info"
@@ -175,6 +177,17 @@
             </LinearLayout>
 
         </awais.instagrabber.customviews.ChatMessageLayout>
+
+        <!--<TextView-->
+        <!--    android:tag="debug"-->
+        <!--    android:textColor="@color/white"-->
+        <!--    android:layout_width="0dp"-->
+        <!--    android:visibility="visible"-->
+        <!--    android:layout_height="wrap_content"-->
+        <!--    android:background="@color/black"-->
+        <!--    app:layout_constraintTop_toTopOf="parent"-->
+        <!--    app:layout_constraintStart_toStartOf="parent"-->
+        <!--    app:layout_constraintEnd_toEndOf="parent"/>-->
 
         <FrameLayout
             android:id="@+id/reactions_wrapper"
