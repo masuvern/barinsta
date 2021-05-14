@@ -662,17 +662,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!postsSetupDone) {
-            setupPosts();
-        } else {
-            binding.postsRecyclerView.refresh();
+        final long profileId = profileModel.getPk();
+        if (!isReallyPrivate()) {
+            if (!postsSetupDone) {
+                setupPosts();
+            }
+            else {
+                binding.postsRecyclerView.refresh();
+            }
+            if (isLoggedIn) {
+                fetchStoryAndHighlights(profileId);
+            }
         }
         profileDetailsBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         profileDetailsBinding.isPrivate.setVisibility(profileModel.isPrivate() ? View.VISIBLE : View.GONE);
-        final long profileId = profileModel.getPk();
-        if (isLoggedIn) {
-            fetchStoryAndHighlights(profileId);
-        }
+
         setupButtons(profileId);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
@@ -905,6 +909,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.privatePage1.setImageResource(R.drawable.lock);
             binding.privatePage2.setText(R.string.priv_acc);
             binding.privatePage.setVisibility(View.VISIBLE);
+            binding.privatePage1.setVisibility(View.VISIBLE);
+            binding.privatePage2.setVisibility(View.VISIBLE);
             binding.postsRecyclerView.setVisibility(View.GONE);
             binding.swipeRefreshLayout.setRefreshing(false);
         }
