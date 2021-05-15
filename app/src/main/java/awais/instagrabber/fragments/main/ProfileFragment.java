@@ -407,7 +407,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         chainingMenuItem = menu.findItem(R.id.chaining);
         if (chainingMenuItem != null) {
-            chainingMenuItem.setVisible(isNotMe);
+            chainingMenuItem.setVisible(isNotMe && profileModel.hasChaining());
         }
     }
 
@@ -976,7 +976,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.unmute_posts : R.string.mute_posts);
             }
             if (chainingMenuItem != null) {
-                chainingMenuItem.setVisible(true);
+                chainingMenuItem.setVisible(profileModel.hasChaining());
             }
         }
     }

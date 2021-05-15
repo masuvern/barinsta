@@ -17,6 +17,7 @@ public class User implements Serializable {
     private final boolean isUnpublished;
     private final boolean isFavorite;
     private final boolean isDirectappInstalled;
+    private final boolean hasChaining;
     private final String reelAutoArchive;
     private final String allowedCommenterType;
     private final long mediaCount;
@@ -45,6 +46,7 @@ public class User implements Serializable {
                 final boolean isUnpublished,
                 final boolean isFavorite,
                 final boolean isDirectappInstalled,
+                final boolean hasChaining,
                 final String reelAutoArchive,
                 final String allowedCommenterType,
                 final long mediaCount,
@@ -72,6 +74,7 @@ public class User implements Serializable {
         this.isUnpublished = isUnpublished;
         this.isFavorite = isFavorite;
         this.isDirectappInstalled = isDirectappInstalled;
+        this.hasChaining = hasChaining;
         this.reelAutoArchive = reelAutoArchive;
         this.allowedCommenterType = allowedCommenterType;
         this.mediaCount = mediaCount;
@@ -118,6 +121,7 @@ public class User implements Serializable {
         this.isUnpublished = false;
         this.isFavorite = false;
         this.isDirectappInstalled = false;
+        this.hasChaining = false;
         this.reelAutoArchive = null;
         this.allowedCommenterType = null;
         this.mediaCount = 0;
@@ -192,6 +196,10 @@ public class User implements Serializable {
 
     public boolean isDirectappInstalled() {
         return isDirectappInstalled;
+    }
+
+    public boolean hasChaining() {
+        return hasChaining;
     }
 
     public String getReelAutoArchive() {
@@ -282,7 +290,7 @@ public class User implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(pk, username, fullName, isPrivate, profilePicUrl, profilePicId, friendshipStatus, isVerified, hasAnonymousProfilePicture,
-                            isUnpublished, isFavorite, isDirectappInstalled, reelAutoArchive, allowedCommenterType, mediaCount, followerCount,
-                            followingCount, followingTagCount, biography, externalUrl, usertagsCount, publicEmail);
+                            isUnpublished, isFavorite, isDirectappInstalled, hasChaining, reelAutoArchive, allowedCommenterType, mediaCount,
+                            followerCount, followingCount, followingTagCount, biography, externalUrl, usertagsCount, publicEmail);
     }
 }
