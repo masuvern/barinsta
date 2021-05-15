@@ -275,7 +275,9 @@ public class StoryViewerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        releasePlayer();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     @Override
