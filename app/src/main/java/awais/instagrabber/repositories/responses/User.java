@@ -28,11 +28,10 @@ public class User implements Serializable {
     private final long usertagsCount;
     private final String publicEmail;
     private final HdProfilePicUrlInfo hdProfilePicUrlInfo;
-    private final String profileContext;
-    private final List<UserProfileContextLink> profileContextLinksWithUserIds;
-    private final String socialContext;
-    // if a DM member is a Facebook user, this is present
-    private final String interopMessagingUserFbid;
+    private final String profileContext; // "also followed by" your friends
+    private final List<UserProfileContextLink> profileContextLinksWithUserIds; // ^
+    private final String socialContext; // AYML
+    private final String interopMessagingUserFbid; // in DMs only: Facebook user ID
 
     public User(final long pk,
                 final String username,
@@ -88,6 +87,52 @@ public class User implements Serializable {
         this.profileContextLinksWithUserIds = profileContextLinksWithUserIds;
         this.socialContext = socialContext;
         this.interopMessagingUserFbid = interopMessagingUserFbid;
+    }
+
+    public User(final long pk,
+                final String username,
+                final String fullName,
+                final boolean isPrivate,
+                final String profilePicUrl,
+                final boolean isVerified) {
+        this.pk = pk;
+        this.username = username;
+        this.fullName = fullName;
+        this.isPrivate = isPrivate;
+        this.profilePicUrl = profilePicUrl;
+        this.profilePicId = null;
+        this.friendshipStatus = new FriendshipStatus(
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        this.isVerified = isVerified;
+        this.hasAnonymousProfilePicture = false;
+        this.isUnpublished = false;
+        this.isFavorite = false;
+        this.isDirectappInstalled = false;
+        this.reelAutoArchive = null;
+        this.allowedCommenterType = null;
+        this.mediaCount = 0;
+        this.followerCount = 0;
+        this.followingCount = 0;
+        this.followingTagCount = 0;
+        this.biography = null;
+        this.externalUrl = null;
+        this.usertagsCount = 0;
+        this.publicEmail = null;
+        this.hdProfilePicUrlInfo = null;
+        this.profileContext = null;
+        this.profileContextLinksWithUserIds = null;
+        this.socialContext = null;
+        this.interopMessagingUserFbid = null;
     }
 
     public long getPk() {
