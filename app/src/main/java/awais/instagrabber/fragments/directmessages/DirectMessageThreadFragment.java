@@ -1117,7 +1117,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 if (!isAdded()) return;
                 if (!entry.isVideo) {
                     navigateToImageEditFragment(entry.path);
+                    return;
                 }
+                handleSentMessage(viewModel.sendUri(entry));
             });
             mediaPicker.show(getChildFragmentManager(), "MediaPicker");
         });
