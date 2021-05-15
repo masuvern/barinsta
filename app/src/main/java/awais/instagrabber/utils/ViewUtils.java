@@ -104,7 +104,6 @@ public final class ViewUtils {
         } else {
             hiddenSuppressLayout($this$suppressLayoutCompat, suppress);
         }
-
     }
 
     private static boolean tryHiddenSuppressLayout = true;
@@ -118,6 +117,5 @@ public final class ViewUtils {
                 tryHiddenSuppressLayout = false;
             }
         }
-
     }
 }

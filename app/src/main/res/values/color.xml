@@ -19,9 +19,9 @@
     <color name="btn_lightpink_text_color">@color/text_color_light</color>
 
     <color name="btn_orange_background">#FF5500</color>
-    <color name="btn_orange_text_color">#FFFFFFFF</color>
+    <color name="btn_orange_text_color">@color/white</color>
     <color name="btn_lightorange_background">#FFBB00</color>
-    <color name="btn_lightorange_text_color">#FF000000</color>
+    <color name="btn_lightorange_text_color">@color/black</color>
 
     <color name="dm_profile_button_color">#efefef</color>
 
