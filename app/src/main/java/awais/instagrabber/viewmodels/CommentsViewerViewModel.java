@@ -238,11 +238,7 @@ public class CommentsViewerViewModel extends ViewModel {
                 null,
                 false,
                 owner.getString("profile_pic_url"),
-                null,
-                new FriendshipStatus(false, false, false, false, false, false, false, false, false, false),
-                owner.optBoolean("is_verified"),
-                false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null, null, null,
-                null, null);
+                owner.optBoolean("is_verified"));
         final JSONObject likedBy = commentJsonObject.optJSONObject("edge_liked_by");
         final String commentId = commentJsonObject.getString("id");
         final JSONObject childCommentsJsonObject = commentJsonObject.optJSONObject("edge_threaded_comments");

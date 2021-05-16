@@ -31,6 +31,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.provider.FontRequest;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.fragment.app.FragmentManager;
@@ -61,6 +64,7 @@ import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.emoji.EmojiVariantManager;
+import awais.instagrabber.customviews.helpers.RootViewDeferringInsetsCallback;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.ActivityMainBinding;
 import awais.instagrabber.fragments.PostViewV2Fragment;
@@ -137,11 +141,19 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         instance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setupCookie();
-        if (settingsHelper.getBoolean(Constants.FLAG_SECURE))
+        if (settingsHelper.getBoolean(Constants.FLAG_SECURE)) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        }
         setContentView(binding.getRoot());
         final Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
+        final RootViewDeferringInsetsCallback deferringInsetsCallback = new RootViewDeferringInsetsCallback(
+                WindowInsetsCompat.Type.systemBars(),
+                WindowInsetsCompat.Type.ime()
+        );
+        ViewCompat.setWindowInsetsAnimationCallback(binding.getRoot(), deferringInsetsCallback);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), deferringInsetsCallback);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         createNotificationChannels();
         try {
             final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();

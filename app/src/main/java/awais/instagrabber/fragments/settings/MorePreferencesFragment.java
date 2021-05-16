@@ -4,8 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,6 +22,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -51,6 +55,20 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     private AccountRepository accountRepository;
 
     public MorePreferencesFragment() {
+    }
+
+    @Override
+    public RecyclerView onCreateRecyclerView(final LayoutInflater inflater, final ViewGroup parent, final Bundle savedInstanceState) {
+        final RecyclerView recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState);
+        final Context context = getContext();
+        if (recyclerView != null && context != null) {
+            recyclerView.setClipToPadding(false);
+            recyclerView.setPadding(recyclerView.getPaddingLeft(),
+                                    recyclerView.getPaddingTop(),
+                                    recyclerView.getPaddingRight(),
+                                    Utils.getActionBarHeight(context));
+        }
+        return recyclerView;
     }
 
     @Override

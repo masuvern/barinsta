@@ -191,9 +191,7 @@ public class SearchItem {
                 recentSearch.getName(),
                 false,
                 recentSearch.getPicUrl(),
-                null, null, false, false, false, false, false,
-                null, null, 0, 0, 0, 0, null, null,
-                0, null, null, null, null, null, null
+                false
         );
     }
 
@@ -205,9 +203,7 @@ public class SearchItem {
                 favorite.getDisplayName(),
                 false,
                 favorite.getPicUrl(),
-                null, null, false, false, false, false, false,
-                null, null, 0, 0, 0, 0, null, null,
-                0, null, null, null, null, null, null
+                false
         );
     }
 

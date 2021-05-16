@@ -38,6 +38,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
@@ -561,5 +563,40 @@ public final class Utils {
         Point size = new Point();
         display.getRealSize(size);
         return size;
+    }
+
+    public static <F, S> LiveData<Pair<F, S>> zipLiveData(@NonNull final LiveData<F> firstLiveData,
+                                                          @NonNull final LiveData<S> secondLiveData) {
+        final ZippedLiveData<F, S> zippedLiveData = new ZippedLiveData<>();
+        zippedLiveData.addFirstSource(firstLiveData);
+        zippedLiveData.addSecondSource(secondLiveData);
+        return zippedLiveData;
+    }
+
+    public static class ZippedLiveData<F, S> extends MediatorLiveData<Pair<F, S>> {
+        private F lastF;
+        private S lastS;
+
+        private void update() {
+            F localLastF = lastF;
+            S localLastS = lastS;
+            if (localLastF != null && localLastS != null) {
+                setValue(new Pair<>(localLastF, localLastS));
+            }
+        }
+
+        public void addFirstSource(@NonNull final LiveData<F> firstLiveData) {
+            addSource(firstLiveData, f -> {
+                lastF = f;
+                update();
+            });
+        }
+
+        public void addSecondSource(@NonNull final LiveData<S> secondLiveData) {
+            addSource(secondLiveData, s -> {
+                lastS = s;
+                update();
+            });
+        }
     }
 }

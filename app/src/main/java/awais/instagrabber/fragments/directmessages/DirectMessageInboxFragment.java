@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -27,6 +28,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.internal.ToolbarUtils;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -102,7 +104,9 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
         super.onPause();
         unregisterReceiver();
         isPendingRequestTotalBadgeAttached = false;
-        if (pendingRequestTotalBadgeDrawable != null) {
+        @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
+                .getActionMenuItemView(fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+        if (pendingRequestTotalBadgeDrawable != null && menuItemView != null) {
             BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
             pendingRequestTotalBadgeDrawable = null;
         }
@@ -217,7 +221,11 @@ public class DirectMessageInboxFragment extends Fragment implements SwipeRefresh
             pendingRequestTotalBadgeDrawable = BadgeDrawable.create(context);
         }
         if (count == null || count == 0) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
+                    .getActionMenuItemView(fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            if (menuItemView != null) {
+                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            }
             isPendingRequestTotalBadgeAttached = false;
             pendingRequestTotalBadgeDrawable.setNumber(0);
             pendingRequestsMenuItem.setVisible(false);

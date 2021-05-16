@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +30,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
@@ -100,7 +102,6 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-import static awais.instagrabber.utils.Utils.getAttrValue;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class PostViewV2Fragment extends Fragment implements EditTextDialogFragment.EditTextDialogFragmentCallback {
@@ -131,6 +132,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private boolean isInFullScreenMode;
     private StyledPlayerView playerView;
     private int playerViewOriginalHeight;
+    private Drawable originalRootBackground;
+    private ColorStateList originalLikeColorStateList;
+    private ColorStateList originalSaveColorStateList;
 
     private final Observer<Object> backStackSavedStateObserver = result -> {
         if (result == null) return;
@@ -141,7 +145,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         // clear result
         backStackSavedStateResultLiveData.postValue(null);
     };
-    private Drawable originalRootBackground;
 
     public void setOnDeleteListener(final OnDeleteListener onDeleteListener) {
         if (onDeleteListener == null) return;
@@ -441,6 +444,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     }
 
     private void setupLike() {
+        originalLikeColorStateList = bottom.like.getIconTint();
         final boolean likableMedia = viewModel.hasPk() /*&& viewModel.getMedia().isCommentLikesEnabled()*/;
         if (!likableMedia) {
             bottom.like.setVisibility(View.GONE);
@@ -503,25 +507,25 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
 
     private void setLikedResources(final boolean liked) {
         final int iconResource;
-        final int tintResource;
+        final ColorStateList tintColorStateList;
         final Context context = getContext();
         if (context == null) return;
         final Resources resources = context.getResources();
         if (resources == null) return;
         if (liked) {
             iconResource = R.drawable.ic_like;
-            tintResource = resources.getColor(R.color.red_600);
-            // textResId = R.string.unlike_without_count;
+            tintColorStateList = ColorStateList.valueOf(resources.getColor(R.color.red_600));
         } else {
             iconResource = R.drawable.ic_not_liked;
-            tintResource = getAttrValue(context, R.attr.colorPrimary);
-            // textResId = R.string.like_without_count;
+            tintColorStateList = originalLikeColorStateList != null ? originalLikeColorStateList
+                                                                    : ColorStateList.valueOf(resources.getColor(R.color.white));
         }
         bottom.like.setIconResource(iconResource);
-        bottom.like.setIconTint(ColorStateList.valueOf(tintResource));
+        bottom.like.setIconTint(tintColorStateList);
     }
 
     private void setupSave() {
+        originalSaveColorStateList = bottom.save.getIconTint();
         if (!viewModel.isLoggedIn() || !viewModel.hasPk() || !viewModel.getMedia().canViewerSave()) {
             bottom.save.setVisibility(View.GONE);
             return;
@@ -574,22 +578,21 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
 
     private void setSavedResources(final boolean saved) {
         final int iconResource;
-        final int tintResource;
+        final ColorStateList tintColorStateList;
         final Context context = getContext();
         if (context == null) return;
         final Resources resources = context.getResources();
         if (resources == null) return;
         if (saved) {
             iconResource = R.drawable.ic_bookmark;
-            tintResource = resources.getColor(R.color.blue_700);
-            // textResId = R.string.saved;
+            tintColorStateList = ColorStateList.valueOf(resources.getColor(R.color.blue_700));
         } else {
             iconResource = R.drawable.ic_round_bookmark_border_24;
-            tintResource = getAttrValue(context, R.attr.colorPrimary);
-            // textResId = R.string.save;
+            tintColorStateList = originalSaveColorStateList != null ? originalSaveColorStateList
+                                                                    : ColorStateList.valueOf(resources.getColor(R.color.white));
         }
         bottom.save.setIconResource(iconResource);
-        bottom.save.setIconTint(ColorStateList.valueOf(tintResource));
+        bottom.save.setIconTint(tintColorStateList);
     }
 
     private void setupProfilePic(final User user) {
@@ -1427,8 +1430,10 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (toolbar != null) {
             toolbar.setVisibility(View.VISIBLE);
         }
-        final View decorView = activity.getWindow().getDecorView();
+        final Window window = activity.getWindow();
+        final View decorView = window.getDecorView();
         decorView.setSystemUiVisibility(originalSystemUi);
+        WindowCompat.setDecorFitsSystemWindows(window, false);
         isInFullScreenMode = false;
     }
 

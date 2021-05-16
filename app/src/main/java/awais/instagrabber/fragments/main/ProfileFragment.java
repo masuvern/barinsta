@@ -407,7 +407,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         chainingMenuItem = menu.findItem(R.id.chaining);
         if (chainingMenuItem != null) {
-            chainingMenuItem.setVisible(isNotMe);
+            chainingMenuItem.setVisible(isNotMe && profileModel.hasChaining());
         }
     }
 
@@ -527,7 +527,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     @Override
     public void onRefresh() {
-        profileDetailsBinding.countsBarrier.getRoot().setVisibility(View.GONE);
+        profileDetailsBinding.countsDivider.getRoot().setVisibility(View.GONE);
         profileDetailsBinding.mainProfileImage.setVisibility(View.INVISIBLE);
         fetchProfileDetails();
     }
@@ -662,17 +662,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!postsSetupDone) {
-            setupPosts();
-        } else {
-            binding.postsRecyclerView.refresh();
+        final long profileId = profileModel.getPk();
+        if (!isReallyPrivate()) {
+            if (!postsSetupDone) {
+                setupPosts();
+            }
+            else {
+                binding.postsRecyclerView.refresh();
+            }
+            if (isLoggedIn) {
+                fetchStoryAndHighlights(profileId);
+            }
         }
         profileDetailsBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         profileDetailsBinding.isPrivate.setVisibility(profileModel.isPrivate() ? View.VISIBLE : View.GONE);
-        final long profileId = profileModel.getPk();
-        if (isLoggedIn) {
-            fetchStoryAndHighlights(profileId);
-        }
+
         setupButtons(profileId);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
         favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
@@ -744,7 +748,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         profileDetailsBinding.mainProfileImage.setImageURI(profileModel.getProfilePicUrl());
         profileDetailsBinding.mainProfileImage.setVisibility(View.VISIBLE);
 
-        profileDetailsBinding.countsBarrier.getRoot().setVisibility(View.VISIBLE);
+        profileDetailsBinding.countsDivider.getRoot().setVisibility(View.VISIBLE);
 
         final long followersCount = profileModel.getFollowerCount();
         final long followingCount = profileModel.getFollowingCount();
@@ -905,6 +909,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.privatePage1.setImageResource(R.drawable.lock);
             binding.privatePage2.setText(R.string.priv_acc);
             binding.privatePage.setVisibility(View.VISIBLE);
+            binding.privatePage1.setVisibility(View.VISIBLE);
+            binding.privatePage2.setVisibility(View.VISIBLE);
             binding.postsRecyclerView.setVisibility(View.GONE);
             binding.swipeRefreshLayout.setRefreshing(false);
         }
@@ -970,7 +976,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.unmute_posts : R.string.mute_posts);
             }
             if (chainingMenuItem != null) {
-                chainingMenuItem.setVisible(true);
+                chainingMenuItem.setVisible(profileModel.hasChaining());
             }
         }
     }
