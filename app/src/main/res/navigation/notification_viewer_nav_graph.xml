@@ -72,6 +72,18 @@
             app:argType="boolean" />
     </action>
 
+    <action
+        android:id="@+id/action_global_post_view"
+        app:destination="@id/postViewFragment">
+        <argument
+            android:name="media"
+            app:argType="awais.instagrabber.repositories.responses.Media"
+            app:nullable="false" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
+    </action>
+
     <fragment
         android:id="@+id/storyViewerFragment"
         android:name="awais.instagrabber.fragments.StoryViewerFragment"
@@ -100,4 +112,9 @@
             android:id="@+id/action_notifications_to_story"
             app:destination="@id/storyViewerFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewV2Fragment"
+        android:label="Post"
+        tools:layout="@layout/dialog_post_view" />
 </navigation>

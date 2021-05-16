@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
@@ -21,6 +20,7 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVisualMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -170,15 +170,15 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER
                                        ? View.VISIBLE
                                        : View.GONE);
-        final Pair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
+        final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 media.getOriginalHeight(),
                 media.getOriginalWidth(),
                 mediaImageMaxHeight,
                 maxWidth
         );
         final ViewGroup.LayoutParams layoutParams = binding.preview.getLayoutParams();
-        layoutParams.width = widthHeight.first != null ? widthHeight.first : 0;
-        layoutParams.height = widthHeight.second != null ? widthHeight.second : 0;
+        layoutParams.width = widthHeight.first;
+        layoutParams.height = widthHeight.second;
         binding.preview.requestLayout();
         final String thumbUrl = ResponseBodyUtils.getThumbUrl(media);
         binding.preview.setImageURI(thumbUrl);

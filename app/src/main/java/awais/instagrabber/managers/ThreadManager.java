@@ -585,8 +585,7 @@ public final class ThreadManager {
         if (index < 0) {
             temp.add(0, reaction);
         } else if (shouldReplaceIfAlreadyReacted) {
-            temp.add(0, reaction);
-            temp.remove(index);
+            temp.set(index, reaction);
         }
         return temp;
     }
@@ -736,6 +735,7 @@ public final class ThreadManager {
         });
     }
 
+    @NonNull
     public LiveData<Resource<Object>> sendReaction(final DirectItem item, final Emoji emoji) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final Long userId = getCurrentUserId(data);

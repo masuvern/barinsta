@@ -21,6 +21,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.List;
 
 import awais.instagrabber.R;
+import awais.instagrabber.customviews.NavHostFragmentWithDefaultAnimations;
 import awais.instagrabber.fragments.main.FeedFragment;
 
 /**
@@ -62,7 +63,7 @@ public class NavigationExtensions {
         selectedItemTag = graphIdToTagMap.get(bottomNavigationView.getSelectedItemId());
         final String firstFragmentTag = graphIdToTagMap.get(firstFragmentGraphId);
         isOnFirstFragment = selectedItemTag != null && selectedItemTag.equals(firstFragmentTag);
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
             if (fragmentManager.isStateSaved()) {
                 return false;
             }
@@ -139,7 +140,7 @@ public class NavigationExtensions {
         if (existingFragment != null) {
             return existingFragment;
         }
-        final NavHostFragment navHostFragment = NavHostFragment.create(navGraphId);
+        final NavHostFragment navHostFragment = NavHostFragmentWithDefaultAnimations.create(navGraphId);
         fragmentManager.beginTransaction()
                        .setReorderingAllowed(true)
                        .add(containerId, navHostFragment, fragmentTag)
@@ -168,7 +169,7 @@ public class NavigationExtensions {
     private static void setupItemReselected(final BottomNavigationView bottomNavigationView,
                                             final SparseArray<String> graphIdToTagMap,
                                             final FragmentManager fragmentManager) {
-        bottomNavigationView.setOnNavigationItemReselectedListener(item -> {
+        bottomNavigationView.setOnItemReselectedListener(item -> {
             final String newlySelectedItemTag = graphIdToTagMap.get(item.getItemId());
             final Fragment fragmentByTag = fragmentManager.findFragmentByTag(newlySelectedItemTag);
             if (fragmentByTag == null) {

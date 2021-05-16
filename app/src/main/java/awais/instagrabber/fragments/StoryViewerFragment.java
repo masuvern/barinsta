@@ -36,6 +36,7 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -119,6 +120,7 @@ public class StoryViewerFragment extends Fragment {
     private View root;
     private FragmentStoryViewerBinding binding;
     private String currentStoryUsername;
+    private String highlightTitle;
     private StoriesAdapter storiesAdapter;
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
@@ -274,7 +276,9 @@ public class StoryViewerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        releasePlayer();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     @Override
@@ -463,11 +467,14 @@ public class StoryViewerFragment extends Fragment {
             mediaService.fetch(Long.parseLong(mediaId), new ServiceCallback<Media>() {
                 @Override
                 public void onSuccess(final Media feedModel) {
-                    final PostViewV2Fragment fragment = PostViewV2Fragment
-                            .builder(feedModel)
-                            .build();
-                    fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                    fragment.show(getChildFragmentManager(), "post_view");
+                    final NavController navController = NavHostFragment.findNavController(StoryViewerFragment.this);
+                    final Bundle bundle = new Bundle();
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                    try {
+                        navController.navigate(R.id.action_global_post_view, bundle);
+                    } catch (Exception e) {
+                        Log.e(TAG, "openPostDialog: ", e);
+                    }
                 }
 
                 @Override
@@ -482,18 +489,18 @@ public class StoryViewerFragment extends Fragment {
             if (tag instanceof PollModel) {
                 poll = (PollModel) tag;
                 if (poll.getMyChoice() > -1) {
-                    new AlertDialog.Builder(context).setTitle(R.string.voted_story_poll)
-                                                    .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1,
-                                                                                   new String[]{
-                                                                                           (poll.getMyChoice() == 0 ? "√ " : "") + poll
-                                                                                                   .getLeftChoice() + " (" + poll
-                                                                                                   .getLeftCount() + ")",
-                                                                                           (poll.getMyChoice() == 1 ? "√ " : "") + poll
-                                                                                                   .getRightChoice() + " (" + poll
-                                                                                                   .getRightCount() + ")"
-                                                                                   }), null)
-                                                    .setPositiveButton(R.string.ok, null)
-                                                    .show();
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.voted_story_poll)
+                            .setAdapter(new ArrayAdapter<>(
+                                                context,
+                                                android.R.layout.simple_list_item_1,
+                                                new String[]{
+                                                        (poll.getMyChoice() == 0 ? "√ " : "") + poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
+                                                        (poll.getMyChoice() == 1 ? "√ " : "") + poll.getRightChoice() + " (" + poll.getRightCount() + ")"
+                                                }),
+                                        null)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
                 } else {
                     new AlertDialog.Builder(context)
                             .setTitle(poll.getQuestion())
@@ -724,7 +731,7 @@ public class StoryViewerFragment extends Fragment {
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 fetchOptions = StoryViewerOptions.forHighlight(model.getId());
-                currentStoryUsername = model.getTitle();
+                highlightTitle = model.getTitle();
                 break;
             }
             case FEED_STORY_POSITION: {
@@ -824,8 +831,8 @@ public class StoryViewerFragment extends Fragment {
         if (type == Type.HIGHLIGHT) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
-                actionBarTitle = options.getName();
-                actionBar.setTitle(options.getName());
+                actionBarTitle = highlightTitle;
+                actionBar.setTitle(highlightTitle);
             }
         } else if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");

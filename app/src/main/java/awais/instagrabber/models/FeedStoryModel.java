@@ -16,11 +16,15 @@ public final class FeedStoryModel implements Serializable {
     private final boolean isLive, isBestie;
     private final long timestamp;
     private final int mediaCount;
-    private boolean isShown = true;
 
-    public FeedStoryModel(final String storyMediaId, final User profileModel, final boolean fullyRead,
-                          final long timestamp, final StoryModel firstStoryModel, final int mediaCount,
-                          final boolean isLive, final boolean isBestie) {
+    public FeedStoryModel(final String storyMediaId,
+                          final User profileModel,
+                          final boolean fullyRead,
+                          final long timestamp,
+                          final StoryModel firstStoryModel,
+                          final int mediaCount,
+                          final boolean isLive,
+                          final boolean isBestie) {
         this.storyMediaId = storyMediaId;
         this.profileModel = profileModel;
         this.fullyRead = fullyRead;
@@ -52,10 +56,6 @@ public final class FeedStoryModel implements Serializable {
         return profileModel;
     }
 
-    //    public void setFirstStoryModel(final StoryModel firstStoryModel) {
-    //        this.firstStoryModel = firstStoryModel;
-    //    }
-
     public StoryModel getFirstStoryModel() {
         return firstStoryModel;
     }
@@ -74,13 +74,5 @@ public final class FeedStoryModel implements Serializable {
 
     public boolean isBestie() {
         return isBestie;
-    }
-
-    public boolean isShown() {
-        return isShown;
-    }
-
-    public void setShown(final boolean shown) {
-        isShown = shown;
     }
 }

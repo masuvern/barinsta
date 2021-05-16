@@ -69,6 +69,18 @@
         android:id="@+id/action_global_search"
         app:destination="@id/searchFragment" />
 
+    <action
+        android:id="@+id/action_global_post_view"
+        app:destination="@id/postViewFragment">
+        <argument
+            android:name="media"
+            app:argType="awais.instagrabber.repositories.responses.Media"
+            app:nullable="false" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
+    </action>
+
     <fragment
         android:id="@+id/hashTagFragment"
         android:name="awais.instagrabber.fragments.HashTagFragment"
@@ -104,4 +116,9 @@
             app:argType="string"
             app:nullable="false" />
     </action>
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewV2Fragment"
+        android:label="Post"
+        tools:layout="@layout/dialog_post_view" />
 </navigation>

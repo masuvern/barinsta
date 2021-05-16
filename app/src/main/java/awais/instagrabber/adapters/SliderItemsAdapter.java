@@ -1,16 +1,18 @@
 package awais.instagrabber.adapters;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
+import com.google.android.exoplayer2.ui.StyledPlayerView;
+
 import awais.instagrabber.adapters.viewholder.SliderItemViewHolder;
 import awais.instagrabber.adapters.viewholder.SliderPhotoViewHolder;
 import awais.instagrabber.adapters.viewholder.SliderVideoViewHolder;
-import awais.instagrabber.customviews.VerticalDragHelper;
 import awais.instagrabber.databinding.ItemSliderPhotoBinding;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -18,10 +20,8 @@ import awais.instagrabber.repositories.responses.Media;
 
 public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewHolder> {
 
-    private final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener;
     private final boolean loadVideoOnItemClick;
     private final SliderCallback sliderCallback;
-    // private final LayoutExoCustomControlsBinding controlsBinding;
 
     private static final DiffUtil.ItemCallback<Media> DIFF_CALLBACK = new DiffUtil.ItemCallback<Media>() {
         @Override
@@ -35,15 +35,11 @@ public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewH
         }
     };
 
-    public SliderItemsAdapter(final VerticalDragHelper.OnVerticalDragListener onVerticalDragListener,
-                              // final LayoutExoCustomControlsBinding controlsBinding,
-                              final boolean loadVideoOnItemClick,
+    public SliderItemsAdapter(final boolean loadVideoOnItemClick,
                               final SliderCallback sliderCallback) {
         super(DIFF_CALLBACK);
-        this.onVerticalDragListener = onVerticalDragListener;
         this.loadVideoOnItemClick = loadVideoOnItemClick;
         this.sliderCallback = sliderCallback;
-        // this.controlsBinding = controlsBinding;
     }
 
     @NonNull
@@ -54,12 +50,12 @@ public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewH
         switch (mediaItemType) {
             case MEDIA_TYPE_VIDEO: {
                 final LayoutVideoPlayerWithThumbnailBinding binding = LayoutVideoPlayerWithThumbnailBinding.inflate(inflater, parent, false);
-                return new SliderVideoViewHolder(binding, onVerticalDragListener, loadVideoOnItemClick);
+                return new SliderVideoViewHolder(binding, loadVideoOnItemClick);
             }
             case MEDIA_TYPE_IMAGE:
             default:
                 final ItemSliderPhotoBinding binding = ItemSliderPhotoBinding.inflate(inflater, parent, false);
-                return new SliderPhotoViewHolder(binding, onVerticalDragListener);
+                return new SliderPhotoViewHolder(binding);
         }
     }
 
@@ -142,12 +138,16 @@ public final class SliderItemsAdapter extends ListAdapter<Media, SliderItemViewH
     public interface SliderCallback {
         void onThumbnailLoaded(int position);
 
-        void onItemClicked(int position);
+        void onItemClicked(int position, final Media media, final View view);
 
         void onPlayerPlay(int position);
 
         void onPlayerPause(int position);
 
         void onPlayerRelease(int position);
+
+        void onFullScreenModeChanged(boolean isFullScreen, final StyledPlayerView playerView);
+
+        boolean isInFullScreen();
     }
 }

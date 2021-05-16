@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Spanned;
 import android.text.TextPaint;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.emoji.text.EmojiCompat;

@@ -36,17 +36,17 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    public void setIconSize(int width, int height) {
-        iconWidth = width;
-        iconHeight = height;
-    }
-
     public CombinedDrawable(Drawable backgroundDrawable, Drawable iconDrawable) {
         background = backgroundDrawable;
         icon = iconDrawable;
         if (iconDrawable != null) {
             iconDrawable.setCallback(this);
         }
+    }
+
+    public void setIconSize(int width, int height) {
+        iconWidth = width;
+        iconHeight = height;
     }
 
     public void setCustomSize(int width, int height) {
@@ -82,11 +82,12 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean setState(int[] stateSet) {
+    public boolean setState(@NonNull int[] stateSet) {
         icon.setState(stateSet);
         return true;
     }
 
+    @NonNull
     @Override
     public int[] getState() {
         return icon.getState();
@@ -108,7 +109,7 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         background.setBounds(getBounds());
         background.draw(canvas);
         if (icon != null) {

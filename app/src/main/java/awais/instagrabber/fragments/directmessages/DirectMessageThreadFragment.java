@@ -26,14 +26,20 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsAnimationCompat;
+import androidx.core.view.WindowInsetsAnimationControlListenerCompat;
+import androidx.core.view.WindowInsetsAnimationControllerCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -51,6 +57,7 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.internal.ToolbarUtils;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
@@ -72,14 +79,21 @@ import awais.instagrabber.adapters.DirectItemsAdapter.DirectItemOrHeader;
 import awais.instagrabber.adapters.DirectReactionsAdapter;
 import awais.instagrabber.adapters.viewholder.directmessages.DirectItemViewHolder;
 import awais.instagrabber.animations.CubicBezierInterpolator;
+import awais.instagrabber.customviews.InsetsAnimationLinearLayout;
+import awais.instagrabber.customviews.KeyNotifyingEmojiEditText;
 import awais.instagrabber.customviews.RecordView;
 import awais.instagrabber.customviews.Tooltip;
 import awais.instagrabber.customviews.emoji.Emoji;
+import awais.instagrabber.customviews.emoji.EmojiBottomSheetDialog;
+import awais.instagrabber.customviews.emoji.EmojiPicker;
+import awais.instagrabber.customviews.helpers.ControlFocusInsetsAnimationCallback;
+import awais.instagrabber.customviews.helpers.EmojiPickerInsetsAnimationCallback;
 import awais.instagrabber.customviews.helpers.HeaderItemDecoration;
-import awais.instagrabber.customviews.helpers.HeightProvider;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
+import awais.instagrabber.customviews.helpers.SimpleImeAnimationController;
 import awais.instagrabber.customviews.helpers.SwipeAndRestoreItemTouchHelperCallback;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
+import awais.instagrabber.customviews.helpers.TranslateDeferringInsetsAnimationCallback;
 import awais.instagrabber.databinding.FragmentDirectMessagesThreadBinding;
 import awais.instagrabber.dialogs.DirectItemReactionDialogFragment;
 import awais.instagrabber.dialogs.GifPickerBottomDialogFragment;
@@ -111,10 +125,8 @@ import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectThreadViewModel;
 import awais.instagrabber.viewmodels.factories.DirectThreadViewModelFactory;
 
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
-
-public class DirectMessageThreadFragment extends Fragment implements DirectReactionsAdapter.OnReactionClickListener {
+public class DirectMessageThreadFragment extends Fragment implements DirectReactionsAdapter.OnReactionClickListener,
+        EmojiPicker.OnEmojiClickListener {
     private static final String TAG = DirectMessageThreadFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int AUDIO_RECORD_PERM_REQUEST_CODE = 1000;
@@ -124,7 +136,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private DirectItemsAdapter itemsAdapter;
     private MainActivity fragmentActivity;
     private DirectThreadViewModel viewModel;
-    private ConstraintLayout root;
+    private InsetsAnimationLinearLayout root;
     private boolean shouldRefresh = true;
     private List<DirectItemOrHeader> itemOrHeaders;
     private List<User> users;
@@ -134,14 +146,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private ActionBar actionBar;
     private AppStateViewModel appStateViewModel;
     private Runnable prevTitleRunnable;
-    private int originalSoftInputMode;
     private AnimatorSet animatorSet;
-    private boolean isEmojiPickerShown;
-    private boolean isKbShown;
-    private HeightProvider heightProvider;
     private boolean isRecording;
-    private boolean wasKbShowing;
-    private int keyboardHeight = Utils.convertDpToPx(250);
     private DirectItemReactionDialogFragment reactionDialogFragment;
     private DirectItem itemToForward;
     private MutableLiveData<Object> backStackSavedStateResultLiveData;
@@ -159,6 +165,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private LiveData<Integer> pendingRequestsCountLiveData;
     private LiveData<List<User>> usersLiveData;
     private boolean autoMarkAsSeen = false;
+    private MenuItem markAsSeenMenuItem;
+    private Media tempMedia;
+    private DirectItem addReactionItem;
+    private TranslateDeferringInsetsAnimationCallback inputHolderAnimationCallback;
+    private TranslateDeferringInsetsAnimationCallback chatsAnimationCallback;
+    private EmojiPickerInsetsAnimationCallback emojiPickerAnimationCallback;
+    private boolean hasKbOpenedOnce;
+    private boolean wasToggled;
 
     private final AppExecutors appExecutors = AppExecutors.getInstance();
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -224,8 +238,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 }
                 return;
             }
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment.builder(media);
-            builder.build().show(getChildFragmentManager(), "post_view");
+            final NavController navController = NavHostFragment.findNavController(DirectMessageThreadFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
+            }
         }
 
         @Override
@@ -285,8 +305,15 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 cb.apply(item);
             }
         }
-    };
 
+        @Override
+        public void onAddReactionListener(final DirectItem item) {
+            if (item == null) return;
+            addReactionItem = item;
+            final EmojiBottomSheetDialog emojiBottomSheetDialog = EmojiBottomSheetDialog.newInstance();
+            emojiBottomSheetDialog.show(getChildFragmentManager(), EmojiBottomSheetDialog.TAG);
+        }
+    };
     private final DirectItemLongClickListener directItemLongClickListener = position -> {
         // viewModel.setSelectedPosition(position);
     };
@@ -315,8 +342,14 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         backStackSavedStateResultLiveData.postValue(null);
     };
     private final MutableLiveData<Integer> inputLength = new MutableLiveData<>(0);
-    private MenuItem markAsSeenMenuItem;
-    private Media tempMedia;
+    private final MutableLiveData<Boolean> emojiPickerVisible = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> kbVisible = new MutableLiveData<>(false);
+    private final OnBackPressedCallback onEmojiPickerBackPressedCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            emojiPickerVisible.postValue(false);
+        }
+    };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -327,11 +360,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final Bundle arguments = getArguments();
         if (arguments == null) return;
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
+        final User currentUser = appStateViewModel.getCurrentUser();
+        if (currentUser == null) return;
         final DirectThreadViewModelFactory viewModelFactory = new DirectThreadViewModelFactory(
                 fragmentActivity.getApplication(),
                 fragmentArgs.getThreadId(),
                 fragmentArgs.getPending(),
-                appStateViewModel.getCurrentUser()
+                currentUser
         );
         viewModel = new ViewModelProvider(this, viewModelFactory).get(DirectThreadViewModel.class);
         setHasOptionsMenu(true);
@@ -353,13 +388,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             return root;
         }
         tooltip = new Tooltip(context, root, getResources().getColor(R.color.grey_400), getResources().getColor(R.color.black));
-        originalSoftInputMode = fragmentActivity.getWindow().getAttributes().softInputMode;
         // todo check has camera and remove view
         return root;
     }
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        // WindowCompat.setDecorFitsSystemWindows(fragmentActivity.getWindow(), false);
         if (!shouldRefresh) return;
         init();
         binding.send.post(() -> initialSendX = binding.send.getX());
@@ -386,7 +421,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             final DirectMessageThreadFragmentDirections.ActionThreadToSettings directions = DirectMessageThreadFragmentDirections
                     .actionThreadToSettings(viewModel.getThreadId(), null);
             final Boolean pending = viewModel.isPending().getValue();
-            directions.setPending(pending == null ? false : pending);
+            directions.setPending(pending != null && pending);
             NavHostFragment.findNavController(this).navigate(directions);
             return true;
         }
@@ -414,14 +449,10 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                         case SUCCESS:
                             Toast.makeText(context, R.string.marked_as_seen, Toast.LENGTH_SHORT).show();
                         case LOADING:
-                            if (item != null) {
-                                item.setEnabled(false);
-                            }
+                            item.setEnabled(false);
                             break;
                         case ERROR:
-                            if (item != null) {
-                                item.setEnabled(true);
-                            }
+                            item.setEnabled(true);
                             if (resource.message != null) {
                                 Snackbar.make(context, binding.getRoot(), resource.message, Snackbar.LENGTH_LONG).show();
                                 return;
@@ -476,10 +507,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (isRecording) {
             binding.recordView.cancelRecording(binding.send);
         }
-        if (isKbShown) {
-            wasKbShowing = true;
-            binding.emojiPicker.setAlpha(0);
-        }
+        emojiPickerVisible.postValue(false);
+        kbVisible.postValue(false);
+        binding.inputHolder.setTranslationY(0);
+        binding.chats.setTranslationY(0);
+        binding.emojiPicker.setTranslationY(0);
         removeObservers();
         super.onPause();
     }
@@ -487,16 +519,12 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     @Override
     public void onResume() {
         super.onResume();
-        fragmentActivity.getWindow().setSoftInputMode(SOFT_INPUT_ADJUST_NOTHING | SOFT_INPUT_STATE_HIDDEN);
-        if (wasKbShowing) {
-            binding.input.requestFocus();
-            binding.input.post(this::showKeyboard);
-            wasKbShowing = false;
-        }
         if (initialSendX != 0) {
             binding.send.setX(initialSendX);
         }
         binding.send.stopScale();
+        final OnBackPressedDispatcher onBackPressedDispatcher = fragmentActivity.getOnBackPressedDispatcher();
+        onBackPressedDispatcher.addCallback(onEmojiPickerBackPressedCallback);
         setupBackStackResultObserver();
         setObservers();
         // attachPendingRequestsBadge(viewModel.getPendingRequestsCount().getValue());
@@ -519,13 +547,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (prevTitleRunnable != null) {
             appExecutors.mainThread().cancel(prevTitleRunnable);
         }
-        if (heightProvider != null) {
-            // need to close the height provider popup before navigating back to prevent leak
-            heightProvider.dismiss();
-        }
-        if (originalSoftInputMode != 0) {
-            fragmentActivity.getWindow().setSoftInputMode(originalSoftInputMode);
-        }
         for (int childCount = binding.chats.getChildCount(), i = 0; i < childCount; ++i) {
             final RecyclerView.ViewHolder holder = binding.chats.getChildViewHolder(binding.chats.getChildAt(i));
             if (holder == null) continue;
@@ -535,7 +556,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
         isPendingRequestCountBadgeAttached = false;
         if (pendingRequestCountBadgeDrawable != null) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
+                    .getActionMenuItemView(fragmentActivity.getToolbar(), R.id.info);
+            if (menuItemView != null) {
+                BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            }
             pendingRequestCountBadgeDrawable = null;
         }
     }
@@ -547,36 +572,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         actionBar = fragmentActivity.getSupportActionBar();
         setupList();
         root.post(this::setupInput);
-        // root.post(this::getInitialData);
     }
-
-    // private void getInitialData() {
-    //     final Bundle arguments = getArguments();
-    //     if (arguments == null) return;
-    //     final DirectMessageThreadFragmentArgs args = DirectMessageThreadFragmentArgs.fromBundle(arguments);
-    //     final boolean pending = args.getPending();
-    //     final NavController navController = NavHostFragment.findNavController(this);
-    //     final ViewModelStoreOwner viewModelStoreOwner = navController.getViewModelStoreOwner(R.id.direct_messages_nav_graph);
-    //     final List<DirectThread> threads;
-    //     if (!pending) {
-    //         final DirectInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectInboxViewModel.class);
-    //         threads = threadListViewModel.getThreads().getValue();
-    //     } else {
-    //         final DirectPendingInboxViewModel threadListViewModel = new ViewModelProvider(viewModelStoreOwner).get(DirectPendingInboxViewModel.class);
-    //         threads = threadListViewModel.getThreads().getValue();
-    //     }
-    //     final Optional<DirectThread> first = threads != null
-    //                                          ? threads.stream()
-    //                                                   .filter(thread -> thread.getThreadId().equals(viewModel.getThreadId()))
-    //                                                   .findFirst()
-    //                                          : Optional.empty();
-    //     if (first.isPresent()) {
-    //         final DirectThread thread = first.get();
-    //         viewModel.setThread(thread);
-    //         return;
-    //     }
-    //     viewModel.fetchChats();
-    // }
 
     private void setupList() {
         final Context context = getContext();
@@ -848,7 +844,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             pendingRequestCountBadgeDrawable = BadgeDrawable.create(context);
         }
         if (count == null || count == 0) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
+                    .getActionMenuItemView(fragmentActivity.getToolbar(), R.id.info);
+            if (menuItemView != null) {
+                BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            }
             isPendingRequestCountBadgeAttached = false;
             pendingRequestCountBadgeDrawable.setNumber(0);
             return;
@@ -1086,23 +1086,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
                 final int length = s.length();
                 inputLength.postValue(length);
-                // boolean showExtraInputOptionsChanged = false;
-                // if (prevLength != 0 && length == 0) {
-                //     inputLength.postValue(true);
-                // showExtraInputOptionsChanged = true;
-                // binding.send.setListenForRecord(true);
-                // startIconAnimation();
-                // }
-                // if (prevLength == 0 && length != 0) {
-                //     inputLength.postValue(false);
-                // showExtraInputOptionsChanged = true;
-                // binding.send.setListenForRecord(false);
-                // startIconAnimation();
-                // }
-                // if (!showExtraInputOptionsChanged) {
-                //     showExtraInputOptions.postValue(length == 0);
-                // }
-                // prevLength = length;
             }
         });
         binding.send.setOnRecordClickListener(v -> {
@@ -1117,30 +1100,15 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             Log.d(TAG, "setOnRecordLongClickListener");
             return true;
         });
-        binding.input.setShowSoftInputOnFocus(false);
-        binding.input.requestFocus();
-        binding.input.setOnKeyEventListener((keyCode, keyEvent) -> {
-            if (keyCode != KeyEvent.KEYCODE_BACK) return false;
-            // We'll close the keyboard/emoji picker only when user releases the back button
-            // return true so that system doesn't handle the event
-            if (keyEvent.getAction() != KeyEvent.ACTION_UP) return true;
-            if (!isKbShown && !isEmojiPickerShown) {
-                // if both keyboard and emoji picker are hidden, navigate back
-                if (heightProvider != null) {
-                    // need to close the height provider popup before navigating back to prevent leak
-                    heightProvider.dismiss();
-                }
-                NavHostFragment.findNavController(this).navigateUp();
-                return true;
-            }
-            binding.emojiToggle.setIconResource(R.drawable.ic_face_24);
-            hideKeyboard(true);
-            return true;
+        binding.input.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) return;
+            final Boolean emojiPickerVisibleValue = emojiPickerVisible.getValue();
+            if (emojiPickerVisibleValue == null || !emojiPickerVisibleValue) return;
+            inputHolderAnimationCallback.setShouldTranslate(false);
+            chatsAnimationCallback.setShouldTranslate(false);
+            emojiPickerAnimationCallback.setShouldTranslate(false);
         });
-        binding.input.setOnClickListener(v -> {
-            if (isKbShown) return;
-            showKeyboard();
-        });
+        setupInsetsCallback();
         setupEmojiPicker();
         binding.gallery.setOnClickListener(v -> {
             final MediaPickerBottomDialogFragment mediaPicker = MediaPickerBottomDialogFragment.newInstance();
@@ -1149,10 +1117,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 if (!isAdded()) return;
                 if (!entry.isVideo) {
                     navigateToImageEditFragment(entry.path);
+                    return;
                 }
+                handleSentMessage(viewModel.sendUri(entry));
             });
             mediaPicker.show(getChildFragmentManager(), "MediaPicker");
-            hideKeyboard(true);
         });
         binding.gif.setOnClickListener(v -> {
             final GifPickerBottomDialogFragment gifPicker = GifPickerBottomDialogFragment.newInstance();
@@ -1162,12 +1131,78 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 handleSentMessage(viewModel.sendAnimatedMedia(giphyGif));
             });
             gifPicker.show(getChildFragmentManager(), "GifPicker");
-            hideKeyboard(true);
         });
         binding.camera.setOnClickListener(v -> {
             final Intent intent = new Intent(context, CameraActivity.class);
             startActivityForResult(intent, CAMERA_REQUEST_CODE);
         });
+    }
+
+    private void setupInsetsCallback() {
+        inputHolderAnimationCallback = new TranslateDeferringInsetsAnimationCallback(
+                binding.inputHolder,
+                WindowInsetsCompat.Type.systemBars(),
+                WindowInsetsCompat.Type.ime(),
+                WindowInsetsAnimationCompat.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE
+        );
+        ViewCompat.setWindowInsetsAnimationCallback(binding.inputHolder, inputHolderAnimationCallback);
+        chatsAnimationCallback = new TranslateDeferringInsetsAnimationCallback(
+                binding.chats,
+                WindowInsetsCompat.Type.systemBars(),
+                WindowInsetsCompat.Type.ime()
+        );
+        ViewCompat.setWindowInsetsAnimationCallback(binding.chats, chatsAnimationCallback);
+        emojiPickerAnimationCallback = new EmojiPickerInsetsAnimationCallback(
+                binding.emojiPicker,
+                WindowInsetsCompat.Type.systemBars(),
+                WindowInsetsCompat.Type.ime()
+        );
+        emojiPickerAnimationCallback.setKbVisibilityListener(this::onKbVisibilityChange);
+        ViewCompat.setWindowInsetsAnimationCallback(binding.emojiPicker, emojiPickerAnimationCallback);
+        ViewCompat.setWindowInsetsAnimationCallback(
+                binding.input,
+                new ControlFocusInsetsAnimationCallback(binding.input)
+        );
+        final SimpleImeAnimationController imeAnimController = root.getImeAnimController();
+        if (imeAnimController != null) {
+            imeAnimController.setAnimationControlListener(new WindowInsetsAnimationControlListenerCompat() {
+                @Override
+                public void onReady(@NonNull final WindowInsetsAnimationControllerCompat controller, final int types) {}
+
+                @Override
+                public void onFinished(@NonNull final WindowInsetsAnimationControllerCompat controller) {
+                    checkKbVisibility();
+                }
+
+                @Override
+                public void onCancelled(@Nullable final WindowInsetsAnimationControllerCompat controller) {
+                    checkKbVisibility();
+                }
+
+                private void checkKbVisibility() {
+                    final WindowInsetsCompat rootWindowInsets = ViewCompat.getRootWindowInsets(binding.getRoot());
+                    final boolean visible = rootWindowInsets != null && rootWindowInsets.isVisible(WindowInsetsCompat.Type.ime());
+                    onKbVisibilityChange(visible);
+                }
+            });
+        }
+    }
+
+    private void onKbVisibilityChange(final boolean kbVisible) {
+        this.kbVisible.postValue(kbVisible);
+        if (wasToggled) {
+            emojiPickerVisible.postValue(!kbVisible);
+            wasToggled = false;
+            return;
+        }
+        final Boolean emojiPickerVisibleValue = emojiPickerVisible.getValue();
+        if (kbVisible && emojiPickerVisibleValue != null && emojiPickerVisibleValue) {
+            emojiPickerVisible.postValue(false);
+            return;
+        }
+        if (!kbVisible) {
+            emojiPickerVisible.postValue(false);
+        }
     }
 
     private void startIconAnimation() {
@@ -1216,15 +1251,87 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private void setupEmojiPicker() {
         root.post(() -> binding.emojiPicker.init(
                 root,
-                (view, emoji) -> binding.input.append(emoji.getUnicode()),
+                (view, emoji) -> {
+                    final KeyNotifyingEmojiEditText input = binding.input;
+                    final int start = input.getSelectionStart();
+                    final int end = input.getSelectionEnd();
+                    if (start < 0) {
+                        input.append(emoji.getUnicode());
+                        return;
+                    }
+                    input.getText().replace(
+                            Math.min(start, end),
+                            Math.max(start, end),
+                            emoji.getUnicode(),
+                            0,
+                            emoji.getUnicode().length()
+                    );
+                },
                 () -> binding.input.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
         ));
-        setupKbHeightProvider();
-        if (keyboardHeight == 0) {
-            keyboardHeight = Utils.convertDpToPx(250);
-        }
-        setEmojiPickerBounds();
-        binding.emojiToggle.setOnClickListener(v -> toggleEmojiPicker());
+        binding.emojiToggle.setOnClickListener(v -> {
+            Boolean isEmojiPickerVisible = emojiPickerVisible.getValue();
+            if (isEmojiPickerVisible == null) isEmojiPickerVisible = false;
+            Boolean isKbVisible = kbVisible.getValue();
+            if (isKbVisible == null) isKbVisible = false;
+            wasToggled = isEmojiPickerVisible || isKbVisible;
+
+            if (isEmojiPickerVisible) {
+                if (hasKbOpenedOnce && binding.emojiPicker.getTranslationY() != 0) {
+                    inputHolderAnimationCallback.setShouldTranslate(false);
+                    chatsAnimationCallback.setShouldTranslate(false);
+                    emojiPickerAnimationCallback.setShouldTranslate(false);
+                }
+                // trigger ime.
+                // Since the kb visibility listener will toggle the emojiPickerVisible live data, we do not explicitly toggle it here
+                showKeyboard();
+                return;
+            }
+
+            if (isKbVisible) {
+                // hide the keyboard, but don't translate the views
+                // Since the kb visibility listener will toggle the emojiPickerVisible live data, we do not explicitly toggle it here
+                inputHolderAnimationCallback.setShouldTranslate(false);
+                chatsAnimationCallback.setShouldTranslate(false);
+                emojiPickerAnimationCallback.setShouldTranslate(false);
+                hideKeyboard();
+            }
+            emojiPickerVisible.postValue(true);
+        });
+        final LiveData<Pair<Boolean, Boolean>> emojiKbVisibilityLD = Utils.zipLiveData(emojiPickerVisible, kbVisible);
+        emojiKbVisibilityLD.observe(getViewLifecycleOwner(), pair -> {
+            Boolean isEmojiPickerVisible = pair.first;
+            Boolean isKbVisible = pair.second;
+            if (isEmojiPickerVisible == null) isEmojiPickerVisible = false;
+            if (isKbVisible == null) isKbVisible = false;
+            root.setScrollImeOffScreenWhenVisible(!isEmojiPickerVisible);
+            root.setScrollImeOnScreenWhenNotVisible(!isEmojiPickerVisible);
+            onEmojiPickerBackPressedCallback.setEnabled(isEmojiPickerVisible && !isKbVisible);
+            if (isEmojiPickerVisible && !isKbVisible) {
+                animatePan(binding.emojiPicker.getMeasuredHeight(), unused -> {
+                    binding.emojiPicker.setAlpha(1);
+                    binding.emojiToggle.setIconResource(R.drawable.ic_keyboard_24);
+                    return null;
+                }, null);
+                return;
+            }
+            if (!isEmojiPickerVisible && !isKbVisible) {
+                animatePan(0, null, unused -> {
+                    binding.emojiPicker.setAlpha(0);
+                    binding.emojiToggle.setIconResource(R.drawable.ic_face_24);
+                    return null;
+                });
+                return;
+            }
+            // isKbVisible will always be true going forward
+            hasKbOpenedOnce = true;
+            if (!isEmojiPickerVisible) {
+                binding.emojiToggle.setIconResource(R.drawable.ic_face_24);
+                binding.emojiPicker.setAlpha(0);
+                return;
+            }
+            binding.emojiPicker.setAlpha(1);
+        });
     }
 
     public void showKeyboard() {
@@ -1232,67 +1339,21 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (context == null) return;
         final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm == null) return;
-        if (!isEmojiPickerShown) {
-            binding.emojiPicker.setAlpha(0);
+        if (!binding.input.isFocused()) {
+            binding.input.requestFocus();
         }
         final boolean shown = imm.showSoftInput(binding.input, InputMethodManager.SHOW_IMPLICIT);
         if (!shown) {
             Log.e(TAG, "showKeyboard: System did not display the keyboard");
         }
-        if (!isEmojiPickerShown) {
-            animatePan(keyboardHeight);
-        }
-        isKbShown = true;
     }
 
-    public void hideKeyboard(final boolean shouldPan) {
+    public void hideKeyboard() {
         final Context context = getContext();
         if (context == null) return;
         final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm == null) return;
-        if (shouldPan) {
-            binding.emojiPicker.setAlpha(0);
-        }
         imm.hideSoftInputFromWindow(binding.input.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
-        if (shouldPan) {
-            animatePan(0);
-            isEmojiPickerShown = false;
-            binding.emojiToggle.setIconResource(R.drawable.ic_face_24);
-        }
-        isKbShown = false;
-    }
-
-    /**
-     * Toggle between emoji picker and keyboard
-     * If both are hidden, the emoji picker is shown first
-     */
-    private void toggleEmojiPicker() {
-        if (isKbShown) {
-            binding.emojiToggle.setIconResource(R.drawable.ic_keyboard_24);
-            hideKeyboard(false);
-            return;
-        }
-        if (isEmojiPickerShown) {
-            binding.emojiToggle.setIconResource(R.drawable.ic_face_24);
-            showKeyboard();
-            return;
-        }
-        binding.emojiToggle.setIconResource(R.drawable.ic_keyboard_24);
-        animatePan(keyboardHeight);
-        isEmojiPickerShown = true;
-    }
-
-    /**
-     * Set height of the emoji picker
-     */
-    private void setEmojiPickerBounds() {
-        final ViewGroup.LayoutParams layoutParams = binding.emojiPicker.getLayoutParams();
-        layoutParams.height = keyboardHeight;
-        if (!isEmojiPickerShown) {
-            // If emoji picker is hidden reset the translationY so that it doesn't peek from bottom
-            binding.emojiPicker.setTranslationY(keyboardHeight);
-        }
-        binding.emojiPicker.requestLayout();
     }
 
     private void setSendToMicIcon() {
@@ -1352,7 +1413,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
     }
 
-    @NonNull
+    @Nullable
     private User getUser(final long userId) {
         for (final User user : users) {
             if (userId != user.getPk()) continue;
@@ -1361,40 +1422,18 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         return null;
     }
 
-    private void setupKbHeightProvider() {
-        if (heightProvider != null) return;
-        heightProvider = new HeightProvider(fragmentActivity).init().setHeightListener(height -> {
-            if (height > 100 && keyboardHeight != height) {
-                // save the current keyboard height to settings to use later
-                keyboardHeight = height;
-                setEmojiPickerBounds();
-                animatePan(keyboardHeight);
-            }
-        });
-    }
-
     // Sets the translationY of views to height with animation
-    private void animatePan(final int height) {
+    private void animatePan(final int height,
+                            @Nullable final Function<Void, Void> onAnimationStart,
+                            @Nullable final Function<Void, Void> onAnimationEnd) {
         if (animatorSet != null && animatorSet.isStarted()) {
             animatorSet.cancel();
         }
         final ImmutableList.Builder<Animator> builder = ImmutableList.builder();
         builder.add(
                 ObjectAnimator.ofFloat(binding.chats, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.input, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.inputBg, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.recordView, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.emojiToggle, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.gif, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.gallery, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.camera, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.send, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.replyBg, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.replyInfo, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.replyCancel, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.replyPreviewImage, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.replyPreviewText, TRANSLATION_Y, -height),
-                ObjectAnimator.ofFloat(binding.emojiPicker, TRANSLATION_Y, keyboardHeight - height)
+                ObjectAnimator.ofFloat(binding.inputHolder, TRANSLATION_Y, -height),
+                ObjectAnimator.ofFloat(binding.emojiPicker, TRANSLATION_Y, -height)
         );
         // if (headerItemDecoration != null && headerItemDecoration.getCurrentHeader() != null) {
         //     builder.add(ObjectAnimator.ofFloat(headerItemDecoration.getCurrentHeader(), TRANSLATION_Y, height));
@@ -1405,9 +1444,20 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         animatorSet.setInterpolator(CubicBezierInterpolator.EASE_IN);
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+                if (onAnimationStart != null) {
+                    onAnimationStart.apply(null);
+                }
+            }
+
+            @Override
             public void onAnimationEnd(final Animator animation) {
-                binding.emojiPicker.setAlpha(1);
+                super.onAnimationEnd(animation);
                 animatorSet = null;
+                if (onAnimationEnd != null) {
+                    onAnimationEnd.apply(null);
+                }
             }
         });
         animatorSet.start();
@@ -1457,25 +1507,12 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         NavHostFragment.findNavController(DirectMessageThreadFragment.this).navigate(direction);
     }
 
-    public static class ItemsAdapterDataMerger extends MediatorLiveData<Pair<User, DirectThread>> {
-        private User user;
-        private DirectThread thread;
-
-        public ItemsAdapterDataMerger(final LiveData<User> userLiveData,
-                                      final LiveData<DirectThread> threadLiveData) {
-            addSource(userLiveData, user -> {
-                this.user = user;
-                combine();
-            });
-            addSource(threadLiveData, thread -> {
-                this.thread = thread;
-                combine();
-            });
-        }
-
-        private void combine() {
-            if (user == null || thread == null) return;
-            setValue(new Pair<>(user, thread));
+    @Override
+    public void onClick(final View view, final Emoji emoji) {
+        if (addReactionItem == null) return;
+        final LiveData<Resource<Object>> resourceLiveData = viewModel.sendReaction(addReactionItem, emoji);
+        if (resourceLiveData != null) {
+            resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
         }
     }
 }

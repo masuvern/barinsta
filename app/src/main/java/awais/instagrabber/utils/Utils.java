@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
@@ -22,6 +23,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -36,6 +38,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
@@ -288,6 +292,18 @@ public final class Utils {
         return outValue.data;
     }
 
+    public static int getAttrValue(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.data;
+    }
+
+    public static int getAttrResId(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.resourceId;
+    }
+
     public static void transparentStatusBar(final Activity activity,
                                             final boolean enable,
                                             final boolean fullscreen) {
@@ -510,5 +526,77 @@ public final class Utils {
     public static boolean isNavRootInCurrentTabs(final String navRootString) {
         if (navRootString == null || tabOrderString == null) return false;
         return tabOrderString.contains(navRootString);
+    }
+
+    @NonNull
+    public static Point getNavigationBarSize(@NonNull Context context) {
+        Point appUsableSize = getAppUsableScreenSize(context);
+        Point realScreenSize = getRealScreenSize(context);
+
+        // navigation bar on the right
+        if (appUsableSize.x < realScreenSize.x) {
+            return new Point(realScreenSize.x - appUsableSize.x, appUsableSize.y);
+        }
+
+        // navigation bar at the bottom
+        if (appUsableSize.y < realScreenSize.y) {
+            return new Point(appUsableSize.x, realScreenSize.y - appUsableSize.y);
+        }
+
+        // navigation bar is not present
+        return new Point();
+    }
+
+    @NonNull
+    public static Point getAppUsableScreenSize(@NonNull Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
+    }
+
+    @NonNull
+    public static Point getRealScreenSize(@NonNull Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
+        return size;
+    }
+
+    public static <F, S> LiveData<Pair<F, S>> zipLiveData(@NonNull final LiveData<F> firstLiveData,
+                                                          @NonNull final LiveData<S> secondLiveData) {
+        final ZippedLiveData<F, S> zippedLiveData = new ZippedLiveData<>();
+        zippedLiveData.addFirstSource(firstLiveData);
+        zippedLiveData.addSecondSource(secondLiveData);
+        return zippedLiveData;
+    }
+
+    public static class ZippedLiveData<F, S> extends MediatorLiveData<Pair<F, S>> {
+        private F lastF;
+        private S lastS;
+
+        private void update() {
+            F localLastF = lastF;
+            S localLastS = lastS;
+            if (localLastF != null && localLastS != null) {
+                setValue(new Pair<>(localLastF, localLastS));
+            }
+        }
+
+        public void addFirstSource(@NonNull final LiveData<F> firstLiveData) {
+            addSource(firstLiveData, f -> {
+                lastF = f;
+                update();
+            });
+        }
+
+        public void addSecondSource(@NonNull final LiveData<S> secondLiveData) {
+            addSource(secondLiveData, s -> {
+                lastS = s;
+                update();
+            });
+        }
     }
 }

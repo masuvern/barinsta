@@ -3,6 +3,8 @@ package awais.instagrabber.customviews;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
@@ -60,14 +63,17 @@ public class PostsRecyclerView extends RecyclerView {
     private FeedAdapterV2.FeedItemCallback feedItemCallback;
     private boolean shouldScrollToTop;
     private FeedAdapterV2.SelectionModeCallback selectionModeCallback;
+    private Function<ViewGroup, View> headerViewCreator;
+    private Function<View, Void> headerBinder;
+    private boolean refresh = true;
 
     private final List<FetchStatusChangeListener> fetchStatusChangeListeners = new ArrayList<>();
 
     private final FetchListener<List<Media>> fetchListener = new FetchListener<List<Media>>() {
         @Override
         public void onResult(final List<Media> result) {
-            final int currentPage = lazyLoader.getCurrentPage();
-            if (currentPage == 0) {
+            if (refresh) {
+                refresh = false;
                 mediaViewModel.getList().postValue(result);
                 shouldScrollToTop = true;
                 dispatchFetchStatus();
@@ -198,21 +204,19 @@ public class PostsRecyclerView extends RecyclerView {
             Log.e(TAG, "initSelf: ", e);
         }
         if (mediaViewModel == null) return;
-        mediaViewModel.getList().observe(lifeCycleOwner, list -> {
-            if (list.size() <= 0) return;
-            feedAdapter.submitList(list, () -> {
-                // postDelayed(this::fetchMoreIfPossible, 1000);
-                if (!shouldScrollToTop) return;
-                smoothScrollToPosition(0);
-                shouldScrollToTop = false;
-            });
-        });
+        mediaViewModel.getList().observe(lifeCycleOwner, list -> feedAdapter.submitList(list, () -> {
+            // postDelayed(this::fetchMoreIfPossible, 1000);
+            if (!shouldScrollToTop) return;
+            shouldScrollToTop = false;
+            post(() -> smoothScrollToPosition(0));
+        }));
         postFetcher = new PostFetcher(postFetchService, fetchListener);
         if (layoutPreferences.getHasGap()) {
             addItemDecoration(gridSpacingItemDecoration);
         }
         setHasFixedSize(true);
         setNestedScrollingEnabled(true);
+        setItemAnimator(null);
         lazyLoader = new RecyclerLazyLoaderAtEdge(layoutManager, (page) -> {
             if (postFetcher.hasMore()) {
                 postFetcher.fetch();
@@ -316,11 +320,12 @@ public class PostsRecyclerView extends RecyclerView {
     }
 
     public void refresh() {
+        refresh = true;
         if (lazyLoader != null) {
             lazyLoader.resetState();
         }
         if (postFetcher != null) {
-            mediaViewModel.getList().postValue(Collections.emptyList());
+            // mediaViewModel.getList().postValue(Collections.emptyList());
             postFetcher.reset();
             postFetcher.fetch();
         }

@@ -17,6 +17,7 @@ public class User implements Serializable {
     private final boolean isUnpublished;
     private final boolean isFavorite;
     private final boolean isDirectappInstalled;
+    private final boolean hasChaining;
     private final String reelAutoArchive;
     private final String allowedCommenterType;
     private final long mediaCount;
@@ -28,11 +29,10 @@ public class User implements Serializable {
     private final long usertagsCount;
     private final String publicEmail;
     private final HdProfilePicUrlInfo hdProfilePicUrlInfo;
-    private final String profileContext;
-    private final List<UserProfileContextLink> profileContextLinksWithUserIds;
-    private final String socialContext;
-    // if a DM member is a Facebook user, this is present
-    private final String interopMessagingUserFbid;
+    private final String profileContext; // "also followed by" your friends
+    private final List<UserProfileContextLink> profileContextLinksWithUserIds; // ^
+    private final String socialContext; // AYML
+    private final String interopMessagingUserFbid; // in DMs only: Facebook user ID
 
     public User(final long pk,
                 final String username,
@@ -46,6 +46,7 @@ public class User implements Serializable {
                 final boolean isUnpublished,
                 final boolean isFavorite,
                 final boolean isDirectappInstalled,
+                final boolean hasChaining,
                 final String reelAutoArchive,
                 final String allowedCommenterType,
                 final long mediaCount,
@@ -73,6 +74,7 @@ public class User implements Serializable {
         this.isUnpublished = isUnpublished;
         this.isFavorite = isFavorite;
         this.isDirectappInstalled = isDirectappInstalled;
+        this.hasChaining = hasChaining;
         this.reelAutoArchive = reelAutoArchive;
         this.allowedCommenterType = allowedCommenterType;
         this.mediaCount = mediaCount;
@@ -88,6 +90,53 @@ public class User implements Serializable {
         this.profileContextLinksWithUserIds = profileContextLinksWithUserIds;
         this.socialContext = socialContext;
         this.interopMessagingUserFbid = interopMessagingUserFbid;
+    }
+
+    public User(final long pk,
+                final String username,
+                final String fullName,
+                final boolean isPrivate,
+                final String profilePicUrl,
+                final boolean isVerified) {
+        this.pk = pk;
+        this.username = username;
+        this.fullName = fullName;
+        this.isPrivate = isPrivate;
+        this.profilePicUrl = profilePicUrl;
+        this.profilePicId = null;
+        this.friendshipStatus = new FriendshipStatus(
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        this.isVerified = isVerified;
+        this.hasAnonymousProfilePicture = false;
+        this.isUnpublished = false;
+        this.isFavorite = false;
+        this.isDirectappInstalled = false;
+        this.hasChaining = false;
+        this.reelAutoArchive = null;
+        this.allowedCommenterType = null;
+        this.mediaCount = 0;
+        this.followerCount = 0;
+        this.followingCount = 0;
+        this.followingTagCount = 0;
+        this.biography = null;
+        this.externalUrl = null;
+        this.usertagsCount = 0;
+        this.publicEmail = null;
+        this.hdProfilePicUrlInfo = null;
+        this.profileContext = null;
+        this.profileContextLinksWithUserIds = null;
+        this.socialContext = null;
+        this.interopMessagingUserFbid = null;
     }
 
     public long getPk() {
@@ -111,6 +160,9 @@ public class User implements Serializable {
     }
 
     public String getHDProfilePicUrl() {
+        if (hdProfilePicUrlInfo == null) {
+            return getProfilePicUrl();
+        }
         return hdProfilePicUrlInfo.getUrl();
     }
 
@@ -144,6 +196,10 @@ public class User implements Serializable {
 
     public boolean isDirectappInstalled() {
         return isDirectappInstalled;
+    }
+
+    public boolean hasChaining() {
+        return hasChaining;
     }
 
     public String getReelAutoArchive() {
@@ -234,7 +290,7 @@ public class User implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(pk, username, fullName, isPrivate, profilePicUrl, profilePicId, friendshipStatus, isVerified, hasAnonymousProfilePicture,
-                            isUnpublished, isFavorite, isDirectappInstalled, reelAutoArchive, allowedCommenterType, mediaCount, followerCount,
-                            followingCount, followingTagCount, biography, externalUrl, usertagsCount, publicEmail);
+                            isUnpublished, isFavorite, isDirectappInstalled, hasChaining, reelAutoArchive, allowedCommenterType, mediaCount,
+                            followerCount, followingCount, followingTagCount, biography, externalUrl, usertagsCount, publicEmail);
     }
 }

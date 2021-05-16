@@ -406,6 +406,8 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
         void onReactionClick(DirectItem item, int position);
 
         void onOptionSelect(DirectItem item, @IdRes int itemId, final Function<DirectItem, Void> callback);
+
+        void onAddReactionListener(DirectItem item);
     }
 
     public interface DirectItemInternalLongClickListener {
