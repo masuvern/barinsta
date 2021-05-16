@@ -445,32 +445,11 @@ public class StoryViewerFragment extends Fragment {
         binding.swipeUp.setOnClickListener(v -> {
 			final Object tag = v.getTag();
 		    if (tag instanceof CharSequence) {
-				DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-		        @Override
-		        public void onClick(DialogInterface dialog, int which) {
-					switch (which){
-						case DialogInterface.BUTTON_POSITIVE:
-							//Yes button clicked
-		                    Utils.openURL(context, tag.toString());
-		                    break;
-
-		                case DialogInterface.BUTTON_NEGATIVE:
-		                    //No button clicked
-		                    dialog.dismiss();
-		                    break;
-
-		               	default:
-		               		dialog.dismiss();
-		               		break;
-		           	}
-		      	}
-		  		};
-
-		   		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		   		builder.setTitle(R.string.swipe_up_confirmation);
-		   		builder.setMessage(tag.toString()).setPositiveButton("Yes", dialogClickListener)
-		   			.setNegativeButton("No", dialogClickListener).show();
-		  	}
+                new AlertDialog.Builder(context)
+                .setTitle(R.string.swipe_up_confirmation)
+                .setMessage(tag.toString()).setPositiveButton(R.string.yes, (d, w) -> Utils.openURL(context, tag.toString()))
+                .setNegativeButton(R.string.no, (d, w) -> d.dismiss()).show();
+            }
         });
         binding.viewStoryPost.setOnClickListener(v -> {
             final Object tag = v.getTag();
