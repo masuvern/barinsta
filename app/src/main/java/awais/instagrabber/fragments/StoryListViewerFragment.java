@@ -23,9 +23,12 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.common.collect.Iterables;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedStoriesListAdapter;
@@ -58,15 +61,17 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     private StoriesService storiesService;
     private Context context;
     private String type;
-    private String currentQuery;
     private String endCursor = null;
     private FeedStoriesListAdapter adapter;
-    private MenuItem menuSearch;
 
     private final OnFeedStoryClickListener clickListener = new OnFeedStoryClickListener() {
         @Override
-        public void onFeedStoryClick(final FeedStoryModel model, final int position) {
+        public void onFeedStoryClick(final FeedStoryModel model) {
             if (model == null) return;
+            final List<FeedStoryModel> feedStoryModels = feedStoriesViewModel.getList().getValue();
+            if (feedStoryModels == null) return;
+            final int position = Iterables.indexOf(feedStoryModels, feedStoryModel -> feedStoryModel != null
+                    && Objects.equals(feedStoryModel.getStoryMediaId(), model.getStoryMediaId()));
             final NavDirections action = StoryListViewerFragmentDirections
                     .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forFeedStoryPosition(position));
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
@@ -153,7 +158,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.search, menu);
-        menuSearch = menu.findItem(R.id.action_search);
+        final MenuItem menuSearch = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) menuSearch.getActionView();
         searchView.setQueryHint(getResources().getString(R.string.action_search));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -166,7 +171,6 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
             @Override
             public boolean onQueryTextChange(final String query) {
                 if (adapter != null) {
-                    currentQuery = query;
                     adapter.getFilter().filter(query);
                 }
                 return true;

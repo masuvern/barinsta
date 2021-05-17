@@ -119,6 +119,7 @@ public class StoryViewerFragment extends Fragment {
     private View root;
     private FragmentStoryViewerBinding binding;
     private String currentStoryUsername;
+    private String highlightTitle;
     private StoriesAdapter storiesAdapter;
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
@@ -274,7 +275,9 @@ public class StoryViewerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        releasePlayer();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     @Override
@@ -724,7 +727,7 @@ public class StoryViewerFragment extends Fragment {
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 fetchOptions = StoryViewerOptions.forHighlight(model.getId());
-                currentStoryUsername = model.getTitle();
+                highlightTitle = model.getTitle();
                 break;
             }
             case FEED_STORY_POSITION: {
@@ -824,8 +827,8 @@ public class StoryViewerFragment extends Fragment {
         if (type == Type.HIGHLIGHT) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
-                actionBarTitle = options.getName();
-                actionBar.setTitle(options.getName());
+                actionBarTitle = highlightTitle;
+                actionBar.setTitle(highlightTitle);
             }
         } else if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");

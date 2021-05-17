@@ -34,7 +34,6 @@ import retrofit2.Response;
 
 public class GraphQLService extends BaseService {
     private static final String TAG = "GraphQLService";
-    // private static final boolean loadFromMock = false;
 
     private final GraphQLRepository repository;
 
@@ -230,39 +229,7 @@ public class GraphQLService extends BaseService {
                                 userObject.optString("full_name"),
                                 userObject.optBoolean("is_private"),
                                 userObject.getString("profile_pic_url"),
-                                null,
-                                new FriendshipStatus(
-                                        false,
-                                        false,
-                                        false,
-                                        false,
-                                        false,
-                                        false,
-                                        false,
-                                        false,
-                                        false,
-                                        false
-                                ),
-                                userObject.optBoolean("is_verified"),
-                                false,
-                                false,
-                                false,
-                                false,
-                                null,
-                                null,
-                                0,
-                                0,
-                                0,
-                                0,
-                                null,
-                                null,
-                                0,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null
+                                userObject.optBoolean("is_verified")
                         ));
                         // userModels.add(new ProfileModel(userObject.optBoolean("is_private"),
                         //                                 false,
@@ -353,6 +320,7 @@ public class GraphQLService extends BaseService {
                                     false
                             ),
                             userJson.getBoolean("is_verified"),
+                            false,
                             false,
                             false,
                             false,

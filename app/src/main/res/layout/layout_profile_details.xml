@@ -15,10 +15,11 @@
         android:transitionName="profile_pic"
         android:visibility="invisible"
         app:actualImageScaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="@id/btnTagged"
+        app:layout_constraintBottom_toTopOf="@id/top_barrier"
         app:layout_constraintEnd_toStartOf="@id/btnFollow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0"
         tools:foreground="@mipmap/ic_launcher"
         tools:visibility="visible" />
 
@@ -112,7 +113,7 @@
         app:chipBackgroundColor="@null"
         app:chipIcon="@drawable/ic_outline_person_pin_24"
         app:chipIconTint="@color/deep_orange_800"
-        app:layout_constraintBottom_toTopOf="@+id/mainFullName"
+        app:layout_constraintBottom_toTopOf="@+id/top_barrier"
         app:layout_constraintStart_toEndOf="@id/mainProfileImage"
         app:layout_constraintTop_toBottomOf="@id/fav_chip"
         app:rippleColor="@color/deep_orange_400"
@@ -128,11 +129,17 @@
         app:chipBackgroundColor="@null"
         app:chipIcon="@drawable/ic_round_send_24"
         app:chipIconTint="@color/green"
-        app:layout_constraintBottom_toTopOf="@+id/mainFullName"
+        app:layout_constraintBottom_toTopOf="@+id/top_barrier"
         app:layout_constraintStart_toEndOf="@id/btnTagged"
         app:layout_constraintTop_toBottomOf="@id/fav_chip"
         app:rippleColor="@color/green"
         tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/top_barrier"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:barrierDirection="bottom" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/mainFullName"
@@ -146,40 +153,37 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/mainBiography"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnTagged"
+        app:layout_constraintTop_toBottomOf="@id/top_barrier"
         tools:text="Austin Huang" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/isVerified"
         android:layout_width="30dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
         android:scaleType="fitCenter"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/mainFullName"
         app:layout_constraintStart_toEndOf="@id/mainFullName"
-        app:layout_constraintTop_toBottomOf="@id/btnTagged"
+        app:layout_constraintTop_toTopOf="@id/mainFullName"
         app:srcCompat="@drawable/verified"
         tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/isPrivate"
         android:layout_width="25dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
         android:scaleType="fitCenter"
         android:tint="@color/red_500"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/mainFullName"
         app:layout_constraintStart_toEndOf="@id/isVerified"
-        app:layout_constraintTop_toBottomOf="@id/btnTagged"
+        app:layout_constraintTop_toTopOf="@id/mainFullName"
         app:srcCompat="@drawable/lock"
         tools:visibility="visible" />
 
@@ -233,6 +237,7 @@
         android:paddingBottom="4dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/profileContext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/mainBiography"
@@ -254,7 +259,7 @@
         android:textSize="12sp"
         android:textStyle="italic"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/counts_barrier"
+        app:layout_constraintBottom_toTopOf="@id/counts_divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/mainUrl"
@@ -262,11 +267,12 @@
         tools:visibility="visible" />
 
     <include
-        android:id="@+id/counts_barrier"
+        android:id="@+id/counts_divider"
         layout="@layout/item_pref_divider"
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/mainPostCount"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/profileContext"
@@ -285,7 +291,7 @@
         app:layout_constraintBottom_toBottomOf="@id/highlights_barrier"
         app:layout_constraintEnd_toStartOf="@id/mainFollowers"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/counts_barrier"
+        app:layout_constraintTop_toBottomOf="@id/counts_divider"
         tools:text="35\nPosts" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -302,7 +308,7 @@
         app:layout_constraintBottom_toBottomOf="@id/highlights_barrier"
         app:layout_constraintEnd_toStartOf="@id/mainFollowing"
         app:layout_constraintStart_toEndOf="@id/mainPostCount"
-        app:layout_constraintTop_toBottomOf="@id/counts_barrier"
+        app:layout_constraintTop_toBottomOf="@id/counts_divider"
         tools:text="68\nFollowers" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -319,7 +325,7 @@
         app:layout_constraintBottom_toBottomOf="@id/highlights_barrier"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/mainFollowers"
-        app:layout_constraintTop_toBottomOf="@id/counts_barrier"
+        app:layout_constraintTop_toBottomOf="@id/counts_divider"
         tools:text="64\nFollowing" />
 
     <androidx.constraintlayout.widget.Barrier

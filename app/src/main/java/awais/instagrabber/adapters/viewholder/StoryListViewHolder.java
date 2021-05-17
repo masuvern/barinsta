@@ -20,7 +20,6 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(final FeedStoryModel model,
-                     final int position,
                      final OnFeedStoryClickListener notificationClickListener) {
         if (model == null) return;
 
@@ -53,7 +52,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
 
         itemView.setOnClickListener(v -> {
             if (notificationClickListener == null) return;
-            notificationClickListener.onFeedStoryClick(model, position);
+            notificationClickListener.onFeedStoryClick(model);
         });
     }
 

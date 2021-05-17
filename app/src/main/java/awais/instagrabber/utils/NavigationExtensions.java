@@ -63,7 +63,7 @@ public class NavigationExtensions {
         selectedItemTag = graphIdToTagMap.get(bottomNavigationView.getSelectedItemId());
         final String firstFragmentTag = graphIdToTagMap.get(firstFragmentGraphId);
         isOnFirstFragment = selectedItemTag != null && selectedItemTag.equals(firstFragmentTag);
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
             if (fragmentManager.isStateSaved()) {
                 return false;
             }
@@ -169,7 +169,7 @@ public class NavigationExtensions {
     private static void setupItemReselected(final BottomNavigationView bottomNavigationView,
                                             final SparseArray<String> graphIdToTagMap,
                                             final FragmentManager fragmentManager) {
-        bottomNavigationView.setOnNavigationItemReselectedListener(item -> {
+        bottomNavigationView.setOnItemReselectedListener(item -> {
             final String newlySelectedItemTag = graphIdToTagMap.get(item.getItemId());
             final Fragment fragmentByTag = fragmentManager.findFragmentByTag(newlySelectedItemTag);
             if (fragmentByTag == null) {

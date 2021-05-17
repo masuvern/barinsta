@@ -31,6 +31,7 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsAnimationCompat;
@@ -56,6 +57,7 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.internal.ToolbarUtils;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
@@ -554,7 +556,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
         isPendingRequestCountBadgeAttached = false;
         if (pendingRequestCountBadgeDrawable != null) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
+                    .getActionMenuItemView(fragmentActivity.getToolbar(), R.id.info);
+            if (menuItemView != null) {
+                BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            }
             pendingRequestCountBadgeDrawable = null;
         }
     }
@@ -838,7 +844,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             pendingRequestCountBadgeDrawable = BadgeDrawable.create(context);
         }
         if (count == null || count == 0) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
+                    .getActionMenuItemView(fragmentActivity.getToolbar(), R.id.info);
+            if (menuItemView != null) {
+                BadgeUtils.detachBadgeDrawable(pendingRequestCountBadgeDrawable, fragmentActivity.getToolbar(), R.id.info);
+            }
             isPendingRequestCountBadgeAttached = false;
             pendingRequestCountBadgeDrawable.setNumber(0);
             return;
@@ -1107,7 +1117,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
                 if (!isAdded()) return;
                 if (!entry.isVideo) {
                     navigateToImageEditFragment(entry.path);
+                    return;
                 }
+                handleSentMessage(viewModel.sendUri(entry));
             });
             mediaPicker.show(getChildFragmentManager(), "MediaPicker");
         });

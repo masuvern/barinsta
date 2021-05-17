@@ -767,11 +767,7 @@ public final class ResponseBodyUtils {
                     owner.optString("full_name"),
                     false,
                     owner.optString("profile_pic_url"),
-                    null,
-                    friendshipStatus,
-                    owner.optBoolean("is_verified"),
-                    false, false, false, false, null, null, 0, 0, 0, 0, null, null, 0, null, null,
-                    null, null, null, null);
+                    owner.optBoolean("is_verified"));
         }
         final String id = feedItem.getString(Constants.EXTRAS_ID);
         VideoVersion videoVersion = null;

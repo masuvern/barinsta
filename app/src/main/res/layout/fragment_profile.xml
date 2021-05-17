@@ -38,7 +38,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_marginTop="@dimen/private_page_margins"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
@@ -48,6 +47,8 @@
             android:id="@+id/privatePage1"
             android:layout_width="@dimen/private_page_size"
             android:layout_height="@dimen/private_page_size"
+            android:visibility="gone"
+            tools:visibility="visible"
             app:srcCompat="@drawable/lock" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -55,6 +56,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:text="@string/priv_acc"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
     </LinearLayout>
