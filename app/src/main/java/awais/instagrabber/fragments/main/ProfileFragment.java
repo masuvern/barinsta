@@ -41,7 +41,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
@@ -141,7 +140,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null && !TextUtils.isEmpty(username)) {
             final String finalUsername = username.startsWith("@") ? username.substring(1)
-                                                                  : username;
+                    : username;
             actionBar.setTitle(finalUsername);
             actionBar.setSubtitle(null);
         }
@@ -617,9 +616,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             Log.e(TAG, "Error fetching profile relationship", t);
                             final Context context = getContext();
                             try {
-                                if (t == null) Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
-                                else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                            } catch (final Throwable ignored) {}
+                                if (t == null)
+                                    Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
+                                else
+                                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            } catch (final Throwable ignored) {
+                            }
                         }
                     });
                 }
@@ -629,9 +631,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     Log.e(TAG, "Error fetching profile", t);
                     final Context context = getContext();
                     try {
-                        if (t == null) Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
+                        if (t == null)
+                            Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
                         else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    } catch (final Throwable ignored) {}
+                    } catch (final Throwable ignored) {
+                    }
                 }
             });
             return;
@@ -648,9 +652,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 Log.e(TAG, "Error fetching profile", t);
                 final Context context = getContext();
                 try {
-                    if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
+                    if (t == null)
+                        Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
                     else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (final Throwable ignored) {}
+                } catch (final Throwable ignored) {
+                }
             }
         });
     }
@@ -667,8 +673,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (!isReallyPrivate()) {
             if (!postsSetupDone) {
                 setupPosts();
-            }
-            else {
+            } else {
                 binding.postsRecyclerView.refresh();
             }
             if (isLoggedIn) {
@@ -695,10 +700,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         result.getDateAdded()
                 ), new RepositoryCallback<Void>() {
                     @Override
-                    public void onSuccess(final Void result) {}
+                    public void onSuccess(final Void result) {
+                    }
 
                     @Override
-                    public void onDataNotAvailable() {}
+                    public void onDataNotAvailable() {
+                    }
                 });
             }
 
@@ -721,7 +728,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
 
                             @Override
-                            public void onDataNotAvailable() {}
+                            public void onDataNotAvailable() {
+                            }
                         });
                     }
 
@@ -743,7 +751,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
 
                             @Override
-                            public void onDataNotAvailable() {}
+                            public void onDataNotAvailable() {
+                            }
                         });
                     }
                 }));
@@ -756,13 +765,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final long followingCount = profileModel.getFollowingCount();
 
         final String postCount = String.valueOf(profileModel.getMediaCount());
-
-
+        
         SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count,
-                                                                                                  profileModel.getMediaCount() > 2000000000L
-                                                                                                  ? 2000000000
-                                                                                                  : (int) profileModel.getMediaCount(),
-                                                                                                  postCount));
+                profileModel.getMediaCount() > 2000000000L
+                        ? 2000000000
+                        : (int) profileModel.getMediaCount(),
+                postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         profileDetailsBinding.mainPostCount.setText(span);
@@ -771,8 +779,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String followersCountStr = String.valueOf(followersCount);
         final int followersCountStrLen = followersCountStr.length();
         span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_followers,
-                                                                           followersCount > 2000000000L ? 2000000000 : (int) followersCount,
-                                                                           followersCountStr));
+                followersCount > 2000000000L ? 2000000000 : (int) followersCount,
+                followersCountStr));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, followersCountStrLen, 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, followersCountStrLen, 0);
         profileDetailsBinding.mainFollowers.setText(span);
@@ -781,14 +789,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String followingCountStr = String.valueOf(followingCount);
         final int followingCountStrLen = followingCountStr.length();
         span = new SpannableStringBuilder(getString(R.string.main_posts_following,
-                                                    followingCountStr));
+                followingCountStr));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, followingCountStrLen, 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
         profileDetailsBinding.mainFollowing.setText(span);
         profileDetailsBinding.mainFollowing.setVisibility(View.VISIBLE);
 
         profileDetailsBinding.mainFullName.setText(TextUtils.isEmpty(profileModel.getFullName()) ? profileModel.getUsername()
-                                                                                                 : profileModel.getFullName());
+                : profileModel.getFullName());
 
         final String biography = profileModel.getBiography();
         if (TextUtils.isEmpty(biography)) {
@@ -808,8 +816,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 navigateToProfile(originalText);
             });
             profileDetailsBinding.mainBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
-                                                                                                               autoLinkItem.getOriginalText()
-                                                                                                                           .trim()));
+                    autoLinkItem.getOriginalText()
+                            .trim()));
             profileDetailsBinding.mainBiography
                     .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
             profileDetailsBinding.mainBiography.setOnLongClickListener(v -> {
@@ -1029,21 +1037,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     }
                 });
         storiesService.fetchHighlights(profileId,
-                                       new ServiceCallback<List<HighlightModel>>() {
-                                           @Override
-                                           public void onSuccess(final List<HighlightModel> result) {
-                                               if (result != null) {
-                                                   profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
-                                                   highlightsViewModel.getList().postValue(result);
-                                               } else profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                                           }
+                new ServiceCallback<List<HighlightModel>>() {
+                    @Override
+                    public void onSuccess(final List<HighlightModel> result) {
+                        if (result != null) {
+                            profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
+                            highlightsViewModel.getList().postValue(result);
+                        } else profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                    }
 
-                                           @Override
-                                           public void onFailure(final Throwable t) {
-                                               profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                                               Log.e(TAG, "Error", t);
-                                           }
-                                       });
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                        Log.e(TAG, "Error", t);
+                    }
+                });
     }
 
     private void setupCommonListeners() {
@@ -1108,14 +1116,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         });
         profileDetailsBinding.btnLiked.setOnClickListener(v -> {
             final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
-                                                                                                              profileModel.getPk(),
-                                                                                                              PostItemType.LIKED);
+                    profileModel.getPk(),
+                    PostItemType.LIKED);
             NavHostFragment.findNavController(this).navigate(action);
         });
         profileDetailsBinding.btnTagged.setOnClickListener(v -> {
             final NavDirections action = ProfileFragmentDirections.actionProfileFragmentToSavedViewerFragment(profileModel.getUsername(),
-                                                                                                              profileModel.getPk(),
-                                                                                                              PostItemType.TAGGED);
+                    profileModel.getPk(),
+                    PostItemType.TAGGED);
             NavHostFragment.findNavController(this).navigate(action);
         });
         if (!disableDm) {
@@ -1154,7 +1162,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     // show stories
                     final NavDirections action = ProfileFragmentDirections
                             .actionProfileFragmentToStoryViewerFragment(StoryViewerOptions.forUser(profileModel.getPk(),
-                                                                                                   profileModel.getFullName()));
+                                    profileModel.getFullName()));
                     NavHostFragment.findNavController(this).navigate(action);
                     return;
                 }
@@ -1180,12 +1188,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (profileModel != null) {
             final FragmentManager fragmentManager = getParentFragmentManager();
             final ProfilePicDialogFragment fragment = ProfilePicDialogFragment.getInstance(profileModel.getPk(),
-                                                                                           username,
-                                                                                           profileModel.getProfilePicUrl());
+                    username,
+                    profileModel.getProfilePicUrl());
             final FragmentTransaction ft = fragmentManager.beginTransaction();
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-              .add(fragment, "profilePicDialog")
-              .commit();
+                    .add(fragment, "profilePicDialog")
+                    .commit();
         }
     }
 
@@ -1198,13 +1206,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupPosts() {
         binding.postsRecyclerView.setViewModelStoreOwner(this)
-                                 .setLifeCycleOwner(this)
-                                 .setPostFetchService(new ProfilePostFetchService(profileModel, isLoggedIn))
-                                 .setLayoutPreferences(layoutPreferences)
-                                 .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
-                                 .setFeedItemCallback(feedItemCallback)
-                                 .setSelectionModeCallback(selectionModeCallback)
-                                 .init();
+                .setLifeCycleOwner(this)
+                .setPostFetchService(new ProfilePostFetchService(profileModel, isLoggedIn))
+                .setLayoutPreferences(layoutPreferences)
+                .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
+                .setFeedItemCallback(feedItemCallback)
+                .setSelectionModeCallback(selectionModeCallback)
+                .init();
         binding.postsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
