@@ -757,6 +757,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         final String postCount = String.valueOf(profileModel.getMediaCount());
 
+
         SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count,
                                                                                                   profileModel.getMediaCount() > 2000000000L
                                                                                                   ? 2000000000
@@ -915,7 +916,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.privatePage2.setVisibility(View.VISIBLE);
             binding.postsRecyclerView.setVisibility(View.GONE);
             binding.swipeRefreshLayout.setRefreshing(false);
+            root.getTransition(R.id.transition).setEnable(false);
         }
+
+        if (profileModel.getMediaCount() == 0) {
+            root.getTransition(R.id.transition).setEnable(false);
+        }
+
     }
 
     private void setupButtons(final long profileId) {
