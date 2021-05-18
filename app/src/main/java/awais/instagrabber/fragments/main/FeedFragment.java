@@ -458,8 +458,10 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     public void scrollToTop() {
-        binding.feedRecyclerView.smoothScrollToPosition(0);
-        // binding.storiesContainer.setExpanded(true);
+        if (binding != null) {
+            binding.feedRecyclerView.smoothScrollToPosition(0);
+            // binding.storiesContainer.setExpanded(true);
+        }
     }
 
     private boolean isSafeToNavigate(final NavController navController) {
