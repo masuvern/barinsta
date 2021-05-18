@@ -54,12 +54,14 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
         if (onTopicClickListener != null) {
             itemView.setOnClickListener(v -> onTopicClickListener.onTopicClick(
                     topicCluster,
-                    binding.getRoot(),
                     binding.cover,
-                    binding.title,
                     titleColor.get(),
                     backgroundColor.get()
             ));
+            itemView.setOnLongClickListener(v -> {
+                onTopicClickListener.onTopicLongClick(topicCluster.getCoverMedia());
+                return true;
+            });
         }
         // binding.title.setTransitionName("title-" + topicCluster.getId());
         binding.cover.setTransitionName("cover-" + topicCluster.getId());
