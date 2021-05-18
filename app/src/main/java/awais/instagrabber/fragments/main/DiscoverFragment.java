@@ -15,10 +15,14 @@ import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import java.util.Collections;
+import java.util.List;
+
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.DiscoverTopicsAdapter;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.databinding.FragmentDiscoverBinding;
+import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.repositories.responses.discover.TopicalExploreFeedResponse;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.TopicClusterViewModel;
@@ -93,8 +97,18 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
             @Override
             public void onSuccess(final TopicalExploreFeedResponse result) {
                 if (result == null) return;
-                topicClusterViewModel.getList().postValue(result.getClusters());
+                final List<TopicCluster> clusters = result.getClusters();
                 binding.swipeRefreshLayout.setRefreshing(false);
+                if (clusters.size() == 1 && result.getItems().size() > 0) {
+                    final TopicCluster cluster = clusters.get(0);
+                    if (cluster.getCoverMedia() == null)
+                        cluster.setCoverMedia(result.getItems().get(0).getMedia());
+                    topicClusterViewModel.getList().postValue(Collections.singletonList(cluster));
+                    return;
+                }
+                if (clusters.size() > 1 || result.getItems().size() == 0) {
+                    topicClusterViewModel.getList().postValue(clusters);
+                }
             }
 
             @Override
