@@ -82,7 +82,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
 
     private Preference getUpdateCheckPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.CHECK_UPDATES);
+        preference.setKey(PreferenceKeys.CHECK_UPDATES);
         preference.setTitle(R.string.update_check);
         preference.setIconSpaceReserved(false);
         return preference;
@@ -91,7 +91,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
     private Preference getFlagSecurePreference(@NonNull final Context context) {
         return PreferenceHelper.getSwitchPreference(
                 context,
-                Constants.FLAG_SECURE,
+                PreferenceKeys.FLAG_SECURE,
                 R.string.flag_secure,
                 -1,
                 false,

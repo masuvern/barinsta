@@ -74,6 +74,7 @@ import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
@@ -109,7 +110,7 @@ import retrofit2.Response;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
-import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class StoryViewerFragment extends Fragment {
@@ -990,7 +991,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return;
         player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
-        player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
+        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS));
 
         final Uri uri = Uri.parse(url);
         final MediaItem mediaItem = MediaItem.fromUri(uri);
@@ -1091,7 +1092,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return;
         player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
-        player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
+        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS));
 
         final Uri uri = Uri.parse(url);
         final MediaItem mediaItem = MediaItem.fromUri(uri);

@@ -15,9 +15,9 @@ import awais.instagrabber.adapters.SliderItemsAdapter;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.VideoVersion;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
@@ -55,7 +55,7 @@ public class SliderVideoViewHolder extends SliderItemViewHolder {
     public void bind(@NonNull final Media media,
                      final int position,
                      final SliderItemsAdapter.SliderCallback sliderCallback) {
-        final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
+        final float vol = settingsHelper.getBoolean(PreferenceKeys.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
 
             @Override

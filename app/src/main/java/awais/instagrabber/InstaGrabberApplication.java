@@ -13,6 +13,7 @@ import java.net.CookieHandler;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
 import awais.instagrabber.utils.SettingsHelper;
@@ -82,9 +83,9 @@ public final class InstaGrabberApplication extends Application {
 
         if (datetimeParser == null)
             datetimeParser = new SimpleDateFormat(
-                    settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED) ?
-                    settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT) :
-                    settingsHelper.getString(Constants.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
+                    settingsHelper.getBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED) ?
+                    settingsHelper.getString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT) :
+                    settingsHelper.getString(PreferenceKeys.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
 
         if (TextUtils.isEmpty(settingsHelper.getString(Constants.DEVICE_UUID))) {
             settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());

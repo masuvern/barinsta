@@ -101,6 +101,7 @@ import awais.instagrabber.dialogs.MediaPickerBottomDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.fragments.UserSearchFragmentDirections;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -114,7 +115,6 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItemVisual
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.PermissionUtils;
@@ -356,7 +356,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
-        autoMarkAsSeen = Utils.settingsHelper.getBoolean(Constants.DM_MARK_AS_SEEN);
+        autoMarkAsSeen = Utils.settingsHelper.getBoolean(PreferenceKeys.DM_MARK_AS_SEEN);
         final Bundle arguments = getArguments();
         if (arguments == null) return;
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);

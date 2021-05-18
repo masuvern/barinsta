@@ -36,7 +36,7 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             values[i] = String.valueOf(i);
         }
-        preference.setKey(Constants.APP_LANGUAGE);
+        preference.setKey(PreferenceKeys.APP_LANGUAGE);
         preference.setTitle(R.string.select_language);
         preference.setDialogTitle(R.string.select_language);
         preference.setEntries(R.array.languages);
@@ -59,10 +59,10 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(preference1 -> {
             new TimeSettingsDialog(
-                    settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
-                    settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT),
-                    settingsHelper.getString(Constants.DATE_TIME_SELECTION),
-                    settingsHelper.getBoolean(Constants.SWAP_DATE_TIME_FORMAT_ENABLED),
+                    settingsHelper.getBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED),
+                    settingsHelper.getString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT),
+                    settingsHelper.getString(PreferenceKeys.DATE_TIME_SELECTION),
+                    settingsHelper.getBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED),
                     (isCustomFormat,
                      formatSelection,
                      spTimeFormatSelectedItemPosition,
@@ -72,16 +72,16 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
                      currentFormat,
                      swapDateTime) -> {
                         if (isCustomFormat) {
-                            settingsHelper.putString(Constants.CUSTOM_DATE_TIME_FORMAT, formatSelection);
+                            settingsHelper.putString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT, formatSelection);
                         } else {
                             final String formatSelectionUpdated = spTimeFormatSelectedItemPosition + ";"
                                     + spSeparatorSelectedItemPosition + ';'
                                     + spDateFormatSelectedItemPosition; // time;separator;date
-                            settingsHelper.putString(Constants.DATE_TIME_FORMAT, selectedFormat);
-                            settingsHelper.putString(Constants.DATE_TIME_SELECTION, formatSelectionUpdated);
+                            settingsHelper.putString(PreferenceKeys.DATE_TIME_FORMAT, selectedFormat);
+                            settingsHelper.putString(PreferenceKeys.DATE_TIME_SELECTION, formatSelectionUpdated);
                         }
-                        settingsHelper.putBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
-                        settingsHelper.putBoolean(Constants.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
+                        settingsHelper.putBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
+                        settingsHelper.putBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
                         Utils.datetimeParser = (SimpleDateFormat) currentFormat.clone();
                         preference.setSummary(Utils.datetimeParser.format(new Date()));
                     }

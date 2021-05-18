@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import awais.instagrabber.R;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Audio;
@@ -41,8 +42,8 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
 import awais.instagrabber.workers.DownloadWorker;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_PATH;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_SAVE_TO;
 
 public final class DownloadUtils {
     private static final String TAG = "DownloadUtils";
@@ -74,7 +75,7 @@ public final class DownloadUtils {
                                        final boolean skipCreateDir) {
         File dir = getDownloadDir();
 
-        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(username)) {
+        if (Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_USER_FOLDER) && !TextUtils.isEmpty(username)) {
             final String finaleUsername = username.startsWith("@") ? username.substring(1) : username;
             dir = new File(dir, finaleUsername);
         }
@@ -277,7 +278,7 @@ public final class DownloadUtils {
                            : storyModel.getStoryUrl();
         final String baseFileName = storyModel.getStoryMediaId() + "_"
                 + storyModel.getTimestamp() + DownloadUtils.getFileExtensionFromUrl(url);
-        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
+        final String usernamePrepend = Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME)
                 && storyModel.getUsername() != null ? storyModel.getUsername() + "_" : "";
         final File saveFile = new File(downloadDir,
                  usernamePrepend + baseFileName);
@@ -318,7 +319,7 @@ public final class DownloadUtils {
                     }
                     if (!TextUtils.isEmpty(media.getCode())) {
                         fileName = media.getCode();
-                        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
+                        if (Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
                             fileName = mediaUser.getUsername() + "_" + fileName;
                         }
                     }
@@ -344,7 +345,7 @@ public final class DownloadUtils {
                         }
                         final Media child = sliderItems.get(i);
                         final String url = getUrlOfType(child);
-                        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null ? mediaUser.getUsername() : "";
+                        final String usernamePrepend = Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null ? mediaUser.getUsername() : "";
                         final File file = getDownloadChildSaveFile(downloadDir, media.getCode(), i + 1, url, usernamePrepend);
                         map.put(url, file.getAbsolutePath());
                     }
