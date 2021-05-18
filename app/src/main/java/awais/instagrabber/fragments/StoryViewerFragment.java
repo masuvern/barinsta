@@ -449,7 +449,10 @@ public class StoryViewerFragment extends Fragment {
         binding.swipeUp.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
-                Utils.openURL(context, tag.toString());
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.swipe_up_confirmation)
+                        .setMessage(tag.toString()).setPositiveButton(R.string.yes, (d, w) -> Utils.openURL(context, tag.toString()))
+                        .setNegativeButton(R.string.no, (d, w) -> d.dismiss()).show();
             }
         });
         binding.viewStoryPost.setOnClickListener(v -> {
