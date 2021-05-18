@@ -58,8 +58,8 @@ import static awais.instagrabber.utils.Constants.PREF_SAVED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_TAGGED_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREF_TOPIC_POSTS_LAYOUT;
 import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.SHOW_CAPTIONS;
-import static awais.instagrabber.utils.Constants.SHOW_QUICK_ACCESS_DIALOG;
 import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.STORY_SORT;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED;
@@ -155,18 +155,18 @@ public final class SettingsHelper {
         return sharedPreferences != null && sharedPreferences.contains(key);
     }
 
-    @StringDef(
-            {APP_LANGUAGE, APP_THEME, APP_UA, BROWSER_UA, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION,
+    @StringDef({APP_LANGUAGE, APP_THEME, APP_UA, BROWSER_UA, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION,
                     CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME,
                     PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT,
                     PREF_LOCATION_POSTS_LAYOUT, PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT,
                     STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT, PREF_TAB_ORDER})
     public @interface StringSettings {}
 
-    @StringDef({DOWNLOAD_USER_FOLDER, DOWNLOAD_PREPEND_USER_NAME, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, SHOW_QUICK_ACCESS_DIALOG, MUTED_VIDEOS,
+    @StringDef({DOWNLOAD_USER_FOLDER, DOWNLOAD_PREPEND_USER_NAME, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, MUTED_VIDEOS,
                        SHOW_CAPTIONS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, CHECK_ACTIVITY,
                        CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED, PREF_ENABLE_DM_NOTIFICATIONS, PREF_ENABLE_DM_AUTO_REFRESH,
-                       FLAG_SECURE, TOGGLE_KEYWORD_FILTER, PREF_ENABLE_SENTRY, HIDE_MUTED_REELS, PLAY_IN_BACKGROUND, PREF_SHOWN_COUNT_TOOLTIP})
+                       FLAG_SECURE, TOGGLE_KEYWORD_FILTER, PREF_ENABLE_SENTRY, HIDE_MUTED_REELS, PLAY_IN_BACKGROUND,
+                       PREF_SHOWN_COUNT_TOOLTIP, PREF_SEARCH_FOCUS_KEYBOARD})
     public @interface BooleanSettings {}
 
     @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER})

@@ -36,6 +36,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
         }
         screen.addPreference(getUpdateCheckPreference(context));
         screen.addPreference(getFlagSecurePreference(context));
+        screen.addPreference(getSearchFocusPreference(context));
         final List<Preference> preferences = FlavorSettings.getInstance()
                                                            .getPreferences(context,
                                                                            getChildFragmentManager(),
@@ -99,6 +100,14 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
                     shouldRecreate();
                     return true;
                 });
+    }
+
+    private Preference getSearchFocusPreference(@NonNull final Context context) {
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
+        preference.setKey(PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD);
+        preference.setTitle(R.string.pref_search_focus_keyboard);
+        preference.setIconSpaceReserved(false);
+        return preference;
     }
 
     @Override

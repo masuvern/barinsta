@@ -9,7 +9,7 @@ public final class Constants {
     public static final String APP_UA_CODE = "app_ua_code";
     // never Export
     public static final String COOKIE = "cookie";
-    public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
+    // deprecated: public static final String SHOW_QUICK_ACCESS_DIALOG = "show_quick_dlg";
     public static final String DEVICE_UUID = "device_uuid";
     public static final String BROWSER_UA = "browser_ua";
     public static final String APP_UA = "app_ua";
