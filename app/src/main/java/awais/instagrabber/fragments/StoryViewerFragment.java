@@ -469,6 +469,7 @@ public class StoryViewerFragment extends Fragment {
                     bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
                     try {
                         navController.navigate(R.id.action_global_post_view, bundle);
+                        alertDialog.dismiss();
                     } catch (Exception e) {
                         Log.e(TAG, "openPostDialog: ", e);
                     }
