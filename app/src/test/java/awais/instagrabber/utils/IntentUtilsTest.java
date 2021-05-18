@@ -1,3 +1,6 @@
+// java.lang.RuntimeException: Method parse in android.net.Uri not mocked.
+// See http://g.co/androidstudio/not-mocked for details.
+
 package awais.instagrabber.utils;
 
 import org.junit.jupiter.api.Assertions;
