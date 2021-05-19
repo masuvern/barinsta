@@ -32,7 +32,7 @@ public final class IntentUtils {
         if (1 == paths.size()) {
             text = path;
             type = IntentModelType.USERNAME;
-        } else if ("_u".equals(path) || "u".equals(path)) {
+        } else if ("_u".equals(path)) {
             text = paths.get(1);
             type = IntentModelType.USERNAME;
         } else if ("p".equals(path) || "reel".equals(path) || "tv".equals(path)) {
