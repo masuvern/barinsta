@@ -17,12 +17,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.repositories.StoriesRepository;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
-import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
@@ -135,7 +135,7 @@ public class StoriesService extends BaseService {
             final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
             for (int i = 0; i < feedStoriesReel.length(); ++i) {
                 final JSONObject node = feedStoriesReel.getJSONObject(i);
-                if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(Constants.HIDE_MUTED_REELS)) continue;
+                if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(PreferenceKeys.HIDE_MUTED_REELS)) continue;
                 final JSONObject userJson = node.getJSONObject(node.has("user") ? "user" : "owner");
                 try {
                     final User user = new User(userJson.getLong("pk"),
@@ -505,7 +505,7 @@ public class StoriesService extends BaseService {
         final List<FeedStoryModel> listCopy = new ArrayList<>(list);
         Collections.sort(listCopy, (o1, o2) -> {
             int result;
-            switch (Utils.settingsHelper.getString(Constants.STORY_SORT)) {
+            switch (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
                 case "1":
                     result = Long.compare(o2.getTimestamp(), o1.getTimestamp());
                     break;

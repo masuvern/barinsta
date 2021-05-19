@@ -11,7 +11,7 @@ public class TopicCluster implements Serializable {
     private final boolean canMute;
     private final boolean isMuted;
     private final int rankedPosition;
-    private final Media coverMedia;
+    private Media coverMedia;
 
     public TopicCluster(final String id,
                         final String title,
@@ -55,5 +55,9 @@ public class TopicCluster implements Serializable {
 
     public Media getCoverMedia() {
         return coverMedia;
+    }
+
+    public void setCoverMedia(final Media coverMedia) {
+        this.coverMedia = coverMedia;
     }
 }

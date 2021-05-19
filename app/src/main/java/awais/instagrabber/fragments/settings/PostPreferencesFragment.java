@@ -9,7 +9,6 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.KeywordsFilterDialog;
-import awais.instagrabber.utils.Constants;
 
 public class PostPreferencesFragment extends BasePreferencesFragment {
     @Override
@@ -34,7 +33,7 @@ public class PostPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getBackgroundPlayPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.PLAY_IN_BACKGROUND);
+        preference.setKey(PreferenceKeys.PLAY_IN_BACKGROUND);
         preference.setTitle(R.string.post_viewer_background_play);
         preference.setSummary(R.string.post_viewer_background_play_summary);
         preference.setIconSpaceReserved(false);
@@ -43,7 +42,7 @@ public class PostPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getAlwaysMuteVideosPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.MUTED_VIDEOS);
+        preference.setKey(PreferenceKeys.MUTED_VIDEOS);
         preference.setTitle(R.string.post_viewer_muted_autoplay);
         preference.setIconSpaceReserved(false);
         return preference;
@@ -51,7 +50,7 @@ public class PostPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getShowCaptionPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.SHOW_CAPTIONS);
+        preference.setKey(PreferenceKeys.SHOW_CAPTIONS);
         preference.setDefaultValue(true);
         preference.setTitle(R.string.post_viewer_show_captions);
         preference.setIconSpaceReserved(false);
@@ -60,7 +59,7 @@ public class PostPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getToggleKeywordFilterPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.TOGGLE_KEYWORD_FILTER);
+        preference.setKey(PreferenceKeys.TOGGLE_KEYWORD_FILTER);
         preference.setDefaultValue(false);
         preference.setTitle(R.string.toggle_keyword_filter);
         preference.setIconSpaceReserved(false);

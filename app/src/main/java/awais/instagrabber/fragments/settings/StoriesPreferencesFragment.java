@@ -9,7 +9,6 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 
 import awais.instagrabber.R;
-import awais.instagrabber.utils.Constants;
 
 public class StoriesPreferencesFragment extends BasePreferencesFragment {
     @Override
@@ -29,7 +28,7 @@ public class StoriesPreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             values[i] = String.valueOf(i);
         }
-        preference.setKey(Constants.STORY_SORT);
+        preference.setKey(PreferenceKeys.STORY_SORT);
         preference.setTitle(R.string.story_sort_setting);
         preference.setDialogTitle(R.string.story_sort_setting);
         preference.setEntries(R.array.story_sorts);
@@ -40,7 +39,7 @@ public class StoriesPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getHideMutedReelsPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.HIDE_MUTED_REELS);
+        preference.setKey(PreferenceKeys.HIDE_MUTED_REELS);
         preference.setTitle(R.string.hide_muted_reels_setting);
         preference.setIconSpaceReserved(false);
         return preference;
@@ -48,7 +47,7 @@ public class StoriesPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getMarkStoriesSeenPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.MARK_AS_SEEN);
+        preference.setKey(PreferenceKeys.MARK_AS_SEEN);
         preference.setTitle(R.string.mark_as_seen_setting);
         preference.setSummary(R.string.mark_as_seen_setting_summary);
         preference.setIconSpaceReserved(false);

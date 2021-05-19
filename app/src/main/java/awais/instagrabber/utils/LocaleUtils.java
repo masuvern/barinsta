@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 
 import java.util.Locale;
 
+import awais.instagrabber.fragments.settings.PreferenceKeys;
+
 // taken from my app TESV Console Codes
 public final class LocaleUtils {
     private static Locale defaultLocale, currentLocale;
@@ -22,7 +24,7 @@ public final class LocaleUtils {
         if (Utils.settingsHelper == null)
             Utils.settingsHelper = new SettingsHelper(baseContext);
 
-        final String appLanguageSettings = Utils.settingsHelper.getString(Constants.APP_LANGUAGE);
+        final String appLanguageSettings = Utils.settingsHelper.getString(PreferenceKeys.APP_LANGUAGE);
         final String lang = LocaleUtils.getCorrespondingLanguageCode(appLanguageSettings);
 
         currentLocale = TextUtils.isEmpty(lang) ? defaultLocale :

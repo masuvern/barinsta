@@ -114,6 +114,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
                         try {
                             navController.navigate(R.id.action_global_post_view, bundle);
+                            alertDialog.dismiss();
                         } catch (Exception e) {
                             Log.e(TAG, "onSuccess: ", e);
                         }

@@ -51,8 +51,6 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:host="ig.me" />
-                <data android:host="www.ig.me" />
                 <data android:host="instagr.am" />
                 <data android:host="www.instagr.am" />
                 <data android:host="instagram.com" />
@@ -60,6 +58,7 @@
                 <data android:pathPrefix="/" />
                 <data android:pathPrefix="/p" />
                 <data android:pathPrefix="/explore/tags" />
+                <data android:pathPrefix="/explore/locations" />
             </intent-filter>
         </activity>
         <activity
@@ -103,14 +102,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:mimeType="text/plain" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="ig.me" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
             </intent-filter>
         </activity>
         <activity

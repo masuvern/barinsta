@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments.search;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -35,6 +37,9 @@ import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.repositories.responses.search.SearchItem;
 import awais.instagrabber.viewmodels.SearchFragmentViewModel;
+
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD;
+import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class SearchFragment extends Fragment implements SearchCategoryFragment.OnSearchItemClickListener {
     private static final String TAG = SearchFragment.class.getSimpleName();
@@ -119,9 +124,11 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
         if (mainActivity != null) {
             mainActivity.showSearchView();
         }
-        // if (searchInputLayout != null) {
-        //     searchInputLayout.requestFocus();
-        // }
+        if (settingsHelper.getBoolean(PREF_SEARCH_FOCUS_KEYBOARD)) {
+            searchInput.requestFocus();
+            final InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     private void init(@Nullable final Bundle savedInstanceState) {
@@ -147,7 +154,11 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
             searchInput.setText(savedQuery);
             triggerEmptyQuery = false;
         }
-        // searchInput.requestFocus();
+        if (settingsHelper.getBoolean(PREF_SEARCH_FOCUS_KEYBOARD)) {
+            searchInput.requestFocus();
+            final InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT);
+        }
         if (triggerEmptyQuery) {
             viewModel.submitQuery("");
         }

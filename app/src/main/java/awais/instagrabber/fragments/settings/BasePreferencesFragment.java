@@ -41,7 +41,7 @@ public abstract class BasePreferencesFragment extends PreferenceFragmentCompat i
         if (!shouldRecreate) return;
         final MainActivity activity = (MainActivity) getActivity();
         if (activity == null) return;
-        if (key.equals(Constants.APP_LANGUAGE)) {
+        if (key.equals(PreferenceKeys.APP_LANGUAGE)) {
             LocaleUtils.setLocale(activity.getBaseContext());
         }
         shouldRecreate = false;

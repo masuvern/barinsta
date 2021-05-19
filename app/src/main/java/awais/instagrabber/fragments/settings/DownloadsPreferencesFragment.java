@@ -14,12 +14,11 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import awais.instagrabber.R;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DirectoryChooser;
 import awais.instagrabber.utils.TextUtils;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
-import static awais.instagrabber.utils.Constants.FOLDER_SAVE_TO;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_PATH;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_SAVE_TO;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DownloadsPreferencesFragment extends BasePreferencesFragment {
@@ -34,7 +33,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getDownloadUserFolderPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.DOWNLOAD_USER_FOLDER);
+        preference.setKey(PreferenceKeys.DOWNLOAD_USER_FOLDER);
         preference.setTitle(R.string.download_user_folder);
         preference.setIconSpaceReserved(false);
         return preference;
@@ -52,7 +51,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
 
     private Preference getPrependUsernameToFilenamePreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.DOWNLOAD_PREPEND_USER_NAME);
+        preference.setKey(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME);
         preference.setTitle(R.string.download_prepend_username);
         preference.setIconSpaceReserved(false);
         return preference;
@@ -66,7 +65,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
         public SaveToCustomFolderPreference(final Context context, final OnSelectFolderButtonClickListener onSelectFolderButtonClickListener) {
             super(context);
             this.onSelectFolderButtonClickListener = onSelectFolderButtonClickListener;
-            key = Constants.FOLDER_SAVE_TO;
+            key = PreferenceKeys.FOLDER_SAVE_TO;
             setLayoutResource(R.layout.pref_custom_folder);
             setKey(key);
             setTitle(R.string.save_to_folder);

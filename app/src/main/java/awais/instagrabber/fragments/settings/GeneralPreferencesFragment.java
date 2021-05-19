@@ -36,6 +36,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
         }
         screen.addPreference(getUpdateCheckPreference(context));
         screen.addPreference(getFlagSecurePreference(context));
+        screen.addPreference(getSearchFocusPreference(context));
         final List<Preference> preferences = FlavorSettings.getInstance()
                                                            .getPreferences(context,
                                                                            getChildFragmentManager(),
@@ -82,7 +83,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
 
     private Preference getUpdateCheckPreference(@NonNull final Context context) {
         final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
-        preference.setKey(Constants.CHECK_UPDATES);
+        preference.setKey(PreferenceKeys.CHECK_UPDATES);
         preference.setTitle(R.string.update_check);
         preference.setIconSpaceReserved(false);
         return preference;
@@ -91,7 +92,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
     private Preference getFlagSecurePreference(@NonNull final Context context) {
         return PreferenceHelper.getSwitchPreference(
                 context,
-                Constants.FLAG_SECURE,
+                PreferenceKeys.FLAG_SECURE,
                 R.string.flag_secure,
                 -1,
                 false,
@@ -99,6 +100,14 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
                     shouldRecreate();
                     return true;
                 });
+    }
+
+    private Preference getSearchFocusPreference(@NonNull final Context context) {
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
+        preference.setKey(PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD);
+        preference.setTitle(R.string.pref_search_focus_keyboard);
+        preference.setIconSpaceReserved(false);
+        return preference;
     }
 
     @Override

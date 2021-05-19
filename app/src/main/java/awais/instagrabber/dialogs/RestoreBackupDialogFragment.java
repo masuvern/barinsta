@@ -28,7 +28,7 @@ import awais.instagrabber.utils.PasswordUtils.IncorrectPasswordException;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
-import static awais.instagrabber.utils.Constants.FOLDER_PATH;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_PATH;
 import static awais.instagrabber.utils.DownloadUtils.PERMS;
 
 public class RestoreBackupDialogFragment extends DialogFragment {

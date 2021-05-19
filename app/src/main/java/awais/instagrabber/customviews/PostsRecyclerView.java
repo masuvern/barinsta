@@ -33,10 +33,10 @@ import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.customviews.helpers.PostFetcher;
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.KeywordsFilterUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
@@ -81,8 +81,8 @@ public class PostsRecyclerView extends RecyclerView {
             }
             final List<Media> models = mediaViewModel.getList().getValue();
             final List<Media> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
-            if (settingsHelper.getBoolean(Constants.TOGGLE_KEYWORD_FILTER)) {
-                final ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(Constants.KEYWORD_FILTERS));
+            if (settingsHelper.getBoolean(PreferenceKeys.TOGGLE_KEYWORD_FILTER)) {
+                final ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(PreferenceKeys.KEYWORD_FILTERS));
                 modelsCopy.addAll(new KeywordsFilterUtils(items).filter(result));
             } else {
                 modelsCopy.addAll(result);

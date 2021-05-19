@@ -22,7 +22,7 @@ import java.util.HashSet;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.KeywordsFilterAdapter;
 import awais.instagrabber.databinding.DialogKeywordsFilterBinding;
-import awais.instagrabber.utils.Constants;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.utils.SettingsHelper;
 import awais.instagrabber.utils.Utils;
 
@@ -54,7 +54,7 @@ public final class KeywordsFilterDialog extends DialogFragment {
         recyclerView.setLayoutManager(linearLayoutManager);
 
         final SettingsHelper settingsHelper = new SettingsHelper(context);
-        final ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(Constants.KEYWORD_FILTERS));
+        final ArrayList<String> items = new ArrayList<>(settingsHelper.getStringSet(PreferenceKeys.KEYWORD_FILTERS));
         final KeywordsFilterAdapter adapter = new KeywordsFilterAdapter(context, items);
         recyclerView.setAdapter(adapter);
 
@@ -68,7 +68,7 @@ public final class KeywordsFilterDialog extends DialogFragment {
                 return;
             }
             items.add(s.toLowerCase());
-            settingsHelper.putStringSet(Constants.KEYWORD_FILTERS, new HashSet<>(items));
+            settingsHelper.putStringSet(PreferenceKeys.KEYWORD_FILTERS, new HashSet<>(items));
             adapter.notifyItemInserted(items.size());
             final String message = context.getString(R.string.added_keywords, s);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();

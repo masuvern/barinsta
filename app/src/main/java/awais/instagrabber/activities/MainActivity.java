@@ -141,7 +141,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         instance = this;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setupCookie();
-        if (settingsHelper.getBoolean(Constants.FLAG_SECURE)) {
+        if (settingsHelper.getBoolean(PreferenceKeys.FLAG_SECURE)) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         }
         setContentView(binding.getRoot());
@@ -166,14 +166,14 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
             setupBottomNavigationBar(true);
         }
         if (!BuildConfig.isPre) {
-            final boolean checkUpdates = settingsHelper.getBoolean(Constants.CHECK_UPDATES);
+            final boolean checkUpdates = settingsHelper.getBoolean(PreferenceKeys.CHECK_UPDATES);
             if (checkUpdates) FlavorTown.updateCheck(this);
         }
         FlavorTown.changelogCheck(this);
         new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
         final Intent intent = getIntent();
         handleIntent(intent);
-        if (isLoggedIn && settingsHelper.getBoolean(Constants.CHECK_ACTIVITY)) {
+        if (isLoggedIn && settingsHelper.getBoolean(PreferenceKeys.CHECK_ACTIVITY)) {
             bindActivityCheckerService();
         }
         getSupportFragmentManager().addOnBackStackChangedListener(this);

@@ -82,6 +82,7 @@ import awais.instagrabber.databinding.DialogPostViewBinding;
 import awais.instagrabber.databinding.LayoutPostViewBottomBinding;
 import awais.instagrabber.databinding.LayoutVideoPlayerWithThumbnailBinding;
 import awais.instagrabber.dialogs.EditTextDialogFragment;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
@@ -89,7 +90,6 @@ import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
@@ -184,7 +184,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     public void onPause() {
         super.onPause();
         // wasPaused = true;
-        if (settingsHelper.getBoolean(Constants.PLAY_IN_BACKGROUND)) return;
+        if (settingsHelper.getBoolean(PreferenceKeys.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
         if (media == null) return;
         switch (media.getMediaType()) {
@@ -1058,7 +1058,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         //     gestureDetector.onTouchEvent(event);
         //     return true;
         // });
-        final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
+        final float vol = settingsHelper.getBoolean(PreferenceKeys.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
             @Override
             public void onThumbnailLoaded() {

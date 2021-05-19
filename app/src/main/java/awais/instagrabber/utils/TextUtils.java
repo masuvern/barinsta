@@ -10,11 +10,13 @@ import android.util.Patterns;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 public final class TextUtils {
     // extracted from String class
@@ -105,5 +107,16 @@ public final class TextUtils {
             urls.add(matcher.group());
         }
         return urls;
+    }
+
+    // https://github.com/notslang/instagram-id-to-url-segment
+    public static long shortcodeToId(final String shortcode) {
+        long result = 0L;
+        for (int i = 0; i < shortcode.length() && i < 11; i++){
+            final char c = shortcode.charAt(i);
+            final int k = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".indexOf(c);
+            result = result * 64 + k;
+        }
+        return result;
     }
 }
