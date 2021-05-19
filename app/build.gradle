@@ -182,7 +182,7 @@ dependencies {
     implementation "androidx.core:core:$core_version"
 
     // Room
-    def room_version = "2.2.6"
+    def room_version = "2.3.0"
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-guava:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
