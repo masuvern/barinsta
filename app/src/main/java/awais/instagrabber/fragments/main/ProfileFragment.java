@@ -616,9 +616,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             Log.e(TAG, "Error fetching profile relationship", t);
                             final Context context = getContext();
                             try {
-                                if (t == null) Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
-                                else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                            } catch (final Throwable ignored) {}
+                                if (t == null)
+                                    Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
+                                else
+                                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                            } catch (final Throwable ignored) {
+                            }
                         }
                     });
                 }
@@ -628,9 +631,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     Log.e(TAG, "Error fetching profile", t);
                     final Context context = getContext();
                     try {
-                        if (t == null) Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
+                        if (t == null)
+                            Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
                         else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    } catch (final Throwable ignored) {}
+                    } catch (final Throwable ignored) {
+                    }
                 }
             });
             return;
@@ -647,9 +652,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 Log.e(TAG, "Error fetching profile", t);
                 final Context context = getContext();
                 try {
-                    if (t == null) Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
+                    if (t == null)
+                        Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
                     else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (final Throwable ignored) {}
+                } catch (final Throwable ignored) {
+                }
             }
         });
     }
@@ -666,14 +673,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (!isReallyPrivate()) {
             if (!postsSetupDone) {
                 setupPosts();
-            }
-            else {
+            } else {
                 binding.postsRecyclerView.refresh();
             }
             if (isLoggedIn) {
                 fetchStoryAndHighlights(profileId);
             }
         }
+
         profileDetailsBinding.isVerified.setVisibility(profileModel.isVerified() ? View.VISIBLE : View.GONE);
         profileDetailsBinding.isPrivate.setVisibility(profileModel.isPrivate() ? View.VISIBLE : View.GONE);
 
@@ -693,10 +700,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         result.getDateAdded()
                 ), new RepositoryCallback<Void>() {
                     @Override
-                    public void onSuccess(final Void result) {}
+                    public void onSuccess(final Void result) {
+                    }
 
                     @Override
-                    public void onDataNotAvailable() {}
+                    public void onDataNotAvailable() {
+                    }
                 });
             }
 
@@ -719,7 +728,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
 
                             @Override
-                            public void onDataNotAvailable() {}
+                            public void onDataNotAvailable() {
+                            }
                         });
                     }
 
@@ -741,7 +751,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             }
 
                             @Override
-                            public void onDataNotAvailable() {}
+                            public void onDataNotAvailable() {
+                            }
                         });
                     }
                 }));
@@ -755,11 +766,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         final String postCount = String.valueOf(profileModel.getMediaCount());
 
-        SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count,
-                                                                                                  profileModel.getMediaCount() > 2000000000L
-                                                                                                  ? 2000000000
-                                                                                                  : (int) profileModel.getMediaCount(),
-                                                                                                  postCount));
+        SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(
+                R.plurals.main_posts_count,
+                profileModel.getMediaCount() > 2000000000L ? 2000000000 : (int) profileModel.getMediaCount(),
+                postCount)
+        );
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         profileDetailsBinding.mainPostCount.setText(span);
@@ -767,9 +778,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         final String followersCountStr = String.valueOf(followersCount);
         final int followersCountStrLen = followersCountStr.length();
-        span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_followers,
-                                                                           followersCount > 2000000000L ? 2000000000 : (int) followersCount,
-                                                                           followersCountStr));
+        span = new SpannableStringBuilder(getResources().getQuantityString(
+                R.plurals.main_posts_followers,
+                followersCount > 2000000000L ? 2000000000 : (int) followersCount,
+                followersCountStr)
+        );
         span.setSpan(new RelativeSizeSpan(1.2f), 0, followersCountStrLen, 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, followersCountStrLen, 0);
         profileDetailsBinding.mainFollowers.setText(span);
@@ -777,8 +790,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         final String followingCountStr = String.valueOf(followingCount);
         final int followingCountStrLen = followingCountStr.length();
-        span = new SpannableStringBuilder(getString(R.string.main_posts_following,
-                                                    followingCountStr));
+        span = new SpannableStringBuilder(getString(R.string.main_posts_following, followingCountStr));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, followingCountStrLen, 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, followingCountStrLen, 0);
         profileDetailsBinding.mainFollowing.setText(span);
@@ -804,9 +816,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 final String originalText = autoLinkItem.getOriginalText().trim();
                 navigateToProfile(originalText);
             });
-            profileDetailsBinding.mainBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(getContext(),
-                                                                                                               autoLinkItem.getOriginalText()
-                                                                                                                           .trim()));
+            profileDetailsBinding.mainBiography.addOnEmailClickListener(autoLinkItem -> Utils.openEmailAddress(
+                    getContext(), autoLinkItem.getOriginalText().trim()));
             profileDetailsBinding.mainBiography
                     .addOnURLClickListener(autoLinkItem -> Utils.openURL(getContext(), autoLinkItem.getOriginalText().trim()));
             profileDetailsBinding.mainBiography.setOnLongClickListener(v -> {
@@ -888,6 +899,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return true;
             });
         }
+        final MotionScene.Transition transition = root.getTransition(R.id.transition);
         if (!isReallyPrivate()) {
             if (isLoggedIn) {
                 profileDetailsBinding.mainFollowing.setClickable(true);
@@ -913,6 +925,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             binding.privatePage2.setVisibility(View.VISIBLE);
             binding.postsRecyclerView.setVisibility(View.GONE);
             binding.swipeRefreshLayout.setRefreshing(false);
+            if (transition != null) {
+                transition.setEnable(false);
+            }
+        }
+        if (profileModel.getMediaCount() == 0 && transition != null) {
+            transition.setEnable(false);
         }
     }
 
