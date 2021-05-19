@@ -62,7 +62,6 @@ import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
-import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.emoji.EmojiVariantManager;
 import awais.instagrabber.customviews.helpers.RootViewDeferringInsetsCallback;
 import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
@@ -72,6 +71,7 @@ import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDir
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.IntentModel;
 import awais.instagrabber.models.Tab;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.services.ActivityCheckerService;
 import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.utils.AppExecutors;
@@ -84,7 +84,10 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.DirectInboxViewModel;
+import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.RetrofitFactory;
+import awais.instagrabber.webservices.ServiceCallback;
 
 import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -116,6 +119,8 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
     private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
     private List<Tab> currentTabs;
     private List<Integer> showBottomViewDestinations = Collections.emptyList();
+    private GraphQLService graphQLService = null;
+    private MediaService mediaService = null;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -679,24 +684,35 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                 .setCancelable(false)
                 .setView(R.layout.dialog_opening_post)
                 .create();
-        alertDialog.show();
-        new PostFetcher(shortCode, feedModel -> {
-            if (feedModel != null) {
-                if (currentNavControllerLiveData == null) return;
-                final NavController navController = currentNavControllerLiveData.getValue();
-                if (navController == null) return;
-                final Bundle bundle = new Bundle();
-                bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-                try {
-                    navController.navigate(R.id.action_global_post_view, bundle);
-                } catch (Exception e) {
-                    Log.e(TAG, "showPostView: ", e);
+        if (graphQLService == null) graphQLService = GraphQLService.getInstance();
+        if (mediaService == null) mediaService = MediaService.getInstance(null, null, 0L);
+        final ServiceCallback<Media> postCb = new ServiceCallback<Media>() {
+            @Override
+            public void onSuccess(final Media feedModel){
+                if (feedModel != null) {
+                    if (currentNavControllerLiveData == null) return;
+                    final NavController navController = currentNavControllerLiveData.getValue();
+                    if (navController == null) return;
+                    final Bundle bundle = new Bundle();
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                    try {
+                        navController.navigate(R.id.action_global_post_view, bundle);
+                    } catch (Exception e) {
+                        Log.e(TAG, "showPostView: ", e);
+                    }
                 }
-                return;
+                Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
             }
-            Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
-            alertDialog.dismiss();
-        }).execute();
+
+            @Override
+            public void onFailure(final Throwable t) {
+                alertDialog.dismiss();
+            }
+        };
+        alertDialog.show();
+        if (isLoggedIn) mediaService.fetch(TextUtils.shortcodeToId(shortCode), postCb);
+        else graphQLService.fetchPost(shortCode, postCb);
     }
 
     private void showLocationView(@NonNull final IntentModel intentModel) {

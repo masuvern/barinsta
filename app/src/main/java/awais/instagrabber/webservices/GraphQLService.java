@@ -357,6 +357,40 @@ public class GraphQLService extends BaseService {
         });
     }
 
+    public void fetchPost(final String shortcode,
+                          final ServiceCallback<Media> callback) {
+        final Call<String> request = repository.getPost(shortcode);
+        request.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
+                final String rawBody = response.body();
+                if (rawBody == null) {
+                    Log.e(TAG, "Error occurred while fetching gql post of " + shortcode);
+                    callback.onSuccess(null);
+                    return;
+                }
+                try {
+                    final JSONObject body = new JSONObject(rawBody);
+                    final JSONObject media = body.getJSONObject("graphql")
+                            .getJSONObject("shortcode_media");
+                    callback.onSuccess(ResponseBodyUtils.parseGraphQLItem(media, null));
+                } catch (JSONException e) {
+                    Log.e(TAG, "onResponse", e);
+                    if (callback != null) {
+                        callback.onFailure(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
+            }
+        });
+    }
+
     public void fetchTag(final String tag,
                          final ServiceCallback<Hashtag> callback) {
         final Call<String> request = repository.getTag(tag);

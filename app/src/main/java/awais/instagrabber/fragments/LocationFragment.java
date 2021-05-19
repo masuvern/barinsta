@@ -44,7 +44,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.asyncs.LocationPostFetchService;
-import awais.instagrabber.asyncs.PostFetcher;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentLocationBinding;
 import awais.instagrabber.databinding.LayoutLocationDetailsBinding;
@@ -209,11 +208,20 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (user == null) return;
             if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
-                new PostFetcher(feedModel.getCode(), newFeedModel -> {
-                    opening = false;
-                    if (newFeedModel == null) return;
-                    openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
-                }).execute();
+                graphQLService.fetchPost(feedModel.getCode(), new ServiceCallback<Media>() {
+                    @Override
+                    public void onSuccess(final Media newFeedModel) {
+                        opening = false;
+                        if (newFeedModel == null) return;
+                        openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
+                    }
+
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        opening = false;
+                        Log.e(TAG, "Error", t);
+                    }
+                });
                 return;
             }
             opening = true;
