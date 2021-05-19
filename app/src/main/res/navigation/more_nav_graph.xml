@@ -61,6 +61,18 @@
             app:argType="long" />
     </action>
 
+    <action
+        android:id="@+id/action_global_post_view"
+        app:destination="@id/postViewFragment">
+        <argument
+            android:name="media"
+            app:argType="awais.instagrabber.repositories.responses.Media"
+            app:nullable="false" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
+    </action>
+
     <fragment
         android:id="@+id/morePreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.MorePreferencesFragment"
@@ -151,4 +163,8 @@
         android:id="@+id/postPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.PostPreferencesFragment"
         android:label="@string/pref_category_post" />
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewV2Fragment"
+        android:label="Post" />
 </navigation>
