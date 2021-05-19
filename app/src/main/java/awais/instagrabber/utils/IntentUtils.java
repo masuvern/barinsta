@@ -21,8 +21,12 @@ public final class IntentUtils {
         // final boolean isHttpsUri = "https".equals(parsedUrl.getScheme());
 
         final List<String> paths = parsedUrl.getPathSegments();
-        String path = paths.get(0);
 
+        if (paths.isEmpty()) {
+            return null;
+        }
+
+        String path = paths.get(0);
         String text = null;
         IntentModelType type = IntentModelType.UNKNOWN;
         if (1 == paths.size()) {
@@ -34,7 +38,7 @@ public final class IntentUtils {
         } else if ("p".equals(path) || "reel".equals(path) || "tv".equals(path)) {
             text = paths.get(1);
             type = IntentModelType.POST;
-        } else if (2 >= paths.size() && "explore".equals(path)) {
+        } else if (2 < paths.size() && "explore".equals(path)) {
             path = paths.get(1);
 
             if ("locations".equals(path)) {
