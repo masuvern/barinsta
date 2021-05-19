@@ -78,33 +78,6 @@
             android:taskAffinity="awais.instagrabber.errorreport"
             android:theme="@android:style/Theme.DeviceDefault.Dialog" />
         <activity
-            android:name=".activities.DirectDownload"
-            android:allowEmbedded="false"
-            android:allowTaskReparenting="false"
-            android:autoRemoveFromRecents="true"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:description="@string/direct_download_desc"
-            android:documentLaunchMode="never"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:label="@string/direct_download"
-            android:launchMode="singleTask"
-            android:lockTaskMode="never"
-            android:noHistory="false"
-            android:theme="@style/Theme.AppCompat.Translucent">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.WEB_SEARCH" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".activities.Login"
             android:label="@string/login"
             android:parentActivityName=".activities.MainActivity"
