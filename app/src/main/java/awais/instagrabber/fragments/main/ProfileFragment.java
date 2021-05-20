@@ -55,7 +55,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
-import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.asyncs.ProfilePostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
@@ -85,6 +84,7 @@ import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserProfileContextLink;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -92,12 +92,16 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
+import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.UserService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
@@ -122,6 +126,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private MediaService mediaService;
     private UserService userService;
     private GraphQLService graphQLService;
+    private DirectMessagesService directMessagesService;
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
     private HighlightsAdapter highlightsAdapter;
@@ -313,6 +318,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, myId) : null;
+        directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
         userService = isLoggedIn ? UserService.getInstance() : null;
@@ -1130,20 +1136,30 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (!disableDm) {
             profileDetailsBinding.btnDM.setOnClickListener(v -> {
                 profileDetailsBinding.btnDM.setEnabled(false);
-                new CreateThreadAction(cookie, profileModel.getPk(), thread -> {
-                    if (thread == null) {
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                final Call<DirectThread> createThreadRequest =
+                        directMessagesService.createThread(Collections.singletonList(profileModel.getPk()), null);
+                createThreadRequest.enqueue(new Callback<DirectThread>() {
+                    @Override
+                    public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
                         profileDetailsBinding.btnDM.setEnabled(true);
-                        return;
+                        if (!response.isSuccessful() || response.body() == null) {
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
+                        final DirectThread thread = response.body();
+                        if (!inboxManager.containsThread(thread.getThreadId())) {
+                            thread.setTemp(true);
+                            inboxManager.addThread(thread, 0);
+                        }
+                        fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
                     }
-                    final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
-                    if (!inboxManager.containsThread(thread.getThreadId())) {
-                        thread.setTemp(true);
-                        inboxManager.addThread(thread, 0);
+
+                    @Override
+                    public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
+                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     }
-                    fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
-                    profileDetailsBinding.btnDM.setEnabled(true);
-                }).execute();
+                });
             });
         }
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {

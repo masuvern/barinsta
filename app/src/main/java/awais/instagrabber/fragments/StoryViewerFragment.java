@@ -70,7 +70,6 @@ import java.util.regex.Pattern;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
-import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
@@ -90,6 +89,7 @@ import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
+import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -222,40 +222,54 @@ public class StoryViewerFragment extends Fragment {
             new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
-                    .setPositiveButton(R.string.confirm, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), thread -> {
-                        if (thread == null) {
-                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        try {
-                            final Call<DirectThreadBroadcastResponse> request = directMessagesService
-                                    .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(thread.getThreadId()),
-                                                         input.getText().toString(),
-                                                         currentStory.getStoryMediaId(),
-                                                         String.valueOf(currentStory.getUserId()));
-                            request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
-                                @Override
-                                public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
-                                                       @NonNull final Response<DirectThreadBroadcastResponse> response) {
-                                    if (!response.isSuccessful()) {
-                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                    .setPositiveButton(R.string.confirm, (d, w) -> {
+                        final Call<DirectThread> createThreadRequest =
+                                directMessagesService.createThread(Collections.singletonList(currentStory.getUserId()), null);
+                        createThreadRequest.enqueue(new Callback<DirectThread>() {
+                            @Override
+                            public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
+                                if (!response.isSuccessful() || response.body() == null) {
+                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                    return;
                                 }
+                                final DirectThread thread = response.body();
+                                try {
+                                    final Call<DirectThreadBroadcastResponse> request = directMessagesService
+                                            .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(thread.getThreadId()),
+                                                    input.getText().toString(),
+                                                    currentStory.getStoryMediaId(),
+                                                    String.valueOf(currentStory.getUserId()));
+                                    request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
+                                        @Override
+                                        public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
+                                                               @NonNull final Response<DirectThreadBroadcastResponse> response) {
+                                            if (!response.isSuccessful()) {
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                            Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                        }
 
-                                @Override
-                                public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
-                                    try {
-                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                        Log.e(TAG, "onFailure: ", t);
-                                    } catch (Throwable ignored) {}
+                                        @Override
+                                        public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
+                                            try {
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                Log.e(TAG, "onFailure: ", t);
+                                            } catch (Throwable ignored) {
+                                            }
+                                        }
+                                    });
+                                } catch (UnsupportedEncodingException e) {
+                                    Log.e(TAG, "Error", e);
                                 }
-                            });
-                        } catch (UnsupportedEncodingException e) {
-                            Log.e(TAG, "Error", e);
-                        }
-                    }).execute())
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
                     .setNegativeButton(R.string.cancel, null)
                     .show();
             return true;
