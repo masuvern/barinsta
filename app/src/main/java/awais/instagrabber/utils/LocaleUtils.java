@@ -82,7 +82,7 @@ public final class LocaleUtils {
             case 20: return "ja";
             case 21: return "el";
             case 22: return "eu";
-            case 23: return "sv-SE";
+            case 23: return "sv";
             case 24: return "ko";
         }
 
