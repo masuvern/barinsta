@@ -132,7 +132,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsAdapter highlightsAdapter;
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
-    private MenuItem muteStoriesMenuItem, mutePostsMenuItem;
+    private MenuItem muteStoriesMenuItem, mutePostsMenuItem, removeFollowerMenuItem;
     private boolean accountIsUpdated = false;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -140,6 +140,23 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private int downloadChildPosition = -1;
     private long myId;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_PROFILE_POSTS_LAYOUT);
+
+    private final ServiceCallback<FriendshipChangeResponse> changeCb = new ServiceCallback<FriendshipChangeResponse>() {
+        @Override
+        public void onSuccess(final FriendshipChangeResponse result) {
+            if (result.getFriendshipStatus() != null) {
+                profileModel.setFriendshipStatus(result.getFriendshipStatus());
+                setProfileDetails();
+                return;
+            }
+            fetchProfileDetails();
+        }
+
+        @Override
+        public void onFailure(final Throwable t) {
+            Log.e(TAG, "Error editing relationship", t);
+        }
+    };
 
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -374,8 +391,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.profile_menu, menu);
+        final boolean isNotMe = profileModel != null && isLoggedIn
+                                && !Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie));
         blockMenuItem = menu.findItem(R.id.block);
-        final boolean isNotMe = profileModel != null && !Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie));
         if (blockMenuItem != null) {
             if (isNotMe) {
                 blockMenuItem.setVisible(true);
@@ -415,6 +433,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (chainingMenuItem != null) {
             chainingMenuItem.setVisible(isNotMe && profileModel.hasChaining());
         }
+        removeFollowerMenuItem = menu.findItem(R.id.remove_follower);
+        if (removeFollowerMenuItem != null) {
+            removeFollowerMenuItem.setVisible(isNotMe && profileModel.getFriendshipStatus().isFollowedBy());
+        }
     }
 
     @Override
@@ -445,37 +467,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         if (item.getItemId() == R.id.block) {
             if (!isLoggedIn) return false;
-            if (profileModel.getFriendshipStatus().isBlocking()) {
-                friendshipService.unblock(
-                        profileModel.getPk(),
-                        new ServiceCallback<FriendshipChangeResponse>() {
-                            @Override
-                            public void onSuccess(final FriendshipChangeResponse result) {
-                                Log.d(TAG, "Unblock success: " + result);
-                                fetchProfileDetails();
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable t) {
-                                Log.e(TAG, "Error unblocking", t);
-                            }
-                        });
-                return true;
-            }
-            friendshipService.block(
-                    profileModel.getPk(),
-                    new ServiceCallback<FriendshipChangeResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipChangeResponse result) {
-                            Log.d(TAG, "Block success: " + result);
-                            fetchProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error blocking", t);
-                        }
-                    });
+            friendshipService.changeBlock(profileModel.getFriendshipStatus().isBlocking(), profileModel.getPk(), changeCb);
             return true;
         }
         if (item.getItemId() == R.id.chaining) {
@@ -493,18 +485,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     profileModel.getFriendshipStatus().isMutingReel(),
                     profileModel.getPk(),
                     true,
-                    new ServiceCallback<FriendshipChangeResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipChangeResponse result) {
-                            Log.d(TAG, action + " success: " + result);
-                            fetchProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error while performing " + action, t);
-                        }
-                    });
+                    changeCb);
             return true;
         }
         if (item.getItemId() == R.id.mute_posts) {
@@ -514,18 +495,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     profileModel.getFriendshipStatus().isMuting(),
                     profileModel.getPk(),
                     false,
-                    new ServiceCallback<FriendshipChangeResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipChangeResponse result) {
-                            Log.d(TAG, action + " success: " + result);
-                            fetchProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error while performing " + action, t);
-                        }
-                    });
+                    changeCb);
+            return true;
+        }
+        if (item.getItemId() == R.id.remove_follower) {
+            if (!isLoggedIn) return false;
+            friendshipService.removeFollower(profileModel.getPk(), changeCb);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -973,6 +948,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     profileDetailsBinding.mainStatus.setText(R.string.status_mutual);
                 }
             }
+            else profileDetailsBinding.mainStatus.setVisibility(View.GONE);
             if (profileModel.getFriendshipStatus().isFollowing()) {
                 profileDetailsBinding.btnFollow.setText(R.string.unfollow);
                 profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
@@ -1001,6 +977,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (chainingMenuItem != null) {
                 chainingMenuItem.setVisible(profileModel.hasChaining());
+            }
+            if (removeFollowerMenuItem != null) {
+                removeFollowerMenuItem.setVisible(profileModel.getFriendshipStatus().isFollowedBy());
             }
         }
     }
@@ -1069,52 +1048,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         .setTitle(R.string.priv_acc)
                         .setMessage(R.string.priv_acc_confirm)
                         .setPositiveButton(R.string.confirm, (d, w) ->
-                                friendshipService.unfollow(
-                                        profileModel.getPk(),
-                                        new ServiceCallback<FriendshipChangeResponse>() {
-                                            @Override
-                                            public void onSuccess(final FriendshipChangeResponse result) {
-                                                // Log.d(TAG, "Unfollow success: " + result);
-                                                fetchProfileDetails();
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                Log.e(TAG, "Error unfollowing", t);
-                                            }
-                                        }))
+                                friendshipService.unfollow(profileModel.getPk(), changeCb))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
-                friendshipService.unfollow(
-                        profileModel.getPk(),
-                        new ServiceCallback<FriendshipChangeResponse>() {
-                            @Override
-                            public void onSuccess(final FriendshipChangeResponse result) {
-                                // Log.d(TAG, "Unfollow success: " + result);
-                                fetchProfileDetails();
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable t) {
-                                Log.e(TAG, "Error unfollowing", t);
-                            }
-                        });
+                friendshipService.unfollow(profileModel.getPk(), changeCb);
             } else {
-                friendshipService.follow(
-                        profileModel.getPk(),
-                        new ServiceCallback<FriendshipChangeResponse>() {
-                            @Override
-                            public void onSuccess(final FriendshipChangeResponse result) {
-                                // Log.d(TAG, "Follow success: " + result);
-                                fetchProfileDetails();
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable t) {
-                                Log.e(TAG, "Error following", t);
-                            }
-                        });
+                friendshipService.follow(profileModel.getPk(), changeCb);
             }
         });
         profileDetailsBinding.btnSaved.setOnClickListener(v -> {
