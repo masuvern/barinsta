@@ -917,6 +917,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupButtons(final long profileId) {
         profileDetailsBinding.btnTagged.setVisibility(isReallyPrivate() ? View.GONE : View.VISIBLE);
+        profileDetailsBinding.favChip.setVisibility(View.VISIBLE);
         if (isLoggedIn) {
             if (Objects.equals(profileId, myId)) {
                 profileDetailsBinding.btnTagged.setVisibility(View.VISIBLE);
@@ -932,7 +933,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.btnLiked.setVisibility(View.GONE);
             profileDetailsBinding.btnDM.setVisibility(disableDm ? View.GONE : View.VISIBLE);
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
-            profileDetailsBinding.favChip.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
             if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isFollowedBy()) {

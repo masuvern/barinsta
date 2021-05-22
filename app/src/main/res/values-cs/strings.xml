@@ -22,13 +22,13 @@
     <string name="title_notifications">Aktivita</string>
     <string name="update_check">Zkontrolovat aktualizace při spuštění</string>
     <string name="flag_secure">Blokovat snímky obrazovky a náhled aplikace</string>
-    <string name="download_user_folder">Stáhnout příspěvky do složek s uživatelským jménem</string>
-    <string name="download_prepend_username">Připojit uživatelské jméno k názvu souboru</string>
-    <string name="mark_as_seen_setting">Označit příběhy po zhlédnutí jako zobrazené</string>
+    <string name="download_user_folder">Stáhnout příspěvky do složek se jmény uživatelů</string>
+    <string name="download_prepend_username">Připojit jméno uživatele k názvu souboru</string>
+    <string name="mark_as_seen_setting">Po zobrazení označit příběhy jako zobrazené</string>
     <string name="mark_as_seen_setting_summary">Autor příběhu bude vědět, že jste si jej zobrazili</string>
     <string name="hide_muted_reels_setting">Skrýt ztišené příběhy z kanálu</string>
-    <string name="dm_mark_as_seen_setting">Označovat zprávy po zhlédnutí jako zobrazené</string>
-    <string name="dm_mark_as_seen_setting_summary">Ostatní členové uvidí, že jste si ji ji zobrazili</string>
+    <string name="dm_mark_as_seen_setting">Označovat zprávy po zobrazení jako zobrazené</string>
+    <string name="dm_mark_as_seen_setting_summary">Ostatní členové uvidí, že jste si ji je zobrazili</string>
     <string name="activity_setting">Povolit oznámení o aktivitě</string>
     <string name="story_sort_setting">Řazení kanálu příběhů</string>
     <string name="error_loading_profile">Chyba při načítání profilu! Je uživatelské jméno platné? Pokud ano, jste možná omezeni Instagramem.</string>
@@ -61,7 +61,7 @@
         <item quantity="other">%s\nSledujících</item>
     </plurals>
     <string name="main_posts_following">%s\nSleduje</string>
-    <string name="post_viewer_autoplay_video">Videa spouštět automaticky</string>
+    <string name="post_viewer_autoplay_video">Automaticky přehrávat videa</string>
     <string name="post_viewer_background_play">Pokračovat v přehrávání na pozadí</string>
     <string name="post_viewer_background_play_summary">Nepozastavovat videa při opuštění aplikace</string>
     <string name="post_viewer_muted_autoplay">Vždy ztlumit videa</string>
@@ -83,7 +83,7 @@
     <string name="answered_story">Odpověď úspěšně odeslána!</string>
     <plurals name="slider_info" comment="For slider stickers in stories, eg. 3 responses averaging 17.38%">
         <item quantity="one">%d odpověď, průměrně %s</item>
-        <item quantity="few">%d odpovědí, průměrně %s</item>
+        <item quantity="few">%d odpovědi, průměrně %s</item>
         <item quantity="many">%d odpovědí, průměrně %s</item>
         <item quantity="other">%d odpovědí, průměrně %s</item>
     </plurals>
@@ -114,7 +114,7 @@
     <string name="remove_from_collection">Odebrat ze sbírky</string>
     <string name="liked">Líbí se</string>
     <string name="saved">Uložené</string>
-    <string name="tagged">Označeno</string>
+    <string name="tagged">Označení</string>
     <string name="dm_person">Zpráva</string>
     <string name="like_without_count">To se mi líbí</string>
     <string name="unlike_without_count">Už se mi to nelíbí</string>
@@ -131,8 +131,9 @@
     <string name="mute_posts">Ztlumit příspěvky</string>
     <string name="unmute_stories">Zrušit ztlumení příběhů</string>
     <string name="unmute_posts">Zrušit ztlumení příspěvků</string>
-    <string name="bio_copy">Kopírovat bio</string>
-    <string name="bio_translate">Přeložit bio</string>
+    <string name="remove_follower">Odebrat sledujícího</string>
+    <string name="bio_copy">Kopírovat životopis</string>
+    <string name="bio_translate">Přeložit životopis</string>
     <string name="status_mutual">Vzájemní</string>
     <string name="status_following">Sleduje</string>
     <string name="status_follower">Sledující</string>
@@ -154,7 +155,7 @@
     <string name="time_settings_title_preview">Náhled</string>
     <string name="time_settings_swap_time">Prohodit pozice času a data</string>
     <string name="quick_access_cannot_delete_curr">Nemůžete smazat aktuálně používaný účet</string>
-    <string name="quick_access_confirm_delete">Opravdu chcete smazat \'%s\'?</string>
+    <string name="quick_access_confirm_delete">Opravdu chcete smazat \"%s\"?</string>
     <string name="open_profile">Otevřít profil</string>
     <string name="view_story">Zobrazit příběh</string>
     <string name="view_pfp">Zobrazit obrázek profilu</string>
@@ -240,7 +241,7 @@
     <string name="request_approve">Schválit žádost</string>
     <string name="request_reject">Zamítnout žádost</string>
     <string name="share_public_post">Sdílejte tento veřejný příspěvek na…</string>
-    <string name="share_private_post">Toto je soukromý příspěvek! Sdílejte jej s těmi, kdo jej mohou vidět!</string>
+    <string name="share_private_post">Toto je soukromý příspěvek! Sdílejte jej s těmi, kdo jej mohou vidět.</string>
     <string name="discover_empty">Tato kategorie je nějak prázdná…</string>
     <string name="update_available">Je k dispozici aktualizace! (%s)</string>
     <string name="update_notice">Připomínka: Pokud jste aplikaci stáhli z F-Droidu, musíte ji z něj i aktualizovat! To stejné platí pro GitHub.</string>
@@ -272,6 +273,7 @@
     <string name="skip_update_checkbox">Do další aktualizace znovu nezobrazovat</string>
     <string name="version">Verze</string>
     <string name="pref_start_screen">Úvodní obrazovka</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Při otevření vyhledávání zobrazit klávesnici</string>
     <string name="pref_category_general">Obecné</string>
     <string name="pref_category_theme">Motiv</string>
     <string name="pref_category_downloads">Stažené</string>
@@ -376,6 +378,12 @@
         <item quantity="few">%d se líbí</item>
         <item quantity="many">%d se líbí</item>
         <item quantity="other">%d se líbí</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d odpověď</item>
+        <item quantity="few">%d odpovědi</item>
+        <item quantity="many">%d odpovědí</item>
+        <item quantity="other">%d odpovědí</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d komentář</item>
@@ -497,7 +505,11 @@
     <string name="dm_remove_warning">Po uložení budou při příštím spuštění vypnuty všechny funkce související s posíláním zpráv</string>
     <string name="copy_caption">Kopírovat popisek</string>
     <string name="copy_reply">Kopírovat odpověď</string>
-    <string name="top">Top</string>
-    <string name="recent">Recent</string>
-    <string name="clear">Clear</string>
+    <string name="top">Populární</string>
+    <string name="recent">Nedávné</string>
+    <string name="clear">Vymazat</string>
+    <string name="no_external_map_app">Nemáte žádnou aplikaci pro mapy!</string>
+    <string name="click_to_show_full">Klepnutím zobrazíte přesný počet \"to se mi líbí\"</string>
+    <string name="no_profile_pic_found">Nebyl nalezen žádný obrázek profilu!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

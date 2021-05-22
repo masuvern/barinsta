@@ -21,7 +21,7 @@
     <string name="title_comments">評論</string>
     <string name="title_notifications">動態</string>
     <string name="update_check">啟動時檢查更新</string>
-    <string name="flag_secure">阻擋截圖 &amp; 應用程式預覽</string>
+    <string name="flag_secure">阻擋截圖及應用程式預覽</string>
     <string name="download_user_folder">將貼文下載到用戶名資料夾</string>
     <string name="download_prepend_username">在檔案名稱前添加用戶名</string>
     <string name="mark_as_seen_setting">檢視完限時動態後標記為已讀</string>
@@ -115,10 +115,11 @@
     <string name="unblock">解除封鎖</string>
     <string name="restrict">限制</string>
     <string name="unrestrict">移除限制</string>
-    <string name="mute_stories">隱藏此用戶的限時動態</string>
-    <string name="mute_posts">隱藏此用戶的貼文</string>
-    <string name="unmute_stories">取消隱藏此用戶的限時動態</string>
-    <string name="unmute_posts">取消隱藏此用戶的貼文</string>
+    <string name="mute_stories">隱藏限時動態</string>
+    <string name="mute_posts">隱藏貼文</string>
+    <string name="unmute_stories">取消隱藏限時動態</string>
+    <string name="unmute_posts">取消隱藏貼文</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">複製簡介</string>
     <string name="bio_translate">翻譯簡介</string>
     <string name="status_mutual">正彼此追蹤</string>
@@ -207,7 +208,7 @@
     <string name="comment_viewer_like_comment">對此評論說讚</string>
     <string name="comment_viewer_unlike_comment">收回評論的讚</string>
     <string name="comment_viewer_translate_comment">翻譯評論</string>
-    <string name="comment_viewer_delete_comment">刪除評論</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">無空評論！</string>
     <string name="comment_view_mention_user_search">您要搜尋用戶名嗎？</string>
     <string name="comment_view_mention_hash_search">您要搜尋主題標籤嗎？</string>
@@ -228,7 +229,7 @@
     <string name="request_approve">接受要求</string>
     <string name="request_reject">略過要求</string>
     <string name="share_public_post">分享這則公開貼文給…</string>
-    <string name="share_private_post">這個是私人貼文！分享給可以查看的人！</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">這個類別是空的…</string>
     <string name="update_available">有可用的更新！ （%s）</string>
     <string name="update_notice">提醒：如果您是從F-Droid 下載的，您必須透過其進行更新！ GitHub 也是如此。</string>
@@ -260,6 +261,7 @@
     <string name="skip_update_checkbox">在下次更新之前不再顯示</string>
     <string name="version">版本</string>
     <string name="pref_start_screen">開始畫面</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">一般</string>
     <string name="pref_category_theme">主題</string>
     <string name="pref_category_downloads">下載</string>
@@ -289,9 +291,9 @@
     <string name="locations">地點</string>
     <string name="unknown">未知</string>
     <string name="removed_from_favs">已從收藏中移除!</string>
-    <string name="backup_and_restore">備份 &amp; 還原</string>
+    <string name="backup_and_restore">備份與還原</string>
     <string name="backup_summary">備份 Barinsta 的設定、登入資料、及收藏中的內容至純文字或加密後的檔案，以便日後還原。</string>
-    <string name="backup_warning">如果您選擇備份登入相關資訊，請將此檔案視為密碼看待並妥善保存！</string>
+    <string name="backup_warning">如果您選擇備份登入相關資訊，請將此檔案視為密碼看待，並妥善保存！</string>
     <string name="create_backup">建立備份檔</string>
     <string name="restore_backup">以備份檔還原</string>
     <string name="file_chosen_label">檔案：</string>
@@ -300,7 +302,7 @@
     <string name="apply">套用</string>
     <string name="save">儲存</string>
     <string name="caption">說明</string>
-    <string name="edit_caption">編輯貼文</string>
+    <string name="edit_caption">編輯說明</string>
     <string name="translate_caption">翻譯說明</string>
     <string name="player_timeline_desc">影片播放器時間軸</string>
     <string name="liking">按讚中…</string>
@@ -362,6 +364,9 @@
     <plurals name="likes_count">
         <item quantity="other">%d 個讚</item>
     </plurals>
+    <plurals name="replies_count">
+        <item quantity="other">%d replies</item>
+    </plurals>
     <plurals name="comments_count">
         <item quantity="other">%d 個評論</item>
     </plurals>
@@ -397,7 +402,7 @@
     <string name="replying_to_user">回覆 %s</string>
     <string name="replied_to_yourself">您回覆了自己</string>
     <string name="replied_you">您回覆了</string>
-    <string name="replied_you_group">你回覆了 %s 的限時動態</string>
+    <string name="replied_you_group">您回覆了 %s</string>
     <string name="replied_group">回覆了 %s 的限時動態</string>
     <string name="replied_to_you">回覆給您</string>
     <string name="replied_to_themself">回覆給他自己</string>
@@ -476,4 +481,8 @@
     <string name="top">Top</string>
     <string name="recent">Recent</string>
     <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>
