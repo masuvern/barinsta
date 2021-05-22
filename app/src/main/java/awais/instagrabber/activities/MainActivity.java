@@ -702,7 +702,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                         Log.e(TAG, "showPostView: ", e);
                     }
                 }
-                Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+                else Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
                 alertDialog.dismiss();
             }
 
