@@ -10,7 +10,7 @@ data class FeedStoryModel(
     val profileModel: User,
     var isFullyRead: Boolean,
     val timestamp: Long,
-    val firstStoryModel: StoryModel,
+    val firstStoryModel: StoryModel?,
     val mediaCount: Int,
     val isLive: Boolean,
     val isBestie: Boolean

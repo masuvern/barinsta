@@ -161,7 +161,9 @@ public class StoriesService extends BaseService {
                             node.getInt("media_count"),
                             false,
                             node.optBoolean("has_besties_media")));
-                } catch (Exception e) {} // to cover promotional reels with non-long user pk's
+                } catch (Exception e) {
+                    Log.e(TAG, "parseStoriesBody: ", e);
+                } // to cover promotional reels with non-long user pk's
             }
             final JSONArray broadcasts = new JSONObject(body).getJSONArray("broadcasts");
             for (int i = 0; i < broadcasts.length(); ++i) {
