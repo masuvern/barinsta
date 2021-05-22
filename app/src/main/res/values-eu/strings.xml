@@ -123,6 +123,7 @@
     <string name="mute_posts">Mute posts</string>
     <string name="unmute_stories">Unmute stories</string>
     <string name="unmute_posts">Unmute posts</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Kopiatu biografia</string>
     <string name="bio_translate">Itzuli biografia</string>
     <string name="status_mutual">Alde bikoa</string>
@@ -211,7 +212,7 @@
     <string name="comment_viewer_like_comment">Atsegin iruzkina</string>
     <string name="comment_viewer_unlike_comment">Ez dut atsegin</string>
     <string name="comment_viewer_translate_comment">Itzuli iruzkina</string>
-    <string name="comment_viewer_delete_comment">Ezabatu iruzkina</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">Iruzkin hutsik ez!</string>
     <string name="comment_view_mention_user_search">Erabiltzaile-izena bilatu nahi duzu?</string>
     <string name="comment_view_mention_hash_search">Traol-hitza bilatu nahi duzu?</string>
@@ -232,7 +233,7 @@
     <string name="request_approve">Onartu eskaera</string>
     <string name="request_reject">Baztertu eskaera</string>
     <string name="share_public_post">Partekatu bidalketa publiko hau…</string>
-    <string name="share_private_post">Bidalketa pribatua da. Partekatu ikus dezaketen horiekin!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">Kategoria hau hutsik dago…</string>
     <string name="update_available">Eguneratze bat eskuragarri dago (%s)</string>
     <string name="update_notice">F-Droidetik deskargatu baduzu, bertatik eguneratu behar duzu. GitHubekin ere hori egin behar da.</string>
@@ -264,6 +265,7 @@
     <string name="skip_update_checkbox">Ez erakutsi hurrengo eguneratzera arte</string>
     <string name="version">Bertsioa</string>
     <string name="pref_start_screen">Hasierako pantaila</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">Orokorra</string>
     <string name="pref_category_theme">Gaia</string>
     <string name="pref_category_downloads">Deskargak</string>
@@ -366,6 +368,10 @@
     <plurals name="likes_count">
         <item quantity="one">atsegite %d</item>
         <item quantity="other">%d atsegite</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">Iruzkin %d</item>
@@ -484,4 +490,8 @@
     <string name="top">Top</string>
     <string name="recent">Recent</string>
     <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

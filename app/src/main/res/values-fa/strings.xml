@@ -124,6 +124,7 @@
     <string name="mute_posts">Mute posts</string>
     <string name="unmute_stories">Unmute stories</string>
     <string name="unmute_posts">Unmute posts</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Mutual</string>
@@ -212,7 +213,7 @@
     <string name="comment_viewer_like_comment">پسندیدن دیدگاه</string>
     <string name="comment_viewer_unlike_comment">نپسندیدن دیدگاه</string>
     <string name="comment_viewer_translate_comment">گرداندن دیدگاه</string>
-    <string name="comment_viewer_delete_comment">هذف دیدگاه</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">بدون دیدگاه تهی!</string>
     <string name="comment_view_mention_user_search">ایا میخواهید نام کاربری جستوجو کنید ؟</string>
     <string name="comment_view_mention_hash_search">آیا میخواهید هشتگ جستوجو کنید؟</string>
@@ -233,7 +234,7 @@
     <string name="request_approve">قبول درخواست</string>
     <string name="request_reject">رد درخواست</string>
     <string name="share_public_post">همرسانی این پیک همگانی به…</string>
-    <string name="share_private_post">این پست شخصی است! آنهایی رو به اشتراک بزارید که میتوانید ببینید!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">This category is somehow empty…</string>
     <string name="update_available">یک بروزرسانی آمده است! (%s)</string>
     <string name="update_notice">یادآور: اگه شما از F-Droid دانلود کرده اید، شما باید از همانجا بروزرسانی کنید! برای GitHub هم همینطور.</string>
@@ -265,6 +266,7 @@
     <string name="skip_update_checkbox">دوباره نمایش نده تا بروزرسانی بعدی</string>
     <string name="version">نگارش</string>
     <string name="pref_start_screen">صفحه آغازین</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">فراگیر</string>
     <string name="pref_category_theme">پوسته</string>
     <string name="pref_category_downloads">دریافت‌ها</string>
@@ -367,6 +369,10 @@
     <plurals name="likes_count">
         <item quantity="one">%d پسند</item>
         <item quantity="other">%d پسند</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d دیدگاه</item>
@@ -485,4 +491,8 @@
     <string name="top">Top</string>
     <string name="recent">Recent</string>
     <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>
