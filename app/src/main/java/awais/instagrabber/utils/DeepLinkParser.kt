@@ -1,67 +1,29 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import java.util.regex.Pattern
 
-import com.google.common.collect.ImmutableMap;
+object DeepLinkParser {
+    private val TYPE_PATTERN_MAP: Map<DeepLink.Type, DeepLinkPattern> = mapOf(
+        DeepLink.Type.USER to DeepLinkPattern("instagram://user?username="),
+    )
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
-public final class DeepLinkParser {
-    private static final Map<DeepLink.Type, DeepLinkPattern> TYPE_PATTERN_MAP = ImmutableMap
-            .<DeepLink.Type, DeepLinkPattern>builder()
-            .put(DeepLink.Type.USER, new DeepLinkPattern("instagram://user?username="))
-            .build();
-
-    @Nullable
-    public static DeepLink parse(@NonNull final String text) {
-        for (final Map.Entry<DeepLink.Type, DeepLinkPattern> entry : TYPE_PATTERN_MAP.entrySet()) {
-            if (text.startsWith(entry.getValue().getPatternText())) {
-                final String value = entry.getValue().getPattern().matcher(text).replaceAll("");
-                return new DeepLink(entry.getKey(), value);
+    @JvmStatic
+    fun parse(text: String): DeepLink? {
+        for ((key, value) in TYPE_PATTERN_MAP) {
+            if (text.startsWith(value.patternText)) {
+                return DeepLink(key, value.pattern.matcher(text).replaceAll(""))
             }
         }
-        return null;
+        return null
     }
 
-    public static class DeepLinkPattern {
-        private final String patternText;
-        private final Pattern pattern;
-
-        public DeepLinkPattern(final String patternText) {
-            this.patternText = patternText;
-            pattern = Pattern.compile(patternText, Pattern.LITERAL);
-        }
-
-        public String getPatternText() {
-            return patternText;
-        }
-
-        public Pattern getPattern() {
-            return pattern;
-        }
+    data class DeepLinkPattern(val patternText: String) {
+        val pattern: Pattern = Pattern.compile(patternText, Pattern.LITERAL)
     }
 
-    public static class DeepLink {
-        private final Type type;
-        private final String value;
-
-        public DeepLink(final Type type, final String value) {
-            this.type = type;
-            this.value = value;
-        }
-
-        public Type getType() {
-            return type;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public enum Type {
-            USER,
+    data class DeepLink(val type: Type, val value: String) {
+        enum class Type {
+            USER
         }
     }
 }

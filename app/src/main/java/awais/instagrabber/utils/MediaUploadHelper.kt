@@ -7,6 +7,7 @@ import awais.instagrabber.models.UploadVideoOptions
 import awais.instagrabber.models.enums.MediaItemType
 import org.json.JSONObject
 import java.util.*
+import kotlin.random.Random
 
 
 private const val LOWER = 1000000000L
@@ -109,7 +110,7 @@ fun generateUploadId(): String {
 }
 
 fun generateName(uploadId: String): String {
-    val random = NumberUtils.random(LOWER, UPPER + 1)
+    val random = Random.nextLong(LOWER, UPPER + 1)
     return "${uploadId}_0_$random"
 }
 

@@ -1,121 +1,117 @@
-package awais.instagrabber.utils;
+@file:JvmName("ViewUtils")
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RoundRectShape;
-import android.os.Build;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.TextView;
+package awais.instagrabber.utils
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.util.Pair;
-import androidx.dynamicanimation.animation.FloatPropertyCompat;
-import androidx.dynamicanimation.animation.SpringAnimation;
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RoundRectShape
+import android.os.Build
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.util.Pair
+import androidx.dynamicanimation.animation.FloatPropertyCompat
+import androidx.dynamicanimation.animation.SpringAnimation
+import kotlin.jvm.internal.Intrinsics
 
-import org.jetbrains.annotations.NotNull;
+fun createRoundRectDrawableWithIcon(context: Context, rad: Int, iconRes: Int): Drawable? {
+    val defaultDrawable = ShapeDrawable(RoundRectShape(FloatArray(8) { rad.toFloat() }, null, null))
+    defaultDrawable.paint.color = -0x1
+    val d = ResourcesCompat.getDrawable(context.resources, iconRes, null) ?: return null
+    val drawable = d.mutate()
+    return CombinedDrawable(defaultDrawable, drawable)
+}
 
-import kotlin.jvm.internal.Intrinsics;
+fun createRoundRectDrawable(rad: Int, defaultColor: Int): Drawable {
+    val defaultDrawable = ShapeDrawable(RoundRectShape(FloatArray(8) { rad.toFloat() }, null, null))
+    defaultDrawable.paint.color = defaultColor
+    return defaultDrawable
+}
 
-public final class ViewUtils {
+fun createFrame(
+    width: Int,
+    height: Float,
+    gravity: Int,
+    leftMargin: Float,
+    topMargin: Float,
+    rightMargin: Float,
+    bottomMargin: Float
+): FrameLayout.LayoutParams {
+    val layoutParams = FrameLayout.LayoutParams(getSize(width.toFloat()), getSize(height), gravity)
+    layoutParams.setMargins(
+        Utils.convertDpToPx(leftMargin), Utils.convertDpToPx(topMargin), Utils.convertDpToPx(rightMargin),
+        Utils.convertDpToPx(bottomMargin)
+    )
+    return layoutParams
+}
 
-    public static final int MATCH_PARENT = -1;
-    public static final int WRAP_CONTENT = -2;
+fun createGradientDrawable(
+    orientation: GradientDrawable.Orientation?,
+    @ColorInt colors: IntArray?
+): GradientDrawable {
+    val drawable = GradientDrawable(orientation, colors)
+    drawable.shape = GradientDrawable.RECTANGLE
+    return drawable
+}
 
-    public static Drawable createRoundRectDrawableWithIcon(final Context context, int rad, int iconRes) {
-        ShapeDrawable defaultDrawable = new ShapeDrawable(new RoundRectShape(new float[]{rad, rad, rad, rad, rad, rad, rad, rad}, null, null));
-        defaultDrawable.getPaint().setColor(0xffffffff);
-        final Drawable d = ResourcesCompat.getDrawable(context.getResources(), iconRes, null);
-        if (d == null) return null;
-        Drawable drawable = d.mutate();
-        return new CombinedDrawable(defaultDrawable, drawable);
+private fun getSize(size: Float): Int {
+    return if (size < 0) size.toInt() else Utils.convertDpToPx(size)
+}
+
+fun measure(view: View, parent: View): Pair<Int, Int> {
+    view.measure(
+        View.MeasureSpec.makeMeasureSpec(parent.width, View.MeasureSpec.UNSPECIFIED),
+        View.MeasureSpec.makeMeasureSpec(parent.height, View.MeasureSpec.UNSPECIFIED)
+    )
+    return Pair(view.measuredHeight, view.measuredWidth)
+}
+
+fun getTextViewValueWidth(textView: TextView, text: String?): Float {
+    return textView.paint.measureText(text)
+}
+
+/**
+ * Creates [SpringAnimation] for object.
+ * If finalPosition is not [Float.NaN] then create [SpringAnimation] with
+ * [SpringForce.mFinalPosition].
+ *
+ * @param object        Object
+ * @param property      object's property to be animated.
+ * @param finalPosition [SpringForce.mFinalPosition] Final position of spring.
+ * @return [SpringAnimation]
+ */
+fun springAnimationOf(
+    `object`: Any?,
+    property: FloatPropertyCompat<Any?>?,
+    finalPosition: Float?
+): SpringAnimation {
+    return finalPosition?.let { SpringAnimation(`object`, property, it) } ?: SpringAnimation(`object`, property)
+}
+
+fun suppressLayoutCompat(`$this$suppressLayoutCompat`: ViewGroup, suppress: Boolean) {
+    Intrinsics.checkNotNullParameter(`$this$suppressLayoutCompat`, "\$this\$suppressLayoutCompat")
+    if (Build.VERSION.SDK_INT >= 29) {
+        `$this$suppressLayoutCompat`.suppressLayout(suppress)
+    } else {
+        hiddenSuppressLayout(`$this$suppressLayoutCompat`, suppress)
     }
+}
 
-    public static Drawable createRoundRectDrawable(int rad, int defaultColor) {
-        ShapeDrawable defaultDrawable = new ShapeDrawable(new RoundRectShape(new float[]{rad, rad, rad, rad, rad, rad, rad, rad}, null, null));
-        defaultDrawable.getPaint().setColor(defaultColor);
-        return defaultDrawable;
-    }
+private var tryHiddenSuppressLayout = true
 
-    public static FrameLayout.LayoutParams createFrame(int width,
-                                                       float height,
-                                                       int gravity,
-                                                       float leftMargin,
-                                                       float topMargin,
-                                                       float rightMargin,
-                                                       float bottomMargin) {
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(getSize(width), getSize(height), gravity);
-        layoutParams.setMargins(Utils.convertDpToPx(leftMargin), Utils.convertDpToPx(topMargin), Utils.convertDpToPx(rightMargin),
-                                Utils.convertDpToPx(bottomMargin));
-        return layoutParams;
-    }
-
-    public static GradientDrawable createGradientDrawable(final GradientDrawable.Orientation orientation,
-                                                          @ColorInt final int[] colors) {
-        final GradientDrawable drawable = new GradientDrawable(orientation, colors);
-        drawable.setShape(GradientDrawable.RECTANGLE);
-        return drawable;
-    }
-
-    private static int getSize(float size) {
-        return (int) (size < 0 ? size : Utils.convertDpToPx(size));
-    }
-
-    public static Pair<Integer, Integer> measure(@NonNull final View view, @NonNull final View parent) {
-        view.measure(
-                View.MeasureSpec.makeMeasureSpec(parent.getWidth(), View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(parent.getHeight(), View.MeasureSpec.UNSPECIFIED)
-        );
-        return new Pair<>(view.getMeasuredHeight(), view.getMeasuredWidth());
-    }
-
-    public static float getTextViewValueWidth(final TextView textView, final String text) {
-        return textView.getPaint().measureText(text);
-    }
-
-    /**
-     * Creates [SpringAnimation] for object.
-     * If finalPosition is not [Float.NaN] then create [SpringAnimation] with
-     * [SpringForce.mFinalPosition].
-     *
-     * @param object        Object
-     * @param property      object's property to be animated.
-     * @param finalPosition [SpringForce.mFinalPosition] Final position of spring.
-     * @return [SpringAnimation]
-     */
-    @NonNull
-    public static SpringAnimation springAnimationOf(final Object object,
-                                                    final FloatPropertyCompat<Object> property,
-                                                    @Nullable final Float finalPosition) {
-        return finalPosition == null ? new SpringAnimation(object, property) : new SpringAnimation(object, property, finalPosition);
-    }
-
-    public static void suppressLayoutCompat(@NotNull ViewGroup $this$suppressLayoutCompat, boolean suppress) {
-        Intrinsics.checkNotNullParameter($this$suppressLayoutCompat, "$this$suppressLayoutCompat");
-        if (Build.VERSION.SDK_INT >= 29) {
-            $this$suppressLayoutCompat.suppressLayout(suppress);
-        } else {
-            hiddenSuppressLayout($this$suppressLayoutCompat, suppress);
-        }
-    }
-
-    private static boolean tryHiddenSuppressLayout = true;
-
-    @SuppressLint({"NewApi"})
-    private static void hiddenSuppressLayout(ViewGroup group, boolean suppress) {
-        if (tryHiddenSuppressLayout) {
-            try {
-                group.suppressLayout(suppress);
-            } catch (NoSuchMethodError var3) {
-                tryHiddenSuppressLayout = false;
-            }
+@SuppressLint("NewApi")
+private fun hiddenSuppressLayout(group: ViewGroup, suppress: Boolean) {
+    if (tryHiddenSuppressLayout) {
+        try {
+            group.suppressLayout(suppress)
+        } catch (var3: NoSuchMethodError) {
+            tryHiddenSuppressLayout = false
         }
     }
 }

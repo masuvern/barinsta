@@ -73,7 +73,7 @@ public class UserSearchViewModel extends ViewModel {
         }
         userService = UserService.getInstance();
         directMessagesService = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
-        rankedRecipientsCache = RankedRecipientsCache.getInstance();
+        rankedRecipientsCache = RankedRecipientsCache.INSTANCE;
         if ((rankedRecipientsCache.isFailed() || rankedRecipientsCache.isExpired()) && !rankedRecipientsCache.isUpdateInitiated()) {
             updateRankedRecipientCache();
         }
@@ -113,7 +113,7 @@ public class UserSearchViewModel extends ViewModel {
                     continueSearchIfRequired();
                     return;
                 }
-                rankedRecipientsCache.setRankedRecipientsResponse(response.body());
+                rankedRecipientsCache.setResponse(response.body());
                 rankedRecipientsCache.setUpdateInitiated(false);
                 continueSearchIfRequired();
             }

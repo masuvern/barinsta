@@ -153,7 +153,7 @@ public class FormattedNumberTextView extends AppCompatTextView {
                 return;
             }
             if (showAbbreviation) {
-                setText(NumberUtils.abbreviate(number));
+                setText(NumberUtils.abbreviate(number, null));
                 return;
             }
             setText(String.valueOf(number));

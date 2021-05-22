@@ -1,91 +1,83 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.view.ContextThemeWrapper;
-
-import androidx.annotation.Nullable;
-
-import java.util.Locale;
-
-import awais.instagrabber.fragments.settings.PreferenceKeys;
+import android.content.Context
+import android.content.res.Configuration
+import android.view.ContextThemeWrapper
+import awais.instagrabber.fragments.settings.PreferenceKeys
+import java.util.*
 
 // taken from my app TESV Console Codes
-public final class LocaleUtils {
-    private static Locale defaultLocale, currentLocale;
+object LocaleUtils {
+    private var defaultLocale: Locale? = null
 
-    public static void setLocale(Context baseContext) {
-        if (defaultLocale == null) defaultLocale = Locale.getDefault();
+    @JvmStatic
+    var currentLocale: Locale? = null
+        private set
 
-        if (baseContext instanceof ContextThemeWrapper)
-            baseContext = ((ContextThemeWrapper) baseContext).getBaseContext();
-
-        if (Utils.settingsHelper == null)
-            Utils.settingsHelper = new SettingsHelper(baseContext);
-
-        final String appLanguageSettings = Utils.settingsHelper.getString(PreferenceKeys.APP_LANGUAGE);
-        final String lang = LocaleUtils.getCorrespondingLanguageCode(appLanguageSettings);
-
-        currentLocale = TextUtils.isEmpty(lang) ? defaultLocale :
-                        (lang.contains("_") ? new Locale(lang.split("_")[0], lang.split("_")[1]) : new Locale(lang));
-        Locale.setDefault(currentLocale);
-
-        final Resources res = baseContext.getResources();
-        final Configuration config = res.getConfiguration();
-
-        config.locale = currentLocale;
-        config.setLocale(currentLocale);
-        config.setLayoutDirection(currentLocale);
-
-        res.updateConfiguration(config, res.getDisplayMetrics());
-    }
-
-    public static Locale getCurrentLocale() {
-        return currentLocale;
-    }
-
-    public static void updateConfig(final ContextThemeWrapper wrapper) {
-        if (currentLocale != null) {
-            final Configuration configuration = new Configuration();
-            configuration.locale = currentLocale;
-            configuration.setLocale(currentLocale);
-            wrapper.applyOverrideConfiguration(configuration);
+    @JvmStatic
+    fun setLocale(baseContext: Context) {
+        var baseContext1 = baseContext
+        if (defaultLocale == null) defaultLocale = Locale.getDefault()
+        if (baseContext1 is ContextThemeWrapper) baseContext1 = baseContext1.baseContext
+        if (Utils.settingsHelper == null) Utils.settingsHelper = SettingsHelper(baseContext1)
+        val appLanguageSettings = Utils.settingsHelper.getString(PreferenceKeys.APP_LANGUAGE)
+        val lang = getCorrespondingLanguageCode(appLanguageSettings)
+        currentLocale = when {
+            TextUtils.isEmpty(lang) -> defaultLocale
+            lang!!.contains("_") -> {
+                val split = lang.split("_")
+                Locale(split[0], split[1])
+            }
+            else -> Locale(lang)
+        }
+        currentLocale?.let {
+            Locale.setDefault(it)
+            val res = baseContext1.resources
+            val config = res.configuration
+            // config.locale = currentLocale
+            config.setLocale(it)
+            config.setLayoutDirection(it)
+            res.updateConfiguration(config, res.displayMetrics)
         }
     }
 
-    @Nullable
-    public static String getCorrespondingLanguageCode(final String appLanguageSettings) {
-        if (TextUtils.isEmpty(appLanguageSettings)) return null;
+    @JvmStatic
+    fun updateConfig(wrapper: ContextThemeWrapper) {
+        if (currentLocale == null) return
+        val configuration = Configuration()
+        // configuration.locale = currentLocale
+        configuration.setLocale(currentLocale)
+        wrapper.applyOverrideConfiguration(configuration)
+    }
 
-        final int appLanguageIndex = Integer.parseInt(appLanguageSettings);
-        switch (appLanguageIndex) {
-            case 1: return "en";
-            case 2: return "fr";
-            case 3: return "es";
-            case 4: return "zh_CN";
-            case 5: return "in";
-            case 6: return "it";
-            case 7: return "de";
-            case 8: return "pl";
-            case 9: return "tr";
-            case 10: return "pt";
-            case 11: return "fa";
-            case 12: return "mk";
-            case 13: return "vi";
-            case 14: return "zh_TW";
-            case 15: return "ca";
-            case 16: return "ru";
-            case 17: return "hi";
-            case 18: return "nl";
-            case 19: return "sk";
-            case 20: return "ja";
-            case 21: return "el";
-            case 22: return "eu";
-            case 23: return "sv";
-            case 24: return "ko";
+    fun getCorrespondingLanguageCode(appLanguageSettings: String): String? {
+        if (TextUtils.isEmpty(appLanguageSettings)) return null
+        when (appLanguageSettings.toInt()) {
+            1 -> return "en"
+            2 -> return "fr"
+            3 -> return "es"
+            4 -> return "zh_CN"
+            5 -> return "in"
+            6 -> return "it"
+            7 -> return "de"
+            8 -> return "pl"
+            9 -> return "tr"
+            10 -> return "pt"
+            11 -> return "fa"
+            12 -> return "mk"
+            13 -> return "vi"
+            14 -> return "zh_TW"
+            15 -> return "ca"
+            16 -> return "ru"
+            17 -> return "hi"
+            18 -> return "nl"
+            19 -> return "sk"
+            20 -> return "ja"
+            21 -> return "el"
+            22 -> return "eu"
+            23 -> return "sv"
+            24 -> return "ko"
         }
-
-        return null;
+        return null
     }
 }

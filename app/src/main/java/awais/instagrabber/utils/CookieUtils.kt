@@ -1,139 +1,114 @@
-package awais.instagrabber.utils;
+@file:JvmName("CookieUtils")
 
-import android.content.Context;
-import android.util.Log;
-import android.webkit.CookieManager;
+package awais.instagrabber.utils
 
-import androidx.annotation.Nullable;
+import android.content.Context
+import android.util.Log
+import android.webkit.CookieManager
+import awais.instagrabber.db.datasources.AccountDataSource
+import awais.instagrabber.db.repositories.AccountRepository
+import awais.instagrabber.db.repositories.RepositoryCallback
+import java.net.CookiePolicy
+import java.net.HttpCookie
+import java.net.URI
+import java.net.URISyntaxException
+import java.util.regex.Pattern
 
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+private const val TAG = "CookieUtils"
+private val COOKIE_MANAGER = CookieManager.getInstance()
 
-import awais.instagrabber.BuildConfig;
-import awais.instagrabber.db.datasources.AccountDataSource;
-import awais.instagrabber.db.repositories.AccountRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
-//import awaisomereport.LogCollector;
+@JvmField
+val NET_COOKIE_MANAGER = java.net.CookieManager(null, CookiePolicy.ACCEPT_ALL)
 
-public final class CookieUtils {
-    private static final String TAG = CookieUtils.class.getSimpleName();
-    public static final CookieManager COOKIE_MANAGER = CookieManager.getInstance();
-    public static final java.net.CookieManager NET_COOKIE_MANAGER = new java.net.CookieManager(null, CookiePolicy.ACCEPT_ALL);
-
-    public static void setupCookies(final String cookieRaw) {
-        final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
-        if (cookieStore == null || TextUtils.isEmpty(cookieRaw)) {
-            return;
-        }
-        if (cookieRaw.equals("LOGOUT")) {
-            cookieStore.removeAll();
-            return;
-        }
-        try {
-            final URI uri1 = new URI("https://instagram.com");
-            final URI uri2 = new URI("https://instagram.com/");
-            final URI uri3 = new URI("https://i.instagram.com/");
-            for (final String cookie : cookieRaw.split("; ")) {
-                final String[] strings = cookie.split("=", 2);
-                final HttpCookie httpCookie = new HttpCookie(strings[0].trim(), strings[1].trim());
-                httpCookie.setDomain(".instagram.com");
-                httpCookie.setPath("/");
-                httpCookie.setVersion(0);
-                cookieStore.add(uri1, httpCookie);
-                cookieStore.add(uri2, httpCookie);
-                cookieStore.add(uri3, httpCookie);
-            }
-        } catch (final URISyntaxException e) {
-//            if (Utils.logCollector != null)
-//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "setupCookies");
-            if (BuildConfig.DEBUG) Log.e(TAG, "", e);
-        }
+fun setupCookies(cookieRaw: String) {
+    val cookieStore = NET_COOKIE_MANAGER.cookieStore
+    if (cookieStore == null || TextUtils.isEmpty(cookieRaw)) {
+        return
     }
-
-    public static void removeAllAccounts(final Context context, final RepositoryCallback<Void> callback) {
-        final CookieStore cookieStore = NET_COOKIE_MANAGER.getCookieStore();
-        if (cookieStore == null) return;
-        cookieStore.removeAll();
-        try {
-            AccountRepository.getInstance(AccountDataSource.getInstance(context))
-                             .deleteAllAccounts(callback);
-        } catch (Exception e) {
-            Log.e(TAG, "setupCookies", e);
-        }
+    if (cookieRaw == "LOGOUT") {
+        cookieStore.removeAll()
+        return
     }
-
-    public static long getUserIdFromCookie(final String cookies) {
-        final String dsUserId = getCookieValue(cookies, "ds_user_id");
-        if (dsUserId == null) {
-            return 0;
+    try {
+        val uri1 = URI("https://instagram.com")
+        val uri2 = URI("https://instagram.com/")
+        val uri3 = URI("https://i.instagram.com/")
+        for (cookie in cookieRaw.split("; ")) {
+            val strings = cookie.split("=", limit = 2)
+            val httpCookie = HttpCookie(strings[0].trim { it <= ' ' }, strings[1].trim { it <= ' ' })
+            httpCookie.domain = ".instagram.com"
+            httpCookie.path = "/"
+            httpCookie.version = 0
+            cookieStore.add(uri1, httpCookie)
+            cookieStore.add(uri2, httpCookie)
+            cookieStore.add(uri3, httpCookie)
         }
-        try {
-            return Long.parseLong(dsUserId);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "getUserIdFromCookie: ", e);
-        }
-        return 0;
+    } catch (e: URISyntaxException) {
+        Log.e(TAG, "", e)
     }
+}
 
-    @Nullable
-    public static String getCsrfTokenFromCookie(final String cookies) {
-        return getCookieValue(cookies, "csrftoken");
+fun removeAllAccounts(context: Context?, callback: RepositoryCallback<Void?>?) {
+    val cookieStore = NET_COOKIE_MANAGER.cookieStore ?: return
+    cookieStore.removeAll()
+    try {
+        AccountRepository.getInstance(AccountDataSource.getInstance(context!!))
+            .deleteAllAccounts(callback)
+    } catch (e: Exception) {
+        Log.e(TAG, "setupCookies", e)
     }
+}
 
-    @Nullable
-    private static String getCookieValue(final String cookies, final String name) {
-        if (cookies == null) return null;
-        final Pattern pattern = Pattern.compile(name + "=(.+?);");
-        final Matcher matcher = pattern.matcher(cookies);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
+fun getUserIdFromCookie(cookies: String?): Long {
+    val dsUserId = getCookieValue(cookies, "ds_user_id") ?: return 0
+    try {
+        return dsUserId.toLong()
+    } catch (e: NumberFormatException) {
+        Log.e(TAG, "getUserIdFromCookie: ", e)
     }
+    return 0
+}
 
-    @Nullable
-    public static String getCookie(@Nullable final String webViewUrl) {
-        final List<String> domains = new ArrayList<>(Arrays.asList(
-                "https://instagram.com",
-                "https://instagram.com/",
-                "http://instagram.com",
-                "http://instagram.com",
-                "https://www.instagram.com",
-                "https://www.instagram.com/",
-                "http://www.instagram.com",
-                "http://www.instagram.com/"
-        ));
-        if (!TextUtils.isEmpty(webViewUrl)) {
-            domains.add(0, webViewUrl);
-        }
+fun getCsrfTokenFromCookie(cookies: String?): String? {
+    return getCookieValue(cookies, "csrftoken")
+}
 
-        return getLongestCookie(domains);
-    }
+private fun getCookieValue(cookies: String?, name: String): String? {
+    if (cookies == null) return null
+    val pattern = Pattern.compile("$name=(.+?);")
+    val matcher = pattern.matcher(cookies)
+    return if (matcher.find()) {
+        matcher.group(1)
+    } else null
+}
 
-    @Nullable
-    private static String getLongestCookie(final List<String> domains) {
-        int longestLength = 0;
-        String longestCookie = null;
+fun getCookie(webViewUrl: String?): String? {
+    val domains: List<String> = listOfNotNull(
+        if (!TextUtils.isEmpty(webViewUrl)) webViewUrl else null,
+        "https://instagram.com",
+        "https://instagram.com/",
+        "http://instagram.com",
+        "http://instagram.com",
+        "https://www.instagram.com",
+        "https://www.instagram.com/",
+        "http://www.instagram.com",
+        "http://www.instagram.com/",
+    )
+    return getLongestCookie(domains)
+}
 
-        for (final String domain : domains) {
-            final String cookie = COOKIE_MANAGER.getCookie(domain);
-            if (cookie != null) {
-                final int cookieLength = cookie.length();
-                if (cookieLength > longestLength) {
-                    longestCookie = cookie;
-                    longestLength = cookieLength;
-                }
+private fun getLongestCookie(domains: List<String>): String? {
+    var longestLength = 0
+    var longestCookie: String? = null
+    for (domain in domains) {
+        val cookie = COOKIE_MANAGER.getCookie(domain)
+        if (cookie != null) {
+            val cookieLength = cookie.length
+            if (cookieLength > longestLength) {
+                longestCookie = cookie
+                longestLength = cookieLength
             }
         }
-
-        return longestCookie;
     }
+    return longestCookie
 }

@@ -1,185 +1,157 @@
-package awais.instagrabber.utils;/*
+/*
  * This is the source code of Telegram for Android v. 5.x.x.
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
- *
+ * <p>
  * Copyright Nikolai Kudashov, 2013-2018.
  */
+package awais.instagrabber.utils
 
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
+import android.graphics.Canvas
+import android.graphics.ColorFilter
+import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 
-import androidx.annotation.NonNull;
+class CombinedDrawable : Drawable, Drawable.Callback {
+    val background: Drawable
+    val icon: Drawable?
+    private var left = 0
+    private var top = 0
+    private var iconWidth = 0
+    private var iconHeight = 0
+    private var backWidth = 0
+    private var backHeight = 0
+    private var offsetX = 0
+    private var offsetY = 0
+    private var fullSize = false
 
-public class CombinedDrawable extends Drawable implements Drawable.Callback {
-
-    private final Drawable background;
-    private final Drawable icon;
-    private int left;
-    private int top;
-    private int iconWidth;
-    private int iconHeight;
-    private int backWidth;
-    private int backHeight;
-    private int offsetX;
-    private int offsetY;
-    private boolean fullSize;
-
-    public CombinedDrawable(Drawable backgroundDrawable, Drawable iconDrawable, int leftOffset, int topOffset) {
-        background = backgroundDrawable;
-        icon = iconDrawable;
-        left = leftOffset;
-        top = topOffset;
+    constructor(backgroundDrawable: Drawable, iconDrawable: Drawable?, leftOffset: Int, topOffset: Int) {
+        background = backgroundDrawable
+        icon = iconDrawable
+        left = leftOffset
+        top = topOffset
         if (iconDrawable != null) {
-            iconDrawable.setCallback(this);
+            iconDrawable.callback = this
         }
     }
 
-    public CombinedDrawable(Drawable backgroundDrawable, Drawable iconDrawable) {
-        background = backgroundDrawable;
-        icon = iconDrawable;
+    constructor(backgroundDrawable: Drawable, iconDrawable: Drawable?) {
+        background = backgroundDrawable
+        icon = iconDrawable
         if (iconDrawable != null) {
-            iconDrawable.setCallback(this);
+            iconDrawable.callback = this
         }
     }
 
-    public void setIconSize(int width, int height) {
-        iconWidth = width;
-        iconHeight = height;
+    fun setIconSize(width: Int, height: Int) {
+        iconWidth = width
+        iconHeight = height
     }
 
-    public void setCustomSize(int width, int height) {
-        backWidth = width;
-        backHeight = height;
+    fun setCustomSize(width: Int, height: Int) {
+        backWidth = width
+        backHeight = height
     }
 
-    public void setIconOffset(int x, int y) {
-        offsetX = x;
-        offsetY = y;
+    fun setIconOffset(x: Int, y: Int) {
+        offsetX = x
+        offsetY = y
     }
 
-    public Drawable getIcon() {
-        return icon;
+    fun setFullsize(value: Boolean) {
+        fullSize = value
     }
 
-    public Drawable getBackground() {
-        return background;
+    override fun setColorFilter(colorFilter: ColorFilter?) {
+        icon?.colorFilter = colorFilter
     }
 
-    public void setFullsize(boolean value) {
-        fullSize = value;
+    override fun isStateful(): Boolean {
+        return icon?.isStateful ?: false
     }
 
-    @Override
-    public void setColorFilter(ColorFilter colorFilter) {
-        icon.setColorFilter(colorFilter);
+    override fun setState(stateSet: IntArray): Boolean {
+        icon?.state = stateSet
+        return true
     }
 
-    @Override
-    public boolean isStateful() {
-        return icon.isStateful();
+    override fun getState(): IntArray {
+        return icon?.state ?: super.getState()
     }
 
-    @Override
-    public boolean setState(@NonNull int[] stateSet) {
-        icon.setState(stateSet);
-        return true;
+    override fun onStateChange(state: IntArray): Boolean {
+        return true
     }
 
-    @NonNull
-    @Override
-    public int[] getState() {
-        return icon.getState();
+    override fun jumpToCurrentState() {
+        icon?.jumpToCurrentState()
     }
 
-    @Override
-    protected boolean onStateChange(int[] state) {
-        return true;
+    override fun getConstantState(): ConstantState? {
+        return icon?.constantState
     }
 
-    @Override
-    public void jumpToCurrentState() {
-        icon.jumpToCurrentState();
-    }
-
-    @Override
-    public ConstantState getConstantState() {
-        return icon.getConstantState();
-    }
-
-    @Override
-    public void draw(@NonNull Canvas canvas) {
-        background.setBounds(getBounds());
-        background.draw(canvas);
-        if (icon != null) {
-            if (fullSize) {
-                android.graphics.Rect bounds = getBounds();
-                if (left != 0) {
-                    icon.setBounds(bounds.left + left, bounds.top + top, bounds.right - left, bounds.bottom - top);
-                } else {
-                    icon.setBounds(bounds);
-                }
+    override fun draw(canvas: Canvas) {
+        background.bounds = bounds
+        background.draw(canvas)
+        if (icon == null) return
+        if (fullSize) {
+            val bounds = bounds
+            if (left != 0) {
+                icon.setBounds(bounds.left + left, bounds.top + top, bounds.right - left, bounds.bottom - top)
             } else {
-                int x;
-                int y;
-                if (iconWidth != 0) {
-                    x = getBounds().centerX() - iconWidth / 2 + left + offsetX;
-                    y = getBounds().centerY() - iconHeight / 2 + top + offsetY;
-                    icon.setBounds(x, y, x + iconWidth, y + iconHeight);
-                } else {
-                    x = getBounds().centerX() - icon.getIntrinsicWidth() / 2 + left;
-                    y = getBounds().centerY() - icon.getIntrinsicHeight() / 2 + top;
-                    icon.setBounds(x, y, x + icon.getIntrinsicWidth(), y + icon.getIntrinsicHeight());
-                }
+                icon.bounds = bounds
             }
-            icon.draw(canvas);
+        } else {
+            val x: Int
+            val y: Int
+            if (iconWidth != 0) {
+                x = bounds.centerX() - iconWidth / 2 + left + offsetX
+                y = bounds.centerY() - iconHeight / 2 + top + offsetY
+                icon.setBounds(x, y, x + iconWidth, y + iconHeight)
+            } else {
+                x = bounds.centerX() - icon.intrinsicWidth / 2 + left
+                y = bounds.centerY() - icon.intrinsicHeight / 2 + top
+                icon.setBounds(x, y, x + icon.intrinsicWidth, y + icon.intrinsicHeight)
+            }
         }
+        icon.draw(canvas)
     }
 
-    @Override
-    public void setAlpha(int alpha) {
-        icon.setAlpha(alpha);
-        background.setAlpha(alpha);
+    override fun setAlpha(alpha: Int) {
+        icon?.alpha = alpha
+        background.alpha = alpha
     }
 
-    @Override
-    public int getIntrinsicWidth() {
-        return backWidth != 0 ? backWidth : background.getIntrinsicWidth();
+    override fun getIntrinsicWidth(): Int {
+        return if (backWidth != 0) backWidth else background.intrinsicWidth
     }
 
-    @Override
-    public int getIntrinsicHeight() {
-        return backHeight != 0 ? backHeight : background.getIntrinsicHeight();
+    override fun getIntrinsicHeight(): Int {
+        return if (backHeight != 0) backHeight else background.intrinsicHeight
     }
 
-    @Override
-    public int getMinimumWidth() {
-        return backWidth != 0 ? backWidth : background.getMinimumWidth();
+    override fun getMinimumWidth(): Int {
+        return if (backWidth != 0) backWidth else background.minimumWidth
     }
 
-    @Override
-    public int getMinimumHeight() {
-        return backHeight != 0 ? backHeight : background.getMinimumHeight();
+    override fun getMinimumHeight(): Int {
+        return if (backHeight != 0) backHeight else background.minimumHeight
     }
 
-    @Override
-    public int getOpacity() {
-        return icon.getOpacity();
+    override fun getOpacity(): Int {
+        return icon?.opacity ?: PixelFormat.UNKNOWN
     }
 
-    @Override
-    public void invalidateDrawable(@NonNull Drawable who) {
-        invalidateSelf();
+    override fun invalidateDrawable(who: Drawable) {
+        invalidateSelf()
     }
 
-    @Override
-    public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
-        scheduleSelf(what, when);
+    override fun scheduleDrawable(who: Drawable, what: Runnable, `when`: Long) {
+        scheduleSelf(what, `when`)
     }
 
-    @Override
-    public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
-        unscheduleSelf(what);
+    override fun unscheduleDrawable(who: Drawable, what: Runnable) {
+        unscheduleSelf(what)
     }
 }

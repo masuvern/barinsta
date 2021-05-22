@@ -16,6 +16,8 @@ import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.ViewUtils;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 public class Tooltip extends AppCompatTextView {
 
     private View anchor;
@@ -40,8 +42,7 @@ public class Tooltip extends AppCompatTextView {
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         setPadding(Utils.convertDpToPx(8), Utils.convertDpToPx(7), Utils.convertDpToPx(8), Utils.convertDpToPx(7));
         setGravity(Gravity.CENTER_VERTICAL);
-        parentView.addView(this, ViewUtils.createFrame(
-                ViewUtils.WRAP_CONTENT, ViewUtils.WRAP_CONTENT, Gravity.START | Gravity.TOP, 5, 0, 5, 3));
+        parentView.addView(this, ViewUtils.createFrame(WRAP_CONTENT, WRAP_CONTENT, Gravity.START | Gravity.TOP, 5, 0, 5, 3));
         setVisibility(GONE);
     }
 

@@ -27,9 +27,6 @@ import static awais.instagrabber.utils.Utils.clipboardManager;
 import static awais.instagrabber.utils.Utils.datetimeParser;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
-//import awaisomereport.LogCollector;
-//import static awais.instagrabber.utils.Utils.logCollector;
-
 public final class InstaGrabberApplication extends Application {
     private static final String TAG = "InstaGrabberApplication";
 
@@ -56,7 +53,7 @@ public final class InstaGrabberApplication extends Application {
                 Log.e(TAG, "Error", e);
             }
         }
-      
+
         // final Set<RequestListener> requestListeners = new HashSet<>();
         // requestListeners.add(new RequestLoggingListener());
         final ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
