@@ -78,14 +78,10 @@ public class FriendshipService extends BaseService {
         change("destroy", targetUserId, callback);
     }
 
-    public void block(final long targetUserId,
-                      final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("block", targetUserId, callback);
-    }
-
-    public void unblock(final long targetUserId,
-                        final ServiceCallback<FriendshipChangeResponse> callback) {
-        change("unblock", targetUserId, callback);
+    public void changeBlock(final boolean unblock,
+                            final long targetUserId,
+                            final ServiceCallback<FriendshipChangeResponse> callback) {
+        change(unblock ? "unblock" : "block", targetUserId, callback);
     }
 
     public void toggleRestrict(final long targetUserId,
@@ -124,6 +120,11 @@ public class FriendshipService extends BaseService {
     public void ignore(final long targetUserId,
                        final ServiceCallback<FriendshipChangeResponse> callback) {
         change("ignore", targetUserId, callback);
+    }
+
+    public void removeFollower(final long targetUserId,
+                               final ServiceCallback<FriendshipChangeResponse> callback) {
+        change("remove_follower", targetUserId, callback);
     }
 
     private void change(final String action,

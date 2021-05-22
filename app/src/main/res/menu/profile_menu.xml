@@ -8,6 +8,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/chaining"
+        android:title="@string/action_ayml"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/block"
         android:icon="@drawable/ic_block_24"
         android:title="@string/block"
@@ -22,8 +28,9 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/chaining"
-        android:title="@string/action_ayml"
+        android:id="@+id/remove_follower"
+        android:icon="@drawable/ic_block_24"
+        android:title="@string/remove_follower"
         android:visible="false"
         app:showAsAction="never" />
 

@@ -1597,7 +1597,7 @@ public final class ThreadManager {
     public LiveData<Resource<Object>> blockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         if (user == null) return data;
-        friendshipService.block(user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
+        friendshipService.changeBlock(false, user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
             @Override
             public void onSuccess(final FriendshipChangeResponse result) {
                 refreshChats();
@@ -1615,7 +1615,7 @@ public final class ThreadManager {
     public LiveData<Resource<Object>> unblockUser(final User user) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         if (user == null) return data;
-        friendshipService.unblock(user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
+        friendshipService.changeBlock(true, user.getPk(), new ServiceCallback<FriendshipChangeResponse>() {
             @Override
             public void onSuccess(final FriendshipChangeResponse result) {
                 refreshChats();

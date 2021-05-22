@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?colorSurface"
+    android:paddingBottom="?attr/actionBarSize"
     tools:context=".fragments.PostViewV2Fragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout

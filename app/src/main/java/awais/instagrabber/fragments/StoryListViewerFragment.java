@@ -88,7 +88,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         public void onHighlightClick(final HighlightModel model, final int position) {
             if (model == null) return;
             final NavDirections action = StoryListViewerFragmentDirections
-                    .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forStoryArchive(model.getId()));
+                    .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forStoryArchive(position));
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
         }
 

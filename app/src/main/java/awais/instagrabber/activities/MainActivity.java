@@ -412,6 +412,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         showBottomViewDestinations = currentTabs.stream()
                                                 .map(Tab::getStartDestinationFragmentId)
                                                 .collect(Collectors.toList());
+        showBottomViewDestinations.add(R.id.postViewFragment);
         if (setDefaultTabFromSettings) {
             setSelectedTab(currentTabs);
         } else {
