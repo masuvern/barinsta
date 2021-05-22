@@ -689,7 +689,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         if (mediaService == null) mediaService = MediaService.getInstance(null, null, 0L);
         final ServiceCallback<Media> postCb = new ServiceCallback<Media>() {
             @Override
-            public void onSuccess(final Media feedModel){
+            public void onSuccess(final Media feedModel) {
                 if (feedModel != null) {
                     if (currentNavControllerLiveData == null) return;
                     final NavController navController = currentNavControllerLiveData.getValue();
@@ -701,8 +701,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
                     } catch (Exception e) {
                         Log.e(TAG, "showPostView: ", e);
                     }
-                }
-                else Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
                 alertDialog.dismiss();
             }
 

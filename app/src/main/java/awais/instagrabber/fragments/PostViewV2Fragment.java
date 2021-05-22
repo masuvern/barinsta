@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,6 +30,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
@@ -52,6 +53,7 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.skydoves.balloon.ArrowOrientation;
@@ -135,6 +137,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private Drawable originalRootBackground;
     private ColorStateList originalLikeColorStateList;
     private ColorStateList originalSaveColorStateList;
+    private WindowInsetsControllerCompat controller;
 
     private final Observer<Object> backStackSavedStateObserver = result -> {
         if (result == null) return;
@@ -162,6 +165,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(PostViewV2ViewModel.class);
+        final MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+        controller = new WindowInsetsControllerCompat(activity.getWindow(), activity.getRootView());
     }
 
     @Nullable
@@ -789,10 +795,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         originalHeight = widthHeight.second;
         final ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
                                                                                              originalHeight);
-        layoutParams.topToBottom = binding.topBarrier.getId();
-        layoutParams.bottomToTop = bottom.buttonsTopBarrier.getId();
-        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-        layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
         postImage.setLayoutParams(layoutParams);
         postImage.setHierarchy(new GenericDraweeHierarchyBuilder(resources)
                                        .setActualImageScaleType(ScalingUtils.ScaleType.FIT_CENTER)
@@ -823,8 +825,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             }
         };
         postImage.setTapListener(tapListener);
-        // postImage.setAllowTouchInterceptionWhileZoomed(true);
-        binding.contentRoot.addView(postImage, 0);
+        binding.postContainer.addView(postView);
     }
 
     private void setupSlider() {
@@ -833,8 +834,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         final Context context = getContext();
         if (context == null) return;
         sliderParent = new ViewPager2(context);
-        final NullSafePair<Integer, Integer> maxHW = media
-                .getCarouselMedia()
+        final List<Media> carouselMedia = media.getCarouselMedia();
+        if (carouselMedia == null) return;
+        final NullSafePair<Integer, Integer> maxHW = carouselMedia
                 .stream()
                 .reduce(new NullSafePair<>(0, 0),
                         (prev, m) -> {
@@ -854,13 +856,10 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         originalHeight = widthHeight.second;
         final ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
                                                                                              originalHeight);
-        layoutParams.topToBottom = binding.topBarrier.getId();
-        layoutParams.bottomToTop = bottom.buttonsTopBarrier.getId();
-        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-        layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
         sliderParent.setLayoutParams(layoutParams);
         postView = sliderParent;
-        binding.contentRoot.addView(sliderParent, 0);
+        // binding.contentRoot.addView(sliderParent, 0);
+        binding.postContainer.addView(postView);
 
         final boolean hasVideo = media.getCarouselMedia()
                                       .stream()
@@ -997,7 +996,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 }
             }
         });
-        final String text = "1/" + media.getCarouselMedia().size();
+        final String text = "1/" + carouselMedia.size();
         binding.mediaCounter.setText(text);
         sliderItemsAdapter.submitList(media.getCarouselMedia());
     }
@@ -1040,12 +1039,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         layoutParams.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
         originalHeight = widthHeight.second;
         layoutParams.height = originalHeight;
-        layoutParams.topToBottom = binding.topBarrier.getId();
-        layoutParams.bottomToTop = bottom.buttonsTopBarrier.getId();
-        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-        layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
         postView = videoPost.getRoot();
-        binding.contentRoot.addView(postView, 0);
+        binding.postContainer.addView(postView);
 
         // final GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
         //     @Override
@@ -1279,16 +1274,16 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 binding.getRoot().setBackground(colorDrawable);
                 if (postView != null) {
                     // Make post match parent
-                    final ViewGroup.LayoutParams layoutParams = postView.getLayoutParams();
-                    final int fullHeight = Utils.displayMetrics.heightPixels + Utils.getNavigationBarSize(context).y;
-                    layoutParams.height = fullHeight;
-                    binding.contentRoot.getLayoutParams().height = fullHeight;
+                    final int fullHeight = Utils.displayMetrics.heightPixels - Utils.getStatusBarHeight(context);
+                    postView.getLayoutParams().height = fullHeight;
+                    binding.postContainer.getLayoutParams().height = fullHeight;
                     if (playerView != null) {
                         playerViewOriginalHeight = playerView.getLayoutParams().height;
                         playerView.getLayoutParams().height = fullHeight;
                     }
                 }
                 detailsVisible = false;
+
                 if (media.getUser() != null) {
                     binding.profilePic.setVisibility(View.GONE);
                     binding.title.setVisibility(View.GONE);
@@ -1322,9 +1317,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             }
             if (postView != null) {
                 // Make post height back to original
-                final ViewGroup.LayoutParams layoutParams = postView.getLayoutParams();
-                layoutParams.height = originalHeight;
-                binding.contentRoot.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                postView.getLayoutParams().height = originalHeight;
+                binding.postContainer.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
                 if (playerView != null) {
                     playerView.getLayoutParams().height = playerViewOriginalHeight;
                     playerView = null;
@@ -1395,23 +1389,17 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (toolbar != null) {
             toolbar.setVisibility(View.GONE);
         }
-        final View decorView = activity.getWindow().getDecorView();
-        originalSystemUi = decorView.getSystemUiVisibility();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE
-                        // Set the content to appear under the system bars so that the
-                        // content doesn't resize when the system bars hide and show.
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        // Hide the nav bar and status bar
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        final BottomNavigationView bottomNavView = activity.getBottomNavView();
+        bottomNavView.setVisibility(View.GONE);
+        binding.getRoot().setPadding(binding.getRoot().getPaddingLeft(),
+                                     binding.getRoot().getPaddingTop(),
+                                     binding.getRoot().getPaddingRight(),
+                                     0);
+        controller.hide(WindowInsetsCompat.Type.systemBars());
+        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE);
         isInFullScreenMode = true;
     }
 
-    // Shows the system bars by removing all the flags
-    // except for the ones that make the content appear under the system bars.
     private void showSystemUI() {
         if (!detailsVisible) {
             toggleDetails();
@@ -1430,10 +1418,16 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (toolbar != null) {
             toolbar.setVisibility(View.VISIBLE);
         }
-        final Window window = activity.getWindow();
-        final View decorView = window.getDecorView();
-        decorView.setSystemUiVisibility(originalSystemUi);
-        WindowCompat.setDecorFitsSystemWindows(window, false);
+        final BottomNavigationView bottomNavView = activity.getBottomNavView();
+        bottomNavView.setVisibility(View.VISIBLE);
+        final Context context = getContext();
+        if (context == null) return;
+        binding.getRoot().setPadding(binding.getRoot().getPaddingLeft(),
+                                     binding.getRoot().getPaddingTop(),
+                                     binding.getRoot().getPaddingRight(),
+                                     Utils.getActionBarHeight(context));
+        controller.show(WindowInsetsCompat.Type.systemBars());
+        WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
         isInFullScreenMode = false;
     }
 

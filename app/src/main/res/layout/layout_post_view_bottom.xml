@@ -9,7 +9,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierAllowsGoneWidgets="true"
-        app:barrierDirection="bottom" />
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="post_container" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/like"
@@ -154,7 +155,7 @@
         app:layout_constraintTop_toBottomOf="@id/buttons_bottom_barrier"
         tools:layout_constraintVertical_chainStyle="packed"
         tools:text="2020-11-07 11:18:55"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/views_count"
@@ -166,14 +167,15 @@
         app:layout_constraintStart_toEndOf="@id/date"
         app:layout_constraintTop_toTopOf="@id/date"
         tools:text="9999999999 views"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/caption_barrier"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:barrierAllowsGoneWidgets="true"
-        app:barrierDirection="bottom" />
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="like,likes_count,comment,comments_count,space_1,share,save,download" />
 
     <awais.instagrabber.customviews.RamboTextViewV2
         android:id="@+id/caption"
