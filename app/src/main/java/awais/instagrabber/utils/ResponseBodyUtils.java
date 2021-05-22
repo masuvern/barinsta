@@ -75,10 +75,10 @@ public final class ResponseBodyUtils {
             if (lastIndexMain >= 0) return sources[lastIndexMain];
             else if (lastIndexBase >= 0) return sources[lastIndexBase];
         } catch (final Exception e) {
-//            if (Utils.logCollector != null)
-//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
-//                                                   new Pair<>("resourcesNull", resources == null),
-//                                                   new Pair<>("isVideo", isVideo));
+            //            if (Utils.logCollector != null)
+            //                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityPost",
+            //                                                   new Pair<>("resourcesNull", resources == null),
+            //                                                   new Pair<>("isVideo", isVideo));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return null;
@@ -93,9 +93,9 @@ public final class ResponseBodyUtils {
                 src = getHighQualityPost(resources.getJSONObject("image_versions2").getJSONArray("candidates"), false, true, false);
             if (src == null) return resources.getString("display_url");
         } catch (final Exception e) {
-//            if (Utils.logCollector != null)
-//                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
-//                                                   new Pair<>("resourcesNull", resources == null));
+            //            if (Utils.logCollector != null)
+            //                Utils.logCollector.appendException(e, LogCollector.LogFile.UTILS, "getHighQualityImage",
+            //                                                   new Pair<>("resourcesNull", resources == null));
             if (BuildConfig.DEBUG) Log.e("AWAISKING_APP", "", e);
         }
         return src;
@@ -731,8 +731,8 @@ public final class ResponseBodyUtils {
         final List<MediaCandidate> candidates = new ArrayList<MediaCandidate>();
         if (feedItem.has("display_resources") || feedItem.has("thumbnail_resources")) {
             final JSONArray displayResources = feedItem.has("display_resources")
-                    ? feedItem.getJSONArray("display_resources")
-                    : feedItem.getJSONArray("thumbnail_resources");
+                                               ? feedItem.getJSONArray("display_resources")
+                                               : feedItem.getJSONArray("thumbnail_resources");
             for (int i = 0; i < displayResources.length(); i++) {
                 final JSONObject displayResource = displayResources.getJSONObject(i);
                 candidates.add(new MediaCandidate(
@@ -781,8 +781,9 @@ public final class ResponseBodyUtils {
             );
         }
         final Caption caption = new Caption(
+                0,
                 userId,
-                captionText
+                captionText != null ? captionText : ""
         );
 
         final boolean isSlider = "GraphSidecar".equals(mediaType) && feedItem.has("edge_sidecar_to_children");
@@ -802,7 +803,7 @@ public final class ResponseBodyUtils {
                         final JSONObject child = children.optJSONObject(i);
                         if (child == null) continue;
                         final Media media = parseGraphQLItem(child, null);
-                        media.setIsSidecarChild(true);
+                        media.setSidecarChild(true);
                         childItems.add(media);
                     }
                 }
@@ -1087,15 +1088,16 @@ public final class ResponseBodyUtils {
         if (candidates == null || candidates.isEmpty()) return null;
         final boolean isSquare = Integer.compare(media.getOriginalWidth(), media.getOriginalHeight()) == 0;
         final List<MediaCandidate> sortedCandidates = candidates.stream()
-                .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
-                .collect(Collectors.toList());
+                                                                .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
+                                                                .collect(Collectors.toList());
         final List<MediaCandidate> filteredCandidates = sortedCandidates.stream()
-                .filter(c ->
-                        c.getWidth() <= media.getOriginalWidth()
-                                && c.getWidth() <= type.getValue()
-                                && (isSquare || Integer.compare(c.getWidth(), c.getHeight()) != 0)
-                )
-                .collect(Collectors.toList());
+                                                                        .filter(c ->
+                                                                                        c.getWidth() <= media.getOriginalWidth()
+                                                                                                && c.getWidth() <= type.getValue()
+                                                                                                && (isSquare || Integer
+                                                                                                .compare(c.getWidth(), c.getHeight()) != 0)
+                                                                        )
+                                                                        .collect(Collectors.toList());
         if (filteredCandidates.size() == 0) return sortedCandidates.get(0).getUrl();
         final MediaCandidate candidate = filteredCandidates.get(0);
         if (candidate == null) return null;

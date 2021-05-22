@@ -140,7 +140,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (result == null) return;
         if (result instanceof String) {
             final String collection = (String) result;
-            handleSaveUnsaveResourceLiveData(viewModel.toggleSave(collection, viewModel.getMedia().hasViewerSaved()));
+            handleSaveUnsaveResourceLiveData(viewModel.toggleSave(collection, viewModel.getMedia().getHasViewerSaved()));
         }
         // clear result
         backStackSavedStateResultLiveData.postValue(null);
@@ -313,7 +313,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 binding.getRoot().postDelayed(this::showCountTooltip, 1000);
             }
         });
-        if (!viewModel.getMedia().isCommentsDisabled()) {
+        if (!viewModel.getMedia().getCommentsDisabled()) {
             viewModel.getCommentCount().observe(getViewLifecycleOwner(), count -> {
                 bottom.commentsCount.setNumber(getSafeCount(count));
                 binding.getRoot().postDelayed(() -> bottom.commentsCount.setAnimateChanges(true), 1000);
@@ -395,7 +395,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     }
 
     private void setupComment() {
-        if (!viewModel.hasPk() || viewModel.getMedia().isCommentsDisabled()) {
+        if (!viewModel.hasPk() || viewModel.getMedia().getCommentsDisabled()) {
             bottom.comment.setVisibility(View.GONE);
             // bottom.commentsCount.setVisibility(View.GONE);
             return;
@@ -493,7 +493,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private void unsuccessfulLike() {
         final int errorTextResId;
         final Media media = viewModel.getMedia();
-        if (!media.hasLiked()) {
+        if (!media.getHasLiked()) {
             Log.e(TAG, "like unsuccessful!");
             errorTextResId = R.string.like_unsuccessful;
         } else {
@@ -526,7 +526,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
 
     private void setupSave() {
         originalSaveColorStateList = bottom.save.getIconTint();
-        if (!viewModel.isLoggedIn() || !viewModel.hasPk() || !viewModel.getMedia().canViewerSave()) {
+        if (!viewModel.isLoggedIn() || !viewModel.hasPk() || !viewModel.getMedia().getCanViewerSave()) {
             bottom.save.setVisibility(View.GONE);
             return;
         }
@@ -564,7 +564,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private void unsuccessfulSave() {
         final int errorTextResId;
         final Media media = viewModel.getMedia();
-        if (!media.hasViewerSaved()) {
+        if (!media.getHasViewerSaved()) {
             Log.e(TAG, "save unsuccessful!");
             errorTextResId = R.string.save_unsuccessful;
         } else {
@@ -1350,7 +1350,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 // binding.captionToggle.setVisibility(View.VISIBLE);
                 bottom.share.setVisibility(View.VISIBLE);
             }
-            if (viewModel.hasPk() && !viewModel.getMedia().isCommentsDisabled()) {
+            if (viewModel.hasPk() && !viewModel.getMedia().getCommentsDisabled()) {
                 bottom.comment.setVisibility(View.VISIBLE);
                 bottom.commentsCount.setVisibility(View.VISIBLE);
             }

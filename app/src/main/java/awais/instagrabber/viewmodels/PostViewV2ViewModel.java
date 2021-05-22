@@ -69,8 +69,8 @@ public class PostViewV2ViewModel extends ViewModel {
         commentCount.postValue(media.getCommentCount());
         viewCount.postValue(media.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? media.getViewCount() : null);
         type.postValue(media.getMediaType());
-        liked.postValue(media.hasLiked());
-        saved.postValue(media.hasViewerSaved());
+        liked.postValue(media.getHasLiked());
+        saved.postValue(media.getHasViewerSaved());
         initOptions();
     }
 
@@ -137,7 +137,7 @@ public class PostViewV2ViewModel extends ViewModel {
 
     @NonNull
     public LiveData<Resource<Object>> toggleLike() {
-        if (media.hasLiked()) {
+        if (media.getHasLiked()) {
             return unlike();
         }
         return like();
@@ -169,7 +169,7 @@ public class PostViewV2ViewModel extends ViewModel {
                 data.postValue(Resource.success(true));
                 final long currentLikesCount = media.getLikeCount();
                 final long updatedCount;
-                if (!media.hasLiked()) {
+                if (!media.getHasLiked()) {
                     updatedCount = currentLikesCount + 1;
                     media.setHasLiked(true);
                 } else {
@@ -178,7 +178,7 @@ public class PostViewV2ViewModel extends ViewModel {
                 }
                 media.setLikeCount(updatedCount);
                 likeCount.postValue(updatedCount);
-                liked.postValue(media.hasLiked());
+                liked.postValue(media.getHasLiked());
             }
 
             @Override
@@ -191,7 +191,7 @@ public class PostViewV2ViewModel extends ViewModel {
 
     @NonNull
     public LiveData<Resource<Object>> toggleSave() {
-        if (!media.hasViewerSaved()) {
+        if (!media.getHasViewerSaved()) {
             return save(null, false);
         }
         return unsave();
@@ -227,8 +227,8 @@ public class PostViewV2ViewModel extends ViewModel {
                     return;
                 }
                 data.postValue(Resource.success(true));
-                if (!ignoreSaveState) media.setHasViewerSaved(!media.hasViewerSaved());
-                saved.postValue(media.hasViewerSaved());
+                if (!ignoreSaveState) media.setHasViewerSaved(!media.getHasViewerSaved());
+                saved.postValue(media.getHasViewerSaved());
             }
 
             @Override

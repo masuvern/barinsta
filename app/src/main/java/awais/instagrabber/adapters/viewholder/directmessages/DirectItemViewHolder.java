@@ -144,7 +144,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         }
         setupReply(item, messageDirection);
         setReactions(item, position);
-        if (item.getRepliedToMessage() == null && item.showForwardAttribution()) {
+        if (item.getRepliedToMessage() == null && item.getShowForwardAttribution()) {
             setForwardInfo(messageDirection);
         }
     }
@@ -193,7 +193,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         if (showMessageInfo()) {
             binding.messageInfo.setVisibility(View.VISIBLE);
             binding.deliveryStatus.setVisibility(messageDirection == MessageDirection.OUTGOING ? View.VISIBLE : View.GONE);
-            binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
+            if (item.getDate() != null) {
+                binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
+            }
             if (messageDirection == MessageDirection.OUTGOING) {
                 if (item.isPending()) {
                     binding.deliveryStatus.setImageResource(R.drawable.ic_check_24);
