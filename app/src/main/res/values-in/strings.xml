@@ -119,6 +119,7 @@
     <string name="mute_posts">Mute posts</string>
     <string name="unmute_stories">Unmute stories</string>
     <string name="unmute_posts">Unmute posts</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Salin bio</string>
     <string name="bio_translate">Terjemahkan bio</string>
     <string name="status_mutual">Mutual</string>
@@ -207,7 +208,7 @@
     <string name="comment_viewer_like_comment">Suka komentar</string>
     <string name="comment_viewer_unlike_comment">Batal suka komentar</string>
     <string name="comment_viewer_translate_comment">Terjemahkan komentar</string>
-    <string name="comment_viewer_delete_comment">Hapus komentar</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">Ups, komentar kosong!</string>
     <string name="comment_view_mention_user_search">Apakah anda ingin mencari nama pengguna ini?</string>
     <string name="comment_view_mention_hash_search">Apakah anda ingin mencari tagar ini?</string>
@@ -228,7 +229,7 @@
     <string name="request_approve">Terima permintaan</string>
     <string name="request_reject">Tolak permintaan</string>
     <string name="share_public_post">Bagikan kiriman publik ini ke…</string>
-    <string name="share_private_post">Kiriman privat! Bagikan kepada orang yang bisa melihatnya!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">Entah bagaimana kategori ini kosong…</string>
     <string name="update_available">Ada pembaruan! (%s)</string>
     <string name="update_notice">Kiat: Jika anda mengunduh InstaGrabber dari F-Droid, perbarui dari situ. Juga berlaku jika diunduh lewat GitHub.</string>
@@ -260,6 +261,7 @@
     <string name="skip_update_checkbox">Jangan tampilkan lagi sampai pembaruan berikutnya</string>
     <string name="version">Versi</string>
     <string name="pref_start_screen">Layar mulai</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">Umum</string>
     <string name="pref_category_theme">Tema</string>
     <string name="pref_category_downloads">Unduhan</string>
@@ -361,6 +363,9 @@
     <string name="normal">Normal</string>
     <plurals name="likes_count">
         <item quantity="other">%d suka</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="other">%d replies</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="other">%d komentar</item>
@@ -476,4 +481,8 @@
     <string name="top">Top</string>
     <string name="recent">Recent</string>
     <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

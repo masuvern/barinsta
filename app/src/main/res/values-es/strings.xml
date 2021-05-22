@@ -123,6 +123,7 @@
     <string name="mute_posts">Silenciar publicaciones</string>
     <string name="unmute_stories">Quitar silencio a historias</string>
     <string name="unmute_posts">Quitar silencio a publicaciones</string>
+    <string name="remove_follower">Quitar seguidor</string>
     <string name="bio_copy">Copiar biografía</string>
     <string name="bio_translate">Traducir biografía</string>
     <string name="status_mutual">Mutuo</string>
@@ -232,7 +233,7 @@
     <string name="request_approve">Aprobar solicitud</string>
     <string name="request_reject">Rechazar solicitud</string>
     <string name="share_public_post">Compartir esta publicación pública a…</string>
-    <string name="share_private_post">¡Esta es una publicación privada! ¡Comparta con aquellos que puedan verla!</string>
+    <string name="share_private_post">¡Esta es una publicación privada! Comparte con quienes puedan verla.</string>
     <string name="discover_empty">Esta categoría está de alguna manera vacía…</string>
     <string name="update_available">¡Hay una actualización disponible! (%s)</string>
     <string name="update_notice">Recordatorio: si ha descargado de F-Droid, ¡debe actualizar desde él! Lo mismo se aplica a GitHub.</string>
@@ -264,6 +265,7 @@
     <string name="skip_update_checkbox">No mostrar de nuevo hasta la siguiente actualización</string>
     <string name="version">Versión</string>
     <string name="pref_start_screen">Pantalla de inicio</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Mostrar teclado al buscar</string>
     <string name="pref_category_general">General</string>
     <string name="pref_category_theme">Tema</string>
     <string name="pref_category_downloads">Descargas</string>
@@ -366,6 +368,10 @@
     <plurals name="likes_count">
         <item quantity="one">%d me gusta</item>
         <item quantity="other">%d me gustas</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d respuesta</item>
+        <item quantity="other">%d respuestas</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d comentario</item>
@@ -481,7 +487,11 @@
     <string name="dm_remove_warning">Si se guarda, todas las funcionalidades relacionadas con MDs se desactivarán en el próximo lanzamiento</string>
     <string name="copy_caption">Copiar título</string>
     <string name="copy_reply">Copiar respuesta</string>
-    <string name="top">Top</string>
-    <string name="recent">Recent</string>
-    <string name="clear">Clear</string>
+    <string name="top">Arriba</string>
+    <string name="recent">Reciente</string>
+    <string name="clear">Eliminar</string>
+    <string name="no_external_map_app">¡No se encontró una aplicación de mapa!</string>
+    <string name="click_to_show_full">Clic para ver el recuento completo de me gustas</string>
+    <string name="no_profile_pic_found">¡No se encontró foto de perfil!</string>
+    <string name="swipe_up_confirmation">¿Está seguro de querer abrir este enlace?</string>
 </resources>
