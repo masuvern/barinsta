@@ -57,7 +57,7 @@ public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, St
 
         @Override
         public boolean areContentsTheSame(@NonNull final FeedStoryModel oldItem, @NonNull final FeedStoryModel newItem) {
-            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId()) && oldItem.isFullyRead().equals(newItem.isFullyRead());
+            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId()) && oldItem.isFullyRead() == newItem.isFullyRead();
         }
     };
 

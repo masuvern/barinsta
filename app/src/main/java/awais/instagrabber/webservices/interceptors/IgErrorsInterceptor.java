@@ -108,9 +108,9 @@ public class IgErrorsInterceptor implements Interceptor {
         // final View view = mainActivity.getRootView();
         // if (view == null) return;
         try {
-            AppExecutors.getInstance()
-                        .mainThread()
-                        .execute(() -> Toast.makeText(mainActivity.getApplicationContext(), message, Toast.LENGTH_LONG).show());
+            AppExecutors.INSTANCE
+                    .getMainThread()
+                    .execute(() -> Toast.makeText(mainActivity.getApplicationContext(), message, Toast.LENGTH_LONG).show());
         } catch (Exception e) {
             Log.e(TAG, "showSnackbar: ", e);
         }

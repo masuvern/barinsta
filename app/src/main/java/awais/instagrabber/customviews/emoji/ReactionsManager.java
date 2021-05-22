@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
@@ -22,7 +21,7 @@ public class ReactionsManager {
     private static final String TAG = ReactionsManager.class.getSimpleName();
     private static final Object LOCK = new Object();
 
-    private final AppExecutors appExecutors = AppExecutors.getInstance();
+    // private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final List<Emoji> reactions = new ArrayList<>();
 
     private static ReactionsManager instance;

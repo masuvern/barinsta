@@ -22,7 +22,7 @@ public class Tooltip extends AppCompatTextView {
     private ViewPropertyAnimator animator;
     private boolean showing;
 
-    private final AppExecutors appExecutors = AppExecutors.getInstance();
+    private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final Runnable dismissRunnable = () -> {
         animator = animate().alpha(0).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -86,8 +86,8 @@ public class Tooltip extends AppCompatTextView {
         updateTooltipPosition();
         showing = true;
 
-        appExecutors.mainThread().cancel(dismissRunnable);
-        appExecutors.mainThread().execute(dismissRunnable, 2000);
+        appExecutors.getMainThread().cancel(dismissRunnable);
+        appExecutors.getMainThread().execute(dismissRunnable, 2000);
         if (animator != null) {
             animator.setListener(null);
             animator.cancel();
@@ -109,7 +109,7 @@ public class Tooltip extends AppCompatTextView {
                 animator = null;
             }
 
-            appExecutors.mainThread().cancel(dismissRunnable);
+            appExecutors.getMainThread().cancel(dismissRunnable);
             dismissRunnable.run();
         }
         showing = false;

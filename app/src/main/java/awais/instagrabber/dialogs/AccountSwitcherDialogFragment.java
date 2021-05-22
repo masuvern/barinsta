@@ -59,7 +59,7 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
         // final FragmentActivity activity = getActivity();
         // if (activity != null) activity.recreate();
         // dismiss();
-        AppExecutors.getInstance().mainThread().execute(() -> {
+        AppExecutors.INSTANCE.getMainThread().execute(() -> {
             final Context context = getContext();
             if (context == null) return;
             ProcessPhoenix.triggerRebirth(context);

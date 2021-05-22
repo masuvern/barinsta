@@ -135,7 +135,7 @@ public class ImageEditViewModel extends AndroidViewModel {
     private void applyFilters() {
         final GPUImage gpuImage = new GPUImage(getApplication());
         if ((tuningFilters != null && !tuningFilters.isEmpty()) || appliedFilter != null) {
-            AppExecutors.getInstance().tasksThread().submit(() -> {
+            AppExecutors.INSTANCE.getTasksThread().submit(() -> {
                 final List<GPUImageFilter> list = new ArrayList<>();
                 if (tuningFilters != null) {
                     for (Filter<? extends GPUImageFilter> tuningFilter : tuningFilters) {

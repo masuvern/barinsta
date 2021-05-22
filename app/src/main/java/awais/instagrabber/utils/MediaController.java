@@ -60,7 +60,7 @@ public class MediaController {
     public MediaController(final Context context, final OnLoadListener onLoadListener) {
         this.context = context;
         this.onLoadListener = onLoadListener;
-        appExecutors = AppExecutors.getInstance();
+        appExecutors = AppExecutors.INSTANCE;
     }
 
     public void load() {
@@ -285,9 +285,9 @@ public class MediaController {
                                     final AlbumEntry allVideosAlbumFinal,
                                     int delay) {
         if (broadcastPhotosRunnable != null) {
-            appExecutors.mainThread().cancel(broadcastPhotosRunnable);
+            appExecutors.getMainThread().cancel(broadcastPhotosRunnable);
         }
-        appExecutors.mainThread().execute(broadcastPhotosRunnable = () -> {
+        appExecutors.getMainThread().execute(broadcastPhotosRunnable = () -> {
             allMediaAlbums = mediaAlbumsSorted;
             allPhotoAlbums = photoAlbumsSorted;
             broadcastPhotosRunnable = null;

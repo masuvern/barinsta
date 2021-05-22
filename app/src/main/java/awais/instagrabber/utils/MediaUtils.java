@@ -25,7 +25,7 @@ public final class MediaUtils {
     public static void getVideoInfo(@NonNull final ContentResolver contentResolver,
                                     @NonNull final Uri uri,
                                     @NonNull final OnInfoLoadListener<VideoInfo> listener) {
-        AppExecutors.getInstance().tasksThread().submit(() -> {
+        AppExecutors.INSTANCE.getTasksThread().submit(() -> {
             try (Cursor cursor = MediaStore.Video.query(contentResolver, uri, PROJECTION_VIDEO)) {
                 if (cursor == null) {
                     if (listener != null) {
@@ -63,7 +63,7 @@ public final class MediaUtils {
     public static void getVoiceInfo(@NonNull final ContentResolver contentResolver,
                                     @NonNull final Uri uri,
                                     @NonNull final OnInfoLoadListener<VideoInfo> listener) {
-        AppExecutors.getInstance().tasksThread().submit(() -> {
+        AppExecutors.INSTANCE.getTasksThread().submit(() -> {
             try (Cursor cursor = MediaStore.Video.query(contentResolver, uri, PROJECTION_AUDIO)) {
                 if (cursor == null) {
                     if (listener != null) {

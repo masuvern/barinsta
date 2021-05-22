@@ -23,7 +23,7 @@ public final class UpdateCheckCommon {
     public static void showUpdateDialog(@NonNull final Context context,
                                         @NonNull final String version,
                                         @NonNull final DialogInterface.OnClickListener onDownloadClickListener) {
-        AppExecutors.getInstance().mainThread().execute(() -> {
+        AppExecutors.INSTANCE.getMainThread().execute(() -> {
             new MaterialAlertDialogBuilder(context)
                     .setTitle(context.getString(R.string.update_available, version))
                     .setNeutralButton(R.string.skip_update, (dialog, which) -> {

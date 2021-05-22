@@ -22,7 +22,7 @@ public class DMLastNotifiedRepository {
 
     public static DMLastNotifiedRepository getInstance(final DMLastNotifiedDataSource dmLastNotifiedDataSource) {
         if (instance == null) {
-            instance = new DMLastNotifiedRepository(AppExecutors.getInstance(), dmLastNotifiedDataSource);
+            instance = new DMLastNotifiedRepository(AppExecutors.INSTANCE, dmLastNotifiedDataSource);
         }
         return instance;
     }
@@ -30,10 +30,10 @@ public class DMLastNotifiedRepository {
     public void getDMLastNotified(final String threadId,
                                   final RepositoryCallback<DMLastNotified> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final DMLastNotified dmLastNotified = dmLastNotifiedDataSource.getDMLastNotified(threadId);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (dmLastNotified == null) {
                     callback.onDataNotAvailable();
@@ -46,10 +46,10 @@ public class DMLastNotifiedRepository {
 
     public void getAllDMDmLastNotified(final RepositoryCallback<List<DMLastNotified>> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final List<DMLastNotified> allDMDmLastNotified = dmLastNotifiedDataSource.getAllDMDmLastNotified();
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (allDMDmLastNotified == null) {
                     callback.onDataNotAvailable();
@@ -64,14 +64,14 @@ public class DMLastNotifiedRepository {
     public void insertOrUpdateDMLastNotified(final List<DMLastNotified> dmLastNotifiedList,
                                              final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             for (final DMLastNotified dmLastNotified : dmLastNotifiedList) {
                 dmLastNotifiedDataSource.insertOrUpdateDMLastNotified(dmLastNotified.getThreadId(),
                                                                       dmLastNotified.getLastNotifiedMsgTs(),
                                                                       dmLastNotified.getLastNotifiedAt());
             }
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });
@@ -83,11 +83,11 @@ public class DMLastNotifiedRepository {
                                              final LocalDateTime lastNotifiedAt,
                                              final RepositoryCallback<DMLastNotified> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             dmLastNotifiedDataSource.insertOrUpdateDMLastNotified(threadId, lastNotifiedMsgTs, lastNotifiedAt);
             final DMLastNotified updated = dmLastNotifiedDataSource.getDMLastNotified(threadId);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (updated == null) {
                     callback.onDataNotAvailable();
@@ -101,10 +101,10 @@ public class DMLastNotifiedRepository {
     public void deleteDMLastNotified(final DMLastNotified dmLastNotified,
                                      final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             dmLastNotifiedDataSource.deleteDMLastNotified(dmLastNotified);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });
@@ -113,10 +113,10 @@ public class DMLastNotifiedRepository {
 
     public void deleteAllDMLastNotified(final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             dmLastNotifiedDataSource.deleteAllDMLastNotified();
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });

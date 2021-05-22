@@ -174,7 +174,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private boolean hasKbOpenedOnce;
     private boolean wasToggled;
 
-    private final AppExecutors appExecutors = AppExecutors.getInstance();
+    private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
         @Override
         public void onAnimationEnd(final Drawable drawable) {
@@ -545,7 +545,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     @SuppressLint("UnsafeOptInUsageError")
     private void cleanup() {
         if (prevTitleRunnable != null) {
-            appExecutors.mainThread().cancel(prevTitleRunnable);
+            appExecutors.getMainThread().cancel(prevTitleRunnable);
         }
         for (int childCount = binding.chats.getChildCount(), i = 0; i < childCount; ++i) {
             final RecyclerView.ViewHolder holder = binding.chats.getChildViewHolder(binding.chats.getChildAt(i));
@@ -1379,11 +1379,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private void setTitle(final String title) {
         if (actionBar == null) return;
         if (prevTitleRunnable != null) {
-            appExecutors.mainThread().cancel(prevTitleRunnable);
+            appExecutors.getMainThread().cancel(prevTitleRunnable);
         }
         prevTitleRunnable = () -> actionBar.setTitle(title);
         // set title delayed to avoid title blink if fetch is fast
-        appExecutors.mainThread().execute(prevTitleRunnable, 1000);
+        appExecutors.getMainThread().execute(prevTitleRunnable, 1000);
     }
 
     private void downloadItem(final DirectItem item) {

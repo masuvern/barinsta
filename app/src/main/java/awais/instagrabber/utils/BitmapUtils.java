@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 public final class BitmapUtils {
     private static final String TAG = BitmapUtils.class.getSimpleName();
     private static final LruCache<String, Bitmap> bitmapMemoryCache;
-    private static final AppExecutors appExecutors = AppExecutors.getInstance();
+    private static final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private static final ExecutorService callbackHandlers = Executors
             .newCachedThreadPool(r -> new Thread(r, "bm-load-callback-handler#" + NumberUtils.random(0, 100)));
     public static final float THUMBNAIL_SIZE = 200f;
@@ -128,7 +128,7 @@ public final class BitmapUtils {
                                    final ThumbnailLoadCallback callback) {
         if (contentResolver == null || uri == null || callback == null) return;
         final ListenableFuture<BitmapResult> future = appExecutors
-                .tasksThread()
+                .getTasksThread()
                 .submit(() -> getBitmapResult(contentResolver, uri, reqWidth, reqHeight, maxDimenSize, addToCache));
         Futures.addCallback(future, new FutureCallback<BitmapResult>() {
             @Override
@@ -149,11 +149,11 @@ public final class BitmapUtils {
 
     @Nullable
     public static BitmapResult getBitmapResult(final ContentResolver contentResolver,
-                                                final Uri uri,
-                                                final float reqWidth,
-                                                final float reqHeight,
-                                                final float maxDimenSize,
-                                                final boolean addToCache) {
+                                               final Uri uri,
+                                               final float reqWidth,
+                                               final float reqHeight,
+                                               final float maxDimenSize,
+                                               final boolean addToCache) {
         BitmapFactory.Options bitmapOptions;
         float actualReqWidth = reqWidth;
         float actualReqHeight = reqHeight;

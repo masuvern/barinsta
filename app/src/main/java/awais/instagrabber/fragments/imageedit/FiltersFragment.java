@@ -116,7 +116,7 @@ public class FiltersFragment extends Fragment {
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appExecutors = AppExecutors.getInstance();
+        appExecutors = AppExecutors.INSTANCE;
         viewModel = new ViewModelProvider(this).get(FiltersFragmentViewModel.class);
     }
 
@@ -194,7 +194,7 @@ public class FiltersFragment extends Fragment {
         final Context context = getContext();
         if (context == null) return;
         binding.preview.setScaleType(GPUImage.ScaleType.CENTER_INSIDE);
-        appExecutors.tasksThread().execute(() -> {
+        appExecutors.getTasksThread().execute(() -> {
             binding.preview.setImage(sourceUri);
             setPreviewBounds();
         });
@@ -230,7 +230,7 @@ public class FiltersFragment extends Fragment {
         binding.apply.setOnClickListener(v -> {
             if (callback == null) return;
             final List<Filter<?>> appliedTunings = getAppliedTunings();
-            appExecutors.tasksThread().submit(() -> {
+            appExecutors.getTasksThread().submit(() -> {
                 final Bitmap bitmap = binding.preview.getGPUImage().getBitmapWithFilterApplied();
                 try {
                     BitmapUtils.convertToJpegAndSaveToUri(context, bitmap, destUri);
@@ -287,7 +287,7 @@ public class FiltersFragment extends Fragment {
             inputStream = context.getContentResolver().openInputStream(sourceUri);
             BitmapFactory.decodeStream(inputStream, null, options);
             final float ratio = (float) options.outWidth / options.outHeight;
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 final ViewGroup.LayoutParams previewLayoutParams = binding.preview.getLayoutParams();
                 if (options.outHeight > options.outWidth) {
                     previewLayoutParams.width = (int) (binding.preview.getHeight() * ratio);
@@ -472,7 +472,7 @@ public class FiltersFragment extends Fragment {
                         bitmap,
                         onFilterClickListener
                 );
-                appExecutors.mainThread().execute(() -> {
+                appExecutors.getMainThread().execute(() -> {
                     binding.filters.setAdapter(filtersAdapter);
                     filtersAdapter.submitList(FiltersHelper.getFilters(), () -> {
                         if (appliedFilter == null) return;

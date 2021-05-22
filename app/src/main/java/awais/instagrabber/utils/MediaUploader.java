@@ -33,7 +33,7 @@ import okio.Source;
 public final class MediaUploader {
     private static final String TAG = MediaUploader.class.getSimpleName();
     private static final String HOST = "https://i.instagram.com";
-    private static final AppExecutors appExecutors = AppExecutors.getInstance();
+    private static final AppExecutors appExecutors = AppExecutors.INSTANCE;
 
     public static void uploadPhoto(@NonNull final Uri uri,
                                    @NonNull final ContentResolver contentResolver,
@@ -57,7 +57,7 @@ public final class MediaUploader {
 
     private static void uploadPhoto(@NonNull final Bitmap bitmap,
                                     @NonNull final OnMediaUploadCompleteListener listener) {
-        appExecutors.tasksThread().submit(() -> {
+        appExecutors.getTasksThread().submit(() -> {
             final File file;
             final long byteLength;
             try {
@@ -70,7 +70,7 @@ public final class MediaUploader {
             final UploadPhotoOptions options = MediaUploadHelper.createUploadPhotoOptions(byteLength);
             final Map<String, String> headers = MediaUploadHelper.getUploadPhotoHeaders(options);
             final String url = HOST + "/rupload_igphoto/" + options.getName() + "/";
-            appExecutors.networkIO().execute(() -> {
+            appExecutors.getNetworkIO().execute(() -> {
                 try (FileInputStream input = new FileInputStream(file)) {
                     upload(input, url, headers, listener);
                 } catch (IOException e) {
@@ -87,10 +87,10 @@ public final class MediaUploader {
                                    final ContentResolver contentResolver,
                                    final UploadVideoOptions options,
                                    final OnMediaUploadCompleteListener listener) {
-        appExecutors.tasksThread().submit(() -> {
+        appExecutors.getTasksThread().submit(() -> {
             final Map<String, String> headers = MediaUploadHelper.getUploadVideoHeaders(options);
             final String url = HOST + "/rupload_igvideo/" + options.getName() + "/";
-            appExecutors.networkIO().execute(() -> {
+            appExecutors.getNetworkIO().execute(() -> {
                 try (InputStream input = contentResolver.openInputStream(uri)) {
                     if (input == null) {
                         listener.onFailure(new RuntimeException("InputStream was null"));

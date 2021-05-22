@@ -33,7 +33,7 @@ public class FilterViewHolder extends RecyclerView.ViewHolder {
         this.binding = binding;
         this.tuneFilters = tuneFilters;
         this.onFilterClickListener = onFilterClickListener;
-        appExecutors = AppExecutors.getInstance();
+        appExecutors = AppExecutors.INSTANCE;
     }
 
     public void bind(final int position, final String originalKey, final Bitmap originalBitmap, final Filter<?> item, final boolean isSelected) {
@@ -55,13 +55,13 @@ public class FilterViewHolder extends RecyclerView.ViewHolder {
         final Bitmap bitmap = BitmapUtils.getBitmapFromMemCache(filterKey);
         if (bitmap == null) {
             final GPUImageFilter filter = item.getInstance();
-            appExecutors.tasksThread().submit(() -> {
+            appExecutors.getTasksThread().submit(() -> {
                 GPUImage.getBitmapForMultipleFilters(
                         originalBitmap,
                         ImmutableList.<GPUImageFilter>builder().add(filter).addAll(tuneFilters).build(),
                         filteredBitmap -> {
                             BitmapUtils.addBitmapToMemoryCache(filterKey, filteredBitmap, true);
-                            appExecutors.mainThread().execute(() -> binding.getRoot().post(() -> binding.preview.setImageBitmap(filteredBitmap)));
+                            appExecutors.getMainThread().execute(() -> binding.getRoot().post(() -> binding.preview.setImageBitmap(filteredBitmap)));
                         }
                 );
             });

@@ -53,7 +53,7 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
         final EmojiParser emojiParser = EmojiParser.getInstance();
         final Map<EmojiCategoryType, EmojiCategory> categoryMap = emojiParser.getCategoryMap();
         emojiVariantManager = EmojiVariantManager.getInstance();
-        appExecutors = AppExecutors.getInstance();
+        appExecutors = AppExecutors.INSTANCE;
         setHasStableIds(true);
         if (emojiCategoryType == null) {
             // show all if type is null
@@ -81,13 +81,13 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
         final Emoji emoji = differ.getCurrentList().get(position);
         final String variant = emojiVariantManager.getVariant(emoji.getUnicode());
         if (variant != null) {
-            appExecutors.tasksThread().execute(() -> {
+            appExecutors.getTasksThread().execute(() -> {
                 final Optional<Emoji> first = emoji.getVariants()
                                                    .stream()
                                                    .filter(e -> e.getUnicode().equals(variant))
                                                    .findFirst();
                 if (!first.isPresent()) return;
-                appExecutors.mainThread().execute(() -> holder.bind(position, first.get(), emoji));
+                appExecutors.getMainThread().execute(() -> holder.bind(position, first.get(), emoji));
             });
             return;
         }

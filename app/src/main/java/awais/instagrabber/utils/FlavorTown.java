@@ -32,14 +32,14 @@ public final class FlavorTown {
                                    final boolean force) {
         if (checking) return;
         checking = true;
-        AppExecutors.getInstance().networkIO().execute(() -> {
+        AppExecutors.INSTANCE.getNetworkIO().execute(() -> {
             final String onlineVersionName = UPDATE_CHECKER.getLatestVersion();
             if (onlineVersionName == null) return;
             final String onlineVersion = getVersion(onlineVersionName);
             final String localVersion = getVersion(BuildConfig.VERSION_NAME);
             if (Objects.equals(onlineVersion, localVersion)) {
                 if (force) {
-                    AppExecutors.getInstance().mainThread().execute(() -> {
+                    AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         final Context applicationContext = context.getApplicationContext();
                         // Check if app was closed or crashed before reaching here
                         if (applicationContext == null) return;

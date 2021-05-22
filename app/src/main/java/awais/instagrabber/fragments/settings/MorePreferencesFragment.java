@@ -94,7 +94,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 // shouldRecreate();
                 Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                 settingsHelper.putString(Constants.COOKIE, "");
-                AppExecutors.getInstance().mainThread().execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
+                AppExecutors.INSTANCE.getMainThread().execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
                 return true;
             }));
         }
@@ -139,8 +139,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                                     if (context1 == null) return;
                                                     Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                                                     settingsHelper.putString(Constants.COOKIE, "");
-                                                    AppExecutors.getInstance().mainThread()
-                                                                .execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
+                                                    AppExecutors.INSTANCE.getMainThread().execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
                                                 }
 
                                                 @Override
@@ -307,7 +306,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                         // final FragmentActivity activity = getActivity();
                                         // if (activity == null) return;
                                         // activity.recreate();
-                                        AppExecutors.getInstance().mainThread().execute(() -> {
+                                        AppExecutors.INSTANCE.getMainThread().execute(() -> {
                                             final Context context = getContext();
                                             if (context == null) return;
                                             ProcessPhoenix.triggerRebirth(context);

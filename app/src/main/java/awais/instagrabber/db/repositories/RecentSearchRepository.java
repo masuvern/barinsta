@@ -25,7 +25,7 @@ public class RecentSearchRepository {
 
     public static RecentSearchRepository getInstance(final RecentSearchDataSource recentSearchDataSource) {
         if (instance == null) {
-            instance = new RecentSearchRepository(AppExecutors.getInstance(), recentSearchDataSource);
+            instance = new RecentSearchRepository(AppExecutors.INSTANCE, recentSearchDataSource);
         }
         return instance;
     }
@@ -34,10 +34,10 @@ public class RecentSearchRepository {
                                 @NonNull final FavoriteType type,
                                 final RepositoryCallback<RecentSearch> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final RecentSearch recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (recentSearch == null) {
                     callback.onDataNotAvailable();
@@ -50,10 +50,10 @@ public class RecentSearchRepository {
 
     public void getAllRecentSearches(final RepositoryCallback<List<RecentSearch>> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final List<RecentSearch> recentSearches = recentSearchDataSource.getAllRecentSearches();
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(recentSearches);
             });
@@ -73,14 +73,14 @@ public class RecentSearchRepository {
                                            @NonNull final FavoriteType type,
                                            final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             RecentSearch recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type);
             recentSearch = recentSearch == null
                            ? new RecentSearch(igId, name, username, picUrl, type, LocalDateTime.now())
                            : new RecentSearch(recentSearch.getId(), igId, name, username, picUrl, type, LocalDateTime.now());
             recentSearchDataSource.insertOrUpdateRecentSearch(recentSearch);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });
@@ -91,13 +91,13 @@ public class RecentSearchRepository {
                                                 @NonNull final FavoriteType type,
                                                 final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final RecentSearch recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type);
             if (recentSearch != null) {
                 recentSearchDataSource.deleteRecentSearch(recentSearch);
             }
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (recentSearch == null) {
                     callback.onDataNotAvailable();
@@ -111,11 +111,11 @@ public class RecentSearchRepository {
     public void deleteRecentSearch(@NonNull final RecentSearch recentSearch,
                                    final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
 
             recentSearchDataSource.deleteRecentSearch(recentSearch);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });

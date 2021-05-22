@@ -57,7 +57,7 @@ public final class EmojiVariantPopup {
         this.rootView = rootView;
         this.listener = listener;
         emojiVariantManager = EmojiVariantManager.getInstance();
-        appExecutors = AppExecutors.getInstance();
+        appExecutors = AppExecutors.INSTANCE;
     }
 
     public void show(@NonNull final View view, @NonNull final Emoji emoji) {

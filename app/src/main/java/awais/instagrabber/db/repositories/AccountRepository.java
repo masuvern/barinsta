@@ -23,7 +23,7 @@ public class AccountRepository {
 
     public static AccountRepository getInstance(final AccountDataSource accountDataSource) {
         if (instance == null) {
-            instance = new AccountRepository(AppExecutors.getInstance(), accountDataSource);
+            instance = new AccountRepository(AppExecutors.INSTANCE, accountDataSource);
         }
         return instance;
     }
@@ -31,10 +31,10 @@ public class AccountRepository {
     public void getAccount(final long uid,
                            final RepositoryCallback<Account> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final Account account = accountDataSource.getAccount(String.valueOf(uid));
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (account == null) {
                     callback.onDataNotAvailable();
@@ -47,10 +47,10 @@ public class AccountRepository {
 
     public void getAllAccounts(final RepositoryCallback<List<Account>> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             final List<Account> accounts = accountDataSource.getAllAccounts();
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (accounts == null) {
                     callback.onDataNotAvailable();
@@ -65,7 +65,7 @@ public class AccountRepository {
     public void insertOrUpdateAccounts(final List<Account> accounts,
                                        final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             for (final Account account : accounts) {
                 accountDataSource.insertOrUpdateAccount(account.getUid(),
                                                         account.getUsername(),
@@ -74,7 +74,7 @@ public class AccountRepository {
                                                         account.getProfilePic());
             }
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });
@@ -88,11 +88,11 @@ public class AccountRepository {
                                       final String profilePicUrl,
                                       final RepositoryCallback<Account> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             accountDataSource.insertOrUpdateAccount(String.valueOf(uid), username, cookie, fullName, profilePicUrl);
             final Account updated = accountDataSource.getAccount(String.valueOf(uid));
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 if (updated == null) {
                     callback.onDataNotAvailable();
@@ -106,10 +106,10 @@ public class AccountRepository {
     public void deleteAccount(final Account account,
                               final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             accountDataSource.deleteAccount(account);
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });
@@ -118,10 +118,10 @@ public class AccountRepository {
 
     public void deleteAllAccounts(final RepositoryCallback<Void> callback) {
         // request on the I/O thread
-        appExecutors.diskIO().execute(() -> {
+        appExecutors.getDiskIO().execute(() -> {
             accountDataSource.deleteAllAccounts();
             // notify on the main thread
-            appExecutors.mainThread().execute(() -> {
+            appExecutors.getMainThread().execute(() -> {
                 if (callback == null) return;
                 callback.onSuccess(null);
             });

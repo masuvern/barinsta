@@ -232,7 +232,7 @@ public class SearchFragmentViewModel extends AppStateViewModel {
                 topResults.postValue(Resource.success(Collections.emptyList()));
                 Log.e(TAG, "onFailure: ", t);
             }
-        }, AppExecutors.getInstance().mainThread());
+        }, AppExecutors.INSTANCE.getMainThread());
     }
 
     private void sendErrorResponse(@NonNull final FavoriteType type) {
