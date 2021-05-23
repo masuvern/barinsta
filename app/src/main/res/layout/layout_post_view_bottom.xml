@@ -73,16 +73,16 @@
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
         android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintBottom_toTopOf="@id/buttons_bottom_barrier"
+        app:layout_constraintBottom_toBottomOf="@id/comment"
         app:layout_constraintEnd_toStartOf="@id/space_1"
         app:layout_constraintStart_toEndOf="@id/comment"
-        app:layout_constraintTop_toBottomOf="@id/buttons_top_barrier"
+        app:layout_constraintTop_toTopOf="@id/comment"
         tools:text="9999999999999999999999999999999999999999" />
 
     <Space
         android:id="@+id/space_1"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="40dp"
         app:layout_constraintBottom_toTopOf="@id/buttons_bottom_barrier"
         app:layout_constraintEnd_toStartOf="@id/share"
         app:layout_constraintStart_toEndOf="@id/comments_count"
@@ -142,7 +142,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:barrierAllowsGoneWidgets="true"
-        app:barrierDirection="top" />
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="date,views_count" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/date"
@@ -175,7 +176,7 @@
         android:layout_height="0dp"
         app:barrierAllowsGoneWidgets="true"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="like,likes_count,comment,comments_count,space_1,share,save,download" />
+        app:constraint_referenced_ids="date,views_count" />
 
     <awais.instagrabber.customviews.RamboTextViewV2
         android:id="@+id/caption"
