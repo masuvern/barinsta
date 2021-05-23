@@ -21,6 +21,7 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.databinding.ItemFeedGridBinding;
 import awais.instagrabber.models.PostsLayoutPreferences;
+import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.DownloadUtils;
@@ -68,7 +69,9 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
         setUserDetails(media, layoutPreferences);
         String thumbnailUrl = null;
         final int typeIconRes;
-        switch (media.getMediaType()) {
+        final MediaItemType mediaType = media.getMediaType();
+        if (mediaType == null) return;
+        switch (mediaType) {
             case MEDIA_TYPE_IMAGE:
                 typeIconRes = -1;
                 thumbnailUrl = ResponseBodyUtils.getThumbUrl(media);
@@ -103,7 +106,7 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
             binding.typeIcon.setImageResource(typeIconRes);
         }
         final List<Boolean> checkList = DownloadUtils.checkDownloaded(media);
-        if (checkList == null || checkList.isEmpty()) {
+        if (checkList.isEmpty()) {
             return;
         }
         switch (media.getMediaType()) {
