@@ -36,7 +36,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -539,7 +539,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                             FavoriteType.LOCATION,
                             locationModel.getName(),
                             "res:/" + R.drawable.ic_location,
-                            new Date()
+                            LocalDateTime.now()
                     ), new RepositoryCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {

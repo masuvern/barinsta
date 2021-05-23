@@ -1,6 +1,5 @@
 package awais.instagrabber.adapters;
 
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -13,8 +12,10 @@ import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -57,7 +58,6 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemStoryShare;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.utils.DateUtils;
 
 public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = DirectItemsAdapter.class.getSimpleName();
@@ -292,12 +292,15 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
 
     private List<DirectItemOrHeader> sectionAndSort(final List<DirectItem> list) {
         final List<DirectItemOrHeader> itemOrHeaders = new ArrayList<>();
-        Date prevSectionDate = null;
+        LocalDate prevSectionDate = null;
         for (int i = 0; i < list.size(); i++) {
             final DirectItem item = list.get(i);
-            if (item == null) continue;
+            if (item == null || item.getDate() == null) continue;
             final DirectItemOrHeader prev = itemOrHeaders.isEmpty() ? null : itemOrHeaders.get(itemOrHeaders.size() - 1);
-            if (prev != null && prev.item != null && DateUtils.isSameDay(prev.item.getDate(), item.getDate())) {
+            if (prev != null
+                    && prev.item != null
+                    && prev.item.getDate() != null
+                    && prev.item.getDate().toLocalDate().isEqual(item.getDate().toLocalDate())) {
                 // just add item
                 final DirectItemOrHeader itemOrHeader = new DirectItemOrHeader();
                 itemOrHeader.item = item;
@@ -320,7 +323,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             final DirectItemOrHeader itemOrHeader = new DirectItemOrHeader();
             itemOrHeader.item = item;
             itemOrHeaders.add(itemOrHeader);
-            prevSectionDate = DateUtils.dateAtZeroHours(item.getDate());
+            prevSectionDate = item.getDate().toLocalDate();
         }
         return itemOrHeaders;
     }
@@ -352,7 +355,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
     }
 
     public static class DirectItemOrHeader {
-        Date date;
+        LocalDate date;
         public DirectItem item;
 
         public boolean isHeader() {
@@ -377,12 +380,13 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
             this.binding = binding;
         }
 
-        public void bind(final Date date) {
+        public void bind(final LocalDate date) {
             if (date == null) {
                 binding.header.setText("");
                 return;
             }
-            binding.header.setText(DateFormat.getDateFormat(itemView.getContext()).format(date));
+            final DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+            binding.header.setText(dateFormatter.format(date));
         }
     }
 

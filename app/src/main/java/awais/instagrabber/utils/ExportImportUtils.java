@@ -23,8 +23,10 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -147,13 +149,15 @@ public final class ExportImportUtils {
             if (query == null || favoriteType == null) {
                 continue;
             }
+            final long epochMillis = favsObject.getLong("d");
             final Favorite favorite = new Favorite(
                     0,
                     query,
                     favoriteType,
                     favsObject.optString("s"),
                     favoriteType == FavoriteType.USER ? favsObject.optString("pic_url") : null,
-                    new Date(favsObject.getLong("d")));
+                    LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneId.systemDefault())
+            );
             // Log.d(TAG, "importJson: favoriteModel: " + favoriteModel);
             final FavoriteRepository favRepo = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
             favRepo.getFavorite(query, favoriteType, new RepositoryCallback<Favorite>() {
@@ -370,7 +374,7 @@ public final class ExportImportUtils {
                         jsonObject.put("type", favorite.getType().toString());
                         jsonObject.put("s", favorite.getDisplayName());
                         jsonObject.put("pic_url", favorite.getPicUrl());
-                        jsonObject.put("d", favorite.getDateAdded().getTime());
+                        jsonObject.put("d", favorite.getDateAdded().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
                         jsonArray.put(jsonObject);
                     }
                 } catch (Exception e) {

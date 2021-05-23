@@ -6,7 +6,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import awais.instagrabber.models.enums.FavoriteType;
 
@@ -37,14 +37,14 @@ public class Favorite {
     private final String picUrl;
 
     @ColumnInfo(name = COL_DATE_ADDED)
-    private final Date dateAdded;
+    private final LocalDateTime dateAdded;
 
     public Favorite(final int id,
                     final String query,
                     final FavoriteType type,
                     final String displayName,
                     final String picUrl,
-                    final Date dateAdded) {
+                    final LocalDateTime dateAdded) {
         this.id = id;
         this.query = query;
         this.type = type;
@@ -73,7 +73,7 @@ public class Favorite {
         return picUrl;
     }
 
-    public Date getDateAdded() {
+    public LocalDateTime getDateAdded() {
         return dateAdded;
     }
 

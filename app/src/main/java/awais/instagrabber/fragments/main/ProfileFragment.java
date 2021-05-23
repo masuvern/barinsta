@@ -45,8 +45,8 @@ import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -722,7 +722,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 FavoriteType.USER,
                                 profileModel.getFullName(),
                                 profileModel.getProfilePicUrl(),
-                                new Date()
+                                LocalDateTime.now()
                         ), new RepositoryCallback<Void>() {
                             @Override
                             public void onSuccess(final Void result) {

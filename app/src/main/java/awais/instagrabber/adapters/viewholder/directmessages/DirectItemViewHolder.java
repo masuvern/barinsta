@@ -5,7 +5,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.text.format.DateFormat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -25,6 +24,8 @@ import androidx.transition.TransitionManager;
 import com.google.android.material.transition.MaterialFade;
 import com.google.common.collect.ImmutableList;
 
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -194,7 +195,8 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             binding.messageInfo.setVisibility(View.VISIBLE);
             binding.deliveryStatus.setVisibility(messageDirection == MessageDirection.OUTGOING ? View.VISIBLE : View.GONE);
             if (item.getDate() != null) {
-                binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
+                final DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
+                binding.messageTime.setText(dateFormatter.format(item.getDate()));
             }
             if (messageDirection == MessageDirection.OUTGOING) {
                 if (item.isPending()) {

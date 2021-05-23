@@ -112,7 +112,7 @@ public class DMSyncService extends LifecycleService {
             final DirectItem latestItem = unreadItems.get(unreadItems.size() - 1);
             lastNotifiedListBuilder.add(new DMLastNotified(0,
                                                            unreadMessagesEntry.getKey(),
-                                                           latestItem.getLocalDateTime(),
+                                                           latestItem.getDate(),
                                                            now));
         }
         dmLastNotifiedRepository.insertOrUpdateDMLastNotified(
@@ -145,8 +145,8 @@ public class DMSyncService extends LifecycleService {
             if (item.getUserId() == viewerId) break; // Reached a message from the viewer, it is assumed the viewer has read the next messages
             final boolean read = DMUtils.isRead(item, lastSeenAt, Collections.singletonList(viewerId));
             if (read) break;
-            if (dmLastNotified != null && dmLastNotified.getLastNotifiedMsgTs() != null) {
-                if (count == 0 && DateUtils.isBeforeOrEqual(item.getLocalDateTime(), dmLastNotified.getLastNotifiedMsgTs())) {
+            if (dmLastNotified != null && dmLastNotified.getLastNotifiedMsgTs() != null && item.getDate() != null) {
+                if (count == 0 && DateUtils.isBeforeOrEqual(item.getDate(), dmLastNotified.getLastNotifiedMsgTs())) {
                     // The first unread item has been notified and hence all subsequent items can be ignored
                     // since the items are in desc timestamp order
                     break;

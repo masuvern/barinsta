@@ -8,7 +8,6 @@ import java.io.Serializable
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.*
 
 data class DirectItem(
     var itemId: String? = null,
@@ -40,9 +39,8 @@ data class DirectItem(
     val hideInThread: Int? = 0,
     val showForwardAttribution: Boolean = false
 ) : Cloneable, Serializable {
-    private var date: Date? = null
     var isPending = false
-    var localDateTime: LocalDateTime? = null
+    var date: LocalDateTime? = null
         get() {
             if (field == null) {
                 field = Instant.ofEpochMilli(timestamp / 1000).atZone(ZoneId.systemDefault()).toLocalDateTime()
@@ -58,13 +56,6 @@ data class DirectItem(
     fun setTimestamp(timestamp: Long) {
         this.timestamp = timestamp
         date = null
-    }
-
-    fun getDate(): Date? {
-        if (date == null) {
-            date = Date(timestamp / 1000)
-        }
-        return date
     }
 
     @Throws(CloneNotSupportedException::class)

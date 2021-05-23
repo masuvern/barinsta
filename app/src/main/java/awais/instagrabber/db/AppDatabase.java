@@ -15,8 +15,10 @@ import androidx.room.TypeConverters;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import awais.instagrabber.db.dao.AccountDao;
@@ -195,14 +197,18 @@ public abstract class AppDatabase extends RoomDatabase {
                         if (favoriteTypeQueryPair == null) continue;
                         final FavoriteType type = favoriteTypeQueryPair.first;
                         final String query = favoriteTypeQueryPair.second;
+                        final long epochMillis = cursor.getLong(cursor.getColumnIndex("date_added"));
+                        final LocalDateTime localDateTime = LocalDateTime.ofInstant(
+                                Instant.ofEpochMilli(epochMillis),
+                                ZoneId.systemDefault()
+                        );
                         oldModels.add(new Favorite(
                                 0,
                                 query,
                                 type,
-                                queryDisplayExists ? cursor.getString(cursor.getColumnIndex("query_display"))
-                                                   : null,
+                                queryDisplayExists ? cursor.getString(cursor.getColumnIndex("query_display")) : null,
                                 null,
-                                new Date(cursor.getLong(cursor.getColumnIndex("date_added")))
+                                localDateTime
                         ));
                     } catch (Exception e) {
                         Log.e(TAG, "onUpgrade", e);
@@ -222,7 +228,7 @@ public abstract class AppDatabase extends RoomDatabase {
         values.put(Favorite.COL_TYPE, model.getType().toString());
         values.put(Favorite.COL_DISPLAY_NAME, model.getDisplayName());
         values.put(Favorite.COL_PIC_URL, model.getPicUrl());
-        values.put(Favorite.COL_DATE_ADDED, model.getDateAdded().getTime());
+        values.put(Favorite.COL_DATE_ADDED, model.getDateAdded().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         int rows;
         if (model.getId() >= 1) {
             rows = db.update(Favorite.TABLE_NAME,
