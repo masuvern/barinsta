@@ -233,7 +233,7 @@ public final class Utils {
         final Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP | Gravity.START,
                          view.getLeft(),
-                         view.getTop() - view.getHeight() - 4);
+                         view.getTop());
         toast.show();
     }
 
