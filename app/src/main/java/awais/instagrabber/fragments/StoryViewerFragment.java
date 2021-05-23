@@ -980,7 +980,7 @@ public class StoryViewerFragment extends Fragment {
                                                               downloadVisible = true;
                                                               menuDownload.setVisible(true);
                                                           }
-                                                          if (currentStory.canReply() && menuDm != null) {
+                                                          if (currentStory.getCanReply() && menuDm != null) {
                                                               dmVisible = true;
                                                               menuDm.setVisible(true);
                                                           }
@@ -1021,7 +1021,7 @@ public class StoryViewerFragment extends Fragment {
                     downloadVisible = true;
                     menuDownload.setVisible(true);
                 }
-                if (currentStory.canReply() && menuDm != null) {
+                if (currentStory.getCanReply() && menuDm != null) {
                     dmVisible = true;
                     menuDm.setVisible(true);
                 }
@@ -1041,7 +1041,7 @@ public class StoryViewerFragment extends Fragment {
                     downloadVisible = true;
                     menuDownload.setVisible(true);
                 }
-                if (currentStory.canReply() && menuDm != null) {
+                if (currentStory.getCanReply() && menuDm != null) {
                     dmVisible = true;
                     menuDm.setVisible(true);
                 }

@@ -1,41 +1,31 @@
-package awais.instagrabber.models.enums;
+package awais.instagrabber.models.enums
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable
 
-public enum NotificationType implements Serializable {
-    // story_type
+enum class NotificationType(val itemType: Int) : Serializable {
     LIKE(60),
     FOLLOW(101),
-    COMMENT(12), // NOT TESTED
+    COMMENT(12),  // NOT TESTED
     COMMENT_MENTION(66),
-    TAGGED(102), // NOT TESTED
+    TAGGED(102),  // NOT TESTED
     COMMENT_LIKE(13),
     TAGGED_COMMENT(14),
     RESPONDED_STORY(213),
     REQUEST(75),
-    // aymf - arbitrary, misspelled as ayml but eh
     AYML(9999);
 
-    private final int itemType;
-    private static final Map<Integer, NotificationType> map = new HashMap<>();
+    companion object {
+        private val map: MutableMap<Int, NotificationType> = mutableMapOf()
 
-    static {
-        for (NotificationType type : NotificationType.values()) {
-            map.put(type.itemType, type);
+        @JvmStatic
+        fun valueOfType(itemType: Int): NotificationType? {
+            return map[itemType]
         }
-    }
 
-    NotificationType(final int itemType) {
-        this.itemType = itemType;
-    }
-
-    public int getItemType() {
-        return itemType;
-    }
-
-    public static NotificationType valueOfType(final int itemType) {
-        return map.get(itemType);
+        init {
+            for (type in values()) {
+                map[type.itemType] = type
+            }
+        }
     }
 }

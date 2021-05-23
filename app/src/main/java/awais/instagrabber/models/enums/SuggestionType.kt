@@ -1,7 +1,5 @@
-package awais.instagrabber.models.enums;
+package awais.instagrabber.models.enums
 
-public enum SuggestionType {
-    TYPE_USER,
-    TYPE_HASHTAG,
-    TYPE_LOCATION
+enum class SuggestionType {
+    TYPE_USER, TYPE_HASHTAG, TYPE_LOCATION
 }

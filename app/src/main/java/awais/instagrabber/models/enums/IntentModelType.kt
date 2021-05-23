@@ -1,9 +1,9 @@
-package awais.instagrabber.models.enums;
+package awais.instagrabber.models.enums
 
-public enum IntentModelType {
+enum class IntentModelType {
     UNKNOWN,
     USERNAME,
     POST,
     HASHTAG,
-    LOCATION
+    LOCATION,
 }

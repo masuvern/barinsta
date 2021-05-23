@@ -1,6 +1,6 @@
-package awais.instagrabber.models.enums;
+package awais.instagrabber.models.enums
 
-public enum BroadcastItemType {
+enum class BroadcastItemType(val value: String) {
     TEXT("text"),
     REACTION("reaction"),
     REELSHARE("reel_share"),
@@ -9,15 +9,5 @@ public enum BroadcastItemType {
     VIDEO("configure_video"),
     VOICE("share_voice"),
     ANIMATED_MEDIA("animated_media"),
-    MEDIA_SHARE("media_share");
-
-    private final String value;
-
-    BroadcastItemType(final String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
+    MEDIA_SHARE("media_share"),
 }
