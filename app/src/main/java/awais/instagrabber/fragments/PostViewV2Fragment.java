@@ -27,6 +27,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.widget.TooltipCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.PermissionChecker;
 import androidx.core.view.WindowCompat;
@@ -423,12 +424,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 Log.e(TAG, "setupComment: ", e);
             }
         });
-        bottom.comment.setOnLongClickListener(v -> {
-            final Context context = getContext();
-            if (context == null) return false;
-            Utils.displayToastAboveView(context, v, getString(R.string.comment));
-            return true;
-        });
+        TooltipCompat.setTooltipText(bottom.comment, getString(R.string.comment));
     }
 
     private void setupDownload() {
@@ -441,12 +437,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             }
             requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         });
-        bottom.download.setOnLongClickListener(v -> {
-            final Context context = getContext();
-            if (context == null) return false;
-            Utils.displayToastAboveView(context, v, getString(R.string.action_download));
-            return true;
-        });
+        TooltipCompat.setTooltipText(bottom.download, getString(R.string.action_download));
     }
 
     private void setupLike() {
@@ -737,12 +728,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             return;
         }
         bottom.share.setVisibility(View.VISIBLE);
-        bottom.share.setOnLongClickListener(v -> {
-            final Context context = getContext();
-            if (context == null) return false;
-            Utils.displayToastAboveView(context, v, getString(R.string.share));
-            return true;
-        });
+        TooltipCompat.setTooltipText(bottom.share, getString(R.string.share));
         bottom.share.setOnClickListener(v -> {
             final Media media = viewModel.getMedia();
             final User profileModel = media.getUser();
