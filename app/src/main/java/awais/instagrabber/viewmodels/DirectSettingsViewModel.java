@@ -237,7 +237,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
             ));
         }
 
-        final boolean blocking = user.getFriendshipStatus().isBlocking();
+        final boolean blocking = user.getFriendshipStatus().getBlocking();
         options.add(new Option<>(
                 blocking ? getString(R.string.unblock) : getString(R.string.block),
                 blocking ? ACTION_UNBLOCK : ACTION_BLOCK

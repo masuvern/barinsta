@@ -392,12 +392,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.profile_menu, menu);
         final boolean isNotMe = profileModel != null && isLoggedIn
-                                && !Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie));
+                && !Objects.equals(profileModel.getPk(), CookieUtils.getUserIdFromCookie(cookie));
         blockMenuItem = menu.findItem(R.id.block);
         if (blockMenuItem != null) {
             if (isNotMe) {
                 blockMenuItem.setVisible(true);
-                blockMenuItem.setTitle(profileModel.getFriendshipStatus().isBlocking() ? R.string.unblock : R.string.block);
+                blockMenuItem.setTitle(profileModel.getFriendshipStatus().getBlocking() ? R.string.unblock : R.string.block);
             } else {
                 blockMenuItem.setVisible(false);
             }
@@ -424,7 +424,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (mutePostsMenuItem != null) {
             if (isNotMe) {
                 mutePostsMenuItem.setVisible(true);
-                mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.mute_posts : R.string.unmute_posts);
+                mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().getMuting() ? R.string.mute_posts : R.string.unmute_posts);
             } else {
                 mutePostsMenuItem.setVisible(false);
             }
@@ -435,7 +435,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         removeFollowerMenuItem = menu.findItem(R.id.remove_follower);
         if (removeFollowerMenuItem != null) {
-            removeFollowerMenuItem.setVisible(isNotMe && profileModel.getFriendshipStatus().isFollowedBy());
+            removeFollowerMenuItem.setVisible(isNotMe && profileModel.getFriendshipStatus().getFollowedBy());
         }
     }
 
@@ -467,7 +467,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         if (item.getItemId() == R.id.block) {
             if (!isLoggedIn) return false;
-            friendshipService.changeBlock(profileModel.getFriendshipStatus().isBlocking(), profileModel.getPk(), changeCb);
+            friendshipService.changeBlock(profileModel.getFriendshipStatus().getBlocking(), profileModel.getPk(), changeCb);
             return true;
         }
         if (item.getItemId() == R.id.chaining) {
@@ -490,9 +490,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         if (item.getItemId() == R.id.mute_posts) {
             if (!isLoggedIn) return false;
-            final String action = profileModel.getFriendshipStatus().isMuting() ? "Unmute stories" : "Mute stories";
+            final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
             friendshipService.changeMute(
-                    profileModel.getFriendshipStatus().isMuting(),
+                    profileModel.getFriendshipStatus().getMuting(),
                     profileModel.getPk(),
                     false,
                     changeCb);
@@ -935,24 +935,23 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.btnFollow.setVisibility(View.VISIBLE);
             final Context context = getContext();
             if (context == null) return;
-            if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isFollowedBy()) {
+            if (profileModel.getFriendshipStatus().getFollowing() || profileModel.getFriendshipStatus().getFollowedBy()) {
                 profileDetailsBinding.mainStatus.setVisibility(View.VISIBLE);
-                if (!profileModel.getFriendshipStatus().isFollowing()) {
+                if (!profileModel.getFriendshipStatus().getFollowing()) {
                     profileDetailsBinding.mainStatus.setChipBackgroundColor(AppCompatResources.getColorStateList(context, R.color.blue_800));
                     profileDetailsBinding.mainStatus.setText(R.string.status_follower);
-                } else if (!profileModel.getFriendshipStatus().isFollowedBy()) {
+                } else if (!profileModel.getFriendshipStatus().getFollowedBy()) {
                     profileDetailsBinding.mainStatus.setChipBackgroundColor(AppCompatResources.getColorStateList(context, R.color.deep_orange_800));
                     profileDetailsBinding.mainStatus.setText(R.string.status_following);
                 } else {
                     profileDetailsBinding.mainStatus.setChipBackgroundColor(AppCompatResources.getColorStateList(context, R.color.green_800));
                     profileDetailsBinding.mainStatus.setText(R.string.status_mutual);
                 }
-            }
-            else profileDetailsBinding.mainStatus.setVisibility(View.GONE);
-            if (profileModel.getFriendshipStatus().isFollowing()) {
+            } else profileDetailsBinding.mainStatus.setVisibility(View.GONE);
+            if (profileModel.getFriendshipStatus().getFollowing()) {
                 profileDetailsBinding.btnFollow.setText(R.string.unfollow);
                 profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
-            } else if (profileModel.getFriendshipStatus().isOutgoingRequest()) {
+            } else if (profileModel.getFriendshipStatus().getOutgoingRequest()) {
                 profileDetailsBinding.btnFollow.setText(R.string.cancel);
                 profileDetailsBinding.btnFollow.setChipIconResource(R.drawable.ic_outline_person_add_disabled_24);
             } else {
@@ -965,7 +964,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (blockMenuItem != null) {
                 blockMenuItem.setVisible(true);
-                blockMenuItem.setTitle(profileModel.getFriendshipStatus().isBlocking() ? R.string.unblock : R.string.block);
+                blockMenuItem.setTitle(profileModel.getFriendshipStatus().getBlocking() ? R.string.unblock : R.string.block);
             }
             if (muteStoriesMenuItem != null) {
                 muteStoriesMenuItem.setVisible(true);
@@ -973,13 +972,13 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (mutePostsMenuItem != null) {
                 mutePostsMenuItem.setVisible(true);
-                mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().isMuting() ? R.string.unmute_posts : R.string.mute_posts);
+                mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().getMuting() ? R.string.unmute_posts : R.string.mute_posts);
             }
             if (chainingMenuItem != null) {
                 chainingMenuItem.setVisible(profileModel.hasChaining());
             }
             if (removeFollowerMenuItem != null) {
-                removeFollowerMenuItem.setVisible(profileModel.getFriendshipStatus().isFollowedBy());
+                removeFollowerMenuItem.setVisible(profileModel.getFriendshipStatus().getFollowedBy());
             }
         }
     }
@@ -1043,7 +1042,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void setupCommonListeners() {
         final Context context = getContext();
         profileDetailsBinding.btnFollow.setOnClickListener(v -> {
-            if (profileModel.getFriendshipStatus().isFollowing() && profileModel.isPrivate()) {
+            if (profileModel.getFriendshipStatus().getFollowing() && profileModel.isPrivate()) {
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.priv_acc)
                         .setMessage(R.string.priv_acc_confirm)
@@ -1051,7 +1050,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 friendshipService.unfollow(profileModel.getPk(), changeCb))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
-            } else if (profileModel.getFriendshipStatus().isFollowing() || profileModel.getFriendshipStatus().isOutgoingRequest()) {
+            } else if (profileModel.getFriendshipStatus().getFollowing() || profileModel.getFriendshipStatus().getOutgoingRequest()) {
                 friendshipService.unfollow(profileModel.getPk(), changeCb);
             } else {
                 friendshipService.follow(profileModel.getPk(), changeCb);
@@ -1225,6 +1224,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private boolean isReallyPrivate() {
         if (profileModel.getPk() == myId) return false;
         final FriendshipStatus friendshipStatus = profileModel.getFriendshipStatus();
-        return !friendshipStatus.isFollowing() && profileModel.isPrivate();
+        return !friendshipStatus.getFollowing() && profileModel.isPrivate();
     }
 }

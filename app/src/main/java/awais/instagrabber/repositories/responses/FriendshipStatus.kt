@@ -3,13 +3,13 @@ package awais.instagrabber.repositories.responses
 import java.io.Serializable
 
 data class FriendshipStatus(
-    val isFollowing: Boolean,
-    val isFollowedBy: Boolean,
-    val isBlocking: Boolean,
-    val isMuting: Boolean,
+    val following: Boolean,
+    val followedBy: Boolean,
+    val blocking: Boolean,
+    val muting: Boolean,
     val isPrivate: Boolean,
-    val isIncomingRequest: Boolean,
-    val isOutgoingRequest: Boolean,
+    val incomingRequest: Boolean,
+    val outgoingRequest: Boolean,
     val isBestie: Boolean,
     val isRestricted: Boolean,
     val isMutingReel: Boolean
