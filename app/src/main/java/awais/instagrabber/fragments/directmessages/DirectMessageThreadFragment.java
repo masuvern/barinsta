@@ -266,7 +266,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
         @Override
         public void onReaction(final DirectItem item, final Emoji emoji) {
-            if (item == null) return;
+            if (item == null || emoji == null) return;
             final LiveData<Resource<Object>> resourceLiveData = viewModel.sendReaction(item, emoji);
             if (resourceLiveData != null) {
                 resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));
@@ -1487,7 +1487,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (reactionDialogFragment != null) {
             reactionDialogFragment.dismiss();
         }
-        if (reaction == null) return;
+        if (itemId == null || reaction == null) return;
         if (reaction.getSenderId() == viewModel.getViewerId()) {
             final LiveData<Resource<Object>> resourceLiveData = viewModel.sendDeleteReaction(itemId);
             if (resourceLiveData != null) {
@@ -1509,7 +1509,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
     @Override
     public void onClick(final View view, final Emoji emoji) {
-        if (addReactionItem == null) return;
+        if (addReactionItem == null || emoji == null) return;
         final LiveData<Resource<Object>> resourceLiveData = viewModel.sendReaction(addReactionItem, emoji);
         if (resourceLiveData != null) {
             resourceLiveData.observe(getViewLifecycleOwner(), directItemResource -> handleSentMessage(resourceLiveData));

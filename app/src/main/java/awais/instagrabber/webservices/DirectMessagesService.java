@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 
 import org.json.JSONArray;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +18,13 @@ import java.util.stream.Collectors;
 import awais.instagrabber.repositories.DirectMessagesRepository;
 import awais.instagrabber.repositories.requests.directmessages.AnimatedMediaBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.requests.directmessages.LinkBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.MediaShareBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.PhotoBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.ReactionBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.StoryReplyBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.TextBroadcastOptions;
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.requests.directmessages.VideoBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.VoiceBroadcastOptions;
 import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
@@ -121,73 +120,77 @@ public class DirectMessagesService extends BaseService {
         return repository.fetchUnseenCount();
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastText(final String clientContext,
-                                                             final ThreadIdOrUserIds threadIdOrUserIds,
-                                                             final String text,
-                                                             final String repliedToItemId,
-                                                             final String repliedToClientContext) {
+    public Call<DirectThreadBroadcastResponse> broadcastText(@NonNull final String clientContext,
+                                                             @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                             @NonNull final String text,
+                                                             @Nullable final String repliedToItemId,
+                                                             @Nullable final String repliedToClientContext) {
         final List<String> urls = TextUtils.extractUrls(text);
         if (!urls.isEmpty()) {
             return broadcastLink(clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext);
         }
         final TextBroadcastOptions broadcastOptions = new TextBroadcastOptions(clientContext, threadIdOrUserIds, text);
-        broadcastOptions.setRepliedToItemId(repliedToItemId);
-        broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        if (repliedToItemId != null && repliedToClientContext != null) {
+            broadcastOptions.setRepliedToItemId(repliedToItemId);
+            broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        }
         return broadcast(broadcastOptions);
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastLink(final String clientContext,
-                                                             final ThreadIdOrUserIds threadIdOrUserIds,
-                                                             final String linkText,
-                                                             final List<String> urls,
-                                                             final String repliedToItemId,
-                                                             final String repliedToClientContext) {
+    public Call<DirectThreadBroadcastResponse> broadcastLink(@NonNull final String clientContext,
+                                                             @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                             @NonNull final String linkText,
+                                                             @NonNull final List<String> urls,
+                                                             @Nullable final String repliedToItemId,
+                                                             @Nullable final String repliedToClientContext) {
         final LinkBroadcastOptions broadcastOptions = new LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls);
-        broadcastOptions.setRepliedToItemId(repliedToItemId);
-        broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        if (repliedToItemId != null && repliedToClientContext != null) {
+            broadcastOptions.setRepliedToItemId(repliedToItemId);
+            broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        }
         return broadcast(broadcastOptions);
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastPhoto(final String clientContext,
-                                                              final ThreadIdOrUserIds threadIdOrUserIds,
-                                                              final String uploadId) {
+    public Call<DirectThreadBroadcastResponse> broadcastPhoto(@NonNull final String clientContext,
+                                                              @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                              @NonNull final String uploadId) {
         return broadcast(new PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId));
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastVideo(final String clientContext,
-                                                              final ThreadIdOrUserIds threadIdOrUserIds,
-                                                              final String uploadId,
-                                                              final String videoResult,
+    public Call<DirectThreadBroadcastResponse> broadcastVideo(@NonNull final String clientContext,
+                                                              @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                              @NonNull final String uploadId,
+                                                              @NonNull final String videoResult,
                                                               final boolean sampled) {
         return broadcast(new VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled));
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastVoice(final String clientContext,
-                                                              final ThreadIdOrUserIds threadIdOrUserIds,
-                                                              final String uploadId,
-                                                              final List<Float> waveform,
+    public Call<DirectThreadBroadcastResponse> broadcastVoice(@NonNull final String clientContext,
+                                                              @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                              @NonNull final String uploadId,
+                                                              @NonNull final List<Float> waveform,
                                                               final int samplingFreq) {
         return broadcast(new VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq));
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastStoryReply(final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                   final String text,
-                                                                   final String mediaId,
-                                                                   final String reelId) throws UnsupportedEncodingException {
+    public Call<DirectThreadBroadcastResponse> broadcastStoryReply(@NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                   @NonNull final String text,
+                                                                   @NonNull final String mediaId,
+                                                                   @NonNull final String reelId) {
         return broadcast(new StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId));
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastReaction(final String clientContext,
-                                                                 final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                 final String itemId,
-                                                                 final String emoji,
+    public Call<DirectThreadBroadcastResponse> broadcastReaction(@NonNull final String clientContext,
+                                                                 @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                 @NonNull final String itemId,
+                                                                 @Nullable final String emoji,
                                                                  final boolean delete) {
         return broadcast(new ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete));
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastAnimatedMedia(final String clientContext,
-                                                                      final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                      final GiphyGif giphyGif) {
+    public Call<DirectThreadBroadcastResponse> broadcastAnimatedMedia(@NonNull final String clientContext,
+                                                                      @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                      @NonNull final GiphyGif giphyGif) {
         return broadcast(new AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif));
     }
 
@@ -456,8 +459,10 @@ public class DirectMessagesService extends BaseService {
         return repository.declineRequest(threadId, form);
     }
 
+    @Nullable
     public Call<DirectItemSeenResponse> markAsSeen(@NonNull final String threadId,
                                                    @NonNull final DirectItem directItem) {
+        if (directItem.getItemId() == null) return null;
         final ImmutableMap<String, String> form = ImmutableMap.<String, String>builder()
                 .put("_csrftoken", csrfToken)
                 .put("_uuid", deviceUuid)

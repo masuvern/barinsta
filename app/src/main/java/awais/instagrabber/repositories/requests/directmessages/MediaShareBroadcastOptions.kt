@@ -3,7 +3,7 @@ package awais.instagrabber.repositories.requests.directmessages
 import awais.instagrabber.models.enums.BroadcastItemType
 
 class MediaShareBroadcastOptions(
-    clientContext: String?,
+    clientContext: String,
     threadIdOrUserIds: ThreadIdOrUserIds,
     val mediaId: String
 ) : BroadcastOptions(
@@ -11,8 +11,6 @@ class MediaShareBroadcastOptions(
     threadIdOrUserIds,
     BroadcastItemType.MEDIA_SHARE
 ) {
-
-    override fun getFormMap(): Map<String, String> {
-        return mapOf("media_id" to mediaId)
-    }
+    override val formMap: Map<String, String>
+        get() = mapOf("media_id" to mediaId)
 }

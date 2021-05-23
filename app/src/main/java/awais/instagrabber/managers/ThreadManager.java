@@ -40,7 +40,7 @@ import awais.instagrabber.models.Resource.Status;
 import awais.instagrabber.models.UploadVideoOptions;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
-import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.User;
@@ -485,8 +485,8 @@ public final class ThreadManager {
         inboxManager.addItemsToThread(threadId, index, items);
     }
 
-    private void addReaction(final DirectItem item, final Emoji emoji) {
-        if (item == null || emoji == null || currentUser == null) return;
+    private void addReaction(@NonNull final DirectItem item, @NonNull final Emoji emoji) {
+        if (currentUser == null) return;
         final boolean isLike = emoji.getUnicode().equals("❤️");
         DirectItemReactions reactions = item.getReactions();
         if (reactions == null) {
@@ -737,7 +737,8 @@ public final class ThreadManager {
     }
 
     @NonNull
-    public LiveData<Resource<Object>> sendReaction(final DirectItem item, final Emoji emoji) {
+    public LiveData<Resource<Object>> sendReaction(@NonNull final DirectItem item,
+                                                   @NonNull final Emoji emoji) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final Long userId = getCurrentUserId(data);
         if (userId == null) {
@@ -752,13 +753,23 @@ public final class ThreadManager {
         if (!emoji.getUnicode().equals("❤️")) {
             emojiUnicode = emoji.getUnicode();
         }
+        final String itemId = item.getItemId();
+        if (itemId == null) {
+            data.postValue(Resource.error("itemId is null", null));
+            return data;
+        }
         final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(
-                clientContext, threadIdOrUserIds, item.getItemId(), emojiUnicode, false);
+                clientContext,
+                threadIdOrUserIds,
+                itemId,
+                emojiUnicode,
+                false
+        );
         handleBroadcastReactionRequest(data, item, request);
         return data;
     }
 
-    public LiveData<Resource<Object>> sendDeleteReaction(final String itemId) {
+    public LiveData<Resource<Object>> sendDeleteReaction(@NonNull final String itemId) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         final DirectItem item = getItem(itemId);
         if (item == null) {
@@ -773,7 +784,12 @@ public final class ThreadManager {
         }
         removeReaction(item);
         final String clientContext = UUID.randomUUID().toString();
-        final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(clientContext, threadIdOrUserIds, item.getItemId(), null, true);
+        final String itemId1 = item.getItemId();
+        if (itemId1 == null) {
+            data.postValue(Resource.error("itemId is null", null));
+            return data;
+        }
+        final Call<DirectThreadBroadcastResponse> request = service.broadcastReaction(clientContext, threadIdOrUserIds, itemId1, null, true);
         handleBroadcastReactionRequest(data, item, request);
         return data;
     }

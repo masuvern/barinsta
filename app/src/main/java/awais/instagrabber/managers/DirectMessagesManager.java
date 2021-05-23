@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import awais.instagrabber.models.Resource;
-import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
@@ -220,7 +220,7 @@ public final class DirectMessagesManager {
         data.postValue(Resource.loading(null));
         final Call<DirectThreadBroadcastResponse> request = service.broadcastMediaShare(
                 UUID.randomUUID().toString(),
-                BroadcastOptions.ThreadIdOrUserIds.of(threadId),
+                ThreadIdOrUserIds.of(threadId),
                 mediaId
         );
         request.enqueue(new Callback<DirectThreadBroadcastResponse>() {

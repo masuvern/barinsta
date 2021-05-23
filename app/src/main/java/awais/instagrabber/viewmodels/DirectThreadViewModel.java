@@ -214,11 +214,11 @@ public class DirectThreadViewModel extends AndroidViewModel {
         voiceRecorder = null;
     }
 
-    public LiveData<Resource<Object>> sendReaction(final DirectItem item, final Emoji emoji) {
+    public LiveData<Resource<Object>> sendReaction(@NonNull final DirectItem item, @NonNull final Emoji emoji) {
         return threadManager.sendReaction(item, emoji);
     }
 
-    public LiveData<Resource<Object>> sendDeleteReaction(final String itemId) {
+    public LiveData<Resource<Object>> sendDeleteReaction(@NonNull final String itemId) {
         return threadManager.sendDeleteReaction(itemId);
     }
 

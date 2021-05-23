@@ -1,86 +1,34 @@
-package awais.instagrabber.repositories.requests.directmessages;
+package awais.instagrabber.repositories.requests.directmessages
 
-import androidx.annotation.NonNull;
+import awais.instagrabber.models.enums.BroadcastItemType
 
-import java.util.List;
-import java.util.Map;
+sealed class BroadcastOptions(
+    val clientContext: String,
+    private val threadIdOrUserIds: ThreadIdOrUserIds,
+    val itemType: BroadcastItemType
+) {
+    var repliedToItemId: String? = null
+    var repliedToClientContext: String? = null
+    val threadId: String?
+        get() = threadIdOrUserIds.threadId
+    val userIds: List<String>?
+        get() = threadIdOrUserIds.userIds
 
-import awais.instagrabber.models.enums.BroadcastItemType;
+    abstract val formMap: Map<String, String>
+}
 
-public abstract class BroadcastOptions {
+// TODO convert to data class once usages are migrated to kotlin
+class ThreadIdOrUserIds(val threadId: String? = null, val userIds: List<String>? = null) {
 
-    private final String clientContext;
-    private final ThreadIdOrUserIds threadIdOrUserIds;
-    private final BroadcastItemType itemType;
-
-    private String repliedToItemId;
-    private String repliedToClientContext;
-
-    public BroadcastOptions(final String clientContext,
-                            @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                            @NonNull final BroadcastItemType itemType) {
-        this.clientContext = clientContext;
-        this.threadIdOrUserIds = threadIdOrUserIds;
-        this.itemType = itemType;
-    }
-
-    public String getClientContext() {
-        return clientContext;
-    }
-
-    public String getThreadId() {
-        return threadIdOrUserIds.getThreadId();
-    }
-
-    public List<String> getUserIds() {
-        return threadIdOrUserIds.getUserIds();
-    }
-
-    public BroadcastItemType getItemType() {
-        return itemType;
-    }
-
-    public abstract Map<String, String> getFormMap();
-
-    public String getRepliedToItemId() {
-        return repliedToItemId;
-    }
-
-    public void setRepliedToItemId(final String repliedToItemId) {
-        this.repliedToItemId = repliedToItemId;
-    }
-
-    public String getRepliedToClientContext() {
-        return repliedToClientContext;
-    }
-
-    public void setRepliedToClientContext(final String repliedToClientContext) {
-        this.repliedToClientContext = repliedToClientContext;
-    }
-
-    public static final class ThreadIdOrUserIds {
-        private final String threadId;
-        private final List<String> userIds;
-
-        private ThreadIdOrUserIds(final String threadId, final List<String> userIds) {
-            this.threadId = threadId;
-            this.userIds = userIds;
+    companion object {
+        @JvmStatic
+        fun of(threadId: String?): ThreadIdOrUserIds {
+            return ThreadIdOrUserIds(threadId, null)
         }
 
-        public static ThreadIdOrUserIds of(final String threadId) {
-            return new ThreadIdOrUserIds(threadId, null);
-        }
-
-        public static ThreadIdOrUserIds of(final List<String> userIds) {
-            return new ThreadIdOrUserIds(null, userIds);
-        }
-
-        public String getThreadId() {
-            return threadId;
-        }
-
-        public List<String> getUserIds() {
-            return userIds;
+        @JvmStatic
+        fun of(userIds: List<String>?): ThreadIdOrUserIds {
+            return ThreadIdOrUserIds(null, userIds)
         }
     }
 }
