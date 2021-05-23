@@ -14,6 +14,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -68,8 +69,10 @@ import com.skydoves.balloon.overlay.BalloonOverlayCircle;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import awais.instagrabber.R;
+import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.SliderCallbackAdapter;
 import awais.instagrabber.adapters.SliderItemsAdapter;
@@ -93,6 +96,7 @@ import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.VideoVersion;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
@@ -124,6 +128,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private PopupMenu optionsPopup;
     private EditTextDialogFragment editTextDialogFragment;
     private boolean wasDeleted;
+    private MutableLiveData<Object> backStackSavedStateCollectionLiveData;
     private MutableLiveData<Object> backStackSavedStateResultLiveData;
     private OnDeleteListener onDeleteListener;
     @Nullable
@@ -131,7 +136,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private LayoutPostViewBottomBinding bottom;
     private View postView;
     private int originalHeight;
-    private int originalSystemUi;
     private boolean isInFullScreenMode;
     private StyledPlayerView playerView;
     private int playerViewOriginalHeight;
@@ -145,8 +149,28 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (result instanceof String) {
             final String collection = (String) result;
             handleSaveUnsaveResourceLiveData(viewModel.toggleSave(collection, viewModel.getMedia().getHasViewerSaved()));
+        } else if ((result instanceof RankedRecipient)) {
+            // Log.d(TAG, "result: " + result);
+            final Context context = getContext();
+            if (context != null) {
+                Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
+            }
+            viewModel.shareDm((RankedRecipient) result);
+        } else if ((result instanceof Set)) {
+            try {
+                // Log.d(TAG, "result: " + result);
+                final Context context = getContext();
+                if (context != null) {
+                    Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
+                }
+                //noinspection unchecked
+                viewModel.shareDm((Set<RankedRecipient>) result);
+            } catch (Exception e) {
+                Log.e(TAG, "share: ", e);
+            }
         }
         // clear result
+        backStackSavedStateCollectionLiveData.postValue(null);
         backStackSavedStateResultLiveData.postValue(null);
     };
 
@@ -193,7 +217,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         // wasPaused = true;
         if (settingsHelper.getBoolean(PreferenceKeys.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
-        if (media == null) return;
+        if (media == null || media.getMediaType() == null) return;
         switch (media.getMediaType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
@@ -214,7 +238,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         final NavController navController = NavHostFragment.findNavController(this);
         final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
         if (backStackEntry != null) {
-            backStackSavedStateResultLiveData = backStackEntry.getSavedStateHandle().getLiveData("collection");
+            backStackSavedStateCollectionLiveData = backStackEntry.getSavedStateHandle().getLiveData("collection");
+            backStackSavedStateCollectionLiveData.observe(getViewLifecycleOwner(), backStackSavedStateObserver);
+            backStackSavedStateResultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
             backStackSavedStateResultLiveData.observe(getViewLifecycleOwner(), backStackSavedStateObserver);
         }
     }
@@ -224,7 +250,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         super.onDestroyView();
         showSystemUI();
         final Media media = viewModel.getMedia();
-        if (media == null) return;
+        if (media == null || media.getMediaType() == null) return;
         switch (media.getMediaType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
@@ -740,12 +766,53 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 // is this necessary?
                 Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
             }
-            final Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-            sharingIntent.setType("text/plain");
-            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/" + media.getCode());
-            startActivity(Intent.createChooser(sharingIntent,
-                                               isPrivate ? getString(R.string.share_private_post) : getString(R.string.share_public_post)));
+            if (viewModel.isLoggedIn()) {
+                final Context context = getContext();
+                if (context == null) return;
+                final ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, R.style.popupMenuStyle);
+                final PopupMenu popupMenu = new PopupMenu(themeWrapper, bottom.share);
+                final Menu menu = popupMenu.getMenu();
+                menu.add(0, R.id.share_dm, 0, R.string.share_via_dm);
+                menu.add(0, R.id.share, 1, R.string.share_link);
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    final int itemId = item.getItemId();
+                    if (itemId == R.id.share_dm) {
+                        final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                                .actionGlobalUserSearch()
+                                .setTitle(getString(R.string.share))
+                                .setActionLabel(getString(R.string.send))
+                                .setShowGroups(true)
+                                .setMultiple(true)
+                                .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+                        final NavController navController = NavHostFragment.findNavController(PostViewV2Fragment.this);
+                        try {
+                            navController.navigate(actionGlobalUserSearch);
+                        } catch (Exception e) {
+                            Log.e(TAG, "setupShare: ", e);
+                        }
+                        return true;
+                    } else if (itemId == R.id.share) {
+                        shareLink(media, isPrivate);
+                        return true;
+                    }
+                    return false;
+                });
+                popupMenu.show();
+                return;
+            }
+            shareLink(media, isPrivate);
         });
+    }
+
+    private void shareLink(@NonNull final Media media, final boolean isPrivate) {
+        final Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/" + media.getCode());
+        startActivity(Intent.createChooser(
+                sharingIntent,
+                isPrivate ? getString(R.string.share_private_post)
+                          : getString(R.string.share_public_post)
+        ));
     }
 
     private void setupPostTypeLayout(final MediaItemType type) {
@@ -1246,7 +1313,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     }
 
     private void toggleDetails() {
-        final boolean hasBeenToggled = true;
+        // final boolean hasBeenToggled = true;
+        final MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
         final Media media = viewModel.getMedia();
         binding.getRoot().post(() -> {
             TransitionManager.beginDelayedTransition(binding.getRoot());
@@ -1268,8 +1337,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                         playerView.getLayoutParams().height = fullHeight;
                     }
                 }
+                final BottomNavigationView bottomNavView = activity.getBottomNavView();
+                bottomNavView.setVisibility(View.GONE);
                 detailsVisible = false;
-
                 if (media.getUser() != null) {
                     binding.profilePic.setVisibility(View.GONE);
                     binding.title.setVisibility(View.GONE);
@@ -1310,6 +1380,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                     playerView = null;
                 }
             }
+            final BottomNavigationView bottomNavView = activity.getBottomNavView();
+            bottomNavView.setVisibility(View.VISIBLE);
             if (media.getUser() != null) {
                 binding.profilePic.setVisibility(View.VISIBLE);
                 binding.title.setVisibility(View.VISIBLE);
@@ -1375,8 +1447,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (toolbar != null) {
             toolbar.setVisibility(View.GONE);
         }
-        final BottomNavigationView bottomNavView = activity.getBottomNavView();
-        bottomNavView.setVisibility(View.GONE);
         binding.getRoot().setPadding(binding.getRoot().getPaddingLeft(),
                                      binding.getRoot().getPaddingTop(),
                                      binding.getRoot().getPaddingRight(),
@@ -1404,8 +1474,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         if (toolbar != null) {
             toolbar.setVisibility(View.VISIBLE);
         }
-        final BottomNavigationView bottomNavView = activity.getBottomNavView();
-        bottomNavView.setVisibility(View.VISIBLE);
         final Context context = getContext();
         if (context == null) return;
         binding.getRoot().setPadding(binding.getRoot().getPaddingLeft(),

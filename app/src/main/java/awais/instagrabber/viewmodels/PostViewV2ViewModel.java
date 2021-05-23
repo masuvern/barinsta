@@ -11,14 +11,17 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import awais.instagrabber.R;
+import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -49,6 +52,7 @@ public class PostViewV2ViewModel extends ViewModel {
     private final boolean isLoggedIn;
 
     private Media media;
+    private DirectMessagesManager messageManager;
 
     public PostViewV2ViewModel() {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
@@ -325,5 +329,19 @@ public class PostViewV2ViewModel extends ViewModel {
             }
         });
         return data;
+    }
+
+    public void shareDm(@NonNull final RankedRecipient result) {
+        if (messageManager == null) {
+            messageManager = DirectMessagesManager.getInstance();
+        }
+        messageManager.sendMedia(result, media.getId());
+    }
+
+    public void shareDm(@NonNull final Set<RankedRecipient> recipients) {
+        if (messageManager == null) {
+            messageManager = DirectMessagesManager.getInstance();
+        }
+        messageManager.sendMedia(recipients, media.getId());
     }
 }

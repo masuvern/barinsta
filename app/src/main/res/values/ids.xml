@@ -5,4 +5,5 @@
     <item name="forward" type="id" />
     <item name="detail" type="id" />
     <item name="copy" type="id" />
+    <item name="share_dm" type="id" />
 </resources>

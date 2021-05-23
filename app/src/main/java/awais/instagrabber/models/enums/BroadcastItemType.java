@@ -8,7 +8,8 @@ public enum BroadcastItemType {
     LINK("link"),
     VIDEO("configure_video"),
     VOICE("share_voice"),
-    ANIMATED_MEDIA("animated_media");
+    ANIMATED_MEDIA("animated_media"),
+    MEDIA_SHARE("media_share");
 
     private final String value;
 

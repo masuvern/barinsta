@@ -96,6 +96,7 @@ public final class ThreadManager {
     private final ThreadIdOrUserIds threadIdOrUserIds;
     private final User currentUser;
     private final ContentResolver contentResolver;
+    private final DirectMessagesManager messagesManager;
 
     private DirectMessagesService service;
     private MediaService mediaService;
@@ -147,7 +148,7 @@ public final class ThreadManager {
                           final boolean pending,
                           @NonNull final User currentUser,
                           @NonNull final ContentResolver contentResolver) {
-        final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
+        messagesManager = DirectMessagesManager.getInstance();
         this.inboxManager = pending ? messagesManager.getPendingInboxManager() : messagesManager.getInboxManager();
         this.threadId = threadId;
         this.threadIdOrUserIds = ThreadIdOrUserIds.of(threadId);
@@ -821,42 +822,10 @@ public final class ThreadManager {
         if (recipient == null || itemToForward == null) return;
         if (recipient.getThread() == null && recipient.getUser() != null) {
             // create thread and forward
-            final Call<DirectThread> createThreadRequest = service.createThread(Collections.singletonList(recipient.getUser().getPk()), null);
-            createThreadRequest.enqueue(new Callback<DirectThread>() {
-                @Override
-                public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
-                    if (!response.isSuccessful()) {
-                        if (response.errorBody() != null) {
-                            try {
-                                final String string = response.errorBody().string();
-                                final String msg = String.format(Locale.US,
-                                                                 "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                                                                 call.request().url().toString(),
-                                                                 response.code(),
-                                                                 string);
-                                Log.e(TAG, msg);
-                            } catch (IOException e) {
-                                Log.e(TAG, "onResponse: ", e);
-                            }
-                            return;
-                        }
-                        Log.e(TAG, "onResponse: request was not successful and response error body was null");
-                        return;
-                    }
-                    final DirectThread thread = response.body();
-                    if (thread == null) {
-                        Log.e(TAG, "onResponse: thread is null");
-                        return;
-                    }
-                    forward(thread, itemToForward);
-                }
-
-                @Override
-                public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
-
-                }
+            messagesManager.createThread(recipient.getUser().getPk(), directThread -> {
+                forward(directThread, itemToForward);
+                return null;
             });
-            return;
         }
         if (recipient.getThread() != null) {
             // just forward
@@ -870,13 +839,25 @@ public final class ThreadManager {
         replyToItem.postValue(item);
     }
 
-    private void forward(@NonNull final DirectThread thread, @NonNull final DirectItem itemToForward) {
+    @NonNull
+    private LiveData<Resource<Object>> forward(@NonNull final DirectThread thread, @NonNull final DirectItem itemToForward) {
+        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
+        if (itemToForward.getItemId() == null) {
+            data.postValue(Resource.error("item id is null", null));
+            return data;
+        }
         final DirectItemType itemType = itemToForward.getItemType();
+        if (itemType == null) {
+            data.postValue(Resource.error("item type is null", null));
+            return data;
+        }
         final String itemTypeName = itemType.getName();
         if (itemTypeName == null) {
             Log.e(TAG, "forward: itemTypeName was null!");
-            return;
+            data.postValue(Resource.error("itemTypeName is null", null));
+            return data;
         }
+        data.postValue(Resource.loading(null));
         final Call<DirectThreadBroadcastResponse> request = service.forward(thread.getThreadId(),
                                                                             itemTypeName,
                                                                             threadId,
@@ -885,7 +866,10 @@ public final class ThreadManager {
             @Override
             public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
                                    @NonNull final Response<DirectThreadBroadcastResponse> response) {
-                if (response.isSuccessful()) return;
+                if (response.isSuccessful()) {
+                    data.postValue(Resource.success(new Object()));
+                    return;
+                }
                 if (response.errorBody() != null) {
                     try {
                         final String string = response.errorBody().string();
@@ -895,19 +879,25 @@ public final class ThreadManager {
                                                          response.code(),
                                                          string);
                         Log.e(TAG, msg);
+                        data.postValue(Resource.error(msg, null));
                     } catch (IOException e) {
                         Log.e(TAG, "onResponse: ", e);
+                        data.postValue(Resource.error(e.getMessage(), null));
                     }
                     return;
                 }
-                Log.e(TAG, "onResponse: request was not successful and response error body was null");
+                final String msg = "onResponse: request was not successful and response error body was null";
+                Log.e(TAG, msg);
+                data.postValue(Resource.error(msg, null));
             }
 
             @Override
             public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
                 Log.e(TAG, "onFailure: ", t);
+                data.postValue(Resource.error(t.getMessage(), null));
             }
         });
+        return data;
     }
 
     public LiveData<Resource<Object>> acceptRequest() {

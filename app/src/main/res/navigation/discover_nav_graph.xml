@@ -111,6 +111,12 @@
             app:argType="integer" />
     </action>
 
+    <include app:graph="@navigation/user_search_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_user_search"
+        app:destination="@id/user_search_nav_graph" />
+
     <fragment
         android:id="@+id/discoverFragment"
         android:name="awais.instagrabber.fragments.main.DiscoverFragment"

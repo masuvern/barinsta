@@ -21,6 +21,7 @@ import awais.instagrabber.repositories.requests.directmessages.AnimatedMediaBroa
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.requests.directmessages.LinkBroadcastOptions;
+import awais.instagrabber.repositories.requests.directmessages.MediaShareBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.PhotoBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.ReactionBroadcastOptions;
 import awais.instagrabber.repositories.requests.directmessages.StoryReplyBroadcastOptions;
@@ -188,6 +189,12 @@ public class DirectMessagesService extends BaseService {
                                                                       final ThreadIdOrUserIds threadIdOrUserIds,
                                                                       final GiphyGif giphyGif) {
         return broadcast(new AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif));
+    }
+
+    public Call<DirectThreadBroadcastResponse> broadcastMediaShare(@NonNull final String clientContext,
+                                                                   @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
+                                                                   @NonNull final String mediaId) {
+        return broadcast(new MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId));
     }
 
     private Call<DirectThreadBroadcastResponse> broadcast(@NonNull final BroadcastOptions broadcastOptions) {
