@@ -48,11 +48,10 @@ fun setupCookies(cookieRaw: String) {
     }
 }
 
-fun removeAllAccounts(context: Context?, callback: RepositoryCallback<Void?>?) {
-    val cookieStore = NET_COOKIE_MANAGER.cookieStore ?: return
-    cookieStore.removeAll()
+fun removeAllAccounts(context: Context, callback: RepositoryCallback<Void?>?) {
+    NET_COOKIE_MANAGER.cookieStore.removeAll()
     try {
-        AccountRepository.getInstance(AccountDataSource.getInstance(context!!))
+        AccountRepository.getInstance(AccountDataSource.getInstance(context))
             .deleteAllAccounts(callback)
     } catch (e: Exception) {
         Log.e(TAG, "setupCookies", e)
@@ -60,6 +59,7 @@ fun removeAllAccounts(context: Context?, callback: RepositoryCallback<Void?>?) {
 }
 
 fun getUserIdFromCookie(cookies: String?): Long {
+    cookies ?: return 0
     val dsUserId = getCookieValue(cookies, "ds_user_id") ?: return 0
     try {
         return dsUserId.toLong()
@@ -69,12 +69,11 @@ fun getUserIdFromCookie(cookies: String?): Long {
     return 0
 }
 
-fun getCsrfTokenFromCookie(cookies: String?): String? {
+fun getCsrfTokenFromCookie(cookies: String): String? {
     return getCookieValue(cookies, "csrftoken")
 }
 
-private fun getCookieValue(cookies: String?, name: String): String? {
-    if (cookies == null) return null
+private fun getCookieValue(cookies: String, name: String): String? {
     val pattern = Pattern.compile("$name=(.+?);")
     val matcher = pattern.matcher(cookies)
     return if (matcher.find()) {
