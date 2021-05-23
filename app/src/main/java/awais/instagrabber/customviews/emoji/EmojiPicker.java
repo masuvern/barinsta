@@ -67,7 +67,9 @@ public class EmojiPicker extends LinearLayout {
         viewPager2.setAdapter(new EmojiPickerPageAdapter(rootView, onEmojiClickListener));
         viewPager2.setOffscreenPageLimit(1);
 
-        final EmojiParser emojiParser = EmojiParser.getInstance();
+        final Context context = getContext();
+        if (context == null) return;
+        final EmojiParser emojiParser = EmojiParser.Companion.getInstance(context);
         final List<EmojiCategory> categories = emojiParser.getEmojiCategories();
 
         new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {

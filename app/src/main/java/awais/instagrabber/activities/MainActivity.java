@@ -184,7 +184,7 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         // Initialise the internal map
         AppExecutors.INSTANCE.getTasksThread().execute(() -> {
-            EmojiParser.setup(this);
+            EmojiParser.Companion.getInstance(this);
             EmojiVariantManager.getInstance();
         });
         initEmojiCompat();

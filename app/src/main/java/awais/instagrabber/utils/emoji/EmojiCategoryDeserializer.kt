@@ -1,52 +1,44 @@
-package awais.instagrabber.utils.emoji;
+package awais.instagrabber.utils.emoji
 
-import android.util.Log;
+import android.util.Log
+import awais.instagrabber.customviews.emoji.Emoji
+import awais.instagrabber.customviews.emoji.EmojiCategory
+import awais.instagrabber.customviews.emoji.EmojiCategoryType
+import awais.instagrabber.utils.extensions.TAG
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import java.lang.reflect.Type
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+class EmojiCategoryDeserializer : JsonDeserializer<EmojiCategory> {
 
-import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import awais.instagrabber.customviews.emoji.Emoji;
-import awais.instagrabber.customviews.emoji.EmojiCategory;
-import awais.instagrabber.customviews.emoji.EmojiCategoryType;
-
-public class EmojiCategoryDeserializer implements JsonDeserializer<EmojiCategory> {
-    private static final String TAG = EmojiCategoryDeserializer.class.getSimpleName();
-
-    @Override
-    public EmojiCategory deserialize(final JsonElement json,
-                                     final Type typeOfT,
-                                     final JsonDeserializationContext context) throws JsonParseException {
-        final JsonObject jsonObject = json.getAsJsonObject();
-        final JsonElement typeElement = jsonObject.get("type");
-        final JsonObject emojisObject = jsonObject.getAsJsonObject("emojis");
+    @Throws(JsonParseException::class)
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type,
+        context: JsonDeserializationContext
+    ): EmojiCategory {
+        val jsonObject = json.asJsonObject
+        val typeElement = jsonObject["type"]
+        val emojisObject = jsonObject.getAsJsonObject("emojis")
         if (typeElement == null || emojisObject == null) {
-            throw new JsonParseException("Invalid json for EmojiCategory");
+            throw JsonParseException("Invalid json for EmojiCategory")
         }
-        final String typeString = typeElement.getAsString();
-        EmojiCategoryType type;
-        try {
-            type = EmojiCategoryType.valueOf(typeString);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "deserialize: ", e);
-            type = EmojiCategoryType.OTHERS;
+        val typeString = typeElement.asString
+        val type: EmojiCategoryType = try {
+            EmojiCategoryType.valueOf(typeString)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "deserialize: ", e)
+            EmojiCategoryType.OTHERS
         }
-        final Map<String, Emoji> emojis = new LinkedHashMap<>();
-        for (final Map.Entry<String, JsonElement> emojiObjectEntry : emojisObject.entrySet()) {
-            final String unicode = emojiObjectEntry.getKey();
-            final JsonElement value = emojiObjectEntry.getValue();
+        val emojis: MutableMap<String, Emoji> = linkedMapOf()
+        for ((unicode, value) in emojisObject.entrySet()) {
             if (unicode == null || value == null) {
-                throw new JsonParseException("Invalid json for EmojiCategory");
+                throw JsonParseException("Invalid json for EmojiCategory")
             }
-            final Emoji emoji = context.deserialize(value, Emoji.class);
-            emojis.put(unicode, emoji);
+            emojis[unicode] = context.deserialize(value, Emoji::class.java)
         }
-        return new EmojiCategory(type, emojis);
+        return EmojiCategory(type, emojis)
     }
 }

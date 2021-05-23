@@ -37,13 +37,14 @@ public class EmojiPickerPageAdapter extends RecyclerView.Adapter<EmojiCategoryPa
     private final OnEmojiClickListener onEmojiClickListener;
     private final AsyncListDiffer<EmojiCategory> differ;
 
-    public EmojiPickerPageAdapter(final View rootView,
+    public EmojiPickerPageAdapter(@NonNull final View rootView,
                                   final OnEmojiClickListener onEmojiClickListener) {
         this.rootView = rootView;
         this.onEmojiClickListener = onEmojiClickListener;
         differ = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
                                        new AsyncDifferConfig.Builder<>(diffCallback).build());
-        differ.submitList(EmojiParser.getInstance().getEmojiCategories());
+        final EmojiParser emojiParser = EmojiParser.Companion.getInstance(rootView.getContext());
+        differ.submitList(emojiParser.getEmojiCategories());
         setHasStableIds(true);
     }
 

@@ -43,14 +43,14 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
     private final EmojiVariantManager emojiVariantManager;
     private final AppExecutors appExecutors;
 
-    public EmojiGridAdapter(final EmojiCategoryType emojiCategoryType,
+    public EmojiGridAdapter(@NonNull final EmojiParser emojiParser,
+                            final EmojiCategoryType emojiCategoryType,
                             final OnEmojiClickListener onEmojiClickListener,
                             final OnEmojiLongClickListener onEmojiLongClickListener) {
         this.onEmojiClickListener = onEmojiClickListener;
         this.onEmojiLongClickListener = onEmojiLongClickListener;
         differ = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
                                        new AsyncDifferConfig.Builder<>(diffCallback).build());
-        final EmojiParser emojiParser = EmojiParser.getInstance();
         final Map<EmojiCategoryType, EmojiCategory> categoryMap = emojiParser.getCategoryMap();
         emojiVariantManager = EmojiVariantManager.getInstance();
         appExecutors = AppExecutors.INSTANCE;

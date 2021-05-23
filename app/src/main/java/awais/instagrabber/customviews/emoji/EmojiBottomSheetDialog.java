@@ -20,6 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import awais.instagrabber.R;
 import awais.instagrabber.customviews.helpers.GridSpacingItemDecoration;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.emoji.EmojiParser;
 
 public class EmojiBottomSheetDialog extends BottomSheetDialogFragment {
     public static final String TAG = EmojiBottomSheetDialog.class.getSimpleName();
@@ -89,7 +90,8 @@ public class EmojiBottomSheetDialog extends BottomSheetDialogFragment {
         grid.setHasFixedSize(true);
         grid.setClipToPadding(false);
         grid.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(8)));
-        final EmojiGridAdapter adapter = new EmojiGridAdapter(null, (view, emoji) -> {
+        final EmojiParser emojiParser = EmojiParser.Companion.getInstance(context);
+        final EmojiGridAdapter adapter = new EmojiGridAdapter(emojiParser, null, (view, emoji) -> {
             if (callback != null) {
                 callback.onClick(view, emoji);
             }

@@ -80,7 +80,7 @@ public class DirectItemContextMenu extends PopupWindow {
         if (!showReactions && (options == null || options.isEmpty())) {
             throw new IllegalArgumentException("showReactions is set false and options are empty");
         }
-        reactionsManager = ReactionsManager.getInstance();
+        reactionsManager = ReactionsManager.getInstance(context);
         final Resources resources = context.getResources();
         emojiSize = resources.getDimensionPixelSize(R.dimen.reaction_picker_emoji_size);
         emojiMargin = resources.getDimensionPixelSize(R.dimen.reaction_picker_emoji_margin);

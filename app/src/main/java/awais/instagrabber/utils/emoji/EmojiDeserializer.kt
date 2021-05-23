@@ -1,44 +1,40 @@
-package awais.instagrabber.utils.emoji;
+package awais.instagrabber.utils.emoji
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import awais.instagrabber.customviews.emoji.Emoji
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import java.lang.reflect.Type
 
-import java.lang.reflect.Type;
-import java.util.LinkedList;
-import java.util.List;
-
-import awais.instagrabber.customviews.emoji.Emoji;
-
-public class EmojiDeserializer implements JsonDeserializer<Emoji> {
-    @Override
-    public Emoji deserialize(final JsonElement json,
-                             final Type typeOfT,
-                             final JsonDeserializationContext context) throws JsonParseException {
-        final JsonObject jsonObject = json.getAsJsonObject();
-        final JsonElement unicodeElement = jsonObject.get("unicode");
-        final JsonElement nameElement = jsonObject.get("name");
+class EmojiDeserializer : JsonDeserializer<Emoji> {
+    @Throws(JsonParseException::class)
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type,
+        context: JsonDeserializationContext
+    ): Emoji {
+        val jsonObject = json.asJsonObject
+        val unicodeElement = jsonObject["unicode"]
+        val nameElement = jsonObject["name"]
         if (unicodeElement == null || nameElement == null) {
-            throw new JsonParseException("Invalid json for Emoji class");
+            throw JsonParseException("Invalid json for Emoji class")
         }
-        final JsonElement variantsElement = jsonObject.get("variants");
-        final List<Emoji> variants = new LinkedList<>();
+        val variantsElement = jsonObject["variants"]
+        val variants: MutableList<Emoji> = mutableListOf()
         if (variantsElement != null) {
-            final JsonArray variantsArray = variantsElement.getAsJsonArray();
-            for (final JsonElement variantElement : variantsArray) {
-                final Emoji variant = context.deserialize(variantElement, Emoji.class);
+            val variantsArray = variantsElement.asJsonArray
+            for (variantElement in variantsArray) {
+                val variant = context.deserialize<Emoji>(variantElement, Emoji::class.java)
                 if (variant != null) {
-                    variants.add(variant);
+                    variants.add(variant)
                 }
             }
         }
-        return new Emoji(
-                unicodeElement.getAsString(),
-                nameElement.getAsString(),
-                variants
-        );
+        return Emoji(
+            unicodeElement.asString,
+            nameElement.asString,
+            variants
+        )
     }
 }
