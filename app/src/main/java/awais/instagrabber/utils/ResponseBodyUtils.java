@@ -781,7 +781,6 @@ public final class ResponseBodyUtils {
             );
         }
         final Caption caption = new Caption(
-                0,
                 userId,
                 captionText != null ? captionText : ""
         );
