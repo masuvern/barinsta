@@ -1,5 +1,7 @@
 package awais.instagrabber.webservices.interceptors;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -57,7 +59,9 @@ public class IgErrorsInterceptor implements Interceptor {
                 final String location = response.header("location");
                 if (location != null && location.equals("https://www.instagram.com/accounts/login/")) {
                     // rate limited
-                    showErrorDialog(R.string.rate_limit);
+                    final String message = MainActivity.getInstance().getString(R.string.rate_limit);
+                    final Spanned spanned = Html.fromHtml(message);
+                    showErrorDialog(spanned);
                 }
                 return;
         }
@@ -121,21 +125,24 @@ public class IgErrorsInterceptor implements Interceptor {
         return String.format("code: %s, internalMessage: %s", errorCode, message);
     }
 
-    private void showErrorDialog(@StringRes final int messageResId) {
+    private void showErrorDialog(@NonNull final CharSequence message) {
         final MainActivity mainActivity = MainActivity.getInstance();
         if (mainActivity == null) return;
         final FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
         if (fragmentManager.isStateSaved()) return;
-        if (messageResId == 0) return;
         final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
                 Constants.GLOBAL_NETWORK_ERROR_DIALOG_REQUEST_CODE,
                 R.string.error,
-                messageResId,
+                message,
                 R.string.ok,
                 0,
                 0
         );
         dialogFragment.show(fragmentManager, "network_error_dialog");
+    }
+
+    private void showErrorDialog(@StringRes final int messageResId) {
+        showErrorDialog(MainActivity.getInstance().getString(messageResId));
     }
 
     public void destroy() {
