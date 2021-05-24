@@ -52,6 +52,7 @@ public class GraphQLService extends BaseService {
         return instance;
     }
 
+    // TODO convert string response to a response class
     private void fetch(final String queryHash,
                        final String variables,
                        final String arg1,
@@ -194,6 +195,7 @@ public class GraphQLService extends BaseService {
         return new PostsFetchResponse(items, hasNextPage, endCursor);
     }
 
+    // TODO convert string response to a response class
     public void fetchCommentLikers(final String commentId,
                                    final String endCursor,
                                    final ServiceCallback<GraphQLUserListFetchResponse> callback) {
@@ -273,6 +275,7 @@ public class GraphQLService extends BaseService {
         return repository.fetch(queryMap);
     }
 
+    // TODO convert string response to a response class
     public void fetchUser(final String username,
                           final ServiceCallback<User> callback) {
         final Call<String> request = repository.getUser(username);
@@ -357,6 +360,7 @@ public class GraphQLService extends BaseService {
         });
     }
 
+    // TODO convert string response to a response class
     public void fetchPost(final String shortcode,
                           final ServiceCallback<Media> callback) {
         final Call<String> request = repository.getPost(shortcode);
@@ -391,6 +395,7 @@ public class GraphQLService extends BaseService {
         });
     }
 
+    // TODO convert string response to a response class
     public void fetchTag(final String tag,
                          final ServiceCallback<Hashtag> callback) {
         final Call<String> request = repository.getTag(tag);
@@ -431,6 +436,7 @@ public class GraphQLService extends BaseService {
         });
     }
 
+    // TODO convert string response to a response class
     public void fetchLocation(final long locationId,
                               final ServiceCallback<Location> callback) {
         final Call<String> request = repository.getLocation(locationId);
