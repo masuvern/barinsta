@@ -49,7 +49,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse.DirectItemSeenResponsePayload;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;

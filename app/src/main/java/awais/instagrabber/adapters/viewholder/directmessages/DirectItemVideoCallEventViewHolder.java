@@ -17,9 +17,9 @@ import awais.instagrabber.databinding.LayoutDmActionLogBinding;
 import awais.instagrabber.databinding.LayoutDmBaseBinding;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemActionLog;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemVideoCallEvent;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.TextRange;
 import awais.instagrabber.utils.TextUtils;
 
 public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
@@ -41,9 +41,9 @@ public class DirectItemVideoCallEventViewHolder extends DirectItemViewHolder {
         final DirectItemVideoCallEvent videoCallEvent = directItemModel.getVideoCallEvent();
         final String text = videoCallEvent.getDescription();
         final SpannableStringBuilder sb = new SpannableStringBuilder(text);
-        final List<DirectItemActionLog.TextRange> textAttributes = videoCallEvent.getTextAttributes();
+        final List<TextRange> textAttributes = videoCallEvent.getTextAttributes();
         if (textAttributes != null && !textAttributes.isEmpty()) {
-            for (final DirectItemActionLog.TextRange textAttribute : textAttributes) {
+            for (final TextRange textAttribute : textAttributes) {
                 if (!TextUtils.isEmpty(textAttribute.getColor())) {
                     final ForegroundColorSpan colorSpan = new ForegroundColorSpan(itemView.getResources().getColor(R.color.deep_orange_400));
                     sb.setSpan(colorSpan, textAttribute.getStart(), textAttribute.getEnd(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);

@@ -1,19 +1,6 @@
-package awais.instagrabber.repositories.responses.directmessages;
+package awais.instagrabber.repositories.responses.directmessages
 
-public class DirectThreadFeedResponse {
-    private final DirectThread thread;
-    private final String status;
-
-    public DirectThreadFeedResponse(final DirectThread thread, final String status) {
-        this.thread = thread;
-        this.status = status;
-    }
-
-    public DirectThread getThread() {
-        return thread;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-}
+data class DirectThreadFeedResponse(
+    val thread: DirectThread? = null,
+    val status: String? = null,
+)
