@@ -30,27 +30,24 @@ private fun createPhotoRuploadParams(options: UploadPhotoOptions): Map<String, S
     ).toMap()
 }
 
-private fun createVideoRuploadParams(options: UploadVideoOptions): Map<String, String> {
-    val retryContextString = retryContextString
-    return listOfNotNull(
-        "retry_context" to retryContextString,
-        "media_type" to "2",
-        "xsharing_user_ids" to "[]",
-        "upload_id" to options.uploadId,
-        "upload_media_width" to options.width.toString(),
-        "upload_media_height" to options.height.toString(),
-        "upload_media_duration_ms" to options.duration.toString(),
-        if (options.isSideCar) "is_sidecar" to "1" else null,
-        if (options.isForAlbum) "for_album" to "1" else null,
-        if (options.isDirect) "direct_v2" to "1" else null,
-        *(if (options.isForDirectStory) arrayOf(
-            "for_direct_story" to "1",
-            "content_tags" to ""
-        ) else emptyArray()),
-        if (options.isIgtvVideo) "is_igtv_video" to "1" else null,
-        if (options.isDirectVoice) "is_direct_voice" to "1" else null,
-    ).toMap()
-}
+private fun createVideoRuploadParams(options: UploadVideoOptions): Map<String, String> = listOfNotNull(
+    "retry_context" to retryContextString,
+    "media_type" to "2",
+    "xsharing_user_ids" to "[]",
+    "upload_id" to options.uploadId,
+    "upload_media_width" to options.width.toString(),
+    "upload_media_height" to options.height.toString(),
+    "upload_media_duration_ms" to options.duration.toString(),
+    if (options.isSideCar) "is_sidecar" to "1" else null,
+    if (options.forAlbum) "for_album" to "1" else null,
+    if (options.isDirect) "direct_v2" to "1" else null,
+    *(if (options.isForDirectStory) arrayOf(
+        "for_direct_story" to "1",
+        "content_tags" to ""
+    ) else emptyArray()),
+    if (options.isIgtvVideo) "is_igtv_video" to "1" else null,
+    if (options.isDirectVoice) "is_direct_voice" to "1" else null,
+).toMap()
 
 val retryContextString: String
     get() {

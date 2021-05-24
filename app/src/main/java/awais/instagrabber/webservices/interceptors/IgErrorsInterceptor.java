@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.FragmentManager;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -70,8 +71,18 @@ public class IgErrorsInterceptor implements Interceptor {
         try {
             final String bodyString = body.string();
             Log.d(TAG, "checkError: " + bodyString);
-            final JSONObject jsonObject = new JSONObject(bodyString);
-            String message = jsonObject.optString("message");
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(bodyString);
+            } catch (JSONException e) {
+                Log.e(TAG, "checkError: ", e);
+            }
+            String message;
+            if (jsonObject != null) {
+                message = jsonObject.optString("message");
+            } else {
+                message = bodyString;
+            }
             if (!TextUtils.isEmpty(message)) {
                 message = message.toLowerCase();
                 switch (message) {

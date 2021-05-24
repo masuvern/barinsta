@@ -11,7 +11,7 @@ data class UploadVideoOptions(
     val height: Int = 0,
     val isSideCar: Boolean = false,
     // Stories
-    val isForAlbum: Boolean = false,
+    val forAlbum: Boolean = false,
     val isDirect: Boolean = false,
     val isDirectVoice: Boolean = false,
     val isForDirectStory: Boolean = false,
