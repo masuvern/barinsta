@@ -15,6 +15,7 @@ import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.directmessages.ActionType;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemAnimatedMedia;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReelShare;
@@ -267,7 +268,7 @@ public final class DMUtils {
         final DirectItemVisualMedia visualMedia = item.getVisualMedia();
         final RavenExpiringMediaActionSummary summary = visualMedia.getExpiringMediaActionSummary();
         if (summary != null) {
-            final RavenExpiringMediaActionSummary.ActionType expiringMediaType = summary.getType();
+            final ActionType expiringMediaType = summary.getType();
             int textRes = 0;
             switch (expiringMediaType) {
                 case DELIVERED:

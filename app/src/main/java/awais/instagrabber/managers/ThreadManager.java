@@ -195,7 +195,7 @@ public final class ThreadManager {
                                                .orElse(null);
             if (thread != null) {
                 cursor = thread.getOldestCursor();
-                hasOlder = thread.hasOlder();
+                hasOlder = thread.getHasOlder();
             }
             return thread;
         }));
@@ -229,7 +229,7 @@ public final class ThreadManager {
         }));
         pending = distinctUntilChanged(map(thread, t -> {
             if (t == null) return true;
-            return t.isPending();
+            return t.getPending();
         }));
         adminUserIds = distinctUntilChanged(map(thread, t -> {
             if (t == null) return Collections.emptyList();
@@ -249,15 +249,15 @@ public final class ThreadManager {
         }));
         isMuted = distinctUntilChanged(map(thread, t -> {
             if (t == null) return false;
-            return t.isMuted();
+            return t.getMuted();
         }));
         isApprovalRequiredToJoin = distinctUntilChanged(map(thread, t -> {
             if (t == null) return false;
-            return t.isApprovalRequiredForNewMembers();
+            return t.getApprovalRequiredForNewMembers();
         }));
         isMentionsMuted = distinctUntilChanged(map(thread, t -> {
             if (t == null) return false;
-            return t.isMentionsMuted();
+            return t.getMentionsMuted();
         }));
         pendingRequestsCount = distinctUntilChanged(map(pendingRequests, p -> {
             if (p == null) return 0;

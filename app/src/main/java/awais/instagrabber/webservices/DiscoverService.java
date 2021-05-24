@@ -107,7 +107,7 @@ public class DiscoverService extends BaseService {
     //         }
     //         final String type = clusterJson.optString("type");
     //         final boolean canMute = clusterJson.optBoolean("can_mute");
-    //         final boolean isMuted = clusterJson.optBoolean("is_muted");
+    //         final boolean getMuted = clusterJson.optBoolean("is_muted");
     //         final JSONObject coverMediaJson = clusterJson.optJSONObject("cover_media");
     //         final int rankedPosition = clusterJson.optInt("ranked_position");
     //         final FeedModel feedModel = parseClusterCover(coverMediaJson);
@@ -116,7 +116,7 @@ public class DiscoverService extends BaseService {
     //                 title,
     //                 type,
     //                 canMute,
-    //                 isMuted,
+    //                 getMuted,
     //                 rankedPosition,
     //                 feedModel
     //         );

@@ -80,7 +80,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
     //     final List<Long> adminUserIds = thread.getAdminUserIds();
     //     this.adminUserIds.postValue(adminUserIds);
     //     viewerIsAdmin = adminUserIds.contains(viewerId);
-    //     muted.postValue(thread.isMuted());
+    //     muted.postValue(thread.getMuted());
     //     mentionsMuted.postValue(thread.isMentionsMuted());
     //     approvalRequiredToJoin.postValue(thread.isApprovalRequiredForNewMembers());
     //     isPending.postValue(thread.isPending());
