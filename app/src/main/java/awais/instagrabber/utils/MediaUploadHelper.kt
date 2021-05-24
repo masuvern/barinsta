@@ -83,7 +83,7 @@ fun createUploadDmVideoOptions(
         duration,
         width,
         height,
-        true,
+        isDirect = true,
         mediaType = MediaItemType.MEDIA_TYPE_VIDEO,
     )
 }
