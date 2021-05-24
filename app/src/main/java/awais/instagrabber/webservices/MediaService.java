@@ -21,7 +21,9 @@ import java.util.UUID;
 import awais.instagrabber.models.Comment;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.MediaRepository;
+import awais.instagrabber.repositories.requests.Clip;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
+import awais.instagrabber.repositories.requests.VideoOptions;
 import awais.instagrabber.repositories.responses.LikersResponse;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaInfoResponse;
@@ -443,13 +445,9 @@ public class MediaService extends BaseService {
 
     public Call<String> uploadFinish(@NonNull final UploadFinishOptions options) {
         if (options.getVideoOptions() != null) {
-            final UploadFinishOptions.VideoOptions videoOptions = options.getVideoOptions();
-            if (videoOptions.getClips() == null) {
-                videoOptions.setClips(Collections.singletonList(
-                        new UploadFinishOptions.Clip()
-                                .setLength(videoOptions.getLength())
-                                .setSourceType(options.getSourceType())
-                ));
+            final VideoOptions videoOptions = options.getVideoOptions();
+            if (videoOptions.getClips().isEmpty()) {
+                videoOptions.setClips(Collections.singletonList(new Clip(videoOptions.getLength(), options.getSourceType())));
             }
         }
         final String timezoneOffset = String.valueOf(DateUtils.getTimezoneOffset());

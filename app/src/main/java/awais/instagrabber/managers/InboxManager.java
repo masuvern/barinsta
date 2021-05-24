@@ -220,7 +220,7 @@ public final class InboxManager {
         }
         this.inbox.postValue(Resource.success(inbox));
         cursor = inbox.getOldestCursor();
-        hasOlder = inbox.hasOlder();
+        hasOlder = inbox.getHasOlder();
         pendingRequestsTotal.postValue(response.getPendingRequestsTotal());
     }
 

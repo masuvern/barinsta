@@ -40,6 +40,7 @@ import awais.instagrabber.models.Resource.Status;
 import awais.instagrabber.models.UploadVideoOptions;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
+import awais.instagrabber.repositories.requests.VideoOptions;
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
@@ -694,9 +695,11 @@ public final class ThreadManager {
             public void onUploadComplete(final MediaUploader.MediaUploadResponse response) {
                 // Log.d(TAG, "onUploadComplete: " + response);
                 if (handleInvalidResponse(data, response)) return;
-                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions()
-                        .setUploadId(uploadDmVoiceOptions.getUploadId())
-                        .setSourceType("4");
+                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions(
+                        uploadDmVoiceOptions.getUploadId(),
+                        "4",
+                        null
+                );
                 final Call<String> uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions);
                 uploadFinishRequest.enqueue(new Callback<String>() {
                     @Override
@@ -1082,10 +1085,11 @@ public final class ThreadManager {
             public void onUploadComplete(final MediaUploader.MediaUploadResponse response) {
                 // Log.d(TAG, "onUploadComplete: " + response);
                 if (handleInvalidResponse(data, response)) return;
-                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions()
-                        .setUploadId(uploadDmVideoOptions.getUploadId())
-                        .setSourceType("2")
-                        .setVideoOptions(new UploadFinishOptions.VideoOptions().setLength(duration / 1000f));
+                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions(
+                        uploadDmVideoOptions.getUploadId(),
+                        "2",
+                        new VideoOptions(duration / 1000f, Collections.emptyList(), 0, false)
+                );
                 final Call<String> uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions);
                 uploadFinishRequest.enqueue(new Callback<String>() {
                     @Override
