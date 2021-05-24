@@ -61,7 +61,6 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -928,7 +927,7 @@ public class StoryViewerFragment extends Fragment {
         else setupImage();
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        actionBarSubtitle = Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L));
+        actionBarSubtitle = TextUtils.epochSecondToString(currentStory.getTimestamp());
         if (actionBar != null) {
             try {
                 actionBar.setSubtitle(actionBarSubtitle);

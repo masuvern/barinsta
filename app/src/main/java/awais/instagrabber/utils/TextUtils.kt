@@ -4,9 +4,15 @@ import android.content.Context
 import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.util.Patterns
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 object TextUtils {
+    var datetimeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("")
+
     @JvmStatic
     fun isEmpty(charSequence: CharSequence?): Boolean {
         if (charSequence == null || charSequence.length < 1) return true
@@ -71,5 +77,26 @@ object TextUtils {
             i++
         }
         return result
+    }
+
+    @JvmStatic
+    fun setFormatter(datetimeParser: DateTimeFormatter) {
+        this.datetimeParser = datetimeParser
+    }
+
+    @JvmStatic
+    fun epochSecondToString(epochSecond: Long): String {
+        return LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(epochSecond),
+                ZoneId.systemDefault()
+        ).format(datetimeParser)
+    }
+
+    @JvmStatic
+    fun nowToString(): String {
+        return LocalDateTime.ofInstant(
+                Instant.now(),
+                ZoneId.systemDefault()
+        ).format(datetimeParser)
     }
 }

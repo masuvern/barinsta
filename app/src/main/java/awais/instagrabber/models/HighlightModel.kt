@@ -1,6 +1,6 @@
 package awais.instagrabber.models
 
-import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.TextUtils
 import java.util.*
 
 data class HighlightModel(
@@ -11,5 +11,5 @@ data class HighlightModel(
     val mediaCount: Int
 ) {
     val dateTime: String
-        get() = Utils.datetimeParser.format(Date(timestamp * 1000L))
+        get() = TextUtils.epochSecondToString(timestamp)
 }

@@ -2,7 +2,7 @@ package awais.instagrabber.repositories.responses
 
 import awais.instagrabber.models.enums.MediaItemType
 import awais.instagrabber.repositories.responses.feed.EndOfFeedDemarcator
-import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.TextUtils
 import java.io.Serializable
 import java.util.*
 
@@ -54,7 +54,7 @@ data class Media(
         get() {
             if (takenAt <= 0) return ""
             if (dateString != null) return dateString ?: ""
-            dateString = Utils.datetimeParser.format(Date(takenAt * 1000L))
+            dateString = TextUtils.epochSecondToString(takenAt)
             return dateString ?: ""
         }
 

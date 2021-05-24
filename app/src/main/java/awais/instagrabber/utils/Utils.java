@@ -53,7 +53,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -78,7 +77,6 @@ public final class Utils {
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
     public static final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static ClipboardManager clipboardManager;
-    public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
     private static int statusBarHeight;
     private static int actionBarHeight;

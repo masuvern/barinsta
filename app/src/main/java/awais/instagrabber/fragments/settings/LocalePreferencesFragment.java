@@ -7,15 +7,14 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.TimeSettingsDialog;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.UserAgentUtils;
-import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -55,7 +54,7 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
     private Preference getPostTimeFormatPreference(@NonNull final Context context) {
         final Preference preference = new Preference(context);
         preference.setTitle(R.string.time_settings);
-        preference.setSummary(Utils.datetimeParser.format(new Date()));
+        preference.setSummary(TextUtils.nowToString());
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(preference1 -> {
             new TimeSettingsDialog(
@@ -64,15 +63,15 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
                     settingsHelper.getString(PreferenceKeys.DATE_TIME_SELECTION),
                     settingsHelper.getBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED),
                     (isCustomFormat,
-                     formatSelection,
                      spTimeFormatSelectedItemPosition,
                      spSeparatorSelectedItemPosition,
                      spDateFormatSelectedItemPosition,
                      selectedFormat,
-                     currentFormat,
                      swapDateTime) -> {
+                        settingsHelper.putBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
+                        settingsHelper.putBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
                         if (isCustomFormat) {
-                            settingsHelper.putString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT, formatSelection);
+                            settingsHelper.putString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT, selectedFormat);
                         } else {
                             final String formatSelectionUpdated = spTimeFormatSelectedItemPosition + ";"
                                     + spSeparatorSelectedItemPosition + ';'
@@ -80,10 +79,8 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
                             settingsHelper.putString(PreferenceKeys.DATE_TIME_FORMAT, selectedFormat);
                             settingsHelper.putString(PreferenceKeys.DATE_TIME_SELECTION, formatSelectionUpdated);
                         }
-                        settingsHelper.putBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
-                        settingsHelper.putBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
-                        Utils.datetimeParser = (SimpleDateFormat) currentFormat.clone();
-                        preference.setSummary(Utils.datetimeParser.format(new Date()));
+                        TextUtils.setFormatter(DateTimeFormatter.ofPattern(selectedFormat, LocaleUtils.getCurrentLocale()));
+                        preference.setSummary(TextUtils.nowToString());
                     }
             ).show(getParentFragmentManager(), null);
             return true;

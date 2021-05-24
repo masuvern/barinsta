@@ -10,7 +10,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
 import java.net.CookieHandler;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import awais.instagrabber.fragments.settings.PreferenceKeys;
@@ -24,7 +24,6 @@ import static awais.instagrabber.utils.CookieUtils.NET_COOKIE_MANAGER;
 import static awais.instagrabber.utils.Utils.applicationHandler;
 import static awais.instagrabber.utils.Utils.cacheDir;
 import static awais.instagrabber.utils.Utils.clipboardManager;
-import static awais.instagrabber.utils.Utils.datetimeParser;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class InstaGrabberApplication extends Application {
@@ -78,11 +77,10 @@ public final class InstaGrabberApplication extends Application {
         if (clipboardManager == null)
             clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
-        if (datetimeParser == null)
-            datetimeParser = new SimpleDateFormat(
+        TextUtils.setFormatter(DateTimeFormatter.ofPattern(
                     settingsHelper.getBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED) ?
                     settingsHelper.getString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT) :
-                    settingsHelper.getString(PreferenceKeys.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale());
+                    settingsHelper.getString(PreferenceKeys.DATE_TIME_FORMAT), LocaleUtils.getCurrentLocale()));
 
         if (TextUtils.isEmpty(settingsHelper.getString(Constants.DEVICE_UUID))) {
             settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());

@@ -1,7 +1,7 @@
 package awais.instagrabber.models
 
 import awais.instagrabber.repositories.responses.User
-import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.TextUtils
 import java.io.Serializable
 import java.util.*
 
@@ -16,5 +16,5 @@ data class FeedStoryModel(
     val isBestie: Boolean
 ) : Serializable {
     val dateTime: String
-        get() = Utils.datetimeParser.format(Date(timestamp * 1000L))
+        get() = TextUtils.epochSecondToString(timestamp)
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import awais.instagrabber.utils.Utils;
+import awais.instagrabber.utils.TextUtils;
 
 public class NotificationArgs {
     private final String text;
@@ -74,7 +74,7 @@ public class NotificationArgs {
 
     @NonNull
     public String getDateTime() {
-        return Utils.datetimeParser.format(new Date(Math.round(timestamp * 1000)));
+        return TextUtils.epochSecondToString(Math.round(timestamp));
     }
 
     private String cleanRichText(final String raw) {
