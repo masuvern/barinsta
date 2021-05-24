@@ -30,7 +30,7 @@ public class CaptionDeserializer implements JsonDeserializer<Caption> {
                     pkString = pkString.substring(0, pkString.indexOf("_"));
                 }
                 try {
-                    caption.setPk(Long.parseLong(pkString));
+                    caption.setPk(pkString);
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "deserialize: ", e);
                 }

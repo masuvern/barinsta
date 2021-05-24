@@ -272,7 +272,7 @@ public class PostViewV2ViewModel extends ViewModel {
         data.postValue(Resource.loading(null));
         final Caption value = caption.getValue();
         if (value == null) return data;
-        mediaService.translate(String.valueOf(value.getPk()), "1", new ServiceCallback<String>() {
+        mediaService.translate(value.getPk(), "1", new ServiceCallback<String>() {
             @Override
             public void onSuccess(final String result) {
                 if (TextUtils.isEmpty(result)) {
