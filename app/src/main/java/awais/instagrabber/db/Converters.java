@@ -6,20 +6,20 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Date;
+//import java.util.Date;
 
 import awais.instagrabber.models.enums.FavoriteType;
 
 public class Converters {
-    @TypeConverter
-    public static Date fromTimestamp(Long value) {
-        return value == null ? null : new Date(value);
-    }
-
-    @TypeConverter
-    public static Long dateToTimestamp(Date date) {
-        return date == null ? null : date.getTime();
-    }
+//    @TypeConverter
+//    public static Date fromTimestamp(Long value) {
+//        return value == null ? null : new Date(value);
+//    }
+//
+//    @TypeConverter
+//    public static Long dateToTimestamp(Date date) {
+//        return date == null ? null : date.getTime();
+//    }
 
     @TypeConverter
     public static FavoriteType fromFavoriteTypeString(String value) {

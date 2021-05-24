@@ -16,7 +16,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -28,9 +28,10 @@ public final class CrashReporterHelper {
     public static void startErrorReporterActivity(@NonNull final Application application,
                                                   @NonNull final Throwable exception) {
         final StringBuilder reportBuilder = new StringBuilder();
-        reportBuilder.append("IMPORTANT: If sending by email, your email address and the entire content will be made public on GitHub issues.")
+        reportBuilder.append("IMPORTANT: If sending by email, your email address and the entire content will be made public at")
+                     .append("\r\nIMPORTANT: https://github.com/austinhuang0131/barinsta/issues")
                      .append("\r\nIMPORTANT: When possible, please describe the steps leading to this crash. Thank you for your cooperation.")
-                     .append("\r\n\r\nError report collected on: ").append(new Date().toString())
+                     .append("\r\n\r\nError report collected on: ").append(LocalDateTime.now().toString())
                      .append("\r\n\r\nInformation:\r\n==============")
                      .append("\r\nVERSION		: ").append(BuildConfig.VERSION_NAME)
                      .append("\r\nVERSION_CODE	: ").append(BuildConfig.VERSION_CODE)

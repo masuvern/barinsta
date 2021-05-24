@@ -2,7 +2,6 @@ package awais.instagrabber.repositories.responses.notification;
 
 import androidx.annotation.NonNull;
 
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

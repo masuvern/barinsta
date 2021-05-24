@@ -94,9 +94,6 @@ object TextUtils {
 
     @JvmStatic
     fun nowToString(): String {
-        return LocalDateTime.ofInstant(
-                Instant.now(),
-                ZoneId.systemDefault()
-        ).format(datetimeParser)
+        return LocalDateTime.now().format(datetimeParser)
     }
 }

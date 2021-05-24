@@ -10,9 +10,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +34,7 @@ public class ImageEditViewModel extends AndroidViewModel {
     private static final String CROP = "crop";
     private static final String RESULT = "result";
     private static final String FILE_FORMAT = "yyyyMMddHHmmssSSS";
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(FILE_FORMAT, Locale.US);
+    private static final DateTimeFormatter SIMPLE_DATE_FORMAT = DateTimeFormatter.ofPattern(FILE_FORMAT, Locale.US);
 
     private Uri originalUri;
     private SavedImageEditState savedImageEditState;
@@ -55,7 +55,7 @@ public class ImageEditViewModel extends AndroidViewModel {
 
     public ImageEditViewModel(final Application application) {
         super(application);
-        sessionId = SIMPLE_DATE_FORMAT.format(new Date());
+        sessionId = LocalDateTime.now().format(SIMPLE_DATE_FORMAT);
         outputDir = DirectoryUtils.getOutputMediaDirectory(application, "Edit", sessionId);
         destinationFile = new File(outputDir, RESULT + ".jpg");
         destinationUri = Uri.fromFile(destinationFile);

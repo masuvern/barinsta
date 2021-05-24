@@ -6,6 +6,7 @@ import awais.instagrabber.models.UploadPhotoOptions
 import awais.instagrabber.models.UploadVideoOptions
 import awais.instagrabber.models.enums.MediaItemType
 import org.json.JSONObject
+import java.time.Instant
 import java.util.*
 import kotlin.random.Random
 
@@ -106,7 +107,7 @@ fun createUploadDmVoiceOptions(
 }
 
 fun generateUploadId(): String {
-    return (Date().time / 1000).toString()
+    return Instant.now().epochSecond.toString()
 }
 
 fun generateName(uploadId: String): String {

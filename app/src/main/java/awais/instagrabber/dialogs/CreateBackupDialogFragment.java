@@ -19,8 +19,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 import awais.instagrabber.databinding.DialogCreateBackupBinding;
@@ -34,7 +34,7 @@ import static awais.instagrabber.utils.DownloadUtils.PERMS;
 
 public class CreateBackupDialogFragment extends DialogFragment {
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
-    private static final SimpleDateFormat BACKUP_FILE_DATE_TIME_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
+    private static final DateTimeFormatter BACKUP_FILE_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
 
     private final OnResultListener onResultListener;
     private DialogCreateBackupBinding binding;
@@ -142,8 +142,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
         final DirectoryChooser directoryChooser = new DirectoryChooser()
                 .setInitialDirectory(folderPath)
                 .setInteractionListener(path -> {
-                    final Date now = new Date();
-                    final File file = new File(path, String.format("barinsta_%s.backup", BACKUP_FILE_DATE_TIME_FORMAT.format(now)));
+                    final File file = new File(path, String.format("barinsta_%s.backup", LocalDateTime.now().format(BACKUP_FILE_DATE_TIME_FORMAT)));
                     int flags = 0;
                     if (binding.cbExportFavorites.isChecked()) {
                         flags |= ExportImportUtils.FLAG_FAVORITES;
