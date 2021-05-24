@@ -7,17 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import awais.instagrabber.R
 import awais.instagrabber.adapters.FavoritesAdapter
 import awais.instagrabber.databinding.FragmentFavoritesBinding
-import awais.instagrabber.db.datasources.FavoriteDataSource
 import awais.instagrabber.db.entities.Favorite
-import awais.instagrabber.db.repositories.FavoriteRepository
-import awais.instagrabber.db.repositories.RepositoryCallback
 import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.viewmodels.FavoritesViewModel
@@ -28,16 +25,9 @@ class FavoritesFragment : Fragment() {
 
     private lateinit var binding: FragmentFavoritesBinding
     private lateinit var root: RecyclerView
-    private lateinit var favoritesViewModel: FavoritesViewModel
-    private lateinit var favoriteRepository: FavoriteRepository
     private lateinit var adapter: FavoritesAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val context = context ?: return
-        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context))
-        favoritesViewModel = ViewModelProvider(this).get(FavoritesViewModel::class.java)
-    }
+    private val favoritesViewModel: FavoritesViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         if (this::root.isInitialized) {
@@ -61,13 +51,6 @@ class FavoritesFragment : Fragment() {
         if (!this::adapter.isInitialized) return
         // refresh list every time in onViewStateRestored since it is cheaper than implementing pull down to refresh
         favoritesViewModel.list.observe(viewLifecycleOwner, { list: List<Favorite?>? -> adapter.submitList(list) })
-        favoriteRepository.getAllFavorites(object : RepositoryCallback<List<Favorite>> {
-            override fun onSuccess(favorites: List<Favorite>) {
-                favoritesViewModel.list.postValue(favorites)
-            }
-
-            override fun onDataNotAvailable() {}
-        })
     }
 
     private fun init() {
@@ -109,22 +92,7 @@ class FavoritesFragment : Fragment() {
             val context = context ?: return@FavoritesAdapter false
             MaterialAlertDialogBuilder(context)
                 .setMessage(getString(R.string.quick_access_confirm_delete, model.query))
-                .setPositiveButton(R.string.yes) { d: DialogInterface, _: Int ->
-                    favoriteRepository.deleteFavorite(model.query, model.type, object : RepositoryCallback<Void> {
-                        override fun onSuccess(result: Void) {
-                            d.dismiss()
-                            favoriteRepository.getAllFavorites(object : RepositoryCallback<List<Favorite>> {
-                                override fun onSuccess(result: List<Favorite>) {
-                                    favoritesViewModel.list.postValue(result)
-                                }
-
-                                override fun onDataNotAvailable() {}
-                            })
-                        }
-
-                        override fun onDataNotAvailable() {}
-                    })
-                }
+                .setPositiveButton(R.string.yes) { d: DialogInterface, _: Int -> favoritesViewModel.delete(model) { d.dismiss() } }
                 .setNegativeButton(R.string.no, null)
                 .show()
             true
