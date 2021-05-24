@@ -16,7 +16,6 @@ import com.google.common.collect.Iterables;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -1008,7 +1007,7 @@ public final class ThreadManager {
                 return;
             }
             sendPhoto(data, uri, dimensions.first, dimensions.second);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             data.postValue(Resource.error(e.getMessage(), null));
             Log.e(TAG, "sendPhoto: ", e);
         }

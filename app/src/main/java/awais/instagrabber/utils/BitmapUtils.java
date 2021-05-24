@@ -17,7 +17,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -243,13 +242,15 @@ public final class BitmapUtils {
      * @return dimensions of the image
      */
     public static Pair<Integer, Integer> decodeDimensions(@NonNull final ContentResolver contentResolver,
-                                                          @NonNull final Uri uri) throws FileNotFoundException {
+                                                          @NonNull final Uri uri) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(contentResolver.openInputStream(uri), null, options);
-        return (options.outWidth == -1 || options.outHeight == -1)
-               ? null
-               : new Pair<>(options.outWidth, options.outHeight);
+        try (final InputStream stream = contentResolver.openInputStream(uri)) {
+            BitmapFactory.decodeStream(stream, null, options);
+            return (options.outWidth == -1 || options.outHeight == -1)
+                   ? null
+                   : new Pair<>(options.outWidth, options.outHeight);
+        }
     }
 
     public static File convertToJpegAndSaveToFile(@NonNull final Bitmap bitmap, @Nullable final File file) throws IOException {
