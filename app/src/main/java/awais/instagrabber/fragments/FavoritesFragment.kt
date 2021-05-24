@@ -1,159 +1,134 @@
-package awais.instagrabber.fragments;
+package awais.instagrabber.fragments
 
-import android.content.Context;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.DialogInterface
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import awais.instagrabber.R
+import awais.instagrabber.adapters.FavoritesAdapter
+import awais.instagrabber.databinding.FragmentFavoritesBinding
+import awais.instagrabber.db.datasources.FavoriteDataSource
+import awais.instagrabber.db.entities.Favorite
+import awais.instagrabber.db.repositories.FavoriteRepository
+import awais.instagrabber.db.repositories.RepositoryCallback
+import awais.instagrabber.models.enums.FavoriteType
+import awais.instagrabber.utils.extensions.TAG
+import awais.instagrabber.viewmodels.FavoritesViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+class FavoritesFragment : Fragment() {
+    private var shouldRefresh = true
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+    private lateinit var binding: FragmentFavoritesBinding
+    private lateinit var root: RecyclerView
+    private lateinit var favoritesViewModel: FavoritesViewModel
+    private lateinit var favoriteRepository: FavoriteRepository
+    private lateinit var adapter: FavoritesAdapter
 
-import java.util.List;
-
-import awais.instagrabber.R;
-import awais.instagrabber.adapters.FavoritesAdapter;
-import awais.instagrabber.databinding.FragmentFavoritesBinding;
-import awais.instagrabber.db.datasources.FavoriteDataSource;
-import awais.instagrabber.db.entities.Favorite;
-import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
-import awais.instagrabber.viewmodels.FavoritesViewModel;
-
-public class FavoritesFragment extends Fragment {
-    private static final String TAG = "FavoritesFragment";
-
-    private boolean shouldRefresh = true;
-    private FragmentFavoritesBinding binding;
-    private RecyclerView root;
-    private FavoritesViewModel favoritesViewModel;
-    private FavoritesAdapter adapter;
-    private FavoriteRepository favoriteRepository;
-
-    @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        final Context context = getContext();
-        if (context == null) return;
-        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val context = context ?: return
+        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context))
+        favoritesViewModel = ViewModelProvider(this).get(FavoritesViewModel::class.java)
     }
 
-    @NonNull
-    @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
-        if (root != null) {
-            shouldRefresh = false;
-            return root;
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        if (this::root.isInitialized) {
+            shouldRefresh = false
+            return root
         }
-        binding = FragmentFavoritesBinding.inflate(getLayoutInflater());
-        root = binding.getRoot();
-        binding.favoriteList.setLayoutManager(new LinearLayoutManager(getContext()));
-        return root;
+        binding = FragmentFavoritesBinding.inflate(layoutInflater)
+        root = binding.root
+        binding.favoriteList.layoutManager = LinearLayoutManager(context)
+        return root
     }
 
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        if (!shouldRefresh) return;
-        init();
-        shouldRefresh = false;
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (!shouldRefresh) return
+        init()
+        shouldRefresh = false
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (favoritesViewModel == null || adapter == null) return;
+    override fun onResume() {
+        super.onResume()
+        if (!this::adapter.isInitialized) return
         // refresh list every time in onViewStateRestored since it is cheaper than implementing pull down to refresh
-        favoritesViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
-        favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
-            @Override
-            public void onSuccess(final List<Favorite> favorites) {
-                favoritesViewModel.getList().postValue(favorites);
+        favoritesViewModel.list.observe(viewLifecycleOwner, { list: List<Favorite?>? -> adapter.submitList(list) })
+        favoriteRepository.getAllFavorites(object : RepositoryCallback<List<Favorite>> {
+            override fun onSuccess(favorites: List<Favorite>) {
+                favoritesViewModel.list.postValue(favorites)
             }
 
-            @Override
-            public void onDataNotAvailable() {}
-        });
+            override fun onDataNotAvailable() {}
+        })
     }
 
-    private void init() {
-        favoritesViewModel = new ViewModelProvider(this).get(FavoritesViewModel.class);
-        adapter = new FavoritesAdapter(model -> {
-            // navigate
-            switch (model.getType()) {
-                case USER: {
-                    final String username = model.getQuery();
+    private fun init() {
+        adapter = FavoritesAdapter({ model: Favorite ->
+            when (model.type) {
+                FavoriteType.USER -> {
+                    val username = model.query
                     // Log.d(TAG, "username: " + username);
-                    final NavController navController = NavHostFragment.findNavController(this);
-                    final Bundle bundle = new Bundle();
-                    bundle.putString("username", "@" + username);
-                    navController.navigate(R.id.action_global_profileFragment, bundle);
-                    break;
+                    val navController = NavHostFragment.findNavController(this)
+                    val bundle = Bundle()
+                    bundle.putString("username", "@$username")
+                    navController.navigate(R.id.action_global_profileFragment, bundle)
                 }
-                case LOCATION: {
-                    final String locationId = model.getQuery();
+                FavoriteType.LOCATION -> {
+                    val locationId = model.query
                     // Log.d(TAG, "locationId: " + locationId);
-                    final NavController navController = NavHostFragment.findNavController(this);
-                    final Bundle bundle = new Bundle();
+                    val navController = NavHostFragment.findNavController(this)
+                    val bundle = Bundle()
                     try {
-                        bundle.putLong("locationId", Long.parseLong(locationId));
-                        navController.navigate(R.id.action_global_locationFragment, bundle);
-                    } catch (Exception e) {
-                        Log.e(TAG, "init: ", e);
-                        return;
+                        bundle.putLong("locationId", locationId.toLong())
+                        navController.navigate(R.id.action_global_locationFragment, bundle)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "init: ", e)
                     }
-                    break;
                 }
-                case HASHTAG: {
-                    final String hashtag = model.getQuery();
+                FavoriteType.HASHTAG -> {
+                    val hashtag = model.query
                     // Log.d(TAG, "hashtag: " + hashtag);
-                    final NavController navController = NavHostFragment.findNavController(this);
-                    final Bundle bundle = new Bundle();
-                    bundle.putString("hashtag", "#" + hashtag);
-                    navController.navigate(R.id.action_global_hashTagFragment, bundle);
-                    break;
+                    val navController = NavHostFragment.findNavController(this)
+                    val bundle = Bundle()
+                    bundle.putString("hashtag", "#$hashtag")
+                    navController.navigate(R.id.action_global_hashTagFragment, bundle)
                 }
-                default:
-                    // do nothing
+                else -> {
+                }
             }
-        }, model -> {
+        }, { model: Favorite ->
             // delete
-            final Context context = getContext();
-            if (context == null) return false;
-            new MaterialAlertDialogBuilder(context)
-                    .setMessage(getString(R.string.quick_access_confirm_delete, model.getQuery()))
-                    .setPositiveButton(R.string.yes, (d, which) -> favoriteRepository
-                            .deleteFavorite(model.getQuery(), model.getType(), new RepositoryCallback<Void>() {
-                                @Override
-                                public void onSuccess(final Void result) {
-                                    d.dismiss();
-                                    favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
-                                        @Override
-                                        public void onSuccess(final List<Favorite> result) {
-                                            favoritesViewModel.getList().postValue(result);
-                                        }
-
-                                        @Override
-                                        public void onDataNotAvailable() {}
-                                    });
+            val context = context ?: return@FavoritesAdapter false
+            MaterialAlertDialogBuilder(context)
+                .setMessage(getString(R.string.quick_access_confirm_delete, model.query))
+                .setPositiveButton(R.string.yes) { d: DialogInterface, _: Int ->
+                    favoriteRepository.deleteFavorite(model.query, model.type, object : RepositoryCallback<Void> {
+                        override fun onSuccess(result: Void) {
+                            d.dismiss()
+                            favoriteRepository.getAllFavorites(object : RepositoryCallback<List<Favorite>> {
+                                override fun onSuccess(result: List<Favorite>) {
+                                    favoritesViewModel.list.postValue(result)
                                 }
 
-                                @Override
-                                public void onDataNotAvailable() {}
-                            }))
-                    .setNegativeButton(R.string.no, null)
-                    .show();
-            return true;
-        });
-        binding.favoriteList.setAdapter(adapter);
+                                override fun onDataNotAvailable() {}
+                            })
+                        }
 
+                        override fun onDataNotAvailable() {}
+                    })
+                }
+                .setNegativeButton(R.string.no, null)
+                .show()
+            true
+        })
+        binding.favoriteList.adapter = adapter
     }
 }
