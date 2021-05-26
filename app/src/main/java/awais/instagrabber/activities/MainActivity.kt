@@ -1,264 +1,223 @@
-package awais.instagrabber.activities;
+package awais.instagrabber.activities
 
-import android.animation.LayoutTransition;
-import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.text.Editable;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.animation.LayoutTransition
+import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.*
+import android.text.Editable
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.WindowManager
+import android.widget.Toast
+import androidx.annotation.IdRes
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.provider.FontRequest
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.emoji.text.EmojiCompat
+import androidx.emoji.text.EmojiCompat.InitCallback
+import androidx.emoji.text.FontRequestEmojiCompatConfig
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavController.OnDestinationChangedListener
+import androidx.navigation.NavDestination
+import androidx.navigation.ui.NavigationUI
+import awais.instagrabber.BuildConfig
+import awais.instagrabber.R
+import awais.instagrabber.customviews.emoji.EmojiVariantManager
+import awais.instagrabber.customviews.helpers.RootViewDeferringInsetsCallback
+import awais.instagrabber.customviews.helpers.TextWatcherAdapter
+import awais.instagrabber.databinding.ActivityMainBinding
+import awais.instagrabber.fragments.PostViewV2Fragment
+import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDirections
+import awais.instagrabber.fragments.settings.PreferenceKeys
+import awais.instagrabber.models.IntentModel
+import awais.instagrabber.models.Resource
+import awais.instagrabber.models.Tab
+import awais.instagrabber.models.enums.IntentModelType
+import awais.instagrabber.repositories.responses.Media
+import awais.instagrabber.services.ActivityCheckerService
+import awais.instagrabber.services.DMSyncAlarmReceiver
+import awais.instagrabber.utils.*
+import awais.instagrabber.utils.AppExecutors.tasksThread
+import awais.instagrabber.utils.TextUtils.isEmpty
+import awais.instagrabber.utils.TextUtils.shortcodeToId
+import awais.instagrabber.utils.emoji.EmojiParser
+import awais.instagrabber.viewmodels.AppStateViewModel
+import awais.instagrabber.viewmodels.DirectInboxViewModel
+import awais.instagrabber.webservices.GraphQLService
+import awais.instagrabber.webservices.MediaService
+import awais.instagrabber.webservices.RetrofitFactory
+import awais.instagrabber.webservices.ServiceCallback
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.AppBarLayout.ScrollingViewBehavior
+import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.textfield.TextInputLayout
+import com.google.common.collect.ImmutableList
+import com.google.common.collect.Iterators
+import java.util.*
+import java.util.stream.Collectors
 
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.provider.FontRequest;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.emoji.text.EmojiCompat;
-import androidx.emoji.text.FontRequestEmojiCompatConfig;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavBackStackEntry;
-import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
-import androidx.navigation.ui.NavigationUI;
+class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedListener {
+    private lateinit var binding: ActivityMainBinding
 
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
+    private var currentNavControllerLiveData: LiveData<NavController>? = null
+    private var searchMenuItem: MenuItem? = null
+    private var firstFragmentGraphIndex = 0
+    private var lastSelectedNavMenuId = 0
+    private var isActivityCheckerServiceBound = false
+    private var isBackStackEmpty = false
+    private var isLoggedIn = false
 
-import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+    // private var behavior: HideBottomViewOnScrollBehavior<BottomNavigationView>? = null
+    var currentTabs: List<Tab> = emptyList()
+        private set
+    private var showBottomViewDestinations: List<Int> = emptyList<Int>()
+    private var graphQLService: GraphQLService? = null
+    private var mediaService: MediaService? = null
 
-import awais.instagrabber.BuildConfig;
-import awais.instagrabber.R;
-import awais.instagrabber.customviews.emoji.EmojiVariantManager;
-import awais.instagrabber.customviews.helpers.RootViewDeferringInsetsCallback;
-import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
-import awais.instagrabber.databinding.ActivityMainBinding;
-import awais.instagrabber.fragments.PostViewV2Fragment;
-import awais.instagrabber.fragments.directmessages.DirectMessageInboxFragmentDirections;
-import awais.instagrabber.fragments.settings.PreferenceKeys;
-import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.Tab;
-import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.services.ActivityCheckerService;
-import awais.instagrabber.services.DMSyncAlarmReceiver;
-import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.FlavorTown;
-import awais.instagrabber.utils.IntentUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
-import awais.instagrabber.utils.emoji.EmojiParser;
-import awais.instagrabber.viewmodels.AppStateViewModel;
-import awais.instagrabber.viewmodels.DirectInboxViewModel;
-import awais.instagrabber.webservices.GraphQLService;
-import awais.instagrabber.webservices.MediaService;
-import awais.instagrabber.webservices.RetrofitFactory;
-import awais.instagrabber.webservices.ServiceCallback;
-
-import static awais.instagrabber.utils.NavigationExtensions.setupWithNavController;
-import static awais.instagrabber.utils.Utils.settingsHelper;
-
-public class MainActivity extends BaseLanguageActivity implements FragmentManager.OnBackStackChangedListener {
-    private static final String TAG = "MainActivity";
-    private static final String FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex";
-    private static final String LAST_SELECT_NAV_MENU_ID = "lastSelectedNavMenuId";
-    private static final List<Integer> SEARCH_VISIBLE_DESTINATIONS = ImmutableList.of(
-            R.id.feedFragment,
-            R.id.profileFragment,
-            R.id.directMessagesInboxFragment,
-            R.id.discoverFragment,
-            R.id.favoritesFragment,
-            R.id.hashTagFragment,
-            R.id.locationFragment
-    );
-
-    private static MainActivity instance;
-
-    private ActivityMainBinding binding;
-    private LiveData<NavController> currentNavControllerLiveData;
-    private MenuItem searchMenuItem;
-    private int firstFragmentGraphIndex;
-    private int lastSelectedNavMenuId;
-    private boolean isActivityCheckerServiceBound = false;
-    private boolean isBackStackEmpty = false;
-    private boolean isLoggedIn;
-    private HideBottomViewOnScrollBehavior<BottomNavigationView> behavior;
-    private List<Tab> currentTabs;
-    private List<Integer> showBottomViewDestinations = Collections.emptyList();
-    private GraphQLService graphQLService = null;
-    private MediaService mediaService = null;
-
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(final ComponentName name, final IBinder service) {
+    private val serviceConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
             // final ActivityCheckerService.LocalBinder binder = (ActivityCheckerService.LocalBinder) service;
             // final ActivityCheckerService activityCheckerService = binder.getService();
-            isActivityCheckerServiceBound = true;
+            isActivityCheckerServiceBound = true
         }
 
-        @Override
-        public void onServiceDisconnected(final ComponentName name) {
-            isActivityCheckerServiceBound = false;
+        override fun onServiceDisconnected(name: ComponentName) {
+            isActivityCheckerServiceBound = false
         }
-    };
-
-    public static MainActivity getInstance() {
-        return instance;
     }
 
-    @Override
-    protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        instance = this;
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setupCookie();
-        if (settingsHelper.getBoolean(PreferenceKeys.FLAG_SECURE)) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance = this
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setupCookie()
+        if (Utils.settingsHelper.getBoolean(PreferenceKeys.FLAG_SECURE)) {
+            window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
         }
-        setContentView(binding.getRoot());
-        final Toolbar toolbar = binding.toolbar;
-        setSupportActionBar(toolbar);
-        final RootViewDeferringInsetsCallback deferringInsetsCallback = new RootViewDeferringInsetsCallback(
-                WindowInsetsCompat.Type.systemBars(),
-                WindowInsetsCompat.Type.ime()
-        );
-        ViewCompat.setWindowInsetsAnimationCallback(binding.getRoot(), deferringInsetsCallback);
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), deferringInsetsCallback);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        createNotificationChannels();
-        try {
-            final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.bottomNavView.getLayoutParams();
-            //noinspection unchecked
-            behavior = (HideBottomViewOnScrollBehavior<BottomNavigationView>) layoutParams.getBehavior();
-        } catch (Exception e) {
-            Log.e(TAG, "onCreate: ", e);
-        }
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
+        setupInsetsCallback()
+        createNotificationChannels()
+        // try {
+        //     val layoutParams = binding.bottomNavView.layoutParams as CoordinatorLayout.LayoutParams
+        //     @Suppress("UNCHECKED_CAST")
+        //     behavior = layoutParams.behavior as HideBottomViewOnScrollBehavior<BottomNavigationView>
+        // } catch (e: Exception) {
+        //     Log.e(TAG, "onCreate: ", e)
+        // }
         if (savedInstanceState == null) {
-            setupBottomNavigationBar(true);
+            setupBottomNavigationBar(true)
         }
         if (!BuildConfig.isPre) {
-            final boolean checkUpdates = settingsHelper.getBoolean(PreferenceKeys.CHECK_UPDATES);
-            if (checkUpdates) FlavorTown.updateCheck(this);
+            val checkUpdates = Utils.settingsHelper.getBoolean(PreferenceKeys.CHECK_UPDATES)
+            if (checkUpdates) FlavorTown.updateCheck(this)
         }
-        FlavorTown.changelogCheck(this);
-        new ViewModelProvider(this).get(AppStateViewModel.class); // Just initiate the App state here
-        final Intent intent = getIntent();
-        handleIntent(intent);
-        if (isLoggedIn && settingsHelper.getBoolean(PreferenceKeys.CHECK_ACTIVITY)) {
-            bindActivityCheckerService();
+        FlavorTown.changelogCheck(this)
+        ViewModelProvider(this).get(AppStateViewModel::class.java) // Just initiate the App state here
+        handleIntent(intent)
+        if (isLoggedIn && Utils.settingsHelper.getBoolean(PreferenceKeys.CHECK_ACTIVITY)) {
+            bindActivityCheckerService()
         }
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
+        supportFragmentManager.addOnBackStackChangedListener(this)
         // Initialise the internal map
-        AppExecutors.INSTANCE.getTasksThread().execute(() -> {
-            EmojiParser.Companion.getInstance(this);
-            EmojiVariantManager.getInstance();
-        });
-        initEmojiCompat();
+        tasksThread.execute {
+            EmojiParser.getInstance(this)
+            EmojiVariantManager.getInstance()
+        }
+        initEmojiCompat()
         // initDmService();
-        initDmUnreadCount();
-        initSearchInput();
+        initDmUnreadCount()
+        initSearchInput()
     }
 
-    private void setupCookie() {
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        long userId = 0;
-        String csrfToken = null;
-        if (!TextUtils.isEmpty(cookie)) {
-            userId = CookieUtils.getUserIdFromCookie(cookie);
-            csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+    private fun setupInsetsCallback() {
+        val deferringInsetsCallback = RootViewDeferringInsetsCallback(
+            WindowInsetsCompat.Type.systemBars(),
+            WindowInsetsCompat.Type.ime()
+        )
+        ViewCompat.setWindowInsetsAnimationCallback(binding.root, deferringInsetsCallback)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root, deferringInsetsCallback)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+    }
+
+    private fun setupCookie() {
+        val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
+        var userId: Long = 0
+        var csrfToken: String? = null
+        if (!isEmpty(cookie)) {
+            userId = getUserIdFromCookie(cookie)
+            csrfToken = getCsrfTokenFromCookie(cookie)
         }
-        if (TextUtils.isEmpty(cookie) || userId == 0 || TextUtils.isEmpty(csrfToken)) {
-            isLoggedIn = false;
-            return;
+        if (isEmpty(cookie) || userId == 0L || isEmpty(csrfToken)) {
+            isLoggedIn = false
+            return
         }
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
-        if (TextUtils.isEmpty(deviceUuid)) {
-            settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString());
+        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        if (isEmpty(deviceUuid)) {
+            Utils.settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString())
         }
-        CookieUtils.setupCookies(cookie);
-        isLoggedIn = true;
+        setupCookies(cookie)
+        isLoggedIn = true
     }
 
-    private void initDmService() {
-        if (!isLoggedIn) return;
-        final boolean enabled = settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH);
-        if (!enabled) return;
-        DMSyncAlarmReceiver.setAlarm(this);
+    private fun initDmService() {
+        if (!isLoggedIn) return
+        val enabled = Utils.settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH)
+        if (!enabled) return
+        DMSyncAlarmReceiver.setAlarm(this)
     }
 
-    private void initDmUnreadCount() {
-        if (!isLoggedIn) return;
-        final DirectInboxViewModel directInboxViewModel = new ViewModelProvider(this).get(DirectInboxViewModel.class);
-        directInboxViewModel.getUnseenCount().observe(this, unseenCountResource -> {
-            if (unseenCountResource == null) return;
-            final Integer unseenCount = unseenCountResource.data;
-            setNavBarDMUnreadCountBadge(unseenCount == null ? 0 : unseenCount);
-        });
+    private fun initDmUnreadCount() {
+        if (!isLoggedIn) return
+        val directInboxViewModel = ViewModelProvider(this).get(DirectInboxViewModel::class.java)
+        directInboxViewModel.unseenCount.observe(this, { unseenCountResource: Resource<Int>? ->
+            if (unseenCountResource == null) return@observe
+            val unseenCount = unseenCountResource.data
+            setNavBarDMUnreadCountBadge(unseenCount ?: 0)
+        })
     }
 
-    private void initSearchInput() {
-        binding.searchInputLayout.setEndIconOnClickListener(v -> {
-            final EditText editText = binding.searchInputLayout.getEditText();
-            if (editText == null) return;
-            editText.setText("");
-        });
-        binding.searchInputLayout.addOnEditTextAttachedListener(textInputLayout -> {
-            textInputLayout.setEndIconVisible(false);
-            final EditText editText = textInputLayout.getEditText();
-            if (editText == null) return;
-            editText.addTextChangedListener(new TextWatcherAdapter() {
-                @Override
-                public void afterTextChanged(final Editable s) {
-                    binding.searchInputLayout.setEndIconVisible(!TextUtils.isEmpty(s));
+    private fun initSearchInput() {
+        binding.searchInputLayout.setEndIconOnClickListener {
+            val editText = binding.searchInputLayout.editText ?: return@setEndIconOnClickListener
+            editText.setText("")
+        }
+        binding.searchInputLayout.addOnEditTextAttachedListener { textInputLayout: TextInputLayout ->
+            textInputLayout.isEndIconVisible = false
+            val editText = textInputLayout.editText ?: return@addOnEditTextAttachedListener
+            editText.addTextChangedListener(object : TextWatcherAdapter() {
+                override fun afterTextChanged(s: Editable) {
+                    binding.searchInputLayout.isEndIconVisible = !isEmpty(s)
                 }
-            });
-        });
+            })
+        }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        searchMenuItem = menu.findItem(R.id.search);
-        final NavController navController = currentNavControllerLiveData.getValue();
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        searchMenuItem = menu.findItem(R.id.search)
+        val navController = currentNavControllerLiveData?.value
         if (navController != null) {
-            final NavDestination currentDestination = navController.getCurrentDestination();
+            val currentDestination = navController.currentDestination
             if (currentDestination != null) {
-                @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
-                setupMenu(backStack.size(), currentDestination.getId());
+                @SuppressLint("RestrictedApi") val backStack = navController.backStack
+                setupMenu(backStack.size, currentDestination.id)
             }
         }
         // if (binding.searchInputLayout.getVisibility() == View.VISIBLE) {
@@ -281,593 +240,572 @@ public class MainActivity extends BaseLanguageActivity implements FragmentManage
         //     return true;
         // }
         // return setupSearchView();
-        return true;
+        return true
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        if (item.getItemId() == R.id.search) {
-            final NavController navController = currentNavControllerLiveData.getValue();
-            if (navController == null) return false;
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.search) {
+            val navController = currentNavControllerLiveData?.value ?: return false
             try {
-                navController.navigate(R.id.action_global_search);
-                return true;
-            } catch (Exception e) {
-                Log.e(TAG, "onOptionsItemSelected: ", e);
+                navController.navigate(R.id.action_global_search)
+                return true
+            } catch (e: Exception) {
+                Log.e(TAG, "onOptionsItemSelected: ", e)
             }
-            return false;
+            return false
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 
-    @Override
-    protected void onSaveInstanceState(@NonNull final Bundle outState) {
-        outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, String.valueOf(firstFragmentGraphIndex));
-        outState.putString(LAST_SELECT_NAV_MENU_ID, String.valueOf(binding.bottomNavView.getSelectedItemId()));
-        super.onSaveInstanceState(outState);
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(FIRST_FRAGMENT_GRAPH_INDEX_KEY, firstFragmentGraphIndex.toString())
+        outState.putString(LAST_SELECT_NAV_MENU_ID, binding.bottomNavView.selectedItemId.toString())
+        super.onSaveInstanceState(outState)
     }
 
-    @Override
-    protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        final String key = (String) savedInstanceState.get(FIRST_FRAGMENT_GRAPH_INDEX_KEY);
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val key = savedInstanceState[FIRST_FRAGMENT_GRAPH_INDEX_KEY] as String?
         if (key != null) {
             try {
-                firstFragmentGraphIndex = Integer.parseInt(key);
-            } catch (NumberFormatException ignored) { }
+                firstFragmentGraphIndex = key.toInt()
+            } catch (ignored: NumberFormatException) {
+            }
         }
-        final String lastSelected = (String) savedInstanceState.get(LAST_SELECT_NAV_MENU_ID);
+        val lastSelected = savedInstanceState[LAST_SELECT_NAV_MENU_ID] as String?
         if (lastSelected != null) {
             try {
-                lastSelectedNavMenuId = Integer.parseInt(lastSelected);
-            } catch (NumberFormatException ignored) { }
+                lastSelectedNavMenuId = lastSelected.toInt()
+            } catch (ignored: NumberFormatException) {
+            }
         }
-        setupBottomNavigationBar(false);
+        setupBottomNavigationBar(false)
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        if (currentNavControllerLiveData == null) return false;
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (navController == null) return false;
-        return navController.navigateUp();
+    override fun onSupportNavigateUp(): Boolean {
+        if (currentNavControllerLiveData == null) return false
+        val navController = currentNavControllerLiveData?.value ?: return false
+        return navController.navigateUp()
     }
 
-    @Override
-    protected void onNewIntent(final Intent intent) {
-        super.onNewIntent(intent);
-        handleIntent(intent);
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
     }
 
-    @Override
-    protected void onDestroy() {
+    override fun onDestroy() {
         try {
-            super.onDestroy();
-        } catch (Exception e) {
-            Log.e(TAG, "onDestroy: ", e);
+            super.onDestroy()
+        } catch (e: Exception) {
+            Log.e(TAG, "onDestroy: ", e)
         }
-        unbindActivityCheckerService();
+        unbindActivityCheckerService()
         try {
-            RetrofitFactory.getInstance().destroy();
-        } catch (Exception e) {
-            Log.e(TAG, "onDestroy: ", e);
+            RetrofitFactory.getInstance().destroy()
+        } catch (e: Exception) {
+            Log.e(TAG, "onDestroy: ", e)
         }
-        instance = null;
+        instance = null
     }
 
-    @Override
-    public void onBackPressed() {
-        int currentNavControllerBackStack = 2;
-        if (currentNavControllerLiveData != null) {
-            final NavController navController = currentNavControllerLiveData.getValue();
+    override fun onBackPressed() {
+        var currentNavControllerBackStack = 2
+        currentNavControllerLiveData?.let {
+            val navController = it.value
             if (navController != null) {
-                @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
-                currentNavControllerBackStack = backStack.size();
+                @SuppressLint("RestrictedApi") val backStack = navController.backStack
+                currentNavControllerBackStack = backStack.size
             }
         }
-        if (isTaskRoot() && isBackStackEmpty && currentNavControllerBackStack == 2) {
-            finishAfterTransition();
-            return;
+        if (isTaskRoot && isBackStackEmpty && currentNavControllerBackStack == 2) {
+            finishAfterTransition()
+            return
         }
-        if (!isFinishing()) {
+        if (!isFinishing) {
             try {
-                super.onBackPressed();
-            } catch (Exception e) {
-                Log.e(TAG, "onBackPressed: ", e);
-                finish();
+                super.onBackPressed()
+            } catch (e: Exception) {
+                Log.e(TAG, "onBackPressed: ", e)
+                finish()
             }
         }
     }
 
-    @Override
-    public void onBackStackChanged() {
-        final int backStackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
-        isBackStackEmpty = backStackEntryCount == 0;
+    override fun onBackStackChanged() {
+        val backStackEntryCount = supportFragmentManager.backStackEntryCount
+        isBackStackEmpty = backStackEntryCount == 0
     }
 
-    private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
-        notificationManager.createNotificationChannel(new NotificationChannel(Constants.DOWNLOAD_CHANNEL_ID,
-                                                                              Constants.DOWNLOAD_CHANNEL_NAME,
-                                                                              NotificationManager.IMPORTANCE_DEFAULT));
-        notificationManager.createNotificationChannel(new NotificationChannel(Constants.ACTIVITY_CHANNEL_ID,
-                                                                              Constants.ACTIVITY_CHANNEL_NAME,
-                                                                              NotificationManager.IMPORTANCE_DEFAULT));
-        notificationManager.createNotificationChannel(new NotificationChannel(Constants.DM_UNREAD_CHANNEL_ID,
-                                                                              Constants.DM_UNREAD_CHANNEL_NAME,
-                                                                              NotificationManager.IMPORTANCE_DEFAULT));
-        final NotificationChannel silentNotificationChannel = new NotificationChannel(Constants.SILENT_NOTIFICATIONS_CHANNEL_ID,
-                                                                                      Constants.SILENT_NOTIFICATIONS_CHANNEL_NAME,
-                                                                                      NotificationManager.IMPORTANCE_LOW);
-        silentNotificationChannel.setSound(null, null);
-        notificationManager.createNotificationChannel(silentNotificationChannel);
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val notificationManager = NotificationManagerCompat.from(applicationContext)
+        notificationManager.createNotificationChannel(NotificationChannel(
+            Constants.DOWNLOAD_CHANNEL_ID,
+            Constants.DOWNLOAD_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ))
+        notificationManager.createNotificationChannel(NotificationChannel(
+            Constants.ACTIVITY_CHANNEL_ID,
+            Constants.ACTIVITY_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ))
+        notificationManager.createNotificationChannel(NotificationChannel(
+            Constants.DM_UNREAD_CHANNEL_ID,
+            Constants.DM_UNREAD_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        ))
+        val silentNotificationChannel = NotificationChannel(
+            Constants.SILENT_NOTIFICATIONS_CHANNEL_ID,
+            Constants.SILENT_NOTIFICATIONS_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_LOW
+        )
+        silentNotificationChannel.setSound(null, null)
+        notificationManager.createNotificationChannel(silentNotificationChannel)
     }
 
-    private void setupBottomNavigationBar(final boolean setDefaultTabFromSettings) {
-        currentTabs = !isLoggedIn ? setupAnonBottomNav() : setupMainBottomNav();
-        final List<Integer> mainNavList = currentTabs.stream()
-                                                     .map(Tab::getNavigationResId)
-                                                     .collect(Collectors.toList());
-        showBottomViewDestinations = currentTabs.stream()
-                                                .map(Tab::getStartDestinationFragmentId)
-                                                .collect(Collectors.toList());
-        showBottomViewDestinations.add(R.id.postViewFragment);
+    private fun setupBottomNavigationBar(setDefaultTabFromSettings: Boolean) {
+        currentTabs = if (!isLoggedIn) setupAnonBottomNav() else setupMainBottomNav()
+        val mainNavList = currentTabs.stream()
+            .map(Tab::navigationResId)
+            .collect(Collectors.toList())
+        showBottomViewDestinations = currentTabs.asSequence().map {
+            it.startDestinationFragmentId
+        }.toMutableList().apply { add(R.id.postViewFragment) }
         if (setDefaultTabFromSettings) {
-            setSelectedTab(currentTabs);
+            setSelectedTab(currentTabs)
         } else {
-            binding.bottomNavView.setSelectedItemId(lastSelectedNavMenuId);
+            binding.bottomNavView.selectedItemId = lastSelectedNavMenuId
         }
-        final LiveData<NavController> navControllerLiveData = setupWithNavController(
-                binding.bottomNavView,
-                mainNavList,
-                getSupportFragmentManager(),
-                R.id.main_nav_host,
-                getIntent(),
-                firstFragmentGraphIndex);
-        navControllerLiveData.observe(this, navController -> setupNavigation(binding.toolbar, navController));
-        currentNavControllerLiveData = navControllerLiveData;
+        val navControllerLiveData = NavigationExtensions.setupWithNavController(
+            binding.bottomNavView,
+            mainNavList,
+            supportFragmentManager,
+            R.id.main_nav_host,
+            intent,
+            firstFragmentGraphIndex)
+        navControllerLiveData.observe(this, { navController: NavController? -> setupNavigation(binding.toolbar, navController) })
+        currentNavControllerLiveData = navControllerLiveData
     }
 
-    private void setSelectedTab(final List<Tab> tabs) {
-        final String defaultTabResNameString = settingsHelper.getString(Constants.DEFAULT_TAB);
+    private fun setSelectedTab(tabs: List<Tab>) {
+        val defaultTabResNameString = Utils.settingsHelper.getString(Constants.DEFAULT_TAB)
         try {
-            int navId = 0;
-            if (!TextUtils.isEmpty(defaultTabResNameString)) {
-                navId = getResources().getIdentifier(defaultTabResNameString, "navigation", getPackageName());
+            var navId = 0
+            if (!isEmpty(defaultTabResNameString)) {
+                navId = resources.getIdentifier(defaultTabResNameString, "navigation", packageName)
             }
-            final int navGraph = isLoggedIn ? R.navigation.feed_nav_graph
-                                            : R.navigation.profile_nav_graph;
-            final int defaultNavId = navId <= 0 ? navGraph : navId;
-            int index = Iterators.indexOf(tabs.iterator(), tab -> {
-                if (tab == null) return false;
-                return tab.getNavigationResId() == defaultNavId;
-            });
-            if (index < 0 || index >= tabs.size()) index = 0;
-            firstFragmentGraphIndex = index;
-            setBottomNavSelectedTab(tabs.get(index));
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing id", e);
+            val navGraph = if (isLoggedIn) R.navigation.feed_nav_graph else R.navigation.profile_nav_graph
+            val defaultNavId = if (navId <= 0) navGraph else navId
+            var index = Iterators.indexOf(tabs.iterator()) { tab: Tab? ->
+                if (tab == null) return@indexOf false
+                tab.navigationResId == defaultNavId
+            }
+            if (index < 0 || index >= tabs.size) index = 0
+            firstFragmentGraphIndex = index
+            setBottomNavSelectedTab(tabs[index])
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing id", e)
         }
     }
 
-    private List<Tab> setupAnonBottomNav() {
-        final int selectedItemId = binding.bottomNavView.getSelectedItemId();
-        final Tab favoriteTab = new Tab(R.drawable.ic_star_24,
-                                        getString(R.string.title_favorites),
-                                        false,
-                                        "favorites_nav_graph",
-                                        R.navigation.favorites_nav_graph,
-                                        R.id.favorites_nav_graph,
-                                        R.id.favoritesFragment);
-        final Tab profileTab = new Tab(R.drawable.ic_person_24,
-                                       getString(R.string.profile),
-                                       false,
-                                       "profile_nav_graph",
-                                       R.navigation.profile_nav_graph,
-                                       R.id.profile_nav_graph,
-                                       R.id.profileFragment);
-        final Tab moreTab = new Tab(R.drawable.ic_more_horiz_24,
-                                    getString(R.string.more),
-                                    false,
-                                    "more_nav_graph",
-                                    R.navigation.more_nav_graph,
-                                    R.id.more_nav_graph,
-                                    R.id.morePreferencesFragment);
-        final Menu menu = binding.bottomNavView.getMenu();
-        menu.clear();
-        menu.add(0, favoriteTab.getNavigationRootId(), 0, favoriteTab.getTitle()).setIcon(favoriteTab.getIconResId());
-        menu.add(0, profileTab.getNavigationRootId(), 0, profileTab.getTitle()).setIcon(profileTab.getIconResId());
-        menu.add(0, moreTab.getNavigationRootId(), 0, moreTab.getTitle()).setIcon(moreTab.getIconResId());
-        if (selectedItemId != R.id.profile_nav_graph
-                && selectedItemId != R.id.more_nav_graph
-                && selectedItemId != R.id.favorites_nav_graph) {
-            setBottomNavSelectedTab(profileTab);
+    private fun setupAnonBottomNav(): List<Tab> {
+        val selectedItemId = binding.bottomNavView.selectedItemId
+        val favoriteTab = Tab(R.drawable.ic_star_24,
+            getString(R.string.title_favorites),
+            false,
+            "favorites_nav_graph",
+            R.navigation.favorites_nav_graph,
+            R.id.favorites_nav_graph,
+            R.id.favoritesFragment)
+        val profileTab = Tab(R.drawable.ic_person_24,
+            getString(R.string.profile),
+            false,
+            "profile_nav_graph",
+            R.navigation.profile_nav_graph,
+            R.id.profile_nav_graph,
+            R.id.profileFragment)
+        val moreTab = Tab(R.drawable.ic_more_horiz_24,
+            getString(R.string.more),
+            false,
+            "more_nav_graph",
+            R.navigation.more_nav_graph,
+            R.id.more_nav_graph,
+            R.id.morePreferencesFragment)
+        val menu = binding.bottomNavView.menu
+        menu.clear()
+        menu.add(0, favoriteTab.navigationRootId, 0, favoriteTab.title).setIcon(favoriteTab.iconResId)
+        menu.add(0, profileTab.navigationRootId, 0, profileTab.title).setIcon(profileTab.iconResId)
+        menu.add(0, moreTab.navigationRootId, 0, moreTab.title).setIcon(moreTab.iconResId)
+        if (selectedItemId != R.id.profile_nav_graph && selectedItemId != R.id.more_nav_graph && selectedItemId != R.id.favorites_nav_graph) {
+            setBottomNavSelectedTab(profileTab)
         }
-        return ImmutableList.of(favoriteTab, profileTab, moreTab);
+        return ImmutableList.of(favoriteTab, profileTab, moreTab)
     }
 
-    private List<Tab> setupMainBottomNav() {
-        final Menu menu = binding.bottomNavView.getMenu();
-        menu.clear();
-        final List<Tab> navTabList = Utils.getNavTabList(this).first;
-        for (final Tab tab : navTabList) {
-            menu.add(0, tab.getNavigationRootId(), 0, tab.getTitle()).setIcon(tab.getIconResId());
+    private fun setupMainBottomNav(): List<Tab> {
+        val menu = binding.bottomNavView.menu
+        menu.clear()
+        val navTabList = Utils.getNavTabList(this).first
+        for ((iconResId, title, _, _, _, navigationRootId) in navTabList) {
+            menu.add(0, navigationRootId, 0, title).setIcon(iconResId)
         }
-        return navTabList;
+        return navTabList
     }
 
-    private void setBottomNavSelectedTab(@NonNull final Tab tab) {
-        binding.bottomNavView.setSelectedItemId(tab.getNavigationRootId());
+    private fun setBottomNavSelectedTab(tab: Tab) {
+        binding.bottomNavView.selectedItemId = tab.navigationRootId
     }
 
-    private void setBottomNavSelectedTab(@SuppressWarnings("SameParameterValue") @IdRes final int navGraphRootId) {
-        binding.bottomNavView.setSelectedItemId(navGraphRootId);
+    private fun setBottomNavSelectedTab(@IdRes navGraphRootId: Int) {
+        binding.bottomNavView.selectedItemId = navGraphRootId
     }
 
-    private void setupNavigation(final Toolbar toolbar, final NavController navController) {
-        if (navController == null) return;
-        NavigationUI.setupWithNavController(toolbar, navController);
-        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-            if (destination.getId() == R.id.directMessagesThreadFragment && arguments != null) {
+    private fun setupNavigation(toolbar: Toolbar, navController: NavController?) {
+        if (navController == null) return
+        NavigationUI.setupWithNavController(toolbar, navController)
+        navController.addOnDestinationChangedListener(OnDestinationChangedListener { _: NavController?, destination: NavDestination, arguments: Bundle? ->
+            if (destination.id == R.id.directMessagesThreadFragment && arguments != null) {
                 // Set the thread title earlier for better ux
-                final String title = arguments.getString("title");
-                final ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null && !TextUtils.isEmpty(title)) {
-                    actionBar.setTitle(title);
+                val title = arguments.getString("title")
+                val actionBar = supportActionBar
+                if (actionBar != null && !isEmpty(title)) {
+                    actionBar.title = title
                 }
             }
             // below is a hack to check if we are at the end of the current stack, to setup the search view
-            binding.appBarLayout.setExpanded(true, true);
-            final int destinationId = destination.getId();
-            @SuppressLint("RestrictedApi") final Deque<NavBackStackEntry> backStack = navController.getBackStack();
-            setupMenu(backStack.size(), destinationId);
-            final boolean contains = showBottomViewDestinations.contains(destinationId);
-            binding.getRoot().post(() -> {
-                binding.bottomNavView.setVisibility(contains ? View.VISIBLE : View.GONE);
-                if (contains && behavior != null) {
-                    behavior.slideUp(binding.bottomNavView);
-                }
-            });
-            // explicitly hide keyboard when we navigate
-            final View view = getCurrentFocus();
-            Utils.hideKeyboard(view);
-        });
-    }
-
-    private void setupMenu(final int backStackSize, final int destinationId) {
-        if (searchMenuItem == null) return;
-        if (backStackSize >= 2 && SEARCH_VISIBLE_DESTINATIONS.contains(destinationId)) {
-            searchMenuItem.setVisible(true);
-            return;
-        }
-        searchMenuItem.setVisible(false);
-    }
-
-    private void setScrollingBehaviour() {
-        final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.mainNavHost.getLayoutParams();
-        layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
-        binding.mainNavHost.requestLayout();
-    }
-
-    private void removeScrollingBehaviour() {
-        final CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) binding.mainNavHost.getLayoutParams();
-        layoutParams.setBehavior(null);
-        binding.mainNavHost.requestLayout();
-    }
-
-    private void handleIntent(final Intent intent) {
-        if (intent == null) return;
-        final String action = intent.getAction();
-        final String type = intent.getType();
-        // Log.d(TAG, action + " " + type);
-        if (Intent.ACTION_MAIN.equals(action)) return;
-        if (Constants.ACTION_SHOW_ACTIVITY.equals(action)) {
-            showActivityView();
-            return;
-        }
-        if (Constants.ACTION_SHOW_DM_THREAD.equals(action)) {
-            showThread(intent);
-            return;
-        }
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if (type.equals("text/plain")) {
-                handleUrl(intent.getStringExtra(Intent.EXTRA_TEXT));
+            binding.appBarLayout.setExpanded(true, true)
+            val destinationId = destination.id
+            @SuppressLint("RestrictedApi") val backStack = navController.backStack
+            setupMenu(backStack.size, destinationId)
+            val contains = showBottomViewDestinations.contains(destinationId)
+            binding.root.post {
+                binding.bottomNavView.visibility = if (contains) View.VISIBLE else View.GONE
+                // if (contains) {
+                //     behavior?.slideUp(binding.bottomNavView)
+                // }
             }
-            return;
+            // explicitly hide keyboard when we navigate
+            val view = currentFocus
+            Utils.hideKeyboard(view)
+        })
+    }
+
+    private fun setupMenu(backStackSize: Int, destinationId: Int) {
+        val searchMenuItem = searchMenuItem ?: return
+        if (backStackSize >= 2 && SEARCH_VISIBLE_DESTINATIONS.contains(destinationId)) {
+            searchMenuItem.isVisible = true
+            return
         }
-        if (Intent.ACTION_VIEW.equals(action)) {
-            final Uri data = intent.getData();
-            if (data == null) return;
-            handleUrl(data.toString());
+        searchMenuItem.isVisible = false
+    }
+
+    private fun setScrollingBehaviour() {
+        val layoutParams = binding.mainNavHost.layoutParams as CoordinatorLayout.LayoutParams
+        layoutParams.behavior = ScrollingViewBehavior()
+        binding.mainNavHost.requestLayout()
+    }
+
+    private fun removeScrollingBehaviour() {
+        val layoutParams = binding.mainNavHost.layoutParams as CoordinatorLayout.LayoutParams
+        layoutParams.behavior = null
+        binding.mainNavHost.requestLayout()
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+        val action = intent.action
+        val type = intent.type
+        // Log.d(TAG, action + " " + type);
+        if (Intent.ACTION_MAIN == action) return
+        if (Constants.ACTION_SHOW_ACTIVITY == action) {
+            showActivityView()
+            return
+        }
+        if (Constants.ACTION_SHOW_DM_THREAD == action) {
+            showThread(intent)
+            return
+        }
+        if (Intent.ACTION_SEND == action && type != null) {
+            if (type == "text/plain") {
+                handleUrl(intent.getStringExtra(Intent.EXTRA_TEXT))
+            }
+            return
+        }
+        if (Intent.ACTION_VIEW == action) {
+            val data = intent.data ?: return
+            handleUrl(data.toString())
         }
     }
 
-    private void showThread(@NonNull final Intent intent) {
-        final String threadId = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_ID);
-        final String threadTitle = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_TITLE);
-        navigateToThread(threadId, threadTitle);
+    private fun showThread(intent: Intent) {
+        val threadId = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_ID)
+        val threadTitle = intent.getStringExtra(Constants.DM_THREAD_ACTION_EXTRA_THREAD_TITLE)
+        navigateToThread(threadId, threadTitle)
     }
 
-    public void navigateToThread(final String threadId, final String threadTitle) {
-        if (threadId == null || threadTitle == null) return;
-        currentNavControllerLiveData.observe(this, new Observer<NavController>() {
-            @Override
-            public void onChanged(final NavController navController) {
-                if (navController == null) return;
-                if (navController.getGraph().getId() != R.id.direct_messages_nav_graph) return;
+    fun navigateToThread(threadId: String?, threadTitle: String?) {
+        if (threadId == null || threadTitle == null) return
+        currentNavControllerLiveData?.observe(this, object : Observer<NavController?> {
+            override fun onChanged(navController: NavController?) {
+                if (navController == null) return
+                if (navController.graph.id != R.id.direct_messages_nav_graph) return
                 try {
-                    final NavDestination currentDestination = navController.getCurrentDestination();
-                    if (currentDestination != null && currentDestination.getId() == R.id.directMessagesInboxFragment) {
+                    val currentDestination = navController.currentDestination
+                    if (currentDestination != null && currentDestination.id == R.id.directMessagesInboxFragment) {
                         // if we are already on the inbox page, navigate to the thread
                         // need handler.post() to wait for the fragment manager to be ready to navigate
-                        new Handler().post(() -> {
-                            final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
-                                    .actionInboxToThread(threadId, threadTitle);
-                            navController.navigate(action);
-                        });
-                        return;
+                        Handler(Looper.getMainLooper()).post {
+                            val action = DirectMessageInboxFragmentDirections
+                                .actionInboxToThread(threadId, threadTitle)
+                            navController.navigate(action)
+                        }
+                        return
                     }
                     // add a destination change listener to navigate to thread once we are on the inbox page
-                    navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
-                        @Override
-                        public void onDestinationChanged(@NonNull final NavController controller,
-                                                         @NonNull final NavDestination destination,
-                                                         @Nullable final Bundle arguments) {
-                            if (destination.getId() == R.id.directMessagesInboxFragment) {
-                                final DirectMessageInboxFragmentDirections.ActionInboxToThread action = DirectMessageInboxFragmentDirections
-                                        .actionInboxToThread(threadId, threadTitle);
-                                controller.navigate(action);
-                                controller.removeOnDestinationChangedListener(this);
+                    navController.addOnDestinationChangedListener(object : OnDestinationChangedListener {
+                        override fun onDestinationChanged(
+                            controller: NavController,
+                            destination: NavDestination,
+                            arguments: Bundle?,
+                        ) {
+                            if (destination.id == R.id.directMessagesInboxFragment) {
+                                val action = DirectMessageInboxFragmentDirections
+                                    .actionInboxToThread(threadId, threadTitle)
+                                controller.navigate(action)
+                                controller.removeOnDestinationChangedListener(this)
                             }
                         }
-                    });
+                    })
                     // pop back stack until we reach the inbox page
-                    navController.popBackStack(R.id.directMessagesInboxFragment, false);
+                    navController.popBackStack(R.id.directMessagesInboxFragment, false)
                 } finally {
-                    currentNavControllerLiveData.removeObserver(this);
+                    currentNavControllerLiveData?.removeObserver(this)
                 }
             }
-        });
-        final int selectedItemId = binding.bottomNavView.getSelectedItemId();
+        })
+        val selectedItemId = binding.bottomNavView.selectedItemId
         if (selectedItemId != R.navigation.direct_messages_nav_graph) {
-            setBottomNavSelectedTab(R.id.direct_messages_nav_graph);
+            setBottomNavSelectedTab(R.id.direct_messages_nav_graph)
         }
     }
 
-    private void handleUrl(final String url) {
-        if (url == null) return;
+    private fun handleUrl(url: String?) {
+        if (url == null) return
         // Log.d(TAG, url);
-        final IntentModel intentModel = IntentUtils.parseUrl(url);
-        if (intentModel == null) return;
-        showView(intentModel);
+        val intentModel = IntentUtils.parseUrl(url) ?: return
+        showView(intentModel)
     }
 
-    private void showView(final IntentModel intentModel) {
-        switch (intentModel.getType()) {
-            case USERNAME:
-                showProfileView(intentModel);
-                break;
-            case POST:
-                showPostView(intentModel);
-                break;
-            case LOCATION:
-                showLocationView(intentModel);
-                break;
-            case HASHTAG:
-                showHashtagView(intentModel);
-                break;
-            case UNKNOWN:
-            default:
-                Log.w(TAG, "Unknown model type received!");
+    private fun showView(intentModel: IntentModel) {
+        when (intentModel.type) {
+            IntentModelType.USERNAME -> showProfileView(intentModel)
+            IntentModelType.POST -> showPostView(intentModel)
+            IntentModelType.LOCATION -> showLocationView(intentModel)
+            IntentModelType.HASHTAG -> showHashtagView(intentModel)
+            IntentModelType.UNKNOWN -> Log.w(TAG, "Unknown model type received!")
+            // else -> Log.w(TAG, "Unknown model type received!")
         }
     }
 
-    private void showProfileView(@NonNull final IntentModel intentModel) {
-        final String username = intentModel.getText();
+    private fun showProfileView(intentModel: IntentModel) {
+        val username = intentModel.text
         // Log.d(TAG, "username: " + username);
-        if (currentNavControllerLiveData == null) return;
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (navController == null) return;
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", "@" + username);
+        val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        val navController = currentNavControllerLiveData.value
+        val bundle = Bundle()
+        bundle.putString("username", "@$username")
         try {
-            navController.navigate(R.id.action_global_profileFragment, bundle);
-        } catch (Exception e) {
-            Log.e(TAG, "showProfileView: ", e);
+            navController?.navigate(R.id.action_global_profileFragment, bundle)
+        } catch (e: Exception) {
+            Log.e(TAG, "showProfileView: ", e)
         }
     }
 
-    private void showPostView(@NonNull final IntentModel intentModel) {
-        final String shortCode = intentModel.getText();
+    private fun showPostView(intentModel: IntentModel) {
+        val shortCode = intentModel.text
         // Log.d(TAG, "shortCode: " + shortCode);
-        final AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setView(R.layout.dialog_opening_post)
-                .create();
-        if (graphQLService == null) graphQLService = GraphQLService.getInstance();
-        if (mediaService == null) mediaService = MediaService.getInstance(null, null, 0L);
-        final ServiceCallback<Media> postCb = new ServiceCallback<Media>() {
-            @Override
-            public void onSuccess(final Media feedModel) {
+        val alertDialog = AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setView(R.layout.dialog_opening_post)
+            .create()
+        if (graphQLService == null) graphQLService = GraphQLService.getInstance()
+        if (mediaService == null) mediaService = MediaService.getInstance(null, null, 0L)
+        val postCb: ServiceCallback<Media> = object : ServiceCallback<Media> {
+            override fun onSuccess(feedModel: Media?) {
                 if (feedModel != null) {
-                    if (currentNavControllerLiveData == null) return;
-                    final NavController navController = currentNavControllerLiveData.getValue();
-                    if (navController == null) return;
-                    final Bundle bundle = new Bundle();
-                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+                    val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+                    val navController = currentNavControllerLiveData.value
+                    val bundle = Bundle()
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel)
                     try {
-                        navController.navigate(R.id.action_global_post_view, bundle);
-                    } catch (Exception e) {
-                        Log.e(TAG, "showPostView: ", e);
+                        navController?.navigate(R.id.action_global_post_view, bundle)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "showPostView: ", e)
                     }
-                } else Toast.makeText(getApplicationContext(), R.string.post_not_found, Toast.LENGTH_SHORT).show();
-                alertDialog.dismiss();
+                } else Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()
+                alertDialog.dismiss()
             }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                alertDialog.dismiss();
+            override fun onFailure(t: Throwable) {
+                alertDialog.dismiss()
             }
-        };
-        alertDialog.show();
-        if (isLoggedIn) mediaService.fetch(TextUtils.shortcodeToId(shortCode), postCb);
-        else graphQLService.fetchPost(shortCode, postCb);
+        }
+        alertDialog.show()
+        if (isLoggedIn) mediaService?.fetch(shortcodeToId(shortCode), postCb) else graphQLService?.fetchPost(shortCode, postCb)
     }
 
-    private void showLocationView(@NonNull final IntentModel intentModel) {
-        final String locationId = intentModel.getText();
+    private fun showLocationView(intentModel: IntentModel) {
+        val locationId = intentModel.text
         // Log.d(TAG, "locationId: " + locationId);
-        if (currentNavControllerLiveData == null) return;
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (navController == null) return;
-        final Bundle bundle = new Bundle();
-        bundle.putLong("locationId", Long.parseLong(locationId));
-        navController.navigate(R.id.action_global_locationFragment, bundle);
+        val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        val navController = currentNavControllerLiveData.value
+        val bundle = Bundle()
+        bundle.putLong("locationId", locationId.toLong())
+        navController?.navigate(R.id.action_global_locationFragment, bundle)
     }
 
-    private void showHashtagView(@NonNull final IntentModel intentModel) {
-        final String hashtag = intentModel.getText();
+    private fun showHashtagView(intentModel: IntentModel) {
+        val hashtag = intentModel.text
         // Log.d(TAG, "hashtag: " + hashtag);
-        if (currentNavControllerLiveData == null) return;
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (navController == null) return;
-        final Bundle bundle = new Bundle();
-        bundle.putString("hashtag", hashtag);
-        navController.navigate(R.id.action_global_hashTagFragment, bundle);
+        val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        val navController = currentNavControllerLiveData.value
+        val bundle = Bundle()
+        bundle.putString("hashtag", hashtag)
+        navController?.navigate(R.id.action_global_hashTagFragment, bundle)
     }
 
-    private void showActivityView() {
-        if (currentNavControllerLiveData == null) return;
-        final NavController navController = currentNavControllerLiveData.getValue();
-        if (navController == null) return;
-        final Bundle bundle = new Bundle();
-        bundle.putString("type", "notif");
-        navController.navigate(R.id.action_global_notificationsViewerFragment, bundle);
+    private fun showActivityView() {
+        val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        val navController = currentNavControllerLiveData.value
+        val bundle = Bundle()
+        bundle.putString("type", "notif")
+        navController?.navigate(R.id.action_global_notificationsViewerFragment, bundle)
     }
 
-    private void bindActivityCheckerService() {
-        bindService(new Intent(this, ActivityCheckerService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-        isActivityCheckerServiceBound = true;
+    private fun bindActivityCheckerService() {
+        bindService(Intent(this, ActivityCheckerService::class.java), serviceConnection, BIND_AUTO_CREATE)
+        isActivityCheckerServiceBound = true
     }
 
-    private void unbindActivityCheckerService() {
-        if (!isActivityCheckerServiceBound) return;
-        unbindService(serviceConnection);
-        isActivityCheckerServiceBound = false;
+    private fun unbindActivityCheckerService() {
+        if (!isActivityCheckerServiceBound) return
+        unbindService(serviceConnection)
+        isActivityCheckerServiceBound = false
     }
 
-    @NonNull
-    public BottomNavigationView getBottomNavView() {
-        return binding.bottomNavView;
-    }
+    val bottomNavView: BottomNavigationView
+        get() = binding.bottomNavView
 
-    public void setCollapsingView(@NonNull final View view) {
+    fun setCollapsingView(view: View) {
         try {
-            binding.collapsingToolbarLayout.addView(view, 0);
-        } catch (Exception e) {
-            Log.e(TAG, "setCollapsingView: ", e);
+            binding.collapsingToolbarLayout.addView(view, 0)
+        } catch (e: Exception) {
+            Log.e(TAG, "setCollapsingView: ", e)
         }
     }
 
-    public void removeCollapsingView(@NonNull final View view) {
+    fun removeCollapsingView(view: View) {
         try {
-            binding.collapsingToolbarLayout.removeView(view);
-        } catch (Exception e) {
-            Log.e(TAG, "removeCollapsingView: ", e);
+            binding.collapsingToolbarLayout.removeView(view)
+        } catch (e: Exception) {
+            Log.e(TAG, "removeCollapsingView: ", e)
         }
     }
 
-    public void setToolbar(final Toolbar toolbar) {
-        binding.appBarLayout.setVisibility(View.GONE);
-        removeScrollingBehaviour();
-        setSupportActionBar(toolbar);
-        if (currentNavControllerLiveData == null) return;
-        setupNavigation(toolbar, currentNavControllerLiveData.getValue());
+    fun resetToolbar() {
+        binding.appBarLayout.visibility = View.VISIBLE
+        setScrollingBehaviour()
+        setSupportActionBar(binding.toolbar)
+        val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        setupNavigation(binding.toolbar, currentNavControllerLiveData.value)
     }
 
-    public void resetToolbar() {
-        binding.appBarLayout.setVisibility(View.VISIBLE);
-        setScrollingBehaviour();
-        setSupportActionBar(binding.toolbar);
-        if (currentNavControllerLiveData == null) return;
-        setupNavigation(binding.toolbar, currentNavControllerLiveData.getValue());
+    val collapsingToolbarView: CollapsingToolbarLayout
+        get() = binding.collapsingToolbarLayout
+    val appbarLayout: AppBarLayout
+        get() = binding.appBarLayout
+
+    fun removeLayoutTransition() {
+        binding.root.layoutTransition = null
     }
 
-    public CollapsingToolbarLayout getCollapsingToolbarView() {
-        return binding.collapsingToolbarLayout;
+    fun setLayoutTransition() {
+        binding.root.layoutTransition = LayoutTransition()
     }
 
-    public AppBarLayout getAppbarLayout() {
-        return binding.appBarLayout;
-    }
-
-    public void removeLayoutTransition() {
-        binding.getRoot().setLayoutTransition(null);
-    }
-
-    public void setLayoutTransition() {
-        binding.getRoot().setLayoutTransition(new LayoutTransition());
-    }
-
-    private void initEmojiCompat() {
+    private fun initEmojiCompat() {
         // Use a downloadable font for EmojiCompat
-        final FontRequest fontRequest = new FontRequest(
-                "com.google.android.gms.fonts",
-                "com.google.android.gms",
-                "Noto Color Emoji Compat",
-                R.array.com_google_android_gms_fonts_certs);
-        final EmojiCompat.Config config = new FontRequestEmojiCompatConfig(getApplicationContext(), fontRequest);
-        config.setReplaceAll(true)
-              // .setUseEmojiAsDefaultStyle(true)
-              .registerInitCallback(new EmojiCompat.InitCallback() {
-                  @Override
-                  public void onInitialized() {
-                      Log.i(TAG, "EmojiCompat initialized");
-                  }
+        val fontRequest = FontRequest(
+            "com.google.android.gms.fonts",
+            "com.google.android.gms",
+            "Noto Color Emoji Compat",
+            R.array.com_google_android_gms_fonts_certs)
+        val config: EmojiCompat.Config = FontRequestEmojiCompatConfig(applicationContext, fontRequest)
+        config.setReplaceAll(true) // .setUseEmojiAsDefaultStyle(true)
+            .registerInitCallback(object : InitCallback() {
+                override fun onInitialized() {
+                    Log.i(TAG, "EmojiCompat initialized")
+                }
 
-                  @Override
-                  public void onFailed(@Nullable Throwable throwable) {
-                      Log.e(TAG, "EmojiCompat initialization failed", throwable);
-                  }
-              });
-        EmojiCompat.init(config);
+                override fun onFailed(throwable: Throwable?) {
+                    Log.e(TAG, "EmojiCompat initialization failed", throwable)
+                }
+            })
+        EmojiCompat.init(config)
     }
 
-    public Toolbar getToolbar() {
-        return binding.toolbar;
-    }
+    var toolbar: Toolbar?
+        get() = binding.toolbar
+        set(toolbar) {
+            toolbar ?: return
+            binding.appBarLayout.visibility = View.GONE
+            removeScrollingBehaviour()
+            setSupportActionBar(toolbar)
+            if (currentNavControllerLiveData == null) return
+            setupNavigation(toolbar, currentNavControllerLiveData?.value)
+        }
+    val rootView: View
+        get() = binding.root
 
-    public View getRootView() {
-        return binding.getRoot();
-    }
-
-    public List<Tab> getCurrentTabs() {
-        return currentTabs;
-    }
-
-    private void setNavBarDMUnreadCountBadge(final int unseenCount) {
-        final BadgeDrawable badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph);
-        if (badge == null) return;
+    private fun setNavBarDMUnreadCountBadge(unseenCount: Int) {
+        val badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph)
         if (unseenCount == 0) {
-            badge.setVisible(false);
-            badge.clearNumber();
-            return;
+            badge.isVisible = false
+            badge.clearNumber()
+            return
         }
-        if (badge.getVerticalOffset() != 10) {
-            badge.setVerticalOffset(10);
+        if (badge.verticalOffset != 10) {
+            badge.verticalOffset = 10
         }
-        badge.setNumber(unseenCount);
-        badge.setVisible(true);
+        badge.number = unseenCount
+        badge.isVisible = true
     }
 
-    @NonNull
-    public TextInputLayout showSearchView() {
-        binding.searchInputLayout.setVisibility(View.VISIBLE);
-        return binding.searchInputLayout;
+    fun showSearchView(): TextInputLayout {
+        binding.searchInputLayout.visibility = View.VISIBLE
+        return binding.searchInputLayout
     }
 
-    public void hideSearchView() {
-        binding.searchInputLayout.setVisibility(View.GONE);
+    fun hideSearchView() {
+        binding.searchInputLayout.visibility = View.GONE
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val FIRST_FRAGMENT_GRAPH_INDEX_KEY = "firstFragmentGraphIndex"
+        private const val LAST_SELECT_NAV_MENU_ID = "lastSelectedNavMenuId"
+        private val SEARCH_VISIBLE_DESTINATIONS: List<Int> = ImmutableList.of(
+            R.id.feedFragment,
+            R.id.profileFragment,
+            R.id.directMessagesInboxFragment,
+            R.id.discoverFragment,
+            R.id.favoritesFragment,
+            R.id.hashTagFragment,
+            R.id.locationFragment
+        )
+
+        @JvmStatic
+        var instance: MainActivity? = null
+            private set
     }
 }
