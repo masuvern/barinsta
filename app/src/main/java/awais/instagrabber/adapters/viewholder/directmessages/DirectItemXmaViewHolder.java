@@ -15,6 +15,7 @@ import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemXma;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
+import awais.instagrabber.repositories.responses.directmessages.XmaUrlInfo;
 import awais.instagrabber.utils.NullSafePair;
 import awais.instagrabber.utils.NumberUtils;
 
@@ -35,13 +36,13 @@ public class DirectItemXmaViewHolder extends DirectItemViewHolder {
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
         final DirectItemXma xma = item.getXma();
-        final DirectItemXma.XmaUrlInfo playableUrlInfo = xma.getPlayableUrlInfo();
-        final DirectItemXma.XmaUrlInfo previewUrlInfo = xma.getPreviewUrlInfo();
+        final XmaUrlInfo playableUrlInfo = xma.getPlayableUrlInfo();
+        final XmaUrlInfo previewUrlInfo = xma.getPreviewUrlInfo();
         if (playableUrlInfo == null && previewUrlInfo == null) {
             binding.ivAnimatedMessage.setController(null);
             return;
         }
-        final DirectItemXma.XmaUrlInfo urlInfo = playableUrlInfo != null ? playableUrlInfo : previewUrlInfo;
+        final XmaUrlInfo urlInfo = playableUrlInfo != null ? playableUrlInfo : previewUrlInfo;
         final String url = urlInfo.getUrl();
         final NullSafePair<Integer, Integer> widthHeight = NumberUtils.calculateWidthHeight(
                 urlInfo.getHeight(),

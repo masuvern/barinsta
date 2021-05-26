@@ -1,14 +1,14 @@
 package awais.instagrabber.utils
 
-import android.content.Context
-import android.text.format.DateFormat
-import android.text.format.DateUtils
 import android.util.Patterns
-import java.time.format.DateTimeFormatter
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
+import kotlin.math.absoluteValue
 
 object TextUtils {
     var datetimeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("")
@@ -40,22 +40,19 @@ object TextUtils {
         } else String.format(Locale.ENGLISH, "%02d:%02d", min, sec)
     }
 
-    @JvmStatic
-    fun getRelativeDateTimeString(context: Context?, from: Long): String {
-        val now = Date()
-        val then = Date(from)
-        val days = daysBetween(from, now.time)
-        return if (days == 0) {
-            DateFormat.getTimeFormat(context).format(then)
-        } else DateFormat.getDateFormat(context).format(then)
-    }
+    private val timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+    private val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
 
-    private fun daysBetween(d1: Long, d2: Long): Int {
-        return ((d2 - d1) / DateUtils.DAY_IN_MILLIS).toInt()
+    @JvmStatic
+    fun getRelativeDateTimeString(from: Long): String {
+        val now = LocalDateTime.now()
+        val then = LocalDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneId.systemDefault())
+        val days = Duration.between(now, then).toDays().absoluteValue
+        return then.format(if (days == 0L) timeFormatter else dateFormatter)
     }
 
     @JvmStatic
-    fun extractUrls(text: String?): List<String> {
+    fun extractUrls(text: String): List<String> {
         if (isEmpty(text)) return emptyList()
         val matcher = Patterns.WEB_URL.matcher(text)
         val urls: MutableList<String> = ArrayList()
@@ -87,8 +84,8 @@ object TextUtils {
     @JvmStatic
     fun epochSecondToString(epochSecond: Long): String {
         return LocalDateTime.ofInstant(
-                Instant.ofEpochSecond(epochSecond),
-                ZoneId.systemDefault()
+            Instant.ofEpochSecond(epochSecond),
+            ZoneId.systemDefault()
         ).format(datetimeParser)
     }
 

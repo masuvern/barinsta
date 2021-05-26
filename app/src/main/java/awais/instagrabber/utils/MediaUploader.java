@@ -110,6 +110,7 @@ public final class MediaUploader {
                                @NonNull final OnMediaUploadCompleteListener listener) {
         try {
             final OkHttpClient client = new OkHttpClient.Builder()
+                    // .addInterceptor(new LoggingInterceptor())
                     .addInterceptor(new AddCookiesInterceptor())
                     .followRedirects(false)
                     .followSslRedirects(false)

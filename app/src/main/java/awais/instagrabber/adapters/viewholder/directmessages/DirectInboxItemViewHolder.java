@@ -17,11 +17,9 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.DirectMessageInboxAdapter.OnItemClickListener;
 import awais.instagrabber.databinding.LayoutDmInboxItemBinding;
-import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadDirectStory;
 import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.TextUtils;
 
@@ -136,7 +134,7 @@ public final class DirectInboxItemViewHolder extends RecyclerView.ViewHolder {
 
     private void setDateTime(@NonNull final DirectItem item) {
         final long timestamp = item.getTimestamp() / 1000;
-        final String dateTimeString = TextUtils.getRelativeDateTimeString(itemView.getContext(), timestamp);
+        final String dateTimeString = TextUtils.getRelativeDateTimeString(timestamp);
         binding.tvDate.setText(dateTimeString);
     }
 

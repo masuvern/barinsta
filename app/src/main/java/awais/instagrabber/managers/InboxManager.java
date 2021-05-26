@@ -198,7 +198,7 @@ public final class InboxManager {
             hasOlder = false;
             return;
         }
-        if (!response.getStatus().equals("ok")) {
+        if (!Objects.equals(response.getStatus(), "ok")) {
             Log.e(TAG, "DM inbox fetch response: status not ok");
             inbox.postValue(Resource.error(R.string.generic_not_ok_response, getCurrentDirectInbox()));
             hasOlder = false;
@@ -209,18 +209,19 @@ public final class InboxManager {
             viewer = response.getViewer();
         }
         final DirectInbox inbox = response.getInbox();
+        if (inbox == null) return;
         if (!TextUtils.isEmpty(cursor)) {
             final DirectInbox currentDirectInbox = getCurrentDirectInbox();
             if (currentDirectInbox != null) {
                 List<DirectThread> threads = currentDirectInbox.getThreads();
                 threads = threads == null ? new LinkedList<>() : new LinkedList<>(threads);
-                threads.addAll(inbox.getThreads());
+                threads.addAll(inbox.getThreads() == null ? Collections.emptyList() : inbox.getThreads());
                 inbox.setThreads(threads);
             }
         }
         this.inbox.postValue(Resource.success(inbox));
         cursor = inbox.getOldestCursor();
-        hasOlder = inbox.hasOlder();
+        hasOlder = inbox.getHasOlder();
         pendingRequestsTotal.postValue(response.getPendingRequestsTotal());
     }
 

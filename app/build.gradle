@@ -182,6 +182,8 @@ dependencies {
     def core_version = "1.6.0-beta01"
     implementation "androidx.core:core:$core_version"
 
+    implementation "androidx.fragment:fragment-ktx:1.3.4"
+
     // Room
     def room_version = "2.3.0"
     implementation "androidx.room:room-runtime:$room_version"

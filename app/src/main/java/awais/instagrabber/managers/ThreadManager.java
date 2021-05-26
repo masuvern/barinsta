@@ -16,7 +16,6 @@ import com.google.common.collect.Iterables;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import awais.instagrabber.models.Resource.Status;
 import awais.instagrabber.models.UploadVideoOptions;
 import awais.instagrabber.models.enums.DirectItemType;
 import awais.instagrabber.repositories.requests.UploadFinishOptions;
+import awais.instagrabber.repositories.requests.VideoOptions;
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
@@ -49,7 +49,7 @@ import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemEmojiReaction;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemReactions;
 import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse.DirectItemSeenResponsePayload;
+import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponsePayload;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponseMessageMetadata;
@@ -195,7 +195,7 @@ public final class ThreadManager {
                                                .orElse(null);
             if (thread != null) {
                 cursor = thread.getOldestCursor();
-                hasOlder = thread.hasOlder();
+                hasOlder = thread.getHasOlder();
             }
             return thread;
         }));
@@ -229,7 +229,7 @@ public final class ThreadManager {
         }));
         pending = distinctUntilChanged(map(thread, t -> {
             if (t == null) return true;
-            return t.isPending();
+            return t.getPending();
         }));
         adminUserIds = distinctUntilChanged(map(thread, t -> {
             if (t == null) return Collections.emptyList();
@@ -249,15 +249,15 @@ public final class ThreadManager {
         }));
         isMuted = distinctUntilChanged(map(thread, t -> {
             if (t == null) return false;
-            return t.isMuted();
+            return t.getMuted();
         }));
         isApprovalRequiredToJoin = distinctUntilChanged(map(thread, t -> {
             if (t == null) return false;
-            return t.isApprovalRequiredForNewMembers();
+            return t.getApprovalRequiredForNewMembers();
         }));
         isMentionsMuted = distinctUntilChanged(map(thread, t -> {
             if (t == null) return false;
-            return t.isMentionsMuted();
+            return t.getMentionsMuted();
         }));
         pendingRequestsCount = distinctUntilChanged(map(pendingRequests, p -> {
             if (p == null) return 0;
@@ -694,9 +694,11 @@ public final class ThreadManager {
             public void onUploadComplete(final MediaUploader.MediaUploadResponse response) {
                 // Log.d(TAG, "onUploadComplete: " + response);
                 if (handleInvalidResponse(data, response)) return;
-                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions()
-                        .setUploadId(uploadDmVoiceOptions.getUploadId())
-                        .setSourceType("4");
+                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions(
+                        uploadDmVoiceOptions.getUploadId(),
+                        "4",
+                        null
+                );
                 final Call<String> uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions);
                 uploadFinishRequest.enqueue(new Callback<String>() {
                     @Override
@@ -1005,7 +1007,7 @@ public final class ThreadManager {
                 return;
             }
             sendPhoto(data, uri, dimensions.first, dimensions.second);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             data.postValue(Resource.error(e.getMessage(), null));
             Log.e(TAG, "sendPhoto: ", e);
         }
@@ -1082,10 +1084,11 @@ public final class ThreadManager {
             public void onUploadComplete(final MediaUploader.MediaUploadResponse response) {
                 // Log.d(TAG, "onUploadComplete: " + response);
                 if (handleInvalidResponse(data, response)) return;
-                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions()
-                        .setUploadId(uploadDmVideoOptions.getUploadId())
-                        .setSourceType("2")
-                        .setVideoOptions(new UploadFinishOptions.VideoOptions().setLength(duration / 1000f));
+                final UploadFinishOptions uploadFinishOptions = new UploadFinishOptions(
+                        uploadDmVideoOptions.getUploadId(),
+                        "2",
+                        new VideoOptions(duration / 1000f, Collections.emptyList(), 0, false)
+                );
                 final Call<String> uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions);
                 uploadFinishRequest.enqueue(new Callback<String>() {
                     @Override

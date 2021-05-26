@@ -91,7 +91,7 @@ public class DMSyncService extends LifecycleService {
             return;
         }
         for (final DirectThread thread : threads) {
-            if (thread.isMuted()) continue;
+            if (thread.getMuted()) continue;
             final boolean read = DMUtils.isRead(thread);
             if (read) continue;
             final List<DirectItem> unreadMessages = getUnreadMessages(thread);
