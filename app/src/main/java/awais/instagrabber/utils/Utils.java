@@ -17,7 +17,6 @@ import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.provider.Browser;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -80,7 +79,6 @@ public final class Utils {
     public static SimpleCache simpleCache;
     private static int statusBarHeight;
     private static int actionBarHeight;
-    public static Handler applicationHandler;
     public static String cacheDir;
     public static String tabOrderString;
     private static int defaultStatusBarColor;

@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.math.absoluteValue
 
 object TextUtils {
-    var datetimeParser: DateTimeFormatter = DateTimeFormatter.ofPattern("")
+    lateinit var datetimeParser: DateTimeFormatter
 
     @JvmStatic
     fun isEmpty(charSequence: CharSequence?): Boolean {
