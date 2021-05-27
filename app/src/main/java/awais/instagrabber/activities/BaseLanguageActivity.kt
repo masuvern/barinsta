@@ -1,21 +1,18 @@
-package awais.instagrabber.activities;
+package awais.instagrabber.activities
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import awais.instagrabber.utils.LocaleUtils
+import awais.instagrabber.utils.ThemeUtils
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
-import awais.instagrabber.utils.LocaleUtils;
-import awais.instagrabber.utils.ThemeUtils;
-
-public abstract class BaseLanguageActivity extends AppCompatActivity {
-    protected BaseLanguageActivity() {
-        LocaleUtils.updateConfig(this);
+abstract class BaseLanguageActivity protected constructor() : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.changeTheme(this)
+        super.onCreate(savedInstanceState)
     }
 
-    @Override
-    protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        ThemeUtils.changeTheme(this);
-        super.onCreate(savedInstanceState);
+    init {
+        @Suppress("LeakingThis")
+        LocaleUtils.updateConfig(this)
     }
 }
