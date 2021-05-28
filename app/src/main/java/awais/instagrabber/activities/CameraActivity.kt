@@ -1,239 +1,211 @@
-package awais.instagrabber.activities;
+package awais.instagrabber.activities
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.hardware.display.DisplayManager;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.webkit.MimeTypeMap;
+import android.content.Intent
+import android.content.res.Configuration
+import android.hardware.display.DisplayManager
+import android.hardware.display.DisplayManager.DisplayListener
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.webkit.MimeTypeMap
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
+import awais.instagrabber.databinding.ActivityCameraBinding
+import awais.instagrabber.utils.DirectoryUtils
+import awais.instagrabber.utils.PermissionUtils
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.extensions.TAG
+import com.google.common.io.Files
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.camera.core.CameraInfoUnavailableException;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.core.content.ContextCompat;
+class CameraActivity : BaseLanguageActivity() {
+    private lateinit var binding: ActivityCameraBinding
+    private lateinit var outputDirectory: File
+    private lateinit var displayManager: DisplayManager
+    private lateinit var cameraExecutor: ExecutorService
 
-import com.google.common.io.Files;
-import com.google.common.util.concurrent.ListenableFuture;
+    private var imageCapture: ImageCapture? = null
+    private var displayId = -1
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var lensFacing = 0
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import awais.instagrabber.databinding.ActivityCameraBinding;
-import awais.instagrabber.utils.DirectoryUtils;
-import awais.instagrabber.utils.PermissionUtils;
-import awais.instagrabber.utils.Utils;
-
-public class CameraActivity extends BaseLanguageActivity {
-    private static final String TAG = CameraActivity.class.getSimpleName();
-    private static final int CAMERA_REQUEST_CODE = 100;
-    private static final String FILE_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS";
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(FILE_FORMAT, Locale.US);
-
-    private ActivityCameraBinding binding;
-    private ImageCapture imageCapture;
-    private File outputDirectory;
-    private ExecutorService cameraExecutor;
-    private int displayId = -1;
-
-    private final DisplayManager.DisplayListener displayListener = new DisplayManager.DisplayListener() {
-        @Override
-        public void onDisplayAdded(final int displayId) {}
-
-        @Override
-        public void onDisplayRemoved(final int displayId) {}
-
-        @Override
-        public void onDisplayChanged(final int displayId) {
-            if (displayId == CameraActivity.this.displayId) {
-                imageCapture.setTargetRotation(binding.getRoot().getDisplay().getRotation());
+    private val cameraRequestCode = 100
+    private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
+    private val displayListener: DisplayListener = object : DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+        override fun onDisplayChanged(displayId: Int) {
+            if (displayId == this@CameraActivity.displayId) {
+                imageCapture?.targetRotation = binding.root.display.rotation
             }
         }
-    };
-    private DisplayManager displayManager;
-    private ProcessCameraProvider cameraProvider;
-    private int lensFacing;
-
-    @Override
-    protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityCameraBinding.inflate(LayoutInflater.from(getBaseContext()));
-        setContentView(binding.getRoot());
-        Utils.transparentStatusBar(this, true, false);
-        displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-        outputDirectory = DirectoryUtils.getOutputMediaDirectory(this, "Camera");
-        cameraExecutor = Executors.newSingleThreadExecutor();
-        displayManager.registerDisplayListener(displayListener, null);
-        binding.viewFinder.post(() -> {
-            displayId = binding.viewFinder.getDisplay().getDisplayId();
-            updateUi();
-            checkPermissionsAndSetupCamera();
-        });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityCameraBinding.inflate(LayoutInflater.from(baseContext))
+        setContentView(binding.root)
+        Utils.transparentStatusBar(this, true, false)
+        displayManager = getSystemService(DISPLAY_SERVICE) as DisplayManager
+        outputDirectory = DirectoryUtils.getOutputMediaDirectory(this, "Camera")
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        displayManager.registerDisplayListener(displayListener, null)
+        binding.viewFinder.post {
+            displayId = binding.viewFinder.display.displayId
+            updateUi()
+            checkPermissionsAndSetupCamera()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
         // Make sure that all permissions are still present, since the
         // user could have removed them while the app was in paused state.
         if (!PermissionUtils.hasCameraPerms(this)) {
-            PermissionUtils.requestCameraPerms(this, CAMERA_REQUEST_CODE);
+            PermissionUtils.requestCameraPerms(this, cameraRequestCode)
         }
     }
 
-    @Override
-    public void onConfigurationChanged(@NonNull final Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
         // Redraw the camera UI controls
-        updateUi();
+        updateUi()
 
         // Enable or disable switching between cameras
-        updateCameraSwitchButton();
+        updateCameraSwitchButton()
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Utils.transparentStatusBar(this, false, false);
-        cameraExecutor.shutdown();
-        displayManager.unregisterDisplayListener(displayListener);
+    override fun onDestroy() {
+        super.onDestroy()
+        Utils.transparentStatusBar(this, false, false)
+        cameraExecutor.shutdown()
+        displayManager.unregisterDisplayListener(displayListener)
     }
 
-    private void updateUi() {
-        binding.cameraCaptureButton.setOnClickListener(v -> takePhoto());
+    private fun updateUi() {
+        binding.cameraCaptureButton.setOnClickListener { takePhoto() }
         // Disable the button until the camera is set up
-        binding.switchCamera.setEnabled(false);
+        binding.switchCamera.isEnabled = false
         // Listener for button used to switch cameras. Only called if the button is enabled
-        binding.switchCamera.setOnClickListener(v -> {
-            lensFacing = CameraSelector.LENS_FACING_FRONT == lensFacing ? CameraSelector.LENS_FACING_BACK
-                                                                        : CameraSelector.LENS_FACING_FRONT;
+        binding.switchCamera.setOnClickListener {
+            lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) CameraSelector.LENS_FACING_BACK else CameraSelector.LENS_FACING_FRONT
             // Re-bind use cases to update selected camera
-            bindCameraUseCases();
-        });
-        binding.close.setOnClickListener(v -> {
-            setResult(Activity.RESULT_CANCELED);
-            finish();
-        });
+            bindCameraUseCases()
+        }
+        binding.close.setOnClickListener {
+            setResult(RESULT_CANCELED)
+            finish()
+        }
     }
 
-    private void checkPermissionsAndSetupCamera() {
+    private fun checkPermissionsAndSetupCamera() {
         if (PermissionUtils.hasCameraPerms(this)) {
-            setupCamera();
-            return;
+            setupCamera()
+            return
         }
-        PermissionUtils.requestCameraPerms(this, CAMERA_REQUEST_CODE);
+        PermissionUtils.requestCameraPerms(this, cameraRequestCode)
     }
 
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        if (requestCode == CAMERA_REQUEST_CODE) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == cameraRequestCode) {
             if (PermissionUtils.hasCameraPerms(this)) {
-                setupCamera();
+                setupCamera()
             }
         }
     }
 
-    private void setupCamera() {
-        final ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        cameraProviderFuture.addListener(() -> {
+    private fun setupCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        cameraProviderFuture.addListener({
             try {
-                cameraProvider = cameraProviderFuture.get();
+                cameraProvider = cameraProviderFuture.get()
                 // Select lensFacing depending on the available cameras
-                lensFacing = -1;
+                lensFacing = -1
                 if (hasBackCamera()) {
-                    lensFacing = CameraSelector.LENS_FACING_BACK;
+                    lensFacing = CameraSelector.LENS_FACING_BACK
                 } else if (hasFrontCamera()) {
-                    lensFacing = CameraSelector.LENS_FACING_FRONT;
+                    lensFacing = CameraSelector.LENS_FACING_FRONT
                 }
-                if (lensFacing == -1) {
-                    throw new IllegalStateException("Back and front camera are unavailable");
-                }
+                check(lensFacing != -1) { "Back and front camera are unavailable" }
                 // Enable or disable switching between cameras
-                updateCameraSwitchButton();
+                updateCameraSwitchButton()
                 // Build and bind the camera use cases
-                bindCameraUseCases();
-            } catch (ExecutionException | InterruptedException | CameraInfoUnavailableException e) {
-                Log.e(TAG, "setupCamera: ", e);
+                bindCameraUseCases()
+            } catch (e: ExecutionException) {
+                Log.e(TAG, "setupCamera: ", e)
+            } catch (e: InterruptedException) {
+                Log.e(TAG, "setupCamera: ", e)
+            } catch (e: CameraInfoUnavailableException) {
+                Log.e(TAG, "setupCamera: ", e)
             }
-
-        }, ContextCompat.getMainExecutor(this));
+        }, ContextCompat.getMainExecutor(this))
     }
 
-    private void bindCameraUseCases() {
-        final int rotation = binding.viewFinder.getDisplay().getRotation();
+    private fun bindCameraUseCases() {
+        val rotation = binding.viewFinder.display.rotation
 
         // CameraSelector
-        final CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(lensFacing)
-                .build();
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(lensFacing)
+            .build()
 
         // Preview
-        final Preview preview = new Preview.Builder()
-                // Set initial target rotation
-                .setTargetRotation(rotation)
-                .build();
+        val preview = Preview.Builder() // Set initial target rotation
+            .setTargetRotation(rotation)
+            .build()
 
         // ImageCapture
-        imageCapture = new ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                // Set initial target rotation, we will have to call this again if rotation changes
-                // during the lifecycle of this use case
-                .setTargetRotation(rotation)
-                .build();
-
-        cameraProvider.unbindAll();
-        cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
-
-        preview.setSurfaceProvider(binding.viewFinder.getSurfaceProvider());
+        imageCapture = ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY) // Set initial target rotation, we will have to call this again if rotation changes
+            // during the lifecycle of this use case
+            .setTargetRotation(rotation)
+            .build()
+        cameraProvider?.unbindAll()
+        cameraProvider?.bindToLifecycle(this, cameraSelector, preview, imageCapture)
+        preview.setSurfaceProvider(binding.viewFinder.surfaceProvider)
     }
 
-    private void takePhoto() {
-        if (imageCapture == null) return;
-        final File photoFile = new File(outputDirectory, SIMPLE_DATE_FORMAT.format(System.currentTimeMillis()) + ".jpg");
-        final ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
-        imageCapture.takePicture(
-                outputFileOptions,
-                cameraExecutor,
-                new ImageCapture.OnImageSavedCallback() {
-                    @Override
-                    public void onImageSaved(@NonNull final ImageCapture.OutputFileResults outputFileResults) {
-                        final Uri uri = Uri.fromFile(photoFile);
-                        //noinspection UnstableApiUsage
-                        final String mimeType = MimeTypeMap.getSingleton()
-                                                           .getMimeTypeFromExtension(Files.getFileExtension(photoFile.getName()));
-                        MediaScannerConnection.scanFile(
-                                CameraActivity.this,
-                                new String[]{photoFile.getAbsolutePath()},
-                                new String[]{mimeType},
-                                (path, uri1) -> {
-                                    Log.d(TAG, "onImageSaved: scan complete");
-                                    final Intent intent = new Intent();
-                                    intent.setData(uri1);
-                                    setResult(Activity.RESULT_OK, intent);
-                                    finish();
-                                });
-                        Log.d(TAG, "onImageSaved: " + uri);
+    private fun takePhoto() {
+        if (imageCapture == null) return
+        val photoFile = File(outputDirectory, simpleDateFormat.format(System.currentTimeMillis()) + ".jpg")
+        val outputFileOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        imageCapture?.takePicture(
+            outputFileOptions,
+            cameraExecutor,
+            object : ImageCapture.OnImageSavedCallback {
+                @Suppress("UnstableApiUsage")
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    val uri = Uri.fromFile(photoFile)
+                    val mimeType = MimeTypeMap.getSingleton()
+                        .getMimeTypeFromExtension(Files.getFileExtension(photoFile.name))
+                    MediaScannerConnection.scanFile(
+                        this@CameraActivity,
+                        arrayOf(photoFile.absolutePath),
+                        arrayOf(mimeType)
+                    ) { _: String?, uri1: Uri? ->
+                        Log.d(TAG, "onImageSaved: scan complete")
+                        val intent = Intent()
+                        intent.data = uri1
+                        setResult(RESULT_OK, intent)
+                        finish()
                     }
-
-                    @Override
-                    public void onError(@NonNull final ImageCaptureException exception) {
-                        Log.e(TAG, "onError: ", exception);
-                    }
+                    Log.d(TAG, "onImageSaved: $uri")
                 }
-        );
+
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e(TAG, "onError: ", exception)
+                }
+            }
+        )
         // We can only change the foreground Drawable using API level 23+ API
         // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         //     // Display flash animation to indicate that photo was captured
@@ -248,29 +220,29 @@ public class CameraActivity extends BaseLanguageActivity {
     /**
      * Enabled or disabled a button to switch cameras depending on the available cameras
      */
-    private void updateCameraSwitchButton() {
+    private fun updateCameraSwitchButton() {
         try {
-            binding.switchCamera.setEnabled(hasBackCamera() && hasFrontCamera());
-        } catch (CameraInfoUnavailableException e) {
-            binding.switchCamera.setEnabled(false);
+            binding.switchCamera.isEnabled = hasBackCamera() && hasFrontCamera()
+        } catch (e: CameraInfoUnavailableException) {
+            binding.switchCamera.isEnabled = false
         }
     }
 
     /**
      * Returns true if the device has an available back camera. False otherwise
      */
-    private boolean hasBackCamera() throws CameraInfoUnavailableException {
-        if (cameraProvider == null) return false;
-        return cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
+    @Throws(CameraInfoUnavailableException::class)
+    private fun hasBackCamera(): Boolean {
+        return if (cameraProvider == null) false else cameraProvider?.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) ?: false
     }
 
     /**
      * Returns true if the device has an available front camera. False otherwise
      */
-    private boolean hasFrontCamera() throws CameraInfoUnavailableException {
-        if (cameraProvider == null) {
-            return false;
-        }
-        return cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA);
+    @Throws(CameraInfoUnavailableException::class)
+    private fun hasFrontCamera(): Boolean {
+        return if (cameraProvider == null) {
+            false
+        } else cameraProvider?.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
     }
 }
