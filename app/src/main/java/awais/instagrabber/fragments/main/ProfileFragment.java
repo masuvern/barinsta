@@ -548,6 +548,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (getArguments() != null) {
             final ProfileFragmentArgs fragmentArgs = ProfileFragmentArgs.fromBundle(getArguments());
             username = fragmentArgs.getUsername();
+            if (!TextUtils.isEmpty(username) && username.startsWith("@")) {
+                username = username.substring(1);
+            }
             setUsernameDelayed();
         }
         if (TextUtils.isEmpty(username) && !isLoggedIn) {
