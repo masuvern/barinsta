@@ -17,17 +17,16 @@ import java.net.CookieHandler
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-
 @Suppress("unused")
 class InstaGrabberApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         CookieHandler.setDefault(NET_COOKIE_MANAGER)
+        settingsHelper = SettingsHelper(this)
         setupCrashReporter()
         setupCloseGuard()
         setupFresco()
         Utils.cacheDir = cacheDir.absolutePath
-        settingsHelper = SettingsHelper(this)
         Utils.clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         LocaleUtils.setLocale(baseContext)
         val pattern = if (settingsHelper.getBoolean(CUSTOM_DATE_TIME_FORMAT_ENABLED)) {
