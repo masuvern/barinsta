@@ -31,7 +31,7 @@ public class FeedService extends BaseService {
     private static FeedService instance;
 
     private FeedService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(FeedRepository.class);
     }

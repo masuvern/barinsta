@@ -31,7 +31,7 @@ public class TagsService extends BaseService {
     private final TagsRepository repository;
 
     private TagsService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(TagsRepository.class);
     }

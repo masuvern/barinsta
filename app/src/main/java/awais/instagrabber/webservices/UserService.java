@@ -21,7 +21,7 @@ public class UserService extends BaseService {
     private static UserService instance;
 
     private UserService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(UserRepository.class);
     }

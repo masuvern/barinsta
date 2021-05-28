@@ -22,7 +22,7 @@ public class LocationService extends BaseService {
     private static LocationService instance;
 
     private LocationService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(LocationRepository.class);
     }

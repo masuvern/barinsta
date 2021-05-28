@@ -1,476 +1,483 @@
-package awais.instagrabber.webservices;
+package awais.instagrabber.webservices
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import awais.instagrabber.repositories.DirectMessagesRepository
+import awais.instagrabber.repositories.requests.directmessages.*
+import awais.instagrabber.repositories.responses.directmessages.*
+import awais.instagrabber.repositories.responses.giphy.GiphyGif
+import awais.instagrabber.utils.TextUtils.extractUrls
+import awais.instagrabber.utils.TextUtils.isEmpty
+import awais.instagrabber.utils.Utils
+import org.json.JSONArray
+import retrofit2.Call
+import java.util.*
 
-import com.google.common.collect.ImmutableMap;
+class DirectMessagesService private constructor(
+    val csrfToken: String,
+    val userId: Long,
+    val deviceUuid: String,
+) : BaseService() {
+    private val repository: DirectMessagesRepository = RetrofitFactory.retrofit.create(DirectMessagesRepository::class.java)
 
-import org.json.JSONArray;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import awais.instagrabber.repositories.DirectMessagesRepository;
-import awais.instagrabber.repositories.requests.directmessages.AnimatedMediaBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.LinkBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.MediaShareBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.PhotoBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.ReactionBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.StoryReplyBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.TextBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
-import awais.instagrabber.repositories.requests.directmessages.VideoBroadcastOptions;
-import awais.instagrabber.repositories.requests.directmessages.VoiceBroadcastOptions;
-import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
-import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectItemSeenResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadDetailsChangeResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadFeedResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadParticipantRequestsResponse;
-import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
-import awais.instagrabber.repositories.responses.giphy.GiphyGif;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
-import retrofit2.Call;
-
-public class DirectMessagesService extends BaseService {
-    private static final String TAG = "DiscoverService";
-
-    private static DirectMessagesService instance;
-
-    private final DirectMessagesRepository repository;
-    private final String csrfToken;
-    private final long userId;
-    private final String deviceUuid;
-
-    private DirectMessagesService(@NonNull final String csrfToken,
-                                  final long userId,
-                                  @NonNull final String deviceUuid) {
-        this.csrfToken = csrfToken;
-        this.userId = userId;
-        this.deviceUuid = deviceUuid;
-        repository = RetrofitFactory.getInstance()
-                                    .getRetrofit()
-                                    .create(DirectMessagesRepository.class);
-    }
-
-    public String getCsrfToken() {
-        return csrfToken;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public String getDeviceUuid() {
-        return deviceUuid;
-    }
-
-    public static DirectMessagesService getInstance(@NonNull final String csrfToken,
-                                                    final long userId,
-                                                    @NonNull final String deviceUuid) {
-        if (instance == null
-                || !Objects.equals(instance.getCsrfToken(), csrfToken)
-                || !Objects.equals(instance.getUserId(), userId)
-                || !Objects.equals(instance.getDeviceUuid(), deviceUuid)) {
-            instance = new DirectMessagesService(csrfToken, userId, deviceUuid);
+    fun fetchInbox(
+        cursor: String?,
+        seqId: Long,
+    ): Call<DirectInboxResponse?> {
+        val queryMap = mutableMapOf(
+            "visual_message_return_type" to "unseen",
+            "thread_message_limit" to 10.toString(),
+            "persistentBadging" to true.toString(),
+            "limit" to 10.toString(),
+        )
+        if (!cursor.isNullOrBlank()) {
+            queryMap["cursor"] = cursor
+            queryMap["direction"] = "older"
         }
-        return instance;
-    }
-
-    public Call<DirectInboxResponse> fetchInbox(final String cursor,
-                                                final long seqId) {
-        final ImmutableMap.Builder<String, Object> queryMapBuilder = ImmutableMap.<String, Object>builder()
-                .put("visual_message_return_type", "unseen")
-                .put("thread_message_limit", 10)
-                .put("persistentBadging", true)
-                .put("limit", 10);
-        if (!TextUtils.isEmpty(cursor)) {
-            queryMapBuilder.put("cursor", cursor);
-            queryMapBuilder.put("direction", "older");
+        if (seqId != 0L) {
+            queryMap["seq_id"] = seqId.toString()
         }
-        if (seqId != 0) {
-            queryMapBuilder.put("seq_id", seqId);
+        return repository.fetchInbox(queryMap)
+    }
+
+    fun fetchThread(
+        threadId: String,
+        cursor: String?,
+    ): Call<DirectThreadFeedResponse?> {
+        val queryMap = mutableMapOf(
+            "visual_message_return_type" to "unseen",
+            "limit" to 20.toString(),
+            "direction" to "older",
+        )
+        if (!cursor.isNullOrBlank()) {
+            queryMap["cursor"] = cursor
         }
-        return repository.fetchInbox(queryMapBuilder.build());
+        return repository.fetchThread(threadId, queryMap)
     }
 
-    public Call<DirectThreadFeedResponse> fetchThread(final String threadId,
-                                                      final String cursor) {
-        final ImmutableMap.Builder<String, Object> queryMapBuilder = ImmutableMap.<String, Object>builder()
-                .put("visual_message_return_type", "unseen")
-                .put("limit", 20)
-                .put("direction", "older");
-        if (!TextUtils.isEmpty(cursor)) {
-            queryMapBuilder.put("cursor", cursor);
+    fun fetchUnseenCount(): Call<DirectBadgeCount?> {
+        return repository.fetchUnseenCount()
+    }
+
+    fun broadcastText(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        text: String,
+        repliedToItemId: String?,
+        repliedToClientContext: String?,
+    ): Call<DirectThreadBroadcastResponse?> {
+        val urls = extractUrls(text)
+        if (urls.isNotEmpty()) {
+            return broadcastLink(clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
         }
-        return repository.fetchThread(threadId, queryMapBuilder.build());
-    }
-
-    public Call<DirectBadgeCount> fetchUnseenCount() {
-        return repository.fetchUnseenCount();
-    }
-
-    public Call<DirectThreadBroadcastResponse> broadcastText(@NonNull final String clientContext,
-                                                             @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                             @NonNull final String text,
-                                                             @Nullable final String repliedToItemId,
-                                                             @Nullable final String repliedToClientContext) {
-        final List<String> urls = TextUtils.extractUrls(text);
-        if (!urls.isEmpty()) {
-            return broadcastLink(clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext);
+        val broadcastOptions = TextBroadcastOptions(clientContext, threadIdOrUserIds, text)
+        if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
+            broadcastOptions.repliedToItemId = repliedToItemId
+            broadcastOptions.repliedToClientContext = repliedToClientContext
         }
-        final TextBroadcastOptions broadcastOptions = new TextBroadcastOptions(clientContext, threadIdOrUserIds, text);
-        if (repliedToItemId != null && repliedToClientContext != null) {
-            broadcastOptions.setRepliedToItemId(repliedToItemId);
-            broadcastOptions.setRepliedToClientContext(repliedToClientContext);
+        return broadcast(broadcastOptions)
+    }
+
+    private fun broadcastLink(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        linkText: String,
+        urls: List<String>,
+        repliedToItemId: String?,
+        repliedToClientContext: String?,
+    ): Call<DirectThreadBroadcastResponse?> {
+        val broadcastOptions = LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls)
+        if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
+            broadcastOptions.repliedToItemId = repliedToItemId
+            broadcastOptions.repliedToClientContext = repliedToClientContext
         }
-        return broadcast(broadcastOptions);
+        return broadcast(broadcastOptions)
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastLink(@NonNull final String clientContext,
-                                                             @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                             @NonNull final String linkText,
-                                                             @NonNull final List<String> urls,
-                                                             @Nullable final String repliedToItemId,
-                                                             @Nullable final String repliedToClientContext) {
-        final LinkBroadcastOptions broadcastOptions = new LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls);
-        if (repliedToItemId != null && repliedToClientContext != null) {
-            broadcastOptions.setRepliedToItemId(repliedToItemId);
-            broadcastOptions.setRepliedToClientContext(repliedToClientContext);
-        }
-        return broadcast(broadcastOptions);
+    fun broadcastPhoto(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        uploadId: String,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastPhoto(@NonNull final String clientContext,
-                                                              @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                              @NonNull final String uploadId) {
-        return broadcast(new PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId));
+    fun broadcastVideo(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        uploadId: String,
+        videoResult: String,
+        sampled: Boolean,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastVideo(@NonNull final String clientContext,
-                                                              @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                              @NonNull final String uploadId,
-                                                              @NonNull final String videoResult,
-                                                              final boolean sampled) {
-        return broadcast(new VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled));
+    fun broadcastVoice(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        uploadId: String,
+        waveform: List<Float>,
+        samplingFreq: Int,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastVoice(@NonNull final String clientContext,
-                                                              @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                              @NonNull final String uploadId,
-                                                              @NonNull final List<Float> waveform,
-                                                              final int samplingFreq) {
-        return broadcast(new VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq));
+    fun broadcastStoryReply(
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        text: String,
+        mediaId: String,
+        reelId: String,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastStoryReply(@NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                   @NonNull final String text,
-                                                                   @NonNull final String mediaId,
-                                                                   @NonNull final String reelId) {
-        return broadcast(new StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId));
+    fun broadcastReaction(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        itemId: String,
+        emoji: String?,
+        delete: Boolean,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastReaction(@NonNull final String clientContext,
-                                                                 @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                 @NonNull final String itemId,
-                                                                 @Nullable final String emoji,
-                                                                 final boolean delete) {
-        return broadcast(new ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete));
+    fun broadcastAnimatedMedia(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        giphyGif: GiphyGif,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastAnimatedMedia(@NonNull final String clientContext,
-                                                                      @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                      @NonNull final GiphyGif giphyGif) {
-        return broadcast(new AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif));
+    fun broadcastMediaShare(
+        clientContext: String,
+        threadIdOrUserIds: ThreadIdOrUserIds,
+        mediaId: String,
+    ): Call<DirectThreadBroadcastResponse?> {
+        return broadcast(MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId))
     }
 
-    public Call<DirectThreadBroadcastResponse> broadcastMediaShare(@NonNull final String clientContext,
-                                                                   @NonNull final ThreadIdOrUserIds threadIdOrUserIds,
-                                                                   @NonNull final String mediaId) {
-        return broadcast(new MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId));
-    }
-
-    private Call<DirectThreadBroadcastResponse> broadcast(@NonNull final BroadcastOptions broadcastOptions) {
-        if (TextUtils.isEmpty(broadcastOptions.getClientContext())) {
-            throw new IllegalArgumentException("Broadcast requires a valid client context value");
-        }
-        final Map<String, Object> form = new HashMap<>();
-        if (!TextUtils.isEmpty(broadcastOptions.getThreadId())) {
-            form.put("thread_id", broadcastOptions.getThreadId());
+    private fun broadcast(broadcastOptions: BroadcastOptions): Call<DirectThreadBroadcastResponse?> {
+        require(!isEmpty(broadcastOptions.clientContext)) { "Broadcast requires a valid client context value" }
+        val form = mutableMapOf<String, Any>()
+        val threadId = broadcastOptions.threadId
+        if (!threadId.isNullOrBlank()) {
+            form["thread_id"] = threadId
         } else {
-            form.put("recipient_users", new JSONArray(broadcastOptions.getUserIds()).toString());
+            val userIds = broadcastOptions.userIds
+            require(!userIds.isNullOrEmpty()) {
+                "Either provide a thread id or pass a list of user ids"
+            }
+            form["recipient_users"] = JSONArray(userIds).toString()
         }
-        form.put("_csrftoken", csrfToken);
-        form.put("_uid", userId);
-        form.put("__uuid", deviceUuid);
-        form.put("client_context", broadcastOptions.getClientContext());
-        form.put("mutation_token", broadcastOptions.getClientContext());
-        if (!TextUtils.isEmpty(broadcastOptions.getRepliedToItemId()) && !TextUtils.isEmpty(broadcastOptions.getRepliedToClientContext())) {
-            form.put("replied_to_item_id", broadcastOptions.getRepliedToItemId());
-            form.put("replied_to_client_context", broadcastOptions.getRepliedToClientContext());
+        form["_csrftoken"] = csrfToken
+        form["_uid"] = userId
+        form["__uuid"] = deviceUuid
+        form["client_context"] = broadcastOptions.clientContext
+        form["mutation_token"] = broadcastOptions.clientContext
+        val repliedToItemId = broadcastOptions.repliedToItemId
+        val repliedToClientContext = broadcastOptions.repliedToClientContext
+        if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
+            form["replied_to_item_id"] = repliedToItemId
+            form["replied_to_client_context"] = repliedToClientContext
         }
-        form.putAll(broadcastOptions.getFormMap());
-        form.put("action", "send_item");
-        final Map<String, String> signedForm = Utils.sign(form);
-        return repository.broadcast(broadcastOptions.getItemType().getValue(), signedForm);
+        form.putAll(broadcastOptions.formMap)
+        form["action"] = "send_item"
+        val signedForm = Utils.sign(form)
+        return repository.broadcast(broadcastOptions.itemType.value, signedForm)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> addUsers(final String threadId,
-                                                            final Collection<Long> userIds) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "user_ids", new JSONArray(userIds).toString()
-        );
-        return repository.addUsers(threadId, form);
+    fun addUsers(
+        threadId: String,
+        userIds: Collection<Long>,
+    ): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "user_ids" to JSONArray(userIds).toString(),
+        )
+        return repository.addUsers(threadId, form)
     }
 
-    public Call<String> removeUsers(final String threadId,
-                                    final Collection<Long> userIds) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "user_ids", new JSONArray(userIds).toString()
-        );
-        return repository.removeUsers(threadId, form);
+    fun removeUsers(
+        threadId: String,
+        userIds: Collection<Long>,
+    ): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "user_ids" to JSONArray(userIds).toString(),
+        )
+        return repository.removeUsers(threadId, form)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> updateTitle(final String threadId,
-                                                               final String title) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "title", title
-        );
-        return repository.updateTitle(threadId, form);
+    fun updateTitle(
+        threadId: String,
+        title: String,
+    ): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "title" to title,
+        )
+        return repository.updateTitle(threadId, form)
     }
 
-    public Call<String> addAdmins(final String threadId,
-                                  final Collection<Long> userIds) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "user_ids", new JSONArray(userIds).toString()
-        );
-        return repository.addAdmins(threadId, form);
+    fun addAdmins(
+        threadId: String,
+        userIds: Collection<Long>,
+    ): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "user_ids" to JSONArray(userIds).toString(),
+        )
+        return repository.addAdmins(threadId, form)
     }
 
-    public Call<String> removeAdmins(final String threadId,
-                                     final Collection<Long> userIds) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "user_ids", new JSONArray(userIds).toString()
-        );
-        return repository.removeAdmins(threadId, form);
+    fun removeAdmins(
+        threadId: String,
+        userIds: Collection<Long>,
+    ): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "user_ids" to JSONArray(userIds).toString(),
+        )
+        return repository.removeAdmins(threadId, form)
     }
 
-    public Call<String> deleteItem(final String threadId,
-                                   final String itemId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.deleteItem(threadId, itemId, form);
+    fun deleteItem(
+        threadId: String,
+        itemId: String,
+    ): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.deleteItem(threadId, itemId, form)
     }
 
-    public Call<RankedRecipientsResponse> rankedRecipients(@Nullable final String mode,
-                                                           @Nullable final Boolean showThreads,
-                                                           @Nullable final String query) {
+    fun rankedRecipients(
+        mode: String?,
+        showThreads: Boolean?,
+        query: String?,
+    ): Call<RankedRecipientsResponse?> {
         // String correctedMode = mode;
         // if (TextUtils.isEmpty(mode) || (!mode.equals("raven") && !mode.equals("reshare"))) {
         //     correctedMode = "raven";
         // }
-        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        if (mode != null) {
-            builder.put("mode", mode);
+        val queryMap = mutableMapOf<String, String>()
+        if (!mode.isNullOrBlank()) {
+            queryMap["mode"] = mode
         }
-        if (query != null) {
-            builder.put("query", query);
+        if (!query.isNullOrBlank()) {
+            queryMap["query"] = query
         }
         if (showThreads != null) {
-            builder.put("showThreads", String.valueOf(showThreads));
+            queryMap["showThreads"] = showThreads.toString()
         }
-        return repository.rankedRecipients(builder.build());
+        return repository.rankedRecipients(queryMap)
     }
 
-    public Call<DirectThreadBroadcastResponse> forward(@NonNull final String toThreadId,
-                                                       @NonNull final String itemType,
-                                                       @NonNull final String fromThreadId,
-                                                       @NonNull final String itemId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "action", "forward_item",
-                "thread_id", toThreadId,
-                "item_type", itemType,
-                "forwarded_from_thread_id", fromThreadId,
-                "forwarded_from_thread_item_id", itemId
-        );
-        return repository.forward(form);
+    fun forward(
+        toThreadId: String,
+        itemType: String,
+        fromThreadId: String,
+        itemId: String,
+    ): Call<DirectThreadBroadcastResponse?> {
+        val form = mapOf(
+            "action" to "forward_item",
+            "thread_id" to toThreadId,
+            "item_type" to itemType,
+            "forwarded_from_thread_id" to fromThreadId,
+            "forwarded_from_thread_item_id" to itemId,
+        )
+        return repository.forward(form)
     }
 
-    public Call<DirectThread> createThread(@NonNull final List<Long> userIds,
-                                           @Nullable final String threadTitle) {
-        final List<String> userIdStringList = userIds.stream()
-                                                     .filter(Objects::nonNull)
-                                                     .map(String::valueOf)
-                                                     .collect(Collectors.toList());
-        final ImmutableMap.Builder<String, Object> formBuilder = ImmutableMap.<String, Object>builder()
-                .put("_csrftoken", csrfToken)
-                .put("_uuid", deviceUuid)
-                .put("_uid", userId)
-                .put("recipient_users", new JSONArray(userIdStringList).toString());
-        if (threadTitle != null) {
-            formBuilder.put("thread_title", threadTitle);
+    fun createThread(
+        userIds: List<Long>,
+        threadTitle: String?,
+    ): Call<DirectThread?> {
+        val userIdStringList = userIds.asSequence()
+            .filterNotNull()
+            .map { it.toString() }
+        val form = mutableMapOf<String, Any>(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "_uid" to userId,
+            "recipient_users" to JSONArray(userIdStringList).toString(),
+        )
+        if (!threadTitle.isNullOrBlank()) {
+            form["thread_title"] = threadTitle
         }
-        final Map<String, String> signedForm = Utils.sign(formBuilder.build());
-        return repository.createThread(signedForm);
+        val signedForm = Utils.sign(form)
+        return repository.createThread(signedForm)
     }
 
-    public Call<String> mute(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.mute(threadId, form);
+    fun mute(threadId: String): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid
+        )
+        return repository.mute(threadId, form)
     }
 
-    public Call<String> unmute(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.unmute(threadId, form);
+    fun unmute(threadId: String): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.unmute(threadId, form)
     }
 
-    public Call<String> muteMentions(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.muteMentions(threadId, form);
+    fun muteMentions(threadId: String): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.muteMentions(threadId, form)
     }
 
-    public Call<String> unmuteMentions(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.unmuteMentions(threadId, form);
+    fun unmuteMentions(threadId: String): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.unmuteMentions(threadId, form)
     }
 
-    public Call<DirectThreadParticipantRequestsResponse> participantRequests(@NonNull final String threadId,
-                                                                             final int pageSize,
-                                                                             @Nullable final String cursor) {
-        return repository.participantRequests(threadId, pageSize, cursor);
+    fun participantRequests(
+        threadId: String,
+        pageSize: Int,
+        cursor: String?,
+    ): Call<DirectThreadParticipantRequestsResponse?> {
+        return repository.participantRequests(threadId, pageSize, cursor)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> approveParticipantRequests(@NonNull final String threadId,
-                                                                              @NonNull final List<Long> userIds) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "user_ids", new JSONArray(userIds).toString()
-                // , "share_join_chat_story", String.valueOf(true)
-        );
-        return repository.approveParticipantRequests(threadId, form);
+    fun approveParticipantRequests(
+        threadId: String,
+        userIds: List<Long>,
+    ): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "user_ids" to JSONArray(userIds).toString(),
+            // "share_join_chat_story" to String.valueOf(true)
+        )
+        return repository.approveParticipantRequests(threadId, form)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> declineParticipantRequests(@NonNull final String threadId,
-                                                                              @NonNull final List<Long> userIds) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid,
-                "user_ids", new JSONArray(userIds).toString()
-        );
-        return repository.declineParticipantRequests(threadId, form);
+    fun declineParticipantRequests(
+        threadId: String,
+        userIds: List<Long>,
+    ): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "user_ids" to JSONArray(userIds).toString(),
+        )
+        return repository.declineParticipantRequests(threadId, form)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> approvalRequired(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.approvalRequired(threadId, form);
+    fun approvalRequired(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.approvalRequired(threadId, form)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> approvalNotRequired(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.approvalNotRequired(threadId, form);
+    fun approvalNotRequired(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.approvalNotRequired(threadId, form)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> leave(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.leave(threadId, form);
+    fun leave(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.leave(threadId, form)
     }
 
-    public Call<DirectThreadDetailsChangeResponse> end(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.end(threadId, form);
+    fun end(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.end(threadId, form)
     }
 
-    public Call<DirectInboxResponse> fetchPendingInbox(final String cursor, final long seqId) {
-        final ImmutableMap.Builder<String, Object> queryMapBuilder = ImmutableMap.<String, Object>builder()
-                .put("visual_message_return_type", "unseen")
-                .put("thread_message_limit", 20)
-                .put("persistentBadging", true)
-                .put("limit", 10);
-        if (!TextUtils.isEmpty(cursor)) {
-            queryMapBuilder.put("cursor", cursor);
-            queryMapBuilder.put("direction", "older");
+    fun fetchPendingInbox(cursor: String?, seqId: Long): Call<DirectInboxResponse?> {
+        val queryMap = mutableMapOf(
+            "visual_message_return_type" to "unseen",
+            "thread_message_limit" to 20.toString(),
+            "persistentBadging" to true.toString(),
+            "limit" to 10.toString(),
+        )
+        if (!cursor.isNullOrBlank()) {
+            queryMap["cursor"] = cursor
+            queryMap["direction"] = "older"
         }
-        if (seqId != 0) {
-            queryMapBuilder.put("seq_id", seqId);
+        if (seqId != 0L) {
+            queryMap["seq_id"] = seqId.toString()
         }
-        return repository.fetchPendingInbox(queryMapBuilder.build());
+        return repository.fetchPendingInbox(queryMap)
     }
 
-    public Call<String> approveRequest(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.approveRequest(threadId, form);
+    fun approveRequest(threadId: String): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.approveRequest(threadId, form)
     }
 
-    public Call<String> declineRequest(@NonNull final String threadId) {
-        final ImmutableMap<String, String> form = ImmutableMap.of(
-                "_csrftoken", csrfToken,
-                "_uuid", deviceUuid
-        );
-        return repository.declineRequest(threadId, form);
+    fun declineRequest(threadId: String): Call<String?> {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+        )
+        return repository.declineRequest(threadId, form)
     }
 
-    @Nullable
-    public Call<DirectItemSeenResponse> markAsSeen(@NonNull final String threadId,
-                                                   @NonNull final DirectItem directItem) {
-        if (directItem.getItemId() == null) return null;
-        final ImmutableMap<String, String> form = ImmutableMap.<String, String>builder()
-                .put("_csrftoken", csrfToken)
-                .put("_uuid", deviceUuid)
-                .put("use_unified_inbox", "true")
-                .put("action", "mark_seen")
-                .put("thread_id", threadId)
-                .put("item_id", directItem.getItemId())
-                .build();
-        return repository.markItemSeen(threadId, directItem.getItemId(), form);
+    fun markAsSeen(
+        threadId: String,
+        directItem: DirectItem,
+    ): Call<DirectItemSeenResponse?>? {
+        val itemId = directItem.itemId ?: return null
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uuid" to deviceUuid,
+            "use_unified_inbox" to "true",
+            "action" to "mark_seen",
+            "thread_id" to threadId,
+            "item_id" to itemId,
+        )
+        return repository.markItemSeen(threadId, itemId, form)
     }
+
+    companion object {
+        private lateinit var instance: DirectMessagesService
+
+        @JvmStatic
+        fun getInstance(
+            csrfToken: String,
+            userId: Long,
+            deviceUuid: String,
+        ): DirectMessagesService {
+            if (!this::instance.isInitialized
+                || instance.csrfToken != csrfToken
+                || instance.userId != userId
+                || instance.deviceUuid != deviceUuid
+            ) {
+                instance = DirectMessagesService(csrfToken, userId, deviceUuid)
+            }
+            return instance
+        }
+    }
+
 }

@@ -54,7 +54,7 @@ public class MediaService extends BaseService {
         this.deviceUuid = deviceUuid;
         this.csrfToken = csrfToken;
         this.userId = userId;
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(MediaRepository.class);
     }

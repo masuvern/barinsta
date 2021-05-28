@@ -22,7 +22,7 @@ public class DiscoverService extends BaseService {
     private static DiscoverService instance;
 
     private DiscoverService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(DiscoverRepository.class);
     }

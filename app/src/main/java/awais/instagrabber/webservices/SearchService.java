@@ -14,7 +14,7 @@ public class SearchService extends BaseService {
     private static SearchService instance;
 
     private SearchService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofitWeb()
                                     .create(SearchRepository.class);
     }

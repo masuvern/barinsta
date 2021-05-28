@@ -11,7 +11,7 @@ public class GifService extends BaseService {
     private static GifService instance;
 
     private GifService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(GifRepository.class);
     }

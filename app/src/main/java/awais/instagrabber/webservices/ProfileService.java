@@ -32,7 +32,7 @@ public class ProfileService extends BaseService {
     private static ProfileService instance;
 
     private ProfileService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(ProfileRepository.class);
     }

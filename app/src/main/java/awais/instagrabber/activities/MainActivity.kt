@@ -60,7 +60,6 @@ import awais.instagrabber.viewmodels.AppStateViewModel
 import awais.instagrabber.viewmodels.DirectInboxViewModel
 import awais.instagrabber.webservices.GraphQLService
 import awais.instagrabber.webservices.MediaService
-import awais.instagrabber.webservices.RetrofitFactory
 import awais.instagrabber.webservices.ServiceCallback
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.ScrollingViewBehavior
@@ -300,11 +299,11 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             Log.e(TAG, "onDestroy: ", e)
         }
         unbindActivityCheckerService()
-        try {
-            RetrofitFactory.getInstance().destroy()
-        } catch (e: Exception) {
-            Log.e(TAG, "onDestroy: ", e)
-        }
+        // try {
+        //     RetrofitFactory.getInstance().destroy()
+        // } catch (e: Exception) {
+        //     Log.e(TAG, "onDestroy: ", e)
+        // }
         instance = null
     }
 

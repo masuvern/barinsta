@@ -40,7 +40,7 @@ public class GraphQLService extends BaseService {
     private static GraphQLService instance;
 
     private GraphQLService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofitWeb()
                                     .create(GraphQLRepository.class);
     }

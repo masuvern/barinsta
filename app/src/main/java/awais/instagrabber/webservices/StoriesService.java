@@ -49,7 +49,7 @@ public class StoriesService extends BaseService {
         this.csrfToken = csrfToken;
         this.userId = userId;
         this.deviceUuid = deviceUuid;
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(StoriesRepository.class);
     }

@@ -31,7 +31,7 @@ public class NewsService extends BaseService {
     private static NewsService instance;
 
     private NewsService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(NewsRepository.class);
     }

@@ -41,7 +41,7 @@ public class FriendshipService extends BaseService {
         this.deviceUuid = deviceUuid;
         this.csrfToken = csrfToken;
         this.userId = userId;
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(FriendshipRepository.class);
     }
