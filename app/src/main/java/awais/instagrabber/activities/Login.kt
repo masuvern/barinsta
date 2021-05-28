@@ -21,7 +21,7 @@ class Login : BaseLanguageActivity(), View.OnClickListener {
 
     private val webChromeClient = WebChromeClient()
     private val webViewClient: WebViewClient = object : WebViewClient() {
-        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap) {
+        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
             webViewUrl = url
         }
 
