@@ -20,3 +20,4 @@ app/release
 /sentry.properties
 /app/fdroid/
 /app/github/
+/repo
