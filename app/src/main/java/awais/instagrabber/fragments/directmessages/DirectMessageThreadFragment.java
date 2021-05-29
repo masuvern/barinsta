@@ -617,11 +617,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
     private void setObservers() {
         threadLiveData = viewModel.getThread();
-        if (threadLiveData == null) {
-            final NavController navController = NavHostFragment.findNavController(this);
-            navController.navigateUp();
-            return;
-        }
+        // if (threadLiveData == null) {
+        //     final NavController navController = NavHostFragment.findNavController(this);
+        //     navController.navigateUp();
+        //     return;
+        // }
         pendingLiveData = viewModel.isPending();
         pendingLiveData.observe(getViewLifecycleOwner(), isPending -> {
             if (isPending == null) {
