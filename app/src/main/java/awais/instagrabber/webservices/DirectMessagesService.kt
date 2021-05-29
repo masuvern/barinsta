@@ -298,9 +298,7 @@ class DirectMessagesService private constructor(
         userIds: List<Long>,
         threadTitle: String?,
     ): Call<DirectThread?> {
-        val userIdStringList = userIds.asSequence()
-            .filterNotNull()
-            .map { it.toString() }
+        val userIdStringList = userIds.map { it.toString() }
         val form = mutableMapOf<String, Any>(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
