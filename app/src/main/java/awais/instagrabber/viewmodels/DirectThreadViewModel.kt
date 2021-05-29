@@ -1,336 +1,230 @@
-package awais.instagrabber.viewmodels;
+package awais.instagrabber.viewmodels
 
-import android.app.Application;
-import android.content.ContentResolver;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.util.Log;
+import android.app.Application
+import android.content.ContentResolver
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import awais.instagrabber.customviews.emoji.Emoji
+import awais.instagrabber.managers.DirectMessagesManager
+import awais.instagrabber.managers.DirectMessagesManager.inboxManager
+import awais.instagrabber.managers.ThreadManager
+import awais.instagrabber.models.Resource
+import awais.instagrabber.models.Resource.Companion.error
+import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.directmessages.DirectItem
+import awais.instagrabber.repositories.responses.directmessages.DirectThread
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
+import awais.instagrabber.repositories.responses.giphy.GiphyGif
+import awais.instagrabber.utils.*
+import awais.instagrabber.utils.MediaUtils.OnInfoLoadListener
+import awais.instagrabber.utils.MediaUtils.VideoInfo
+import awais.instagrabber.utils.VoiceRecorder.VoiceRecorderCallback
+import awais.instagrabber.utils.VoiceRecorder.VoiceRecordingResult
+import awais.instagrabber.utils.extensions.TAG
+import java.io.File
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
+class DirectThreadViewModel(
+    application: Application,
+    val threadId: String,
+    pending: Boolean,
+    val currentUser: User,
+) : AndroidViewModel(application) {
+    // private val TAG = DirectThreadViewModel::class.java.simpleName
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import awais.instagrabber.customviews.emoji.Emoji;
-import awais.instagrabber.managers.DirectMessagesManager;
-import awais.instagrabber.managers.InboxManager;
-import awais.instagrabber.managers.ThreadManager;
-import awais.instagrabber.models.Resource;
-import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
-import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
-import awais.instagrabber.repositories.responses.giphy.GiphyGif;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.DirectoryUtils;
-import awais.instagrabber.utils.MediaController;
-import awais.instagrabber.utils.MediaUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.VoiceRecorder;
-
-import static awais.instagrabber.utils.Utils.settingsHelper;
-
-public class DirectThreadViewModel extends AndroidViewModel {
-    private static final String TAG = DirectThreadViewModel.class.getSimpleName();
     // private static final String ERROR_INVALID_THREAD = "Invalid thread";
+    private val contentResolver: ContentResolver = application.contentResolver
+    private val recordingsDir: File = DirectoryUtils.getOutputMediaDirectory(application, "Recordings")
+    private var voiceRecorder: VoiceRecorder? = null
+    private lateinit var threadManager: ThreadManager
 
-    private final ContentResolver contentResolver;
-    private final File recordingsDir;
-    private final Application application;
-    private final long viewerId;
-    private final String threadId;
-    private final User currentUser;
+    val viewerId: Long
+    val threadTitle: LiveData<String?> by lazy { threadManager.threadTitle }
+    val thread: LiveData<DirectThread?> by lazy { threadManager.thread }
+    val items: LiveData<List<DirectItem>> by lazy {
+        Transformations.map(threadManager.items) { it.filter { thread -> thread.hideInThread == 0 } }
+    }
+    val isFetching: LiveData<Resource<Any?>> by lazy { threadManager.isFetching() }
+    val users: LiveData<List<User>> by lazy { threadManager.users }
+    val leftUsers: LiveData<List<User>> by lazy { threadManager.leftUsers }
+    val pendingRequestsCount: LiveData<Int> by lazy { threadManager.pendingRequestsCount }
+    val inputMode: LiveData<Int> by lazy { threadManager.inputMode }
+    val isPending: LiveData<Boolean> by lazy { threadManager.isPending }
+    val replyToItem: LiveData<DirectItem?> by lazy { threadManager.getReplyToItem() }
 
-    private ThreadManager threadManager;
-    private VoiceRecorder voiceRecorder;
-
-    public DirectThreadViewModel(@NonNull final Application application,
-                                 @NonNull final String threadId,
-                                 final boolean pending,
-                                 @NonNull final User currentUser) {
-        super(application);
-        this.application = application;
-        this.threadId = threadId;
-        this.currentUser = currentUser;
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        viewerId = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
-            throw new IllegalArgumentException("User is not logged in!");
-        }
-        contentResolver = application.getContentResolver();
-        recordingsDir = DirectoryUtils.getOutputMediaDirectory(application, "Recordings");
-        final DirectMessagesManager messagesManager = DirectMessagesManager.INSTANCE;
-        threadManager = messagesManager.getThreadManager(threadId, pending, currentUser, contentResolver);
-        threadManager.fetchPendingRequests();
+    fun moveFromPending() {
+        val messagesManager = DirectMessagesManager
+        messagesManager.moveThreadFromPending(threadId)
+        threadManager = messagesManager.getThreadManager(threadId, false, currentUser, contentResolver)
     }
 
-    public void moveFromPending() {
-        final DirectMessagesManager messagesManager = DirectMessagesManager.INSTANCE;
-        messagesManager.moveThreadFromPending(threadId);
-        threadManager = messagesManager.getThreadManager(threadId, false, currentUser, contentResolver);
+    fun removeThread() {
+        threadManager.removeThread()
     }
 
-    public void removeThread() {
-        threadManager.removeThread();
+    fun fetchChats() {
+        threadManager.fetchChats()
     }
 
-    public String getThreadId() {
-        return threadId;
+    fun refreshChats() {
+        threadManager.refreshChats()
     }
 
-    public LiveData<String> getThreadTitle() {
-        return threadManager.getThreadTitle();
+    fun sendText(text: String): LiveData<Resource<Any?>> {
+        return threadManager.sendText(text)
     }
 
-    public LiveData<DirectThread> getThread() {
-        return threadManager.getThread();
+    fun sendUri(entry: MediaController.MediaEntry): LiveData<Resource<Any?>> {
+        return threadManager.sendUri(entry)
     }
 
-    public LiveData<List<DirectItem>> getItems() {
-        return Transformations.map(threadManager.getItems(), items -> items.stream()
-                                                                           .filter(directItem -> directItem.getHideInThread() == 0)
-                                                                           .collect(Collectors.toList()));
+    fun sendUri(uri: Uri): LiveData<Resource<Any?>> {
+        return threadManager.sendUri(uri)
     }
 
-    public LiveData<Resource<Object>> isFetching() {
-        return threadManager.isFetching();
-    }
-
-    public LiveData<List<User>> getUsers() {
-        return threadManager.getUsers();
-    }
-
-    public LiveData<List<User>> getLeftUsers() {
-        return threadManager.getLeftUsers();
-    }
-
-    public LiveData<Integer> getPendingRequestsCount() {
-        return threadManager.getPendingRequestsCount();
-    }
-
-    public LiveData<Integer> getInputMode() {
-        return threadManager.getInputMode();
-    }
-
-    public LiveData<Boolean> isPending() {
-        return threadManager.isPending();
-    }
-
-    public long getViewerId() {
-        return viewerId;
-    }
-
-    public LiveData<DirectItem> getReplyToItem() {
-        return threadManager.getReplyToItem();
-    }
-
-    public void fetchChats() {
-        threadManager.fetchChats();
-    }
-
-    public void refreshChats() {
-        threadManager.refreshChats();
-    }
-
-    public LiveData<Resource<Object>> sendText(final String text) {
-        return threadManager.sendText(text);
-    }
-
-    public LiveData<Resource<Object>> sendUri(final MediaController.MediaEntry entry) {
-        return threadManager.sendUri(entry);
-    }
-
-    public LiveData<Resource<Object>> sendUri(final Uri uri) {
-        return threadManager.sendUri(uri);
-    }
-
-    public LiveData<Resource<Object>> startRecording() {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        voiceRecorder = new VoiceRecorder(recordingsDir, new VoiceRecorder.VoiceRecorderCallback() {
-            @Override
-            public void onStart() {}
-
-            @Override
-            public void onComplete(final VoiceRecorder.VoiceRecordingResult result) {
-                Log.d(TAG, "onComplete: recording complete. Scanning file...");
+    fun startRecording(): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        voiceRecorder = VoiceRecorder(recordingsDir, object : VoiceRecorderCallback {
+            override fun onStart() {}
+            override fun onComplete(result: VoiceRecordingResult) {
+                Log.d(TAG, "onComplete: recording complete. Scanning file...")
                 MediaScannerConnection.scanFile(
-                        application,
-                        new String[]{result.getFile().getAbsolutePath()},
-                        new String[]{result.getMimeType()},
-                        (path, uri) -> {
-                            if (uri == null) {
-                                final String msg = "Scan failed!";
-                                Log.e(TAG, msg);
-                                data.postValue(Resource.error(msg, null));
-                                return;
-                            }
-                            Log.d(TAG, "onComplete: scan complete");
-                            MediaUtils.getVoiceInfo(contentResolver, uri, new MediaUtils.OnInfoLoadListener<MediaUtils.VideoInfo>() {
-                                @Override
-                                public void onLoad(@Nullable final MediaUtils.VideoInfo videoInfo) {
-                                    if (videoInfo == null) return;
-                                    threadManager.sendVoice(data,
-                                                            uri,
-                                                            result.getWaveform(),
-                                                            result.getSamplingFreq(),
-                                                            videoInfo == null ? 0 : videoInfo.duration,
-                                                            videoInfo == null ? 0 : videoInfo.size);
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable t) {
-                                    data.postValue(Resource.error(t.getMessage(), null));
-                                }
-                            });
+                    getApplication(),
+                    arrayOf(result.file.absolutePath),
+                    arrayOf(result.mimeType)
+                ) { _: String?, uri: Uri? ->
+                    if (uri == null) {
+                        val msg = "Scan failed!"
+                        Log.e(TAG, msg)
+                        data.postValue(error(msg, null))
+                        return@scanFile
+                    }
+                    Log.d(TAG, "onComplete: scan complete")
+                    MediaUtils.getVoiceInfo(contentResolver, uri, object : OnInfoLoadListener<VideoInfo?> {
+                        override fun onLoad(videoInfo: VideoInfo?) {
+                            if (videoInfo == null) return
+                            threadManager.sendVoice(data,
+                                uri,
+                                result.waveform,
+                                result.samplingFreq,
+                                videoInfo.duration,
+                                videoInfo.size)
                         }
-                );
-            }
 
-            @Override
-            public void onCancel() {
-
-            }
-        });
-        voiceRecorder.startRecording();
-        return data;
-    }
-
-    public void stopRecording(final boolean delete) {
-        if (voiceRecorder == null) return;
-        voiceRecorder.stopRecording(delete);
-        voiceRecorder = null;
-    }
-
-    public LiveData<Resource<Object>> sendReaction(@NonNull final DirectItem item, @NonNull final Emoji emoji) {
-        return threadManager.sendReaction(item, emoji);
-    }
-
-    public LiveData<Resource<Object>> sendDeleteReaction(@NonNull final String itemId) {
-        return threadManager.sendDeleteReaction(itemId);
-    }
-
-    public LiveData<Resource<Object>> unsend(final DirectItem item) {
-        return threadManager.unsend(item);
-    }
-
-    public LiveData<Resource<Object>> sendAnimatedMedia(@NonNull final GiphyGif giphyGif) {
-        return threadManager.sendAnimatedMedia(giphyGif);
-    }
-
-    public User getCurrentUser() {
-        return currentUser;
-    }
-
-    @Nullable
-    public User getUser(final long userId) {
-        final LiveData<List<User>> users = getUsers();
-        User match = null;
-        if (users != null && users.getValue() != null) {
-            final List<User> userList = users.getValue();
-            match = userList.stream()
-                            .filter(Objects::nonNull)
-                            .filter(user -> user.getPk() == userId)
-                            .findFirst()
-                            .orElse(null);
-        }
-        if (match == null) {
-            final LiveData<List<User>> leftUsers = getLeftUsers();
-            if (leftUsers != null && leftUsers.getValue() != null) {
-                final List<User> userList = leftUsers.getValue();
-                match = userList.stream()
-                                .filter(Objects::nonNull)
-                                .filter(user -> user.getPk() == userId)
-                                .findFirst()
-                                .orElse(null);
-            }
-        }
-        return match;
-    }
-
-    public void forward(final Set<RankedRecipient> recipients, final DirectItem itemToForward) {
-        threadManager.forward(recipients, itemToForward);
-    }
-
-    public void forward(final RankedRecipient recipient, final DirectItem itemToForward) {
-        threadManager.forward(recipient, itemToForward);
-    }
-
-    public void setReplyToItem(@Nullable final DirectItem item) {
-        // Log.d(TAG, "setReplyToItem: " + item);
-        threadManager.setReplyToItem(item);
-    }
-
-    public LiveData<Resource<Object>> acceptRequest() {
-        return threadManager.acceptRequest();
-    }
-
-    public LiveData<Resource<Object>> declineRequest() {
-        return threadManager.declineRequest();
-    }
-
-    public LiveData<Resource<Object>> markAsSeen() {
-        if (currentUser == null) {
-            return getSuccessEventResObjectLiveData();
-        }
-        final DirectThread thread = getThread().getValue();
-        if (thread == null) {
-            return getSuccessEventResObjectLiveData();
-        }
-        final List<DirectItem> items = thread.getItems();
-        if (items == null || items.isEmpty()) {
-            return getSuccessEventResObjectLiveData();
-        }
-        final Optional<DirectItem> itemOptional = items.stream()
-                                                       .filter(item -> item.getUserId() != currentUser.getPk())
-                                                       .findFirst();
-        if (!itemOptional.isPresent()) {
-            return getSuccessEventResObjectLiveData();
-        }
-        final DirectItem directItem = itemOptional.get();
-        final Map<Long, DirectThreadLastSeenAt> lastSeenAt = thread.getLastSeenAt();
-        if (lastSeenAt != null) {
-            final DirectThreadLastSeenAt seenAt = lastSeenAt.get(currentUser.getPk());
-            try {
-                if (seenAt != null
-                        && (Objects.equals(seenAt.getItemId(), directItem.getItemId())
-                        || Long.parseLong(seenAt.getTimestamp()) >= directItem.getTimestamp())) {
-                    return getSuccessEventResObjectLiveData();
+                        override fun onFailure(t: Throwable) {
+                            data.postValue(error(t.message, null))
+                        }
+                    })
                 }
-            } catch (Exception ignored) {
-                return getSuccessEventResObjectLiveData();
+            }
+
+            override fun onCancel() {}
+        })
+        voiceRecorder?.startRecording()
+        return data
+    }
+
+    fun stopRecording(delete: Boolean) {
+        voiceRecorder?.stopRecording(delete)
+        voiceRecorder = null
+    }
+
+    fun sendReaction(item: DirectItem, emoji: Emoji): LiveData<Resource<Any?>> {
+        return threadManager.sendReaction(item, emoji)
+    }
+
+    fun sendDeleteReaction(itemId: String): LiveData<Resource<Any?>> {
+        return threadManager.sendDeleteReaction(itemId)
+    }
+
+    fun unsend(item: DirectItem): LiveData<Resource<Any?>> {
+        return threadManager.unsend(item)
+    }
+
+    fun sendAnimatedMedia(giphyGif: GiphyGif): LiveData<Resource<Any?>> {
+        return threadManager.sendAnimatedMedia(giphyGif)
+    }
+
+    fun getUser(userId: Long): User? {
+        var match: User? = null
+        users.value?.let { match = it.firstOrNull { user -> user.pk == userId } }
+        if (match == null) {
+            leftUsers.value?.let { match = it.firstOrNull { user -> user.pk == userId } }
+        }
+        return match
+    }
+
+    fun forward(recipients: Set<RankedRecipient>, itemToForward: DirectItem) {
+        threadManager.forward(recipients, itemToForward)
+    }
+
+    fun forward(recipient: RankedRecipient, itemToForward: DirectItem) {
+        threadManager.forward(recipient, itemToForward)
+    }
+
+    fun setReplyToItem(item: DirectItem?) {
+        // Log.d(TAG, "setReplyToItem: " + item);
+        threadManager.setReplyToItem(item)
+    }
+
+    fun acceptRequest(): LiveData<Resource<Any?>> {
+        return threadManager.acceptRequest()
+    }
+
+    fun declineRequest(): LiveData<Resource<Any?>> {
+        return threadManager.declineRequest()
+    }
+
+    fun markAsSeen(): LiveData<Resource<Any?>> {
+        val thread = thread.value ?: return successEventResObjectLiveData
+        val items = thread.items
+        if (items.isNullOrEmpty()) return successEventResObjectLiveData
+        val directItem = items.firstOrNull { (_, userId) -> userId != currentUser.pk } ?: return successEventResObjectLiveData
+        val lastSeenAt = thread.lastSeenAt
+        if (lastSeenAt != null) {
+            val seenAt = lastSeenAt[currentUser.pk] ?: return successEventResObjectLiveData
+            try {
+                val timestamp = seenAt.timestamp ?: return successEventResObjectLiveData
+                val itemIdMatches = seenAt.itemId == directItem.itemId
+                val timestampMatches = timestamp.toLong() >= directItem.getTimestamp()
+                if (itemIdMatches || timestampMatches) {
+                    return successEventResObjectLiveData
+                }
+            } catch (ignored: Exception) {
+                return successEventResObjectLiveData
             }
         }
-        return threadManager.markAsSeen(directItem);
+        return threadManager.markAsSeen(directItem)
     }
 
-    @NonNull
-    private MutableLiveData<Resource<Object>> getSuccessEventResObjectLiveData() {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.success(new Object()));
-        return data;
-    }
+    private val successEventResObjectLiveData: MutableLiveData<Resource<Any?>>
+        get() {
+            val data = MutableLiveData<Resource<Any?>>()
+            data.postValue(success(Any()))
+            return data
+        }
 
-    public void deleteThreadIfRequired() {
-        final DirectThread thread = getThread().getValue();
-        if (thread == null) return;
-        if (thread.isTemp() && (thread.getItems() == null || thread.getItems().isEmpty())) {
-            final InboxManager inboxManager = DirectMessagesManager.INSTANCE.getInboxManager();
-            inboxManager.removeThread(threadId);
+    fun deleteThreadIfRequired() {
+        val thread = thread.value ?: return
+        if (thread.isTemp && thread.items.isNullOrEmpty()) {
+            val inboxManager = inboxManager
+            inboxManager.removeThread(threadId)
         }
     }
 
+    init {
+        val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
+        viewerId = getUserIdFromCookie(cookie)
+        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        val csrfToken = getCsrfTokenFromCookie(cookie)
+        require(!csrfToken.isNullOrBlank() && viewerId != 0L && deviceUuid.isNotBlank()) { "User is not logged in!" }
+        threadManager = DirectMessagesManager.getThreadManager(threadId, pending, currentUser, contentResolver)
+        threadManager.fetchPendingRequests()
+    }
 }

@@ -73,7 +73,7 @@ class ThreadManager private constructor(
             if (inboxResource == null) return@map null
             val (threads) = inboxResource.data ?: return@map null
             if (threads.isNullOrEmpty()) return@map null
-            val thread = threads.asSequence().filterNotNull().firstOrNull()
+            val thread = threads.firstOrNull { it.threadId == threadId }
             thread?.also {
                 cursor = thread.oldestCursor
                 hasOlder = thread.hasOlder
