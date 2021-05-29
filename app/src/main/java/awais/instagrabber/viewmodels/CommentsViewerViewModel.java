@@ -25,14 +25,14 @@ import java.util.stream.IntStream;
 import awais.instagrabber.R;
 import awais.instagrabber.models.Comment;
 import awais.instagrabber.models.Resource;
-import awais.instagrabber.repositories.responses.FriendshipStatus;
-import awais.instagrabber.repositories.responses.GraphQLCommentsFetchResponse;
+import awais.instagrabber.repositories.responses.ChildCommentsFetchResponse;
+import awais.instagrabber.repositories.responses.CommentsFetchResponse;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.Utils;
+import awais.instagrabber.webservices.CommentService;
 import awais.instagrabber.webservices.GraphQLService;
-import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -48,7 +48,7 @@ public class CommentsViewerViewModel extends ViewModel {
     private final MutableLiveData<Resource<List<Comment>>> rootList = new MutableLiveData<>();
     private final MutableLiveData<Integer> rootCount = new MutableLiveData<>(0);
     private final MutableLiveData<Resource<List<Comment>>> replyList = new MutableLiveData<>();
-    private final GraphQLService service;
+    private final GraphQLService graphQLService;
 
     private String shortCode;
     private String postId;
@@ -57,18 +57,68 @@ public class CommentsViewerViewModel extends ViewModel {
     private Comment repliesParent;
     private String repliesCursor;
     private boolean repliesHasNext = true;
-    private final MediaService mediaService;
+    private final CommentService commentService;
     private List<Comment> prevReplies;
     private String prevRepliesCursor;
     private boolean prevRepliesHasNext = true;
 
+    private final ServiceCallback<CommentsFetchResponse> ccb = new ServiceCallback<CommentsFetchResponse>() {
+        @Override
+        public void onSuccess(final CommentsFetchResponse result) {
+            // Log.d(TAG, "onSuccess: " + result);
+            List<Comment> comments = result.getComments();
+            if (rootCursor == null) {
+                rootCount.postValue(result.getCommentCount());
+            }
+            if (rootCursor != null) {
+                comments = mergeList(rootList, comments);
+            }
+            rootCursor = result.getNextMinId();
+            rootHasNext = result.hasNext();
+            rootList.postValue(Resource.success(comments));
+        }
+
+        @Override
+        public void onFailure(final Throwable t) {
+            Log.e(TAG, "onFailure: ", t);
+            rootList.postValue(Resource.error(t.getMessage(), getPrevList(rootList)));
+        }
+    };
+    private final ServiceCallback<ChildCommentsFetchResponse> rcb = new ServiceCallback<ChildCommentsFetchResponse>() {
+        @Override
+        public void onSuccess(final ChildCommentsFetchResponse result) {
+            // Log.d(TAG, "onSuccess: " + result);
+            List<Comment> comments = result.getChildComments();
+            // Replies
+            if (repliesCursor == null) {
+                // add parent to top of replies
+                comments = ImmutableList.<Comment>builder()
+                        .add(repliesParent)
+                        .addAll(comments)
+                        .build();
+            }
+            if (repliesCursor != null) {
+                comments = mergeList(replyList, comments);
+            }
+            repliesCursor = result.getNextMinId();
+            repliesHasNext = result.hasNext();
+            replyList.postValue(Resource.success(comments));
+        }
+
+        @Override
+        public void onFailure(final Throwable t) {
+            Log.e(TAG, "onFailure: ", t);
+            replyList.postValue(Resource.error(t.getMessage(), getPrevList(replyList)));
+        }
+    };
+
     public CommentsViewerViewModel() {
-        service = GraphQLService.getInstance();
+        graphQLService = GraphQLService.getInstance();
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userIdFromCookie);
+        commentService = CommentService.getInstance(deviceUuid, csrfToken, userIdFromCookie);
     }
 
     public void setCurrentUser(final User currentUser) {
@@ -108,87 +158,45 @@ public class CommentsViewerViewModel extends ViewModel {
     }
 
     public void fetchComments() {
-        if (shortCode == null) return;
-        fetchComments(shortCode, true);
+        if (shortCode == null || postId == null) return;
+        if (!rootHasNext) return;
+        rootList.postValue(Resource.loading(getPrevList(rootList)));
+        if (isLoggedIn.getValue()) {
+            commentService.fetchComments(postId, rootCursor, ccb);
+            return;
+        }
+        final Call<String> request = graphQLService.fetchComments(shortCode, true, rootCursor);
+        enqueueRequest(request, true, shortCode, ccb);
     }
 
     public void fetchReplies() {
         if (repliesParent == null) return;
-        fetchReplies(repliesParent.getId());
+        fetchReplies(repliesParent.getPk());
     }
 
     public void fetchReplies(@NonNull final String commentId) {
-        fetchComments(commentId, false);
-    }
-
-    public void fetchComments(@NonNull final String shortCodeOrCommentId,
-                              final boolean root) {
-        if (root) {
-            if (!rootHasNext) return;
-            rootList.postValue(Resource.loading(getPrevList(rootList)));
+        if (!repliesHasNext) return;
+        final List<Comment> list;
+        if (repliesParent != null && !Objects.equals(repliesParent.getPk(), commentId)) {
+            repliesCursor = null;
+            repliesHasNext = false;
+            list = Collections.emptyList();
         } else {
-            if (!repliesHasNext) return;
-            final List<Comment> list;
-            if (repliesParent != null && !Objects.equals(repliesParent.getId(), shortCodeOrCommentId)) {
-                repliesCursor = null;
-                repliesHasNext = false;
-                list = Collections.emptyList();
-            } else {
-                list = getPrevList(replyList);
-            }
-            replyList.postValue(Resource.loading(list));
+            list = getPrevList(replyList);
         }
-        final Call<String> request = service.fetchComments(shortCodeOrCommentId, root, root ? rootCursor : repliesCursor);
-        enqueueRequest(request, root, shortCodeOrCommentId, new ServiceCallback<GraphQLCommentsFetchResponse>() {
-            @Override
-            public void onSuccess(final GraphQLCommentsFetchResponse result) {
-                // Log.d(TAG, "onSuccess: " + result);
-                List<Comment> comments = result.getComments();
-                if (root) {
-                    if (rootCursor == null) {
-                        rootCount.postValue(result.getCount());
-                    }
-                    if (rootCursor != null) {
-                        comments = mergeList(rootList, comments);
-                    }
-                    rootCursor = result.getCursor();
-                    rootHasNext = result.hasNext();
-                    rootList.postValue(Resource.success(comments));
-                    return;
-                }
-                // Replies
-                if (repliesCursor == null) {
-                    // add parent to top of replies
-                    comments = ImmutableList.<Comment>builder()
-                            .add(repliesParent)
-                            .addAll(comments)
-                            .build();
-                }
-                if (repliesCursor != null) {
-                    comments = mergeList(replyList, comments);
-                }
-                repliesCursor = result.getCursor();
-                repliesHasNext = result.hasNext();
-                replyList.postValue(Resource.success(comments));
-
-            }
-
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                if (root) {
-                    rootList.postValue(Resource.error(t.getMessage(), getPrevList(rootList)));
-                    return;
-                }
-                replyList.postValue(Resource.error(t.getMessage(), getPrevList(replyList)));
-            }
-        });
+        replyList.postValue(Resource.loading(list));
+        if (isLoggedIn.getValue()) {
+            commentService.fetchChildComments(postId, commentId, rootCursor, rcb);
+            return;
+        }
+        final Call<String> request = graphQLService.fetchComments(commentId, false, repliesCursor);
+        enqueueRequest(request, false, commentId, rcb);
     }
 
     private void enqueueRequest(@NonNull final Call<String> request,
                                 final boolean root,
                                 final String shortCodeOrCommentId,
-                                final ServiceCallback<GraphQLCommentsFetchResponse> callback) {
+                                final ServiceCallback callback) {
         request.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
@@ -208,14 +216,16 @@ public class CommentsViewerViewModel extends ViewModel {
                     final int count = body.optInt("count");
                     final JSONObject pageInfo = body.getJSONObject("page_info");
                     final boolean hasNextPage = pageInfo.getBoolean("has_next_page");
-                    final String endCursor = pageInfo.isNull("end_cursor") ? null : pageInfo.optString("end_cursor");
+                    final String endCursor = pageInfo.isNull("end_cursor") || !hasNextPage ? null : pageInfo.optString("end_cursor");
                     final JSONArray commentsJsonArray = body.getJSONArray("edges");
                     final ImmutableList.Builder<Comment> builder = ImmutableList.builder();
                     for (int i = 0; i < commentsJsonArray.length(); i++) {
                         final Comment commentModel = getComment(commentsJsonArray.getJSONObject(i).getJSONObject("node"), root);
                         builder.add(commentModel);
                     }
-                    callback.onSuccess(new GraphQLCommentsFetchResponse(count, endCursor, hasNextPage, builder.build()));
+                    callback.onSuccess(root ?
+                            new CommentsFetchResponse(count, endCursor, builder.build()) :
+                            new ChildCommentsFetchResponse(count, endCursor, builder.build()));
                 } catch (Exception e) {
                     Log.e(TAG, "onResponse", e);
                     callback.onFailure(e);
@@ -252,8 +262,7 @@ public class CommentsViewerViewModel extends ViewModel {
                            likedBy != null ? likedBy.optLong("count", 0) : 0,
                            commentJsonObject.getBoolean("viewer_has_liked"),
                            user,
-                           replyCount,
-                           !root);
+                           replyCount);
     }
 
     @NonNull
@@ -278,12 +287,12 @@ public class CommentsViewerViewModel extends ViewModel {
 
     public void showReplies(final Comment comment) {
         if (comment == null) return;
-        if (repliesParent == null || !Objects.equals(repliesParent.getId(), comment.getId())) {
+        if (repliesParent == null || !Objects.equals(repliesParent.getPk(), comment.getPk())) {
             repliesParent = comment;
             prevReplies = null;
             prevRepliesCursor = null;
             prevRepliesHasNext = true;
-            fetchReplies(comment.getId());
+            fetchReplies(comment.getPk());
             return;
         }
         if (prevReplies != null && !prevReplies.isEmpty()) {
@@ -296,7 +305,7 @@ public class CommentsViewerViewModel extends ViewModel {
         // prev list was null or empty, fetch
         prevRepliesCursor = null;
         prevRepliesHasNext = true;
-        fetchReplies(comment.getId());
+        fetchReplies(comment.getPk());
     }
 
     public LiveData<Resource<Object>> likeComment(@NonNull final Comment comment, final boolean liked, final boolean isReply) {
@@ -319,9 +328,9 @@ public class CommentsViewerViewModel extends ViewModel {
             }
         };
         if (liked) {
-            mediaService.commentLike(comment.getId(), callback);
+            commentService.commentLike(comment.getPk(), callback);
         } else {
-            mediaService.commentUnlike(comment.getId(), callback);
+            commentService.commentUnlike(comment.getPk(), callback);
         }
         return data;
     }
@@ -333,7 +342,7 @@ public class CommentsViewerViewModel extends ViewModel {
         if (list == null) return;
         final List<Comment> copy = new ArrayList<>(list);
         OptionalInt indexOpt = IntStream.range(0, copy.size())
-                                        .filter(i -> copy.get(i) != null && Objects.equals(copy.get(i).getId(), comment.getId()))
+                                        .filter(i -> copy.get(i) != null && Objects.equals(copy.get(i).getPk(), comment.getPk()))
                                         .findFirst();
         if (!indexOpt.isPresent()) return;
         try {
@@ -352,13 +361,13 @@ public class CommentsViewerViewModel extends ViewModel {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>(Resource.loading(null));
         String replyToId = null;
         if (isReply && repliesParent != null) {
-            replyToId = repliesParent.getId();
+            replyToId = repliesParent.getPk();
         }
         if (isReply && replyToId == null) {
             data.postValue(Resource.error(null, null));
             return data;
         }
-        mediaService.comment(postId, text, replyToId, new ServiceCallback<Comment>() {
+        commentService.comment(postId, text, replyToId, new ServiceCallback<Comment>() {
             @Override
             public void onSuccess(final Comment result) {
                 if (result == null) {
@@ -396,12 +405,12 @@ public class CommentsViewerViewModel extends ViewModel {
 
     public void translate(@NonNull final Comment comment,
                           @NonNull final ServiceCallback<String> callback) {
-        mediaService.translate(comment.getId(), "2", callback);
+        commentService.translate(comment.getPk(), callback);
     }
 
     public LiveData<Resource<Object>> deleteComment(@NonNull final Comment comment, final boolean isReply) {
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>(Resource.loading(null));
-        mediaService.deleteComment(postId, comment.getId(), new ServiceCallback<Boolean>() {
+        commentService.deleteComment(postId, comment.getPk(), new ServiceCallback<Boolean>() {
             @Override
             public void onSuccess(final Boolean result) {
                 if (result == null || !result) {
@@ -425,7 +434,7 @@ public class CommentsViewerViewModel extends ViewModel {
         final List<Comment> list = getPrevList(isReply ? replyList : rootList);
         final List<Comment> updated = list.stream()
                                           .filter(Objects::nonNull)
-                                          .filter(c -> !Objects.equals(c.getId(), comment.getId()))
+                                          .filter(c -> !Objects.equals(c.getPk(), comment.getPk()))
                                           .collect(Collectors.toList());
         final MutableLiveData<Resource<List<Comment>>> liveData = isReply ? replyList : rootList;
         liveData.postValue(Resource.success(updated));

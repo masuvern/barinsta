@@ -29,26 +29,6 @@ public interface MediaRepository {
                         @FieldMap final Map<String, String> signedForm);
 
     @FormUrlEncoded
-    @POST("/api/v1/media/{mediaId}/comment/")
-    Call<String> comment(@Path("mediaId") final String mediaId,
-                         @FieldMap final Map<String, String> signedForm);
-
-    @FormUrlEncoded
-    @POST("/api/v1/media/{mediaId}/comment/bulk_delete/")
-    Call<String> commentsBulkDelete(@Path("mediaId") final String mediaId,
-                                    @FieldMap final Map<String, String> signedForm);
-
-    @FormUrlEncoded
-    @POST("/api/v1/media/{commentId}/comment_like/")
-    Call<String> commentLike(@Path("commentId") final String commentId,
-                             @FieldMap final Map<String, String> signedForm);
-
-    @FormUrlEncoded
-    @POST("/api/v1/media/{commentId}/comment_unlike/")
-    Call<String> commentUnlike(@Path("commentId") final String commentId,
-                               @FieldMap final Map<String, String> signedForm);
-
-    @FormUrlEncoded
     @POST("/api/v1/media/{mediaId}/edit_media/")
     Call<String> editCaption(@Path("mediaId") final String mediaId,
                              @FieldMap final Map<String, String> signedForm);

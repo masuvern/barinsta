@@ -419,7 +419,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final long locationId = locationModel.getPk();
         // binding.swipeRefreshLayout.setRefreshing(true);
         locationDetailsBinding.mainLocationImage.setImageURI("res:/" + R.drawable.ic_location);
-        // final String postCount = String.valueOf(locationModel.getCount());
+        // final String postCount = String.valueOf(locationModel.getChildCommentCount());
         // final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
         //                                                                                                 locationModel.getPostCount() > 2000000000L
         //                                                                                                 ? 2000000000

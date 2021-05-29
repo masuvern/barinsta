@@ -17,7 +17,7 @@ public final class CommentsAdapter extends ListAdapter<Comment, CommentViewHolde
     private static final DiffUtil.ItemCallback<Comment> DIFF_CALLBACK = new DiffUtil.ItemCallback<Comment>() {
         @Override
         public boolean areItemsTheSame(@NonNull final Comment oldItem, @NonNull final Comment newItem) {
-            return Objects.equals(oldItem.getId(), newItem.getId());
+            return Objects.equals(oldItem.getPk(), newItem.getPk());
         }
 
         @Override

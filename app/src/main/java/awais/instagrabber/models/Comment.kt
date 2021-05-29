@@ -6,25 +6,24 @@ import java.io.Serializable
 import java.util.*
 
 class Comment(
-    val id: String,
+    val pk: String,
     val text: String,
-    val timestamp: Long,
-    var likes: Long,
-    private var liked: Boolean,
+    val createdAt: Long,
+    var commentLikeCount: Long,
+    private var hasLikedComment: Boolean,
     val user: User,
-    val replyCount: Int,
-    val isChild: Boolean,
+    val childCommentCount: Int
 ) : Serializable, Cloneable {
     val dateTime: String
-        get() = TextUtils.epochSecondToString(timestamp)
+        get() = TextUtils.epochSecondToString(createdAt)
 
     fun getLiked(): Boolean {
-        return liked
+        return hasLikedComment
     }
 
     fun setLiked(liked: Boolean) {
-        likes = if (liked) likes + 1 else likes - 1
-        this.liked = liked
+        commentLikeCount = if (hasLikedComment) commentLikeCount + 1 else commentLikeCount - 1
+        this.hasLikedComment = hasLikedComment
     }
 
     @Throws(CloneNotSupportedException::class)
@@ -39,31 +38,29 @@ class Comment(
 
         other as Comment
 
-        if (id != other.id) return false
+        if (pk != other.pk) return false
         if (text != other.text) return false
-        if (timestamp != other.timestamp) return false
-        if (likes != other.likes) return false
-        if (liked != other.liked) return false
+        if (createdAt != other.createdAt) return false
+        if (commentLikeCount != other.commentLikeCount) return false
+        if (hasLikedComment != other.hasLikedComment) return false
         if (user != other.user) return false
-        if (replyCount != other.replyCount) return false
-        if (isChild != other.isChild) return false
+        if (childCommentCount != other.childCommentCount) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = id.hashCode()
+        var result = pk.hashCode()
         result = 31 * result + text.hashCode()
-        result = 31 * result + timestamp.hashCode()
-        result = 31 * result + likes.hashCode()
-        result = 31 * result + liked.hashCode()
+        result = 31 * result + createdAt.hashCode()
+        result = 31 * result + commentLikeCount.hashCode()
+        result = 31 * result + hasLikedComment.hashCode()
         result = 31 * result + user.hashCode()
-        result = 31 * result + replyCount
-        result = 31 * result + isChild.hashCode()
+        result = 31 * result + childCommentCount
         return result
     }
 
     override fun toString(): String {
-        return "Comment(id='$id', text='$text', timestamp=$timestamp, likes=$likes, liked=$liked, user=$user, replyCount=$replyCount, isChild=$isChild)"
+        return "Comment(pk='$pk', text='$text', createdAt=$createdAt, commentLikeCount=$commentLikeCount, hasLikedComment=$hasLikedComment, user=$user, childCommentCount=$childCommentCount)"
     }
 }

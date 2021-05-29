@@ -126,7 +126,7 @@ public final class Helper {
                 if (navController == null) return;
                 try {
                     final Bundle bundle = new Bundle();
-                    bundle.putString("postId", comment.getId());
+                    bundle.putString("postId", comment.getPk());
                     bundle.putBoolean("isComment", true);
                     navController.navigate(R.id.action_global_likesViewerFragment, bundle);
                 } catch (Exception e) {
