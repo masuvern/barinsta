@@ -1088,7 +1088,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
+                        final InboxManager inboxManager = DirectMessagesManager.INSTANCE.getInboxManager();
                         final DirectThread thread = response.body();
                         if (!inboxManager.containsThread(thread.getThreadId())) {
                             thread.setTemp(true);

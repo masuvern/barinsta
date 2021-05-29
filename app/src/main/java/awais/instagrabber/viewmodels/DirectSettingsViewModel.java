@@ -57,7 +57,7 @@ public class DirectSettingsViewModel extends AndroidViewModel {
         }
         final ContentResolver contentResolver = application.getContentResolver();
         resources = getApplication().getResources();
-        final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
+        final DirectMessagesManager messagesManager = DirectMessagesManager.INSTANCE;
         threadManager = messagesManager.getThreadManager(threadId, pending, currentUser, contentResolver);
     }
 

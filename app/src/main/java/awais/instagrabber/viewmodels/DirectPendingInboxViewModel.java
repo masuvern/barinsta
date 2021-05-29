@@ -18,7 +18,7 @@ public class DirectPendingInboxViewModel extends ViewModel {
     private final InboxManager inboxManager;
 
     public DirectPendingInboxViewModel() {
-        inboxManager = DirectMessagesManager.getInstance().getPendingInboxManager();
+        inboxManager = DirectMessagesManager.INSTANCE.getPendingInboxManager();
         inboxManager.fetchInbox();
     }
 

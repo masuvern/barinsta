@@ -18,7 +18,7 @@ public class DirectInboxViewModel extends ViewModel {
     private final InboxManager inboxManager;
 
     public DirectInboxViewModel() {
-        final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
+        final DirectMessagesManager messagesManager = DirectMessagesManager.INSTANCE;
         inboxManager = messagesManager.getInboxManager();
     }
 

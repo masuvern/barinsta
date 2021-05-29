@@ -1,275 +1,222 @@
-package awais.instagrabber.managers;
+package awais.instagrabber.managers
 
-import android.content.ContentResolver;
-import android.util.Log;
+import android.content.ContentResolver
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import awais.instagrabber.managers.ThreadManager.Companion.getInstance
+import awais.instagrabber.models.Resource
+import awais.instagrabber.models.Resource.Companion.error
+import awais.instagrabber.models.Resource.Companion.loading
+import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds.Companion.of
+import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.directmessages.DirectThread
+import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.getCsrfTokenFromCookie
+import awais.instagrabber.utils.getUserIdFromCookie
+import awais.instagrabber.webservices.DirectMessagesService
+import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.IOException
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+object DirectMessagesManager {
+    val inboxManager: InboxManager by lazy { InboxManager.getInstance(false) }
+    val pendingInboxManager: InboxManager by lazy { InboxManager.getInstance(true) }
 
-import com.google.common.collect.Iterables;
+    private val TAG = DirectMessagesManager::class.java.simpleName
+    private val viewerId: Long
+    private val deviceUuid: String
+    private val csrfToken: String
+    private val service: DirectMessagesService
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-
-import awais.instagrabber.models.Resource;
-import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
-import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
-import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.webservices.DirectMessagesService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static awais.instagrabber.utils.Utils.settingsHelper;
-
-public final class DirectMessagesManager {
-    private static final String TAG = DirectMessagesManager.class.getSimpleName();
-    private static final Object LOCK = new Object();
-
-    private static DirectMessagesManager instance;
-
-    private final InboxManager inboxManager;
-    private final InboxManager pendingInboxManager;
-
-    private DirectMessagesService service;
-
-    public static DirectMessagesManager getInstance() {
-        if (instance == null) {
-            synchronized (LOCK) {
-                if (instance == null) {
-                    instance = new DirectMessagesManager();
-                }
-            }
-        }
-        return instance;
-    }
-
-    private DirectMessagesManager() {
-        inboxManager = InboxManager.getInstance(false);
-        pendingInboxManager = InboxManager.getInstance(true);
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final long viewerId = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (csrfToken == null) return;
-        service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
-    }
-
-    public void moveThreadFromPending(@NonNull final String threadId) {
-        final List<DirectThread> pendingThreads = pendingInboxManager.getThreads().getValue();
-        if (pendingThreads == null) return;
-        final int index = Iterables.indexOf(pendingThreads, t -> t != null && t.getThreadId().equals(threadId));
-        if (index < 0) return;
-        final DirectThread thread = pendingThreads.get(index);
-        final DirectItem threadFirstDirectItem = thread.getFirstDirectItem();
-        if (threadFirstDirectItem == null) return;
-        final List<DirectThread> threads = inboxManager.getThreads().getValue();
-        int insertIndex = 0;
+    fun moveThreadFromPending(threadId: String) {
+        val pendingThreads = pendingInboxManager.threads.value ?: return
+        val index = pendingThreads.indexOfFirst { it.threadId == threadId }
+        if (index < 0) return
+        val thread = pendingThreads[index]
+        val threadFirstDirectItem = thread.firstDirectItem ?: return
+        val threads = inboxManager.threads.value
+        var insertIndex = 0
         if (threads != null) {
-            for (final DirectThread tempThread : threads) {
-                final DirectItem firstDirectItem = tempThread.getFirstDirectItem();
-                if (firstDirectItem == null) continue;
-                final long timestamp = firstDirectItem.getTimestamp();
+            for (tempThread in threads) {
+                val firstDirectItem = tempThread.firstDirectItem ?: continue
+                val timestamp = firstDirectItem.getTimestamp()
                 if (timestamp < threadFirstDirectItem.getTimestamp()) {
-                    break;
+                    break
                 }
-                insertIndex++;
+                insertIndex++
             }
         }
-        thread.setPending(false);
-        inboxManager.addThread(thread, insertIndex);
-        pendingInboxManager.removeThread(threadId);
-        final Integer currentTotal = inboxManager.getPendingRequestsTotal().getValue();
-        if (currentTotal == null) return;
-        inboxManager.setPendingRequestsTotal(currentTotal - 1);
+        thread.pending = false
+        inboxManager.addThread(thread, insertIndex)
+        pendingInboxManager.removeThread(threadId)
+        val currentTotal = inboxManager.getPendingRequestsTotal().value ?: return
+        inboxManager.setPendingRequestsTotal(currentTotal - 1)
     }
 
-    public InboxManager getInboxManager() {
-        return inboxManager;
+    fun getThreadManager(
+        threadId: String,
+        pending: Boolean,
+        currentUser: User,
+        contentResolver: ContentResolver,
+    ): ThreadManager {
+        return getInstance(threadId, pending, currentUser, contentResolver, viewerId, csrfToken, deviceUuid)
     }
 
-    public InboxManager getPendingInboxManager() {
-        return pendingInboxManager;
-    }
-
-    public ThreadManager getThreadManager(@NonNull final String threadId,
-                                          final boolean pending,
-                                          @NonNull final User currentUser,
-                                          @NonNull final ContentResolver contentResolver) {
-        return ThreadManager.getInstance(threadId, pending, currentUser, contentResolver);
-    }
-
-    public void createThread(final long userPk,
-                             @Nullable final Function<DirectThread, Void> callback) {
-        if (service == null) return;
-        final Call<DirectThread> createThreadRequest = service.createThread(Collections.singletonList(userPk), null);
-        createThreadRequest.enqueue(new Callback<DirectThread>() {
-            @Override
-            public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
-                if (!response.isSuccessful()) {
-                    if (response.errorBody() != null) {
+    fun createThread(
+        userPk: Long,
+        callback: ((DirectThread) -> Unit)?,
+    ) {
+        val createThreadRequest = service.createThread(listOf(userPk), null)
+        createThreadRequest.enqueue(object : Callback<DirectThread?> {
+            override fun onResponse(call: Call<DirectThread?>, response: Response<DirectThread?>) {
+                if (!response.isSuccessful) {
+                    val errorBody = response.errorBody()
+                    if (errorBody != null) {
                         try {
-                            final String string = response.errorBody().string();
-                            final String msg = String.format(Locale.US,
-                                                             "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                                                             call.request().url().toString(),
-                                                             response.code(),
-                                                             string);
-                            Log.e(TAG, msg);
-                        } catch (IOException e) {
-                            Log.e(TAG, "onResponse: ", e);
+                            val string = errorBody.string()
+                            val msg = String.format(Locale.US,
+                                "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                                call.request().url().toString(),
+                                response.code(),
+                                string)
+                            Log.e(TAG, msg)
+                        } catch (e: IOException) {
+                            Log.e(TAG, "onResponse: ", e)
                         }
-                        return;
+                        return
                     }
-                    Log.e(TAG, "onResponse: request was not successful and response error body was null");
-                    return;
+                    Log.e(TAG, "onResponse: request was not successful and response error body was null")
+                    return
                 }
-                final DirectThread thread = response.body();
+                val thread = response.body()
                 if (thread == null) {
-                    Log.e(TAG, "onResponse: thread is null");
-                    return;
+                    Log.e(TAG, "onResponse: thread is null")
+                    return
                 }
-                if (callback != null) {
-                    callback.apply(thread);
-                }
+                callback?.invoke(thread)
             }
 
-            @Override
-            public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
-
-            }
-        });
+            override fun onFailure(call: Call<DirectThread?>, t: Throwable) {}
+        })
     }
 
-    public void sendMedia(@NonNull final Set<RankedRecipient> recipients, final String mediaId) {
-        final int[] resultsCount = {0};
-        final Function<Void, Void> callback = unused -> {
-            resultsCount[0]++;
-            if (resultsCount[0] == recipients.size()) {
-                inboxManager.refresh();
+    fun sendMedia(recipients: Set<RankedRecipient>, mediaId: String) {
+        val resultsCount = intArrayOf(0)
+        val callback: () -> Unit = {
+            resultsCount[0]++
+            if (resultsCount[0] == recipients.size) {
+                inboxManager.refresh()
             }
-            return null;
-        };
-        for (final RankedRecipient recipient : recipients) {
-            if (recipient == null) continue;
-            sendMedia(recipient, mediaId, false, callback);
+        }
+        for (recipient in recipients) {
+            sendMedia(recipient, mediaId, false, callback)
         }
     }
 
-    public void sendMedia(@NonNull final RankedRecipient recipient, final String mediaId) {
-        sendMedia(recipient, mediaId, true, null);
+    fun sendMedia(recipient: RankedRecipient, mediaId: String) {
+        sendMedia(recipient, mediaId, true, null)
     }
 
-    private void sendMedia(@NonNull final RankedRecipient recipient,
-                           @NonNull final String mediaId,
-                           final boolean refreshInbox,
-                           @Nullable final Function<Void, Void> callback) {
-        if (recipient.getThread() == null && recipient.getUser() != null) {
+    private fun sendMedia(
+        recipient: RankedRecipient,
+        mediaId: String,
+        refreshInbox: Boolean,
+        callback: (() -> Unit)?,
+    ) {
+        if (recipient.thread == null && recipient.user != null) {
             // create thread and forward
-            createThread(recipient.getUser().getPk(), directThread -> {
-                sendMedia(directThread, mediaId, unused -> {
+            createThread(recipient.user.pk) { (threadId) ->
+                val threadIdTemp = threadId ?: return@createThread
+                sendMedia(threadIdTemp, mediaId) {
                     if (refreshInbox) {
-                        inboxManager.refresh();
+                        inboxManager.refresh()
                     }
-                    if (callback != null) {
-                        callback.apply(null);
-                    }
-                    return null;
-                });
-                return null;
-            });
+                    callback?.invoke()
+                }
+            }
         }
-        if (recipient.getThread() == null) return;
+        if (recipient.thread == null) return
         // just forward
-        final DirectThread thread = recipient.getThread();
-        sendMedia(thread, mediaId, unused -> {
+        val thread = recipient.thread
+        val threadId = thread.threadId ?: return
+        sendMedia(threadId, mediaId) {
             if (refreshInbox) {
-                inboxManager.refresh();
+                inboxManager.refresh()
             }
-            if (callback != null) {
-                callback.apply(null);
-            }
-            return null;
-        });
+            callback?.invoke()
+        }
     }
 
-    @NonNull
-    public LiveData<Resource<Object>> sendMedia(@NonNull final DirectThread thread,
-                                                @NonNull final String mediaId,
-                                                @Nullable final Function<Void, Void> callback) {
-        return sendMedia(thread.getThreadId(), mediaId, callback);
-    }
-
-    @NonNull
-    public LiveData<Resource<Object>> sendMedia(@NonNull final String threadId,
-                                                @NonNull final String mediaId,
-                                                @Nullable final Function<Void, Void> callback) {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        final Call<DirectThreadBroadcastResponse> request = service.broadcastMediaShare(
-                UUID.randomUUID().toString(),
-                ThreadIdOrUserIds.of(threadId),
-                mediaId
-        );
-        request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
-                                   @NonNull final Response<DirectThreadBroadcastResponse> response) {
-                if (response.isSuccessful()) {
-                    data.postValue(Resource.success(new Object()));
-                    if (callback != null) {
-                        callback.apply(null);
-                    }
-                    return;
+    private fun sendMedia(
+        threadId: String,
+        mediaId: String,
+        callback: (() -> Unit)?,
+    ): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        val request = service.broadcastMediaShare(
+            UUID.randomUUID().toString(),
+            of(threadId),
+            mediaId
+        )
+        request.enqueue(object : Callback<DirectThreadBroadcastResponse?> {
+            override fun onResponse(
+                call: Call<DirectThreadBroadcastResponse?>,
+                response: Response<DirectThreadBroadcastResponse?>,
+            ) {
+                if (response.isSuccessful) {
+                    data.postValue(success(Any()))
+                    callback?.invoke()
+                    return
                 }
-                if (response.errorBody() != null) {
+                val errorBody = response.errorBody()
+                if (errorBody != null) {
                     try {
-                        final String string = response.errorBody().string();
-                        final String msg = String.format(Locale.US,
-                                                         "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                                                         call.request().url().toString(),
-                                                         response.code(),
-                                                         string);
-                        Log.e(TAG, msg);
-                        data.postValue(Resource.error(msg, null));
-                    } catch (IOException e) {
-                        Log.e(TAG, "onResponse: ", e);
-                        data.postValue(Resource.error(e.getMessage(), null));
+                        val string = errorBody.string()
+                        val msg = String.format(Locale.US,
+                            "onResponse: url: %s, responseCode: %d, errorBody: %s",
+                            call.request().url().toString(),
+                            response.code(),
+                            string)
+                        Log.e(TAG, msg)
+                        data.postValue(error(msg, null))
+                    } catch (e: IOException) {
+                        Log.e(TAG, "onResponse: ", e)
+                        data.postValue(error(e.message, null))
                     }
-                    if (callback != null) {
-                        callback.apply(null);
-                    }
-                    return;
+                    callback?.invoke()
+                    return
                 }
-                final String msg = "onResponse: request was not successful and response error body was null";
-                Log.e(TAG, msg);
-                data.postValue(Resource.error(msg, null));
-                if (callback != null) {
-                    callback.apply(null);
-                }
+                val msg = "onResponse: request was not successful and response error body was null"
+                Log.e(TAG, msg)
+                data.postValue(error(msg, null))
+                callback?.invoke()
             }
 
-            @Override
-            public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                data.postValue(Resource.error(t.getMessage(), null));
-                if (callback != null) {
-                    callback.apply(null);
-                }
+            override fun onFailure(call: Call<DirectThreadBroadcastResponse?>, t: Throwable) {
+                Log.e(TAG, "onFailure: ", t)
+                data.postValue(error(t.message, null))
+                callback?.invoke()
             }
-        });
-        return data;
+        })
+        return data
+    }
+
+    init {
+        val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
+        viewerId = getUserIdFromCookie(cookie)
+        deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        val csrfToken = getCsrfTokenFromCookie(cookie)
+        require(!csrfToken.isNullOrBlank() && viewerId != 0L && deviceUuid.isNotBlank()) { "User is not logged in!" }
+        this.csrfToken = csrfToken
+        service = getInstance(csrfToken, viewerId, deviceUuid)
     }
 }

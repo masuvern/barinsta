@@ -1,382 +1,349 @@
-package awais.instagrabber.managers;
+package awais.instagrabber.managers
 
-import android.util.Log;
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import awais.instagrabber.R
+import awais.instagrabber.models.Resource
+import awais.instagrabber.models.Resource.Companion.error
+import awais.instagrabber.models.Resource.Companion.loading
+import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.directmessages.*
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.getCsrfTokenFromCookie
+import awais.instagrabber.utils.getUserIdFromCookie
+import awais.instagrabber.webservices.DirectMessagesService
+import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.collect.ImmutableList
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
+import java.util.concurrent.TimeUnit
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
+class InboxManager private constructor(private val pending: Boolean) {
+    private val inbox = MutableLiveData<Resource<DirectInbox?>>()
+    private val unseenCount = MutableLiveData<Resource<Int?>>()
+    private val pendingRequestsTotal = MutableLiveData(0)
+    val threads: LiveData<List<DirectThread>>
+    private val service: DirectMessagesService
+    private var inboxRequest: Call<DirectInboxResponse?>? = null
+    private var unseenCountRequest: Call<DirectBadgeCount?>? = null
+    private var seqId: Long = 0
+    private var cursor: String? = null
+    private var hasOlder = true
+    var viewer: User? = null
+        private set
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
+    fun getInbox(): LiveData<Resource<DirectInbox?>> {
+        return Transformations.distinctUntilChanged(inbox)
+    }
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+    fun getUnseenCount(): LiveData<Resource<Int?>> {
+        return Transformations.distinctUntilChanged(unseenCount)
+    }
 
-import awais.instagrabber.R;
-import awais.instagrabber.models.Resource;
-import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.directmessages.DirectBadgeCount;
-import awais.instagrabber.repositories.responses.directmessages.DirectInbox;
-import awais.instagrabber.repositories.responses.directmessages.DirectInboxResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectItem;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.DirectMessagesService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+    fun getPendingRequestsTotal(): LiveData<Int> {
+        return Transformations.distinctUntilChanged(pendingRequestsTotal)
+    }
 
-import static androidx.lifecycle.Transformations.distinctUntilChanged;
-import static awais.instagrabber.utils.Utils.settingsHelper;
+    fun fetchInbox() {
+        val inboxResource = inbox.value
+        if (inboxResource != null && inboxResource.status === Resource.Status.LOADING || !hasOlder) return
+        stopCurrentInboxRequest()
+        inbox.postValue(loading(currentDirectInbox))
+        inboxRequest = if (pending) service.fetchPendingInbox(cursor, seqId) else service.fetchInbox(cursor, seqId)
+        inboxRequest?.enqueue(object : Callback<DirectInboxResponse?> {
+            override fun onResponse(call: Call<DirectInboxResponse?>, response: Response<DirectInboxResponse?>) {
+                val body = response.body()
+                if (body == null) {
+                    Log.e(TAG, "parseInboxResponse: Response is null")
+                    inbox.postValue(error(R.string.generic_null_response, currentDirectInbox))
+                    hasOlder = false
+                    return
+                }
+                parseInboxResponse(body)
+            }
 
-public final class InboxManager {
-    private static final String TAG = InboxManager.class.getSimpleName();
-    private static final LoadingCache<String, Object> THREAD_LOCKS = CacheBuilder
+            override fun onFailure(call: Call<DirectInboxResponse?>, t: Throwable) {
+                Log.e(TAG, "Failed fetching dm inbox", t)
+                inbox.postValue(error(t.message, currentDirectInbox))
+                hasOlder = false
+            }
+        })
+    }
+
+    fun fetchUnseenCount() {
+        val unseenCountResource = unseenCount.value
+        if (unseenCountResource != null && unseenCountResource.status === Resource.Status.LOADING) return
+        stopCurrentUnseenCountRequest()
+        unseenCount.postValue(loading(currentUnseenCount))
+        unseenCountRequest = service.fetchUnseenCount()
+        unseenCountRequest?.enqueue(object : Callback<DirectBadgeCount?> {
+            override fun onResponse(call: Call<DirectBadgeCount?>, response: Response<DirectBadgeCount?>) {
+                val directBadgeCount = response.body()
+                if (directBadgeCount == null) {
+                    Log.e(TAG, "onResponse: directBadgeCount Response is null")
+                    unseenCount.postValue(error(R.string.dms_inbox_error_null_count, currentUnseenCount))
+                    return
+                }
+                unseenCount.postValue(success(directBadgeCount.badgeCount))
+            }
+
+            override fun onFailure(call: Call<DirectBadgeCount?>, t: Throwable) {
+                Log.e(TAG, "Failed fetching unseen count", t)
+                unseenCount.postValue(error(t.message, currentUnseenCount))
+            }
+        })
+    }
+
+    fun refresh() {
+        cursor = null
+        seqId = 0
+        hasOlder = true
+        fetchInbox()
+        if (!pending) {
+            fetchUnseenCount()
+        }
+    }
+
+    private val currentDirectInbox: DirectInbox?
+        get() {
+            val inboxResource = inbox.value
+            return inboxResource?.data
+        }
+
+    private fun parseInboxResponse(response: DirectInboxResponse) {
+        if (response.status != "ok") {
+            Log.e(TAG, "DM inbox fetch response: status not ok")
+            inbox.postValue(error(R.string.generic_not_ok_response, currentDirectInbox))
+            hasOlder = false
+            return
+        }
+        seqId = response.seqId
+        if (viewer == null) {
+            viewer = response.viewer
+        }
+        val inbox = response.inbox ?: return
+        if (!cursor.isNullOrBlank()) {
+            val currentDirectInbox = currentDirectInbox
+            currentDirectInbox?.let {
+                val threads = it.threads
+                val threadsCopy = if (threads == null) LinkedList() else LinkedList(threads)
+                threadsCopy.addAll(inbox.threads ?: emptyList())
+                inbox.threads = threads
+            }
+        }
+        this.inbox.postValue(success(inbox))
+        cursor = inbox.oldestCursor
+        hasOlder = inbox.hasOlder
+        pendingRequestsTotal.postValue(response.pendingRequestsTotal)
+    }
+
+    fun setThread(
+        threadId: String,
+        thread: DirectThread,
+    ) {
+        val inbox = currentDirectInbox ?: return
+        val index = getThreadIndex(threadId, inbox)
+        setThread(inbox, index, thread)
+    }
+
+    private fun setThread(
+        inbox: DirectInbox,
+        index: Int,
+        thread: DirectThread,
+    ) {
+        if (index < 0) return
+        synchronized(this.inbox) {
+            val threads = inbox.threads
+            val threadsCopy = if (threads == null) LinkedList() else LinkedList(threads)
+            threadsCopy[index] = thread
+            try {
+                val clone = inbox.clone() as DirectInbox
+                clone.threads = threadsCopy
+                this.inbox.postValue(success(clone))
+            } catch (e: CloneNotSupportedException) {
+                Log.e(TAG, "setThread: ", e)
+            }
+        }
+    }
+
+    fun addItemsToThread(
+        threadId: String,
+        insertIndex: Int,
+        items: Collection<DirectItem>,
+    ) {
+        val inbox = currentDirectInbox ?: return
+        synchronized(THREAD_LOCKS.getUnchecked(threadId)) {
+            val index = getThreadIndex(threadId, inbox)
+            if (index < 0) return
+            val threads = inbox.threads ?: return
+            val thread = threads[index]
+            val threadItems = thread.items
+            val list = if (threadItems == null) LinkedList() else LinkedList(threadItems)
+            if (insertIndex >= 0) {
+                list.addAll(insertIndex, items)
+            } else {
+                list.addAll(items)
+            }
+            try {
+                val threadClone = thread.clone() as DirectThread
+                threadClone.items = list
+                setThread(inbox, index, threadClone)
+            } catch (e: Exception) {
+                Log.e(TAG, "addItemsToThread: ", e)
+            }
+        }
+    }
+
+    fun setItemsToThread(
+        threadId: String,
+        updatedItems: List<DirectItem>,
+    ) {
+        val inbox = currentDirectInbox ?: return
+        synchronized(THREAD_LOCKS.getUnchecked(threadId)) {
+            val index = getThreadIndex(threadId, inbox)
+            if (index < 0) return
+            val threads = inbox.threads ?: return
+            val thread = threads[index]
+            try {
+                val threadClone = thread.clone() as DirectThread
+                threadClone.items = updatedItems
+                setThread(inbox, index, threadClone)
+            } catch (e: Exception) {
+                Log.e(TAG, "setItemsToThread: ", e)
+            }
+        }
+    }
+
+    private fun getThreadIndex(
+        threadId: String,
+        inbox: DirectInbox,
+    ): Int {
+        val threads = inbox.threads
+        return if (threads == null || threads.isEmpty()) {
+            -1
+        } else threads.indexOfFirst { it.threadId == threadId }
+    }
+
+    private val currentUnseenCount: Int?
+        get() {
+            val unseenCountResource = unseenCount.value
+            return unseenCountResource?.data
+        }
+
+    private fun stopCurrentInboxRequest() {
+        inboxRequest?.let {
+            if (it.isCanceled || it.isExecuted) return
+            it.cancel()
+        }
+        inboxRequest = null
+    }
+
+    private fun stopCurrentUnseenCountRequest() {
+        unseenCountRequest?.let {
+            if (it.isCanceled || it.isExecuted) return
+            it.cancel()
+        }
+        unseenCountRequest = null
+    }
+
+    fun onDestroy() {
+        stopCurrentInboxRequest()
+        stopCurrentUnseenCountRequest()
+    }
+
+    fun addThread(thread: DirectThread, insertIndex: Int) {
+        if (insertIndex < 0) return
+        synchronized(inbox) {
+            val currentDirectInbox = currentDirectInbox ?: return
+            val threads = currentDirectInbox.threads
+            val threadsCopy = if (threads == null) LinkedList() else LinkedList(threads)
+            threadsCopy.add(insertIndex, thread)
+            try {
+                val clone = currentDirectInbox.clone() as DirectInbox
+                clone.threads = threadsCopy
+                inbox.setValue(success(clone))
+            } catch (e: CloneNotSupportedException) {
+                Log.e(TAG, "setThread: ", e)
+            }
+        }
+    }
+
+    fun removeThread(threadId: String) {
+        synchronized(inbox) {
+            val currentDirectInbox = currentDirectInbox ?: return
+            val threads = currentDirectInbox.threads ?: return
+            val threadsCopy = threads.asSequence().filter { it.threadId != threadId }.toList()
+            try {
+                val clone = currentDirectInbox.clone() as DirectInbox
+                clone.threads = threadsCopy
+                inbox.postValue(success(clone))
+            } catch (e: CloneNotSupportedException) {
+                Log.e(TAG, "setThread: ", e)
+            }
+        }
+    }
+
+    fun setPendingRequestsTotal(total: Int) {
+        pendingRequestsTotal.postValue(total)
+    }
+
+    fun containsThread(threadId: String?): Boolean {
+        if (threadId == null) return false
+        synchronized(inbox) {
+            val currentDirectInbox = currentDirectInbox ?: return false
+            val threads = currentDirectInbox.threads ?: return false
+            return threads.any { it.threadId == threadId }
+        }
+    }
+
+    companion object {
+        private val TAG = InboxManager::class.java.simpleName
+        private val THREAD_LOCKS = CacheBuilder
             .newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES) // max lock time ever expected
-            .build(CacheLoader.from(Object::new));
-    private static final Comparator<DirectThread> THREAD_COMPARATOR = (t1, t2) -> {
-        final DirectItem t1FirstDirectItem = t1.getFirstDirectItem();
-        final DirectItem t2FirstDirectItem = t2.getFirstDirectItem();
-        if (t1FirstDirectItem == null && t2FirstDirectItem == null) return 0;
-        if (t1FirstDirectItem == null) return 1;
-        if (t2FirstDirectItem == null) return -1;
-        return Long.compare(t2FirstDirectItem.getTimestamp(), t1FirstDirectItem.getTimestamp());
-    };
+            .build<String, Any>(CacheLoader.from<Any> { Object() })
+        private val THREAD_COMPARATOR = Comparator { t1: DirectThread, t2: DirectThread ->
+            val t1FirstDirectItem = t1.firstDirectItem
+            val t2FirstDirectItem = t2.firstDirectItem
+            if (t1FirstDirectItem == null && t2FirstDirectItem == null) return@Comparator 0
+            if (t1FirstDirectItem == null) return@Comparator 1
+            if (t2FirstDirectItem == null) return@Comparator -1
+            t2FirstDirectItem.getTimestamp().compareTo(t1FirstDirectItem.getTimestamp())
+        }
 
-    private final MutableLiveData<Resource<DirectInbox>> inbox = new MutableLiveData<>();
-    private final MutableLiveData<Resource<Integer>> unseenCount = new MutableLiveData<>();
-    private final MutableLiveData<Integer> pendingRequestsTotal = new MutableLiveData<>(0);
-
-    private final LiveData<List<DirectThread>> threads;
-    private final DirectMessagesService service;
-    private final boolean pending;
-
-    private Call<DirectInboxResponse> inboxRequest;
-    private Call<DirectBadgeCount> unseenCountRequest;
-    private long seqId;
-    private String cursor;
-    private boolean hasOlder = true;
-    private User viewer;
-
-    @NonNull
-    public static InboxManager getInstance(final boolean pending) {
-        return new InboxManager(pending);
+        fun getInstance(pending: Boolean): InboxManager {
+            return InboxManager(pending)
+        }
     }
 
-    private InboxManager(final boolean pending) {
-        this.pending = pending;
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        if (TextUtils.isEmpty(csrfToken)) {
-            throw new IllegalArgumentException("csrfToken is empty!");
-        } else if (userId == 0) {
-            throw new IllegalArgumentException("user id invalid");
-        } else if (TextUtils.isEmpty(deviceUuid)) {
-            throw new IllegalArgumentException("device uuid is empty!");
-        }
-        service = DirectMessagesService.getInstance(csrfToken, userId, deviceUuid);
+    init {
+        val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
+        val viewerId = getUserIdFromCookie(cookie)
+        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        val csrfToken = getCsrfTokenFromCookie(cookie)
+        require(!csrfToken.isNullOrBlank() && viewerId != 0L && deviceUuid.isNotBlank()) { "User is not logged in!" }
+        service = getInstance(csrfToken, viewerId, deviceUuid)
 
         // Transformations
-        threads = distinctUntilChanged(Transformations.map(inbox, inboxResource -> {
+        threads = Transformations.distinctUntilChanged(Transformations.map(inbox) { inboxResource: Resource<DirectInbox?>? ->
             if (inboxResource == null) {
-                return Collections.emptyList();
+                return@map emptyList()
             }
-            final DirectInbox inbox = inboxResource.data;
-            if (inbox == null) {
-                return Collections.emptyList();
-            }
-            return ImmutableList.sortedCopyOf(THREAD_COMPARATOR, inbox.getThreads());
-        }));
-
-        fetchInbox();
+            val inbox = inboxResource.data
+            val threads = inbox?.threads ?: emptyList()
+            ImmutableList.sortedCopyOf(THREAD_COMPARATOR, threads)
+        })
+        fetchInbox()
         if (!pending) {
-            fetchUnseenCount();
-        }
-    }
-
-    public LiveData<Resource<DirectInbox>> getInbox() {
-        return distinctUntilChanged(inbox);
-    }
-
-    public LiveData<List<DirectThread>> getThreads() {
-        return threads;
-    }
-
-    public LiveData<Resource<Integer>> getUnseenCount() {
-        return distinctUntilChanged(unseenCount);
-    }
-
-    public LiveData<Integer> getPendingRequestsTotal() {
-        return distinctUntilChanged(pendingRequestsTotal);
-    }
-
-    public User getViewer() {
-        return viewer;
-    }
-
-    public void fetchInbox() {
-        final Resource<DirectInbox> inboxResource = inbox.getValue();
-        if ((inboxResource != null && inboxResource.status == Resource.Status.LOADING) || !hasOlder) return;
-        stopCurrentInboxRequest();
-        inbox.postValue(Resource.loading(getCurrentDirectInbox()));
-        inboxRequest = pending ? service.fetchPendingInbox(cursor, seqId) : service.fetchInbox(cursor, seqId);
-        inboxRequest.enqueue(new Callback<DirectInboxResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<DirectInboxResponse> call, @NonNull final Response<DirectInboxResponse> response) {
-                parseInboxResponse(response.body());
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<DirectInboxResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "Failed fetching dm inbox", t);
-                inbox.postValue(Resource.error(t.getMessage(), getCurrentDirectInbox()));
-                hasOlder = false;
-            }
-        });
-    }
-
-    public void fetchUnseenCount() {
-        final Resource<Integer> unseenCountResource = unseenCount.getValue();
-        if ((unseenCountResource != null && unseenCountResource.status == Resource.Status.LOADING)) return;
-        stopCurrentUnseenCountRequest();
-        unseenCount.postValue(Resource.loading(getCurrentUnseenCount()));
-        unseenCountRequest = service.fetchUnseenCount();
-        unseenCountRequest.enqueue(new Callback<DirectBadgeCount>() {
-            @Override
-            public void onResponse(@NonNull final Call<DirectBadgeCount> call, @NonNull final Response<DirectBadgeCount> response) {
-                final DirectBadgeCount directBadgeCount = response.body();
-                if (directBadgeCount == null) {
-                    Log.e(TAG, "onResponse: directBadgeCount Response is null");
-                    unseenCount.postValue(Resource.error(R.string.dms_inbox_error_null_count, getCurrentUnseenCount()));
-                    return;
-                }
-                unseenCount.postValue(Resource.success(directBadgeCount.getBadgeCount()));
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<DirectBadgeCount> call, @NonNull final Throwable t) {
-                Log.e(TAG, "Failed fetching unseen count", t);
-                unseenCount.postValue(Resource.error(t.getMessage(), getCurrentUnseenCount()));
-            }
-        });
-    }
-
-    public void refresh() {
-        cursor = null;
-        seqId = 0;
-        hasOlder = true;
-        fetchInbox();
-        if (!pending) {
-            fetchUnseenCount();
-        }
-    }
-
-    private DirectInbox getCurrentDirectInbox() {
-        final Resource<DirectInbox> inboxResource = inbox.getValue();
-        return inboxResource != null ? inboxResource.data : null;
-    }
-
-    private void parseInboxResponse(final DirectInboxResponse response) {
-        if (response == null) {
-            Log.e(TAG, "parseInboxResponse: Response is null");
-            inbox.postValue(Resource.error(R.string.generic_null_response, getCurrentDirectInbox()));
-            hasOlder = false;
-            return;
-        }
-        if (!Objects.equals(response.getStatus(), "ok")) {
-            Log.e(TAG, "DM inbox fetch response: status not ok");
-            inbox.postValue(Resource.error(R.string.generic_not_ok_response, getCurrentDirectInbox()));
-            hasOlder = false;
-            return;
-        }
-        seqId = response.getSeqId();
-        if (viewer == null) {
-            viewer = response.getViewer();
-        }
-        final DirectInbox inbox = response.getInbox();
-        if (inbox == null) return;
-        if (!TextUtils.isEmpty(cursor)) {
-            final DirectInbox currentDirectInbox = getCurrentDirectInbox();
-            if (currentDirectInbox != null) {
-                List<DirectThread> threads = currentDirectInbox.getThreads();
-                threads = threads == null ? new LinkedList<>() : new LinkedList<>(threads);
-                threads.addAll(inbox.getThreads() == null ? Collections.emptyList() : inbox.getThreads());
-                inbox.setThreads(threads);
-            }
-        }
-        this.inbox.postValue(Resource.success(inbox));
-        cursor = inbox.getOldestCursor();
-        hasOlder = inbox.getHasOlder();
-        pendingRequestsTotal.postValue(response.getPendingRequestsTotal());
-    }
-
-    public void setThread(@NonNull final String threadId,
-                          @NonNull final DirectThread thread) {
-        final DirectInbox inbox = getCurrentDirectInbox();
-        if (inbox == null) return;
-        final int index = getThreadIndex(threadId, inbox);
-        setThread(inbox, index, thread);
-    }
-
-    private void setThread(@NonNull final DirectInbox inbox,
-                           final int index,
-                           @NonNull final DirectThread thread) {
-        if (index < 0) return;
-        synchronized (this.inbox) {
-            final List<DirectThread> threadsCopy = new LinkedList<>(inbox.getThreads());
-            threadsCopy.set(index, thread);
-            try {
-                final DirectInbox clone = (DirectInbox) inbox.clone();
-                clone.setThreads(threadsCopy);
-                this.inbox.postValue(Resource.success(clone));
-            } catch (CloneNotSupportedException e) {
-                Log.e(TAG, "setThread: ", e);
-            }
-        }
-    }
-
-    public void addItemsToThread(@NonNull final String threadId,
-                                 final int insertIndex,
-                                 @NonNull final Collection<DirectItem> items) {
-        final DirectInbox inbox = getCurrentDirectInbox();
-        if (inbox == null) return;
-        synchronized (THREAD_LOCKS.getUnchecked(threadId)) {
-            final int index = getThreadIndex(threadId, inbox);
-            if (index < 0) return;
-            final List<DirectThread> threads = inbox.getThreads();
-            final DirectThread thread = threads.get(index);
-            List<DirectItem> list = thread.getItems();
-            list = list == null ? new LinkedList<>() : new LinkedList<>(list);
-            if (insertIndex >= 0) {
-                list.addAll(insertIndex, items);
-            } else {
-                list.addAll(items);
-            }
-            try {
-                final DirectThread threadClone = (DirectThread) thread.clone();
-                threadClone.setItems(list);
-                setThread(inbox, index, threadClone);
-            } catch (Exception e) {
-                Log.e(TAG, "addItemsToThread: ", e);
-            }
-        }
-    }
-
-    public void setItemsToThread(@NonNull final String threadId,
-                                 @NonNull final List<DirectItem> updatedItems) {
-        final DirectInbox inbox = getCurrentDirectInbox();
-        if (inbox == null) return;
-        synchronized (THREAD_LOCKS.getUnchecked(threadId)) {
-            final int index = getThreadIndex(threadId, inbox);
-            if (index < 0) return;
-            final List<DirectThread> threads = inbox.getThreads();
-            final DirectThread thread = threads.get(index);
-            try {
-                final DirectThread threadClone = (DirectThread) thread.clone();
-                threadClone.setItems(updatedItems);
-                setThread(inbox, index, threadClone);
-            } catch (Exception e) {
-                Log.e(TAG, "setItemsToThread: ", e);
-            }
-        }
-    }
-
-    private int getThreadIndex(@NonNull final String threadId,
-                               @NonNull final DirectInbox inbox) {
-        final List<DirectThread> threads = inbox.getThreads();
-        if (threads == null || threads.isEmpty()) {
-            return -1;
-        }
-        return Iterables.indexOf(threads, t -> {
-            if (t == null) return false;
-            return t.getThreadId().equals(threadId);
-        });
-    }
-
-    private Integer getCurrentUnseenCount() {
-        final Resource<Integer> unseenCountResource = unseenCount.getValue();
-        return unseenCountResource != null ? unseenCountResource.data : null;
-    }
-
-    private void stopCurrentInboxRequest() {
-        if (inboxRequest == null || inboxRequest.isCanceled() || inboxRequest.isExecuted()) return;
-        inboxRequest.cancel();
-        inboxRequest = null;
-    }
-
-    private void stopCurrentUnseenCountRequest() {
-        if (unseenCountRequest == null || unseenCountRequest.isCanceled() || unseenCountRequest.isExecuted()) return;
-        unseenCountRequest.cancel();
-        unseenCountRequest = null;
-    }
-
-    public void onDestroy() {
-        stopCurrentInboxRequest();
-        stopCurrentUnseenCountRequest();
-    }
-
-    public void addThread(@NonNull final DirectThread thread, final int insertIndex) {
-        if (insertIndex < 0) return;
-        synchronized (this.inbox) {
-            final DirectInbox currentDirectInbox = getCurrentDirectInbox();
-            if (currentDirectInbox == null) return;
-            final List<DirectThread> threadsCopy = new LinkedList<>(currentDirectInbox.getThreads());
-            threadsCopy.add(insertIndex, thread);
-            try {
-                final DirectInbox clone = (DirectInbox) currentDirectInbox.clone();
-                clone.setThreads(threadsCopy);
-                this.inbox.setValue(Resource.success(clone));
-            } catch (CloneNotSupportedException e) {
-                Log.e(TAG, "setThread: ", e);
-            }
-        }
-    }
-
-    public void removeThread(@NonNull final String threadId) {
-        synchronized (this.inbox) {
-            final DirectInbox currentDirectInbox = getCurrentDirectInbox();
-            if (currentDirectInbox == null) return;
-            final List<DirectThread> threadsCopy = currentDirectInbox.getThreads()
-                                                                     .stream()
-                                                                     .filter(t -> !t.getThreadId().equals(threadId))
-                                                                     .collect(Collectors.toList());
-            try {
-                final DirectInbox clone = (DirectInbox) currentDirectInbox.clone();
-                clone.setThreads(threadsCopy);
-                this.inbox.postValue(Resource.success(clone));
-            } catch (CloneNotSupportedException e) {
-                Log.e(TAG, "setThread: ", e);
-            }
-        }
-    }
-
-    public void setPendingRequestsTotal(final int total) {
-        pendingRequestsTotal.postValue(total);
-    }
-
-    public boolean containsThread(final String threadId) {
-        if (threadId == null) return false;
-        synchronized (this.inbox) {
-            final DirectInbox currentDirectInbox = getCurrentDirectInbox();
-            if (currentDirectInbox == null) return false;
-            final List<DirectThread> threads = currentDirectInbox.getThreads();
-            if (threads == null) return false;
-            return threads.stream().anyMatch(thread -> Objects.equals(thread.getThreadId(), threadId));
+            fetchUnseenCount()
         }
     }
 }

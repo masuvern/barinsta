@@ -59,7 +59,7 @@ public class DMSyncService extends LifecycleService {
         super.onCreate();
         startForeground(Constants.DM_CHECK_NOTIFICATION_ID, buildForegroundNotification());
         Log.d(TAG, "onCreate: Service created");
-        final DirectMessagesManager directMessagesManager = DirectMessagesManager.getInstance();
+        final DirectMessagesManager directMessagesManager = DirectMessagesManager.INSTANCE;
         inboxManager = directMessagesManager.getInboxManager();
         dmLastNotifiedRepository = DMLastNotifiedRepository.getInstance(DMLastNotifiedDataSource.getInstance(getApplicationContext()));
     }

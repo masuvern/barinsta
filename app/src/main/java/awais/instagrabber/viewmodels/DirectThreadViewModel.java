@@ -52,8 +52,8 @@ public class DirectThreadViewModel extends AndroidViewModel {
     private final long viewerId;
     private final String threadId;
     private final User currentUser;
-    private final ThreadManager threadManager;
 
+    private ThreadManager threadManager;
     private VoiceRecorder voiceRecorder;
 
     public DirectThreadViewModel(@NonNull final Application application,
@@ -73,14 +73,15 @@ public class DirectThreadViewModel extends AndroidViewModel {
         }
         contentResolver = application.getContentResolver();
         recordingsDir = DirectoryUtils.getOutputMediaDirectory(application, "Recordings");
-        final DirectMessagesManager messagesManager = DirectMessagesManager.getInstance();
+        final DirectMessagesManager messagesManager = DirectMessagesManager.INSTANCE;
         threadManager = messagesManager.getThreadManager(threadId, pending, currentUser, contentResolver);
         threadManager.fetchPendingRequests();
     }
 
     public void moveFromPending() {
-        DirectMessagesManager.getInstance().moveThreadFromPending(threadId);
-        threadManager.moveFromPending();
+        final DirectMessagesManager messagesManager = DirectMessagesManager.INSTANCE;
+        messagesManager.moveThreadFromPending(threadId);
+        threadManager = messagesManager.getThreadManager(threadId, false, currentUser, contentResolver);
     }
 
     public void removeThread() {
@@ -268,7 +269,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         threadManager.forward(recipient, itemToForward);
     }
 
-    public void setReplyToItem(final DirectItem item) {
+    public void setReplyToItem(@Nullable final DirectItem item) {
         // Log.d(TAG, "setReplyToItem: " + item);
         threadManager.setReplyToItem(item);
     }
@@ -327,7 +328,7 @@ public class DirectThreadViewModel extends AndroidViewModel {
         final DirectThread thread = getThread().getValue();
         if (thread == null) return;
         if (thread.isTemp() && (thread.getItems() == null || thread.getItems().isEmpty())) {
-            final InboxManager inboxManager = DirectMessagesManager.getInstance().getInboxManager();
+            final InboxManager inboxManager = DirectMessagesManager.INSTANCE.getInboxManager();
             inboxManager.removeThread(threadId);
         }
     }

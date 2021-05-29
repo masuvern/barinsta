@@ -333,14 +333,14 @@ public class PostViewV2ViewModel extends ViewModel {
 
     public void shareDm(@NonNull final RankedRecipient result) {
         if (messageManager == null) {
-            messageManager = DirectMessagesManager.getInstance();
+            messageManager = DirectMessagesManager.INSTANCE;
         }
         messageManager.sendMedia(result, media.getId());
     }
 
     public void shareDm(@NonNull final Set<RankedRecipient> recipients) {
         if (messageManager == null) {
-            messageManager = DirectMessagesManager.getInstance();
+            messageManager = DirectMessagesManager.INSTANCE;
         }
         messageManager.sendMedia(recipients, media.getId());
     }
