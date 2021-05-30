@@ -21,3 +21,4 @@ app/release
 /app/fdroid/
 /app/github/
 /repo
+/.fdroid.yml
