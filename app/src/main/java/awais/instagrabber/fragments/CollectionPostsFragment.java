@@ -297,7 +297,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                     .setTitle(R.string.delete_collection)
                     .setMessage(R.string.delete_collection_note)
                     .setPositiveButton(R.string.confirm, (d, w) -> collectionService.deleteCollection(
-                            savedCollection.getId(),
+                            savedCollection.getCollectionId(),
                             new ServiceCallback<String>() {
                                 @Override
                                 public void onSuccess(final String result) {
@@ -325,7 +325,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                     .setTitle(R.string.edit_collection)
                     .setView(input)
                     .setPositiveButton(R.string.confirm, (d, w) -> collectionService.editCollectionName(
-                            savedCollection.getId(),
+                            savedCollection.getCollectionId(),
                             input.getText().toString(),
                             new ServiceCallback<String>() {
                                 @Override
@@ -408,9 +408,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         if (savedCollection == null) {
             return;
         }
-        binding.cover.setTransitionName("collection-" + savedCollection.getId());
+        binding.cover.setTransitionName("collection-" + savedCollection.getCollectionId());
         fragmentActivity.setToolbar(binding.toolbar);
-        binding.collapsingToolbarLayout.setTitle(savedCollection.getTitle());
+        binding.collapsingToolbarLayout.setTitle(savedCollection.getCollectionName());
         final int collapsedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0xFF);
         final int expandedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0x99);
         binding.collapsingToolbarLayout.setExpandedTitleColor(expandedTitleTextColor);
@@ -442,9 +442,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void setupCover() {
-        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMedias() == null
+        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMediaList() == null
                                                               ? savedCollection.getCoverMedia()
-                                                              : savedCollection.getCoverMedias().get(0));
+                                                              : savedCollection.getCoverMediaList().get(0));
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())
@@ -471,7 +471,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private void setupPosts() {
         binding.posts.setViewModelStoreOwner(this)
                      .setLifeCycleOwner(this)
-                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getId()))
+                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getCollectionId()))
                      .setLayoutPreferences(layoutPreferences)
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)
