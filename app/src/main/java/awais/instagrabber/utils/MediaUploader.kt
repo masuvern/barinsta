@@ -8,7 +8,7 @@ import awais.instagrabber.utils.BitmapUtils.ThumbnailLoadCallback
 import awais.instagrabber.webservices.interceptors.AddCookiesInterceptor
 import okhttp3.*
 import okio.BufferedSink
-import okio.source
+import okio.Okio
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
@@ -140,8 +140,9 @@ object MediaUploader {
             }
 
             @Throws(IOException::class)
+            @Suppress("DEPRECATION_ERROR")
             override fun writeTo(sink: BufferedSink) {
-                inputStream.source().use { sink.writeAll(it) }
+                Okio.source(inputStream).use { sink.writeAll(it) }
             }
         }
     }
