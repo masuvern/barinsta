@@ -84,6 +84,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private int downloadChildPosition = -1;
     private CollectionService collectionService;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_SAVED_POSTS_LAYOUT);
+    private MenuItem deleteMenu, editMenu;
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -281,8 +282,13 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
-        // delaying to make toolbar resume animation smooth, otherwise lags
-        binding.getRoot().postDelayed(() -> inflater.inflate(R.menu.collection_posts_menu, menu), 500);
+        inflater.inflate(R.menu.collection_posts_menu, menu);
+        deleteMenu = menu.findItem(R.id.delete);
+        if (deleteMenu != null)
+            deleteMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
+        editMenu = menu.findItem(R.id.edit);
+        if (editMenu != null)
+            editMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
     }
 
     @Override
@@ -493,7 +499,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     private void showPostsLayoutPreferences() {
         final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(
-                Constants.PREF_TOPIC_POSTS_LAYOUT,
+                Constants.PREF_SAVED_POSTS_LAYOUT,
                 preferences -> {
                     layoutPreferences = preferences;
                     new Handler().postDelayed(() -> binding.posts.setLayoutPreferences(preferences), 200);
