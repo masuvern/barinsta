@@ -1,12 +1,11 @@
-package awais.instagrabber.models.enums;
+package awais.instagrabber.models.enums
 
-import com.google.gson.annotations.SerializedName;
+import com.google.gson.annotations.SerializedName
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable
+import java.util.*
 
-public enum DirectItemType implements Serializable {
+enum class DirectItemType(val id: Int) : Serializable {
     UNKNOWN(0),
     @SerializedName("text")
     TEXT(1),
@@ -45,65 +44,42 @@ public enum DirectItemType implements Serializable {
     @SerializedName("xma")
     XMA(18); // self avatar stickers
 
-    private final int id;
-    private static final Map<Integer, DirectItemType> map = new HashMap<>();
+    companion object {
+        private val map: MutableMap<Int, DirectItemType> = mutableMapOf()
 
-    static {
-        for (DirectItemType type : DirectItemType.values()) {
-            map.put(type.id, type);
+        @JvmStatic
+        fun getId(id: Int): DirectItemType? {
+            return map[id]
         }
-    }
 
-    DirectItemType(final int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public static DirectItemType valueOf(final int id) {
-        if (!map.containsKey(id)) return DirectItemType.UNKNOWN;
-        return map.get(id);
-    }
-
-    public String getName() {
-        switch (this) {
-            case TEXT:
-                return "text";
-            case LIKE:
-                return "like";
-            case LINK:
-                return "link";
-            case MEDIA:
-                return "media";
-            case RAVEN_MEDIA:
-                return "raven_media";
-            case PROFILE:
-                return "profile";
-            case VIDEO_CALL_EVENT:
-                return "video_call_event";
-            case ANIMATED_MEDIA:
-                return "animated_media";
-            case VOICE_MEDIA:
-                return "voice_media";
-            case MEDIA_SHARE:
-                return "media_share";
-            case REEL_SHARE:
-                return "reel_share";
-            case ACTION_LOG:
-                return "action_log";
-            case PLACEHOLDER:
-                return "placeholder";
-            case STORY_SHARE:
-                return "story_share";
-            case CLIP:
-                return "clip";
-            case FELIX_SHARE:
-                return "felix_share";
-            case LOCATION:
-                return "location";
+        @JvmStatic
+        fun getName(directItemType: DirectItemType): String? {
+            when (directItemType) {
+                TEXT -> return "text"
+                LIKE -> return "like"
+                LINK -> return "link"
+                MEDIA -> return "media"
+                RAVEN_MEDIA -> return "raven_media"
+                PROFILE -> return "profile"
+                VIDEO_CALL_EVENT -> return "video_call_event"
+                ANIMATED_MEDIA -> return "animated_media"
+                VOICE_MEDIA -> return "voice_media"
+                MEDIA_SHARE -> return "media_share"
+                REEL_SHARE -> return "reel_share"
+                ACTION_LOG -> return "action_log"
+                PLACEHOLDER -> return "placeholder"
+                STORY_SHARE -> return "story_share"
+                CLIP -> return "clip"
+                FELIX_SHARE -> return "felix_share"
+                LOCATION -> return "location"
+            }
+            return null
         }
-        return null;
+
+        init {
+            for (type in DirectItemType.values()) {
+                map[type.id] = type
+            }
+        }
     }
 }
