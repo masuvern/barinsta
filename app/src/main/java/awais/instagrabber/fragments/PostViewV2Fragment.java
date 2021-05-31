@@ -763,8 +763,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             if (isPrivate) {
                 final Context context = getContext();
                 if (context == null) return;
-                // is this necessary?
-                Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
             }
             if (viewModel.isLoggedIn()) {
                 final Context context = getContext();
@@ -807,6 +806,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private void shareLink(@NonNull final Media media, final boolean isPrivate) {
         final Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TITLE,
+                               getString(isPrivate ? R.string.share_private_post : R.string.share_public_post));
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/p/" + media.getCode());
         startActivity(Intent.createChooser(
                 sharingIntent,
