@@ -120,7 +120,7 @@ public class GraphQLService extends BaseService {
                                   final String maxId,
                                   final User backup,
                                   final ServiceCallback<PostsFetchResponse> callback) {
-        fetch("18a7b935ab438c4514b1f742d8fa07a7",
+        fetch("02e14f6a7812a876f7d133c9555b1151",
               "{\"id\":\"" + profileId + "\"," +
                       "\"first\":" + postsPerPage + "," +
                       "\"after\":\"" + (maxId == null ? "" : maxId) + "\"}",
