@@ -6,7 +6,7 @@
 
 [![Awesome Humane Tech](https://raw.githubusercontent.com/humanetech-community/awesome-humane-tech/main/humane-tech-badge.svg?sanitize=true)](https://github.com/humanetech-community/awesome-humane-tech)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/austinhuang0131/instagrabber.svg?style=social&label=Star)](https://GitHub.com/austinhuang0131/barinsta/stargazers/)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-44-orange.svg)](#contributors)
@@ -70,7 +70,7 @@ Prominent contributors are listed here in the [all-contributors](https://allcont
     <td align="center"><a href="https://github.com/CrazyMarvin"><img src="https://avatars3.githubusercontent.com/u/15004217?v=4?s=100" width="100px;" alt=""/><br /><sub><b>CrazyMarvin</b></sub></a><br /><a href="#financial-CrazyMarvin" title="Financial">💵</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="http://kevinthomas.dev"><img src="https://avatars2.githubusercontent.com/u/15370181?s=100" width="100px;" alt=""/><br /><sub><b>Kevin Thomas</b></sub></a><br /><a href="#financial-KevinNThomas" title="Financial">💵</a></td>
+    <td align="center"><a href="https://kevinthomas.dev"><img src="https://avatars2.githubusercontent.com/u/15370181?s=100" width="100px;" alt=""/><br /><sub><b>Kevin Thomas</b></sub></a><br /><a href="#financial-KevinNThomas" title="Financial">💵</a></td>
     <td align="center"><a href="https://github.com/Shadowspear123"><img src="https://avatars1.githubusercontent.com/u/50462281?s=100" width="100px;" alt=""/><br /><sub><b>Shadowspear123</b></sub></a><br /><a href="#blog-Shadowspear123" title="Blogposts">📝</a> <a href="https://github.com/austinhuang0131/barinsta/issues?q=author%3AShadowspear123" title="Bug reports">🐛</a> <a href="#ideas-Shadowspear123" title="Ideas, Planning, & Feedback">🤔</a> <a href="#question-Shadowspear123" title="Answering Questions">💬</a></td>
     <td align="center"><a href="https://github.com/RickyM7"><img src="https://avatars3.githubusercontent.com/u/24703825?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ricardo</b></sub></a><br /><a href="https://github.com/austinhuang0131/barinsta/issues?q=author%3ARickyM7" title="Bug reports">🐛</a> <a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/Akrai"><img src="https://avatars1.githubusercontent.com/u/5624597?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Akrai</b></sub></a><br /><a href="#ideas-Akrai" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://crowdin.com/project/instagrabber" title="Translation">🌍</a></td>
