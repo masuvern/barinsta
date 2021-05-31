@@ -84,9 +84,9 @@ import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserProfileContextLink;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -99,9 +99,7 @@ import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.UserService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
@@ -1078,30 +1076,24 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (!disableDm) {
             profileDetailsBinding.btnDM.setOnClickListener(v -> {
                 profileDetailsBinding.btnDM.setEnabled(false);
-                final Call<DirectThread> createThreadRequest =
-                        directMessagesService.createThread(Collections.singletonList(profileModel.getPk()), null);
-                createThreadRequest.enqueue(new Callback<DirectThread>() {
-                    @Override
-                    public void onResponse(@NonNull final Call<DirectThread> call, @NonNull final Response<DirectThread> response) {
-                        profileDetailsBinding.btnDM.setEnabled(true);
-                        if (!response.isSuccessful() || response.body() == null) {
-                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        final InboxManager inboxManager = DirectMessagesManager.INSTANCE.getInboxManager();
-                        final DirectThread thread = response.body();
-                        if (!inboxManager.containsThread(thread.getThreadId())) {
-                            thread.setTemp(true);
-                            inboxManager.addThread(thread, 0);
-                        }
-                        fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull final Call<DirectThread> call, @NonNull final Throwable t) {
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                directMessagesService.createThread(
+                        Collections.singletonList(profileModel.getPk()),
+                        null,
+                        CoroutineUtilsKt.getContinuation((thread, throwable) -> {
+                            if (throwable != null) {
+                                Log.e(TAG, "setupCommonListeners: ", throwable);
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            profileDetailsBinding.btnDM.setEnabled(true);
+                            final InboxManager inboxManager = DirectMessagesManager.INSTANCE.getInboxManager();
+                            if (!inboxManager.containsThread(thread.getThreadId())) {
+                                thread.setTemp(true);
+                                inboxManager.addThread(thread, 0);
+                            }
+                            fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
+                        }, Dispatchers.getIO())
+                );
             });
         }
         profileDetailsBinding.mainProfileImage.setOnClickListener(v -> {

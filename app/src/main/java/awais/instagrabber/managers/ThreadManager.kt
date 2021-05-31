@@ -155,79 +155,23 @@ class ThreadManager private constructor(
                 _fetching.postValue(error(e.message, null))
                 hasOlder = false
             }
-
-            // chatsRequest?.enqueue(object : Callback<DirectThreadFeedResponse?> {
-            //     override fun onResponse(call: Call<DirectThreadFeedResponse?>, response: Response<DirectThreadFeedResponse?>) {
-            //         val feedResponse = response.body()
-            //         if (feedResponse == null) {
-            //             fetching.postValue(error(R.string.generic_null_response, null))
-            //             Log.e(TAG, "onResponse: response was null!")
-            //             return
-            //         }
-            //         if (feedResponse.status != null && feedResponse.status != "ok") {
-            //             fetching.postValue(error(R.string.generic_not_ok_response, null))
-            //             return
-            //         }
-            //         val thread = feedResponse.thread
-            //         if (thread == null) {
-            //             fetching.postValue(error("thread is null!", null))
-            //             return
-            //         }
-            //         setThread(thread)
-            //         fetching.postValue(success(Any()))
-            //     }
-            //
-            //     override fun onFailure(call: Call<DirectThreadFeedResponse?>, t: Throwable) {
-            //         Log.e(TAG, "Failed fetching dm chats", t)
-            //         fetching.postValue(error(t.message, null))
-            //         hasOlder = false
-            //     }
-            // })
         }
         if (cursor == null) {
-            fetchPendingRequests()
+            fetchPendingRequests(scope)
         }
     }
 
-    fun fetchPendingRequests() {
+    fun fetchPendingRequests(scope: CoroutineScope) {
         val isGroup = isGroup.value
         if (isGroup == null || !isGroup) return
-        val request = service.participantRequests(threadId, 1, null)
-        request.enqueue(object : Callback<DirectThreadParticipantRequestsResponse?> {
-            override fun onResponse(
-                call: Call<DirectThreadParticipantRequestsResponse?>,
-                response: Response<DirectThreadParticipantRequestsResponse?>,
-            ) {
-                if (!response.isSuccessful) {
-                    if (response.errorBody() != null) {
-                        try {
-                            val string = response.errorBody()?.string() ?: ""
-                            val msg = String.format(Locale.US,
-                                "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                                call.request().url().toString(),
-                                response.code(),
-                                string)
-                            Log.e(TAG, msg)
-                        } catch (e: IOException) {
-                            Log.e(TAG, "onResponse: ", e)
-                        }
-                        return
-                    }
-                    Log.e(TAG, "onResponse: request was not successful and response error body was null")
-                    return
-                }
-                val body = response.body()
-                if (body == null) {
-                    Log.e(TAG, "onResponse: response body was null")
-                    return
-                }
-                _pendingRequests.postValue(body)
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.participantRequests(threadId, 1)
+                _pendingRequests.postValue(response)
+            } catch (e: Exception) {
+                Log.e(TAG, "fetchPendingRequests: ", e)
             }
-
-            override fun onFailure(call: Call<DirectThreadParticipantRequestsResponse?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-            }
-        })
+        }
     }
 
     private fun setThread(thread: DirectThread, skipItems: Boolean) {
@@ -628,7 +572,7 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun unsend(item: DirectItem): LiveData<Resource<Any?>> {
+    fun unsend(item: DirectItem, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val index = removeItem(item)
         val itemId = item.itemId
@@ -636,45 +580,46 @@ class ThreadManager private constructor(
             data.postValue(error("itemId is null", null))
             return data
         }
-        val request = service.deleteItem(threadId, itemId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (response.isSuccessful) {
-                    // Log.d(TAG, "onResponse: " + response.body());
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.deleteItem(threadId, itemId)
+            } catch (e: Exception) {
                 // add the item back if unsuccessful
                 addItems(index, listOf(item))
-                if (response.errorBody() != null) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
-                data.postValue(error(R.string.generic_failed_request, item))
+                data.postValue(error(e.message, item))
+                Log.e(TAG, "unsend: ", e)
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                data.postValue(error(t.message, item))
-                Log.e(TAG, "enqueueRequest: onFailure: ", t)
-            }
-        })
+        }
         return data
     }
 
-    fun forward(recipients: Set<RankedRecipient>, itemToForward: DirectItem) {
+    fun forward(
+        recipients: Set<RankedRecipient>,
+        itemToForward: DirectItem,
+        scope: CoroutineScope,
+    ) {
         for (recipient in recipients) {
-            forward(recipient, itemToForward)
+            forward(recipient, itemToForward, scope)
         }
     }
 
-    fun forward(recipient: RankedRecipient, itemToForward: DirectItem) {
+    fun forward(
+        recipient: RankedRecipient,
+        itemToForward: DirectItem,
+        scope: CoroutineScope,
+    ) {
         if (recipient.thread == null && recipient.user != null) {
-            // create thread and forward
-            DirectMessagesManager.createThread(recipient.user.pk) { forward(it, itemToForward) }
+            scope.launch(Dispatchers.IO) {
+                // create thread and forward
+                val thread = DirectMessagesManager.createThread(recipient.user.pk)
+                forward(thread, itemToForward, scope)
+            }
+            return
         }
         if (recipient.thread != null) {
             // just forward
             val thread = recipient.thread
-            forward(thread, itemToForward)
+            forward(thread, itemToForward, scope)
         }
     }
 
@@ -683,7 +628,11 @@ class ThreadManager private constructor(
         _replyToItem.postValue(item)
     }
 
-    private fun forward(thread: DirectThread, itemToForward: DirectItem): LiveData<Resource<Any?>> {
+    private fun forward(
+        thread: DirectThread,
+        itemToForward: DirectItem,
+        scope: CoroutineScope,
+    ): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val forwardItemId = itemToForward.itemId
         if (forwardItemId == null) {
@@ -707,116 +656,48 @@ class ThreadManager private constructor(
             data.postValue(error("threadId is null", null))
             return data
         }
-        val request = service.forward(thread.threadId,
-            itemTypeName,
-            threadId,
-            forwardItemId)
-        request.enqueue(object : Callback<DirectThreadBroadcastResponse?> {
-            override fun onResponse(
-                call: Call<DirectThreadBroadcastResponse?>,
-                response: Response<DirectThreadBroadcastResponse?>,
-            ) {
-                if (response.isSuccessful) {
-                    data.postValue(success(Any()))
-                    return
-                }
-                val errorBody = response.errorBody()
-                if (errorBody != null) {
-                    try {
-                        val string = errorBody.string()
-                        val msg = String.format(Locale.US,
-                            "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                            call.request().url().toString(),
-                            response.code(),
-                            string)
-                        Log.e(TAG, msg)
-                        data.postValue(error(msg, null))
-                    } catch (e: IOException) {
-                        Log.e(TAG, "onResponse: ", e)
-                        data.postValue(error(e.message, null))
-                    }
-                    return
-                }
-                val msg = "onResponse: request was not successful and response error body was null"
-                Log.e(TAG, msg)
-                data.postValue(error(msg, null))
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.forward(
+                    thread.threadId,
+                    itemTypeName,
+                    threadId,
+                    forwardItemId
+                )
+                data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "forward: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<DirectThreadBroadcastResponse?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun acceptRequest(): LiveData<Resource<Any?>> {
+    fun acceptRequest(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        val request = service.approveRequest(threadId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(
-                call: Call<String?>,
-                response: Response<String?>,
-            ) {
-                if (!response.isSuccessful) {
-                    try {
-                        val string = response.errorBody()?.string() ?: ""
-                        val msg = String.format(Locale.US,
-                            "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                            call.request().url().toString(),
-                            response.code(),
-                            string)
-                        Log.e(TAG, msg)
-                        data.postValue(error(msg, null))
-                        return
-                    } catch (e: IOException) {
-                        Log.e(TAG, "onResponse: ", e)
-                    }
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.approveRequest(threadId)
                 data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "acceptRequest: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun declineRequest(): LiveData<Resource<Any?>> {
+    fun declineRequest(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        val request = service.declineRequest(threadId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(
-                call: Call<String?>,
-                response: Response<String?>,
-            ) {
-                if (!response.isSuccessful) {
-                    try {
-                        val string = response.errorBody()?.string() ?: ""
-                        val msg = String.format(Locale.US,
-                            "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                            call.request().url().toString(),
-                            response.code(),
-                            string)
-                        Log.e(TAG, msg)
-                        data.postValue(error(msg, null))
-                        return
-                    } catch (e: IOException) {
-                        Log.e(TAG, "onResponse: ", e)
-                    }
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.declineRequest(threadId)
                 data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "declineRequest: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
@@ -1105,32 +986,40 @@ class ThreadManager private constructor(
         }
     }
 
-    fun updateTitle(newTitle: String): LiveData<Resource<Any?>> {
+    fun updateTitle(newTitle: String, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        val addUsersRequest = service.updateTitle(threadId, newTitle.trim { it <= ' ' })
-        handleDetailsChangeRequest(data, addUsersRequest)
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.updateTitle(threadId, newTitle.trim())
+                handleDetailsChangeResponse(data, response)
+            } catch (e: Exception) {
+            }
+        }
         return data
     }
 
-    fun addMembers(users: Set<User>): LiveData<Resource<Any?>> {
+    fun addMembers(users: Set<User>, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        val addUsersRequest = service.addUsers(
-            threadId,
-            users.map { obj: User -> obj.pk }
-        )
-        handleDetailsChangeRequest(data, addUsersRequest)
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.addUsers(
+                    threadId,
+                    users.map { obj: User -> obj.pk }
+                )
+                handleDetailsChangeResponse(data, response)
+            } catch (e: Exception) {
+                Log.e(TAG, "addMembers: ", e)
+                data.postValue(error(e.message, null))
+            }
+        }
         return data
     }
 
-    fun removeMember(user: User): LiveData<Resource<Any?>> {
+    fun removeMember(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        val request = service.removeUsers(threadId, setOf(user.pk))
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.removeUsers(threadId, setOf(user.pk))
                 data.postValue(success(Any()))
                 var activeUsers = users.value
                 var leftUsersValue = leftUsers.value
@@ -1147,13 +1036,11 @@ class ThreadManager private constructor(
                 }
                 val updatedLeftUsers = updatedLeftUsersBuilder.build()
                 setThreadUsers(updatedActiveUsers, updatedLeftUsers)
+            } catch (e: Exception) {
+                Log.e(TAG, "removeMember: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
@@ -1162,70 +1049,60 @@ class ThreadManager private constructor(
         return adminUserIdsValue != null && adminUserIdsValue.contains(user.pk)
     }
 
-    fun makeAdmin(user: User): LiveData<Resource<Any?>> {
+    fun makeAdmin(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         if (isAdmin(user)) return data
-        val request = service.addAdmins(threadId, setOf(user.pk))
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.addAdmins(threadId, setOf(user.pk))
                 val currentAdminIds = adminUserIds.value
                 val updatedAdminIds = ImmutableList.builder<Long>()
                     .addAll(currentAdminIds ?: emptyList())
                     .add(user.pk)
                     .build()
-                val currentThread = thread.value ?: return
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.adminUserIds = updatedAdminIds
                     inboxManager.setThread(threadId, thread)
                 } catch (e: CloneNotSupportedException) {
-                    Log.e(TAG, "onResponse: ", e)
+                    Log.e(TAG, "makeAdmin: ", e)
                 }
+                data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "makeAdmin: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun removeAdmin(user: User): LiveData<Resource<Any?>> {
+    fun removeAdmin(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         if (!isAdmin(user)) return data
-        val request = service.removeAdmins(threadId, setOf(user.pk))
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
-                val currentAdmins = adminUserIds.value ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.removeAdmins(threadId, setOf(user.pk))
+                val currentAdmins = adminUserIds.value ?: return@launch
                 val updatedAdminUserIds = currentAdmins.filter { userId1: Long -> userId1 != user.pk }
-                val currentThread = thread.value ?: return
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.adminUserIds = updatedAdminUserIds
                     inboxManager.setThread(threadId, thread)
                 } catch (e: CloneNotSupportedException) {
-                    Log.e(TAG, "onResponse: ", e)
+                    Log.e(TAG, "removeAdmin: ", e)
                 }
+                data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "removeAdmin: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun mute(): LiveData<Resource<Any?>> {
+    fun mute(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val muted = isMuted.value
@@ -1233,33 +1110,27 @@ class ThreadManager private constructor(
             data.postValue(success(Any()))
             return data
         }
-        val request = service.mute(threadId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.mute(threadId)
                 data.postValue(success(Any()))
-                val currentThread = thread.value ?: return
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.muted = true
                     inboxManager.setThread(threadId, thread)
                 } catch (e: CloneNotSupportedException) {
-                    Log.e(TAG, "onResponse: ", e)
+                    Log.e(TAG, "mute: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "mute: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun unmute(): LiveData<Resource<Any?>> {
+    fun unmute(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val muted = isMuted.value
@@ -1267,33 +1138,27 @@ class ThreadManager private constructor(
             data.postValue(success(Any()))
             return data
         }
-        val request = service.unmute(threadId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.unmute(threadId)
                 data.postValue(success(Any()))
-                val currentThread = thread.value ?: return
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.muted = false
                     inboxManager.setThread(threadId, thread)
                 } catch (e: CloneNotSupportedException) {
-                    Log.e(TAG, "onResponse: ", e)
+                    Log.e(TAG, "unmute: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "unmute: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun muteMentions(): LiveData<Resource<Any?>> {
+    fun muteMentions(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val mentionsMuted = isMentionsMuted.value
@@ -1301,33 +1166,27 @@ class ThreadManager private constructor(
             data.postValue(success(Any()))
             return data
         }
-        val request = service.muteMentions(threadId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.muteMentions(threadId)
                 data.postValue(success(Any()))
-                val currentThread = thread.value ?: return
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.mentionsMuted = true
                     inboxManager.setThread(threadId, thread)
                 } catch (e: CloneNotSupportedException) {
-                    Log.e(TAG, "onResponse: ", e)
+                    Log.e(TAG, "muteMentions: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "muteMentions: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
-    fun unmuteMentions(): LiveData<Resource<Any?>> {
+    fun unmuteMentions(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val mentionsMuted = isMentionsMuted.value
@@ -1335,29 +1194,23 @@ class ThreadManager private constructor(
             data.postValue(success(Any()))
             return data
         }
-        val request = service.unmuteMentions(threadId)
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.unmuteMentions(threadId)
                 data.postValue(success(Any()))
-                val currentThread = thread.value ?: return
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.mentionsMuted = false
                     inboxManager.setThread(threadId, thread)
                 } catch (e: CloneNotSupportedException) {
-                    Log.e(TAG, "onResponse: ", e)
+                    Log.e(TAG, "unmuteMentions: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "unmuteMentions: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
@@ -1421,33 +1274,41 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun approveUsers(users: List<User>): LiveData<Resource<Any?>> {
+    fun approveUsers(users: List<User>, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        val approveUsersRequest = service.approveParticipantRequests(
-            threadId,
-            users.map { obj: User -> obj.pk }
-        )
-        handleDetailsChangeRequest(data, approveUsersRequest, object : OnSuccessAction {
-            override fun onSuccess() {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.approveParticipantRequests(
+                    threadId,
+                    users.map { obj: User -> obj.pk }
+                )
+                handleDetailsChangeResponse(data, response)
                 pendingUserApproveDenySuccessAction(users)
+            } catch (e: Exception) {
+                Log.e(TAG, "approveUsers: ", e)
+                data.postValue(error(e.message, null))
             }
-        })
+        }
         return data
     }
 
-    fun denyUsers(users: List<User>): LiveData<Resource<Any?>> {
+    fun denyUsers(users: List<User>, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        val approveUsersRequest = service.declineParticipantRequests(
-            threadId,
-            users.map { obj: User -> obj.pk }
-        )
-        handleDetailsChangeRequest(data, approveUsersRequest, object : OnSuccessAction {
-            override fun onSuccess() {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.declineParticipantRequests(
+                    threadId,
+                    users.map { obj: User -> obj.pk }
+                )
+                handleDetailsChangeResponse(data, response)
                 pendingUserApproveDenySuccessAction(users)
+            } catch (e: Exception) {
+                Log.e(TAG, "denyUsers: ", e)
+                data.postValue(error(e.message, null))
             }
-        })
+        }
         return data
     }
 
@@ -1467,7 +1328,7 @@ class ThreadManager private constructor(
         }
     }
 
-    fun approvalRequired(): LiveData<Resource<Any?>> {
+    fun approvalRequired(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val approvalRequiredToJoin = isApprovalRequiredToJoin.value
@@ -1475,10 +1336,11 @@ class ThreadManager private constructor(
             data.postValue(success(Any()))
             return data
         }
-        val request = service.approvalRequired(threadId)
-        handleDetailsChangeRequest(data, request, object : OnSuccessAction {
-            override fun onSuccess() {
-                val currentThread = thread.value ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.approvalRequired(threadId)
+                handleDetailsChangeResponse(data, response)
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.approvalRequiredForNewMembers = true
@@ -1486,12 +1348,15 @@ class ThreadManager private constructor(
                 } catch (e: CloneNotSupportedException) {
                     Log.e(TAG, "onResponse: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "approvalRequired: ", e)
+                data.postValue(error(e.message, null))
             }
-        })
+        }
         return data
     }
 
-    fun approvalNotRequired(): LiveData<Resource<Any?>> {
+    fun approvalNotRequired(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val approvalRequiredToJoin = isApprovalRequiredToJoin.value
@@ -1499,10 +1364,11 @@ class ThreadManager private constructor(
             data.postValue(success(Any()))
             return data
         }
-        val request = service.approvalNotRequired(threadId)
-        handleDetailsChangeRequest(data, request, object : OnSuccessAction {
-            override fun onSuccess() {
-                val currentThread = thread.value ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                val request = service.approvalNotRequired(threadId)
+                handleDetailsChangeResponse(data, request)
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.approvalRequiredForNewMembers = false
@@ -1510,26 +1376,37 @@ class ThreadManager private constructor(
                 } catch (e: CloneNotSupportedException) {
                     Log.e(TAG, "onResponse: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "approvalNotRequired: ", e)
+                data.postValue(error(e.message, null))
             }
-        })
+        }
         return data
     }
 
-    fun leave(): LiveData<Resource<Any?>> {
+    fun leave(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        val request = service.leave(threadId)
-        handleDetailsChangeRequest(data, request)
+        scope.launch(Dispatchers.IO) {
+            try {
+                val request = service.leave(threadId)
+                handleDetailsChangeResponse(data, request)
+            } catch (e: Exception) {
+                Log.e(TAG, "leave: ", e)
+                data.postValue(error(e.message, null))
+            }
+        }
         return data
     }
 
-    fun end(): LiveData<Resource<Any?>> {
+    fun end(scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        val request = service.end(threadId)
-        handleDetailsChangeRequest(data, request, object : OnSuccessAction {
-            override fun onSuccess() {
-                val currentThread = thread.value ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                val request = service.end(threadId)
+                handleDetailsChangeResponse(data, request)
+                val currentThread = thread.value ?: return@launch
                 try {
                     val thread = currentThread.clone() as DirectThread
                     thread.inputMode = 1
@@ -1537,93 +1414,55 @@ class ThreadManager private constructor(
                 } catch (e: CloneNotSupportedException) {
                     Log.e(TAG, "onResponse: ", e)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "leave: ", e)
+                data.postValue(error(e.message, null))
             }
-        })
+        }
         return data
     }
 
-    private fun handleDetailsChangeRequest(
+    private fun handleDetailsChangeResponse(
         data: MutableLiveData<Resource<Any?>>,
-        request: Call<DirectThreadDetailsChangeResponse?>,
-        action: OnSuccessAction? = null,
+        response: DirectThreadDetailsChangeResponse,
     ) {
-        request.enqueue(object : Callback<DirectThreadDetailsChangeResponse?> {
-            override fun onResponse(
-                call: Call<DirectThreadDetailsChangeResponse?>,
-                response: Response<DirectThreadDetailsChangeResponse?>,
-            ) {
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
-                val changeResponse = response.body()
-                if (changeResponse == null) {
-                    data.postValue(error(R.string.generic_null_response, null))
-                    return
-                }
-                data.postValue(success(Any()))
-                val thread = changeResponse.thread
-                if (thread != null) {
-                    setThread(thread, true)
-                }
-                action?.onSuccess()
-            }
-
-            override fun onFailure(call: Call<DirectThreadDetailsChangeResponse?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        data.postValue(success(Any()))
+        val thread = response.thread
+        if (thread != null) {
+            setThread(thread, true)
+        }
     }
 
-    fun markAsSeen(directItem: DirectItem, scope: CoroutineScope): LiveData<Resource<Any?>> {
+    fun markAsSeen(
+        directItem: DirectItem,
+        scope: CoroutineScope,
+    ): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        val request = service.markAsSeen(threadId, directItem)
-        if (request == null) {
-            data.postValue(error("request was null", null))
-            return data
-        }
-        request.enqueue(object : Callback<DirectItemSeenResponse?> {
-            override fun onResponse(
-                call: Call<DirectItemSeenResponse?>,
-                response: Response<DirectItemSeenResponse?>,
-            ) {
-                if (currentUser == null) return
-                if (!response.isSuccessful) {
-                    handleErrorBody(call, response, data)
-                    return
-                }
-                val seenResponse = response.body()
-                if (seenResponse == null) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.markAsSeen(threadId, directItem)
+                if (response == null) {
                     data.postValue(error(R.string.generic_null_response, null))
-                    return
+                    return@launch
                 }
+                if (currentUser == null) return@launch
                 inboxManager.fetchUnseenCount(scope)
-                val payload = seenResponse.payload ?: return
+                val payload = response.payload ?: return@launch
                 val timestamp = payload.timestamp
-                val thread = thread.value ?: return
+                val thread = thread.value ?: return@launch
                 val currentLastSeenAt = thread.lastSeenAt
                 val lastSeenAt = if (currentLastSeenAt == null) HashMap() else HashMap(currentLastSeenAt)
                 lastSeenAt[currentUser.pk] = DirectThreadLastSeenAt(timestamp, directItem.itemId)
                 thread.lastSeenAt = lastSeenAt
                 setThread(thread, true)
                 data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "markAsSeen: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(
-                call: Call<DirectItemSeenResponse?>,
-                t: Throwable,
-            ) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
-    }
-
-    private interface OnSuccessAction {
-        fun onSuccess()
     }
 
     companion object {

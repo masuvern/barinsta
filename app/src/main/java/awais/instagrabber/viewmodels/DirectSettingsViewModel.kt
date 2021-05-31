@@ -83,23 +83,23 @@ class DirectSettingsViewModel(
 
     fun isViewerAdmin(): LiveData<Boolean> = threadManager.isViewerAdmin
 
-    fun updateTitle(newTitle: String): LiveData<Resource<Any?>> = threadManager.updateTitle(newTitle)
+    fun updateTitle(newTitle: String): LiveData<Resource<Any?>> = threadManager.updateTitle(newTitle, viewModelScope)
 
-    fun addMembers(users: Set<User>): LiveData<Resource<Any?>> = threadManager.addMembers(users)
+    fun addMembers(users: Set<User>): LiveData<Resource<Any?>> = threadManager.addMembers(users, viewModelScope)
 
-    fun removeMember(user: User): LiveData<Resource<Any?>> = threadManager.removeMember(user)
+    fun removeMember(user: User): LiveData<Resource<Any?>> = threadManager.removeMember(user, viewModelScope)
 
-    private fun makeAdmin(user: User): LiveData<Resource<Any?>> = threadManager.makeAdmin(user)
+    private fun makeAdmin(user: User): LiveData<Resource<Any?>> = threadManager.makeAdmin(user, viewModelScope)
 
-    private fun removeAdmin(user: User): LiveData<Resource<Any?>> = threadManager.removeAdmin(user)
+    private fun removeAdmin(user: User): LiveData<Resource<Any?>> = threadManager.removeAdmin(user, viewModelScope)
 
-    fun mute(): LiveData<Resource<Any?>> = threadManager.mute()
+    fun mute(): LiveData<Resource<Any?>> = threadManager.mute(viewModelScope)
 
-    fun unmute(): LiveData<Resource<Any?>> = threadManager.unmute()
+    fun unmute(): LiveData<Resource<Any?>> = threadManager.unmute(viewModelScope)
 
-    fun muteMentions(): LiveData<Resource<Any?>> = threadManager.muteMentions()
+    fun muteMentions(): LiveData<Resource<Any?>> = threadManager.muteMentions(viewModelScope)
 
-    fun unmuteMentions(): LiveData<Resource<Any?>> = threadManager.unmuteMentions()
+    fun unmuteMentions(): LiveData<Resource<Any?>> = threadManager.unmuteMentions(viewModelScope)
 
     private fun blockUser(user: User): LiveData<Resource<Any?>> = threadManager.blockUser(user, viewModelScope)
 
@@ -109,17 +109,17 @@ class DirectSettingsViewModel(
 
     private fun unRestrictUser(user: User): LiveData<Resource<Any?>> = threadManager.unRestrictUser(user, viewModelScope)
 
-    fun approveUsers(users: List<User>): LiveData<Resource<Any?>> = threadManager.approveUsers(users)
+    fun approveUsers(users: List<User>): LiveData<Resource<Any?>> = threadManager.approveUsers(users, viewModelScope)
 
-    fun denyUsers(users: List<User>): LiveData<Resource<Any?>> = threadManager.denyUsers(users)
+    fun denyUsers(users: List<User>): LiveData<Resource<Any?>> = threadManager.denyUsers(users, viewModelScope)
 
-    fun approvalRequired(): LiveData<Resource<Any?>> = threadManager.approvalRequired()
+    fun approvalRequired(): LiveData<Resource<Any?>> = threadManager.approvalRequired(viewModelScope)
 
-    fun approvalNotRequired(): LiveData<Resource<Any?>> = threadManager.approvalNotRequired()
+    fun approvalNotRequired(): LiveData<Resource<Any?>> = threadManager.approvalNotRequired(viewModelScope)
 
-    fun leave(): LiveData<Resource<Any?>> = threadManager.leave()
+    fun leave(): LiveData<Resource<Any?>> = threadManager.leave(viewModelScope)
 
-    fun end(): LiveData<Resource<Any?>> = threadManager.end()
+    fun end(): LiveData<Resource<Any?>> = threadManager.end(viewModelScope)
 
     fun createUserOptions(user: User?): ArrayList<Option<String>> {
         val options: ArrayList<Option<String>> = ArrayList()

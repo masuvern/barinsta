@@ -26,14 +26,15 @@ import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserSearchResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
-import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Debouncer;
 import awais.instagrabber.utils.RankedRecipientsCache;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.UserService;
+import kotlinx.coroutines.Dispatchers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -95,37 +96,23 @@ public class UserSearchViewModel extends ViewModel {
 
     private void updateRankedRecipientCache() {
         rankedRecipientsCache.setUpdateInitiated(true);
-        final Call<RankedRecipientsResponse> request = directMessagesService.rankedRecipients(null, null, null);
-        request.enqueue(new Callback<RankedRecipientsResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Response<RankedRecipientsResponse> response) {
-                if (!response.isSuccessful()) {
-                    handleErrorResponse(response, false);
-                    rankedRecipientsCache.setFailed(true);
+        directMessagesService.rankedRecipients(
+                null,
+                null,
+                null,
+                CoroutineUtilsKt.getContinuation((response, throwable) -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "updateRankedRecipientCache: ", throwable);
+                        rankedRecipientsCache.setUpdateInitiated(false);
+                        rankedRecipientsCache.setFailed(true);
+                        continueSearchIfRequired();
+                        return;
+                    }
+                    rankedRecipientsCache.setResponse(response);
                     rankedRecipientsCache.setUpdateInitiated(false);
                     continueSearchIfRequired();
-                    return;
-                }
-                if (response.body() == null) {
-                    Log.e(TAG, "onResponse: response body is null");
-                    rankedRecipientsCache.setUpdateInitiated(false);
-                    rankedRecipientsCache.setFailed(true);
-                    continueSearchIfRequired();
-                    return;
-                }
-                rankedRecipientsCache.setResponse(response.body());
-                rankedRecipientsCache.setUpdateInitiated(false);
-                continueSearchIfRequired();
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                rankedRecipientsCache.setUpdateInitiated(false);
-                rankedRecipientsCache.setFailed(true);
-                continueSearchIfRequired();
-            }
-        });
+                }, Dispatchers.getIO())
+        );
     }
 
     private void continueSearchIfRequired() {
@@ -189,39 +176,22 @@ public class UserSearchViewModel extends ViewModel {
     }
 
     private void rankedRecipientSearch() {
-        searchRequest = directMessagesService.rankedRecipients(searchMode.getName(), showGroups, currentQuery);
-        //noinspection unchecked
-        handleRankedRecipientRequest((Call<RankedRecipientsResponse>) searchRequest);
-    }
-
-
-    private void handleRankedRecipientRequest(@NonNull final Call<RankedRecipientsResponse> request) {
-        request.enqueue(new Callback<RankedRecipientsResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Response<RankedRecipientsResponse> response) {
-                if (!response.isSuccessful()) {
-                    handleErrorResponse(response, true);
-                    searchRequest = null;
-                    return;
-                }
-                final RankedRecipientsResponse rankedRecipientsResponse = response.body();
-                if (rankedRecipientsResponse == null) {
-                    recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
-                    searchRequest = null;
-                    return;
-                }
-                final List<RankedRecipient> list = rankedRecipientsResponse.getRankedRecipients();
-                recipients.postValue(Resource.success(mergeResponseWithCache(list)));
-                searchRequest = null;
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                recipients.postValue(Resource.error(t.getMessage(), getCachedRecipients()));
-                searchRequest = null;
-            }
-        });
+        directMessagesService.rankedRecipients(
+                searchMode.getName(),
+                showGroups,
+                currentQuery,
+                CoroutineUtilsKt.getContinuation((response, throwable) -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "rankedRecipientSearch: ", throwable);
+                        recipients.postValue(Resource.error(throwable.getMessage(), getCachedRecipients()));
+                        return;
+                    }
+                    final List<RankedRecipient> list = response.getRankedRecipients();
+                    if (list != null) {
+                        recipients.postValue(Resource.success(mergeResponseWithCache(list)));
+                    }
+                }, Dispatchers.getIO())
+        );
     }
 
     private void handleRequest(@NonNull final Call<UserSearchResponse> request) {

@@ -8,7 +8,6 @@ import awais.instagrabber.utils.TextUtils.extractUrls
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.Utils
 import org.json.JSONArray
-import retrofit2.Call
 import java.util.*
 
 class DirectMessagesService private constructor(
@@ -183,10 +182,10 @@ class DirectMessagesService private constructor(
         return repository.broadcast(broadcastOptions.itemType.value, signedForm)
     }
 
-    fun addUsers(
+    suspend fun addUsers(
         threadId: String,
         userIds: Collection<Long>,
-    ): Call<DirectThreadDetailsChangeResponse?> {
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -195,10 +194,10 @@ class DirectMessagesService private constructor(
         return repository.addUsers(threadId, form)
     }
 
-    fun removeUsers(
+    suspend fun removeUsers(
         threadId: String,
         userIds: Collection<Long>,
-    ): Call<String?> {
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -207,10 +206,10 @@ class DirectMessagesService private constructor(
         return repository.removeUsers(threadId, form)
     }
 
-    fun updateTitle(
+    suspend fun updateTitle(
         threadId: String,
         title: String,
-    ): Call<DirectThreadDetailsChangeResponse?> {
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -219,10 +218,10 @@ class DirectMessagesService private constructor(
         return repository.updateTitle(threadId, form)
     }
 
-    fun addAdmins(
+    suspend fun addAdmins(
         threadId: String,
         userIds: Collection<Long>,
-    ): Call<String?> {
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -231,10 +230,10 @@ class DirectMessagesService private constructor(
         return repository.addAdmins(threadId, form)
     }
 
-    fun removeAdmins(
+    suspend fun removeAdmins(
         threadId: String,
         userIds: Collection<Long>,
-    ): Call<String?> {
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -243,10 +242,10 @@ class DirectMessagesService private constructor(
         return repository.removeAdmins(threadId, form)
     }
 
-    fun deleteItem(
+    suspend fun deleteItem(
         threadId: String,
         itemId: String,
-    ): Call<String?> {
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -254,11 +253,11 @@ class DirectMessagesService private constructor(
         return repository.deleteItem(threadId, itemId, form)
     }
 
-    fun rankedRecipients(
+    suspend fun rankedRecipients(
         mode: String?,
         showThreads: Boolean?,
         query: String?,
-    ): Call<RankedRecipientsResponse?> {
+    ): RankedRecipientsResponse {
         // String correctedMode = mode;
         // if (TextUtils.isEmpty(mode) || (!mode.equals("raven") && !mode.equals("reshare"))) {
         //     correctedMode = "raven";
@@ -276,12 +275,12 @@ class DirectMessagesService private constructor(
         return repository.rankedRecipients(queryMap)
     }
 
-    fun forward(
+    suspend fun forward(
         toThreadId: String,
         itemType: String,
         fromThreadId: String,
         itemId: String,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         val form = mapOf(
             "action" to "forward_item",
             "thread_id" to toThreadId,
@@ -292,10 +291,10 @@ class DirectMessagesService private constructor(
         return repository.forward(form)
     }
 
-    fun createThread(
+    suspend fun createThread(
         userIds: List<Long>,
         threadTitle: String?,
-    ): Call<DirectThread?> {
+    ): DirectThread {
         val userIdStringList = userIds.map { it.toString() }
         val form = mutableMapOf<String, Any>(
             "_csrftoken" to csrfToken,
@@ -310,7 +309,7 @@ class DirectMessagesService private constructor(
         return repository.createThread(signedForm)
     }
 
-    fun mute(threadId: String): Call<String?> {
+    suspend fun mute(threadId: String): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid
@@ -318,7 +317,7 @@ class DirectMessagesService private constructor(
         return repository.mute(threadId, form)
     }
 
-    fun unmute(threadId: String): Call<String?> {
+    suspend fun unmute(threadId: String): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -326,7 +325,7 @@ class DirectMessagesService private constructor(
         return repository.unmute(threadId, form)
     }
 
-    fun muteMentions(threadId: String): Call<String?> {
+    suspend fun muteMentions(threadId: String): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -334,7 +333,7 @@ class DirectMessagesService private constructor(
         return repository.muteMentions(threadId, form)
     }
 
-    fun unmuteMentions(threadId: String): Call<String?> {
+    suspend fun unmuteMentions(threadId: String): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -342,18 +341,18 @@ class DirectMessagesService private constructor(
         return repository.unmuteMentions(threadId, form)
     }
 
-    fun participantRequests(
+    suspend fun participantRequests(
         threadId: String,
         pageSize: Int,
-        cursor: String?,
-    ): Call<DirectThreadParticipantRequestsResponse?> {
+        cursor: String? = null,
+    ): DirectThreadParticipantRequestsResponse {
         return repository.participantRequests(threadId, pageSize, cursor)
     }
 
-    fun approveParticipantRequests(
+    suspend fun approveParticipantRequests(
         threadId: String,
         userIds: List<Long>,
-    ): Call<DirectThreadDetailsChangeResponse?> {
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -363,10 +362,10 @@ class DirectMessagesService private constructor(
         return repository.approveParticipantRequests(threadId, form)
     }
 
-    fun declineParticipantRequests(
+    suspend fun declineParticipantRequests(
         threadId: String,
         userIds: List<Long>,
-    ): Call<DirectThreadDetailsChangeResponse?> {
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -375,7 +374,7 @@ class DirectMessagesService private constructor(
         return repository.declineParticipantRequests(threadId, form)
     }
 
-    fun approvalRequired(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+    suspend fun approvalRequired(threadId: String): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -383,7 +382,7 @@ class DirectMessagesService private constructor(
         return repository.approvalRequired(threadId, form)
     }
 
-    fun approvalNotRequired(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+    suspend fun approvalNotRequired(threadId: String): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -391,7 +390,7 @@ class DirectMessagesService private constructor(
         return repository.approvalNotRequired(threadId, form)
     }
 
-    fun leave(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+    suspend fun leave(threadId: String): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -399,7 +398,7 @@ class DirectMessagesService private constructor(
         return repository.leave(threadId, form)
     }
 
-    fun end(threadId: String): Call<DirectThreadDetailsChangeResponse?> {
+    suspend fun end(threadId: String): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -424,7 +423,7 @@ class DirectMessagesService private constructor(
         return repository.fetchPendingInbox(queryMap)
     }
 
-    fun approveRequest(threadId: String): Call<String?> {
+    suspend fun approveRequest(threadId: String): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -432,7 +431,7 @@ class DirectMessagesService private constructor(
         return repository.approveRequest(threadId, form)
     }
 
-    fun declineRequest(threadId: String): Call<String?> {
+    suspend fun declineRequest(threadId: String): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -440,10 +439,10 @@ class DirectMessagesService private constructor(
         return repository.declineRequest(threadId, form)
     }
 
-    fun markAsSeen(
+    suspend fun markAsSeen(
         threadId: String,
         directItem: DirectItem,
-    ): Call<DirectItemSeenResponse?>? {
+    ): DirectItemSeenResponse? {
         val itemId = directItem.itemId ?: return null
         val form = mapOf(
             "_csrftoken" to csrfToken,

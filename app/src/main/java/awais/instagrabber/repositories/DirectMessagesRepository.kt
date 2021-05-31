@@ -1,7 +1,6 @@
 package awais.instagrabber.repositories
 
 import awais.instagrabber.repositories.responses.directmessages.*
-import retrofit2.Call
 import retrofit2.http.*
 
 interface DirectMessagesRepository {
@@ -29,154 +28,154 @@ interface DirectMessagesRepository {
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/add_user/")
-    fun addUsers(
+    suspend fun addUsers(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/remove_users/")
-    fun removeUsers(
+    suspend fun removeUsers(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/update_title/")
-    fun updateTitle(
+    suspend fun updateTitle(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/add_admins/")
-    fun addAdmins(
+    suspend fun addAdmins(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/remove_admins/")
-    fun removeAdmins(
+    suspend fun removeAdmins(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/items/{itemId}/delete/")
-    fun deleteItem(
+    suspend fun deleteItem(
         @Path("threadId") threadId: String,
         @Path("itemId") itemId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @GET("/api/v1/direct_v2/ranked_recipients/")
-    fun rankedRecipients(@QueryMap queryMap: Map<String, String>): Call<RankedRecipientsResponse?>
+    suspend fun rankedRecipients(@QueryMap queryMap: Map<String, String>): RankedRecipientsResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/broadcast/forward/")
-    fun forward(@FieldMap form: Map<String, String>): Call<DirectThreadBroadcastResponse?>
+    suspend fun forward(@FieldMap form: Map<String, String>): DirectThreadBroadcastResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/create_group_thread/")
-    fun createThread(@FieldMap signedForm: Map<String, String>): Call<DirectThread?>
+    suspend fun createThread(@FieldMap signedForm: Map<String, String>): DirectThread
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/mute/")
-    fun mute(
+    suspend fun mute(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/unmute/")
-    fun unmute(
+    suspend fun unmute(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/mute_mentions/")
-    fun muteMentions(
+    suspend fun muteMentions(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String?>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/unmute_mentions/")
-    fun unmuteMentions(
+    suspend fun unmuteMentions(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @GET("/api/v1/direct_v2/threads/{threadId}/participant_requests/")
-    fun participantRequests(
+    suspend fun participantRequests(
         @Path("threadId") threadId: String,
         @Query("page_size") pageSize: Int,
         @Query("cursor") cursor: String?,
-    ): Call<DirectThreadParticipantRequestsResponse?>
+    ): DirectThreadParticipantRequestsResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/approve_participant_requests/")
-    fun approveParticipantRequests(
+    suspend fun approveParticipantRequests(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/deny_participant_requests/")
-    fun declineParticipantRequests(
+    suspend fun declineParticipantRequests(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/approval_required_for_new_members/")
-    fun approvalRequired(
+    suspend fun approvalRequired(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/approval_not_required_for_new_members/")
-    fun approvalNotRequired(
+    suspend fun approvalNotRequired(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/leave/")
-    fun leave(
+    suspend fun leave(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/remove_all_users/")
-    fun end(
+    suspend fun end(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectThreadDetailsChangeResponse?>
+    ): DirectThreadDetailsChangeResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/approve/")
-    fun approveRequest(
+    suspend fun approveRequest(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/decline/")
-    fun declineRequest(
+    suspend fun declineRequest(
         @Path("threadId") threadId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<String?>
+    ): String
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/items/{itemId}/seen/")
-    fun markItemSeen(
+    suspend fun markItemSeen(
         @Path("threadId") threadId: String,
         @Path("itemId") itemId: String,
         @FieldMap form: Map<String, String>,
-    ): Call<DirectItemSeenResponse?>
+    ): DirectItemSeenResponse
 }

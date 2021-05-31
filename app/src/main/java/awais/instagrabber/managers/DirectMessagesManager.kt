@@ -22,10 +22,6 @@ import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstanc
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.io.IOException
 import java.util.*
 
 object DirectMessagesManager {
@@ -72,43 +68,7 @@ object DirectMessagesManager {
         return getInstance(threadId, pending, currentUser, contentResolver, viewerId, csrfToken, deviceUuid)
     }
 
-    fun createThread(
-        userPk: Long,
-        callback: ((DirectThread) -> Unit)?,
-    ) {
-        val createThreadRequest = service.createThread(listOf(userPk), null)
-        createThreadRequest.enqueue(object : Callback<DirectThread?> {
-            override fun onResponse(call: Call<DirectThread?>, response: Response<DirectThread?>) {
-                if (!response.isSuccessful) {
-                    val errorBody = response.errorBody()
-                    if (errorBody != null) {
-                        try {
-                            val string = errorBody.string()
-                            val msg = String.format(Locale.US,
-                                "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                                call.request().url().toString(),
-                                response.code(),
-                                string)
-                            Log.e(TAG, msg)
-                        } catch (e: IOException) {
-                            Log.e(TAG, "onResponse: ", e)
-                        }
-                        return
-                    }
-                    Log.e(TAG, "onResponse: request was not successful and response error body was null")
-                    return
-                }
-                val thread = response.body()
-                if (thread == null) {
-                    Log.e(TAG, "onResponse: thread is null")
-                    return
-                }
-                callback?.invoke(thread)
-            }
-
-            override fun onFailure(call: Call<DirectThread?>, t: Throwable) {}
-        })
-    }
+    suspend fun createThread(userPk: Long): DirectThread = service.createThread(listOf(userPk), null)
 
     fun sendMedia(recipients: Set<RankedRecipient>, mediaId: String, scope: CoroutineScope) {
         val resultsCount = intArrayOf(0)
@@ -136,12 +96,18 @@ object DirectMessagesManager {
     ) {
         if (recipient.thread == null && recipient.user != null) {
             // create thread and forward
-            createThread(recipient.user.pk) { (threadId) ->
-                val threadIdTemp = threadId ?: return@createThread
-                sendMedia(threadIdTemp, mediaId, scope) {
-                    if (refreshInbox) {
-                        inboxManager.refresh(scope)
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val (threadId) = createThread(recipient.user.pk)
+                    val threadIdTemp = threadId ?: return@launch
+                    sendMedia(threadIdTemp, mediaId, scope) {
+                        if (refreshInbox) {
+                            inboxManager.refresh(scope)
+                        }
+                        callback?.invoke()
                     }
+                } catch (e: Exception) {
+                    Log.e(TAG, "sendMedia: ", e)
                     callback?.invoke()
                 }
             }

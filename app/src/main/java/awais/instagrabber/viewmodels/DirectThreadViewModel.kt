@@ -144,7 +144,7 @@ class DirectThreadViewModel(
     }
 
     fun unsend(item: DirectItem): LiveData<Resource<Any?>> {
-        return threadManager.unsend(item)
+        return threadManager.unsend(item, viewModelScope)
     }
 
     fun sendAnimatedMedia(giphyGif: GiphyGif): LiveData<Resource<Any?>> {
@@ -161,11 +161,11 @@ class DirectThreadViewModel(
     }
 
     fun forward(recipients: Set<RankedRecipient>, itemToForward: DirectItem) {
-        threadManager.forward(recipients, itemToForward)
+        threadManager.forward(recipients, itemToForward, viewModelScope)
     }
 
     fun forward(recipient: RankedRecipient, itemToForward: DirectItem) {
-        threadManager.forward(recipient, itemToForward)
+        threadManager.forward(recipient, itemToForward, viewModelScope)
     }
 
     fun setReplyToItem(item: DirectItem?) {
@@ -174,11 +174,11 @@ class DirectThreadViewModel(
     }
 
     fun acceptRequest(): LiveData<Resource<Any?>> {
-        return threadManager.acceptRequest()
+        return threadManager.acceptRequest(viewModelScope)
     }
 
     fun declineRequest(): LiveData<Resource<Any?>> {
-        return threadManager.declineRequest()
+        return threadManager.declineRequest(viewModelScope)
     }
 
     fun markAsSeen(): LiveData<Resource<Any?>> {
@@ -225,6 +225,6 @@ class DirectThreadViewModel(
         val csrfToken = getCsrfTokenFromCookie(cookie)
         require(!csrfToken.isNullOrBlank() && viewerId != 0L && deviceUuid.isNotBlank()) { "User is not logged in!" }
         threadManager = DirectMessagesManager.getThreadManager(threadId, pending, currentUser, contentResolver)
-        threadManager.fetchPendingRequests()
+        threadManager.fetchPendingRequests(viewModelScope)
     }
 }
