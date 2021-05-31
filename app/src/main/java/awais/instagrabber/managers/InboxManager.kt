@@ -11,15 +11,15 @@ import awais.instagrabber.models.Resource.Companion.loading
 import awais.instagrabber.models.Resource.Companion.success
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.*
-import awais.instagrabber.utils.Constants
-import awais.instagrabber.utils.Utils
-import awais.instagrabber.utils.getCsrfTokenFromCookie
-import awais.instagrabber.utils.getUserIdFromCookie
+import awais.instagrabber.utils.*
 import awais.instagrabber.webservices.DirectMessagesService
 import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.ImmutableList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,7 +27,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class InboxManager private constructor(private val pending: Boolean) {
-    private val inbox = MutableLiveData<Resource<DirectInbox?>>()
+    // private val fetchInboxControlledRunner: ControlledRunner<Resource<DirectInbox>> = ControlledRunner()
+    // private val fetchPendingInboxControlledRunner: ControlledRunner<Resource<DirectInbox>> = ControlledRunner()
+    private val inbox = MutableLiveData<Resource<DirectInbox?>>(success(null))
     private val unseenCount = MutableLiveData<Resource<Int?>>()
     private val pendingRequestsTotal = MutableLiveData(0)
     val threads: LiveData<List<DirectThread>>
@@ -52,30 +54,37 @@ class InboxManager private constructor(private val pending: Boolean) {
         return Transformations.distinctUntilChanged(pendingRequestsTotal)
     }
 
-    fun fetchInbox() {
+    fun fetchInbox(scope: CoroutineScope) {
         val inboxResource = inbox.value
         if (inboxResource != null && inboxResource.status === Resource.Status.LOADING || !hasOlder) return
-        stopCurrentInboxRequest()
         inbox.postValue(loading(currentDirectInbox))
-        inboxRequest = if (pending) service.fetchPendingInbox(cursor, seqId) else service.fetchInbox(cursor, seqId)
-        inboxRequest?.enqueue(object : Callback<DirectInboxResponse?> {
-            override fun onResponse(call: Call<DirectInboxResponse?>, response: Response<DirectInboxResponse?>) {
-                val body = response.body()
-                if (body == null) {
-                    Log.e(TAG, "parseInboxResponse: Response is null")
-                    inbox.postValue(error(R.string.generic_null_response, currentDirectInbox))
-                    hasOlder = false
-                    return
-                }
-                parseInboxResponse(body)
-            }
-
-            override fun onFailure(call: Call<DirectInboxResponse?>, t: Throwable) {
-                Log.e(TAG, "Failed fetching dm inbox", t)
-                inbox.postValue(error(t.message, currentDirectInbox))
+        scope.launch(Dispatchers.IO) {
+            try {
+                val inboxValue = if (pending) service.fetchPendingInbox(cursor, seqId) else service.fetchInbox(cursor, seqId)
+                parseInboxResponse(inboxValue)
+            } catch (e: Exception) {
+                inbox.postValue(error(e.message, currentDirectInbox))
                 hasOlder = false
             }
-        })
+            // inboxRequest?.enqueue(object : Callback<DirectInboxResponse?> {
+            //     override fun onResponse(call: Call<DirectInboxResponse?>, response: Response<DirectInboxResponse?>) {
+            //         val body = response.body()
+            //         if (body == null) {
+            //             Log.e(TAG, "parseInboxResponse: Response is null")
+            //             inbox.postValue(error(R.string.generic_null_response, currentDirectInbox))
+            //             hasOlder = false
+            //             return
+            //         }
+            //
+            //     }
+            //
+            //     override fun onFailure(call: Call<DirectInboxResponse?>, t: Throwable) {
+            //         Log.e(TAG, "Failed fetching dm inbox", t)
+            //         inbox.postValue(error(t.message, currentDirectInbox))
+            //         hasOlder = false
+            //     }
+            // })
+        }
     }
 
     fun fetchUnseenCount() {
@@ -102,11 +111,11 @@ class InboxManager private constructor(private val pending: Boolean) {
         })
     }
 
-    fun refresh() {
+    fun refresh(scope: CoroutineScope) {
         cursor = null
         seqId = 0
         hasOlder = true
-        fetchInbox()
+        fetchInbox(scope)
         if (!pending) {
             fetchUnseenCount()
         }
@@ -333,15 +342,15 @@ class InboxManager private constructor(private val pending: Boolean) {
         service = getInstance(csrfToken, viewerId, deviceUuid)
 
         // Transformations
-        threads = Transformations.distinctUntilChanged(Transformations.map(inbox) { inboxResource: Resource<DirectInbox?>? ->
-            if (inboxResource == null) {
-                return@map emptyList()
-            }
+        threads = Transformations.distinctUntilChanged(Transformations.map(inbox) { inboxResource: Resource<DirectInbox?> ->
+            // if (inboxResource == null) {
+            //     return@map emptyList()
+            // }
             val inbox = inboxResource.data
             val threads = inbox?.threads ?: emptyList()
             ImmutableList.sortedCopyOf(THREAD_COMPARATOR, threads)
         })
-        fetchInbox()
+        // fetchInbox()
         if (!pending) {
             fetchUnseenCount()
         }

@@ -1,347 +1,329 @@
-package awais.instagrabber.viewmodels;
+package awais.instagrabber.viewmodels
 
-import android.util.Log;
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import awais.instagrabber.R
+import awais.instagrabber.managers.DirectMessagesManager
+import awais.instagrabber.models.Resource
+import awais.instagrabber.models.Resource.Companion.error
+import awais.instagrabber.models.Resource.Companion.loading
+import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.models.enums.MediaItemType
+import awais.instagrabber.repositories.responses.Caption
+import awais.instagrabber.repositories.responses.Location
+import awais.instagrabber.repositories.responses.Media
+import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.extensions.TAG
+import awais.instagrabber.utils.getCsrfTokenFromCookie
+import awais.instagrabber.utils.getUserIdFromCookie
+import awais.instagrabber.webservices.MediaService
+import awais.instagrabber.webservices.ServiceCallback
+import com.google.common.collect.ImmutableList
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+class PostViewV2ViewModel : ViewModel() {
+    private val user = MutableLiveData<User?>()
+    private val caption = MutableLiveData<Caption?>()
+    private val location = MutableLiveData<Location?>()
+    private val date = MutableLiveData<String>()
+    private val likeCount = MutableLiveData(0L)
+    private val commentCount = MutableLiveData(0L)
+    private val viewCount = MutableLiveData(0L)
+    private val type = MutableLiveData<MediaItemType?>()
+    private val liked = MutableLiveData(false)
+    private val saved = MutableLiveData(false)
+    private val options = MutableLiveData<List<Int>>(ArrayList())
+    private val viewerId: Long
+    val isLoggedIn: Boolean
+    lateinit var media: Media
+        private set
+    private var mediaService: MediaService? = null
+    private var messageManager: DirectMessagesManager? = null
 
-import com.google.common.collect.ImmutableList;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import awais.instagrabber.R;
-import awais.instagrabber.managers.DirectMessagesManager;
-import awais.instagrabber.models.Resource;
-import awais.instagrabber.models.enums.MediaItemType;
-import awais.instagrabber.repositories.responses.Caption;
-import awais.instagrabber.repositories.responses.Location;
-import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.MediaService;
-import awais.instagrabber.webservices.ServiceCallback;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static awais.instagrabber.utils.Utils.settingsHelper;
-
-public class PostViewV2ViewModel extends ViewModel {
-    private static final String TAG = PostViewV2ViewModel.class.getSimpleName();
-
-    private final MutableLiveData<User> user = new MutableLiveData<>();
-    private final MutableLiveData<Caption> caption = new MutableLiveData<>();
-    private final MutableLiveData<Location> location = new MutableLiveData<>();
-    private final MutableLiveData<String> date = new MutableLiveData<>();
-    private final MutableLiveData<Long> likeCount = new MutableLiveData<>(0L);
-    private final MutableLiveData<Long> commentCount = new MutableLiveData<>(0L);
-    private final MutableLiveData<Long> viewCount = new MutableLiveData<>(0L);
-    private final MutableLiveData<MediaItemType> type = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> liked = new MutableLiveData<>(false);
-    private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
-    private final MutableLiveData<List<Integer>> options = new MutableLiveData<>(new ArrayList<>());
-    private final MediaService mediaService;
-    private final long viewerId;
-    private final boolean isLoggedIn;
-
-    private Media media;
-    private DirectMessagesManager messageManager;
-
-    public PostViewV2ViewModel() {
-        final String cookie = settingsHelper.getString(Constants.COOKIE);
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        viewerId = CookieUtils.getUserIdFromCookie(cookie);
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
+    fun setMedia(media: Media) {
+        this.media = media
+        user.postValue(media.user)
+        caption.postValue(media.caption)
+        location.postValue(media.location)
+        date.postValue(media.date)
+        likeCount.postValue(media.likeCount)
+        commentCount.postValue(media.commentCount)
+        viewCount.postValue(if (media.mediaType == MediaItemType.MEDIA_TYPE_VIDEO) media.viewCount else null)
+        type.postValue(media.mediaType)
+        liked.postValue(media.hasLiked)
+        saved.postValue(media.hasViewerSaved)
+        initOptions()
     }
 
-    public void setMedia(final Media media) {
-        this.media = media;
-        user.postValue(media.getUser());
-        caption.postValue(media.getCaption());
-        location.postValue(media.getLocation());
-        date.postValue(media.getDate());
-        likeCount.postValue(media.getLikeCount());
-        commentCount.postValue(media.getCommentCount());
-        viewCount.postValue(media.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO ? media.getViewCount() : null);
-        type.postValue(media.getMediaType());
-        liked.postValue(media.getHasLiked());
-        saved.postValue(media.getHasViewerSaved());
-        initOptions();
-    }
-
-    private void initOptions() {
-        final ImmutableList.Builder<Integer> builder = ImmutableList.builder();
-        if (isLoggedIn && media.getUser() != null && media.getUser().getPk() == viewerId) {
-            builder.add(R.id.edit_caption);
-            builder.add(R.id.delete);
+    private fun initOptions() {
+        val builder = ImmutableList.builder<Int>()
+        val user1 = media.user
+        if (isLoggedIn && user1 != null && user1.pk == viewerId) {
+            builder.add(R.id.edit_caption)
+            builder.add(R.id.delete)
         }
-        options.postValue(builder.build());
+        options.postValue(builder.build())
     }
 
-    public Media getMedia() {
-        return media;
+    fun getUser(): LiveData<User?> {
+        return user
     }
 
-    public boolean isLoggedIn() {
-        return isLoggedIn;
+    fun getCaption(): LiveData<Caption?> {
+        return caption
     }
 
-    public LiveData<User> getUser() {
-        return user;
+    fun getLocation(): LiveData<Location?> {
+        return location
     }
 
-    public LiveData<Caption> getCaption() {
-        return caption;
+    fun getDate(): LiveData<String> {
+        return date
     }
 
-    public LiveData<Location> getLocation() {
-        return location;
+    fun getLikeCount(): LiveData<Long> {
+        return likeCount
     }
 
-    public LiveData<String> getDate() {
-        return date;
+    fun getCommentCount(): LiveData<Long> {
+        return commentCount
     }
 
-    public LiveData<Long> getLikeCount() {
-        return likeCount;
+    fun getViewCount(): LiveData<Long?> {
+        return viewCount
     }
 
-    public LiveData<Long> getCommentCount() {
-        return commentCount;
+    fun getType(): LiveData<MediaItemType?> {
+        return type
     }
 
-    public LiveData<Long> getViewCount() {
-        return viewCount;
+    fun getLiked(): LiveData<Boolean> {
+        return liked
     }
 
-    public LiveData<MediaItemType> getType() {
-        return type;
+    fun getSaved(): LiveData<Boolean> {
+        return saved
     }
 
-    public LiveData<Boolean> getLiked() {
-        return liked;
+    fun getOptions(): LiveData<List<Int>> {
+        return options
     }
 
-    public LiveData<Boolean> getSaved() {
-        return saved;
+    fun toggleLike(): LiveData<Resource<Any?>> {
+        return if (media.hasLiked) {
+            unlike()
+        } else like()
     }
 
-    public LiveData<List<Integer>> getOptions() {
-        return options;
+    fun like(): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        mediaService?.like(media.pk, getLikeUnlikeCallback(data))
+        return data
     }
 
-    @NonNull
-    public LiveData<Resource<Object>> toggleLike() {
-        if (media.getHasLiked()) {
-            return unlike();
-        }
-        return like();
+    fun unlike(): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        mediaService?.unlike(media.pk, getLikeUnlikeCallback(data))
+        return data
     }
 
-    public LiveData<Resource<Object>> like() {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        mediaService.like(media.getPk(), getLikeUnlikeCallback(data));
-        return data;
-    }
-
-    public LiveData<Resource<Object>> unlike() {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        mediaService.unlike(media.getPk(), getLikeUnlikeCallback(data));
-        return data;
-    }
-
-    @NonNull
-    private ServiceCallback<Boolean> getLikeUnlikeCallback(final MutableLiveData<Resource<Object>> data) {
-        return new ServiceCallback<Boolean>() {
-            @Override
-            public void onSuccess(final Boolean result) {
-                if (!result) {
-                    data.postValue(Resource.error("", null));
-                    return;
+    private fun getLikeUnlikeCallback(data: MutableLiveData<Resource<Any?>>): ServiceCallback<Boolean?> {
+        return object : ServiceCallback<Boolean?> {
+            override fun onSuccess(result: Boolean?) {
+                if (result != null && !result) {
+                    data.postValue(error("", null))
+                    return
                 }
-                data.postValue(Resource.success(true));
-                final long currentLikesCount = media.getLikeCount();
-                final long updatedCount;
-                if (!media.getHasLiked()) {
-                    updatedCount = currentLikesCount + 1;
-                    media.setHasLiked(true);
+                data.postValue(success(true))
+                val currentLikesCount = media.likeCount
+                val updatedCount: Long
+                if (!media.hasLiked) {
+                    updatedCount = currentLikesCount + 1
+                    media.hasLiked = true
                 } else {
-                    updatedCount = currentLikesCount - 1;
-                    media.setHasLiked(false);
+                    updatedCount = currentLikesCount - 1
+                    media.hasLiked = false
                 }
-                media.setLikeCount(updatedCount);
-                likeCount.postValue(updatedCount);
-                liked.postValue(media.getHasLiked());
+                media.likeCount = updatedCount
+                likeCount.postValue(updatedCount)
+                liked.postValue(media.hasLiked)
             }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                data.postValue(Resource.error(t.getMessage(), null));
-                Log.e(TAG, "Error during like/unlike", t);
+            override fun onFailure(t: Throwable) {
+                data.postValue(error(t.message, null))
+                Log.e(TAG, "Error during like/unlike", t)
             }
-        };
-    }
-
-    @NonNull
-    public LiveData<Resource<Object>> toggleSave() {
-        if (!media.getHasViewerSaved()) {
-            return save(null, false);
         }
-        return unsave();
     }
 
-    @NonNull
-    public LiveData<Resource<Object>> toggleSave(final String collection, final boolean ignoreSaveState) {
-        return save(collection, ignoreSaveState);
+    fun toggleSave(): LiveData<Resource<Any?>> {
+        return if (!media.hasViewerSaved) {
+            save(null, false)
+        } else unsave()
     }
 
-    public LiveData<Resource<Object>> save(final String collection, final boolean ignoreSaveState) {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        mediaService.save(media.getPk(), collection, getSaveUnsaveCallback(data, ignoreSaveState));
-        return data;
+    fun toggleSave(collection: String?, ignoreSaveState: Boolean): LiveData<Resource<Any?>> {
+        return save(collection, ignoreSaveState)
     }
 
-    public LiveData<Resource<Object>> unsave() {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        mediaService.unsave(media.getPk(), getSaveUnsaveCallback(data, false));
-        return data;
+    fun save(collection: String?, ignoreSaveState: Boolean): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        mediaService?.save(media.pk, collection, getSaveUnsaveCallback(data, ignoreSaveState))
+        return data
     }
 
-    @NonNull
-    private ServiceCallback<Boolean> getSaveUnsaveCallback(final MutableLiveData<Resource<Object>> data,
-                                                           final boolean ignoreSaveState) {
-        return new ServiceCallback<Boolean>() {
-            @Override
-            public void onSuccess(final Boolean result) {
-                if (!result) {
-                    data.postValue(Resource.error("", null));
-                    return;
+    fun unsave(): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        mediaService?.unsave(media.pk, getSaveUnsaveCallback(data, false))
+        return data
+    }
+
+    private fun getSaveUnsaveCallback(
+        data: MutableLiveData<Resource<Any?>>,
+        ignoreSaveState: Boolean,
+    ): ServiceCallback<Boolean?> {
+        return object : ServiceCallback<Boolean?> {
+            override fun onSuccess(result: Boolean?) {
+                if (result != null && !result) {
+                    data.postValue(error("", null))
+                    return
                 }
-                data.postValue(Resource.success(true));
-                if (!ignoreSaveState) media.setHasViewerSaved(!media.getHasViewerSaved());
-                saved.postValue(media.getHasViewerSaved());
+                data.postValue(success(true))
+                if (!ignoreSaveState) media.hasViewerSaved = !media.hasViewerSaved
+                saved.postValue(media.hasViewerSaved)
             }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                data.postValue(Resource.error(t.getMessage(), null));
-                Log.e(TAG, "Error during save/unsave", t);
+            override fun onFailure(t: Throwable) {
+                data.postValue(error(t.message, null))
+                Log.e(TAG, "Error during save/unsave", t)
             }
-        };
+        }
     }
 
-    public LiveData<Resource<Object>> updateCaption(final String caption) {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        mediaService.editCaption(media.getPk(), caption, new ServiceCallback<Boolean>() {
-            @Override
-            public void onSuccess(final Boolean result) {
-                if (result) {
-                    data.postValue(Resource.success(""));
-                    media.setPostCaption(caption);
-                    PostViewV2ViewModel.this.caption.postValue(media.getCaption());
-                    return;
+    fun updateCaption(caption: String): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        mediaService?.editCaption(media.pk, caption, object : ServiceCallback<Boolean?> {
+            override fun onSuccess(result: Boolean?) {
+                if (result != null && result) {
+                    data.postValue(success(""))
+                    media.setPostCaption(caption)
+                    this@PostViewV2ViewModel.caption.postValue(media.caption)
+                    return
                 }
-                data.postValue(Resource.error("", null));
+                data.postValue(error("", null))
             }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error editing caption", t);
-                data.postValue(Resource.error(t.getMessage(), null));
+            override fun onFailure(t: Throwable) {
+                Log.e(TAG, "Error editing caption", t)
+                data.postValue(error(t.message, null))
             }
-        });
-        return data;
+        })
+        return data
     }
 
-    public LiveData<Resource<String>> translateCaption() {
-        final MutableLiveData<Resource<String>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        final Caption value = caption.getValue();
-        if (value == null) return data;
-        mediaService.translate(value.getPk(), "1", new ServiceCallback<String>() {
-            @Override
-            public void onSuccess(final String result) {
-                if (TextUtils.isEmpty(result)) {
-                    data.postValue(Resource.error("", null));
-                    return;
+    fun translateCaption(): LiveData<Resource<String?>> {
+        val data = MutableLiveData<Resource<String?>>()
+        data.postValue(loading(null))
+        val value = caption.value ?: return data
+        mediaService?.translate(value.pk, "1", object : ServiceCallback<String?> {
+            override fun onSuccess(result: String?) {
+                if (result.isNullOrBlank()) {
+                    data.postValue(error("", null))
+                    return
                 }
-                data.postValue(Resource.success(result));
+                data.postValue(success(result))
             }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error translating comment", t);
-                data.postValue(Resource.error(t.getMessage(), null));
+            override fun onFailure(t: Throwable) {
+                Log.e(TAG, "Error translating comment", t)
+                data.postValue(error(t.message, null))
             }
-        });
-        return data;
+        })
+        return data
     }
 
-    public boolean hasPk() {
-        return media.getPk() != null;
+    fun hasPk(): Boolean {
+        return media.pk != null
     }
 
-    public void setViewCount(final Long viewCount) {
-        this.viewCount.postValue(viewCount);
+    fun setViewCount(viewCount: Long?) {
+        this.viewCount.postValue(viewCount)
     }
 
-    public LiveData<Resource<Object>> delete() {
-        final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
-        data.postValue(Resource.loading(null));
-        final Call<String> request = mediaService.delete(media.getId(), media.getMediaType());
+    fun delete(): LiveData<Resource<Any?>> {
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        val mediaId = media.id
+        val mediaType = media.mediaType
+        if (mediaId == null || mediaType == null) {
+            data.postValue(error("media id or type is null", null))
+            return data
+        }
+        val request = mediaService?.delete(mediaId, mediaType)
         if (request == null) {
-            data.postValue(Resource.success(new Object()));
-            return data;
+            data.postValue(success(Any()))
+            return data
         }
-        request.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                if (!response.isSuccessful()) {
-                    data.postValue(Resource.error(R.string.generic_null_response, null));
-                    return;
+        request.enqueue(object : Callback<String?> {
+            override fun onResponse(call: Call<String?>, response: Response<String?>) {
+                if (!response.isSuccessful) {
+                    data.postValue(error(R.string.generic_null_response, null))
+                    return
                 }
-                final String body = response.body();
+                val body = response.body()
                 if (body == null) {
-                    data.postValue(Resource.error(R.string.generic_null_response, null));
-                    return;
+                    data.postValue(error(R.string.generic_null_response, null))
+                    return
                 }
-                data.postValue(Resource.success(new Object()));
+                data.postValue(success(Any()))
             }
 
-            @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                data.postValue(Resource.error(t.getMessage(), null));
+            override fun onFailure(call: Call<String?>, t: Throwable) {
+                Log.e(TAG, "onFailure: ", t)
+                data.postValue(error(t.message, null))
             }
-        });
-        return data;
+        })
+        return data
     }
 
-    public void shareDm(@NonNull final RankedRecipient result) {
+    fun shareDm(result: RankedRecipient) {
         if (messageManager == null) {
-            messageManager = DirectMessagesManager.INSTANCE;
+            messageManager = DirectMessagesManager
         }
-        messageManager.sendMedia(result, media.getId());
+        val mediaId = media.id ?: return
+        messageManager?.sendMedia(result, mediaId, viewModelScope)
     }
 
-    public void shareDm(@NonNull final Set<RankedRecipient> recipients) {
+    fun shareDm(recipients: Set<RankedRecipient>) {
         if (messageManager == null) {
-            messageManager = DirectMessagesManager.INSTANCE;
+            messageManager = DirectMessagesManager
         }
-        messageManager.sendMedia(recipients, media.getId());
+        val mediaId = media.id ?: return
+        messageManager?.sendMedia(recipients, mediaId, viewModelScope)
+    }
+
+    init {
+        val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
+        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        val csrfToken: String? = getCsrfTokenFromCookie(cookie)
+        viewerId = getUserIdFromCookie(cookie)
+        isLoggedIn = cookie.isNotBlank() && viewerId != 0L
+        if (!csrfToken.isNullOrBlank()) {
+            mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId)
+        }
     }
 }

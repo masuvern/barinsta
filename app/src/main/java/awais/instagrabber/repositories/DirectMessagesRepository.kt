@@ -6,16 +6,16 @@ import retrofit2.http.*
 
 interface DirectMessagesRepository {
     @GET("/api/v1/direct_v2/inbox/")
-    fun fetchInbox(@QueryMap queryMap: Map<String, String>): Call<DirectInboxResponse?>
+    suspend fun fetchInbox(@QueryMap queryMap: Map<String, String>): DirectInboxResponse
 
     @GET("/api/v1/direct_v2/pending_inbox/")
-    fun fetchPendingInbox(@QueryMap queryMap: Map<String, String>): Call<DirectInboxResponse?>
+    suspend fun fetchPendingInbox(@QueryMap queryMap: Map<String, String>): DirectInboxResponse
 
     @GET("/api/v1/direct_v2/threads/{threadId}/")
-    fun fetchThread(
+    suspend fun fetchThread(
         @Path("threadId") threadId: String,
         @QueryMap queryMap: Map<String, String>,
-    ): Call<DirectThreadFeedResponse?>
+    ): DirectThreadFeedResponse
 
     @GET("/api/v1/direct_v2/get_badge_count/?no_raven=1")
     fun fetchUnseenCount(): Call<DirectBadgeCount?>

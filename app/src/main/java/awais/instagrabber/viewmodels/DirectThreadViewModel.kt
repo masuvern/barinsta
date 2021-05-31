@@ -5,10 +5,7 @@ import android.content.ContentResolver
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import awais.instagrabber.customviews.emoji.Emoji
 import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.managers.DirectMessagesManager.inboxManager
@@ -50,13 +47,13 @@ class DirectThreadViewModel(
     val items: LiveData<List<DirectItem>> by lazy {
         Transformations.map(threadManager.items) { it.filter { thread -> thread.hideInThread == 0 } }
     }
-    val isFetching: LiveData<Resource<Any?>> by lazy { threadManager.isFetching() }
+    val isFetching: LiveData<Resource<Any?>> by lazy { threadManager.fetching }
     val users: LiveData<List<User>> by lazy { threadManager.users }
     val leftUsers: LiveData<List<User>> by lazy { threadManager.leftUsers }
     val pendingRequestsCount: LiveData<Int> by lazy { threadManager.pendingRequestsCount }
     val inputMode: LiveData<Int> by lazy { threadManager.inputMode }
     val isPending: LiveData<Boolean> by lazy { threadManager.isPending }
-    val replyToItem: LiveData<DirectItem?> by lazy { threadManager.getReplyToItem() }
+    val replyToItem: LiveData<DirectItem?> by lazy { threadManager.replyToItem }
 
     fun moveFromPending() {
         val messagesManager = DirectMessagesManager
@@ -69,11 +66,11 @@ class DirectThreadViewModel(
     }
 
     fun fetchChats() {
-        threadManager.fetchChats()
+        threadManager.fetchChats(viewModelScope)
     }
 
     fun refreshChats() {
-        threadManager.refreshChats()
+        threadManager.refreshChats(viewModelScope)
     }
 
     fun sendText(text: String): LiveData<Resource<Any?>> {

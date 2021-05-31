@@ -185,7 +185,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     private fun initDmUnreadCount() {
         if (!isLoggedIn) return
         val directInboxViewModel = ViewModelProvider(this).get(DirectInboxViewModel::class.java)
-        directInboxViewModel.unseenCount.observe(this, { unseenCountResource: Resource<Int>? ->
+        directInboxViewModel.unseenCount.observe(this, { unseenCountResource: Resource<Int?>? ->
             if (unseenCountResource == null) return@observe
             val unseenCount = unseenCountResource.data
             setNavBarDMUnreadCountBadge(unseenCount ?: 0)

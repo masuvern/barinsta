@@ -37,6 +37,9 @@ import awais.instagrabber.webservices.MediaService
 import awais.instagrabber.webservices.ServiceCallback
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterables
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -56,9 +59,12 @@ class ThreadManager private constructor(
     csrfToken: String,
     deviceUuid: String,
 ) {
-    private val fetching = MutableLiveData<Resource<Any?>>()
-    private val replyToItem = MutableLiveData<DirectItem?>()
-    private val pendingRequests = MutableLiveData<DirectThreadParticipantRequestsResponse?>(null)
+    private val _fetching = MutableLiveData<Resource<Any?>>()
+    val fetching: LiveData<Resource<Any?>> = _fetching
+    private val _replyToItem = MutableLiveData<DirectItem?>()
+    val replyToItem: LiveData<DirectItem?> = _replyToItem
+    private val _pendingRequests = MutableLiveData<DirectThreadParticipantRequestsResponse?>(null)
+    val pendingRequests: LiveData<DirectThreadParticipantRequestsResponse?> = _pendingRequests
     private val inboxManager: InboxManager = if (pending) DirectMessagesManager.pendingInboxManager else DirectMessagesManager.inboxManager
     private val viewerId: Long
     private val threadIdOrUserIds: ThreadIdOrUserIds = of(threadId)
@@ -106,7 +112,7 @@ class ThreadManager private constructor(
     val isMuted: LiveData<Boolean> by lazy { distinctUntilChanged(map(thread) { it?.muted ?: false }) }
     val isApprovalRequiredToJoin: LiveData<Boolean> by lazy { distinctUntilChanged(map(thread) { it?.approvalRequiredForNewMembers ?: false }) }
     val isMentionsMuted: LiveData<Boolean> by lazy { distinctUntilChanged(map(thread) { it?.mentionsMuted ?: false }) }
-    val pendingRequestsCount: LiveData<Int> by lazy { distinctUntilChanged(map(pendingRequests) { it?.totalParticipantRequests ?: 0 }) }
+    val pendingRequestsCount: LiveData<Int> by lazy { distinctUntilChanged(map(_pendingRequests) { it?.totalParticipantRequests ?: 0 }) }
     val inviter: LiveData<User?> by lazy { distinctUntilChanged(map(thread) { it?.inviter }) }
 
     private var hasOlder = true
@@ -125,50 +131,58 @@ class ThreadManager private constructor(
         return builder.build()
     }
 
-    fun isFetching(): LiveData<Resource<Any?>> {
-        return fetching
-    }
-
-    fun getReplyToItem(): LiveData<DirectItem?> {
-        return replyToItem
-    }
-
-    fun getPendingRequests(): LiveData<DirectThreadParticipantRequestsResponse?> {
-        return pendingRequests
-    }
-
-    fun fetchChats() {
-        val fetchingValue = fetching.value
+    fun fetchChats(scope: CoroutineScope) {
+        val fetchingValue = _fetching.value
         if (fetchingValue != null && fetchingValue.status === Resource.Status.LOADING || !hasOlder) return
-        fetching.postValue(loading(null))
-        chatsRequest = service.fetchThread(threadId, cursor)
-        chatsRequest?.enqueue(object : Callback<DirectThreadFeedResponse?> {
-            override fun onResponse(call: Call<DirectThreadFeedResponse?>, response: Response<DirectThreadFeedResponse?>) {
-                val feedResponse = response.body()
-                if (feedResponse == null) {
-                    fetching.postValue(error(R.string.generic_null_response, null))
-                    Log.e(TAG, "onResponse: response was null!")
-                    return
+        _fetching.postValue(loading(null))
+        scope.launch(Dispatchers.IO) {
+            try {
+                val threadFeedResponse = service.fetchThread(threadId, cursor)
+                if (threadFeedResponse.status != null && threadFeedResponse.status != "ok") {
+                    _fetching.postValue(error(R.string.generic_not_ok_response, null))
+                    return@launch
                 }
-                if (feedResponse.status != null && feedResponse.status != "ok") {
-                    fetching.postValue(error(R.string.generic_not_ok_response, null))
-                    return
-                }
-                val thread = feedResponse.thread
+                val thread = threadFeedResponse.thread
                 if (thread == null) {
-                    fetching.postValue(error("thread is null!", null))
-                    return
+                    _fetching.postValue(error("thread is null!", null))
+                    return@launch
                 }
                 setThread(thread)
-                fetching.postValue(success(Any()))
-            }
-
-            override fun onFailure(call: Call<DirectThreadFeedResponse?>, t: Throwable) {
-                Log.e(TAG, "Failed fetching dm chats", t)
-                fetching.postValue(error(t.message, null))
+                _fetching.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed fetching dm chats", e)
+                _fetching.postValue(error(e.message, null))
                 hasOlder = false
             }
-        })
+
+            // chatsRequest?.enqueue(object : Callback<DirectThreadFeedResponse?> {
+            //     override fun onResponse(call: Call<DirectThreadFeedResponse?>, response: Response<DirectThreadFeedResponse?>) {
+            //         val feedResponse = response.body()
+            //         if (feedResponse == null) {
+            //             fetching.postValue(error(R.string.generic_null_response, null))
+            //             Log.e(TAG, "onResponse: response was null!")
+            //             return
+            //         }
+            //         if (feedResponse.status != null && feedResponse.status != "ok") {
+            //             fetching.postValue(error(R.string.generic_not_ok_response, null))
+            //             return
+            //         }
+            //         val thread = feedResponse.thread
+            //         if (thread == null) {
+            //             fetching.postValue(error("thread is null!", null))
+            //             return
+            //         }
+            //         setThread(thread)
+            //         fetching.postValue(success(Any()))
+            //     }
+            //
+            //     override fun onFailure(call: Call<DirectThreadFeedResponse?>, t: Throwable) {
+            //         Log.e(TAG, "Failed fetching dm chats", t)
+            //         fetching.postValue(error(t.message, null))
+            //         hasOlder = false
+            //     }
+            // })
+        }
         if (cursor == null) {
             fetchPendingRequests()
         }
@@ -206,7 +220,7 @@ class ThreadManager private constructor(
                     Log.e(TAG, "onResponse: response body was null")
                     return
                 }
-                pendingRequests.postValue(body)
+                _pendingRequests.postValue(body)
             }
 
             override fun onFailure(call: Call<DirectThreadParticipantRequestsResponse?>, t: Throwable) {
@@ -389,7 +403,7 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         val userId = getCurrentUserId(data) ?: return data
         val clientContext = UUID.randomUUID().toString()
-        val replyToItemValue = replyToItem.value
+        val replyToItemValue = _replyToItem.value
         val directItem = createText(userId, clientContext, text, replyToItemValue)
         // Log.d(TAG, "sendText: sending: itemId: " + directItem.getItemId());
         directItem.isPending = true
@@ -630,7 +644,7 @@ class ThreadManager private constructor(
 
     fun setReplyToItem(item: DirectItem?) {
         // Log.d(TAG, "setReplyToItem: " + item);
-        replyToItem.postValue(item)
+        _replyToItem.postValue(item)
     }
 
     private fun forward(thread: DirectThread, itemToForward: DirectItem): LiveData<Resource<Any?>> {
@@ -770,14 +784,14 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun refreshChats() {
-        val isFetching = fetching.value
+    fun refreshChats(scope: CoroutineScope) {
+        val isFetching = _fetching.value
         if (isFetching != null && isFetching.status === Resource.Status.LOADING) {
             stopCurrentRequest()
         }
         cursor = null
         hasOlder = true
-        fetchChats()
+        fetchChats(scope)
     }
 
     private fun sendPhoto(
@@ -1076,7 +1090,7 @@ class ThreadManager private constructor(
             if (it.isExecuted || it.isCanceled) return
             it.cancel()
         }
-        fetching.postValue(success(Any()))
+        _fetching.postValue(success(Any()))
     }
 
     private fun getCurrentUserId(data: MutableLiveData<Resource<Any?>>): Long? {
@@ -1108,10 +1122,7 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         val addUsersRequest = service.addUsers(
             threadId,
-            users.stream()
-                .filter { obj: User? -> Objects.nonNull(obj) }
-                .map { obj: User -> obj.pk }
-                .collect(Collectors.toList())
+            users.map { obj: User -> obj.pk }
         )
         handleDetailsChangeRequest(data, addUsersRequest)
         return data
@@ -1135,10 +1146,7 @@ class ThreadManager private constructor(
                 if (leftUsersValue == null) {
                     leftUsersValue = emptyList()
                 }
-                val updatedActiveUsers = activeUsers.stream()
-                    .filter { obj: User? -> Objects.nonNull(obj) }
-                    .filter { u: User -> u.pk != user.pk }
-                    .collect(Collectors.toList())
+                val updatedActiveUsers = activeUsers.filter { u: User -> u.pk != user.pk }
                 val updatedLeftUsersBuilder = ImmutableList.builder<User>().addAll(leftUsersValue)
                 if (!leftUsersValue.contains(user)) {
                     updatedLeftUsersBuilder.add(user)
@@ -1204,10 +1212,7 @@ class ThreadManager private constructor(
                     return
                 }
                 val currentAdmins = adminUserIds.value ?: return
-                val updatedAdminUserIds = currentAdmins.stream()
-                    .filter { obj: Long? -> Objects.nonNull(obj) }
-                    .filter { userId1: Long -> userId1 != user.pk }
-                    .collect(Collectors.toList())
+                val updatedAdminUserIds = currentAdmins.filter { userId1: Long -> userId1 != user.pk }
                 val currentThread = thread.value ?: return
                 try {
                     val thread = currentThread.clone() as DirectThread
@@ -1362,11 +1367,11 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun blockUser(user: User): LiveData<Resource<Any?>> {
+    fun blockUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         friendshipService.changeBlock(false, user.pk, object : ServiceCallback<FriendshipChangeResponse?> {
             override fun onSuccess(result: FriendshipChangeResponse?) {
-                refreshChats()
+                refreshChats(scope)
             }
 
             override fun onFailure(t: Throwable) {
@@ -1377,11 +1382,11 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun unblockUser(user: User): LiveData<Resource<Any?>> {
+    fun unblockUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         friendshipService.changeBlock(true, user.pk, object : ServiceCallback<FriendshipChangeResponse?> {
             override fun onSuccess(result: FriendshipChangeResponse?) {
-                refreshChats()
+                refreshChats(scope)
             }
 
             override fun onFailure(t: Throwable) {
@@ -1392,11 +1397,11 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun restrictUser(user: User): LiveData<Resource<Any?>> {
+    fun restrictUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         friendshipService.toggleRestrict(user.pk, true, object : ServiceCallback<FriendshipRestrictResponse?> {
             override fun onSuccess(result: FriendshipRestrictResponse?) {
-                refreshChats()
+                refreshChats(scope)
             }
 
             override fun onFailure(t: Throwable) {
@@ -1407,11 +1412,11 @@ class ThreadManager private constructor(
         return data
     }
 
-    fun unRestrictUser(user: User): LiveData<Resource<Any?>> {
+    fun unRestrictUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         friendshipService.toggleRestrict(user.pk, false, object : ServiceCallback<FriendshipRestrictResponse?> {
             override fun onSuccess(result: FriendshipRestrictResponse?) {
-                refreshChats()
+                refreshChats(scope)
             }
 
             override fun onFailure(t: Throwable) {
@@ -1427,10 +1432,7 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         val approveUsersRequest = service.approveParticipantRequests(
             threadId,
-            users.stream()
-                .filter { obj: User? -> Objects.nonNull(obj) }
-                .map { obj: User -> obj.pk }
-                .collect(Collectors.toList())
+            users.map { obj: User -> obj.pk }
         )
         handleDetailsChangeRequest(data, approveUsersRequest, object : OnSuccessAction {
             override fun onSuccess() {
@@ -1445,9 +1447,7 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         val approveUsersRequest = service.declineParticipantRequests(
             threadId,
-            users.stream()
-                .map { obj: User -> obj.pk }
-                .collect(Collectors.toList())
+            users.map { obj: User -> obj.pk }
         )
         handleDetailsChangeRequest(data, approveUsersRequest, object : OnSuccessAction {
             override fun onSuccess() {
@@ -1458,18 +1458,16 @@ class ThreadManager private constructor(
     }
 
     private fun pendingUserApproveDenySuccessAction(users: List<User>) {
-        val pendingRequestsValue = pendingRequests.value ?: return
+        val pendingRequestsValue = _pendingRequests.value ?: return
         val pendingUsers = pendingRequestsValue.users
         if (pendingUsers == null || pendingUsers.isEmpty()) return
-        val filtered = pendingUsers.stream()
-            .filter { o: User -> !users.contains(o) }
-            .collect(Collectors.toList())
+        val filtered = pendingUsers.filter { o: User -> !users.contains(o) }
         try {
             val clone = pendingRequestsValue.clone() as DirectThreadParticipantRequestsResponse
             clone.users = filtered
             val totalParticipantRequests = clone.totalParticipantRequests
             clone.totalParticipantRequests = if (totalParticipantRequests > 0) totalParticipantRequests - 1 else 0
-            pendingRequests.postValue(clone)
+            _pendingRequests.postValue(clone)
         } catch (e: CloneNotSupportedException) {
             Log.e(TAG, "pendingUserApproveDenySuccessAction: ", e)
         }

@@ -18,10 +18,10 @@ class DirectMessagesService private constructor(
 ) : BaseService() {
     private val repository: DirectMessagesRepository = RetrofitFactory.retrofit.create(DirectMessagesRepository::class.java)
 
-    fun fetchInbox(
+    suspend fun fetchInbox(
         cursor: String?,
         seqId: Long,
-    ): Call<DirectInboxResponse?> {
+    ): DirectInboxResponse {
         val queryMap = mutableMapOf(
             "visual_message_return_type" to "unseen",
             "thread_message_limit" to 10.toString(),
@@ -38,10 +38,10 @@ class DirectMessagesService private constructor(
         return repository.fetchInbox(queryMap)
     }
 
-    fun fetchThread(
+    suspend fun fetchThread(
         threadId: String,
         cursor: String?,
-    ): Call<DirectThreadFeedResponse?> {
+    ): DirectThreadFeedResponse {
         val queryMap = mutableMapOf(
             "visual_message_return_type" to "unseen",
             "limit" to 20.toString(),
@@ -409,7 +409,7 @@ class DirectMessagesService private constructor(
         return repository.end(threadId, form)
     }
 
-    fun fetchPendingInbox(cursor: String?, seqId: Long): Call<DirectInboxResponse?> {
+    suspend fun fetchPendingInbox(cursor: String?, seqId: Long): DirectInboxResponse {
         val queryMap = mutableMapOf(
             "visual_message_return_type" to "unseen",
             "thread_message_limit" to 20.toString(),

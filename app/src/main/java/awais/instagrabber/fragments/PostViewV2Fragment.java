@@ -217,7 +217,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         // wasPaused = true;
         if (settingsHelper.getBoolean(PreferenceKeys.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
-        if (media == null || media.getMediaType() == null) return;
+        if (media.getMediaType() == null) return;
         switch (media.getMediaType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
@@ -250,7 +250,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         super.onDestroyView();
         showSystemUI();
         final Media media = viewModel.getMedia();
-        if (media == null || media.getMediaType() == null) return;
+        if (media.getMediaType() == null) return;
         switch (media.getMediaType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
@@ -269,7 +269,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
         final Media media = viewModel.getMedia();
-        if (media == null) return;
         if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             outState.putInt(ARG_SLIDER_POSITION, sliderPosition);
         }
@@ -1440,9 +1439,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             actionBar.hide();
         }
         final CollapsingToolbarLayout appbarLayout = activity.getCollapsingToolbarView();
-        if (appbarLayout != null) {
-            appbarLayout.setVisibility(View.GONE);
-        }
+        appbarLayout.setVisibility(View.GONE);
         final Toolbar toolbar = activity.getToolbar();
         if (toolbar != null) {
             toolbar.setVisibility(View.GONE);
@@ -1467,9 +1464,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             actionBar.show();
         }
         final CollapsingToolbarLayout appbarLayout = activity.getCollapsingToolbarView();
-        if (appbarLayout != null) {
-            appbarLayout.setVisibility(View.VISIBLE);
-        }
+        appbarLayout.setVisibility(View.VISIBLE);
         final Toolbar toolbar = activity.getToolbar();
         if (toolbar != null) {
             toolbar.setVisibility(View.VISIBLE);

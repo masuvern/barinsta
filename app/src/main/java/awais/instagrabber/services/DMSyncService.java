@@ -234,7 +234,7 @@ public class DMSyncService extends LifecycleService {
             parseUnread(directInbox);
         });
         Log.d(TAG, "onStartCommand: refreshing inbox");
-        inboxManager.refresh();
+        // inboxManager.refresh();
         return START_NOT_STICKY;
     }
 

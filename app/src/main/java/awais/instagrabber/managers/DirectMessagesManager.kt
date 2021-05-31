@@ -20,6 +20,7 @@ import awais.instagrabber.utils.getCsrfTokenFromCookie
 import awais.instagrabber.utils.getUserIdFromCookie
 import awais.instagrabber.webservices.DirectMessagesService
 import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
+import kotlinx.coroutines.CoroutineScope
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -108,21 +109,21 @@ object DirectMessagesManager {
         })
     }
 
-    fun sendMedia(recipients: Set<RankedRecipient>, mediaId: String) {
+    fun sendMedia(recipients: Set<RankedRecipient>, mediaId: String, scope: CoroutineScope) {
         val resultsCount = intArrayOf(0)
         val callback: () -> Unit = {
             resultsCount[0]++
             if (resultsCount[0] == recipients.size) {
-                inboxManager.refresh()
+                inboxManager.refresh(scope)
             }
         }
         for (recipient in recipients) {
-            sendMedia(recipient, mediaId, false, callback)
+            sendMedia(recipient, mediaId, false, callback, scope)
         }
     }
 
-    fun sendMedia(recipient: RankedRecipient, mediaId: String) {
-        sendMedia(recipient, mediaId, true, null)
+    fun sendMedia(recipient: RankedRecipient, mediaId: String, scope: CoroutineScope) {
+        sendMedia(recipient, mediaId, true, null, scope)
     }
 
     private fun sendMedia(
@@ -130,6 +131,7 @@ object DirectMessagesManager {
         mediaId: String,
         refreshInbox: Boolean,
         callback: (() -> Unit)?,
+        scope: CoroutineScope,
     ) {
         if (recipient.thread == null && recipient.user != null) {
             // create thread and forward
@@ -137,7 +139,7 @@ object DirectMessagesManager {
                 val threadIdTemp = threadId ?: return@createThread
                 sendMedia(threadIdTemp, mediaId) {
                     if (refreshInbox) {
-                        inboxManager.refresh()
+                        inboxManager.refresh(scope)
                     }
                     callback?.invoke()
                 }
@@ -149,7 +151,7 @@ object DirectMessagesManager {
         val threadId = thread.threadId ?: return
         sendMedia(threadId, mediaId) {
             if (refreshInbox) {
-                inboxManager.refresh()
+                inboxManager.refresh(scope)
             }
             callback?.invoke()
         }
