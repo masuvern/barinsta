@@ -88,9 +88,9 @@ import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -231,32 +231,21 @@ public class StoryViewerFragment extends Fragment {
                                     return;
                                 }
                                 final DirectThread thread = response.body();
-                                final Call<DirectThreadBroadcastResponse> request = directMessagesService.broadcastStoryReply(
+                                directMessagesService.broadcastStoryReply(
                                         ThreadIdOrUserIds.of(thread.getThreadId()),
                                         input.getText().toString(),
                                         currentStory.getStoryMediaId(),
-                                        String.valueOf(currentStory.getUserId())
-                                );
-                                request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
-                                    @Override
-                                    public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
-                                                           @NonNull final Response<DirectThreadBroadcastResponse> response) {
-                                        if (!response.isSuccessful()) {
-                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
-                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                    }
+                                        String.valueOf(currentStory.getUserId()),
+                                        CoroutineUtilsKt.getContinuation((directThreadBroadcastResponse, throwable) -> {
+                                            if (throwable != null) {
+                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                Log.e(TAG, "onFailure: ", throwable);
+                                                return;
+                                            }
+                                            Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                        })
 
-                                    @Override
-                                    public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
-                                        try {
-                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                            Log.e(TAG, "onFailure: ", t);
-                                        } catch (Throwable ignored) {
-                                        }
-                                    }
-                                });
+                                );
                             }
 
                             @Override

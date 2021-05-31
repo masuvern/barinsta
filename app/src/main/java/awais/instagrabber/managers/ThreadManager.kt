@@ -10,11 +10,11 @@ import androidx.lifecycle.Transformations.distinctUntilChanged
 import androidx.lifecycle.Transformations.map
 import awais.instagrabber.R
 import awais.instagrabber.customviews.emoji.Emoji
-import awais.instagrabber.models.enums.DirectItemType.Companion.getName
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
 import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.models.enums.DirectItemType
 import awais.instagrabber.repositories.requests.UploadFinishOptions
 import awais.instagrabber.repositories.requests.VideoOptions
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds
@@ -400,7 +400,7 @@ class ThreadManager private constructor(
         return temp
     }
 
-    fun sendText(text: String): LiveData<Resource<Any?>> {
+    fun sendText(text: String, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val userId = getCurrentUserId(data) ?: return data
         val clientContext = UUID.randomUUID().toString()
@@ -412,29 +412,36 @@ class ThreadManager private constructor(
         data.postValue(loading(directItem))
         val repliedToItemId = replyToItemValue?.itemId
         val repliedToClientContext = replyToItemValue?.clientContext
-        val request = service.broadcastText(
-            clientContext,
-            threadIdOrUserIds,
-            text,
-            repliedToItemId,
-            repliedToClientContext
-        )
-        enqueueRequest(request, data, directItem)
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = service.broadcastText(
+                    clientContext,
+                    threadIdOrUserIds,
+                    text,
+                    repliedToItemId,
+                    repliedToClientContext
+                )
+                parseResponse(response, data, directItem)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, directItem))
+                Log.e(TAG, "sendText: ", e)
+            }
+        }
         return data
     }
 
-    fun sendUri(entry: MediaController.MediaEntry): LiveData<Resource<Any?>> {
+    fun sendUri(entry: MediaController.MediaEntry, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val uri = Uri.fromFile(File(entry.path))
         if (!entry.isVideo) {
-            sendPhoto(data, uri, entry.width, entry.height)
+            sendPhoto(data, uri, entry.width, entry.height, scope)
             return data
         }
-        sendVideo(data, uri, entry.size, entry.duration, entry.width, entry.height)
+        sendVideo(data, uri, entry.size, entry.duration, entry.width, entry.height, scope)
         return data
     }
 
-    fun sendUri(uri: Uri): LiveData<Resource<Any?>> {
+    fun sendUri(uri: Uri, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val mimeType = Utils.getMimeType(uri, contentResolver)
         if (isEmpty(mimeType)) {
@@ -443,16 +450,16 @@ class ThreadManager private constructor(
         }
         val isPhoto = mimeType != null && mimeType.startsWith("image")
         if (isPhoto) {
-            sendPhoto(data, uri)
+            sendPhoto(data, uri, scope)
             return data
         }
         if (mimeType != null && mimeType.startsWith("video")) {
-            sendVideo(data, uri)
+            sendVideo(data, uri, scope)
         }
         return data
     }
 
-    fun sendAnimatedMedia(giphyGif: GiphyGif): LiveData<Resource<Any?>> {
+    fun sendAnimatedMedia(giphyGif: GiphyGif, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val userId = getCurrentUserId(data) ?: return data
         val clientContext = UUID.randomUUID().toString()
@@ -460,12 +467,19 @@ class ThreadManager private constructor(
         directItem.isPending = true
         addItems(0, listOf(directItem))
         data.postValue(loading(directItem))
-        val request = service.broadcastAnimatedMedia(
-            clientContext,
-            threadIdOrUserIds,
-            giphyGif
-        )
-        enqueueRequest(request, data, directItem)
+        scope.launch(Dispatchers.IO) {
+            try {
+                val request = service.broadcastAnimatedMedia(
+                    clientContext,
+                    threadIdOrUserIds,
+                    giphyGif
+                )
+                parseResponse(request, data, directItem)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, directItem))
+                Log.e(TAG, "sendAnimatedMedia: ", e)
+            }
+        }
         return data
     }
 
@@ -476,6 +490,7 @@ class ThreadManager private constructor(
         samplingFreq: Int,
         duration: Long,
         byteLength: Long,
+        scope: CoroutineScope,
     ) {
         if (duration > 60000) {
             // instagram does not allow uploading audio longer than 60 secs for Direct messages
@@ -502,14 +517,21 @@ class ThreadManager private constructor(
                 uploadFinishRequest.enqueue(object : Callback<String?> {
                     override fun onResponse(call: Call<String?>, response: Response<String?>) {
                         if (response.isSuccessful) {
-                            val request = service.broadcastVoice(
-                                clientContext,
-                                threadIdOrUserIds,
-                                uploadDmVoiceOptions.uploadId,
-                                waveform,
-                                samplingFreq
-                            )
-                            enqueueRequest(request, data, directItem)
+                            scope.launch(Dispatchers.IO) {
+                                try {
+                                    val request = service.broadcastVoice(
+                                        clientContext,
+                                        threadIdOrUserIds,
+                                        uploadDmVoiceOptions.uploadId,
+                                        waveform,
+                                        samplingFreq
+                                    )
+                                    parseResponse(request, data, directItem)
+                                } catch (e: Exception) {
+                                    data.postValue(error(e.message, directItem))
+                                    Log.e(TAG, "sendVoice: ", e)
+                                }
+                            }
                             return
                         }
                         if (response.errorBody() != null) {
@@ -537,6 +559,7 @@ class ThreadManager private constructor(
     fun sendReaction(
         item: DirectItem,
         emoji: Emoji,
+        scope: CoroutineScope,
     ): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val userId = getCurrentUserId(data)
@@ -557,18 +580,24 @@ class ThreadManager private constructor(
             data.postValue(error("itemId is null", null))
             return data
         }
-        val request = service.broadcastReaction(
-            clientContext,
-            threadIdOrUserIds,
-            itemId,
-            emojiUnicode,
-            false
-        )
-        handleBroadcastReactionRequest(data, item, request)
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.broadcastReaction(
+                    clientContext,
+                    threadIdOrUserIds,
+                    itemId,
+                    emojiUnicode,
+                    false
+                )
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+                Log.e(TAG, "sendReaction: ", e)
+            }
+        }
         return data
     }
 
-    fun sendDeleteReaction(itemId: String): LiveData<Resource<Any?>> {
+    fun sendDeleteReaction(itemId: String, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val item = getItem(itemId)
         if (item == null) {
@@ -588,8 +617,14 @@ class ThreadManager private constructor(
             data.postValue(error("itemId is null", null))
             return data
         }
-        val request = service.broadcastReaction(clientContext, threadIdOrUserIds, itemId1, null, true)
-        handleBroadcastReactionRequest(data, item, request)
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.broadcastReaction(clientContext, threadIdOrUserIds, itemId1, null, true)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+                Log.e(TAG, "sendDeleteReaction: ", e)
+            }
+        }
         return data
     }
 
@@ -660,7 +695,7 @@ class ThreadManager private constructor(
             data.postValue(error("item type is null", null))
             return data
         }
-        val itemTypeName = getName(itemType)
+        val itemTypeName = DirectItemType.getName(itemType)
         if (itemTypeName == null) {
             Log.e(TAG, "forward: itemTypeName was null!")
             data.postValue(error("itemTypeName is null", null))
@@ -798,6 +833,7 @@ class ThreadManager private constructor(
     private fun sendPhoto(
         data: MutableLiveData<Resource<Any?>>,
         uri: Uri,
+        scope: CoroutineScope,
     ) {
         try {
             val dimensions = BitmapUtils.decodeDimensions(contentResolver, uri)
@@ -805,7 +841,7 @@ class ThreadManager private constructor(
                 data.postValue(error("Decoding dimensions failed", null))
                 return
             }
-            sendPhoto(data, uri, dimensions.first, dimensions.second)
+            sendPhoto(data, uri, dimensions.first, dimensions.second, scope)
         } catch (e: IOException) {
             data.postValue(error(e.message, null))
             Log.e(TAG, "sendPhoto: ", e)
@@ -817,6 +853,7 @@ class ThreadManager private constructor(
         uri: Uri,
         width: Int,
         height: Int,
+        scope: CoroutineScope,
     ) {
         val userId = getCurrentUserId(data) ?: return
         val clientContext = UUID.randomUUID().toString()
@@ -829,8 +866,15 @@ class ThreadManager private constructor(
                 if (handleInvalidResponse(data, response)) return
                 val response1 = response.response ?: return
                 val uploadId = response1.optString("upload_id")
-                val request = service.broadcastPhoto(clientContext, threadIdOrUserIds, uploadId)
-                enqueueRequest(request, data, directItem)
+                scope.launch(Dispatchers.IO) {
+                    try {
+                        val response2 = service.broadcastPhoto(clientContext, threadIdOrUserIds, uploadId)
+                        parseResponse(response2, data, directItem)
+                    } catch (e: Exception) {
+                        data.postValue(error(e.message, null))
+                        Log.e(TAG, "sendPhoto: ", e)
+                    }
+                }
             }
 
             override fun onFailure(t: Throwable) {
@@ -843,6 +887,7 @@ class ThreadManager private constructor(
     private fun sendVideo(
         data: MutableLiveData<Resource<Any?>>,
         uri: Uri,
+        scope: CoroutineScope,
     ) {
         MediaUtils.getVideoInfo(contentResolver, uri, object : OnInfoLoadListener<VideoInfo?> {
             override fun onLoad(info: VideoInfo?) {
@@ -850,7 +895,7 @@ class ThreadManager private constructor(
                     data.postValue(error("Could not get the video info", null))
                     return
                 }
-                sendVideo(data, uri, info.size, info.duration, info.width, info.height)
+                sendVideo(data, uri, info.size, info.duration, info.width, info.height, scope)
             }
 
             override fun onFailure(t: Throwable) {
@@ -866,6 +911,7 @@ class ThreadManager private constructor(
         duration: Long,
         width: Int,
         height: Int,
+        scope: CoroutineScope,
     ) {
         if (duration > 60000) {
             // instagram does not allow uploading videos longer than 60 secs for Direct messages
@@ -892,14 +938,21 @@ class ThreadManager private constructor(
                 uploadFinishRequest.enqueue(object : Callback<String?> {
                     override fun onResponse(call: Call<String?>, response: Response<String?>) {
                         if (response.isSuccessful) {
-                            val request = service.broadcastVideo(
-                                clientContext,
-                                threadIdOrUserIds,
-                                uploadDmVideoOptions.uploadId,
-                                "",
-                                true
-                            )
-                            enqueueRequest(request, data, directItem)
+                            scope.launch(Dispatchers.IO) {
+                                try {
+                                    val response1 = service.broadcastVideo(
+                                        clientContext,
+                                        threadIdOrUserIds,
+                                        uploadDmVideoOptions.uploadId,
+                                        "",
+                                        true
+                                    )
+                                    parseResponse(response1, data, directItem)
+                                } catch (e: Exception) {
+                                    data.postValue(error(e.message, null))
+                                    Log.e(TAG, "sendVideo: ", e)
+                                }
+                            }
                             return
                         }
                         if (response.errorBody() != null) {
@@ -924,64 +977,36 @@ class ThreadManager private constructor(
         })
     }
 
-    private fun enqueueRequest(
-        request: Call<DirectThreadBroadcastResponse?>,
+    private fun parseResponse(
+        response: DirectThreadBroadcastResponse,
         data: MutableLiveData<Resource<Any?>>,
         directItem: DirectItem,
     ) {
-        request.enqueue(object : Callback<DirectThreadBroadcastResponse?> {
-            override fun onResponse(
-                call: Call<DirectThreadBroadcastResponse?>,
-                response: Response<DirectThreadBroadcastResponse?>,
-            ) {
-                if (response.isSuccessful) {
-                    val broadcastResponse = response.body()
-                    if (broadcastResponse == null) {
-                        data.postValue(error(R.string.generic_null_response, directItem))
-                        Log.e(TAG, "enqueueRequest: onResponse: response body is null")
-                        return
-                    }
-                    val payloadClientContext: String?
-                    val timestamp: Long
-                    val itemId: String?
-                    val payload = broadcastResponse.payload
-                    if (payload == null) {
-                        val messageMetadata = broadcastResponse.messageMetadata
-                        if (messageMetadata == null || messageMetadata.isEmpty()) {
-                            data.postValue(success(directItem))
-                            return
-                        }
-                        val (clientContext, itemId1, timestamp1) = messageMetadata[0]
-                        payloadClientContext = clientContext
-                        itemId = itemId1
-                        timestamp = timestamp1
-                    } else {
-                        payloadClientContext = payload.clientContext
-                        timestamp = payload.timestamp
-                        itemId = payload.itemId
-                    }
-                    if (payloadClientContext == null) {
-                        data.postValue(error("clientContext in response was null", null))
-                        return
-                    }
-                    updateItemSent(payloadClientContext, timestamp, itemId)
-                    data.postValue(success(directItem))
-                    return
-                }
-                if (response.errorBody() != null) {
-                    handleErrorBody(call, response, data)
-                }
-                data.postValue(error(R.string.generic_failed_request, directItem))
+        val payloadClientContext: String?
+        val timestamp: Long
+        val itemId: String?
+        val payload = response.payload
+        if (payload == null) {
+            val messageMetadata = response.messageMetadata
+            if (messageMetadata == null || messageMetadata.isEmpty()) {
+                data.postValue(success(directItem))
+                return
             }
-
-            override fun onFailure(
-                call: Call<DirectThreadBroadcastResponse?>,
-                t: Throwable,
-            ) {
-                data.postValue(error(t.message, directItem))
-                Log.e(TAG, "enqueueRequest: onFailure: ", t)
-            }
-        })
+            val (clientContext, itemId1, timestamp1) = messageMetadata[0]
+            payloadClientContext = clientContext
+            itemId = itemId1
+            timestamp = timestamp1
+        } else {
+            payloadClientContext = payload.clientContext
+            timestamp = payload.timestamp
+            itemId = payload.itemId
+        }
+        if (payloadClientContext == null) {
+            data.postValue(error("clientContext in response was null", null))
+            return
+        }
+        updateItemSent(payloadClientContext, timestamp, itemId)
+        data.postValue(success(directItem))
     }
 
     private fun updateItemSent(
@@ -1052,38 +1077,6 @@ class ThreadManager private constructor(
         return items.asSequence()
             .filter { it.itemId == itemId }
             .firstOrNull()
-    }
-
-    private fun handleBroadcastReactionRequest(
-        data: MutableLiveData<Resource<Any?>>,
-        item: DirectItem,
-        request: Call<DirectThreadBroadcastResponse?>,
-    ) {
-        request.enqueue(object : Callback<DirectThreadBroadcastResponse?> {
-            override fun onResponse(
-                call: Call<DirectThreadBroadcastResponse?>,
-                response: Response<DirectThreadBroadcastResponse?>,
-            ) {
-                if (!response.isSuccessful) {
-                    if (response.errorBody() != null) {
-                        handleErrorBody(call, response, data)
-                        return
-                    }
-                    data.postValue(error(R.string.generic_failed_request, item))
-                    return
-                }
-                val body = response.body()
-                if (body == null) {
-                    data.postValue(error(R.string.generic_null_response, item))
-                }
-                // otherwise nothing to do? maybe update the timestamp in the emoji?
-            }
-
-            override fun onFailure(call: Call<DirectThreadBroadcastResponse?>, t: Throwable) {
-                data.postValue(error(t.message, item))
-                Log.e(TAG, "enqueueRequest: onFailure: ", t)
-            }
-        })
     }
 
     private fun stopCurrentRequest() {
@@ -1583,7 +1576,7 @@ class ThreadManager private constructor(
         })
     }
 
-    fun markAsSeen(directItem: DirectItem): LiveData<Resource<Any?>> {
+    fun markAsSeen(directItem: DirectItem, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
         val request = service.markAsSeen(threadId, directItem)
@@ -1606,7 +1599,7 @@ class ThreadManager private constructor(
                     data.postValue(error(R.string.generic_null_response, null))
                     return
                 }
-                inboxManager.fetchUnseenCount()
+                inboxManager.fetchUnseenCount(scope)
                 val payload = seenResponse.payload ?: return
                 val timestamp = payload.timestamp
                 val thread = thread.value ?: return

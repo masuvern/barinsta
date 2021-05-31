@@ -12,7 +12,6 @@ import awais.instagrabber.models.Resource.Companion.success
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds.Companion.of
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.DirectThread
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.Utils
@@ -21,6 +20,8 @@ import awais.instagrabber.utils.getUserIdFromCookie
 import awais.instagrabber.webservices.DirectMessagesService
 import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -137,7 +138,7 @@ object DirectMessagesManager {
             // create thread and forward
             createThread(recipient.user.pk) { (threadId) ->
                 val threadIdTemp = threadId ?: return@createThread
-                sendMedia(threadIdTemp, mediaId) {
+                sendMedia(threadIdTemp, mediaId, scope) {
                     if (refreshInbox) {
                         inboxManager.refresh(scope)
                     }
@@ -149,7 +150,7 @@ object DirectMessagesManager {
         // just forward
         val thread = recipient.thread
         val threadId = thread.threadId ?: return
-        sendMedia(threadId, mediaId) {
+        sendMedia(threadId, mediaId, scope) {
             if (refreshInbox) {
                 inboxManager.refresh(scope)
             }
@@ -160,55 +161,26 @@ object DirectMessagesManager {
     private fun sendMedia(
         threadId: String,
         mediaId: String,
+        scope: CoroutineScope,
         callback: (() -> Unit)?,
     ): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        val request = service.broadcastMediaShare(
-            UUID.randomUUID().toString(),
-            of(threadId),
-            mediaId
-        )
-        request.enqueue(object : Callback<DirectThreadBroadcastResponse?> {
-            override fun onResponse(
-                call: Call<DirectThreadBroadcastResponse?>,
-                response: Response<DirectThreadBroadcastResponse?>,
-            ) {
-                if (response.isSuccessful) {
-                    data.postValue(success(Any()))
-                    callback?.invoke()
-                    return
-                }
-                val errorBody = response.errorBody()
-                if (errorBody != null) {
-                    try {
-                        val string = errorBody.string()
-                        val msg = String.format(Locale.US,
-                            "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                            call.request().url().toString(),
-                            response.code(),
-                            string)
-                        Log.e(TAG, msg)
-                        data.postValue(error(msg, null))
-                    } catch (e: IOException) {
-                        Log.e(TAG, "onResponse: ", e)
-                        data.postValue(error(e.message, null))
-                    }
-                    callback?.invoke()
-                    return
-                }
-                val msg = "onResponse: request was not successful and response error body was null"
-                Log.e(TAG, msg)
-                data.postValue(error(msg, null))
+        scope.launch(Dispatchers.IO) {
+            try {
+                service.broadcastMediaShare(
+                    UUID.randomUUID().toString(),
+                    of(threadId),
+                    mediaId
+                )
+                data.postValue(success(Any()))
+                callback?.invoke()
+            } catch (e: Exception) {
+                Log.e(TAG, "sendMedia: ", e)
+                data.postValue(error(e.message, null))
                 callback?.invoke()
             }
-
-            override fun onFailure(call: Call<DirectThreadBroadcastResponse?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-                callback?.invoke()
-            }
-        })
+        }
         return data
     }
 

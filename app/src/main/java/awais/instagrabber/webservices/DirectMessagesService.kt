@@ -53,17 +53,15 @@ class DirectMessagesService private constructor(
         return repository.fetchThread(threadId, queryMap)
     }
 
-    fun fetchUnseenCount(): Call<DirectBadgeCount?> {
-        return repository.fetchUnseenCount()
-    }
+    suspend fun fetchUnseenCount(): DirectBadgeCount = repository.fetchUnseenCount()
 
-    fun broadcastText(
+    suspend fun broadcastText(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         text: String,
         repliedToItemId: String?,
         repliedToClientContext: String?,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         val urls = extractUrls(text)
         if (urls.isNotEmpty()) {
             return broadcastLink(clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
@@ -76,14 +74,14 @@ class DirectMessagesService private constructor(
         return broadcast(broadcastOptions)
     }
 
-    private fun broadcastLink(
+    private suspend fun broadcastLink(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         linkText: String,
         urls: List<String>,
         repliedToItemId: String?,
         repliedToClientContext: String?,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         val broadcastOptions = LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls)
         if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
             broadcastOptions.repliedToItemId = repliedToItemId
@@ -92,70 +90,70 @@ class DirectMessagesService private constructor(
         return broadcast(broadcastOptions)
     }
 
-    fun broadcastPhoto(
+    suspend fun broadcastPhoto(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         uploadId: String,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId))
     }
 
-    fun broadcastVideo(
+    suspend fun broadcastVideo(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         uploadId: String,
         videoResult: String,
         sampled: Boolean,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled))
     }
 
-    fun broadcastVoice(
+    suspend fun broadcastVoice(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         uploadId: String,
         waveform: List<Float>,
         samplingFreq: Int,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq))
     }
 
-    fun broadcastStoryReply(
+    suspend fun broadcastStoryReply(
         threadIdOrUserIds: ThreadIdOrUserIds,
         text: String,
         mediaId: String,
         reelId: String,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId))
     }
 
-    fun broadcastReaction(
+    suspend fun broadcastReaction(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         itemId: String,
         emoji: String?,
         delete: Boolean,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete))
     }
 
-    fun broadcastAnimatedMedia(
+    suspend fun broadcastAnimatedMedia(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         giphyGif: GiphyGif,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif))
     }
 
-    fun broadcastMediaShare(
+    suspend fun broadcastMediaShare(
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         mediaId: String,
-    ): Call<DirectThreadBroadcastResponse?> {
+    ): DirectThreadBroadcastResponse {
         return broadcast(MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId))
     }
 
-    private fun broadcast(broadcastOptions: BroadcastOptions): Call<DirectThreadBroadcastResponse?> {
+    private suspend fun broadcast(broadcastOptions: BroadcastOptions): DirectThreadBroadcastResponse {
         require(!isEmpty(broadcastOptions.clientContext)) { "Broadcast requires a valid client context value" }
         val form = mutableMapOf<String, Any>()
         val threadId = broadcastOptions.threadId

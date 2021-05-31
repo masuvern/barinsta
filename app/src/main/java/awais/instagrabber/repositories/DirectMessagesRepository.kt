@@ -18,14 +18,14 @@ interface DirectMessagesRepository {
     ): DirectThreadFeedResponse
 
     @GET("/api/v1/direct_v2/get_badge_count/?no_raven=1")
-    fun fetchUnseenCount(): Call<DirectBadgeCount?>
+    suspend fun fetchUnseenCount(): DirectBadgeCount
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/broadcast/{item}/")
-    fun broadcast(
+    suspend fun broadcast(
         @Path("item") item: String,
         @FieldMap signedForm: Map<String, String>,
-    ): Call<DirectThreadBroadcastResponse?>
+    ): DirectThreadBroadcastResponse
 
     @FormUrlEncoded
     @POST("/api/v1/direct_v2/threads/{threadId}/add_user/")

@@ -74,15 +74,15 @@ class DirectThreadViewModel(
     }
 
     fun sendText(text: String): LiveData<Resource<Any?>> {
-        return threadManager.sendText(text)
+        return threadManager.sendText(text, viewModelScope)
     }
 
     fun sendUri(entry: MediaController.MediaEntry): LiveData<Resource<Any?>> {
-        return threadManager.sendUri(entry)
+        return threadManager.sendUri(entry, viewModelScope)
     }
 
     fun sendUri(uri: Uri): LiveData<Resource<Any?>> {
-        return threadManager.sendUri(uri)
+        return threadManager.sendUri(uri, viewModelScope)
     }
 
     fun startRecording(): LiveData<Resource<Any?>> {
@@ -106,12 +106,15 @@ class DirectThreadViewModel(
                     MediaUtils.getVoiceInfo(contentResolver, uri, object : OnInfoLoadListener<VideoInfo?> {
                         override fun onLoad(videoInfo: VideoInfo?) {
                             if (videoInfo == null) return
-                            threadManager.sendVoice(data,
+                            threadManager.sendVoice(
+                                data,
                                 uri,
                                 result.waveform,
                                 result.samplingFreq,
                                 videoInfo.duration,
-                                videoInfo.size)
+                                videoInfo.size,
+                                viewModelScope,
+                            )
                         }
 
                         override fun onFailure(t: Throwable) {
@@ -133,11 +136,11 @@ class DirectThreadViewModel(
     }
 
     fun sendReaction(item: DirectItem, emoji: Emoji): LiveData<Resource<Any?>> {
-        return threadManager.sendReaction(item, emoji)
+        return threadManager.sendReaction(item, emoji, viewModelScope)
     }
 
     fun sendDeleteReaction(itemId: String): LiveData<Resource<Any?>> {
-        return threadManager.sendDeleteReaction(itemId)
+        return threadManager.sendDeleteReaction(itemId, viewModelScope)
     }
 
     fun unsend(item: DirectItem): LiveData<Resource<Any?>> {
@@ -145,7 +148,7 @@ class DirectThreadViewModel(
     }
 
     fun sendAnimatedMedia(giphyGif: GiphyGif): LiveData<Resource<Any?>> {
-        return threadManager.sendAnimatedMedia(giphyGif)
+        return threadManager.sendAnimatedMedia(giphyGif, viewModelScope)
     }
 
     fun getUser(userId: Long): User? {
@@ -197,7 +200,7 @@ class DirectThreadViewModel(
                 return successEventResObjectLiveData
             }
         }
-        return threadManager.markAsSeen(directItem)
+        return threadManager.markAsSeen(directItem, viewModelScope)
     }
 
     private val successEventResObjectLiveData: MutableLiveData<Resource<Any?>>

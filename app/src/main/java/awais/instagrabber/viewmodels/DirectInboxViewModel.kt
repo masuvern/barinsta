@@ -32,5 +32,6 @@ class DirectInboxViewModel : ViewModel() {
 
     init {
         inboxManager.fetchInbox(viewModelScope)
+        inboxManager.fetchUnseenCount(viewModelScope)
     }
 }

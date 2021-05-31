@@ -21,8 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -66,49 +64,23 @@ class InboxManager private constructor(private val pending: Boolean) {
                 inbox.postValue(error(e.message, currentDirectInbox))
                 hasOlder = false
             }
-            // inboxRequest?.enqueue(object : Callback<DirectInboxResponse?> {
-            //     override fun onResponse(call: Call<DirectInboxResponse?>, response: Response<DirectInboxResponse?>) {
-            //         val body = response.body()
-            //         if (body == null) {
-            //             Log.e(TAG, "parseInboxResponse: Response is null")
-            //             inbox.postValue(error(R.string.generic_null_response, currentDirectInbox))
-            //             hasOlder = false
-            //             return
-            //         }
-            //
-            //     }
-            //
-            //     override fun onFailure(call: Call<DirectInboxResponse?>, t: Throwable) {
-            //         Log.e(TAG, "Failed fetching dm inbox", t)
-            //         inbox.postValue(error(t.message, currentDirectInbox))
-            //         hasOlder = false
-            //     }
-            // })
         }
     }
 
-    fun fetchUnseenCount() {
+    fun fetchUnseenCount(scope: CoroutineScope) {
         val unseenCountResource = unseenCount.value
         if (unseenCountResource != null && unseenCountResource.status === Resource.Status.LOADING) return
         stopCurrentUnseenCountRequest()
         unseenCount.postValue(loading(currentUnseenCount))
-        unseenCountRequest = service.fetchUnseenCount()
-        unseenCountRequest?.enqueue(object : Callback<DirectBadgeCount?> {
-            override fun onResponse(call: Call<DirectBadgeCount?>, response: Response<DirectBadgeCount?>) {
-                val directBadgeCount = response.body()
-                if (directBadgeCount == null) {
-                    Log.e(TAG, "onResponse: directBadgeCount Response is null")
-                    unseenCount.postValue(error(R.string.dms_inbox_error_null_count, currentUnseenCount))
-                    return
-                }
+        scope.launch(Dispatchers.IO) {
+            try {
+                val directBadgeCount = service.fetchUnseenCount()
                 unseenCount.postValue(success(directBadgeCount.badgeCount))
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed fetching unseen count", e)
+                unseenCount.postValue(error(e.message, currentUnseenCount))
             }
-
-            override fun onFailure(call: Call<DirectBadgeCount?>, t: Throwable) {
-                Log.e(TAG, "Failed fetching unseen count", t)
-                unseenCount.postValue(error(t.message, currentUnseenCount))
-            }
-        })
+        }
     }
 
     fun refresh(scope: CoroutineScope) {
@@ -117,7 +89,7 @@ class InboxManager private constructor(private val pending: Boolean) {
         hasOlder = true
         fetchInbox(scope)
         if (!pending) {
-            fetchUnseenCount()
+            fetchUnseenCount(scope)
         }
     }
 
@@ -350,9 +322,5 @@ class InboxManager private constructor(private val pending: Boolean) {
             val threads = inbox?.threads ?: emptyList()
             ImmutableList.sortedCopyOf(THREAD_COMPARATOR, threads)
         })
-        // fetchInbox()
-        if (!pending) {
-            fetchUnseenCount()
-        }
     }
 }
