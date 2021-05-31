@@ -84,6 +84,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private int downloadChildPosition = -1;
     private CollectionService collectionService;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_SAVED_POSTS_LAYOUT);
+    private MenuItem deleteMenu, editMenu;
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -281,8 +282,13 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
-        // delaying to make toolbar resume animation smooth, otherwise lags
-        binding.getRoot().postDelayed(() -> inflater.inflate(R.menu.collection_posts_menu, menu), 500);
+        inflater.inflate(R.menu.collection_posts_menu, menu);
+        deleteMenu = menu.findItem(R.id.delete);
+        if (deleteMenu != null)
+            deleteMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
+        editMenu = menu.findItem(R.id.edit);
+        if (editMenu != null)
+            editMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
     }
 
     @Override
@@ -297,7 +303,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                     .setTitle(R.string.delete_collection)
                     .setMessage(R.string.delete_collection_note)
                     .setPositiveButton(R.string.confirm, (d, w) -> collectionService.deleteCollection(
-                            savedCollection.getId(),
+                            savedCollection.getCollectionId(),
                             new ServiceCallback<String>() {
                                 @Override
                                 public void onSuccess(final String result) {
@@ -325,7 +331,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                     .setTitle(R.string.edit_collection)
                     .setView(input)
                     .setPositiveButton(R.string.confirm, (d, w) -> collectionService.editCollectionName(
-                            savedCollection.getId(),
+                            savedCollection.getCollectionId(),
                             input.getText().toString(),
                             new ServiceCallback<String>() {
                                 @Override
@@ -408,9 +414,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         if (savedCollection == null) {
             return;
         }
-        binding.cover.setTransitionName("collection-" + savedCollection.getId());
+        binding.cover.setTransitionName("collection-" + savedCollection.getCollectionId());
         fragmentActivity.setToolbar(binding.toolbar);
-        binding.collapsingToolbarLayout.setTitle(savedCollection.getTitle());
+        binding.collapsingToolbarLayout.setTitle(savedCollection.getCollectionName());
         final int collapsedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0xFF);
         final int expandedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0x99);
         binding.collapsingToolbarLayout.setExpandedTitleColor(expandedTitleTextColor);
@@ -442,9 +448,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void setupCover() {
-        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMedias() == null
+        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMediaList() == null
                                                               ? savedCollection.getCoverMedia()
-                                                              : savedCollection.getCoverMedias().get(0));
+                                                              : savedCollection.getCoverMediaList().get(0));
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())
@@ -471,7 +477,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private void setupPosts() {
         binding.posts.setViewModelStoreOwner(this)
                      .setLifeCycleOwner(this)
-                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getId()))
+                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getCollectionId()))
                      .setLayoutPreferences(layoutPreferences)
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)
@@ -493,7 +499,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     private void showPostsLayoutPreferences() {
         final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(
-                Constants.PREF_TOPIC_POSTS_LAYOUT,
+                Constants.PREF_SAVED_POSTS_LAYOUT,
                 preferences -> {
                     layoutPreferences = preferences;
                     new Handler().postDelayed(() -> binding.posts.setLayoutPreferences(preferences), 200);

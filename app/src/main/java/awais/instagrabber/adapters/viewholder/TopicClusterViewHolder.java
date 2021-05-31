@@ -128,11 +128,11 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
                     backgroundColor.get()
             ));
         }
-        // binding.title.setTransitionName("title-" + topicCluster.getId());
-        binding.cover.setTransitionName("cover-" + topicCluster.getId());
-        final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMedias() == null
+        // binding.title.setTransitionName("title-" + topicCluster.getCollectionId());
+        binding.cover.setTransitionName("cover-" + topicCluster.getCollectionId());
+        final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMediaList() == null
                                                               ? topicCluster.getCoverMedia()
-                                                              : topicCluster.getCoverMedias().get(0));
+                                                              : topicCluster.getCoverMediaList().get(0));
         if (thumbUrl == null) {
             binding.cover.setImageURI((String) null);
         } else {
@@ -174,6 +174,6 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
             }, CallerThreadExecutor.getInstance());
             binding.cover.setImageRequest(imageRequest);
         }
-        binding.title.setText(topicCluster.getTitle());
+        binding.title.setText(topicCluster.getCollectionName());
     }
 }

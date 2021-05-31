@@ -21,7 +21,7 @@ class Comment(
         return hasLikedComment
     }
 
-    fun setLiked(liked: Boolean) {
+    fun setLiked(hasLikedComment: Boolean) {
         commentLikeCount = if (hasLikedComment) commentLikeCount + 1 else commentLikeCount - 1
         this.hasLikedComment = hasLikedComment
     }

@@ -1,8 +1,8 @@
-package awais.instagrabber.models.enums;
+package awais.instagrabber.models.enums
 
-import com.google.gson.annotations.SerializedName;
+import com.google.gson.annotations.SerializedName
 
-public enum RavenMediaViewMode {
+enum class RavenMediaViewMode {
     @SerializedName("permanent")
     PERMANENT,
     @SerializedName("replayable")

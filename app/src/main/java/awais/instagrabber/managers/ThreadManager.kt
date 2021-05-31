@@ -10,6 +10,7 @@ import androidx.lifecycle.Transformations.distinctUntilChanged
 import androidx.lifecycle.Transformations.map
 import awais.instagrabber.R
 import awais.instagrabber.customviews.emoji.Emoji
+import awais.instagrabber.models.enums.DirectItemType.Companion.getName
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
@@ -659,7 +660,7 @@ class ThreadManager private constructor(
             data.postValue(error("item type is null", null))
             return data
         }
-        val itemTypeName = itemType.getName()
+        val itemTypeName = getName(itemType)
         if (itemTypeName == null) {
             Log.e(TAG, "forward: itemTypeName was null!")
             data.postValue(error("itemTypeName is null", null))
