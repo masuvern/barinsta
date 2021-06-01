@@ -1,282 +1,238 @@
-package awais.instagrabber.fragments.directmessages;
+package awais.instagrabber.fragments.directmessages
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.*
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
+import awais.instagrabber.R
+import awais.instagrabber.activities.MainActivity
+import awais.instagrabber.adapters.DirectMessageInboxAdapter
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge
+import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding
+import awais.instagrabber.models.Resource
+import awais.instagrabber.repositories.responses.directmessages.DirectInbox
+import awais.instagrabber.repositories.responses.directmessages.DirectThread
+import awais.instagrabber.utils.extensions.TAG
+import awais.instagrabber.viewmodels.DirectInboxViewModel
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
+import com.google.android.material.internal.ToolbarUtils
+import com.google.android.material.snackbar.Snackbar
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.view.menu.ActionMenuItemView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
+    private lateinit var fragmentActivity: MainActivity
+    private lateinit var viewModel: DirectInboxViewModel
+    private lateinit var root: CoordinatorLayout
+    private lateinit var binding: FragmentDirectMessagesInboxBinding
+    private lateinit var inboxAdapter: DirectMessageInboxAdapter
+    private lateinit var lazyLoader: RecyclerLazyLoaderAtEdge
 
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.badge.BadgeUtils;
-import com.google.android.material.internal.ToolbarUtils;
-import com.google.android.material.snackbar.Snackbar;
+    private var shouldRefresh = true
+    // private var receiver: DMRefreshBroadcastReceiver? = null
+    private var scrollToTop = false
+    private var navigating = false
+    private var threadsObserver: Observer<List<DirectThread?>>? = null
+    private var pendingRequestsMenuItem: MenuItem? = null
+    private var pendingRequestTotalBadgeDrawable: BadgeDrawable? = null
+    private var isPendingRequestTotalBadgeAttached = false
 
-import java.util.List;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fragmentActivity = requireActivity() as MainActivity
+        viewModel = ViewModelProvider(fragmentActivity).get(DirectInboxViewModel::class.java)
+        setHasOptionsMenu(true)
+    }
 
-import awais.instagrabber.R;
-import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.adapters.DirectMessageInboxAdapter;
-import awais.instagrabber.broadcasts.DMRefreshBroadcastReceiver;
-import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
-import awais.instagrabber.databinding.FragmentDirectMessagesInboxBinding;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.viewmodels.DirectInboxViewModel;
-
-public class DirectMessageInboxFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final String TAG = "DirectMessagesInboxFrag";
-
-    private CoordinatorLayout root;
-    private RecyclerLazyLoaderAtEdge lazyLoader;
-    private DirectInboxViewModel viewModel;
-    private boolean shouldRefresh = true;
-    private FragmentDirectMessagesInboxBinding binding;
-    private DMRefreshBroadcastReceiver receiver;
-    private DirectMessageInboxAdapter inboxAdapter;
-    private MainActivity fragmentActivity;
-    private boolean scrollToTop = false;
-    private boolean navigating;
-    private Observer<List<DirectThread>> threadsObserver;
-    private MenuItem pendingRequestsMenuItem;
-    private BadgeDrawable pendingRequestTotalBadgeDrawable;
-    private boolean isPendingRequestTotalBadgeAttached;
-
-    @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        fragmentActivity = (MainActivity) getActivity();
-        if (fragmentActivity != null) {
-            viewModel = new ViewModelProvider(fragmentActivity).get(DirectInboxViewModel.class);
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        if (this::root.isInitialized) {
+            shouldRefresh = false
+            return root
         }
-        setHasOptionsMenu(true);
+        binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false)
+        root = binding.root
+        return root
     }
 
-    @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
-        if (root != null) {
-            shouldRefresh = false;
-            return root;
-        }
-        binding = FragmentDirectMessagesInboxBinding.inflate(inflater, container, false);
-        root = binding.getRoot();
-        return root;
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (!shouldRefresh) return
+        init()
     }
 
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        if (!shouldRefresh) return;
-        init();
+    override fun onRefresh() {
+        lazyLoader.resetState()
+        scrollToTop = true
+        viewModel.refresh()
     }
 
-    @Override
-    public void onRefresh() {
-        lazyLoader.resetState();
-        scrollToTop = true;
-        if (viewModel != null) {
-            viewModel.refresh();
-        }
-    }
-
-    @SuppressLint({"UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
-    @Override
-    public void onPause() {
-        super.onPause();
-        unregisterReceiver();
-        isPendingRequestTotalBadgeAttached = false;
-        @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
-                .getActionMenuItemView(fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
-        if (pendingRequestTotalBadgeDrawable != null && menuItemView != null) {
-            BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
-            pendingRequestTotalBadgeDrawable = null;
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setupObservers();
-        final Context context = getContext();
-        if (context == null) return;
-        receiver = new DMRefreshBroadcastReceiver(() -> {
-            Log.d(TAG, "onResume: broadcast received");
-            // refreshInbox = true;
-        });
-        context.registerReceiver(receiver, new IntentFilter(DMRefreshBroadcastReceiver.ACTION_REFRESH_DM));
-    }
-
-    @SuppressLint("UnsafeExperimentalUsageError")
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unregisterReceiver();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
-        inflater.inflate(R.menu.dm_inbox_menu, menu);
-        pendingRequestsMenuItem = menu.findItem(R.id.pending_requests);
-        pendingRequestsMenuItem.setVisible(isPendingRequestTotalBadgeAttached);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        if (item.getItemId() == R.id.pending_requests) {
-            final NavDirections directions = DirectMessageInboxFragmentDirections.actionInboxToPendingInbox();
-            try {
-                NavHostFragment.findNavController(this).navigate(directions);
-            } catch (Exception e) {
-                Log.e(TAG, "onOptionsItemSelected: ", e);
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    override fun onPause() {
+        super.onPause()
+        // unregisterReceiver()
+        isPendingRequestTotalBadgeAttached = false
+        pendingRequestsMenuItem?.let {
+            @SuppressLint("RestrictedApi") val menuItemView = ToolbarUtils.getActionMenuItemView(fragmentActivity.toolbar, it.itemId)
+            if (menuItemView != null) {
+                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.toolbar, it.itemId)
+                pendingRequestTotalBadgeDrawable = null
             }
-            return true;
         }
-        return super.onOptionsItemSelected(item);
     }
 
-    private void unregisterReceiver() {
-        if (receiver == null) return;
-        final Context context = getContext();
-        if (context == null) return;
-        context.unregisterReceiver(receiver);
-        receiver = null;
+    override fun onResume() {
+        super.onResume()
+        setupObservers()
+        // val context = context ?: return
+        // receiver = DMRefreshBroadcastReceiver { Log.d(TAG, "onResume: broadcast received") }
+        // context.registerReceiver(receiver, IntentFilter(DMRefreshBroadcastReceiver.ACTION_REFRESH_DM))
     }
 
-    @Override
-    public void onConfigurationChanged(@NonNull final Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        init();
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.dm_inbox_menu, menu)
+        pendingRequestsMenuItem = menu.findItem(R.id.pending_requests)
+        pendingRequestsMenuItem?.isVisible = isPendingRequestTotalBadgeAttached
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        removeViewModelObservers();
-        viewModel.onDestroy();
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.pending_requests) {
+            val directions = DirectMessageInboxFragmentDirections.actionInboxToPendingInbox()
+            try {
+                NavHostFragment.findNavController(this).navigate(directions)
+            } catch (e: Exception) {
+                Log.e(TAG, "onOptionsItemSelected: ", e)
+            }
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
-    private void setupObservers() {
-        removeViewModelObservers();
-        threadsObserver = list -> {
-            if (inboxAdapter == null) return;
-            inboxAdapter.submitList(list, () -> {
-                if (!scrollToTop) return;
-                binding.inboxList.post(() -> binding.inboxList.smoothScrollToPosition(0));
-                scrollToTop = false;
-            });
-        };
-        viewModel.getThreads().observe(fragmentActivity, threadsObserver);
-        viewModel.getInbox().observe(getViewLifecycleOwner(), inboxResource -> {
-            if (inboxResource == null) return;
-            switch (inboxResource.status) {
-                case SUCCESS:
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    break;
-                case ERROR:
+    // private fun unregisterReceiver() {
+    //     if (receiver == null) return
+    //     val context = context ?: return
+    //     context.unregisterReceiver(receiver)
+    //     receiver = null
+    // }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        init()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        removeViewModelObservers()
+        viewModel.onDestroy()
+    }
+
+    private fun setupObservers() {
+        removeViewModelObservers()
+        threadsObserver = Observer { list: List<DirectThread?> ->
+            inboxAdapter.submitList(list) {
+                if (!scrollToTop) return@submitList
+                binding.inboxList.post { binding.inboxList.smoothScrollToPosition(0) }
+                scrollToTop = false
+            }
+        }
+        threadsObserver?.let { viewModel.threads.observe(fragmentActivity, it) }
+        viewModel.inbox.observe(viewLifecycleOwner, { inboxResource: Resource<DirectInbox?>? ->
+            if (inboxResource == null) return@observe
+            when (inboxResource.status) {
+                Resource.Status.SUCCESS -> binding.swipeRefreshLayout.isRefreshing = false
+                Resource.Status.ERROR -> {
                     if (inboxResource.message != null) {
-                        Snackbar.make(binding.getRoot(), inboxResource.message, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(binding.root, inboxResource.message, Snackbar.LENGTH_LONG).show()
                     }
                     if (inboxResource.resId != 0) {
-                        Snackbar.make(binding.getRoot(), inboxResource.resId, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(binding.root, inboxResource.resId, Snackbar.LENGTH_LONG).show()
                     }
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    break;
-                case LOADING:
-                    binding.swipeRefreshLayout.setRefreshing(true);
-                    break;
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
+                Resource.Status.LOADING -> binding.swipeRefreshLayout.isRefreshing = true
             }
-        });
-        viewModel.getPendingRequestsTotal().observe(getViewLifecycleOwner(), this::attachPendingRequestsBadge);
+        })
+        viewModel.pendingRequestsTotal.observe(viewLifecycleOwner, { count: Int? -> attachPendingRequestsBadge(count) })
     }
 
-    @SuppressLint({"UnsafeExperimentalUsageError", "UnsafeOptInUsageError"})
-    private void attachPendingRequestsBadge(@Nullable final Integer count) {
-        if (pendingRequestsMenuItem == null) {
-            final Handler handler = new Handler();
-            handler.postDelayed(() -> attachPendingRequestsBadge(count), 500);
-            return;
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    private fun attachPendingRequestsBadge(count: Int?) {
+        val pendingRequestsMenuItem1 = pendingRequestsMenuItem
+        if (pendingRequestsMenuItem1 == null) {
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed({ attachPendingRequestsBadge(count) }, 500)
+            return
         }
         if (pendingRequestTotalBadgeDrawable == null) {
-            final Context context = getContext();
-            if (context == null) return;
-            pendingRequestTotalBadgeDrawable = BadgeDrawable.create(context);
+            val context = context ?: return
+            pendingRequestTotalBadgeDrawable = BadgeDrawable.create(context)
         }
         if (count == null || count == 0) {
-            @SuppressLint("RestrictedApi") final ActionMenuItemView menuItemView = ToolbarUtils
-                    .getActionMenuItemView(fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+            @SuppressLint("RestrictedApi") val menuItemView = ToolbarUtils.getActionMenuItemView(
+                fragmentActivity.toolbar,
+                pendingRequestsMenuItem1.itemId
+            )
             if (menuItemView != null) {
-                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
+                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.toolbar, pendingRequestsMenuItem1.itemId)
             }
-            isPendingRequestTotalBadgeAttached = false;
-            pendingRequestTotalBadgeDrawable.setNumber(0);
-            pendingRequestsMenuItem.setVisible(false);
-            return;
+            isPendingRequestTotalBadgeAttached = false
+            pendingRequestTotalBadgeDrawable?.number = 0
+            pendingRequestsMenuItem1.isVisible = false
+            return
         }
-        pendingRequestsMenuItem.setVisible(true);
-        if (pendingRequestTotalBadgeDrawable.getNumber() == count) return;
-        pendingRequestTotalBadgeDrawable.setNumber(count);
+        pendingRequestsMenuItem1.isVisible = true
+        if (pendingRequestTotalBadgeDrawable?.number == count) return
+        pendingRequestTotalBadgeDrawable?.number = count
         if (!isPendingRequestTotalBadgeAttached) {
-            BadgeUtils.attachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem.getItemId());
-            isPendingRequestTotalBadgeAttached = true;
+            pendingRequestTotalBadgeDrawable?.let {
+                BadgeUtils.attachBadgeDrawable(it, fragmentActivity.toolbar, pendingRequestsMenuItem1.itemId)
+                isPendingRequestTotalBadgeAttached = true
+            }
         }
     }
 
-    private void removeViewModelObservers() {
-        if (viewModel == null) return;
-        if (threadsObserver != null) {
-            viewModel.getThreads().removeObserver(threadsObserver);
-        }
+    private fun removeViewModelObservers() {
+        threadsObserver?.let { viewModel.threads.removeObserver(it) }
         // no need to explicitly remove observers whose lifecycle owner is getViewLifecycleOwner
     }
 
-    private void init() {
-        final Context context = getContext();
-        if (context == null) return;
-        setupObservers();
-        binding.swipeRefreshLayout.setOnRefreshListener(this);
-        binding.inboxList.setHasFixedSize(true);
-        binding.inboxList.setItemViewCacheSize(20);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        binding.inboxList.setLayoutManager(layoutManager);
-        inboxAdapter = new DirectMessageInboxAdapter(thread -> {
-            if (navigating) return;
-            navigating = true;
-            if (isAdded()) {
-                final DirectMessageInboxFragmentDirections.ActionInboxToThread directions = DirectMessageInboxFragmentDirections
-                        .actionInboxToThread(thread.getThreadId(), thread.getThreadTitle());
+    private fun init() {
+        val context = context ?: return
+        setupObservers()
+        binding.swipeRefreshLayout.setOnRefreshListener(this)
+        binding.inboxList.setHasFixedSize(true)
+        binding.inboxList.setItemViewCacheSize(20)
+        val layoutManager = LinearLayoutManager(context)
+        binding.inboxList.layoutManager = layoutManager
+        inboxAdapter = DirectMessageInboxAdapter { thread ->
+            val threadId = thread.threadId
+            val threadTitle = thread.threadTitle
+            if (navigating || threadId.isNullOrBlank() || threadTitle.isNullOrBlank()) return@DirectMessageInboxAdapter
+            navigating = true
+            if (isAdded) {
+                val directions = DirectMessageInboxFragmentDirections.actionInboxToThread(threadId, threadTitle)
                 try {
-                    NavHostFragment.findNavController(this).navigate(directions);
-                } catch (Exception e) {
-                    Log.e(TAG, "init: ", e);
+                    NavHostFragment.findNavController(this).navigate(directions)
+                } catch (e: Exception) {
+                    Log.e(TAG, "init: ", e)
                 }
             }
-            navigating = false;
-        });
-        inboxAdapter.setHasStableIds(true);
-        binding.inboxList.setAdapter(inboxAdapter);
-        lazyLoader = new RecyclerLazyLoaderAtEdge(layoutManager, page -> {
-            if (viewModel == null) return;
-            viewModel.fetchInbox();
-        });
-        binding.inboxList.addOnScrollListener(lazyLoader);
+            navigating = false
+        }
+        inboxAdapter.setHasStableIds(true)
+        binding.inboxList.adapter = inboxAdapter
+        lazyLoader = RecyclerLazyLoaderAtEdge(layoutManager) { viewModel.fetchInbox() }
+        lazyLoader.let { binding.inboxList.addOnScrollListener(it) }
     }
 }

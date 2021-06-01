@@ -753,10 +753,9 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         EmojiCompat.init(config)
     }
 
-    var toolbar: Toolbar?
+    var toolbar: Toolbar
         get() = binding.toolbar
         set(toolbar) {
-            toolbar ?: return
             binding.appBarLayout.visibility = View.GONE
             removeScrollingBehaviour()
             setSupportActionBar(toolbar)
