@@ -185,8 +185,9 @@ public class CommentsViewerViewModel extends ViewModel {
             list = getPrevList(replyList);
         }
         replyList.postValue(Resource.loading(list));
-        if (isLoggedIn.getValue()) {
-            commentService.fetchChildComments(postId, commentId, rootCursor, rcb);
+        final Boolean isLoggedInValue = isLoggedIn.getValue();
+        if (isLoggedInValue != null && isLoggedInValue) {
+            commentService.fetchChildComments(postId, commentId, repliesCursor, rcb);
             return;
         }
         final Call<String> request = graphQLService.fetchComments(commentId, false, repliesCursor);
@@ -224,8 +225,8 @@ public class CommentsViewerViewModel extends ViewModel {
                         builder.add(commentModel);
                     }
                     callback.onSuccess(root ?
-                            new CommentsFetchResponse(count, endCursor, builder.build()) :
-                            new ChildCommentsFetchResponse(count, endCursor, builder.build()));
+                                       new CommentsFetchResponse(count, endCursor, builder.build()) :
+                                       new ChildCommentsFetchResponse(count, endCursor, builder.build()));
                 } catch (Exception e) {
                     Log.e(TAG, "onResponse", e);
                     callback.onFailure(e);

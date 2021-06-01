@@ -79,7 +79,6 @@ public class CommentService extends BaseService {
         request.enqueue(new Callback<CommentsFetchResponse>() {
             @Override
             public void onResponse(@NonNull final Call<CommentsFetchResponse> call, @NonNull final Response<CommentsFetchResponse> response) {
-                if (callback == null) return;
                 final CommentsFetchResponse cfr = response.body();
                 if (cfr == null) callback.onFailure(new Exception("response is empty"));
                 callback.onSuccess(cfr);
@@ -102,7 +101,6 @@ public class CommentService extends BaseService {
         request.enqueue(new Callback<ChildCommentsFetchResponse>() {
             @Override
             public void onResponse(@NonNull final Call<ChildCommentsFetchResponse> call, @NonNull final Response<ChildCommentsFetchResponse> response) {
-                if (callback == null) return;
                 final ChildCommentsFetchResponse cfr = response.body();
                 if (cfr == null) callback.onFailure(new Exception("response is empty"));
                 callback.onSuccess(cfr);
