@@ -1,175 +1,148 @@
-package awais.instagrabber.fragments.directmessages;
+package awais.instagrabber.fragments.directmessages
 
-import android.content.Context;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.res.Configuration
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
+import awais.instagrabber.activities.MainActivity
+import awais.instagrabber.adapters.DirectMessageInboxAdapter
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge
+import awais.instagrabber.databinding.FragmentDirectPendingInboxBinding
+import awais.instagrabber.models.Resource
+import awais.instagrabber.repositories.responses.directmessages.DirectInbox
+import awais.instagrabber.repositories.responses.directmessages.DirectThread
+import awais.instagrabber.viewmodels.DirectPendingInboxViewModel
+import com.google.android.material.snackbar.Snackbar
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+class DirectPendingInboxFragment : Fragment(), OnRefreshListener {
+    private val viewModel: DirectPendingInboxViewModel by activityViewModels()
 
-import com.google.android.material.snackbar.Snackbar;
+    private lateinit var root: CoordinatorLayout
+    private lateinit var lazyLoader: RecyclerLazyLoaderAtEdge
+    private lateinit var binding: FragmentDirectPendingInboxBinding
+    private lateinit var fragmentActivity: MainActivity
+    private lateinit var inboxAdapter: DirectMessageInboxAdapter
 
-import java.util.Collections;
-import java.util.List;
+    private var shouldRefresh = true
+    private var scrollToTop = false
+    private var navigating = false
+    private var threadsObserver: Observer<List<DirectThread?>>? = null
 
-import awais.instagrabber.activities.MainActivity;
-import awais.instagrabber.adapters.DirectMessageInboxAdapter;
-import awais.instagrabber.customviews.helpers.RecyclerLazyLoaderAtEdge;
-import awais.instagrabber.databinding.FragmentDirectPendingInboxBinding;
-import awais.instagrabber.repositories.responses.directmessages.DirectThread;
-import awais.instagrabber.viewmodels.DirectPendingInboxViewModel;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fragmentActivity = requireActivity() as MainActivity
+    }
 
-public class DirectPendingInboxFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final String TAG = DirectPendingInboxFragment.class.getSimpleName();
-
-    private CoordinatorLayout root;
-    private RecyclerLazyLoaderAtEdge lazyLoader;
-    private DirectPendingInboxViewModel viewModel;
-    private boolean shouldRefresh = true;
-    private FragmentDirectPendingInboxBinding binding;
-    private DirectMessageInboxAdapter inboxAdapter;
-    private MainActivity fragmentActivity;
-    private boolean scrollToTop = false;
-    private boolean navigating;
-    private Observer<List<DirectThread>> threadsObserver;
-
-    @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        fragmentActivity = (MainActivity) getActivity();
-        if (fragmentActivity != null) {
-            viewModel = new ViewModelProvider(fragmentActivity).get(DirectPendingInboxViewModel.class);
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        if (this::root.isInitialized) {
+            shouldRefresh = false
+            return root
         }
+        binding = FragmentDirectPendingInboxBinding.inflate(inflater, container, false)
+        root = binding.root
+        return root
     }
 
-    @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater,
-                             final ViewGroup container,
-                             final Bundle savedInstanceState) {
-        if (root != null) {
-            shouldRefresh = false;
-            return root;
-        }
-        binding = FragmentDirectPendingInboxBinding.inflate(inflater, container, false);
-        root = binding.getRoot();
-        return root;
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (!shouldRefresh) return
+        init()
     }
 
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        if (!shouldRefresh) return;
-        init();
+    override fun onRefresh() {
+        lazyLoader.resetState()
+        scrollToTop = true
+        viewModel.refresh()
     }
 
-    @Override
-    public void onRefresh() {
-        lazyLoader.resetState();
-        scrollToTop = true;
-        if (viewModel != null) {
-            viewModel.refresh();
-        }
+    override fun onResume() {
+        super.onResume()
+        setupObservers()
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        setupObservers();
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        init()
     }
 
-    @Override
-    public void onConfigurationChanged(@NonNull final Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        init();
+    override fun onDestroy() {
+        super.onDestroy()
+        removeViewModelObservers()
+        viewModel.onDestroy()
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        removeViewModelObservers();
-        viewModel.onDestroy();
-    }
-
-    private void setupObservers() {
-        removeViewModelObservers();
-        threadsObserver = list -> {
-            if (inboxAdapter == null) return;
-            if (binding.swipeRefreshLayout.getVisibility() == View.GONE) {
-                binding.swipeRefreshLayout.setVisibility(View.VISIBLE);
-                binding.empty.setVisibility(View.GONE);
+    private fun setupObservers() {
+        removeViewModelObservers()
+        threadsObserver = Observer { list: List<DirectThread?>? ->
+            if (!this::inboxAdapter.isInitialized) return@Observer
+            if (binding.swipeRefreshLayout.visibility == View.GONE) {
+                binding.swipeRefreshLayout.visibility = View.VISIBLE
+                binding.empty.visibility = View.GONE
             }
-            inboxAdapter.submitList(list == null ? Collections.emptyList() : list, () -> {
-                if (!scrollToTop) return;
-                binding.pendingInboxList.smoothScrollToPosition(0);
-                scrollToTop = false;
-            });
+            inboxAdapter.submitList(list ?: emptyList()) {
+                if (!scrollToTop) return@submitList
+                binding.pendingInboxList.smoothScrollToPosition(0)
+                scrollToTop = false
+            }
             if (list == null || list.isEmpty()) {
-                binding.swipeRefreshLayout.setVisibility(View.GONE);
-                binding.empty.setVisibility(View.VISIBLE);
+                binding.swipeRefreshLayout.visibility = View.GONE
+                binding.empty.visibility = View.VISIBLE
             }
-        };
-        viewModel.getThreads().observe(fragmentActivity, threadsObserver);
-        viewModel.getInbox().observe(getViewLifecycleOwner(), inboxResource -> {
-            if (inboxResource == null) return;
-            switch (inboxResource.status) {
-                case SUCCESS:
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    break;
-                case ERROR:
-                    if (inboxResource.message != null) {
-                        Snackbar.make(binding.getRoot(), inboxResource.message, Snackbar.LENGTH_LONG).show();
-                    }
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    break;
-                case LOADING:
-                    binding.swipeRefreshLayout.setRefreshing(true);
-                    break;
-            }
-        });
-    }
-
-    private void removeViewModelObservers() {
-        if (viewModel == null) return;
-        if (threadsObserver != null) {
-            viewModel.getThreads().removeObserver(threadsObserver);
         }
+        threadsObserver?.let { viewModel.threads.observe(fragmentActivity, it) }
+        viewModel.inbox.observe(viewLifecycleOwner, { inboxResource: Resource<DirectInbox?>? ->
+            if (inboxResource == null) return@observe
+            when (inboxResource.status) {
+                Resource.Status.SUCCESS -> binding.swipeRefreshLayout.isRefreshing = false
+                Resource.Status.ERROR -> {
+                    if (inboxResource.message != null) {
+                        Snackbar.make(binding.root, inboxResource.message, Snackbar.LENGTH_LONG).show()
+                    }
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
+                Resource.Status.LOADING -> binding.swipeRefreshLayout.isRefreshing = true
+            }
+        })
     }
 
-    private void init() {
-        final Context context = getContext();
-        if (context == null) return;
-        setupObservers();
-        binding.swipeRefreshLayout.setOnRefreshListener(this);
-        binding.pendingInboxList.setHasFixedSize(true);
-        binding.pendingInboxList.setItemViewCacheSize(20);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        binding.pendingInboxList.setLayoutManager(layoutManager);
-        inboxAdapter = new DirectMessageInboxAdapter(thread -> {
-            if (navigating) return;
-            navigating = true;
-            if (isAdded()) {
-                final DirectPendingInboxFragmentDirections.ActionPendingInboxToThread directions = DirectPendingInboxFragmentDirections
-                        .actionPendingInboxToThread(thread.getThreadId(), thread.getThreadTitle());
-                directions.setPending(true);
-                NavHostFragment.findNavController(this).navigate(directions);
+    private fun removeViewModelObservers() {
+        threadsObserver?.let { viewModel.threads.removeObserver(it) }
+    }
+
+    private fun init() {
+        val context = context ?: return
+        setupObservers()
+        binding.swipeRefreshLayout.setOnRefreshListener(this)
+        binding.pendingInboxList.setHasFixedSize(true)
+        binding.pendingInboxList.setItemViewCacheSize(20)
+        val layoutManager = LinearLayoutManager(context)
+        binding.pendingInboxList.layoutManager = layoutManager
+        inboxAdapter = DirectMessageInboxAdapter { thread ->
+            if (navigating) return@DirectMessageInboxAdapter
+            val threadId = thread.threadId ?: return@DirectMessageInboxAdapter
+            val threadTitle = thread.threadTitle ?: return@DirectMessageInboxAdapter
+            navigating = true
+            if (isAdded) {
+                val directions = DirectPendingInboxFragmentDirections.actionPendingInboxToThread(threadId, threadTitle)
+                directions.pending = true
+                NavHostFragment.findNavController(this).navigate(directions)
             }
-            navigating = false;
-        });
-        inboxAdapter.setHasStableIds(true);
-        binding.pendingInboxList.setAdapter(inboxAdapter);
-        lazyLoader = new RecyclerLazyLoaderAtEdge(layoutManager, page -> {
-            if (viewModel == null) return;
-            viewModel.fetchInbox();
-        });
-        binding.pendingInboxList.addOnScrollListener(lazyLoader);
+            navigating = false
+        }
+        inboxAdapter.setHasStableIds(true)
+        binding.pendingInboxList.adapter = inboxAdapter
+        lazyLoader = RecyclerLazyLoaderAtEdge(layoutManager) { viewModel.fetchInbox() }
+        binding.pendingInboxList.addOnScrollListener(lazyLoader)
     }
 }
