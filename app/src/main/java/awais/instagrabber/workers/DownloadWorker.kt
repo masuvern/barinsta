@@ -1,399 +1,383 @@
-package awais.instagrabber.workers;
+package awais.instagrabber.workers
 
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import android.app.Notification
+import android.app.PendingIntent
+import android.content.ContentResolver
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.FileProvider
+import androidx.work.CoroutineWorker
+import androidx.work.Data
+import androidx.work.ForegroundInfo
+import androidx.work.WorkerParameters
+import awais.instagrabber.BuildConfig
+import awais.instagrabber.R
+import awais.instagrabber.services.DeleteImageIntentService
+import awais.instagrabber.utils.BitmapUtils
+import awais.instagrabber.utils.Constants.DOWNLOAD_CHANNEL_ID
+import awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME
+import awais.instagrabber.utils.DownloadUtils
+import awais.instagrabber.utils.TextUtils.isEmpty
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.extensions.TAG
+import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.apache.commons.imaging.formats.jpeg.iptc.JpegIptcRewriter
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.net.URL
+import java.util.*
+import java.util.concurrent.ExecutionException
+import kotlin.math.abs
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.FileProvider;
-import androidx.work.Data;
-import androidx.work.ForegroundInfo;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
+class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+    private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(context)
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
-import org.apache.commons.imaging.formats.jpeg.iptc.JpegIptcRewriter;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import awais.instagrabber.BuildConfig;
-import awais.instagrabber.R;
-import awais.instagrabber.services.DeleteImageIntentService;
-import awais.instagrabber.utils.BitmapUtils;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DownloadUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
-
-import static awais.instagrabber.utils.BitmapUtils.THUMBNAIL_SIZE;
-import static awais.instagrabber.utils.Constants.DOWNLOAD_CHANNEL_ID;
-import static awais.instagrabber.utils.Constants.NOTIF_GROUP_NAME;
-
-public class DownloadWorker extends Worker {
-    private static final String TAG = "DownloadWorker";
-    private static final String DOWNLOAD_GROUP = "DOWNLOAD_GROUP";
-
-    public static final String PROGRESS = "PROGRESS";
-    public static final String URL = "URL";
-    public static final String KEY_DOWNLOAD_REQUEST_JSON = "download_request_json";
-    public static final int DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE = 2020;
-    public static final int DELETE_IMAGE_REQUEST_CODE = 2030;
-
-    private final NotificationManagerCompat notificationManager;
-
-    public DownloadWorker(@NonNull final Context context, @NonNull final WorkerParameters workerParams) {
-        super(context, workerParams);
-        notificationManager = NotificationManagerCompat.from(context);
-    }
-
-    @NonNull
-    @Override
-    public Result doWork() {
-        final String downloadRequestFilePath = getInputData().getString(KEY_DOWNLOAD_REQUEST_JSON);
-        if (TextUtils.isEmpty(downloadRequestFilePath)) {
-            return Result.failure(new Data.Builder()
-                                          .putString("error", "downloadRequest is empty or null")
-                                          .build());
+    override suspend fun doWork(): Result {
+        val downloadRequestFilePath = inputData.getString(KEY_DOWNLOAD_REQUEST_JSON)
+        if (downloadRequestFilePath.isNullOrBlank()) {
+            return Result.failure(Data.Builder()
+                .putString("error", "downloadRequest is empty or null")
+                .build())
         }
-        final String downloadRequestString;
-        final File requestFile = new File(downloadRequestFilePath);
-        try (Scanner scanner = new Scanner(requestFile)) {
-            downloadRequestString = scanner.useDelimiter("\\A").next();
-        } catch (Exception e) {
-            Log.e(TAG, "doWork: ", e);
-            return Result.failure(new Data.Builder()
-                                          .putString("error", e.getLocalizedMessage())
-                                          .build());
-        }
-        if (TextUtils.isEmpty(downloadRequestString)) {
-            return Result.failure(new Data.Builder()
-                                          .putString("error", "downloadRequest is empty or null")
-                                          .build());
-        }
-        final DownloadRequest downloadRequest;
+        val downloadRequestString: String
+        val requestFile = File(downloadRequestFilePath)
         try {
-            downloadRequest = new Gson().fromJson(downloadRequestString, DownloadRequest.class);
-        } catch (JsonSyntaxException e) {
-            Log.e(TAG, "doWork", e);
-            return Result.failure(new Data.Builder()
-                                          .putString("error", e.getLocalizedMessage())
-                                          .build());
+            downloadRequestString = requestFile.bufferedReader().use { it.readText() }
+        } catch (e: Exception) {
+            Log.e(TAG, "doWork: ", e)
+            return Result.failure(Data.Builder()
+                .putString("error", e.localizedMessage)
+                .build())
         }
-        if (downloadRequest == null) {
-            return Result.failure(new Data.Builder()
-                                          .putString("error", "downloadRequest is null")
-                                          .build());
+        if (downloadRequestString.isBlank()) {
+            return Result.failure(Data.Builder()
+                .putString("error", "downloadRequest is empty")
+                .build())
         }
-        final Map<String, String> urlToFilePathMap = downloadRequest.getUrlToFilePathMap();
-        download(urlToFilePathMap);
-        new Handler(Looper.getMainLooper()).postDelayed(() -> showSummary(urlToFilePathMap), 500);
-        final boolean deleted = requestFile.delete();
+        val downloadRequest: DownloadRequest = try {
+            Gson().fromJson(downloadRequestString, DownloadRequest::class.java)
+        } catch (e: JsonSyntaxException) {
+            Log.e(TAG, "doWork", e)
+            return Result.failure(Data.Builder()
+                .putString("error", e.localizedMessage)
+                .build())
+        } ?: return Result.failure(Data.Builder()
+            .putString("error", "downloadRequest is null")
+            .build())
+        val urlToFilePathMap = downloadRequest.urlToFilePathMap
+        download(urlToFilePathMap)
+        Handler(Looper.getMainLooper()).postDelayed({ showSummary(urlToFilePathMap) }, 500)
+        val deleted = requestFile.delete()
         if (!deleted) {
-            Log.w(TAG, "doWork: requestFile not deleted!");
+            Log.w(TAG, "doWork: requestFile not deleted!")
         }
-        return Result.success();
+        return Result.success()
     }
 
-    private void download(final Map<String, String> urlToFilePathMap) {
-        final int notificationId = getNotificationId();
-        final Set<Map.Entry<String, String>> entries = urlToFilePathMap.entrySet();
-        int count = 1;
-        final int total = urlToFilePathMap.size();
-        for (final Map.Entry<String, String> urlAndFilePath : entries) {
-            final String url = urlAndFilePath.getKey();
-            updateDownloadProgress(notificationId, count, total, 0);
-            download(notificationId, count, total, url, urlAndFilePath.getValue());
-            count++;
+    private suspend fun download(urlToFilePathMap: Map<String, String>) {
+        val notificationId = notificationId
+        val entries = urlToFilePathMap.entries
+        var count = 1
+        val total = urlToFilePathMap.size
+        for ((url, value) in entries) {
+            updateDownloadProgress(notificationId, count, total, 0f)
+            withContext(Dispatchers.IO) {
+                download(notificationId, count, total, url, value)
+            }
+            count++
         }
     }
 
-    private int getNotificationId() {
-        return Math.abs(getId().hashCode());
-    }
+    private val notificationId: Int
+        get() = abs(id.hashCode())
 
-    private void download(final int notificationId,
-                          final int position,
-                          final int total,
-                          final String url,
-                          final String filePath) {
-        final boolean isJpg = filePath.endsWith("jpg");
+    private fun download(
+        notificationId: Int,
+        position: Int,
+        total: Int,
+        url: String,
+        filePath: String,
+    ) {
+        val isJpg = filePath.endsWith("jpg")
         // using temp file approach to remove IPTC so that download progress can be reported
-        final File outFile = isJpg ? DownloadUtils.getTempFile() : new File(filePath);
+        val outFile = if (isJpg) DownloadUtils.getTempFile() else File(filePath)
         try {
-            final URLConnection urlConnection = new URL(url).openConnection();
-            final long fileSize = Build.VERSION.SDK_INT >= 24 ? urlConnection.getContentLengthLong() :
-                                  urlConnection.getContentLength();
-            float totalRead = 0;
-            try (final BufferedInputStream bis = new BufferedInputStream(urlConnection.getInputStream());
-                 final FileOutputStream fos = new FileOutputStream(outFile)) {
-                final byte[] buffer = new byte[0x2000];
-                int count;
-                while ((count = bis.read(buffer, 0, 0x2000)) != -1) {
-                    totalRead = totalRead + count;
-                    fos.write(buffer, 0, count);
-                    setProgressAsync(new Data.Builder().putString(URL, url)
-                                                       .putFloat(PROGRESS, totalRead * 100f / fileSize)
-                                                       .build());
-                    updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize);
+            val urlConnection = URL(url).openConnection()
+            val fileSize = if (Build.VERSION.SDK_INT >= 24) urlConnection.contentLengthLong else urlConnection.contentLength.toLong()
+            var totalRead = 0f
+            try {
+                BufferedInputStream(urlConnection.getInputStream()).use { bis ->
+                    FileOutputStream(outFile).use { fos ->
+                        val buffer = ByteArray(0x2000)
+                        var count: Int
+                        while (bis.read(buffer, 0, 0x2000).also { count = it } != -1) {
+                            totalRead += count
+                            fos.write(buffer, 0, count)
+                            setProgressAsync(Data.Builder().putString(URL, url)
+                                .putFloat(PROGRESS, totalRead * 100f / fileSize)
+                                .build())
+                            updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize)
+                        }
+                        fos.flush()
+                    }
                 }
-                fos.flush();
-            } catch (final Exception e) {
-                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.getAbsolutePath(), e);
+            } catch (e: Exception) {
+                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.absolutePath, e)
             }
             if (isJpg) {
-                final File finalFile = new File(filePath);
-                try (FileInputStream fis = new FileInputStream(outFile);
-                     FileOutputStream fos = new FileOutputStream(finalFile)) {
-                    final JpegIptcRewriter jpegIptcRewriter = new JpegIptcRewriter();
-                    jpegIptcRewriter.removeIPTC(fis, fos);
-                } catch (Exception e) {
+                val finalFile = File(filePath)
+                try {
+                    FileInputStream(outFile).use { fis ->
+                        FileOutputStream(finalFile).use { fos ->
+                            val jpegIptcRewriter = JpegIptcRewriter()
+                            jpegIptcRewriter.removeIPTC(fis, fos)
+                        }
+                    }
+                } catch (e: Exception) {
                     Log.e(TAG, "Error while removing iptc: url: " + url
-                            + ", tempFile: " + outFile.getAbsolutePath()
-                            + ", finalFile: " + finalFile.getAbsolutePath(), e);
+                               + ", tempFile: " + outFile.absolutePath
+                               + ", finalFile: " + finalFile.absolutePath, e)
                 }
-                final boolean deleted = outFile.delete();
+                val deleted = outFile.delete()
                 if (!deleted) {
-                    Log.w(TAG, "download: tempFile not deleted!");
+                    Log.w(TAG, "download: tempFile not deleted!")
                 }
             }
-        } catch (final Exception e) {
-            Log.e(TAG, "Error while downloading: " + url, e);
+        } catch (e: Exception) {
+            Log.e(TAG, "Error while downloading: $url", e)
         }
-        setProgressAsync(new Data.Builder().putString(URL, url)
-                                           .putFloat(PROGRESS, 100)
-                                           .build());
-        updateDownloadProgress(notificationId, position, total, 100);
+        setProgressAsync(Data.Builder().putString(URL, url)
+            .putFloat(PROGRESS, 100f)
+            .build())
+        updateDownloadProgress(notificationId, position, total, 100f)
     }
 
-    private void updateDownloadProgress(final int notificationId,
-                                        final int position,
-                                        final int total,
-                                        final float percent) {
-        final Notification notification = createProgressNotification(position, total, percent);
+    private fun updateDownloadProgress(
+        notificationId: Int,
+        position: Int,
+        total: Int,
+        percent: Float,
+    ) {
+        val notification = createProgressNotification(position, total, percent)
         try {
             if (notification == null) {
-                notificationManager.cancel(notificationId);
-                return;
+                notificationManager.cancel(notificationId)
+                return
             }
-            setForegroundAsync(new ForegroundInfo(notificationId, notification)).get();
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e(TAG, "updateDownloadProgress", e);
+            setForegroundAsync(ForegroundInfo(notificationId, notification)).get()
+        } catch (e: ExecutionException) {
+            Log.e(TAG, "updateDownloadProgress", e)
+        } catch (e: InterruptedException) {
+            Log.e(TAG, "updateDownloadProgress", e)
         }
     }
 
-    private Notification createProgressNotification(final int position, final int total, final float percent) {
-        final Context context = getApplicationContext();
-        boolean ongoing = true;
-        int totalPercent;
-        if (position == total && percent == 100) {
-            ongoing = false;
-            totalPercent = 100;
+    private fun createProgressNotification(position: Int, total: Int, percent: Float): Notification? {
+        val context = applicationContext
+        var ongoing = true
+        val totalPercent: Int
+        if (position == total && percent == 100f) {
+            ongoing = false
+            totalPercent = 100
         } else {
-            totalPercent = (int) ((100f * (position - 1) / total) + (1f / total) * (percent));
+            totalPercent = (100f * (position - 1) / total + 1f / total * percent).toInt()
         }
         if (totalPercent == 100) {
-            return null;
+            return null
         }
         // Log.d(TAG, "createProgressNotification: position: " + position
         //         + ", total: " + total
         //         + ", percent: " + percent
         //         + ", totalPercent: " + totalPercent);
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.DOWNLOAD_CHANNEL_ID)
-                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                .setSmallIcon(R.drawable.ic_download)
-                .setOngoing(ongoing)
-                .setProgress(100, totalPercent, totalPercent < 0)
-                .setAutoCancel(false)
-                .setOnlyAlertOnce(true)
-                .setContentTitle(context.getString(R.string.downloader_downloading_post));
+        val builder = NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setSmallIcon(R.drawable.ic_download)
+            .setOngoing(ongoing)
+            .setProgress(100, totalPercent, totalPercent < 0)
+            .setAutoCancel(false)
+            .setOnlyAlertOnce(true)
+            .setContentTitle(context.getString(R.string.downloader_downloading_post))
         if (total > 1) {
-            builder.setContentText(context.getString(R.string.downloader_downloading_child, position, total));
+            builder.setContentText(context.getString(R.string.downloader_downloading_child, position, total))
         }
-        return builder.build();
+        return builder.build()
     }
 
-    private void showSummary(final Map<String, String> urlToFilePathMap) {
-        final Context context = getApplicationContext();
-        final Collection<String> filePaths = urlToFilePathMap.values();
-        final List<NotificationCompat.Builder> notifications = new LinkedList<>();
-        final List<Integer> notificationIds = new LinkedList<>();
-        int count = 1;
-        for (final String filePath : filePaths) {
-            final File file = new File(filePath);
-            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-            MediaScannerConnection.scanFile(context, new String[]{file.getAbsolutePath()}, null, null);
-            final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
-            final ContentResolver contentResolver = context.getContentResolver();
-            final Bitmap bitmap = getThumbnail(context, file, uri, contentResolver);
-            final String downloadComplete = context.getString(R.string.downloader_complete);
-            final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                                      | Intent.FLAG_FROM_BACKGROUND
-                                      | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                      | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    .putExtra(Intent.EXTRA_STREAM, uri);
-            final PendingIntent pendingIntent = PendingIntent.getActivity(
-                    context,
-                    DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT
-            );
-            final int notificationId = getNotificationId() + count;
-            notificationIds.add(notificationId);
-            count++;
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_download)
-                    .setContentText(null)
-                    .setContentTitle(downloadComplete)
-                    .setWhen(System.currentTimeMillis())
-                    .setOnlyAlertOnce(true)
-                    .setAutoCancel(true)
-                    .setGroup(NOTIF_GROUP_NAME + "_" + getId())
-                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
-                    .setContentIntent(pendingIntent)
-                    .addAction(R.drawable.ic_delete,
-                               context.getString(R.string.delete),
-                               DeleteImageIntentService.pendingIntent(context, filePath, notificationId));
+    private fun showSummary(urlToFilePathMap: Map<String, String>?) {
+        val context = applicationContext
+        val filePaths = urlToFilePathMap!!.values
+        val notifications: MutableList<NotificationCompat.Builder> = LinkedList()
+        val notificationIds: MutableList<Int> = LinkedList()
+        var count = 1
+        for (filePath in filePaths) {
+            val file = File(filePath)
+            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
+            MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
+            val uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
+            val contentResolver = context.contentResolver
+            val bitmap = getThumbnail(context, file, uri, contentResolver)
+            val downloadComplete = context.getString(R.string.downloader_complete)
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        or Intent.FLAG_FROM_BACKGROUND
+                        or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                .putExtra(Intent.EXTRA_STREAM, uri)
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT
+            )
+            val notificationId = notificationId + count
+            notificationIds.add(notificationId)
+            count++
+            val builder: NotificationCompat.Builder = NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_download)
+                .setContentText(null)
+                .setContentTitle(downloadComplete)
+                .setWhen(System.currentTimeMillis())
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true)
+                .setGroup(NOTIF_GROUP_NAME + "_" + id)
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                .setContentIntent(pendingIntent)
+                .addAction(R.drawable.ic_delete,
+                    context.getString(R.string.delete),
+                    DeleteImageIntentService.pendingIntent(context, filePath, notificationId))
             if (bitmap != null) {
                 builder.setLargeIcon(bitmap)
-                       .setStyle(new NotificationCompat.BigPictureStyle()
-                                         .bigPicture(bitmap)
-                                         .bigLargeIcon(null))
-                       .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL);
+                    .setStyle(NotificationCompat.BigPictureStyle()
+                        .bigPicture(bitmap)
+                        .bigLargeIcon(null))
+                    .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             }
-            notifications.add(builder);
+            notifications.add(builder)
         }
-        Notification summaryNotification = null;
-        if (urlToFilePathMap.size() != 1) {
-            final String text = "Downloaded " + urlToFilePathMap.size() + " items";
-            summaryNotification = new NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
-                    .setContentTitle("Downloaded")
-                    .setContentText(text)
-                    .setSmallIcon(R.drawable.ic_download)
-                    .setStyle(new NotificationCompat.InboxStyle().setSummaryText(text))
-                    .setGroup(NOTIF_GROUP_NAME + "_" + getId())
-                    .setGroupSummary(true)
-                    .build();
+        var summaryNotification: Notification? = null
+        if (urlToFilePathMap.size != 1) {
+            val text = "Downloaded " + urlToFilePathMap.size + " items"
+            summaryNotification = NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
+                .setContentTitle("Downloaded")
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_download)
+                .setStyle(NotificationCompat.InboxStyle().setSummaryText(text))
+                .setGroup(NOTIF_GROUP_NAME + "_" + id)
+                .setGroupSummary(true)
+                .build()
         }
-        for (int i = 0; i < notifications.size(); i++) {
-            final NotificationCompat.Builder builder = notifications.get(i);
+        for (i in notifications.indices) {
+            val builder = notifications[i]
             // only make sound and vibrate for the last notification
-            if (i != notifications.size() - 1) {
+            if (i != notifications.size - 1) {
                 builder.setSound(null)
-                       .setVibrate(null);
+                    .setVibrate(null)
             }
-            notificationManager.notify(notificationIds.get(i), builder.build());
+            notificationManager.notify(notificationIds[i], builder.build())
         }
         if (summaryNotification != null) {
-            notificationManager.notify(getNotificationId() + count, summaryNotification);
+            notificationManager.notify(notificationId + count, summaryNotification)
         }
     }
 
-    @Nullable
-    private Bitmap getThumbnail(final Context context,
-                                final File file,
-                                final Uri uri,
-                                final ContentResolver contentResolver) {
-        final String mimeType = Utils.getMimeType(uri, contentResolver);
-        if (TextUtils.isEmpty(mimeType)) return null;
-        Bitmap bitmap = null;
+    private fun getThumbnail(
+        context: Context,
+        file: File,
+        uri: Uri,
+        contentResolver: ContentResolver,
+    ): Bitmap? {
+        val mimeType = Utils.getMimeType(uri, contentResolver)
+        if (isEmpty(mimeType)) return null
+        var bitmap: Bitmap? = null
         if (mimeType.startsWith("image")) {
             try {
-                final BitmapUtils.BitmapResult bitmapResult = BitmapUtils
-                        .getBitmapResult(context.getContentResolver(), uri, THUMBNAIL_SIZE, THUMBNAIL_SIZE, -1, true);
-                if (bitmapResult == null) return null;
-                bitmap = bitmapResult.bitmap;
-            } catch (final Exception e) {
-                Log.e(TAG, "", e);
+                val bitmapResult = BitmapUtils.getBitmapResult(
+                    context.contentResolver,
+                    uri,
+                    BitmapUtils.THUMBNAIL_SIZE,
+                    BitmapUtils.THUMBNAIL_SIZE,
+                    -1f,
+                    true
+                ) ?: return null
+                bitmap = bitmapResult.bitmap
+            } catch (e: Exception) {
+                Log.e(TAG, "", e)
             }
-            return bitmap;
+            return bitmap
         }
         if (mimeType.startsWith("video")) {
             try {
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                try {
+                val retriever = MediaMetadataRetriever()
+                bitmap = try {
                     try {
-                        retriever.setDataSource(context, uri);
-                    } catch (final Exception e) {
-                        retriever.setDataSource(file.getAbsolutePath());
+                        retriever.setDataSource(context, uri)
+                    } catch (e: Exception) {
+                        retriever.setDataSource(file.absolutePath)
                     }
-                    bitmap = retriever.getFrameAtTime();
+                    retriever.frameAtTime
                 } finally {
                     try {
-                        retriever.release();
-                    } catch (Exception e) {
-                        Log.e(TAG, "getThumbnail: ", e);
+                        retriever.release()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "getThumbnail: ", e)
                     }
                 }
-            } catch (final Exception e) {
-                Log.e(TAG, "", e);
+            } catch (e: Exception) {
+                Log.e(TAG, "", e)
             }
         }
-        return bitmap;
+        return bitmap
     }
 
-    public static class DownloadRequest {
-        private final Map<String, String> urlToFilePathMap;
+    class DownloadRequest private constructor(val urlToFilePathMap: Map<String, String>) {
 
-        public static class Builder {
-            private Map<String, String> urlToFilePathMap;
-
-            public Builder setUrlToFilePathMap(final Map<String, String> urlToFilePathMap) {
-                this.urlToFilePathMap = urlToFilePathMap;
-                return this;
+        class Builder {
+            private var urlToFilePathMap: MutableMap<String, String> = mutableMapOf()
+            fun setUrlToFilePathMap(urlToFilePathMap: MutableMap<String, String>): Builder {
+                this.urlToFilePathMap = urlToFilePathMap
+                return this
             }
 
-            public Builder addUrl(@NonNull final String url, @NonNull final String filePath) {
-                if (urlToFilePathMap == null) {
-                    urlToFilePathMap = new HashMap<>();
-                }
-                urlToFilePathMap.put(url, filePath);
-                return this;
+            fun addUrl(url: String, filePath: String): Builder {
+                urlToFilePathMap[url] = filePath
+                return this
             }
 
-            public DownloadRequest build() {
-                return new DownloadRequest(urlToFilePathMap);
+            fun build(): DownloadRequest {
+                return DownloadRequest(urlToFilePathMap)
             }
         }
 
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        private DownloadRequest(final Map<String, String> urlToFilePathMap) {
-            this.urlToFilePathMap = urlToFilePathMap;
-        }
-
-        public Map<String, String> getUrlToFilePathMap() {
-            return urlToFilePathMap;
+        companion object {
+            @JvmStatic
+            fun builder(): Builder {
+                return Builder()
+            }
         }
     }
+
+    companion object {
+        const val PROGRESS = "PROGRESS"
+        const val URL = "URL"
+        const val KEY_DOWNLOAD_REQUEST_JSON = "download_request_json"
+        private const val DOWNLOAD_GROUP = "DOWNLOAD_GROUP"
+        private const val DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE = 2020
+        private const val DELETE_IMAGE_REQUEST_CODE = 2030
+    }
+
 }

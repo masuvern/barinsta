@@ -172,7 +172,6 @@ dependencies {
     implementation "androidx.navigation:navigation-ui:$nav_version"
     implementation "androidx.constraintlayout:constraintlayout:2.0.4"
     implementation "androidx.preference:preference:1.1.1"
-    implementation "androidx.work:work-runtime:2.5.0"
     implementation 'androidx.palette:palette:1.0.0'
 
     implementation 'com.google.guava:guava:27.0.1-android'
@@ -203,6 +202,11 @@ dependencies {
     def emoji_compat_version = "1.1.0"
     implementation "androidx.emoji:emoji:$emoji_compat_version"
     implementation "androidx.emoji:emoji-appcompat:$emoji_compat_version"
+
+    // Work
+    def work_version = '2.5.0'
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
     implementation 'com.facebook.fresco:fresco:2.3.0'
     implementation 'com.facebook.fresco:animated-webp:2.3.0'
