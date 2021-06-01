@@ -9,8 +9,8 @@ import android.util.Log
 import android.view.*
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
@@ -30,15 +30,15 @@ import com.google.android.material.internal.ToolbarUtils
 import com.google.android.material.snackbar.Snackbar
 
 class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
+    private val viewModel: DirectInboxViewModel by activityViewModels()
+
     private lateinit var fragmentActivity: MainActivity
-    private lateinit var viewModel: DirectInboxViewModel
     private lateinit var root: CoordinatorLayout
     private lateinit var binding: FragmentDirectMessagesInboxBinding
     private lateinit var inboxAdapter: DirectMessageInboxAdapter
     private lateinit var lazyLoader: RecyclerLazyLoaderAtEdge
 
     private var shouldRefresh = true
-    // private var receiver: DMRefreshBroadcastReceiver? = null
     private var scrollToTop = false
     private var navigating = false
     private var threadsObserver: Observer<List<DirectThread?>>? = null
@@ -49,7 +49,6 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fragmentActivity = requireActivity() as MainActivity
-        viewModel = ViewModelProvider(fragmentActivity).get(DirectInboxViewModel::class.java)
         setHasOptionsMenu(true)
     }
 
@@ -78,13 +77,12 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
         viewModel.refresh()
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError", "RestrictedApi")
     override fun onPause() {
         super.onPause()
-        // unregisterReceiver()
         isPendingRequestTotalBadgeAttached = false
         pendingRequestsMenuItem?.let {
-            @SuppressLint("RestrictedApi") val menuItemView = ToolbarUtils.getActionMenuItemView(fragmentActivity.toolbar, it.itemId)
+            val menuItemView = ToolbarUtils.getActionMenuItemView(fragmentActivity.toolbar, it.itemId)
             if (menuItemView != null) {
                 BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.toolbar, it.itemId)
                 pendingRequestTotalBadgeDrawable = null
@@ -95,9 +93,6 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
     override fun onResume() {
         super.onResume()
         setupObservers()
-        // val context = context ?: return
-        // receiver = DMRefreshBroadcastReceiver { Log.d(TAG, "onResume: broadcast received") }
-        // context.registerReceiver(receiver, IntentFilter(DMRefreshBroadcastReceiver.ACTION_REFRESH_DM))
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -119,13 +114,6 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
         return super.onOptionsItemSelected(item)
     }
 
-    // private fun unregisterReceiver() {
-    //     if (receiver == null) return
-    //     val context = context ?: return
-    //     context.unregisterReceiver(receiver)
-    //     receiver = null
-    // }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         init()
@@ -140,6 +128,7 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
     private fun setupObservers() {
         removeViewModelObservers()
         threadsObserver = Observer { list: List<DirectThread?> ->
+            if (!this::inboxAdapter.isInitialized) return@Observer
             inboxAdapter.submitList(list) {
                 if (!scrollToTop) return@submitList
                 binding.inboxList.post { binding.inboxList.smoothScrollToPosition(0) }
@@ -166,7 +155,7 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
         viewModel.pendingRequestsTotal.observe(viewLifecycleOwner, { count: Int? -> attachPendingRequestsBadge(count) })
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError", "RestrictedApi")
     private fun attachPendingRequestsBadge(count: Int?) {
         val pendingRequestsMenuItem1 = pendingRequestsMenuItem
         if (pendingRequestsMenuItem1 == null) {
@@ -179,7 +168,7 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
             pendingRequestTotalBadgeDrawable = BadgeDrawable.create(context)
         }
         if (count == null || count == 0) {
-            @SuppressLint("RestrictedApi") val menuItemView = ToolbarUtils.getActionMenuItemView(
+            val menuItemView = ToolbarUtils.getActionMenuItemView(
                 fragmentActivity.toolbar,
                 pendingRequestsMenuItem1.itemId
             )
