@@ -26,7 +26,6 @@ import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.repositories.responses.giphy.GiphyGif
 import awais.instagrabber.utils.*
 import awais.instagrabber.utils.MediaUploader.MediaUploadResponse
-import awais.instagrabber.utils.MediaUploader.OnMediaUploadCompleteListener
 import awais.instagrabber.utils.MediaUploader.uploadPhoto
 import awais.instagrabber.utils.MediaUploader.uploadVideo
 import awais.instagrabber.utils.MediaUtils.OnInfoLoadListener
@@ -448,10 +447,11 @@ class ThreadManager private constructor(
         addItems(0, listOf(directItem))
         data.postValue(loading(directItem))
         val uploadDmVoiceOptions = createUploadDmVoiceOptions(byteLength, duration)
-        uploadVideo(uri, contentResolver, uploadDmVoiceOptions, object : OnMediaUploadCompleteListener {
-            override fun onUploadComplete(response: MediaUploadResponse) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = uploadVideo(uri, contentResolver, uploadDmVoiceOptions)
                 // Log.d(TAG, "onUploadComplete: " + response);
-                if (handleInvalidResponse(data, response)) return
+                if (handleInvalidResponse(data, response)) return@launch
                 val uploadFinishOptions = UploadFinishOptions(
                     uploadDmVoiceOptions.uploadId,
                     "4",
@@ -488,16 +488,14 @@ class ThreadManager private constructor(
 
                     override fun onFailure(call: Call<String?>, t: Throwable) {
                         data.postValue(error(t.message, directItem))
-                        Log.e(TAG, "onFailure: ", t)
+                        Log.e(TAG, "sendVoice: ", t)
                     }
                 })
+            } catch (e: Exception) {
+                data.postValue(error(e.message, directItem))
+                Log.e(TAG, "sendVoice: ", e)
             }
-
-            override fun onFailure(t: Throwable) {
-                data.postValue(error(t.message, directItem))
-                Log.e(TAG, "onFailure: ", t)
-            }
-        })
+        }
     }
 
     fun sendReaction(
@@ -742,27 +740,19 @@ class ThreadManager private constructor(
         directItem.isPending = true
         addItems(0, listOf(directItem))
         data.postValue(loading(directItem))
-        uploadPhoto(uri, contentResolver, object : OnMediaUploadCompleteListener {
-            override fun onUploadComplete(response: MediaUploadResponse) {
-                if (handleInvalidResponse(data, response)) return
-                val response1 = response.response ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = uploadPhoto(uri, contentResolver)
+                if (handleInvalidResponse(data, response)) return@launch
+                val response1 = response.response ?: return@launch
                 val uploadId = response1.optString("upload_id")
-                scope.launch(Dispatchers.IO) {
-                    try {
-                        val response2 = service.broadcastPhoto(clientContext, threadIdOrUserIds, uploadId)
-                        parseResponse(response2, data, directItem)
-                    } catch (e: Exception) {
-                        data.postValue(error(e.message, null))
-                        Log.e(TAG, "sendPhoto: ", e)
-                    }
-                }
+                val response2 = service.broadcastPhoto(clientContext, threadIdOrUserIds, uploadId)
+                parseResponse(response2, data, directItem)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+                Log.e(TAG, "sendPhoto: ", e)
             }
-
-            override fun onFailure(t: Throwable) {
-                data.postValue(error(t.message, directItem))
-                Log.e(TAG, "onFailure: ", t)
-            }
-        })
+        }
     }
 
     private fun sendVideo(
@@ -806,10 +796,11 @@ class ThreadManager private constructor(
         addItems(0, listOf(directItem))
         data.postValue(loading(directItem))
         val uploadDmVideoOptions = createUploadDmVideoOptions(byteLength, duration, width, height)
-        uploadVideo(uri, contentResolver, uploadDmVideoOptions, object : OnMediaUploadCompleteListener {
-            override fun onUploadComplete(response: MediaUploadResponse) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val response = uploadVideo(uri, contentResolver, uploadDmVideoOptions)
                 // Log.d(TAG, "onUploadComplete: " + response);
-                if (handleInvalidResponse(data, response)) return
+                if (handleInvalidResponse(data, response)) return@launch
                 val uploadFinishOptions = UploadFinishOptions(
                     uploadDmVideoOptions.uploadId,
                     "2",
@@ -843,19 +834,16 @@ class ThreadManager private constructor(
                         data.postValue(error("uploadFinishRequest was not successful and response error body was null", directItem))
                         Log.e(TAG, "uploadFinishRequest was not successful and response error body was null")
                     }
-
                     override fun onFailure(call: Call<String?>, t: Throwable) {
                         data.postValue(error(t.message, directItem))
-                        Log.e(TAG, "onFailure: ", t)
+                        Log.e(TAG, "sendVideo: ", t)
                     }
                 })
+            } catch (e: Exception) {
+                data.postValue(error(e.message, directItem))
+                Log.e(TAG, "sendVideo: ", e)
             }
-
-            override fun onFailure(t: Throwable) {
-                data.postValue(error(t.message, directItem))
-                Log.e(TAG, "onFailure: ", t)
-            }
-        })
+        }
     }
 
     private fun parseResponse(
