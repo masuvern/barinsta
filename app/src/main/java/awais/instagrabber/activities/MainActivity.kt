@@ -31,6 +31,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavDestination
@@ -68,6 +69,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterators
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.stream.Collectors
 
@@ -81,11 +84,14 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     private var isActivityCheckerServiceBound = false
     private var isBackStackEmpty = false
     private var isLoggedIn = false
+    private var deviceUuid: String? = null
+    private var csrfToken: String? = null
+    private var userId: Long = 0
 
     // private var behavior: HideBottomViewOnScrollBehavior<BottomNavigationView>? = null
     var currentTabs: List<Tab> = emptyList()
         private set
-    private var showBottomViewDestinations: List<Int> = emptyList<Int>()
+    private var showBottomViewDestinations: List<Int> = emptyList()
     private var graphQLService: GraphQLService? = null
     private var mediaService: MediaService? = null
 
@@ -157,17 +163,17 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
 
     private fun setupCookie() {
         val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
-        var userId: Long = 0
-        var csrfToken: String? = null
-        if (!isEmpty(cookie)) {
+        userId = 0
+        csrfToken = null
+        if (cookie.isNotBlank()) {
             userId = getUserIdFromCookie(cookie)
             csrfToken = getCsrfTokenFromCookie(cookie)
         }
-        if (isEmpty(cookie) || userId == 0L || isEmpty(csrfToken)) {
+        if (cookie.isBlank() || userId == 0L || csrfToken.isNullOrBlank()) {
             isLoggedIn = false
             return
         }
-        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
         if (isEmpty(deviceUuid)) {
             Utils.settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString())
         }
@@ -175,6 +181,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         isLoggedIn = true
     }
 
+    @Suppress("unused")
     private fun initDmService() {
         if (!isLoggedIn) return
         val enabled = Utils.settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH)
@@ -628,7 +635,9 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             .setView(R.layout.dialog_opening_post)
             .create()
         if (graphQLService == null) graphQLService = GraphQLService.getInstance()
-        if (mediaService == null) mediaService = MediaService.getInstance(null, null, 0L)
+        if (mediaService == null) {
+            mediaService = deviceUuid?.let { csrfToken?.let { it1 -> MediaService.getInstance(it, it1, userId) } }
+        }
         val postCb: ServiceCallback<Media> = object : ServiceCallback<Media> {
             override fun onSuccess(feedModel: Media?) {
                 if (feedModel != null) {
@@ -650,7 +659,18 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             }
         }
         alertDialog.show()
-        if (isLoggedIn) mediaService?.fetch(shortcodeToId(shortCode), postCb) else graphQLService?.fetchPost(shortCode, postCb)
+        if (isLoggedIn) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val media = mediaService?.fetch(shortcodeToId(shortCode))
+                    postCb.onSuccess(media)
+                } catch (e: Exception) {
+                    postCb.onFailure(e)
+                }
+            }
+        } else {
+            graphQLService?.fetchPost(shortCode, postCb)
+        }
     }
 
     private fun showLocationView(intentModel: IntentModel) {

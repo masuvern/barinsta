@@ -41,8 +41,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -457,40 +455,15 @@ class ThreadManager private constructor(
                     "4",
                     null
                 )
-                val uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions)
-                uploadFinishRequest.enqueue(object : Callback<String?> {
-                    override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                        if (response.isSuccessful) {
-                            scope.launch(Dispatchers.IO) {
-                                try {
-                                    val request = service.broadcastVoice(
-                                        clientContext,
-                                        threadIdOrUserIds,
-                                        uploadDmVoiceOptions.uploadId,
-                                        waveform,
-                                        samplingFreq
-                                    )
-                                    parseResponse(request, data, directItem)
-                                } catch (e: Exception) {
-                                    data.postValue(error(e.message, directItem))
-                                    Log.e(TAG, "sendVoice: ", e)
-                                }
-                            }
-                            return
-                        }
-                        if (response.errorBody() != null) {
-                            handleErrorBody(call, response, data)
-                            return
-                        }
-                        data.postValue(error("uploadFinishRequest was not successful and response error body was null", directItem))
-                        Log.e(TAG, "uploadFinishRequest was not successful and response error body was null")
-                    }
-
-                    override fun onFailure(call: Call<String?>, t: Throwable) {
-                        data.postValue(error(t.message, directItem))
-                        Log.e(TAG, "sendVoice: ", t)
-                    }
-                })
+                mediaService.uploadFinish(uploadFinishOptions)
+                val broadcastResponse = service.broadcastVoice(
+                    clientContext,
+                    threadIdOrUserIds,
+                    uploadDmVoiceOptions.uploadId,
+                    waveform,
+                    samplingFreq
+                )
+                parseResponse(broadcastResponse, data, directItem)
             } catch (e: Exception) {
                 data.postValue(error(e.message, directItem))
                 Log.e(TAG, "sendVoice: ", e)
@@ -806,39 +779,15 @@ class ThreadManager private constructor(
                     "2",
                     VideoOptions(duration / 1000f, emptyList(), 0, false)
                 )
-                val uploadFinishRequest = mediaService.uploadFinish(uploadFinishOptions)
-                uploadFinishRequest.enqueue(object : Callback<String?> {
-                    override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                        if (response.isSuccessful) {
-                            scope.launch(Dispatchers.IO) {
-                                try {
-                                    val response1 = service.broadcastVideo(
-                                        clientContext,
-                                        threadIdOrUserIds,
-                                        uploadDmVideoOptions.uploadId,
-                                        "",
-                                        true
-                                    )
-                                    parseResponse(response1, data, directItem)
-                                } catch (e: Exception) {
-                                    data.postValue(error(e.message, null))
-                                    Log.e(TAG, "sendVideo: ", e)
-                                }
-                            }
-                            return
-                        }
-                        if (response.errorBody() != null) {
-                            handleErrorBody(call, response, data)
-                            return
-                        }
-                        data.postValue(error("uploadFinishRequest was not successful and response error body was null", directItem))
-                        Log.e(TAG, "uploadFinishRequest was not successful and response error body was null")
-                    }
-                    override fun onFailure(call: Call<String?>, t: Throwable) {
-                        data.postValue(error(t.message, directItem))
-                        Log.e(TAG, "sendVideo: ", t)
-                    }
-                })
+                mediaService.uploadFinish(uploadFinishOptions)
+                val broadcastResponse = service.broadcastVideo(
+                    clientContext,
+                    threadIdOrUserIds,
+                    uploadDmVideoOptions.uploadId,
+                    "",
+                    true
+                )
+                parseResponse(broadcastResponse, data, directItem)
             } catch (e: Exception) {
                 data.postValue(error(e.message, directItem))
                 Log.e(TAG, "sendVideo: ", e)
@@ -897,26 +846,6 @@ class ThreadManager private constructor(
             inboxManager.setItemsToThread(threadId, list)
         } catch (e: CloneNotSupportedException) {
             Log.e(TAG, "updateItemSent: ", e)
-        }
-    }
-
-    private fun handleErrorBody(
-        call: Call<*>,
-        response: Response<*>,
-        data: MutableLiveData<Resource<Any?>>?,
-    ) {
-        try {
-            val string = response.errorBody()?.string() ?: ""
-            val msg = String.format(Locale.US,
-                "onResponse: url: %s, responseCode: %d, errorBody: %s",
-                call.request().url().toString(),
-                response.code(),
-                string)
-            data?.postValue(error(msg, null))
-            Log.e(TAG, msg)
-        } catch (e: IOException) {
-            data?.postValue(error(e.message, null))
-            Log.e(TAG, "onResponse: ", e)
         }
     }
 

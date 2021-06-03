@@ -84,6 +84,7 @@ import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserProfileContextLink;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
@@ -335,7 +336,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, myId) : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
-        mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
+        mediaService = isLoggedIn ? MediaService.getInstance(deviceUuid, csrfToken, myId) : null;
         userService = isLoggedIn ? UserService.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         final Context context = getContext();
@@ -821,26 +822,26 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                     Utils.copyText(context, biography);
                                     break;
                                 case 1:
-                                    mediaService.translate(String.valueOf(profileModel.getPk()), "3", new ServiceCallback<String>() {
-                                        @Override
-                                        public void onSuccess(final String result) {
-                                            if (TextUtils.isEmpty(result)) {
-                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                return;
-                                            }
-                                            new AlertDialog.Builder(context)
-                                                    .setTitle(profileModel.getUsername())
-                                                    .setMessage(result)
-                                                    .setPositiveButton(R.string.ok, null)
-                                                    .show();
-                                        }
-
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            Log.e(TAG, "Error translating bio", t);
-                                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
+                                    mediaService.translate(String.valueOf(profileModel.getPk()), "3", CoroutineUtilsKt.getContinuation(
+                                            (result, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                if (throwable != null) {
+                                                    Log.e(TAG, "Error translating bio", throwable);
+                                                    Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    return;
+                                                }
+                                                if (TextUtils.isEmpty(result)) {
+                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT)
+                                                         .show();
+                                                    return;
+                                                }
+                                                new AlertDialog.Builder(context)
+                                                        .setTitle(profileModel.getUsername())
+                                                        .setMessage(result)
+                                                        .setPositiveButton(R.string.ok, null)
+                                                        .show();
+                                            }),
+                                            Dispatchers.getIO()
+                                    ));
                                     break;
                             }
                         })
@@ -1079,7 +1080,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 directMessagesService.createThread(
                         Collections.singletonList(profileModel.getPk()),
                         null,
-                        CoroutineUtilsKt.getContinuation((thread, throwable) -> {
+                        CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                             if (throwable != null) {
                                 Log.e(TAG, "setupCommonListeners: ", throwable);
                                 Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
@@ -1092,7 +1093,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                 inboxManager.addThread(thread, 0);
                             }
                             fragmentActivity.navigateToThread(thread.getThreadId(), profileModel.getUsername());
-                        }, Dispatchers.getIO())
+                        }), Dispatchers.getIO())
                 );
             });
         }

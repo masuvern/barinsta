@@ -25,12 +25,15 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentLikesBinding;
 import awais.instagrabber.repositories.responses.GraphQLUserListFetchResponse;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -104,9 +107,12 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
-        // final AppCompatActivity fragmentActivity = (AppCompatActivity) getActivity();
-        mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && userId != 0;
+        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        if (csrfToken == null) return;
+        mediaService = isLoggedIn ? MediaService.getInstance(deviceUuid, csrfToken, userId) : null;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         // setHasOptionsMenu(true);
     }
@@ -130,7 +136,20 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         if (isComment && !isLoggedIn) {
             lazyLoader.resetState();
             graphQLService.fetchCommentLikers(postId, null, anonCb);
-        } else mediaService.fetchLikes(postId, isComment, cb);
+        } else {
+            mediaService.fetchLikes(
+                    postId,
+                    isComment,
+                    CoroutineUtilsKt.getContinuation((users, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            cb.onFailure(throwable);
+                            return;
+                        }
+                        //noinspection unchecked
+                        cb.onSuccess((List<User>) users);
+                    }), Dispatchers.getIO())
+            );
+        }
     }
 
     private void init() {

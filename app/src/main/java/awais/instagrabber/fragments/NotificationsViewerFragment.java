@@ -35,12 +35,13 @@ import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
-import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.notification.Notification;
 import awais.instagrabber.repositories.responses.notification.NotificationArgs;
 import awais.instagrabber.repositories.responses.notification.NotificationImage;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
@@ -48,6 +49,7 @@ import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -106,26 +108,25 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         .setView(R.layout.dialog_opening_post)
                         .create();
                 alertDialog.show();
-                mediaService.fetch(mediaId, new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media feedModel) {
-                        final NavController navController = NavHostFragment.findNavController(NotificationsViewerFragment.this);
-                        final Bundle bundle = new Bundle();
-                        bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-                        try {
-                            navController.navigate(R.id.action_global_post_view, bundle);
-                            alertDialog.dismiss();
-                        } catch (Exception e) {
-                            Log.e(TAG, "onSuccess: ", e);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        alertDialog.dismiss();
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                mediaService.fetch(
+                        mediaId,
+                        CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                alertDialog.dismiss();
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            final NavController navController = NavHostFragment.findNavController(NotificationsViewerFragment.this);
+                            final Bundle bundle = new Bundle();
+                            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+                            try {
+                                navController.navigate(R.id.action_global_post_view, bundle);
+                                alertDialog.dismiss();
+                            } catch (Exception e) {
+                                Log.e(TAG, "onSuccess: ", e);
+                            }
+                        }), Dispatchers.getIO())
+                );
             }
         }
 
@@ -218,11 +219,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         if (TextUtils.isEmpty(cookie)) {
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
-        mediaService = MediaService.getInstance(null, null, 0);
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
+        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
         newsService = NewsService.getInstance();
     }
 

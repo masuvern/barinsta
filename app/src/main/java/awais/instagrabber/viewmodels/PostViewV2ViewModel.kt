@@ -23,11 +23,9 @@ import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.utils.getCsrfTokenFromCookie
 import awais.instagrabber.utils.getUserIdFromCookie
 import awais.instagrabber.webservices.MediaService
-import awais.instagrabber.webservices.ServiceCallback
 import com.google.common.collect.ImmutableList
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class PostViewV2ViewModel : ViewModel() {
@@ -127,44 +125,51 @@ class PostViewV2ViewModel : ViewModel() {
     fun like(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        mediaService?.like(media.pk, getLikeUnlikeCallback(data))
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val mediaId = media.pk ?: return@launch
+                val liked = mediaService?.like(mediaId)
+                updateMediaLikeUnlike(data, liked ?: false)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+            }
+        }
         return data
     }
 
     fun unlike(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        mediaService?.unlike(media.pk, getLikeUnlikeCallback(data))
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val mediaId = media.pk ?: return@launch
+                val unliked = mediaService?.unlike(mediaId)
+                updateMediaLikeUnlike(data, unliked ?: false)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+            }
+        }
         return data
     }
 
-    private fun getLikeUnlikeCallback(data: MutableLiveData<Resource<Any?>>): ServiceCallback<Boolean?> {
-        return object : ServiceCallback<Boolean?> {
-            override fun onSuccess(result: Boolean?) {
-                if (result != null && !result) {
-                    data.postValue(error("", null))
-                    return
-                }
-                data.postValue(success(true))
-                val currentLikesCount = media.likeCount
-                val updatedCount: Long
-                if (!media.hasLiked) {
-                    updatedCount = currentLikesCount + 1
-                    media.hasLiked = true
-                } else {
-                    updatedCount = currentLikesCount - 1
-                    media.hasLiked = false
-                }
-                media.likeCount = updatedCount
-                likeCount.postValue(updatedCount)
-                liked.postValue(media.hasLiked)
-            }
-
-            override fun onFailure(t: Throwable) {
-                data.postValue(error(t.message, null))
-                Log.e(TAG, "Error during like/unlike", t)
-            }
+    private fun updateMediaLikeUnlike(data: MutableLiveData<Resource<Any?>>, result: Boolean) {
+        if (!result) {
+            data.postValue(error("", null))
+            return
         }
+        data.postValue(success(true))
+        val currentLikesCount = media.likeCount
+        val updatedCount: Long
+        if (!media.hasLiked) {
+            updatedCount = currentLikesCount + 1
+            media.hasLiked = true
+        } else {
+            updatedCount = currentLikesCount - 1
+            media.hasLiked = false
+        }
+        media.likeCount = updatedCount
+        likeCount.postValue(updatedCount)
+        liked.postValue(media.hasLiked)
     }
 
     fun toggleSave(): LiveData<Resource<Any?>> {
@@ -180,79 +185,87 @@ class PostViewV2ViewModel : ViewModel() {
     fun save(collection: String?, ignoreSaveState: Boolean): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        mediaService?.save(media.pk, collection, getSaveUnsaveCallback(data, ignoreSaveState))
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val mediaId = media.pk ?: return@launch
+                val saved = mediaService?.save(mediaId, collection)
+                getSaveUnsaveCallback(data, saved ?: false, ignoreSaveState)
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+            }
+        }
         return data
     }
 
     fun unsave(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        mediaService?.unsave(media.pk, getSaveUnsaveCallback(data, false))
+        viewModelScope.launch(Dispatchers.IO) {
+            val mediaId = media.pk ?: return@launch
+            val unsaved = mediaService?.unsave(mediaId)
+            getSaveUnsaveCallback(data, unsaved ?: false, false)
+        }
         return data
     }
 
     private fun getSaveUnsaveCallback(
         data: MutableLiveData<Resource<Any?>>,
+        result: Boolean,
         ignoreSaveState: Boolean,
-    ): ServiceCallback<Boolean?> {
-        return object : ServiceCallback<Boolean?> {
-            override fun onSuccess(result: Boolean?) {
-                if (result != null && !result) {
-                    data.postValue(error("", null))
-                    return
-                }
-                data.postValue(success(true))
-                if (!ignoreSaveState) media.hasViewerSaved = !media.hasViewerSaved
-                saved.postValue(media.hasViewerSaved)
-            }
-
-            override fun onFailure(t: Throwable) {
-                data.postValue(error(t.message, null))
-                Log.e(TAG, "Error during save/unsave", t)
-            }
+    ) {
+        if (!result) {
+            data.postValue(error("", null))
+            return
         }
+        data.postValue(success(true))
+        if (!ignoreSaveState) media.hasViewerSaved = !media.hasViewerSaved
+        saved.postValue(media.hasViewerSaved)
     }
 
     fun updateCaption(caption: String): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
-        mediaService?.editCaption(media.pk, caption, object : ServiceCallback<Boolean?> {
-            override fun onSuccess(result: Boolean?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val postId = media.pk ?: return@launch
+                val result = mediaService?.editCaption(postId, caption)
                 if (result != null && result) {
                     data.postValue(success(""))
                     media.setPostCaption(caption)
                     this@PostViewV2ViewModel.caption.postValue(media.caption)
-                    return
+                    return@launch
                 }
                 data.postValue(error("", null))
+            } catch (e: Exception) {
+                Log.e(TAG, "Error editing caption", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "Error editing caption", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun translateCaption(): LiveData<Resource<String?>> {
         val data = MutableLiveData<Resource<String?>>()
         data.postValue(loading(null))
-        val value = caption.value ?: return data
-        mediaService?.translate(value.pk, "1", object : ServiceCallback<String?> {
-            override fun onSuccess(result: String?) {
+        val value = caption.value
+        val pk = value?.pk
+        if (pk == null) {
+            data.postValue(error("caption is null", null))
+            return data
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = mediaService?.translate(pk, "1")
                 if (result.isNullOrBlank()) {
                     data.postValue(error("", null))
-                    return
+                    return@launch
                 }
                 data.postValue(success(result))
+            } catch (e: Exception) {
+                Log.e(TAG, "Error translating comment", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "Error translating comment", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
@@ -273,30 +286,19 @@ class PostViewV2ViewModel : ViewModel() {
             data.postValue(error("media id or type is null", null))
             return data
         }
-        val request = mediaService?.delete(mediaId, mediaType)
-        if (request == null) {
-            data.postValue(success(Any()))
-            return data
-        }
-        request.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                if (!response.isSuccessful) {
-                    data.postValue(error(R.string.generic_null_response, null))
-                    return
-                }
-                val body = response.body()
-                if (body == null) {
-                    data.postValue(error(R.string.generic_null_response, null))
-                    return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val response = mediaService?.delete(mediaId, mediaType)
+                if (response == null) {
+                    data.postValue(success(Any()))
+                    return@launch
                 }
                 data.postValue(success(Any()))
+            } catch (e: Exception) {
+                Log.e(TAG, "delete: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(call: Call<String?>, t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 

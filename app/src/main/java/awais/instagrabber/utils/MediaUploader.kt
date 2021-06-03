@@ -26,12 +26,10 @@ object MediaUploader {
     suspend fun uploadPhoto(
         uri: Uri,
         contentResolver: ContentResolver,
-    ): MediaUploadResponse {
-        return withContext(Dispatchers.IO) {
-            val bitmapResult = BitmapUtils.loadBitmap(contentResolver, uri, 1000f, false)
-            val bitmap = bitmapResult?.bitmap ?: throw IOException("bitmap is null")
-            uploadPhoto(bitmap)
-        }
+    ): MediaUploadResponse = withContext(Dispatchers.IO) {
+        val bitmapResult = BitmapUtils.loadBitmap(contentResolver, uri, 1000f, false)
+        val bitmap = bitmapResult?.bitmap ?: throw IOException("bitmap is null")
+        uploadPhoto(bitmap)
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -98,25 +96,23 @@ object MediaUploader {
         }
     }
 
-    private fun create(mediaType: MediaType, inputStream: InputStream): RequestBody {
-        return object : RequestBody() {
-            override fun contentType(): MediaType {
-                return mediaType
-            }
+    private fun create(mediaType: MediaType, inputStream: InputStream): RequestBody = object : RequestBody() {
+        override fun contentType(): MediaType {
+            return mediaType
+        }
 
-            override fun contentLength(): Long {
-                return try {
-                    inputStream.available().toLong()
-                } catch (e: IOException) {
-                    0
-                }
+        override fun contentLength(): Long {
+            return try {
+                inputStream.available().toLong()
+            } catch (e: IOException) {
+                0
             }
+        }
 
-            @Throws(IOException::class)
-            @Suppress("DEPRECATION_ERROR")
-            override fun writeTo(sink: BufferedSink) {
-                Okio.source(inputStream).use { sink.writeAll(it) }
-            }
+        @Throws(IOException::class)
+        @Suppress("DEPRECATION_ERROR")
+        override fun writeTo(sink: BufferedSink) {
+            Okio.source(inputStream).use { sink.writeAll(it) }
         }
     }
 

@@ -85,8 +85,8 @@ import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
-import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.StoryStickerResponse;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
@@ -159,7 +159,7 @@ public class StoryViewerFragment extends Fragment {
         final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesService = StoriesService.getInstance(csrfToken, userIdFromCookie, deviceId);
-        mediaService = MediaService.getInstance(null, null, 0);
+        mediaService = MediaService.getInstance(deviceId, csrfToken, userIdFromCookie);
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         setHasOptionsMenu(true);
     }
@@ -220,7 +220,7 @@ public class StoryViewerFragment extends Fragment {
                     .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.createThread(
                             Collections.singletonList(currentStory.getUserId()),
                             null,
-                            CoroutineUtilsKt.getContinuation((thread, throwable) -> {
+                            CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                                 if (throwable != null) {
                                     Log.e(TAG, "onOptionsItemSelected: ", throwable);
                                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
@@ -231,17 +231,19 @@ public class StoryViewerFragment extends Fragment {
                                         input.getText().toString(),
                                         currentStory.getStoryMediaId(),
                                         String.valueOf(currentStory.getUserId()),
-                                        CoroutineUtilsKt.getContinuation((directThreadBroadcastResponse, throwable1) -> {
-                                            if (throwable1 != null) {
-                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                Log.e(TAG, "onFailure: ", throwable1);
-                                                return;
-                                            }
-                                            Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                        }, Dispatchers.getIO())
+                                        CoroutineUtilsKt.getContinuation(
+                                                (directThreadBroadcastResponse, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable1 != null) {
+                                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        Log.e(TAG, "onFailure: ", throwable1);
+                                                        return;
+                                                    }
+                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                }), Dispatchers.getIO()
+                                        )
 
                                 );
-                            }, Dispatchers.getIO())
+                            }), Dispatchers.getIO())
                     ))
                     .setNegativeButton(R.string.cancel, null)
                     .show();
@@ -451,26 +453,25 @@ public class StoryViewerFragment extends Fragment {
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            mediaService.fetch(Long.parseLong(mediaId), new ServiceCallback<Media>() {
-                @Override
-                public void onSuccess(final Media feedModel) {
-                    final NavController navController = NavHostFragment.findNavController(StoryViewerFragment.this);
-                    final Bundle bundle = new Bundle();
-                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-                    try {
-                        navController.navigate(R.id.action_global_post_view, bundle);
-                        alertDialog.dismiss();
-                    } catch (Exception e) {
-                        Log.e(TAG, "openPostDialog: ", e);
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    alertDialog.dismiss();
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                }
-            });
+            mediaService.fetch(
+                    Long.parseLong(mediaId),
+                    CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            alertDialog.dismiss();
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        final NavController navController = NavHostFragment.findNavController(StoryViewerFragment.this);
+                        final Bundle bundle = new Bundle();
+                        bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+                        try {
+                            navController.navigate(R.id.action_global_post_view, bundle);
+                            alertDialog.dismiss();
+                        } catch (Exception e) {
+                            Log.e(TAG, "openPostDialog: ", e);
+                        }
+                    }), Dispatchers.getIO())
+            );
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();

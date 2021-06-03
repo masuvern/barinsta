@@ -30,11 +30,16 @@ import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.repositories.responses.discover.TopicalExploreFeedResponse;
+import awais.instagrabber.utils.AppExecutors;
+import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.TopicClusterViewModel;
 import awais.instagrabber.webservices.DiscoverService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "DiscoverFragment";
@@ -52,7 +57,11 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         discoverService = DiscoverService.getInstance();
-        mediaService = MediaService.getInstance(null, null, 0);
+        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
     }
 
     @Override
@@ -104,29 +113,29 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
                         .setView(R.layout.dialog_opening_post)
                         .create();
                 alertDialog.show();
-                mediaService.fetch(Long.valueOf(coverMedia.getPk()), new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media feedModel) {
-                        final NavController navController = NavHostFragment.findNavController(DiscoverFragment.this);
-                        final Bundle bundle = new Bundle();
-                        bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-                        try {
-                            navController.navigate(R.id.action_global_post_view, bundle);
-                            alertDialog.dismiss();
-                        } catch (Exception e) {
-                            Log.e(TAG, "onSuccess: ", e);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        alertDialog.dismiss();
-                        try {
-                            Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                        }
-                        catch (Throwable e) {}
-                    }
-                });
+                final String pk = coverMedia.getPk();
+                if (pk == null) return;
+                mediaService.fetch(
+                        Long.parseLong(pk),
+                        CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                alertDialog.dismiss();
+                                try {
+                                    Toast.makeText(requireContext(), R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                } catch (Throwable ignored) {}
+                                return;
+                            }
+                            final NavController navController = NavHostFragment.findNavController(DiscoverFragment.this);
+                            final Bundle bundle = new Bundle();
+                            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+                            try {
+                                navController.navigate(R.id.action_global_post_view, bundle);
+                                alertDialog.dismiss();
+                            } catch (Exception e) {
+                                Log.e(TAG, "onTopicLongClick: ", e);
+                            }
+                        }), Dispatchers.getIO())
+                );
             }
         };
         final DiscoverTopicsAdapter adapter = new DiscoverTopicsAdapter(otcl);
