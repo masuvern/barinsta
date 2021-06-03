@@ -17,10 +17,6 @@ import java.io.IOException
 
 object BitmapUtils {
     private val bitmapMemoryCache: LruCache<String, Bitmap>
-
-    // private val appExecutors = AppExecutors
-    // private val callbackHandlers = Executors
-    //     .newCachedThreadPool { r: Runnable? -> Thread(r, "bm-load-callback-handler#" + random(0, 100)) }
     const val THUMBNAIL_SIZE = 200f
 
     @JvmStatic
@@ -53,7 +49,6 @@ object BitmapUtils {
      * @param reqWidth        Required width
      * @param reqHeight       Required height
      * @param addToCache      true if the loaded bitmap should be added to the mem cache
-    // * @param callback        Bitmap load callback
      */
     suspend fun loadBitmap(
         contentResolver: ContentResolver?,
@@ -70,7 +65,6 @@ object BitmapUtils {
      * @param uri             Uri from where Bitmap will be loaded
      * @param maxDimenSize    Max size of the largest side of the image
      * @param addToCache      true if the loaded bitmap should be added to the mem cache
-    // * @param callback        Bitmap load callback
      */
     suspend fun loadBitmap(
         contentResolver: ContentResolver?,
@@ -88,7 +82,6 @@ object BitmapUtils {
      * @param reqHeight       Required height (set to -1 if maxDimenSize provided)
      * @param maxDimenSize    Max size of the largest side of the image (set to -1 if setting reqWidth and reqHeight)
      * @param addToCache      true if the loaded bitmap should be added to the mem cache
-    // * @param callback        Bitmap load callback
      */
     private suspend fun loadBitmap(
         contentResolver: ContentResolver?,
@@ -226,16 +219,6 @@ object BitmapUtils {
     }
 
     class BitmapResult(var bitmap: Bitmap?, var width: Int, var height: Int)
-
-    interface ThumbnailLoadCallback {
-        /**
-         * @param bitmap Resulting bitmap
-         * @param width  width of the bitmap (Only correct if loadBitmap was called or -1)
-         * @param height height of the bitmap (Only correct if loadBitmap was called or -1)
-         */
-        fun onLoad(bitmap: Bitmap, width: Int, height: Int)
-        fun onFailure(t: Throwable)
-    }
 
     init {
         // Get max available VM memory, exceeding this amount will throw an

@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,9 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
-import awais.instagrabber.models.Comment;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.MediaRepository;
 import awais.instagrabber.repositories.requests.Clip;
