@@ -117,7 +117,7 @@ class InboxManager private constructor(private val pending: Boolean) {
                 val threads = it.threads
                 val threadsCopy = if (threads == null) LinkedList() else LinkedList(threads)
                 threadsCopy.addAll(inbox.threads ?: emptyList())
-                inbox.threads = threads
+                inbox.threads = threadsCopy
             }
         }
         this.inbox.postValue(success(inbox))
