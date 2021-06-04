@@ -7,6 +7,8 @@ import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -214,7 +216,7 @@ public class StoryViewerFragment extends Fragment {
         if (itemId == R.id.action_dms) {
             final EditText input = new EditText(context);
             input.setHint(R.string.reply_hint);
-            new AlertDialog.Builder(context)
+            final AlertDialog ad = new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
                     .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.createThread(
@@ -247,6 +249,19 @@ public class StoryViewerFragment extends Fragment {
                     ))
                     .setNegativeButton(R.string.cancel, null)
                     .show();
+            ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            input.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {}
+
+                @Override
+                public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+                    ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!TextUtils.isEmpty(s));
+                }
+
+                @Override
+                public void afterTextChanged(final Editable s) {}
+            });
             return true;
         }
         if (itemId == R.id.action_profile) {
@@ -529,7 +544,7 @@ public class StoryViewerFragment extends Fragment {
                 question = (QuestionModel) tag;
                 final EditText input = new EditText(context);
                 input.setHint(R.string.answer_hint);
-                new AlertDialog.Builder(context)
+                final AlertDialog ad = new AlertDialog.Builder(context)
                         .setTitle(question.getQuestion())
                         .setView(input)
                         .setPositiveButton(R.string.confirm, (d, w) -> {
@@ -559,6 +574,19 @@ public class StoryViewerFragment extends Fragment {
                         })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
+                ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                input.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {}
+
+                    @Override
+                    public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+                        ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!TextUtils.isEmpty(s));
+                    }
+
+                    @Override
+                    public void afterTextChanged(final Editable s) {}
+                });
             } else if (tag instanceof String[]) {
                 mentions = (String[]) tag;
                 new AlertDialog.Builder(context)
