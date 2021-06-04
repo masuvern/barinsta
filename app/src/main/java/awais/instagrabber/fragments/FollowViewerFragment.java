@@ -174,6 +174,13 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         onRefresh();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        setTitle(username);
+        setSubtitle(type);
+    }
+
     private void setTitle(final String title) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar == null) return;
