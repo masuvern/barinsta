@@ -37,7 +37,7 @@ public class RecipientThreadViewHolder extends RecyclerView.ViewHolder {
                      final DirectThread thread,
                      final boolean showSelection,
                      final boolean isSelected) {
-        if (thread == null) return;
+        if (thread == null || thread.getUsers().size() == 0) return;
         binding.getRoot().setOnClickListener(v -> {
             if (onThreadClickListener == null) return;
             onThreadClickListener.onClick(position, RankedRecipient.of(thread), isSelected);
