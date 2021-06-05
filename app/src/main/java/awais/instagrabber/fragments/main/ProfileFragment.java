@@ -433,7 +433,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         chainingMenuItem = menu.findItem(R.id.chaining);
         if (chainingMenuItem != null) {
-            chainingMenuItem.setVisible(isNotMe && profileModel.hasChaining());
+            chainingMenuItem.setVisible(isNotMe && profileModel.getHasChaining());
         }
         removeFollowerMenuItem = menu.findItem(R.id.remove_follower);
         if (removeFollowerMenuItem != null) {
@@ -859,7 +859,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.profileContext.setVisibility(View.GONE);
         } else {
             profileDetailsBinding.profileContext.setVisibility(View.VISIBLE);
-            final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinks();
+            final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinksWithUserIds();
             for (int i = 0; i < userProfileContextLinks.size(); i++) {
                 final UserProfileContextLink link = userProfileContextLinks.get(i);
                 if (link.getUsername() != null)
@@ -980,7 +980,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().getMuting() ? R.string.unmute_posts : R.string.mute_posts);
             }
             if (chainingMenuItem != null) {
-                chainingMenuItem.setVisible(profileModel.hasChaining());
+                chainingMenuItem.setVisible(profileModel.getHasChaining());
             }
             if (removeFollowerMenuItem != null) {
                 removeFollowerMenuItem.setVisible(profileModel.getFriendshipStatus().getFollowedBy());

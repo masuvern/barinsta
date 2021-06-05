@@ -41,8 +41,8 @@ public class GraphQLService extends BaseService {
 
     private GraphQLService() {
         repository = RetrofitFactory.INSTANCE
-                                    .getRetrofitWeb()
-                                    .create(GraphQLRepository.class);
+                .getRetrofitWeb()
+                .create(GraphQLRepository.class);
     }
 
     public static GraphQLService getInstance() {
@@ -309,6 +309,7 @@ public class GraphQLService extends BaseService {
                             userJson.getString("full_name"),
                             isPrivate,
                             userJson.getString("profile_pic_url_hd"),
+                            userJson.getBoolean("is_verified"),
                             null,
                             new FriendshipStatus(
                                     userJson.optBoolean("followed_by_viewer"),
@@ -322,7 +323,6 @@ public class GraphQLService extends BaseService {
                                     userJson.optBoolean("restricted_by_viewer"),
                                     false
                             ),
-                            userJson.getBoolean("is_verified"),
                             false,
                             false,
                             false,
@@ -376,7 +376,7 @@ public class GraphQLService extends BaseService {
                 try {
                     final JSONObject body = new JSONObject(rawBody);
                     final JSONObject media = body.getJSONObject("graphql")
-                            .getJSONObject("shortcode_media");
+                                                 .getJSONObject("shortcode_media");
                     callback.onSuccess(ResponseBodyUtils.parseGraphQLItem(media, null));
                 } catch (JSONException e) {
                     Log.e(TAG, "onResponse", e);
