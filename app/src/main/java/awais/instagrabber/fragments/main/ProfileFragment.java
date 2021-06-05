@@ -93,6 +93,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
+import awais.instagrabber.viewmodels.ProfileFragmentViewModel;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.GraphQLService;
@@ -139,6 +140,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private int downloadChildPosition = -1;
     private long myId;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_PROFILE_POSTS_LAYOUT);
+    private LayoutProfileDetailsBinding profileDetailsBinding;
+    private AccountRepository accountRepository;
+    private FavoriteRepository favoriteRepository;
+    private AppStateViewModel appStateViewModel;
+    private boolean disableDm = false;
+    private ProfileFragmentViewModel viewModel;
 
     private final ServiceCallback<FriendshipChangeResponse> changeCb = new ServiceCallback<FriendshipChangeResponse>() {
         @Override
@@ -156,7 +163,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Log.e(TAG, "Error editing relationship", t);
         }
     };
-
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null && !TextUtils.isEmpty(username)) {
@@ -318,11 +324,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
         }
     };
-    private LayoutProfileDetailsBinding profileDetailsBinding;
-    private AccountRepository accountRepository;
-    private FavoriteRepository favoriteRepository;
-    private AppStateViewModel appStateViewModel;
-    private boolean disableDm = false;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -344,6 +345,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ProfileFragmentViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -373,6 +375,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             shouldRefresh = false;
             return root;
         }
+        // appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> viewModel.setCurrentUser(user));
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         root = binding.getRoot();
         profileDetailsBinding = binding.header;
