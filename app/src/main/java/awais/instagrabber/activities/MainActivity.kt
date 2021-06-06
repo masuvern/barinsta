@@ -376,7 +376,10 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             .collect(Collectors.toList())
         showBottomViewDestinations = currentTabs.asSequence().map {
             it.startDestinationFragmentId
-        }.toMutableList().apply { add(R.id.postViewFragment) }
+        }.toMutableList().apply {
+            add(R.id.postViewFragment)
+            add(R.id.favoritesFragment)
+        }
         if (setDefaultTabFromSettings) {
             setSelectedTab(currentTabs)
         } else {
