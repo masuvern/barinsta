@@ -113,7 +113,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         // setHasOptionsMenu(true);
     }
 
@@ -135,7 +135,17 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onRefresh() {
         if (isComment && !isLoggedIn) {
             lazyLoader.resetState();
-            graphQLService.fetchCommentLikers(postId, null, anonCb);
+            graphQLService.fetchCommentLikers(
+                    postId,
+                    null,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            anonCb.onFailure(throwable);
+                            return;
+                        }
+                        anonCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
         } else {
             mediaService.fetchLikes(
                     postId,
@@ -164,8 +174,19 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
             binding.rvLikes.setLayoutManager(layoutManager);
             binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-                if (!TextUtils.isEmpty(endCursor))
-                    graphQLService.fetchCommentLikers(postId, endCursor, anonCb);
+                if (!TextUtils.isEmpty(endCursor)) {
+                    graphQLService.fetchCommentLikers(
+                            postId,
+                            endCursor,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    anonCb.onFailure(throwable);
+                                    return;
+                                }
+                                anonCb.onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
+                }
                 endCursor = null;
             });
             binding.rvLikes.addOnScrollListener(lazyLoader);

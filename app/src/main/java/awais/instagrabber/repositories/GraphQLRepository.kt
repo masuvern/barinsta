@@ -1,25 +1,22 @@
-package awais.instagrabber.repositories;
+package awais.instagrabber.repositories
 
-import java.util.Map;
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.QueryMap
 
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.QueryMap;
-
-public interface GraphQLRepository {
+interface GraphQLRepository {
     @GET("/graphql/query/")
-    Call<String> fetch(@QueryMap(encoded = true) Map<String, String> queryParams);
+    suspend fun fetch(@QueryMap(encoded = true) queryParams: Map<String, String>): String
 
     @GET("/{username}/?__a=1")
-    Call<String> getUser(@Path("username") String username);
+    suspend fun getUser(@Path("username") username: String): String
 
     @GET("/p/{shortcode}/?__a=1")
-    Call<String> getPost(@Path("shortcode") String shortcode);
+    suspend fun getPost(@Path("shortcode") shortcode: String): String
 
     @GET("/explore/tags/{tag}/?__a=1")
-    Call<String> getTag(@Path("tag") String tag);
+    suspend fun getTag(@Path("tag") tag: String): String
 
     @GET("/explore/locations/{locationId}/?__a=1")
-    Call<String> getLocation(@Path("locationId") long locationId);
+    suspend fun getLocation(@Path("locationId") locationId: Long): String
 }

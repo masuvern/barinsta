@@ -7,9 +7,11 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 public class SavedPostFetchService implements PostFetcher.PostFetchService {
     private final ProfileService profileService;
@@ -27,7 +29,7 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
         this.type = type;
         this.isLoggedIn = isLoggedIn;
         this.collectionId = collectionId;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 
@@ -58,7 +60,18 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
                 break;
             case TAGGED:
                 if (isLoggedIn) profileService.fetchTagged(profileId, nextMaxId, callback);
-                else graphQLService.fetchTaggedPosts(profileId, 30, nextMaxId, callback);
+                else graphQLService.fetchTaggedPosts(
+                        profileId,
+                        30,
+                        nextMaxId,
+                        CoroutineUtilsKt.getContinuation((postsFetchResponse, throwable) -> {
+                            if (throwable != null) {
+                                callback.onFailure(throwable);
+                                return;
+                            }
+                            callback.onSuccess(postsFetchResponse);
+                        }, Dispatchers.getIO())
+                );
                 break;
             case COLLECTION:
             case SAVED:

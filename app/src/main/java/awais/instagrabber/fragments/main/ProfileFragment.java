@@ -339,7 +339,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
         userService = isLoggedIn ? UserService.INSTANCE : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         final Context context = getContext();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
@@ -618,25 +618,19 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             );
             return;
         }
-        graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
-            @Override
-            public void onSuccess(final User user) {
-                profileModel = user;
-                setProfileDetails();
-            }
-
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error fetching profile", t);
-                final Context context = getContext();
-                try {
-                    if (t == null)
-                        Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
-                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (final Throwable ignored) {
-                }
-            }
-        });
+        graphQLService.fetchUser(
+                usernameTemp,
+                CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "Error fetching profile", throwable);
+                        final Context context = getContext();
+                        if (context == null) return;
+                        Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                    profileModel = user;
+                    setProfileDetails();
+                }))
+        );
     }
 
     private void setProfileDetails() {

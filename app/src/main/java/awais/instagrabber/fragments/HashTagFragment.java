@@ -63,8 +63,10 @@ import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -72,6 +74,7 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.TagsService;
+import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
@@ -218,20 +221,15 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (TextUtils.isEmpty(user.getUsername())) {
                 // this only happens for anons
                 opening = true;
-                graphQLService.fetchPost(feedModel.getCode(), new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media newFeedModel) {
-                        opening = false;
-                        if (newFeedModel == null) return;
-                        openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
+                graphQLService.fetchPost(feedModel.getCode(), CoroutineUtilsKt.getContinuation((media, throwable) -> {
+                    opening = false;
+                    if (throwable != null) {
+                        Log.e(TAG, "Error", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        opening = false;
-                        Log.e(TAG, "Error", t);
-                    }
-                });
+                    if (media == null) return;
+                    AppExecutors.INSTANCE.getMainThread().execute(() -> openPostDialog(media, profilePicView, mainPostImage, position));
+                }, Dispatchers.getIO()));
                 return;
             }
             opening = true;
@@ -304,7 +302,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -385,7 +383,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchHashtagModel() {
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) tagsService.fetch(hashtag, cb);
-        else graphQLService.fetchTag(hashtag, cb);
+        else graphQLService.fetchTag(hashtag, CoroutineUtilsKt.getContinuation((hashtag1, throwable) -> {
+            if (throwable != null) {
+                cb.onFailure(throwable);
+                return;
+            }
+            AppExecutors.INSTANCE.getMainThread().execute(() -> cb.onSuccess(hashtag1));
+        }, Dispatchers.getIO()));
     }
 
     private void setupPosts() {

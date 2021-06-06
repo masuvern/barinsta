@@ -49,7 +49,6 @@ import awais.instagrabber.models.IntentModel
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Tab
 import awais.instagrabber.models.enums.IntentModelType
-import awais.instagrabber.repositories.responses.Media
 import awais.instagrabber.services.ActivityCheckerService
 import awais.instagrabber.services.DMSyncAlarmReceiver
 import awais.instagrabber.utils.*
@@ -61,7 +60,6 @@ import awais.instagrabber.viewmodels.AppStateViewModel
 import awais.instagrabber.viewmodels.DirectInboxViewModel
 import awais.instagrabber.webservices.GraphQLService
 import awais.instagrabber.webservices.MediaService
-import awais.instagrabber.webservices.ServiceCallback
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.ScrollingViewBehavior
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -71,6 +69,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterators
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.stream.Collectors
 
@@ -92,7 +91,6 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     var currentTabs: List<Tab> = emptyList()
         private set
     private var showBottomViewDestinations: List<Int> = emptyList()
-    private var graphQLService: GraphQLService? = null
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -633,39 +631,32 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             .setCancelable(false)
             .setView(R.layout.dialog_opening_post)
             .create()
-        if (graphQLService == null) graphQLService = GraphQLService.getInstance()
-        val postCb: ServiceCallback<Media> = object : ServiceCallback<Media> {
-            override fun onSuccess(feedModel: Media?) {
-                if (feedModel != null) {
-                    val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        alertDialog.show()
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val media = if (isLoggedIn) MediaService.fetch(shortcodeToId(shortCode)) else GraphQLService.fetchPost(shortCode)
+                withContext(Dispatchers.Main) {
+                    if (media == null) {
+                        Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()
+                        return@withContext
+                    }
+                    val currentNavControllerLiveData = currentNavControllerLiveData ?: return@withContext
                     val navController = currentNavControllerLiveData.value
                     val bundle = Bundle()
-                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel)
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media)
                     try {
                         navController?.navigate(R.id.action_global_post_view, bundle)
                     } catch (e: Exception) {
                         Log.e(TAG, "showPostView: ", e)
                     }
-                } else Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()
-                alertDialog.dismiss()
-            }
-
-            override fun onFailure(t: Throwable) {
-                alertDialog.dismiss()
-            }
-        }
-        alertDialog.show()
-        if (isLoggedIn) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val media = MediaService.fetch(shortcodeToId(shortCode))
-                    postCb.onSuccess(media)
-                } catch (e: Exception) {
-                    postCb.onFailure(e)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "showPostView: ", e)
+            } finally {
+                withContext(Dispatchers.Main) {
+                    alertDialog.dismiss()
                 }
             }
-        } else {
-            graphQLService?.fetchPost(shortCode, postCb)
         }
     }
 
