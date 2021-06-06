@@ -12,7 +12,7 @@ interface AccountDao {
     suspend fun findAccountByUid(uid: String): Account?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAccounts(vararg accounts: Account): List<Long>
+    suspend fun insertAccounts(vararg accounts: Account)
 
     @Update
     suspend fun updateAccounts(vararg accounts: Account)

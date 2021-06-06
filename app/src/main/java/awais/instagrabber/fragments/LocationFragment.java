@@ -49,7 +49,6 @@ import awais.instagrabber.databinding.LayoutLocationDetailsBinding;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
@@ -493,75 +492,82 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
-            @Override
-            public void onSuccess(final Favorite result) {
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                locationDetailsBinding.favChip.setText(R.string.favorite_short);
-                favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                        result.getId(),
-                        String.valueOf(locationId),
-                        FavoriteType.LOCATION,
-                        locationModel.getName(),
-                        "res:/" + R.drawable.ic_location,
-                        result.getDateAdded()
-                ), new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {}
-
-                    @Override
-                    public void onDataNotAvailable() {}
-                });
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
-            }
-        });
-        locationDetailsBinding.favChip.setOnClickListener(v -> {
-            favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
-                @Override
-                public void onSuccess(final Favorite result) {
-                    favoriteRepository.deleteFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Void>() {
-                        @Override
-                        public void onSuccess(final Void result) {
-                            locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
-                            locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                            showSnackbar(getString(R.string.removed_from_favs));
-                        }
-
-                        @Override
-                        public void onDataNotAvailable() {}
-                    });
-                }
-
-                @Override
-                public void onDataNotAvailable() {
-                    favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                            0,
+        favoriteRepository.getFavorite(
+                String.valueOf(locationId),
+                FavoriteType.LOCATION,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null || favorite == null) {
+                        locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                        Log.e(TAG, "setupLocationDetails: ", throwable);
+                        return;
+                    }
+                    locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                    locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                    locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                    favoriteRepository.insertOrUpdateFavorite(
+                            new Favorite(
+                                    favorite.getId(),
+                                    String.valueOf(locationId),
+                                    FavoriteType.LOCATION,
+                                    locationModel.getName(),
+                                    "res:/" + R.drawable.ic_location,
+                                    favorite.getDateAdded()
+                            ),
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                }
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        );
+        locationDetailsBinding.favChip.setOnClickListener(v -> favoriteRepository.getFavorite(
+                String.valueOf(locationId),
+                FavoriteType.LOCATION,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "setupLocationDetails: ", throwable);
+                        return;
+                    }
+                    if (favorite == null) {
+                        favoriteRepository.insertOrUpdateFavorite(
+                                new Favorite(
+                                        0,
+                                        String.valueOf(locationId),
+                                        FavoriteType.LOCATION,
+                                        locationModel.getName(),
+                                        "res:/" + R.drawable.ic_location,
+                                        LocalDateTime.now()
+                                ),
+                                CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable1 != null) {
+                                        Log.e(TAG, "onDataNotAvailable: ", throwable1);
+                                        return;
+                                    }
+                                    locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                                    locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                    showSnackbar(getString(R.string.added_to_favs));
+                                }), Dispatchers.getIO())
+                        );
+                        return;
+                    }
+                    favoriteRepository.deleteFavorite(
                             String.valueOf(locationId),
                             FavoriteType.LOCATION,
-                            locationModel.getName(),
-                            "res:/" + R.drawable.ic_location,
-                            LocalDateTime.now()
-                    ), new RepositoryCallback<Void>() {
-                        @Override
-                        public void onSuccess(final Void result) {
-                            locationDetailsBinding.favChip.setText(R.string.favorite_short);
-                            locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                            showSnackbar(getString(R.string.added_to_favs));
-                        }
-
-                        @Override
-                        public void onDataNotAvailable() {}
-                    });
-                }
-            });
-        });
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
+                                locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                                showSnackbar(getString(R.string.removed_from_favs));
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        ));
         locationDetailsBinding.mainLocationImage.setOnClickListener(v -> {
             if (hasStories) {
                 // show stories

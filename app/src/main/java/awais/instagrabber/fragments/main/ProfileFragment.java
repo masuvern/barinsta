@@ -65,7 +65,6 @@ import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
@@ -702,76 +701,80 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         setupButtons(profileId);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
-        favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
-            @Override
-            public void onSuccess(final Favorite result) {
-                profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                profileDetailsBinding.favChip.setText(R.string.favorite_short);
-                favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                        result.getId(),
-                        profileModel.getUsername(),
-                        FavoriteType.USER,
-                        profileModel.getFullName(),
-                        profileModel.getProfilePicUrl(),
-                        result.getDateAdded()
-                ), new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {
+        favoriteRepository.getFavorite(
+                profileModel.getUsername(),
+                FavoriteType.USER,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null || favorite == null) {
+                        profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        profileDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                        Log.e(TAG, "setProfileDetails: ", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {
+                    profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                    profileDetailsBinding.favChip.setText(R.string.favorite_short);
+                    favoriteRepository.insertOrUpdateFavorite(
+                            new Favorite(
+                                    favorite.getId(),
+                                    profileModel.getUsername(),
+                                    FavoriteType.USER,
+                                    profileModel.getFullName(),
+                                    profileModel.getProfilePicUrl(),
+                                    favorite.getDateAdded()
+                            ),
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                }
+                            }), Dispatchers.getIO())
+                    );
+                }))
+        );
+        profileDetailsBinding.favChip.setOnClickListener(v -> favoriteRepository.getFavorite(
+                profileModel.getUsername(),
+                FavoriteType.USER,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "setProfileDetails: ", throwable);
+                        return;
                     }
-                });
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                profileDetailsBinding.favChip.setText(R.string.add_to_favorites);
-            }
-        });
-        profileDetailsBinding.favChip.setOnClickListener(
-                v -> favoriteRepository.getFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Favorite>() {
-                    @Override
-                    public void onSuccess(final Favorite result) {
-                        favoriteRepository.deleteFavorite(profileModel.getUsername(), FavoriteType.USER, new RepositoryCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
+                    if (favorite == null) {
+                        favoriteRepository.insertOrUpdateFavorite(
+                                new Favorite(
+                                        0,
+                                        profileModel.getUsername(),
+                                        FavoriteType.USER,
+                                        profileModel.getFullName(),
+                                        profileModel.getProfilePicUrl(),
+                                        LocalDateTime.now()
+                                ),
+                                CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable1 != null) {
+                                        Log.e(TAG, "onDataNotAvailable: ", throwable1);
+                                        return;
+                                    }
+                                    profileDetailsBinding.favChip.setText(R.string.favorite_short);
+                                    profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                    showSnackbar(getString(R.string.added_to_favs));
+                                }), Dispatchers.getIO())
+                        );
+                        return;
+                    }
+                    favoriteRepository.deleteFavorite(
+                            profileModel.getUsername(),
+                            FavoriteType.USER,
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
                                 profileDetailsBinding.favChip.setText(R.string.add_to_favorites);
                                 profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
                                 showSnackbar(getString(R.string.removed_from_favs));
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                                0,
-                                profileModel.getUsername(),
-                                FavoriteType.USER,
-                                profileModel.getFullName(),
-                                profileModel.getProfilePicUrl(),
-                                LocalDateTime.now()
-                        ), new RepositoryCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
-                                profileDetailsBinding.favChip.setText(R.string.favorite_short);
-                                profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {
-                            }
-                        });
-                    }
-                }));
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        ));
         profileDetailsBinding.mainProfileImage.setImageURI(profileModel.getProfilePicUrl());
         profileDetailsBinding.mainProfileImage.setVisibility(View.VISIBLE);
 

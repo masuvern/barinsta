@@ -51,7 +51,6 @@ import awais.instagrabber.databinding.LayoutHashtagDetailsBinding;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
@@ -480,73 +479,81 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final Context context = getContext();
         if (context == null) return;
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
-        favoriteRepository.getFavorite(hashtag, FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
-            @Override
-            public void onSuccess(final Favorite result) {
-                favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                        result.getId(),
-                        hashtag,
-                        FavoriteType.HASHTAG,
-                        hashtagModel.getName(),
-                        "res:/" + R.drawable.ic_hashtag,
-                        result.getDateAdded()
-                ), new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {
-                        hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                        hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+        favoriteRepository.getFavorite(
+                hashtag,
+                FavoriteType.HASHTAG,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null || favorite == null) {
+                        hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                        return;
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {}
-                });
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
-            }
-        });
-        hashtagDetailsBinding.favChip.setOnClickListener(
-                v -> favoriteRepository.getFavorite(hashtag, FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
-                    @Override
-                    public void onSuccess(final Favorite result) {
-                        favoriteRepository.deleteFavorite(hashtag, FavoriteType.HASHTAG, new RepositoryCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
+                    favoriteRepository.insertOrUpdateFavorite(
+                            new Favorite(
+                                    favorite.getId(),
+                                    hashtag,
+                                    FavoriteType.HASHTAG,
+                                    hashtagModel.getName(),
+                                    "res:/" + R.drawable.ic_hashtag,
+                                    favorite.getDateAdded()
+                            ),
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
+                                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        );
+        hashtagDetailsBinding.favChip.setOnClickListener(v -> favoriteRepository.getFavorite(
+                hashtag,
+                FavoriteType.HASHTAG,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "setHashtagDetails: ", throwable);
+                        return;
+                    }
+                    if (favorite == null) {
+                        favoriteRepository.insertOrUpdateFavorite(
+                                new Favorite(
+                                        0,
+                                        hashtag,
+                                        FavoriteType.HASHTAG,
+                                        hashtagModel.getName(),
+                                        "res:/" + R.drawable.ic_hashtag,
+                                        LocalDateTime.now()
+                                ),
+                                CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable1 != null) {
+                                        Log.e(TAG, "onDataNotAvailable: ", throwable1);
+                                        return;
+                                    }
+                                    hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                                    hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                    showSnackbar(getString(R.string.added_to_favs));
+                                }), Dispatchers.getIO())
+                        );
+                        return;
+                    }
+                    favoriteRepository.deleteFavorite(
+                            hashtag,
+                            FavoriteType.HASHTAG,
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
                                 hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
                                 hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
                                 showSnackbar(getString(R.string.removed_from_favs));
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {}
-                        });
-                    }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                                0,
-                                hashtag,
-                                FavoriteType.HASHTAG,
-                                hashtagModel.getName(),
-                                "res:/" + R.drawable.ic_hashtag,
-                                LocalDateTime.now()
-                        ), new RepositoryCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
-                                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
-                                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {}
-                        });
-                    }
-                }));
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+                                                         )
+        );
         hashtagDetailsBinding.mainHashtagImage.setImageURI("res:/" + R.drawable.ic_hashtag);
         final String postCount = String.valueOf(hashtagModel.getMediaCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
