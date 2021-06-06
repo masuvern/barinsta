@@ -42,6 +42,7 @@ import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.PasswordUtils.IncorrectPasswordException;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -396,33 +397,32 @@ public final class ExportImportUtils {
     private static ListenableFuture<JSONArray> getCookies(final Context context) {
         final SettableFuture<JSONArray> future = SettableFuture.create();
         final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
-        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
-            @Override
-            public void onSuccess(final List<Account> accounts) {
-                final JSONArray jsonArray = new JSONArray();
-                try {
-                    for (final Account cookie : accounts) {
-                        final JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("i", cookie.getUid());
-                        jsonObject.put("u", cookie.getUsername());
-                        jsonObject.put("c", cookie.getCookie());
-                        jsonObject.put("full_name", cookie.getFullName());
-                        jsonObject.put("profile_pic", cookie.getProfilePic());
-                        jsonArray.put(jsonObject);
+        accountRepository.getAllAccounts(
+                CoroutineUtilsKt.getContinuation((accounts, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "getCookies: ", throwable);
+                        future.set(new JSONArray());
+                        return;
                     }
-                } catch (Exception e) {
-                    if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "Error exporting accounts", e);
+                    final JSONArray jsonArray = new JSONArray();
+                    try {
+                        for (final Account cookie : accounts) {
+                            final JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("i", cookie.getUid());
+                            jsonObject.put("u", cookie.getUsername());
+                            jsonObject.put("c", cookie.getCookie());
+                            jsonObject.put("full_name", cookie.getFullName());
+                            jsonObject.put("profile_pic", cookie.getProfilePic());
+                            jsonArray.put(jsonObject);
+                        }
+                    } catch (Exception e) {
+                        if (BuildConfig.DEBUG) {
+                            Log.e(TAG, "Error exporting accounts", e);
+                        }
                     }
-                }
-                future.set(jsonArray);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                future.set(new JSONArray());
-            }
-        });
+                    future.set(jsonArray);
+                }), Dispatchers.getIO())
+        );
         return future;
     }
 

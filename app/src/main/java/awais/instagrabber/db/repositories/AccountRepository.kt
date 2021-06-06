@@ -1,131 +1,49 @@
-package awais.instagrabber.db.repositories;
+package awais.instagrabber.db.repositories
 
-import java.util.List;
+import awais.instagrabber.db.datasources.AccountDataSource
+import awais.instagrabber.db.entities.Account
 
-import awais.instagrabber.db.datasources.AccountDataSource;
-import awais.instagrabber.db.entities.Account;
-import awais.instagrabber.utils.AppExecutors;
+class AccountRepository private constructor(private val accountDataSource: AccountDataSource) {
+    suspend fun getAccount(uid: Long): Account? = accountDataSource.getAccount(uid.toString())
 
-public class AccountRepository {
-    private static final String TAG = AccountRepository.class.getSimpleName();
+    suspend fun getAllAccounts(): List<Account> = accountDataSource.getAllAccounts()
 
-    private static AccountRepository instance;
-
-    private final AppExecutors appExecutors;
-    private final AccountDataSource accountDataSource;
-
-    // private List<Account> cachedAccounts;
-
-    private AccountRepository(final AppExecutors appExecutors, final AccountDataSource accountDataSource) {
-        this.appExecutors = appExecutors;
-        this.accountDataSource = accountDataSource;
-    }
-
-    public static AccountRepository getInstance(final AccountDataSource accountDataSource) {
-        if (instance == null) {
-            instance = new AccountRepository(AppExecutors.INSTANCE, accountDataSource);
+    suspend fun insertOrUpdateAccounts(accounts: List<Account>) {
+        for (account in accounts) {
+            accountDataSource.insertOrUpdateAccount(
+                account.uid,
+                account.username,
+                account.cookie,
+                account.fullName,
+                account.profilePic
+            )
         }
-        return instance;
     }
 
-    public void getAccount(final long uid,
-                           final RepositoryCallback<Account> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final Account account = accountDataSource.getAccount(String.valueOf(uid));
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (account == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(account);
-            });
-        });
+    suspend fun insertOrUpdateAccount(
+        uid: Long,
+        username: String,
+        cookie: String,
+        fullName: String,
+        profilePicUrl: String?,
+    ): Account? {
+        accountDataSource.insertOrUpdateAccount(uid.toString(), username, cookie, fullName, profilePicUrl)
+        return accountDataSource.getAccount(uid.toString())
     }
 
-    public void getAllAccounts(final RepositoryCallback<List<Account>> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final List<Account> accounts = accountDataSource.getAllAccounts();
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (accounts == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                // cachedAccounts = accounts;
-                callback.onSuccess(accounts);
-            });
-        });
-    }
+    suspend fun deleteAccount(account: Account) = accountDataSource.deleteAccount(account)
 
-    public void insertOrUpdateAccounts(final List<Account> accounts,
-                                       final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            for (final Account account : accounts) {
-                accountDataSource.insertOrUpdateAccount(account.getUid(),
-                                                        account.getUsername(),
-                                                        account.getCookie(),
-                                                        account.getFullName(),
-                                                        account.getProfilePic());
+    suspend fun deleteAllAccounts() = accountDataSource.deleteAllAccounts()
+
+    companion object {
+        private lateinit var instance: AccountRepository
+
+        @JvmStatic
+        fun getInstance(accountDataSource: AccountDataSource): AccountRepository {
+            if (!this::instance.isInitialized) {
+                instance = AccountRepository(accountDataSource)
             }
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
+            return instance
+        }
     }
-
-    public void insertOrUpdateAccount(final long uid,
-                                      final String username,
-                                      final String cookie,
-                                      final String fullName,
-                                      final String profilePicUrl,
-                                      final RepositoryCallback<Account> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            accountDataSource.insertOrUpdateAccount(String.valueOf(uid), username, cookie, fullName, profilePicUrl);
-            final Account updated = accountDataSource.getAccount(String.valueOf(uid));
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (updated == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(updated);
-            });
-        });
-    }
-
-    public void deleteAccount(final Account account,
-                              final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            accountDataSource.deleteAccount(account);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
-    }
-
-    public void deleteAllAccounts(final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            accountDataSource.deleteAllAccounts();
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
-    }
-
 }

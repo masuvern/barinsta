@@ -62,7 +62,6 @@ import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.databinding.LayoutProfileDetailsBinding;
 import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
-import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.FavoriteRepository;
@@ -1027,17 +1026,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 cookie,
                 profileModel.getFullName(),
                 profileModel.getProfilePicUrl(),
-                new RepositoryCallback<Account>() {
-                    @Override
-                    public void onSuccess(final Account result) {
-                        accountIsUpdated = true;
+                CoroutineUtilsKt.getContinuation((account, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "updateAccountInfo: ", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        Log.e(TAG, "onDataNotAvailable: insert failed");
-                    }
-                });
+                    accountIsUpdated = true;
+                }), Dispatchers.getIO())
+        );
     }
 
     private void fetchStoryAndHighlights(final long profileId) {

@@ -1,34 +1,25 @@
-package awais.instagrabber.db.dao;
+package awais.instagrabber.db.dao
 
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-import androidx.room.Update;
-
-import java.util.List;
-
-import awais.instagrabber.db.entities.Account;
+import androidx.room.*
+import awais.instagrabber.db.entities.Account
 
 @Dao
-public interface AccountDao {
-
+interface AccountDao {
     @Query("SELECT * FROM accounts")
-    List<Account> getAllAccounts();
+    suspend fun getAllAccounts(): List<Account>
 
     @Query("SELECT * FROM accounts WHERE uid = :uid")
-    Account findAccountByUid(String uid);
+    suspend fun findAccountByUid(uid: String): Account?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    List<Long> insertAccounts(Account... accounts);
+    suspend fun insertAccounts(vararg accounts: Account): List<Long>
 
     @Update
-    void updateAccounts(Account... accounts);
+    suspend fun updateAccounts(vararg accounts: Account)
 
     @Delete
-    void deleteAccounts(Account... accounts);
+    suspend fun deleteAccounts(vararg accounts: Account)
 
     @Query("DELETE from accounts")
-    void deleteAllAccounts();
+    suspend fun deleteAllAccounts()
 }
