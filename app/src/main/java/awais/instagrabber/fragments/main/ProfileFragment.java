@@ -74,7 +74,6 @@ import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
@@ -337,7 +336,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = isLoggedIn ? FriendshipService.INSTANCE : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
-        storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
+        storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
         userService = isLoggedIn ? UserService.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
@@ -1044,36 +1043,34 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchStoryAndHighlights(final long profileId) {
         storiesService.getUserStory(
                 StoryViewerOptions.forUser(profileId, profileModel.getFullName()),
-                new ServiceCallback<List<StoryModel>>() {
-                    @Override
-                    public void onSuccess(final List<StoryModel> storyModels) {
-                        if (storyModels != null && !storyModels.isEmpty()) {
-                            profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
-                            hasStories = true;
-                        }
+                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "Error", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        Log.e(TAG, "Error", t);
+                    if (storyModels != null && !storyModels.isEmpty()) {
+                        profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
+                        hasStories = true;
                     }
-                });
-        storiesService.fetchHighlights(profileId,
-                                       new ServiceCallback<List<HighlightModel>>() {
-                                           @Override
-                                           public void onSuccess(final List<HighlightModel> result) {
-                                               if (result != null) {
-                                                   profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
-                                                   highlightsViewModel.getList().postValue(result);
-                                               } else profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                                           }
-
-                                           @Override
-                                           public void onFailure(final Throwable t) {
-                                               profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                                               Log.e(TAG, "Error", t);
-                                           }
-                                       });
+                }), Dispatchers.getIO())
+        );
+        storiesService.fetchHighlights(
+                profileId,
+                CoroutineUtilsKt.getContinuation((highlightModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                        Log.e(TAG, "Error", throwable);
+                        return;
+                    }
+                    if (highlightModels != null) {
+                        profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
+                        //noinspection unchecked
+                        highlightsViewModel.getList().postValue((List<HighlightModel>) highlightModels);
+                    } else {
+                        profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                    }
+                }), Dispatchers.getIO())
+        );
     }
 
     private void setupCommonListeners() {

@@ -1,548 +1,309 @@
-package awais.instagrabber.webservices;
+package awais.instagrabber.webservices
 
-import android.util.Log;
+import android.util.Log
+import awais.instagrabber.fragments.settings.PreferenceKeys
+import awais.instagrabber.models.FeedStoryModel
+import awais.instagrabber.models.HighlightModel
+import awais.instagrabber.models.StoryModel
+import awais.instagrabber.repositories.StoriesRepository
+import awais.instagrabber.repositories.requests.StoryViewerOptions
+import awais.instagrabber.repositories.responses.StoryStickerResponse
+import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.ResponseBodyUtils
+import awais.instagrabber.utils.TextUtils.isEmpty
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.extensions.TAG
+import awais.instagrabber.webservices.RetrofitFactory.retrofit
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+object StoriesService : BaseService() {
+    private val repository: StoriesRepository = retrofit.create(StoriesRepository::class.java)
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-
-import awais.instagrabber.fragments.settings.PreferenceKeys;
-import awais.instagrabber.models.FeedStoryModel;
-import awais.instagrabber.models.HighlightModel;
-import awais.instagrabber.models.StoryModel;
-import awais.instagrabber.repositories.StoriesRepository;
-import awais.instagrabber.repositories.requests.StoryViewerOptions;
-import awais.instagrabber.repositories.responses.StoryStickerResponse;
-import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.ResponseBodyUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class StoriesService extends BaseService {
-    private static final String TAG = "StoriesService";
-
-    private static StoriesService instance;
-
-    private final StoriesRepository repository;
-    private final String csrfToken;
-    private final long userId;
-    private final String deviceUuid;
-
-    private StoriesService(@NonNull final String csrfToken,
-                           final long userId,
-                           @NonNull final String deviceUuid) {
-        this.csrfToken = csrfToken;
-        this.userId = userId;
-        this.deviceUuid = deviceUuid;
-        repository = RetrofitFactory.INSTANCE
-                                    .getRetrofit()
-                                    .create(StoriesRepository.class);
+    suspend fun fetch(mediaId: Long): StoryModel {
+        val response = repository.fetch(mediaId)
+        val itemJson = JSONObject(response).getJSONArray("items").getJSONObject(0)
+        return ResponseBodyUtils.parseStoryItem(itemJson, false, null)
     }
 
-    public String getCsrfToken() {
-        return csrfToken;
+    suspend fun getFeedStories(): List<FeedStoryModel> {
+        val response = repository.getFeedStories()
+        return parseStoriesBody(response)
     }
 
-    public long getUserId() {
-        return userId;
-    }
-
-    public String getDeviceUuid() {
-        return deviceUuid;
-    }
-
-    public static StoriesService getInstance(final String csrfToken,
-                                             final long userId,
-                                             final String deviceUuid) {
-        if (instance == null
-                || !Objects.equals(instance.getCsrfToken(), csrfToken)
-                || !Objects.equals(instance.getUserId(), userId)
-                || !Objects.equals(instance.getDeviceUuid(), deviceUuid)) {
-            instance = new StoriesService(csrfToken, userId, deviceUuid);
+    private fun parseStoriesBody(body: String): List<FeedStoryModel> {
+        val feedStoryModels: MutableList<FeedStoryModel> = ArrayList()
+        val feedStoriesReel = JSONObject(body).getJSONArray("tray")
+        for (i in 0 until feedStoriesReel.length()) {
+            val node = feedStoriesReel.getJSONObject(i)
+            if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(PreferenceKeys.HIDE_MUTED_REELS)) continue
+            val userJson = node.getJSONObject(if (node.has("user")) "user" else "owner")
+            try {
+                val user = User(userJson.getLong("pk"),
+                    userJson.getString("username"),
+                    userJson.optString("full_name"),
+                    userJson.optBoolean("is_private"),
+                    userJson.getString("profile_pic_url"),
+                    userJson.optBoolean("is_verified")
+                )
+                val timestamp = node.getLong("latest_reel_media")
+                val fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp
+                val itemJson = if (node.has("items")) node.getJSONArray("items").optJSONObject(0) else null
+                var firstStoryModel: StoryModel? = null
+                if (itemJson != null) {
+                    firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, null)
+                }
+                feedStoryModels.add(FeedStoryModel(
+                    node.getString("id"),
+                    user,
+                    fullyRead,
+                    timestamp,
+                    firstStoryModel,
+                    node.getInt("media_count"),
+                    false,
+                    node.optBoolean("has_besties_media")))
+            } catch (e: Exception) {
+                Log.e(TAG, "parseStoriesBody: ", e)
+            } // to cover promotional reels with non-long user pk's
         }
-        return instance;
-    }
-
-    public void fetch(final long mediaId,
-                      final ServiceCallback<StoryModel> callback) {
-        final Call<String> request = repository.fetch(mediaId);
-        request.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call,
-                                   @NonNull final Response<String> response) {
-                if (callback == null) return;
-                final String body = response.body();
-                if (body == null) {
-                    callback.onSuccess(null);
-                    return;
-                }
-                try {
-                    final JSONObject itemJson = new JSONObject(body).getJSONArray("items").getJSONObject(0);
-                    callback.onSuccess(ResponseBodyUtils.parseStoryItem(itemJson, false, null));
-                } catch (JSONException e) {
-                    callback.onFailure(e);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<String> call,
-                                  @NonNull final Throwable t) {
-                if (callback != null) {
-                    callback.onFailure(t);
-                }
-            }
-        });
-    }
-
-    public void getFeedStories(final ServiceCallback<List<FeedStoryModel>> callback) {
-        final Call<String> response = repository.getFeedStories();
-        response.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String body = response.body();
-                if (body == null) {
-                    Log.e(TAG, "getFeedStories: body is empty");
-                    return;
-                }
-                parseStoriesBody(body, callback);
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-                callback.onFailure(t);
-            }
-        });
-    }
-
-    private void parseStoriesBody(final String body, final ServiceCallback<List<FeedStoryModel>> callback) {
-        try {
-            final List<FeedStoryModel> feedStoryModels = new ArrayList<>();
-            final JSONArray feedStoriesReel = new JSONObject(body).getJSONArray("tray");
-            for (int i = 0; i < feedStoriesReel.length(); ++i) {
-                final JSONObject node = feedStoriesReel.getJSONObject(i);
-                if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(PreferenceKeys.HIDE_MUTED_REELS)) continue;
-                final JSONObject userJson = node.getJSONObject(node.has("user") ? "user" : "owner");
-                try {
-                    final User user = new User(userJson.getLong("pk"),
-                                               userJson.getString("username"),
-                                               userJson.optString("full_name"),
-                                               userJson.optBoolean("is_private"),
-                                               userJson.getString("profile_pic_url"),
-                                               userJson.optBoolean("is_verified")
-                    );
-                    final long timestamp = node.getLong("latest_reel_media");
-                    final boolean fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp;
-                    final JSONObject itemJson = node.has("items") ? node.getJSONArray("items").optJSONObject(0) : null;
-                    StoryModel firstStoryModel = null;
-                    if (itemJson != null) {
-                        firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, null);
-                    }
-                    feedStoryModels.add(new FeedStoryModel(
-                            node.getString("id"),
-                            user,
-                            fullyRead,
-                            timestamp,
-                            firstStoryModel,
-                            node.getInt("media_count"),
-                            false,
-                            node.optBoolean("has_besties_media")));
-                } catch (Exception e) {
-                    Log.e(TAG, "parseStoriesBody: ", e);
-                } // to cover promotional reels with non-long user pk's
-            }
-            final JSONArray broadcasts = new JSONObject(body).getJSONArray("broadcasts");
-            for (int i = 0; i < broadcasts.length(); ++i) {
-                final JSONObject node = broadcasts.getJSONObject(i);
-                final JSONObject userJson = node.getJSONObject("broadcast_owner");
-                // final ProfileModel profileModel = new ProfileModel(false, false, false,
-                //         userJson.getString("pk"),
-                //         userJson.getString("username"),
-                //         null, null, null,
-                //         userJson.getString("profile_pic_url"),
-                //         null, 0, 0, 0, false, false, false, false, false);
-                final User user = new User(userJson.getLong("pk"),
-                                           userJson.getString("username"),
-                                           userJson.optString("full_name"),
-                                           userJson.optBoolean("is_private"),
-                                           userJson.getString("profile_pic_url"),
-                                           userJson.optBoolean("is_verified")
-                );
-                feedStoryModels.add(new FeedStoryModel(
-                        node.getString("id"),
-                        user,
-                        false,
-                        node.getLong("published_time"),
-                        ResponseBodyUtils.parseBroadcastItem(node),
-                        1,
-                        true,
-                        false
-                ));
-            }
-            callback.onSuccess(sort(feedStoryModels));
-        } catch (JSONException e) {
-            Log.e(TAG, "Error parsing json", e);
+        val broadcasts = JSONObject(body).getJSONArray("broadcasts")
+        for (i in 0 until broadcasts.length()) {
+            val node = broadcasts.getJSONObject(i)
+            val userJson = node.getJSONObject("broadcast_owner")
+            val user = User(userJson.getLong("pk"),
+                userJson.getString("username"),
+                userJson.optString("full_name"),
+                userJson.optBoolean("is_private"),
+                userJson.getString("profile_pic_url"),
+                userJson.optBoolean("is_verified")
+            )
+            feedStoryModels.add(FeedStoryModel(
+                node.getString("id"),
+                user,
+                false,
+                node.getLong("published_time"),
+                ResponseBodyUtils.parseBroadcastItem(node),
+                1,
+                isLive = true,
+                isBestie = false
+            ))
         }
+        return sort(feedStoryModels)
     }
 
-    public void fetchHighlights(final long profileId,
-                                final ServiceCallback<List<HighlightModel>> callback) {
-        final Call<String> request = repository.fetchHighlights(profileId);
-        request.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                try {
-                    if (callback == null) {
-                        return;
-                    }
-                    final String body = response.body();
-                    if (TextUtils.isEmpty(body)) {
-                        callback.onSuccess(null);
-                        return;
-                    }
-                    final JSONArray highlightsReel = new JSONObject(body).getJSONArray("tray");
-
-                    final int length = highlightsReel.length();
-                    final List<HighlightModel> highlightModels = new ArrayList<>();
-
-                    for (int i = 0; i < length; ++i) {
-                        final JSONObject highlightNode = highlightsReel.getJSONObject(i);
-                        highlightModels.add(new HighlightModel(
-                                highlightNode.getString("title"),
-                                highlightNode.getString(Constants.EXTRAS_ID),
-                                highlightNode.getJSONObject("cover_media")
-                                             .getJSONObject("cropped_image_version")
-                                             .getString("url"),
-                                highlightNode.getLong("latest_reel_media"),
-                                highlightNode.getInt("media_count")
-                        ));
-                    }
-                    callback.onSuccess(highlightModels);
-                } catch (JSONException e) {
-                    Log.e(TAG, "onResponse", e);
-                    callback.onFailure(e);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-                if (callback != null) {
-                    callback.onFailure(t);
-                }
-            }
-        });
-    }
-
-    public void fetchArchive(final String maxId,
-                             final ServiceCallback<ArchiveFetchResponse> callback) {
-        final Map<String, String> form = new HashMap<>();
-        form.put("include_suggested_highlights", "false");
-        form.put("is_in_archive_home", "true");
-        form.put("include_cover", "1");
-        if (!TextUtils.isEmpty(maxId)) {
-            form.put("max_id", maxId); // NOT TESTED
+    suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
+        val response = repository.fetchHighlights(profileId)
+        val highlightsReel = JSONObject(response).getJSONArray("tray")
+        val length = highlightsReel.length()
+        val highlightModels: MutableList<HighlightModel> = ArrayList()
+        for (i in 0 until length) {
+            val highlightNode = highlightsReel.getJSONObject(i)
+            highlightModels.add(HighlightModel(
+                highlightNode.getString("title"),
+                highlightNode.getString(Constants.EXTRAS_ID),
+                highlightNode.getJSONObject("cover_media")
+                    .getJSONObject("cropped_image_version")
+                    .getString("url"),
+                highlightNode.getLong("latest_reel_media"),
+                highlightNode.getInt("media_count")
+            ))
         }
-        final Call<String> request = repository.fetchArchive(form);
-        request.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                try {
-                    if (callback == null) {
-                        return;
-                    }
-                    final String body = response.body();
-                    if (TextUtils.isEmpty(body)) {
-                        callback.onSuccess(null);
-                        return;
-                    }
-                    final JSONObject data = new JSONObject(body);
-                    final JSONArray highlightsReel = data.getJSONArray("items");
-
-                    final int length = highlightsReel.length();
-                    final List<HighlightModel> highlightModels = new ArrayList<>();
-
-                    for (int i = 0; i < length; ++i) {
-                        final JSONObject highlightNode = highlightsReel.getJSONObject(i);
-                        highlightModels.add(new HighlightModel(
-                                null,
-                                highlightNode.getString(Constants.EXTRAS_ID),
-                                highlightNode.getJSONObject("cover_image_version").getString("url"),
-                                highlightNode.getLong("latest_reel_media"),
-                                highlightNode.getInt("media_count")
-                        ));
-                    }
-                    callback.onSuccess(new ArchiveFetchResponse(highlightModels,
-                                                                data.getBoolean("more_available"),
-                                                                data.getString("max_id")));
-                } catch (JSONException e) {
-                    Log.e(TAG, "onResponse", e);
-                    callback.onFailure(e);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-                if (callback != null) {
-                    callback.onFailure(t);
-                }
-            }
-        });
+        return highlightModels
     }
 
-    public void getUserStory(final StoryViewerOptions options,
-                             final ServiceCallback<List<StoryModel>> callback) {
-        final String url = buildUrl(options);
-        final Call<String> userStoryCall = repository.getUserStory(url);
-        final boolean isLocOrHashtag = options.getType() == StoryViewerOptions.Type.LOCATION || options.getType() == StoryViewerOptions.Type.HASHTAG;
-        final boolean isHighlight = options.getType() == StoryViewerOptions.Type.HIGHLIGHT || options
-                .getType() == StoryViewerOptions.Type.STORY_ARCHIVE;
-        userStoryCall.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                JSONObject data;
-                try {
-                    final String body = response.body();
-                    if (body == null) {
-                        Log.e(TAG, "body is null");
-                        return;
-                    }
-                    data = new JSONObject(body);
+    suspend fun fetchArchive(maxId: String): ArchiveFetchResponse {
+        val form = mutableMapOf(
+            "include_suggested_highlights" to "false",
+            "is_in_archive_home" to "true",
+            "include_cover" to "1",
+        )
+        if (!isEmpty(maxId)) {
+            form["max_id"] = maxId // NOT TESTED
+        }
+        val response = repository.fetchArchive(form)
+        val data = JSONObject(response)
+        val highlightsReel = data.getJSONArray("items")
+        val length = highlightsReel.length()
+        val highlightModels: MutableList<HighlightModel> = ArrayList()
+        for (i in 0 until length) {
+            val highlightNode = highlightsReel.getJSONObject(i)
+            highlightModels.add(HighlightModel(
+                null,
+                highlightNode.getString(Constants.EXTRAS_ID),
+                highlightNode.getJSONObject("cover_image_version").getString("url"),
+                highlightNode.getLong("latest_reel_media"),
+                highlightNode.getInt("media_count")
+            ))
+        }
+        return ArchiveFetchResponse(highlightModels, data.getBoolean("more_available"), data.getString("max_id"))
+    }
 
-                    if (!isHighlight) {
-                        data = data.optJSONObject((isLocOrHashtag) ? "story" : "reel");
-                    } else {
-                        data = data.getJSONObject("reels").optJSONObject(options.getName());
-                    }
-
-                    String username = null;
-                    if (data != null
-                            // && localUsername == null
-                            && !isLocOrHashtag) {
-                        username = data.getJSONObject("user").getString("username");
-                    }
-
-                    JSONArray media;
-                    if (data != null
-                            && (media = data.optJSONArray("items")) != null
-                            && media.length() > 0 && media.optJSONObject(0) != null) {
-                        final int mediaLen = media.length();
-                        final List<StoryModel> models = new ArrayList<>();
-                        for (int i = 0; i < mediaLen; ++i) {
-                            data = media.getJSONObject(i);
-                            models.add(ResponseBodyUtils.parseStoryItem(data, isLocOrHashtag, username));
-                        }
-                        callback.onSuccess(models);
-                    } else {
-                        callback.onSuccess(null);
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, "Error parsing string", e);
-                }
+    suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
+        val url = buildUrl(options) ?: return emptyList()
+        val response = repository.getUserStory(url)
+        val isLocOrHashtag = options.type == StoryViewerOptions.Type.LOCATION || options.type == StoryViewerOptions.Type.HASHTAG
+        val isHighlight = options.type == StoryViewerOptions.Type.HIGHLIGHT || options.type == StoryViewerOptions.Type.STORY_ARCHIVE
+        var data: JSONObject? = JSONObject(response)
+        data = if (!isHighlight) {
+            data?.optJSONObject(if (isLocOrHashtag) "story" else "reel")
+        } else {
+            data?.getJSONObject("reels")?.optJSONObject(options.name)
+        }
+        var username: String? = null
+        if (data != null && !isLocOrHashtag) {
+            username = data.getJSONObject("user").getString("username")
+        }
+        val media: JSONArray? = data?.optJSONArray("items")
+        return if (media?.length() ?: 0 > 0 && media?.optJSONObject(0) != null) {
+            val mediaLen = media.length()
+            val models: MutableList<StoryModel> = ArrayList()
+            for (i in 0 until mediaLen) {
+                data = media.getJSONObject(i)
+                models.add(ResponseBodyUtils.parseStoryItem(data, isLocOrHashtag, username))
             }
+            models
+        } else emptyList()
+    }
 
-            @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-                callback.onFailure(t);
+    private suspend fun respondToSticker(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        storyId: String,
+        stickerId: String,
+        action: String,
+        arg1: String,
+        arg2: String,
+    ): StoryStickerResponse {
+        val form = mapOf(
+            "_csrftoken" to csrfToken,
+            "_uid" to userId,
+            "_uuid" to deviceUuid,
+            "mutation_token" to UUID.randomUUID().toString(),
+            "client_context" to UUID.randomUUID().toString(),
+            "radio_type" to "wifi-none",
+            arg1 to arg2,
+        )
+        val signedForm = Utils.sign(form)
+        return repository.respondToSticker(storyId, stickerId, action, signedForm)
+    }
+
+    suspend fun respondToQuestion(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        storyId: String,
+        stickerId: String,
+        answer: String,
+    ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_question_response", "response", answer)
+
+    suspend fun respondToQuiz(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        storyId: String,
+        stickerId: String,
+        answer: Int,
+    ): StoryStickerResponse {
+        return respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_quiz_answer", "answer", answer.toString())
+    }
+
+    suspend fun respondToPoll(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        storyId: String,
+        stickerId: String,
+        answer: Int,
+    ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_poll_vote", "vote", answer.toString())
+
+    suspend fun respondToSlider(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        storyId: String,
+        stickerId: String,
+        answer: Double,
+    ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_slider_vote", "vote", answer.toString())
+
+    suspend fun seen(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        storyMediaId: String,
+        takenAt: Long,
+        seenAt: Long,
+    ): String {
+        val reelsForm = mapOf(storyMediaId to listOf(takenAt.toString() + "_" + seenAt))
+        val form = mutableMapOf(
+            "_csrftoken" to csrfToken,
+            "_uid" to userId,
+            "_uuid" to deviceUuid,
+            "container_module" to "feed_timeline",
+            "reels" to reelsForm,
+        )
+        val signedForm = Utils.sign(form)
+        val queryMap = mapOf(
+            "reel" to "1",
+            "live_vod" to "0",
+        )
+        return repository.seen(queryMap, signedForm)
+    }
+
+    private fun buildUrl(options: StoryViewerOptions): String? {
+        val builder = StringBuilder()
+        builder.append("https://i.instagram.com/api/v1/")
+        val type = options.type
+        var id: String? = null
+        when (type) {
+            StoryViewerOptions.Type.HASHTAG -> {
+                builder.append("tags/")
+                id = options.name
             }
-        });
-    }
-
-    private void respondToSticker(final String storyId,
-                                  final String stickerId,
-                                  final String action,
-                                  final String arg1,
-                                  final String arg2,
-                                  final ServiceCallback<StoryStickerResponse> callback) {
-        final Map<String, Object> form = new HashMap<>();
-        form.put("_csrftoken", csrfToken);
-        form.put("_uid", userId);
-        form.put("_uuid", deviceUuid);
-        form.put("mutation_token", UUID.randomUUID().toString());
-        form.put("client_context", UUID.randomUUID().toString());
-        form.put("radio_type", "wifi-none");
-        form.put(arg1, arg2);
-        final Map<String, String> signedForm = Utils.sign(form);
-        final Call<StoryStickerResponse> request =
-                repository.respondToSticker(storyId, stickerId, action, signedForm);
-        request.enqueue(new Callback<StoryStickerResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<StoryStickerResponse> call,
-                                   @NonNull final Response<StoryStickerResponse> response) {
-                if (callback != null) {
-                    callback.onSuccess(response.body());
-                }
+            StoryViewerOptions.Type.LOCATION -> {
+                builder.append("locations/")
+                id = options.id.toString()
             }
-
-            @Override
-            public void onFailure(@NonNull final Call<StoryStickerResponse> call,
-                                  @NonNull final Throwable t) {
-                if (callback != null) {
-                    callback.onFailure(t);
-                }
+            StoryViewerOptions.Type.USER -> {
+                builder.append("feed/user/")
+                id = options.id.toString()
             }
-        });
-    }
-
-    // RespondAction.java
-    public void respondToQuestion(final String storyId,
-                                  final String stickerId,
-                                  final String answer,
-                                  final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_question_response", "response", answer, callback);
-    }
-
-    // QuizAction.java
-    public void respondToQuiz(final String storyId,
-                              final String stickerId,
-                              final int answer,
-                              final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_quiz_answer", "answer", String.valueOf(answer), callback);
-    }
-
-    // VoteAction.java
-    public void respondToPoll(final String storyId,
-                              final String stickerId,
-                              final int answer,
-                              final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_poll_vote", "vote", String.valueOf(answer), callback);
-    }
-
-    public void respondToSlider(final String storyId,
-                                final String stickerId,
-                                final double answer,
-                                final ServiceCallback<StoryStickerResponse> callback) {
-        respondToSticker(storyId, stickerId, "story_slider_vote", "vote", String.valueOf(answer), callback);
-    }
-
-    public void seen(final String storyMediaId,
-                     final long takenAt,
-                     final long seenAt,
-                     final ServiceCallback<String> callback) {
-        final Map<String, Object> form = new HashMap<>();
-        form.put("_csrftoken", csrfToken);
-        form.put("_uid", userId);
-        form.put("_uuid", deviceUuid);
-        form.put("container_module", "feed_timeline");
-        final Map<String, Object> reelsForm = new HashMap<>();
-        reelsForm.put(storyMediaId, Collections.singletonList(takenAt + "_" + seenAt));
-        form.put("reels", reelsForm);
-        final Map<String, String> signedForm = Utils.sign(form);
-        final Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("reel", "1");
-        queryMap.put("live_vod", "0");
-        final Call<String> request = repository.seen(queryMap, signedForm);
-        request.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call,
-                                   @NonNull final Response<String> response) {
-                if (callback != null) {
-                    callback.onSuccess(response.body());
-                }
+            StoryViewerOptions.Type.HIGHLIGHT, StoryViewerOptions.Type.STORY_ARCHIVE -> {
+                builder.append("feed/reels_media/?user_ids=")
+                id = options.name
             }
-
-            @Override
-            public void onFailure(@NonNull final Call<String> call,
-                                  @NonNull final Throwable t) {
-                if (callback != null) {
-                    callback.onFailure(t);
-                }
+            StoryViewerOptions.Type.STORY -> {
             }
-        });
-    }
-
-    @Nullable
-    private String buildUrl(@NonNull final StoryViewerOptions options) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("https://i.instagram.com/api/v1/");
-        final StoryViewerOptions.Type type = options.getType();
-        String id = null;
-        switch (type) {
-            case HASHTAG:
-                builder.append("tags/");
-                id = options.getName();
-                break;
-            case LOCATION:
-                builder.append("locations/");
-                id = String.valueOf(options.getId());
-                break;
-            case USER:
-                builder.append("feed/user/");
-                id = String.valueOf(options.getId());
-                break;
-            case HIGHLIGHT:
-            case STORY_ARCHIVE:
-                builder.append("feed/reels_media/?user_ids=");
-                id = options.getName();
-                break;
-            case STORY:
-                break;
-            // case FEED_STORY_POSITION:
-            //     break;
+            else -> {
+            }
         }
         if (id == null) {
-            return null;
+            return null
         }
-        builder.append(id);
+        builder.append(id)
         if (type != StoryViewerOptions.Type.HIGHLIGHT && type != StoryViewerOptions.Type.STORY_ARCHIVE) {
-            builder.append("/story/");
+            builder.append("/story/")
         }
-        return builder.toString();
+        return builder.toString()
     }
 
-    private List<FeedStoryModel> sort(final List<FeedStoryModel> list) {
-        final List<FeedStoryModel> listCopy = new ArrayList<>(list);
-        Collections.sort(listCopy, (o1, o2) -> {
-            int result;
-            switch (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
-                case "1":
-                    result = Long.compare(o2.getTimestamp(), o1.getTimestamp());
-                    break;
-                case "2":
-                    result = Long.compare(o1.getTimestamp(), o2.getTimestamp());
-                    break;
-                default:
-                    result = 0;
+    private fun sort(list: List<FeedStoryModel>): List<FeedStoryModel> {
+        val listCopy = ArrayList(list)
+        listCopy.sortWith { o1, o2 ->
+            when (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
+                "1" -> return@sortWith o2.timestamp.compareTo(o1.timestamp)
+                "2" -> return@sortWith o1.timestamp.compareTo(o2.timestamp)
+                else -> return@sortWith 0
             }
-            return result;
-        });
-        return listCopy;
+        }
+        return listCopy
     }
 
-    public static class ArchiveFetchResponse {
-        private final List<HighlightModel> archives;
-        private final boolean hasNextPage;
-        private final String nextCursor;
-
-        public ArchiveFetchResponse(final List<HighlightModel> archives, final boolean hasNextPage, final String nextCursor) {
-            this.archives = archives;
-            this.hasNextPage = hasNextPage;
-            this.nextCursor = nextCursor;
-        }
-
-        public List<HighlightModel> getResult() {
-            return archives;
-        }
-
-        public boolean hasNextPage() {
-            return hasNextPage;
-        }
-
-        public String getNextCursor() {
-            return nextCursor;
+    class ArchiveFetchResponse(val result: List<HighlightModel>, val hasNextPage: Boolean, val nextCursor: String) {
+        fun hasNextPage(): Boolean {
+            return hasNextPage
         }
     }
 }

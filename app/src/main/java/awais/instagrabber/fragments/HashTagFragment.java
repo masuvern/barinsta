@@ -39,7 +39,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import awais.instagrabber.R;
@@ -55,7 +54,6 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.FollowingType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
@@ -301,7 +299,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
-        storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
+        storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
@@ -582,24 +580,21 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         storiesFetching = true;
         storiesService.getUserStory(
                 StoryViewerOptions.forHashtag(hashtagModel.getName()),
-                new ServiceCallback<List<StoryModel>>() {
-                    @Override
-                    public void onSuccess(final List<StoryModel> storyModels) {
-                        if (storyModels != null && !storyModels.isEmpty()) {
-                            hashtagDetailsBinding.mainHashtagImage.setStoriesBorder(1);
-                            hasStories = true;
-                        } else {
-                            hasStories = false;
-                        }
+                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "Error", throwable);
                         storiesFetching = false;
+                        return;
                     }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        Log.e(TAG, "Error", t);
-                        storiesFetching = false;
+                    if (storyModels != null && !storyModels.isEmpty()) {
+                        hashtagDetailsBinding.mainHashtagImage.setStoriesBorder(1);
+                        hasStories = true;
+                    } else {
+                        hasStories = false;
                     }
-                });
+                    storiesFetching = false;
+                }), Dispatchers.getIO())
+        );
     }
 
     private void setTitle() {
