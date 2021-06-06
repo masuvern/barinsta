@@ -71,7 +71,7 @@ public class UserSearchViewModel extends ViewModel {
             throw new IllegalArgumentException("User is not logged in!");
         }
         userService = UserService.INSTANCE;
-        directMessagesService = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
+        directMessagesService = DirectMessagesService.INSTANCE;
         rankedRecipientsCache = RankedRecipientsCache.INSTANCE;
         if ((rankedRecipientsCache.isFailed() || rankedRecipientsCache.isExpired()) && !rankedRecipientsCache.isUpdateInitiated()) {
             updateRankedRecipientCache();

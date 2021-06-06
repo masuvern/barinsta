@@ -335,7 +335,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
         friendshipService = isLoggedIn ? FriendshipService.INSTANCE : null;
-        directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
+        directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
         storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
         userService = isLoggedIn ? UserService.INSTANCE : null;
@@ -1146,6 +1146,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.btnDM.setOnClickListener(v -> {
                 profileDetailsBinding.btnDM.setEnabled(false);
                 directMessagesService.createThread(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
                         Collections.singletonList(profileModel.getPk()),
                         null,
                         CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {

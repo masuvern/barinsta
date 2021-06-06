@@ -164,7 +164,7 @@ public class StoryViewerFragment extends Fragment {
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesService = StoriesService.INSTANCE;
         mediaService = MediaService.INSTANCE;
-        directMessagesService = DirectMessagesService.getInstance(csrfToken, userId, deviceId);
+        directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -222,6 +222,9 @@ public class StoryViewerFragment extends Fragment {
                     .setTitle(R.string.reply_story)
                     .setView(input)
                     .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.createThread(
+                            csrfToken,
+                            userId,
+                            deviceId,
                             Collections.singletonList(currentStory.getUserId()),
                             null,
                             CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
@@ -231,6 +234,9 @@ public class StoryViewerFragment extends Fragment {
                                     return;
                                 }
                                 directMessagesService.broadcastStoryReply(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         ThreadIdOrUserIds.of(thread.getThreadId()),
                                         input.getText().toString(),
                                         currentStory.getStoryMediaId(),
