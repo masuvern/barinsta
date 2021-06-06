@@ -36,16 +36,16 @@ import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
-import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.ProcessPhoenix;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.UserService;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -288,44 +288,40 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
             // adds cookies to database for quick access
             final long uid = CookieUtils.getUserIdFromCookie(cookie);
-            final UserService userService = UserService.getInstance();
-            userService.getUserInfo(uid, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User result) {
+            final UserService userService = UserService.INSTANCE;
+            userService.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                if (throwable != null) {
+                    Log.e(TAG, "Error fetching user info", throwable);
+                    return;
+                }
+                if (user != null) {
                     // Log.d(TAG, "adding userInfo: " + result);
-                    if (result != null) {
-                        accountRepository.insertOrUpdateAccount(
-                                uid,
-                                result.getUsername(),
-                                cookie,
-                                result.getFullName(),
-                                result.getProfilePicUrl(),
-                                new RepositoryCallback<Account>() {
-                                    @Override
-                                    public void onSuccess(final Account result) {
-                                        // final FragmentActivity activity = getActivity();
-                                        // if (activity == null) return;
-                                        // activity.recreate();
-                                        AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                                            final Context context = getContext();
-                                            if (context == null) return;
-                                            ProcessPhoenix.triggerRebirth(context);
-                                        }, 200);
-                                    }
+                    accountRepository.insertOrUpdateAccount(
+                            uid,
+                            user.getUsername(),
+                            cookie,
+                            user.getFullName(),
+                            user.getProfilePicUrl(),
+                            new RepositoryCallback<Account>() {
+                                @Override
+                                public void onSuccess(final Account result) {
+                                    // final FragmentActivity activity = getActivity();
+                                    // if (activity == null) return;
+                                    // activity.recreate();
+                                    AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                        final Context context = getContext();
+                                        if (context == null) return;
+                                        ProcessPhoenix.triggerRebirth(context);
+                                    }, 200);
+                                }
 
-                                    @Override
-                                    public void onDataNotAvailable() {
-                                        Log.e(TAG, "onDataNotAvailable: insert failed");
-                                    }
-                                });
-                    }
+                                @Override
+                                public void onDataNotAvailable() {
+                                    Log.e(TAG, "onDataNotAvailable: insert failed");
+                                }
+                            });
                 }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error fetching user info", t);
-                }
-            });
+            }), Dispatchers.getIO()));
         }
     }
 

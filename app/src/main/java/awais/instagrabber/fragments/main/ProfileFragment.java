@@ -338,7 +338,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
-        userService = isLoggedIn ? UserService.getInstance() : null;
+        userService = isLoggedIn ? UserService.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         final Context context = getContext();
         if (context == null) return;
@@ -586,44 +586,36 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             return;
         }
         if (isLoggedIn) {
-            userService.getUsernameInfo(usernameTemp, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User user) {
-                    userService.getUserFriendship(user.getPk(), new ServiceCallback<FriendshipStatus>() {
-                        @Override
-                        public void onSuccess(final FriendshipStatus status) {
-                            user.setFriendshipStatus(status);
-                            profileModel = user;
-                            setProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error fetching profile relationship", t);
+            userService.getUsernameInfo(
+                    usernameTemp,
+                    CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error fetching profile", throwable);
                             final Context context = getContext();
-                            try {
-                                if (t == null)
-                                    Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
-                                else
-                                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                            } catch (final Throwable ignored) {
-                            }
+                            if (context == null) return;
+                            Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                    });
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error fetching profile", t);
-                    final Context context = getContext();
-                    try {
-                        if (t == null)
-                            Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
-                        else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    } catch (final Throwable ignored) {
-                    }
-                }
-            });
+                        userService.getUserFriendship(
+                                user.getPk(),
+                                CoroutineUtilsKt.getContinuation(
+                                        (friendshipStatus, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                            if (throwable1 != null) {
+                                                Log.e(TAG, "Error fetching profile relationship", throwable1);
+                                                final Context context = getContext();
+                                                if (context == null) return;
+                                                Toast.makeText(context, throwable1.getMessage(),
+                                                               Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                            user.setFriendshipStatus(friendshipStatus);
+                                            profileModel = user;
+                                            setProfileDetails();
+                                        }), Dispatchers.getIO()
+                                )
+                        );
+                    }), Dispatchers.getIO())
+            );
             return;
         }
         graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {

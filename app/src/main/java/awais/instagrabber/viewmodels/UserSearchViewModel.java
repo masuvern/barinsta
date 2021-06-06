@@ -24,7 +24,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.UserSearchResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -37,7 +36,6 @@ import awais.instagrabber.webservices.UserService;
 import kotlinx.coroutines.Dispatchers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -72,7 +70,7 @@ public class UserSearchViewModel extends ViewModel {
         if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
-        userService = UserService.getInstance();
+        userService = UserService.INSTANCE;
         directMessagesService = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
         rankedRecipientsCache = RankedRecipientsCache.INSTANCE;
         if ((rankedRecipientsCache.isFailed() || rankedRecipientsCache.isExpired()) && !rankedRecipientsCache.isUpdateInitiated()) {
@@ -170,9 +168,26 @@ public class UserSearchViewModel extends ViewModel {
     }
 
     private void defaultUserSearch() {
-        searchRequest = userService.search(currentQuery);
-        //noinspection unchecked
-        handleRequest((Call<UserSearchResponse>) searchRequest);
+        userService.search(currentQuery, CoroutineUtilsKt.getContinuation((userSearchResponse, throwable) -> {
+            if (throwable != null) {
+                Log.e(TAG, "onFailure: ", throwable);
+                recipients.postValue(Resource.error(throwable.getMessage(), getCachedRecipients()));
+                searchRequest = null;
+                return;
+            }
+            if (userSearchResponse == null) {
+                recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
+                searchRequest = null;
+                return;
+            }
+            final List<RankedRecipient> list = userSearchResponse
+                    .getUsers()
+                    .stream()
+                    .map(RankedRecipient::of)
+                    .collect(Collectors.toList());
+            recipients.postValue(Resource.success(mergeResponseWithCache(list)));
+            searchRequest = null;
+        }));
     }
 
     private void rankedRecipientSearch() {
@@ -192,39 +207,6 @@ public class UserSearchViewModel extends ViewModel {
                     }
                 }, Dispatchers.getIO())
         );
-    }
-
-    private void handleRequest(@NonNull final Call<UserSearchResponse> request) {
-        request.enqueue(new Callback<UserSearchResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<UserSearchResponse> call, @NonNull final Response<UserSearchResponse> response) {
-                if (!response.isSuccessful()) {
-                    handleErrorResponse(response, true);
-                    searchRequest = null;
-                    return;
-                }
-                final UserSearchResponse userSearchResponse = response.body();
-                if (userSearchResponse == null) {
-                    recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
-                    searchRequest = null;
-                    return;
-                }
-                final List<RankedRecipient> list = userSearchResponse
-                        .getUsers()
-                        .stream()
-                        .map(RankedRecipient::of)
-                        .collect(Collectors.toList());
-                recipients.postValue(Resource.success(mergeResponseWithCache(list)));
-                searchRequest = null;
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<UserSearchResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                recipients.postValue(Resource.error(t.getMessage(), getCachedRecipients()));
-                searchRequest = null;
-            }
-        });
     }
 
     private List<RankedRecipient> mergeResponseWithCache(@NonNull final List<RankedRecipient> list) {

@@ -28,13 +28,14 @@ import java.io.File;
 
 import awais.instagrabber.R;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
-import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.UserService;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -129,33 +130,29 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void fetchAvatar() {
         if (isLoggedIn) {
-            final UserService userService = UserService.getInstance();
-            userService.getUserInfo(id, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User result) {
-                    if (result != null) {
-                        final String url = result.getHDProfilePicUrl();
-                        if (url == null) {
-                            final Context context = getContext();
-                            if (context == null) return;
-                            Toast.makeText(context, R.string.no_profile_pic_found, Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        setupPhoto(url);
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
+            final UserService userService = UserService.INSTANCE;
+            userService.getUserInfo(id, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                if (throwable != null) {
                     final Context context = getContext();
                     if (context == null) {
                         dismiss();
                         return;
                     }
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
                     dismiss();
+                    return;
                 }
-            });
+                if (user != null) {
+                    final String url = user.getHDProfilePicUrl();
+                    if (TextUtils.isEmpty(url)) {
+                        final Context context = getContext();
+                        if (context == null) return;
+                        Toast.makeText(context, R.string.no_profile_pic_found, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    setupPhoto(url);
+                }
+            }), Dispatchers.getIO()));
         } else setupPhoto(fallbackUrl);
     }
 
