@@ -109,10 +109,10 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
         isLoggedIn = !TextUtils.isEmpty(cookie) && userId != 0;
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        // final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
-        mediaService = isLoggedIn ? MediaService.getInstance(deviceUuid, csrfToken, userId) : null;
+        mediaService = isLoggedIn ? MediaService.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
         // setHasOptionsMenu(true);
     }

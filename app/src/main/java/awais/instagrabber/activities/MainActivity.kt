@@ -93,7 +93,6 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         private set
     private var showBottomViewDestinations: List<Int> = emptyList()
     private var graphQLService: GraphQLService? = null
-    private var mediaService: MediaService? = null
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -635,9 +634,6 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             .setView(R.layout.dialog_opening_post)
             .create()
         if (graphQLService == null) graphQLService = GraphQLService.getInstance()
-        if (mediaService == null) {
-            mediaService = deviceUuid?.let { csrfToken?.let { it1 -> MediaService.getInstance(it, it1, userId) } }
-        }
         val postCb: ServiceCallback<Media> = object : ServiceCallback<Media> {
             override fun onSuccess(feedModel: Media?) {
                 if (feedModel != null) {
@@ -662,7 +658,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         if (isLoggedIn) {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val media = mediaService?.fetch(shortcodeToId(shortCode))
+                    val media = MediaService.fetch(shortcodeToId(shortCode))
                     postCb.onSuccess(media)
                 } catch (e: Exception) {
                     postCb.onFailure(e)

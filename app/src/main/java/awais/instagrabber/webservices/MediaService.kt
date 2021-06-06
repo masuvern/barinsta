@@ -12,11 +12,12 @@ import awais.instagrabber.utils.retryContextString
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import org.json.JSONObject
 
-class MediaService private constructor(
-    val deviceUuid: String,
-    val csrfToken: String,
-    val userId: Long,
-) : BaseService() {
+object MediaService : BaseService() {
+    private val DELETABLE_ITEMS_TYPES = listOf(
+        MediaItemType.MEDIA_TYPE_IMAGE,
+        MediaItemType.MEDIA_TYPE_VIDEO,
+        MediaItemType.MEDIA_TYPE_SLIDER
+    )
     private val repository: MediaRepository = retrofit.create(MediaRepository::class.java)
 
     suspend fun fetch(
@@ -28,15 +29,38 @@ class MediaService private constructor(
         } else response.items[0]
     }
 
-    suspend fun like(mediaId: String): Boolean = action(mediaId, "like", null)
+    suspend fun like(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        mediaId: String,
+    ): Boolean = action(csrfToken, userId, deviceUuid, mediaId, "like", null)
 
-    suspend fun unlike(mediaId: String): Boolean = action(mediaId, "unlike", null)
+    suspend fun unlike(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        mediaId: String,
+    ): Boolean = action(csrfToken, userId, deviceUuid, mediaId, "unlike", null)
 
-    suspend fun save(mediaId: String, collection: String?): Boolean = action(mediaId, "save", collection)
+    suspend fun save(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        mediaId: String, collection: String?,
+    ): Boolean = action(csrfToken, userId, deviceUuid, mediaId, "save", collection)
 
-    suspend fun unsave(mediaId: String): Boolean = action(mediaId, "unsave", null)
+    suspend fun unsave(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        mediaId: String,
+    ): Boolean = action(csrfToken, userId, deviceUuid, mediaId, "unsave", null)
 
     private suspend fun action(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         mediaId: String,
         action: String,
         collection: String?,
@@ -60,6 +84,9 @@ class MediaService private constructor(
     }
 
     suspend fun editCaption(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         postId: String,
         newCaption: String,
     ): Boolean {
@@ -99,7 +126,12 @@ class MediaService private constructor(
         return jsonObject.optString("translation")
     }
 
-    suspend fun uploadFinish(options: UploadFinishOptions): String {
+    suspend fun uploadFinish(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        options: UploadFinishOptions,
+    ): String {
         if (options.videoOptions != null) {
             val videoOptions = options.videoOptions
             if (videoOptions.clips.isEmpty()) {
@@ -124,6 +156,9 @@ class MediaService private constructor(
     }
 
     suspend fun delete(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         postId: String,
         type: MediaItemType,
     ): String? {
@@ -144,26 +179,4 @@ class MediaService private constructor(
         }
         return repository.delete(postId, mediaType, signedForm)
     }
-
-    companion object {
-        private val DELETABLE_ITEMS_TYPES = listOf(
-            MediaItemType.MEDIA_TYPE_IMAGE,
-            MediaItemType.MEDIA_TYPE_VIDEO,
-            MediaItemType.MEDIA_TYPE_SLIDER
-        )
-        private lateinit var instance: MediaService
-
-        @JvmStatic
-        fun getInstance(deviceUuid: String, csrfToken: String, userId: Long): MediaService {
-            if (!this::instance.isInitialized
-                || instance.csrfToken != csrfToken
-                || instance.deviceUuid != deviceUuid
-                || instance.userId != userId
-            ) {
-                instance = MediaService(deviceUuid, csrfToken, userId)
-            }
-            return instance
-        }
-    }
-
 }

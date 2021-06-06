@@ -54,8 +54,8 @@ class ThreadManager private constructor(
     currentUser: User,
     contentResolver: ContentResolver,
     viewerId: Long,
-    csrfToken: String,
-    deviceUuid: String,
+    private val csrfToken: String,
+    private val deviceUuid: String,
 ) {
     private val _fetching = MutableLiveData<Resource<Any?>>()
     val fetching: LiveData<Resource<Any?>> = _fetching
@@ -69,7 +69,6 @@ class ThreadManager private constructor(
     private val currentUser: User?
     private val contentResolver: ContentResolver
     private val service: DirectMessagesService
-    private val mediaService: MediaService
     private val friendshipService: FriendshipService
 
     val thread: LiveData<DirectThread?> by lazy {
@@ -455,7 +454,7 @@ class ThreadManager private constructor(
                     "4",
                     null
                 )
-                mediaService.uploadFinish(uploadFinishOptions)
+                MediaService.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
                 val broadcastResponse = service.broadcastVoice(
                     clientContext,
                     threadIdOrUserIds,
@@ -779,7 +778,7 @@ class ThreadManager private constructor(
                     "2",
                     VideoOptions(duration / 1000f, emptyList(), 0, false)
                 )
-                mediaService.uploadFinish(uploadFinishOptions)
+                MediaService.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
                 val broadcastResponse = service.broadcastVideo(
                     clientContext,
                     threadIdOrUserIds,
@@ -1416,7 +1415,6 @@ class ThreadManager private constructor(
         this.contentResolver = contentResolver
         this.viewerId = viewerId
         service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid)
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId)
         friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, viewerId)
         // fetchChats();
     }

@@ -223,7 +223,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
+        mediaService = MediaService.INSTANCE;
         newsService = NewsService.getInstance();
     }
 

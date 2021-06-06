@@ -161,7 +161,7 @@ public class StoryViewerFragment extends Fragment {
         final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesService = StoriesService.getInstance(csrfToken, userIdFromCookie, deviceId);
-        mediaService = MediaService.getInstance(deviceId, csrfToken, userIdFromCookie);
+        mediaService = MediaService.INSTANCE;
         directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
         setHasOptionsMenu(true);
     }

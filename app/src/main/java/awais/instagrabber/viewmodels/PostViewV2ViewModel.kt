@@ -40,12 +40,15 @@ class PostViewV2ViewModel : ViewModel() {
     private val liked = MutableLiveData(false)
     private val saved = MutableLiveData(false)
     private val options = MutableLiveData<List<Int>>(ArrayList())
-    private val viewerId: Long
-    val isLoggedIn: Boolean
+    private var messageManager: DirectMessagesManager? = null
+    private val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
+    private val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+    private val csrfToken = getCsrfTokenFromCookie(cookie)
+    private val viewerId = getUserIdFromCookie(cookie)
+
     lateinit var media: Media
         private set
-    private var mediaService: MediaService? = null
-    private var messageManager: DirectMessagesManager? = null
+    val isLoggedIn = cookie.isNotBlank() && !csrfToken.isNullOrBlank() && viewerId != 0L
 
     fun setMedia(media: Media) {
         this.media = media
@@ -125,11 +128,15 @@ class PostViewV2ViewModel : ViewModel() {
     fun like(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
+        if (!isLoggedIn) {
+            data.postValue(error("Not logged in!", null))
+            return data
+        }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val mediaId = media.pk ?: return@launch
-                val liked = mediaService?.like(mediaId)
-                updateMediaLikeUnlike(data, liked ?: false)
+                val liked = MediaService.like(csrfToken!!, viewerId, deviceUuid, mediaId)
+                updateMediaLikeUnlike(data, liked)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
             }
@@ -140,11 +147,15 @@ class PostViewV2ViewModel : ViewModel() {
     fun unlike(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
+        if (!isLoggedIn) {
+            data.postValue(error("Not logged in!", null))
+            return data
+        }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val mediaId = media.pk ?: return@launch
-                val unliked = mediaService?.unlike(mediaId)
-                updateMediaLikeUnlike(data, unliked ?: false)
+                val unliked = MediaService.unlike(csrfToken!!, viewerId, deviceUuid, mediaId)
+                updateMediaLikeUnlike(data, unliked)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
             }
@@ -185,11 +196,15 @@ class PostViewV2ViewModel : ViewModel() {
     fun save(collection: String?, ignoreSaveState: Boolean): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
+        if (!isLoggedIn) {
+            data.postValue(error("Not logged in!", null))
+            return data
+        }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val mediaId = media.pk ?: return@launch
-                val saved = mediaService?.save(mediaId, collection)
-                getSaveUnsaveCallback(data, saved ?: false, ignoreSaveState)
+                val saved = MediaService.save(csrfToken!!, viewerId, deviceUuid, mediaId, collection)
+                getSaveUnsaveCallback(data, saved, ignoreSaveState)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
             }
@@ -200,10 +215,14 @@ class PostViewV2ViewModel : ViewModel() {
     fun unsave(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
+        if (!isLoggedIn) {
+            data.postValue(error("Not logged in!", null))
+            return data
+        }
         viewModelScope.launch(Dispatchers.IO) {
             val mediaId = media.pk ?: return@launch
-            val unsaved = mediaService?.unsave(mediaId)
-            getSaveUnsaveCallback(data, unsaved ?: false, false)
+            val unsaved = MediaService.unsave(csrfToken!!, viewerId, deviceUuid, mediaId)
+            getSaveUnsaveCallback(data, unsaved, false)
         }
         return data
     }
@@ -225,11 +244,15 @@ class PostViewV2ViewModel : ViewModel() {
     fun updateCaption(caption: String): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
+        if (!isLoggedIn) {
+            data.postValue(error("Not logged in!", null))
+            return data
+        }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val postId = media.pk ?: return@launch
-                val result = mediaService?.editCaption(postId, caption)
-                if (result != null && result) {
+                val result = MediaService.editCaption(csrfToken!!, viewerId, deviceUuid, postId, caption)
+                if (result) {
                     data.postValue(success(""))
                     media.setPostCaption(caption)
                     this@PostViewV2ViewModel.caption.postValue(media.caption)
@@ -255,8 +278,8 @@ class PostViewV2ViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val result = mediaService?.translate(pk, "1")
-                if (result.isNullOrBlank()) {
+                val result = MediaService.translate(pk, "1")
+                if (result.isBlank()) {
                     data.postValue(error("", null))
                     return@launch
                 }
@@ -280,6 +303,10 @@ class PostViewV2ViewModel : ViewModel() {
     fun delete(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         data.postValue(loading(null))
+        if (!isLoggedIn) {
+            data.postValue(error("Not logged in!", null))
+            return data
+        }
         val mediaId = media.id
         val mediaType = media.mediaType
         if (mediaId == null || mediaType == null) {
@@ -288,7 +315,7 @@ class PostViewV2ViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = mediaService?.delete(mediaId, mediaType)
+                val response = MediaService.delete(csrfToken!!, viewerId, deviceUuid, mediaId, mediaType)
                 if (response == null) {
                     data.postValue(success(Any()))
                     return@launch
@@ -316,16 +343,5 @@ class PostViewV2ViewModel : ViewModel() {
         }
         val mediaId = media.id ?: return
         messageManager?.sendMedia(recipients, mediaId, viewModelScope)
-    }
-
-    init {
-        val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
-        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
-        val csrfToken: String? = getCsrfTokenFromCookie(cookie)
-        viewerId = getUserIdFromCookie(cookie)
-        isLoggedIn = cookie.isNotBlank() && viewerId != 0L
-        if (!csrfToken.isNullOrBlank()) {
-            mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId)
-        }
     }
 }
