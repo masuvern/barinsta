@@ -79,7 +79,6 @@ import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
-import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
@@ -146,6 +145,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private AppStateViewModel appStateViewModel;
     private boolean disableDm = false;
     private ProfileFragmentViewModel viewModel;
+    private String csrfToken;
+    private String deviceUuid;
 
     private final ServiceCallback<FriendshipChangeResponse> changeCb = new ServiceCallback<FriendshipChangeResponse>() {
         @Override
@@ -331,10 +332,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         cookie = Utils.settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         myId = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, myId) : null;
+        friendshipService = isLoggedIn ? FriendshipService.INSTANCE : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
         storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
@@ -451,25 +452,38 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
             friendshipService.toggleRestrict(
+                    csrfToken,
+                    deviceUuid,
                     profileModel.getPk(),
                     !profileModel.getFriendshipStatus().isRestricted(),
-                    new ServiceCallback<FriendshipRestrictResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipRestrictResponse result) {
-                            Log.d(TAG, action + " success: " + result);
-                            fetchProfileDetails();
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error while performing " + action, throwable);
+                            return;
                         }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error while performing " + action, t);
-                        }
-                    });
+                        // Log.d(TAG, action + " success: " + response);
+                        fetchProfileDetails();
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.block) {
             if (!isLoggedIn) return false;
-            friendshipService.changeBlock(profileModel.getFriendshipStatus().getBlocking(), profileModel.getPk(), changeCb);
+            // changeCb
+            friendshipService.changeBlock(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getFriendshipStatus().getBlocking(),
+                    profileModel.getPk(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.chaining) {
@@ -484,25 +498,57 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
             friendshipService.changeMute(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
                     profileModel.getFriendshipStatus().isMutingReel(),
                     profileModel.getPk(),
                     true,
-                    changeCb);
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.mute_posts) {
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
             friendshipService.changeMute(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
                     profileModel.getFriendshipStatus().getMuting(),
                     profileModel.getPk(),
                     false,
-                    changeCb);
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.remove_follower) {
             if (!isLoggedIn) return false;
-            friendshipService.removeFollower(profileModel.getPk(), changeCb);
+            friendshipService.removeFollower(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getPk(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -1032,19 +1078,55 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void setupCommonListeners() {
         final Context context = getContext();
+        if (context == null) return;
         profileDetailsBinding.btnFollow.setOnClickListener(v -> {
             if (profileModel.getFriendshipStatus().getFollowing() && profileModel.isPrivate()) {
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.priv_acc)
                         .setMessage(R.string.priv_acc_confirm)
-                        .setPositiveButton(R.string.confirm, (d, w) ->
-                                friendshipService.unfollow(profileModel.getPk(), changeCb))
+                        .setPositiveButton(R.string.confirm, (d, w) -> friendshipService.unfollow(
+                                csrfToken,
+                                myId,
+                                deviceUuid,
+                                profileModel.getPk(),
+                                CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable != null) {
+                                        changeCb.onFailure(throwable);
+                                        return;
+                                    }
+                                    changeCb.onSuccess(response);
+                                }), Dispatchers.getIO())
+                        ))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (profileModel.getFriendshipStatus().getFollowing() || profileModel.getFriendshipStatus().getOutgoingRequest()) {
-                friendshipService.unfollow(profileModel.getPk(), changeCb);
+                friendshipService.unfollow(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getPk(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
             } else {
-                friendshipService.follow(profileModel.getPk(), changeCb);
+                friendshipService.follow(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getPk(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
             }
         });
         profileDetailsBinding.btnSaved.setOnClickListener(v -> {
@@ -1109,7 +1191,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 }
                 showProfilePicDialog();
             };
-            if (context == null) return;
             new AlertDialog.Builder(context)
                     .setItems(options, profileDialogListener)
                     .setNegativeButton(R.string.cancel, null)

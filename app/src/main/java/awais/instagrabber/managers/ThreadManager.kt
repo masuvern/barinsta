@@ -19,8 +19,6 @@ import awais.instagrabber.repositories.requests.UploadFinishOptions
 import awais.instagrabber.repositories.requests.VideoOptions
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds.Companion.of
-import awais.instagrabber.repositories.responses.FriendshipChangeResponse
-import awais.instagrabber.repositories.responses.FriendshipRestrictResponse
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.repositories.responses.giphy.GiphyGif
@@ -34,7 +32,6 @@ import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.webservices.DirectMessagesService
 import awais.instagrabber.webservices.FriendshipService
 import awais.instagrabber.webservices.MediaService
-import awais.instagrabber.webservices.ServiceCallback
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterables
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +66,6 @@ class ThreadManager private constructor(
     private val currentUser: User?
     private val contentResolver: ContentResolver
     private val service: DirectMessagesService
-    private val friendshipService: FriendshipService
 
     val thread: LiveData<DirectThread?> by lazy {
         distinctUntilChanged(map(inboxManager.getInbox()) { inboxResource: Resource<DirectInbox?>? ->
@@ -1132,61 +1128,57 @@ class ThreadManager private constructor(
 
     fun blockUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.changeBlock(false, user.pk, object : ServiceCallback<FriendshipChangeResponse?> {
-            override fun onSuccess(result: FriendshipChangeResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.changeBlock(csrfToken, viewerId, deviceUuid, false, user.pk)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun unblockUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.changeBlock(true, user.pk, object : ServiceCallback<FriendshipChangeResponse?> {
-            override fun onSuccess(result: FriendshipChangeResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.changeBlock(csrfToken, viewerId, deviceUuid, true, user.pk)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun restrictUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.toggleRestrict(user.pk, true, object : ServiceCallback<FriendshipRestrictResponse?> {
-            override fun onSuccess(result: FriendshipRestrictResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.toggleRestrict(csrfToken, deviceUuid, user.pk, true)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun unRestrictUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.toggleRestrict(user.pk, false, object : ServiceCallback<FriendshipRestrictResponse?> {
-            override fun onSuccess(result: FriendshipRestrictResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.toggleRestrict(csrfToken, deviceUuid, user.pk, false)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
@@ -1415,7 +1407,6 @@ class ThreadManager private constructor(
         this.contentResolver = contentResolver
         this.viewerId = viewerId
         service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid)
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, viewerId)
         // fetchChats();
     }
 }
