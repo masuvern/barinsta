@@ -30,9 +30,12 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentFollowersViewerBinding;
 import awais.instagrabber.models.FollowModel;
 import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
+import awais.instagrabber.utils.AppExecutors;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 import thoughtbot.expandableadapter.ExpandableGroup;
 
 public final class FollowViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -68,10 +71,32 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                 if (!isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
                     endCursor = result.getNextMaxId();
-                    friendshipService.getList(false, profileId, endCursor, this);
+                    friendshipService.getList(
+                            false,
+                            profileId,
+                            endCursor,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    onFailure(throwable);
+                                    return;
+                                }
+                                onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
                 } else if (followersModels.size() == 0) {
                     if (!isFollowersList) moreAvailable = false;
-                    friendshipService.getList(true, profileId, null, followingFetchCb);
+                    friendshipService.getList(
+                            true,
+                            profileId,
+                            null,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    followingFetchCb.onFailure(throwable);
+                                    return;
+                                }
+                                followingFetchCb.onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
                 } else {
                     if (!isFollowersList) moreAvailable = false;
                     showCompare();
@@ -84,8 +109,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             try {
                 binding.swipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-            catch(Throwable e) {}
+            } catch (Throwable ignored) {}
             Log.e(TAG, "Error fetching list (double, following)", t);
         }
     };
@@ -97,10 +121,32 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                 if (isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
                     endCursor = result.getNextMaxId();
-                    friendshipService.getList(true, profileId, endCursor, this);
+                    friendshipService.getList(
+                            true,
+                            profileId,
+                            endCursor,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    onFailure(throwable);
+                                    return;
+                                }
+                                onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
                 } else if (followingModels.size() == 0) {
                     if (isFollowersList) moreAvailable = false;
-                    friendshipService.getList(false, profileId, null, followingFetchCb);
+                    friendshipService.getList(
+                            false,
+                            profileId,
+                            null,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    followingFetchCb.onFailure(throwable);
+                                    return;
+                                }
+                                followingFetchCb.onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
                 } else {
                     if (isFollowersList) moreAvailable = false;
                     showCompare();
@@ -113,8 +159,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             try {
                 binding.swipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-            catch(Throwable e) {}
+            } catch (Throwable ignored) {}
             Log.e(TAG, "Error fetching list (double, follower)", t);
         }
     };
@@ -122,7 +167,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        friendshipService = FriendshipService.getInstance(null, null, 0);
+        friendshipService = FriendshipService.INSTANCE;
         fragmentActivity = (AppCompatActivity) getActivity();
         setHasOptionsMenu(true);
     }
@@ -235,8 +280,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                 try {
                     binding.swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-                catch(Throwable e) {}
+                } catch (Throwable ignored) {}
                 Log.e(TAG, "Error fetching list (single)", t);
             }
         };
@@ -245,7 +289,18 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             if (!TextUtils.isEmpty(endCursor) && !searching) {
                 binding.swipeRefreshLayout.setRefreshing(true);
                 layoutManager.setStackFromEnd(true);
-                friendshipService.getList(isFollowersList, profileId, endCursor, cb);
+                friendshipService.getList(
+                        isFollowersList,
+                        profileId,
+                        endCursor,
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                cb.onFailure(throwable);
+                                return;
+                            }
+                            cb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
                 endCursor = null;
             }
         });
@@ -253,7 +308,18 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         binding.rvFollow.setLayoutManager(layoutManager);
         if (moreAvailable) {
             binding.swipeRefreshLayout.setRefreshing(true);
-            friendshipService.getList(isFollowersList, profileId, endCursor, cb);
+            friendshipService.getList(
+                    isFollowersList,
+                    profileId,
+                    endCursor,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            cb.onFailure(throwable);
+                            return;
+                        }
+                        cb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
         } else {
             refreshAdapter(followModels, null, null, null);
             layoutManager.scrollToPosition(0);
@@ -269,17 +335,34 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         if (moreAvailable) {
             binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
-            friendshipService.getList(isFollowersList,
-                                      profileId,
-                                      endCursor,
-                                      isFollowersList ? followersFetchCb : followingFetchCb);
+            friendshipService.getList(
+                    isFollowersList,
+                    profileId,
+                    endCursor,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        final ServiceCallback<FriendshipListFetchResponse> callback = isFollowersList ? followersFetchCb : followingFetchCb;
+                        if (throwable != null) {
+                            callback.onFailure(throwable);
+                            return;
+                        }
+                        callback.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
         } else if (followersModels.size() == 0 || followingModels.size() == 0) {
             binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
-            friendshipService.getList(!isFollowersList,
-                                      profileId,
-                                      null,
-                                      isFollowersList ? followingFetchCb : followersFetchCb);
+            friendshipService.getList(
+                    !isFollowersList,
+                    profileId,
+                    null,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        final ServiceCallback<FriendshipListFetchResponse> callback = isFollowersList ? followingFetchCb : followersFetchCb;
+                        if (throwable != null) {
+                            callback.onFailure(throwable);
+                            return;
+                        }
+                        callback.onSuccess(response);
+                    }), Dispatchers.getIO()));
         } else showCompare();
     }
 
@@ -337,10 +420,10 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         final Context context = getContext();
         if (loading) Toast.makeText(context, R.string.follower_wait_to_load, Toast.LENGTH_LONG).show();
         else if (isCompare) {
-            isCompare = !isCompare;
+            isCompare = false;
             listFollows();
         } else {
-            isCompare = !isCompare;
+            isCompare = true;
             listCompare();
         }
         return true;
@@ -354,16 +437,15 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         final ArrayList<ExpandableGroup> groups = new ArrayList<>(1);
 
         if (isCompare && followingModels != null && followersModels != null && allFollowing != null) {
-            if (followingModels != null && followingModels.size() > 0)
+            if (followingModels.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_following, username), followingModels));
-            if (followersModels != null && followersModels.size() > 0)
+            if (followersModels.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_follower, namePost), followersModels));
-            if (allFollowing != null && allFollowing.size() > 0)
+            if (allFollowing.size() > 0)
                 groups.add(new ExpandableGroup(resources.getString(R.string.followers_both_following), allFollowing));
         } else if (followModels != null) {
             groups.add(new ExpandableGroup(type, followModels));
-        }
-        else return;
+        } else return;
         adapter = new FollowAdapter(clickListener, groups);
         adapter.toggleGroup(0);
         binding.rvFollow.setAdapter(adapter);

@@ -30,13 +30,13 @@ import awais.instagrabber.repositories.responses.CommentsFetchResponse;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.CommentService;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -113,7 +113,7 @@ public class CommentsViewerViewModel extends ViewModel {
     };
 
     public CommentsViewerViewModel() {
-        graphQLService = GraphQLService.getInstance();
+        graphQLService = GraphQLService.INSTANCE;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
@@ -165,8 +165,12 @@ public class CommentsViewerViewModel extends ViewModel {
             commentService.fetchComments(postId, rootCursor, ccb);
             return;
         }
-        final Call<String> request = graphQLService.fetchComments(shortCode, true, rootCursor);
-        enqueueRequest(request, true, shortCode, ccb);
+        graphQLService.fetchComments(
+                shortCode,
+                true,
+                rootCursor,
+                enqueueRequest(true, shortCode, ccb)
+        );
     }
 
     public void fetchReplies() {
@@ -190,54 +194,49 @@ public class CommentsViewerViewModel extends ViewModel {
             commentService.fetchChildComments(postId, commentId, repliesCursor, rcb);
             return;
         }
-        final Call<String> request = graphQLService.fetchComments(commentId, false, repliesCursor);
-        enqueueRequest(request, false, commentId, rcb);
+        graphQLService.fetchComments(commentId, false, repliesCursor, enqueueRequest(false, commentId, rcb));
     }
 
-    private void enqueueRequest(@NonNull final Call<String> request,
-                                final boolean root,
-                                final String shortCodeOrCommentId,
-                                final ServiceCallback callback) {
-        request.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(@NonNull final Call<String> call, @NonNull final Response<String> response) {
-                final String rawBody = response.body();
-                if (rawBody == null) {
-                    Log.e(TAG, "Error occurred while fetching gql comments of " + shortCodeOrCommentId);
-                    callback.onSuccess(null);
-                    return;
-                }
-                try {
-                    final JSONObject body = root ? new JSONObject(rawBody).getJSONObject("data")
-                                                                          .getJSONObject("shortcode_media")
-                                                                          .getJSONObject("edge_media_to_parent_comment")
-                                                 : new JSONObject(rawBody).getJSONObject("data")
-                                                                          .getJSONObject("comment")
-                                                                          .getJSONObject("edge_threaded_comments");
-                    final int count = body.optInt("count");
-                    final JSONObject pageInfo = body.getJSONObject("page_info");
-                    final boolean hasNextPage = pageInfo.getBoolean("has_next_page");
-                    final String endCursor = pageInfo.isNull("end_cursor") || !hasNextPage ? null : pageInfo.optString("end_cursor");
-                    final JSONArray commentsJsonArray = body.getJSONArray("edges");
-                    final ImmutableList.Builder<Comment> builder = ImmutableList.builder();
-                    for (int i = 0; i < commentsJsonArray.length(); i++) {
-                        final Comment commentModel = getComment(commentsJsonArray.getJSONObject(i).getJSONObject("node"), root);
-                        builder.add(commentModel);
-                    }
-                    callback.onSuccess(root ?
-                                       new CommentsFetchResponse(count, endCursor, builder.build()) :
-                                       new ChildCommentsFetchResponse(count, endCursor, builder.build()));
-                } catch (Exception e) {
-                    Log.e(TAG, "onResponse", e);
-                    callback.onFailure(e);
-                }
+    private Continuation<String> enqueueRequest(final boolean root,
+                                                final String shortCodeOrCommentId,
+                                                @SuppressWarnings("rawtypes") final ServiceCallback callback) {
+        return CoroutineUtilsKt.getContinuation((response, throwable) -> {
+            if (throwable != null) {
+                callback.onFailure(throwable);
+                return;
             }
-
-            @Override
-            public void onFailure(@NonNull final Call<String> call, @NonNull final Throwable t) {
-                callback.onFailure(t);
+            if (response == null) {
+                Log.e(TAG, "Error occurred while fetching gql comments of " + shortCodeOrCommentId);
+                //noinspection unchecked
+                callback.onSuccess(null);
+                return;
             }
-        });
+            try {
+                final JSONObject body = root ? new JSONObject(response).getJSONObject("data")
+                                                                       .getJSONObject("shortcode_media")
+                                                                       .getJSONObject("edge_media_to_parent_comment")
+                                             : new JSONObject(response).getJSONObject("data")
+                                                                       .getJSONObject("comment")
+                                                                       .getJSONObject("edge_threaded_comments");
+                final int count = body.optInt("count");
+                final JSONObject pageInfo = body.getJSONObject("page_info");
+                final boolean hasNextPage = pageInfo.getBoolean("has_next_page");
+                final String endCursor = pageInfo.isNull("end_cursor") || !hasNextPage ? null : pageInfo.optString("end_cursor");
+                final JSONArray commentsJsonArray = body.getJSONArray("edges");
+                final ImmutableList.Builder<Comment> builder = ImmutableList.builder();
+                for (int i = 0; i < commentsJsonArray.length(); i++) {
+                    final Comment commentModel = getComment(commentsJsonArray.getJSONObject(i).getJSONObject("node"), root);
+                    builder.add(commentModel);
+                }
+                final Object result = root ? new CommentsFetchResponse(count, endCursor, builder.build())
+                                           : new ChildCommentsFetchResponse(count, endCursor, builder.build());
+                //noinspection unchecked
+                callback.onSuccess(result);
+            } catch (Exception e) {
+                Log.e(TAG, "onResponse", e);
+                callback.onFailure(e);
+            }
+        }, Dispatchers.getIO());
     }
 
     @NonNull

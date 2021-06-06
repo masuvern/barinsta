@@ -87,7 +87,6 @@ import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
-import awais.instagrabber.repositories.responses.StoryStickerResponse;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -112,6 +111,8 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class StoryViewerFragment extends Fragment {
     private static final String TAG = "StoryViewerFragment";
+
+    private final String cookie = settingsHelper.getString(Constants.COOKIE);
 
     private AppCompatActivity fragmentActivity;
     private View root;
@@ -148,21 +149,22 @@ public class StoryViewerFragment extends Fragment {
     // private boolean isArchive;
     // private boolean isNotification;
     private DirectMessagesService directMessagesService;
-
-    private final String cookie = settingsHelper.getString(Constants.COOKIE);
     private StoryViewerOptions options;
+    private String csrfToken;
+    private String deviceId;
+    private long userId;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
-        final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
+        userId = CookieUtils.getUserIdFromCookie(cookie);
+        deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
-        storiesService = StoriesService.getInstance(csrfToken, userIdFromCookie, deviceId);
-        mediaService = MediaService.getInstance(deviceId, csrfToken, userIdFromCookie);
-        directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
+        storiesService = StoriesService.INSTANCE;
+        mediaService = MediaService.INSTANCE;
+        directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -220,6 +222,9 @@ public class StoryViewerFragment extends Fragment {
                     .setTitle(R.string.reply_story)
                     .setView(input)
                     .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.createThread(
+                            csrfToken,
+                            userId,
+                            deviceId,
                             Collections.singletonList(currentStory.getUserId()),
                             null,
                             CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
@@ -229,6 +234,9 @@ public class StoryViewerFragment extends Fragment {
                                     return;
                                 }
                                 directMessagesService.broadcastStoryReply(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         ThreadIdOrUserIds.of(thread.getThreadId()),
                                         input.getText().toString(),
                                         currentStory.getStoryMediaId(),
@@ -514,28 +522,31 @@ public class StoryViewerFragment extends Fragment {
                             }), (d, w) -> {
                                 sticking = true;
                                 storiesService.respondToPoll(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         currentStory.getStoryMediaId().split("_")[0],
                                         poll.getId(),
                                         w,
-                                        new ServiceCallback<StoryStickerResponse>() {
-                                            @Override
-                                            public void onSuccess(final StoryStickerResponse result) {
-                                                sticking = false;
-                                                try {
-                                                    poll.setMyChoice(w);
-                                                    Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                sticking = false;
-                                                Log.e(TAG, "Error responding", t);
-                                                try {
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-                                        });
+                                        CoroutineUtilsKt.getContinuation(
+                                                (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        sticking = false;
+                                                        Log.e(TAG, "Error responding", throwable);
+                                                        try {
+                                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        } catch (Exception ignored) {}
+                                                        return;
+                                                    }
+                                                    sticking = false;
+                                                    try {
+                                                        poll.setMyChoice(w);
+                                                        Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                             })
                             .setPositiveButton(R.string.cancel, null)
                             .show();
@@ -550,27 +561,30 @@ public class StoryViewerFragment extends Fragment {
                         .setPositiveButton(R.string.confirm, (d, w) -> {
                             sticking = true;
                             storiesService.respondToQuestion(
+                                    csrfToken,
+                                    userId,
+                                    deviceId,
                                     currentStory.getStoryMediaId().split("_")[0],
                                     question.getId(),
                                     input.getText().toString(),
-                                    new ServiceCallback<StoryStickerResponse>() {
-                                        @Override
-                                        public void onSuccess(final StoryStickerResponse result) {
-                                            sticking = false;
-                                            try {
-                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                            } catch (Exception ignored) {}
-                                        }
-
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            sticking = false;
-                                            Log.e(TAG, "Error responding", t);
-                                            try {
-                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                            } catch (Exception ignored) {}
-                                        }
-                                    });
+                                    CoroutineUtilsKt.getContinuation(
+                                            (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                if (throwable != null) {
+                                                    sticking = false;
+                                                    Log.e(TAG, "Error responding", throwable);
+                                                    try {
+                                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                    return;
+                                                }
+                                                sticking = false;
+                                                try {
+                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                } catch (Exception ignored) {}
+                                            }),
+                                            Dispatchers.getIO()
+                                    )
+                            );
                         })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
@@ -605,28 +619,31 @@ public class StoryViewerFragment extends Fragment {
                             if (quiz.getMyChoice() == -1) {
                                 sticking = true;
                                 storiesService.respondToQuiz(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         currentStory.getStoryMediaId().split("_")[0],
                                         quiz.getId(),
                                         w,
-                                        new ServiceCallback<StoryStickerResponse>() {
-                                            @Override
-                                            public void onSuccess(final StoryStickerResponse result) {
-                                                sticking = false;
-                                                try {
-                                                    quiz.setMyChoice(w);
-                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                sticking = false;
-                                                Log.e(TAG, "Error responding", t);
-                                                try {
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-                                        });
+                                        CoroutineUtilsKt.getContinuation(
+                                                (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        sticking = false;
+                                                        Log.e(TAG, "Error responding", throwable);
+                                                        try {
+                                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        } catch (Exception ignored) {}
+                                                        return;
+                                                    }
+                                                    sticking = false;
+                                                    try {
+                                                        quiz.setMyChoice(w);
+                                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                             }
                         })
                         .setPositiveButton(R.string.cancel, null)
@@ -673,28 +690,30 @@ public class StoryViewerFragment extends Fragment {
                             .setPositiveButton(R.string.confirm, (d, w) -> {
                                 sticking = true;
                                 storiesService.respondToSlider(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         currentStory.getStoryMediaId().split("_")[0],
                                         slider.getId(),
                                         sliderValue,
-                                        new ServiceCallback<StoryStickerResponse>() {
-                                            @Override
-                                            public void onSuccess(final StoryStickerResponse result) {
-                                                sticking = false;
-                                                try {
-                                                    slider.setMyChoice(sliderValue);
-                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                sticking = false;
-                                                Log.e(TAG, "Error responding", t);
-                                                try {
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-                                        });
+                                        CoroutineUtilsKt.getContinuation(
+                                                (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        sticking = false;
+                                                        Log.e(TAG, "Error responding", throwable);
+                                                        try {
+                                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        } catch (Exception ignored) {}
+                                                        return;
+                                                    }
+                                                    sticking = false;
+                                                    try {
+                                                        slider.setMyChoice(sliderValue);
+                                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                }), Dispatchers.getIO()
+                                        )
+                                );
                             })
                             .setNegativeButton(R.string.cancel, null)
                             .show();
@@ -786,27 +805,26 @@ public class StoryViewerFragment extends Fragment {
         setTitle(type);
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (type == Type.STORY) {
-            storiesService.fetch(options.getId(), new ServiceCallback<StoryModel>() {
-                @Override
-                public void onSuccess(final StoryModel storyModel) {
-                    fetching = false;
-                    binding.storiesList.setVisibility(View.GONE);
-                    if (storyModel == null) {
-                        storiesViewModel.getList().setValue(Collections.emptyList());
-                        currentStory = null;
-                        return;
-                    }
-                    storiesViewModel.getList().setValue(Collections.singletonList(storyModel));
-                    currentStory = storyModel;
-                    refreshStory();
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error", t);
-                }
-            });
+            storiesService.fetch(
+                    options.getId(),
+                    CoroutineUtilsKt.getContinuation((storyModel, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "Error", throwable);
+                            return;
+                        }
+                        fetching = false;
+                        binding.storiesList.setVisibility(View.GONE);
+                        if (storyModel == null) {
+                            storiesViewModel.getList().setValue(Collections.emptyList());
+                            currentStory = null;
+                            return;
+                        }
+                        storiesViewModel.getList().setValue(Collections.singletonList(storyModel));
+                        currentStory = storyModel;
+                        refreshStory();
+                    }), Dispatchers.getIO())
+            );
             return;
         }
         if (currentStoryMediaId == null) return;
@@ -840,7 +858,17 @@ public class StoryViewerFragment extends Fragment {
             storyCallback.onSuccess(Collections.singletonList(live));
             return;
         }
-        storiesService.getUserStory(fetchOptions, storyCallback);
+        storiesService.getUserStory(
+                fetchOptions,
+                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        storyCallback.onFailure(throwable);
+                        return;
+                    }
+                    //noinspection unchecked
+                    storyCallback.onSuccess((List<StoryModel>) storyModels);
+                }), Dispatchers.getIO())
+        );
     }
 
     private void setTitle(final Type type) {
@@ -944,10 +972,15 @@ public class StoryViewerFragment extends Fragment {
         }
 
         if (settingsHelper.getBoolean(MARK_AS_SEEN))
-            storiesService.seen(currentStory.getStoryMediaId(),
-                                currentStory.getTimestamp(),
-                                System.currentTimeMillis() / 1000,
-                                null);
+            storiesService.seen(
+                    csrfToken,
+                    userId,
+                    deviceId,
+                    currentStory.getStoryMediaId(),
+                    currentStory.getTimestamp(),
+                    System.currentTimeMillis() / 1000,
+                    CoroutineUtilsKt.getContinuation((s, throwable) -> {}, Dispatchers.getIO())
+            );
     }
 
     private void downloadStory() {

@@ -109,11 +109,11 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final long userId = CookieUtils.getUserIdFromCookie(cookie);
         isLoggedIn = !TextUtils.isEmpty(cookie) && userId != 0;
-        final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        // final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
-        mediaService = isLoggedIn ? MediaService.getInstance(deviceUuid, csrfToken, userId) : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        mediaService = isLoggedIn ? MediaService.INSTANCE : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         // setHasOptionsMenu(true);
     }
 
@@ -135,7 +135,17 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onRefresh() {
         if (isComment && !isLoggedIn) {
             lazyLoader.resetState();
-            graphQLService.fetchCommentLikers(postId, null, anonCb);
+            graphQLService.fetchCommentLikers(
+                    postId,
+                    null,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            anonCb.onFailure(throwable);
+                            return;
+                        }
+                        anonCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
         } else {
             mediaService.fetchLikes(
                     postId,
@@ -164,8 +174,19 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
             binding.rvLikes.setLayoutManager(layoutManager);
             binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-                if (!TextUtils.isEmpty(endCursor))
-                    graphQLService.fetchCommentLikers(postId, endCursor, anonCb);
+                if (!TextUtils.isEmpty(endCursor)) {
+                    graphQLService.fetchCommentLikers(
+                            postId,
+                            endCursor,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    anonCb.onFailure(throwable);
+                                    return;
+                                }
+                                anonCb.onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
+                }
                 endCursor = null;
             });
             binding.rvLikes.addOnScrollListener(lazyLoader);

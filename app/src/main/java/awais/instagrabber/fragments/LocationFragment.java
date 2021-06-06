@@ -37,7 +37,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import awais.instagrabber.R;
@@ -53,14 +52,15 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -68,6 +68,7 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.LocationService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
+import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
@@ -208,20 +209,18 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (user == null) return;
             if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
-                graphQLService.fetchPost(feedModel.getCode(), new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media newFeedModel) {
-                        opening = false;
-                        if (newFeedModel == null) return;
-                        openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        opening = false;
-                        Log.e(TAG, "Error", t);
-                    }
-                });
+                graphQLService.fetchPost(
+                        feedModel.getCode(),
+                        CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            opening = false;
+                            if (throwable != null) {
+                                Log.e(TAG, "Error", throwable);
+                                return;
+                            }
+                            if (media == null) return;
+                            openPostDialog(media, profilePicView, mainPostImage, position);
+                        }))
+                );
                 return;
             }
             opening = true;
@@ -293,8 +292,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-        storiesService = StoriesService.getInstance(null, 0L, null);
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        storiesService = StoriesService.INSTANCE;
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -402,7 +401,16 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchLocationModel() {
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) locationService.fetch(locationId, cb);
-        else graphQLService.fetchLocation(locationId, cb);
+        else graphQLService.fetchLocation(
+                locationId,
+                CoroutineUtilsKt.getContinuation((location, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        cb.onFailure(throwable);
+                        return;
+                    }
+                    cb.onSuccess(location);
+                }))
+        );
     }
 
     private void setupLocationDetails() {
@@ -577,22 +585,19 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             storiesFetching = true;
             storiesService.getUserStory(
                     StoryViewerOptions.forLocation(locationId, locationModel.getName()),
-                    new ServiceCallback<List<StoryModel>>() {
-                        @Override
-                        public void onSuccess(final List<StoryModel> storyModels) {
-                            if (storyModels != null && !storyModels.isEmpty()) {
-                                locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
-                                hasStories = true;
-                            }
+                    CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error", throwable);
                             storiesFetching = false;
+                            return;
                         }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error", t);
-                            storiesFetching = false;
+                        if (storyModels != null && !storyModels.isEmpty()) {
+                            locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
+                            hasStories = true;
                         }
-                    });
+                        storiesFetching = false;
+                    }), Dispatchers.getIO())
+            );
         }
     }
 

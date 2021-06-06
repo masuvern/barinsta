@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import awais.instagrabber.managers.ThreadManager.Companion.getInstance
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
@@ -18,21 +17,19 @@ import awais.instagrabber.utils.Utils
 import awais.instagrabber.utils.getCsrfTokenFromCookie
 import awais.instagrabber.utils.getUserIdFromCookie
 import awais.instagrabber.webservices.DirectMessagesService
-import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
 object DirectMessagesManager {
-    val inboxManager: InboxManager by lazy { InboxManager.getInstance(false) }
-    val pendingInboxManager: InboxManager by lazy { InboxManager.getInstance(true) }
+    val inboxManager: InboxManager by lazy { InboxManager(false) }
+    val pendingInboxManager: InboxManager by lazy { InboxManager(true) }
 
     private val TAG = DirectMessagesManager::class.java.simpleName
     private val viewerId: Long
     private val deviceUuid: String
     private val csrfToken: String
-    private val service: DirectMessagesService
 
     fun moveThreadFromPending(threadId: String) {
         val pendingThreads = pendingInboxManager.threads.value ?: return
@@ -65,10 +62,10 @@ object DirectMessagesManager {
         currentUser: User,
         contentResolver: ContentResolver,
     ): ThreadManager {
-        return getInstance(threadId, pending, currentUser, contentResolver, viewerId, csrfToken, deviceUuid)
+        return ThreadManager(threadId, pending, currentUser, contentResolver, viewerId, csrfToken, deviceUuid)
     }
 
-    suspend fun createThread(userPk: Long): DirectThread = service.createThread(listOf(userPk), null)
+    suspend fun createThread(userPk: Long): DirectThread = DirectMessagesService.createThread(csrfToken, viewerId, deviceUuid, listOf(userPk), null)
 
     fun sendMedia(recipients: Set<RankedRecipient>, mediaId: String, scope: CoroutineScope) {
         val resultsCount = intArrayOf(0)
@@ -134,7 +131,10 @@ object DirectMessagesManager {
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                service.broadcastMediaShare(
+                DirectMessagesService.broadcastMediaShare(
+                    csrfToken,
+                    viewerId,
+                    deviceUuid,
                     UUID.randomUUID().toString(),
                     of(threadId),
                     mediaId
@@ -157,6 +157,5 @@ object DirectMessagesManager {
         val csrfToken = getCsrfTokenFromCookie(cookie)
         require(!csrfToken.isNullOrBlank() && viewerId != 0L && deviceUuid.isNotBlank()) { "User is not logged in!" }
         this.csrfToken = csrfToken
-        service = getInstance(csrfToken, viewerId, deviceUuid)
     }
 }

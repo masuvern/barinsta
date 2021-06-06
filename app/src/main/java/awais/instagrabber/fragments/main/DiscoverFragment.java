@@ -31,8 +31,6 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.repositories.responses.discover.TopicalExploreFeedResponse;
 import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.TopicClusterViewModel;
@@ -57,11 +55,11 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         discoverService = DiscoverService.getInstance();
-        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
-        final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
+        // final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        // final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
+        // final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        // final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        mediaService = MediaService.INSTANCE;
     }
 
     @Override

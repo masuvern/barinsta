@@ -296,8 +296,8 @@ class DirectMessageSettingsFragment : Fragment(), ConfirmDialogFragmentCallback 
         usersAdapter = DirectUsersAdapter(
             inviter?.pk ?: -1,
             { _: Int, user: User, _: Boolean ->
-                if (isEmpty(user.username) && !isEmpty(user.fbId)) {
-                    Utils.openURL(context, "https://facebook.com/" + user.fbId)
+                if (user.username.isBlank() && !user.interopMessagingUserFbid.isNullOrBlank()) {
+                    Utils.openURL(context, "https://facebook.com/" + user.interopMessagingUserFbid)
                     return@DirectUsersAdapter
                 }
                 if (isEmpty(user.username)) return@DirectUsersAdapter

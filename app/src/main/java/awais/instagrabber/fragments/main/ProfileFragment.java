@@ -62,7 +62,6 @@ import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.databinding.LayoutProfileDetailsBinding;
 import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
-import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.FavoriteRepository;
@@ -74,12 +73,10 @@ import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
-import awais.instagrabber.repositories.responses.FriendshipRestrictResponse;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
@@ -93,6 +90,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
+import awais.instagrabber.viewmodels.ProfileFragmentViewModel;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.GraphQLService;
@@ -139,6 +137,14 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private int downloadChildPosition = -1;
     private long myId;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_PROFILE_POSTS_LAYOUT);
+    private LayoutProfileDetailsBinding profileDetailsBinding;
+    private AccountRepository accountRepository;
+    private FavoriteRepository favoriteRepository;
+    private AppStateViewModel appStateViewModel;
+    private boolean disableDm = false;
+    private ProfileFragmentViewModel viewModel;
+    private String csrfToken;
+    private String deviceUuid;
 
     private final ServiceCallback<FriendshipChangeResponse> changeCb = new ServiceCallback<FriendshipChangeResponse>() {
         @Override
@@ -156,7 +162,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Log.e(TAG, "Error editing relationship", t);
         }
     };
-
     private final Runnable usernameSettingRunnable = () -> {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null && !TextUtils.isEmpty(username)) {
@@ -318,11 +323,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
         }
     };
-    private LayoutProfileDetailsBinding profileDetailsBinding;
-    private AccountRepository accountRepository;
-    private FavoriteRepository favoriteRepository;
-    private AppStateViewModel appStateViewModel;
-    private boolean disableDm = false;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -330,20 +330,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         cookie = Utils.settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         myId = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
+        csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = isLoggedIn ? FriendshipService.getInstance(deviceUuid, csrfToken, myId) : null;
-        directMessagesService = isLoggedIn ? DirectMessagesService.getInstance(csrfToken, myId, deviceUuid) : null;
-        storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
-        mediaService = isLoggedIn ? MediaService.getInstance(deviceUuid, csrfToken, myId) : null;
-        userService = isLoggedIn ? UserService.getInstance() : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        friendshipService = isLoggedIn ? FriendshipService.INSTANCE : null;
+        directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
+        storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
+        mediaService = isLoggedIn ? MediaService.INSTANCE : null;
+        userService = isLoggedIn ? UserService.INSTANCE : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         final Context context = getContext();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ProfileFragmentViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -373,6 +374,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             shouldRefresh = false;
             return root;
         }
+        // appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> viewModel.setCurrentUser(user));
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         root = binding.getRoot();
         profileDetailsBinding = binding.header;
@@ -430,7 +432,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         chainingMenuItem = menu.findItem(R.id.chaining);
         if (chainingMenuItem != null) {
-            chainingMenuItem.setVisible(isNotMe && profileModel.hasChaining());
+            chainingMenuItem.setVisible(isNotMe && profileModel.getHasChaining());
         }
         removeFollowerMenuItem = menu.findItem(R.id.remove_follower);
         if (removeFollowerMenuItem != null) {
@@ -448,25 +450,38 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
             friendshipService.toggleRestrict(
+                    csrfToken,
+                    deviceUuid,
                     profileModel.getPk(),
                     !profileModel.getFriendshipStatus().isRestricted(),
-                    new ServiceCallback<FriendshipRestrictResponse>() {
-                        @Override
-                        public void onSuccess(final FriendshipRestrictResponse result) {
-                            Log.d(TAG, action + " success: " + result);
-                            fetchProfileDetails();
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error while performing " + action, throwable);
+                            return;
                         }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error while performing " + action, t);
-                        }
-                    });
+                        // Log.d(TAG, action + " success: " + response);
+                        fetchProfileDetails();
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.block) {
             if (!isLoggedIn) return false;
-            friendshipService.changeBlock(profileModel.getFriendshipStatus().getBlocking(), profileModel.getPk(), changeCb);
+            // changeCb
+            friendshipService.changeBlock(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getFriendshipStatus().getBlocking(),
+                    profileModel.getPk(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.chaining) {
@@ -481,25 +496,57 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
             friendshipService.changeMute(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
                     profileModel.getFriendshipStatus().isMutingReel(),
                     profileModel.getPk(),
                     true,
-                    changeCb);
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.mute_posts) {
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
             friendshipService.changeMute(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
                     profileModel.getFriendshipStatus().getMuting(),
                     profileModel.getPk(),
                     false,
-                    changeCb);
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         if (item.getItemId() == R.id.remove_follower) {
             if (!isLoggedIn) return false;
-            friendshipService.removeFollower(profileModel.getPk(), changeCb);
+            friendshipService.removeFollower(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getPk(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -583,65 +630,51 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             return;
         }
         if (isLoggedIn) {
-            userService.getUsernameInfo(usernameTemp, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User user) {
-                    userService.getUserFriendship(user.getPk(), new ServiceCallback<FriendshipStatus>() {
-                        @Override
-                        public void onSuccess(final FriendshipStatus status) {
-                            user.setFriendshipStatus(status);
-                            profileModel = user;
-                            setProfileDetails();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error fetching profile relationship", t);
+            userService.getUsernameInfo(
+                    usernameTemp,
+                    CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error fetching profile", throwable);
                             final Context context = getContext();
-                            try {
-                                if (t == null)
-                                    Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
-                                else
-                                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                            } catch (final Throwable ignored) {
-                            }
+                            if (context == null) return;
+                            Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                    });
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error fetching profile", t);
-                    final Context context = getContext();
-                    try {
-                        if (t == null)
-                            Toast.makeText(context, R.string.error_loading_profile_loggedin, Toast.LENGTH_LONG).show();
-                        else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    } catch (final Throwable ignored) {
-                    }
-                }
-            });
+                        userService.getUserFriendship(
+                                user.getPk(),
+                                CoroutineUtilsKt.getContinuation(
+                                        (friendshipStatus, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                            if (throwable1 != null) {
+                                                Log.e(TAG, "Error fetching profile relationship", throwable1);
+                                                final Context context = getContext();
+                                                if (context == null) return;
+                                                Toast.makeText(context, throwable1.getMessage(),
+                                                               Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                            user.setFriendshipStatus(friendshipStatus);
+                                            profileModel = user;
+                                            setProfileDetails();
+                                        }), Dispatchers.getIO()
+                                )
+                        );
+                    }), Dispatchers.getIO())
+            );
             return;
         }
-        graphQLService.fetchUser(usernameTemp, new ServiceCallback<User>() {
-            @Override
-            public void onSuccess(final User user) {
-                profileModel = user;
-                setProfileDetails();
-            }
-
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "Error fetching profile", t);
-                final Context context = getContext();
-                try {
-                    if (t == null)
-                        Toast.makeText(context, R.string.error_loading_profile, Toast.LENGTH_LONG).show();
-                    else Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (final Throwable ignored) {
-                }
-            }
-        });
+        graphQLService.fetchUser(
+                usernameTemp,
+                CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "Error fetching profile", throwable);
+                        final Context context = getContext();
+                        if (context == null) return;
+                        Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                    profileModel = user;
+                    setProfileDetails();
+                }))
+        );
     }
 
     private void setProfileDetails() {
@@ -856,7 +889,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.profileContext.setVisibility(View.GONE);
         } else {
             profileDetailsBinding.profileContext.setVisibility(View.VISIBLE);
-            final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinks();
+            final List<UserProfileContextLink> userProfileContextLinks = profileModel.getProfileContextLinksWithUserIds();
             for (int i = 0; i < userProfileContextLinks.size(); i++) {
                 final UserProfileContextLink link = userProfileContextLinks.get(i);
                 if (link.getUsername() != null)
@@ -977,7 +1010,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 mutePostsMenuItem.setTitle(profileModel.getFriendshipStatus().getMuting() ? R.string.unmute_posts : R.string.mute_posts);
             }
             if (chainingMenuItem != null) {
-                chainingMenuItem.setVisible(profileModel.hasChaining());
+                chainingMenuItem.setVisible(profileModel.getHasChaining());
             }
             if (removeFollowerMenuItem != null) {
                 removeFollowerMenuItem.setVisible(profileModel.getFriendshipStatus().getFollowedBy());
@@ -993,69 +1026,100 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 cookie,
                 profileModel.getFullName(),
                 profileModel.getProfilePicUrl(),
-                new RepositoryCallback<Account>() {
-                    @Override
-                    public void onSuccess(final Account result) {
-                        accountIsUpdated = true;
+                CoroutineUtilsKt.getContinuation((account, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "updateAccountInfo: ", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        Log.e(TAG, "onDataNotAvailable: insert failed");
-                    }
-                });
+                    accountIsUpdated = true;
+                }), Dispatchers.getIO())
+        );
     }
 
     private void fetchStoryAndHighlights(final long profileId) {
         storiesService.getUserStory(
                 StoryViewerOptions.forUser(profileId, profileModel.getFullName()),
-                new ServiceCallback<List<StoryModel>>() {
-                    @Override
-                    public void onSuccess(final List<StoryModel> storyModels) {
-                        if (storyModels != null && !storyModels.isEmpty()) {
-                            profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
-                            hasStories = true;
-                        }
+                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "Error", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        Log.e(TAG, "Error", t);
+                    if (storyModels != null && !storyModels.isEmpty()) {
+                        profileDetailsBinding.mainProfileImage.setStoriesBorder(1);
+                        hasStories = true;
                     }
-                });
-        storiesService.fetchHighlights(profileId,
-                                       new ServiceCallback<List<HighlightModel>>() {
-                                           @Override
-                                           public void onSuccess(final List<HighlightModel> result) {
-                                               if (result != null) {
-                                                   profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
-                                                   highlightsViewModel.getList().postValue(result);
-                                               } else profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                                           }
-
-                                           @Override
-                                           public void onFailure(final Throwable t) {
-                                               profileDetailsBinding.highlightsList.setVisibility(View.GONE);
-                                               Log.e(TAG, "Error", t);
-                                           }
-                                       });
+                }), Dispatchers.getIO())
+        );
+        storiesService.fetchHighlights(
+                profileId,
+                CoroutineUtilsKt.getContinuation((highlightModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                        Log.e(TAG, "Error", throwable);
+                        return;
+                    }
+                    if (highlightModels != null) {
+                        profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
+                        //noinspection unchecked
+                        highlightsViewModel.getList().postValue((List<HighlightModel>) highlightModels);
+                    } else {
+                        profileDetailsBinding.highlightsList.setVisibility(View.GONE);
+                    }
+                }), Dispatchers.getIO())
+        );
     }
 
     private void setupCommonListeners() {
         final Context context = getContext();
+        if (context == null) return;
         profileDetailsBinding.btnFollow.setOnClickListener(v -> {
             if (profileModel.getFriendshipStatus().getFollowing() && profileModel.isPrivate()) {
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.priv_acc)
                         .setMessage(R.string.priv_acc_confirm)
-                        .setPositiveButton(R.string.confirm, (d, w) ->
-                                friendshipService.unfollow(profileModel.getPk(), changeCb))
+                        .setPositiveButton(R.string.confirm, (d, w) -> friendshipService.unfollow(
+                                csrfToken,
+                                myId,
+                                deviceUuid,
+                                profileModel.getPk(),
+                                CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable != null) {
+                                        changeCb.onFailure(throwable);
+                                        return;
+                                    }
+                                    changeCb.onSuccess(response);
+                                }), Dispatchers.getIO())
+                        ))
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (profileModel.getFriendshipStatus().getFollowing() || profileModel.getFriendshipStatus().getOutgoingRequest()) {
-                friendshipService.unfollow(profileModel.getPk(), changeCb);
+                friendshipService.unfollow(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getPk(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
             } else {
-                friendshipService.follow(profileModel.getPk(), changeCb);
+                friendshipService.follow(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getPk(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
             }
         });
         profileDetailsBinding.btnSaved.setOnClickListener(v -> {
@@ -1078,6 +1142,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             profileDetailsBinding.btnDM.setOnClickListener(v -> {
                 profileDetailsBinding.btnDM.setEnabled(false);
                 directMessagesService.createThread(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
                         Collections.singletonList(profileModel.getPk()),
                         null,
                         CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
@@ -1120,7 +1187,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 }
                 showProfilePicDialog();
             };
-            if (context == null) return;
             new AlertDialog.Builder(context)
                     .setItems(options, profileDialogListener)
                     .setNegativeButton(R.string.cancel, null)

@@ -19,8 +19,6 @@ import awais.instagrabber.repositories.requests.UploadFinishOptions
 import awais.instagrabber.repositories.requests.VideoOptions
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds.Companion.of
-import awais.instagrabber.repositories.responses.FriendshipChangeResponse
-import awais.instagrabber.repositories.responses.FriendshipRestrictResponse
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.repositories.responses.giphy.GiphyGif
@@ -31,10 +29,10 @@ import awais.instagrabber.utils.MediaUploader.uploadVideo
 import awais.instagrabber.utils.MediaUtils.OnInfoLoadListener
 import awais.instagrabber.utils.MediaUtils.VideoInfo
 import awais.instagrabber.utils.TextUtils.isEmpty
+import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.DirectMessagesService
 import awais.instagrabber.webservices.FriendshipService
 import awais.instagrabber.webservices.MediaService
-import awais.instagrabber.webservices.ServiceCallback
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterables
 import kotlinx.coroutines.CoroutineScope
@@ -45,17 +43,16 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.stream.Collectors
 
-class ThreadManager private constructor(
+class ThreadManager(
     private val threadId: String,
     pending: Boolean,
-    currentUser: User,
-    contentResolver: ContentResolver,
-    viewerId: Long,
-    csrfToken: String,
-    deviceUuid: String,
+    private val currentUser: User?,
+    private val contentResolver: ContentResolver,
+    private val viewerId: Long,
+    private val csrfToken: String,
+    private val deviceUuid: String,
 ) {
     private val _fetching = MutableLiveData<Resource<Any?>>()
     val fetching: LiveData<Resource<Any?>> = _fetching
@@ -64,13 +61,7 @@ class ThreadManager private constructor(
     private val _pendingRequests = MutableLiveData<DirectThreadParticipantRequestsResponse?>(null)
     val pendingRequests: LiveData<DirectThreadParticipantRequestsResponse?> = _pendingRequests
     private val inboxManager: InboxManager = if (pending) DirectMessagesManager.pendingInboxManager else DirectMessagesManager.inboxManager
-    private val viewerId: Long
     private val threadIdOrUserIds: ThreadIdOrUserIds = of(threadId)
-    private val currentUser: User?
-    private val contentResolver: ContentResolver
-    private val service: DirectMessagesService
-    private val mediaService: MediaService
-    private val friendshipService: FriendshipService
 
     val thread: LiveData<DirectThread?> by lazy {
         distinctUntilChanged(map(inboxManager.getInbox()) { inboxResource: Resource<DirectInbox?>? ->
@@ -135,7 +126,7 @@ class ThreadManager private constructor(
         _fetching.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val threadFeedResponse = service.fetchThread(threadId, cursor)
+                val threadFeedResponse = DirectMessagesService.fetchThread(threadId, cursor)
                 if (threadFeedResponse.status != null && threadFeedResponse.status != "ok") {
                     _fetching.postValue(error(R.string.generic_not_ok_response, null))
                     return@launch
@@ -163,7 +154,7 @@ class ThreadManager private constructor(
         if (isGroup == null || !isGroup) return
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.participantRequests(threadId, 1)
+                val response = DirectMessagesService.participantRequests(threadId, 1)
                 _pendingRequests.postValue(response)
             } catch (e: Exception) {
                 Log.e(TAG, "fetchPendingRequests: ", e)
@@ -355,7 +346,10 @@ class ThreadManager private constructor(
         val repliedToClientContext = replyToItemValue?.clientContext
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.broadcastText(
+                val response = DirectMessagesService.broadcastText(
+                    csrfToken,
+                    viewerId,
+                    deviceUuid,
                     clientContext,
                     threadIdOrUserIds,
                     text,
@@ -410,7 +404,10 @@ class ThreadManager private constructor(
         data.postValue(loading(directItem))
         scope.launch(Dispatchers.IO) {
             try {
-                val request = service.broadcastAnimatedMedia(
+                val request = DirectMessagesService.broadcastAnimatedMedia(
+                    csrfToken,
+                    userId,
+                    deviceUuid,
                     clientContext,
                     threadIdOrUserIds,
                     giphyGif
@@ -455,8 +452,11 @@ class ThreadManager private constructor(
                     "4",
                     null
                 )
-                mediaService.uploadFinish(uploadFinishOptions)
-                val broadcastResponse = service.broadcastVoice(
+                MediaService.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
+                val broadcastResponse = DirectMessagesService.broadcastVoice(
+                    csrfToken,
+                    viewerId,
+                    deviceUuid,
                     clientContext,
                     threadIdOrUserIds,
                     uploadDmVoiceOptions.uploadId,
@@ -497,7 +497,10 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.broadcastReaction(
+                DirectMessagesService.broadcastReaction(
+                    csrfToken,
+                    userId,
+                    deviceUuid,
                     clientContext,
                     threadIdOrUserIds,
                     itemId,
@@ -534,7 +537,16 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.broadcastReaction(clientContext, threadIdOrUserIds, itemId1, null, true)
+                DirectMessagesService.broadcastReaction(
+                    csrfToken,
+                    viewerId,
+                    deviceUuid,
+                    clientContext,
+                    threadIdOrUserIds,
+                    itemId1,
+                    null,
+                    true
+                )
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
                 Log.e(TAG, "sendDeleteReaction: ", e)
@@ -553,7 +565,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.deleteItem(threadId, itemId)
+                DirectMessagesService.deleteItem(csrfToken, deviceUuid, threadId, itemId)
             } catch (e: Exception) {
                 // add the item back if unsuccessful
                 addItems(index, listOf(item))
@@ -629,7 +641,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.forward(
+                DirectMessagesService.forward(
                     thread.threadId,
                     itemTypeName,
                     threadId,
@@ -648,7 +660,7 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                service.approveRequest(threadId)
+                DirectMessagesService.approveRequest(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
             } catch (e: Exception) {
                 Log.e(TAG, "acceptRequest: ", e)
@@ -662,7 +674,7 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                service.declineRequest(threadId)
+                DirectMessagesService.declineRequest(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
             } catch (e: Exception) {
                 Log.e(TAG, "declineRequest: ", e)
@@ -707,9 +719,8 @@ class ThreadManager private constructor(
         height: Int,
         scope: CoroutineScope,
     ) {
-        val userId = getCurrentUserId(data) ?: return
         val clientContext = UUID.randomUUID().toString()
-        val directItem = createImageOrVideo(userId, clientContext, uri, width, height, false)
+        val directItem = createImageOrVideo(viewerId, clientContext, uri, width, height, false)
         directItem.isPending = true
         addItems(0, listOf(directItem))
         data.postValue(loading(directItem))
@@ -719,7 +730,7 @@ class ThreadManager private constructor(
                 if (handleInvalidResponse(data, response)) return@launch
                 val response1 = response.response ?: return@launch
                 val uploadId = response1.optString("upload_id")
-                val response2 = service.broadcastPhoto(clientContext, threadIdOrUserIds, uploadId)
+                val response2 = DirectMessagesService.broadcastPhoto(csrfToken, viewerId, deviceUuid, clientContext, threadIdOrUserIds, uploadId)
                 parseResponse(response2, data, directItem)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
@@ -779,8 +790,11 @@ class ThreadManager private constructor(
                     "2",
                     VideoOptions(duration / 1000f, emptyList(), 0, false)
                 )
-                mediaService.uploadFinish(uploadFinishOptions)
-                val broadcastResponse = service.broadcastVideo(
+                MediaService.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
+                val broadcastResponse = DirectMessagesService.broadcastVideo(
+                    csrfToken,
+                    viewerId,
+                    deviceUuid,
                     clientContext,
                     threadIdOrUserIds,
                     uploadDmVideoOptions.uploadId,
@@ -907,7 +921,7 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.updateTitle(threadId, newTitle.trim())
+                val response = DirectMessagesService.updateTitle(csrfToken, deviceUuid, threadId, newTitle.trim())
                 handleDetailsChangeResponse(data, response)
             } catch (e: Exception) {
             }
@@ -919,7 +933,9 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.addUsers(
+                val response = DirectMessagesService.addUsers(
+                    csrfToken,
+                    deviceUuid,
                     threadId,
                     users.map { obj: User -> obj.pk }
                 )
@@ -936,7 +952,7 @@ class ThreadManager private constructor(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                service.removeUsers(threadId, setOf(user.pk))
+                DirectMessagesService.removeUsers(csrfToken, deviceUuid, threadId, setOf(user.pk))
                 data.postValue(success(Any()))
                 var activeUsers = users.value
                 var leftUsersValue = leftUsers.value
@@ -971,7 +987,7 @@ class ThreadManager private constructor(
         if (isAdmin(user)) return data
         scope.launch(Dispatchers.IO) {
             try {
-                service.addAdmins(threadId, setOf(user.pk))
+                DirectMessagesService.addAdmins(csrfToken, deviceUuid, threadId, setOf(user.pk))
                 val currentAdminIds = adminUserIds.value
                 val updatedAdminIds = ImmutableList.builder<Long>()
                     .addAll(currentAdminIds ?: emptyList())
@@ -999,7 +1015,7 @@ class ThreadManager private constructor(
         if (!isAdmin(user)) return data
         scope.launch(Dispatchers.IO) {
             try {
-                service.removeAdmins(threadId, setOf(user.pk))
+                DirectMessagesService.removeAdmins(csrfToken, deviceUuid, threadId, setOf(user.pk))
                 val currentAdmins = adminUserIds.value ?: return@launch
                 val updatedAdminUserIds = currentAdmins.filter { userId1: Long -> userId1 != user.pk }
                 val currentThread = thread.value ?: return@launch
@@ -1029,7 +1045,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.mute(threadId)
+                DirectMessagesService.mute(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1057,7 +1073,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.unmute(threadId)
+                DirectMessagesService.unmute(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1085,7 +1101,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.muteMentions(threadId)
+                DirectMessagesService.muteMentions(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1113,7 +1129,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                service.unmuteMentions(threadId)
+                DirectMessagesService.unmuteMentions(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1133,61 +1149,57 @@ class ThreadManager private constructor(
 
     fun blockUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.changeBlock(false, user.pk, object : ServiceCallback<FriendshipChangeResponse?> {
-            override fun onSuccess(result: FriendshipChangeResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.changeBlock(csrfToken, viewerId, deviceUuid, false, user.pk)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun unblockUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.changeBlock(true, user.pk, object : ServiceCallback<FriendshipChangeResponse?> {
-            override fun onSuccess(result: FriendshipChangeResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.changeBlock(csrfToken, viewerId, deviceUuid, true, user.pk)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun restrictUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.toggleRestrict(user.pk, true, object : ServiceCallback<FriendshipRestrictResponse?> {
-            override fun onSuccess(result: FriendshipRestrictResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.toggleRestrict(csrfToken, deviceUuid, user.pk, true)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
     fun unRestrictUser(user: User, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        friendshipService.toggleRestrict(user.pk, false, object : ServiceCallback<FriendshipRestrictResponse?> {
-            override fun onSuccess(result: FriendshipRestrictResponse?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                FriendshipService.toggleRestrict(csrfToken, deviceUuid, user.pk, false)
                 refreshChats(scope)
+            } catch (e: Exception) {
+                Log.e(TAG, "onFailure: ", e)
+                data.postValue(error(e.message, null))
             }
-
-            override fun onFailure(t: Throwable) {
-                Log.e(TAG, "onFailure: ", t)
-                data.postValue(error(t.message, null))
-            }
-        })
+        }
         return data
     }
 
@@ -1196,7 +1208,9 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.approveParticipantRequests(
+                val response = DirectMessagesService.approveParticipantRequests(
+                    csrfToken,
+                    deviceUuid,
                     threadId,
                     users.map { obj: User -> obj.pk }
                 )
@@ -1215,7 +1229,9 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.declineParticipantRequests(
+                val response = DirectMessagesService.declineParticipantRequests(
+                    csrfToken,
+                    deviceUuid,
                     threadId,
                     users.map { obj: User -> obj.pk }
                 )
@@ -1255,7 +1271,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.approvalRequired(threadId)
+                val response = DirectMessagesService.approvalRequired(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, response)
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1283,7 +1299,7 @@ class ThreadManager private constructor(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                val request = service.approvalNotRequired(threadId)
+                val request = DirectMessagesService.approvalNotRequired(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, request)
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1306,7 +1322,7 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val request = service.leave(threadId)
+                val request = DirectMessagesService.leave(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, request)
             } catch (e: Exception) {
                 Log.e(TAG, "leave: ", e)
@@ -1321,7 +1337,7 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val request = service.end(threadId)
+                val request = DirectMessagesService.end(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, request)
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1358,7 +1374,7 @@ class ThreadManager private constructor(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val response = service.markAsSeen(threadId, directItem)
+                val response = DirectMessagesService.markAsSeen(csrfToken, deviceUuid, threadId, directItem)
                 if (response == null) {
                     data.postValue(error(R.string.generic_null_response, null))
                     return@launch
@@ -1380,44 +1396,5 @@ class ThreadManager private constructor(
             }
         }
         return data
-    }
-
-    companion object {
-        private val TAG = ThreadManager::class.java.simpleName
-        private val LOCK = Any()
-        private val INSTANCE_MAP: MutableMap<String, ThreadManager> = ConcurrentHashMap()
-
-        @JvmStatic
-        fun getInstance(
-            threadId: String,
-            pending: Boolean,
-            currentUser: User,
-            contentResolver: ContentResolver,
-            viewerId: Long,
-            csrfToken: String,
-            deviceUuid: String,
-        ): ThreadManager {
-            var instance = INSTANCE_MAP[threadId]
-            if (instance == null) {
-                synchronized(LOCK) {
-                    instance = INSTANCE_MAP[threadId]
-                    if (instance == null) {
-                        instance = ThreadManager(threadId, pending, currentUser, contentResolver, viewerId, csrfToken, deviceUuid)
-                        INSTANCE_MAP[threadId] = instance!!
-                    }
-                }
-            }
-            return instance!!
-        }
-    }
-
-    init {
-        this.currentUser = currentUser
-        this.contentResolver = contentResolver
-        this.viewerId = viewerId
-        service = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid)
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, viewerId)
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, viewerId)
-        // fetchChats();
     }
 }

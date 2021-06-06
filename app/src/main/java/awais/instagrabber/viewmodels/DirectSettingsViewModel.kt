@@ -135,7 +135,7 @@ class DirectSettingsViewModel(
                 if (isAdmin) ACTION_REMOVE_ADMIN else ACTION_MAKE_ADMIN
             ))
         }
-        val blocking: Boolean = user.friendshipStatus.blocking
+        val blocking: Boolean = user.friendshipStatus?.blocking ?: false
         options.add(Option(
             if (blocking) getString(R.string.unblock) else getString(R.string.block),
             if (blocking) ACTION_UNBLOCK else ACTION_BLOCK
@@ -144,7 +144,7 @@ class DirectSettingsViewModel(
         // options.add(new Option<>(getString(R.string.report), ACTION_REPORT));
         val isGroup: Boolean? = threadManager.isGroup.value
         if (isGroup != null && isGroup) {
-            val restricted: Boolean = user.friendshipStatus.isRestricted
+            val restricted: Boolean = user.friendshipStatus?.isRestricted ?: false
             options.add(Option(
                 if (restricted) getString(R.string.unrestrict) else getString(R.string.restrict),
                 if (restricted) ACTION_UNRESTRICT else ACTION_RESTRICT

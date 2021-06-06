@@ -34,7 +34,6 @@ import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListe
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
-import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
 import awais.instagrabber.repositories.responses.notification.Notification;
 import awais.instagrabber.repositories.responses.notification.NotificationArgs;
 import awais.instagrabber.repositories.responses.notification.NotificationImage;
@@ -68,6 +67,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private String type;
     private long targetId;
     private Context context;
+    private long userId;
 
     private final ServiceCallback<List<Notification>> cb = new ServiceCallback<List<Notification>>() {
         @Override
@@ -168,34 +168,40 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
-                                    @Override
-                                    public void onSuccess(final FriendshipChangeResponse result) {
-                                        onRefresh();
-                                        Log.e(TAG, "approve: status was not ok!");
-                                    }
-
-                                    @Override
-                                    public void onFailure(final Throwable t) {
-                                        Log.e(TAG, "approve: onFailure: ", t);
-                                    }
-                                });
+                                friendshipService.approve(
+                                        csrfToken,
+                                        userId,
+                                        deviceUuid,
+                                        args.getUserId(),
+                                        CoroutineUtilsKt.getContinuation(
+                                                (response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        Log.e(TAG, "approve: onFailure: ", throwable);
+                                                        return;
+                                                    }
+                                                    onRefresh();
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                                 return;
                             }
                             clickListener.onPreviewClick(model);
                             break;
                         case 2:
-                            friendshipService.ignore(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
-                                @Override
-                                public void onSuccess(final FriendshipChangeResponse result) {
-                                    onRefresh();
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable t) {
-                                    Log.e(TAG, "ignore: onFailure: ", t);
-                                }
-                            });
+                            friendshipService.ignore(
+                                    csrfToken,
+                                    userId,
+                                    deviceUuid,
+                                    args.getUserId(),
+                                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                        if (throwable != null) {
+                                            Log.e(TAG, "approve: onFailure: ", throwable);
+                                            return;
+                                        }
+                                        onRefresh();
+                                    }), Dispatchers.getIO())
+                            );
                             break;
                     }
                 };
@@ -219,11 +225,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         if (TextUtils.isEmpty(cookie)) {
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
-        mediaService = MediaService.getInstance(deviceUuid, csrfToken, userId);
+        friendshipService = FriendshipService.INSTANCE;
+        mediaService = MediaService.INSTANCE;
         newsService = NewsService.getInstance();
     }
 

@@ -12,8 +12,8 @@ import awais.instagrabber.models.Resource.Companion.success
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.utils.*
+import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.DirectMessagesService
-import awais.instagrabber.webservices.DirectMessagesService.Companion.getInstance
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.collect.ImmutableList
@@ -24,14 +24,13 @@ import retrofit2.Call
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class InboxManager private constructor(private val pending: Boolean) {
+class InboxManager(private val pending: Boolean) {
     // private val fetchInboxControlledRunner: ControlledRunner<Resource<DirectInbox>> = ControlledRunner()
     // private val fetchPendingInboxControlledRunner: ControlledRunner<Resource<DirectInbox>> = ControlledRunner()
     private val inbox = MutableLiveData<Resource<DirectInbox?>>(success(null))
     private val unseenCount = MutableLiveData<Resource<Int?>>()
     private val pendingRequestsTotal = MutableLiveData(0)
     val threads: LiveData<List<DirectThread>>
-    private val service: DirectMessagesService
     private var inboxRequest: Call<DirectInboxResponse?>? = null
     private var unseenCountRequest: Call<DirectBadgeCount?>? = null
     private var seqId: Long = 0
@@ -58,7 +57,11 @@ class InboxManager private constructor(private val pending: Boolean) {
         inbox.postValue(loading(currentDirectInbox))
         scope.launch(Dispatchers.IO) {
             try {
-                val inboxValue = if (pending) service.fetchPendingInbox(cursor, seqId) else service.fetchInbox(cursor, seqId)
+                val inboxValue = if (pending) {
+                    DirectMessagesService.fetchPendingInbox(cursor, seqId)
+                } else {
+                    DirectMessagesService.fetchInbox(cursor, seqId)
+                }
                 parseInboxResponse(inboxValue)
             } catch (e: Exception) {
                 inbox.postValue(error(e.message, currentDirectInbox))
@@ -74,7 +77,7 @@ class InboxManager private constructor(private val pending: Boolean) {
         unseenCount.postValue(loading(currentUnseenCount))
         scope.launch(Dispatchers.IO) {
             try {
-                val directBadgeCount = service.fetchUnseenCount()
+                val directBadgeCount = DirectMessagesService.fetchUnseenCount()
                 unseenCount.postValue(success(directBadgeCount.badgeCount))
             } catch (e: Exception) {
                 Log.e(TAG, "Failed fetching unseen count", e)
@@ -286,7 +289,6 @@ class InboxManager private constructor(private val pending: Boolean) {
     }
 
     companion object {
-        private val TAG = InboxManager::class.java.simpleName
         private val THREAD_LOCKS = CacheBuilder
             .newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES) // max lock time ever expected
@@ -299,10 +301,6 @@ class InboxManager private constructor(private val pending: Boolean) {
             if (t2FirstDirectItem == null) return@Comparator -1
             t2FirstDirectItem.getTimestamp().compareTo(t1FirstDirectItem.getTimestamp())
         }
-
-        fun getInstance(pending: Boolean): InboxManager {
-            return InboxManager(pending)
-        }
     }
 
     init {
@@ -311,7 +309,6 @@ class InboxManager private constructor(private val pending: Boolean) {
         val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
         val csrfToken = getCsrfTokenFromCookie(cookie)
         require(!csrfToken.isNullOrBlank() && viewerId != 0L && deviceUuid.isNotBlank()) { "User is not logged in!" }
-        service = getInstance(csrfToken, viewerId, deviceUuid)
 
         // Transformations
         threads = Transformations.distinctUntilChanged(Transformations.map(inbox) { inboxResource: Resource<DirectInbox?> ->
