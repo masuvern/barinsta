@@ -2,7 +2,6 @@ package awais.instagrabber.fragments
 
 import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,8 +22,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class FavoritesFragment : Fragment() {
     private var shouldRefresh = true
-
-    private var scrollPosition = 0
 
     private lateinit var binding: FragmentFavoritesBinding
     private lateinit var root: RecyclerView
@@ -51,7 +48,7 @@ class FavoritesFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        scrollPosition = (root.getLayoutManager() as LinearLayoutManager).findLastVisibleItemPosition()
+        adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT)
     }
 
     override fun onResume() {
@@ -60,8 +57,9 @@ class FavoritesFragment : Fragment() {
         // refresh list every time in onViewStateRestored since it is cheaper than implementing pull down to refresh
         favoritesViewModel.list.observe(viewLifecycleOwner, {
             list: List<Favorite?>? -> adapter.submitList(list, Runnable {
-                root.scrollToPosition(scrollPosition)})
+                adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW)
             })
+        })
     }
 
     private fun init() {
