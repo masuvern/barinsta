@@ -48,12 +48,14 @@ import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
-import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
+import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
@@ -274,7 +276,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
-        storiesService = StoriesService.getInstance(null, 0L, null);
+        storiesService = StoriesService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -428,23 +430,23 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         // final String cookie = settingsHelper.getString(Constants.COOKIE);
         storiesFetching = true;
         updateSwipeRefreshState();
-        storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
-            @Override
-            public void onSuccess(final List<FeedStoryModel> result) {
-                storiesFetching = false;
-                feedStoriesViewModel.getList().postValue(result);
-                feedStoriesAdapter.submitList(result);
-                if (storyListMenu != null) storyListMenu.setVisible(true);
-                updateSwipeRefreshState();
-            }
-
-            @Override
-            public void onFailure(final Throwable t) {
-                Log.e(TAG, "failed", t);
-                storiesFetching = false;
-                updateSwipeRefreshState();
-            }
-        });
+        storiesService.getFeedStories(
+                CoroutineUtilsKt.getContinuation((feedStoryModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "failed", throwable);
+                        storiesFetching = false;
+                        updateSwipeRefreshState();
+                        return;
+                    }
+                    storiesFetching = false;
+                    //noinspection unchecked
+                    feedStoriesViewModel.getList().postValue((List<FeedStoryModel>) feedStoryModels);
+                    //noinspection unchecked
+                    feedStoriesAdapter.submitList((List<FeedStoryModel>) feedStoryModels);
+                    if (storyListMenu != null) storyListMenu.setVisible(true);
+                    updateSwipeRefreshState();
+                }), Dispatchers.getIO())
+        );
     }
 
     private void showPostsLayoutPreferences() {

@@ -31,6 +31,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavDestination
@@ -48,7 +49,6 @@ import awais.instagrabber.models.IntentModel
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Tab
 import awais.instagrabber.models.enums.IntentModelType
-import awais.instagrabber.repositories.responses.Media
 import awais.instagrabber.services.ActivityCheckerService
 import awais.instagrabber.services.DMSyncAlarmReceiver
 import awais.instagrabber.utils.*
@@ -60,7 +60,6 @@ import awais.instagrabber.viewmodels.AppStateViewModel
 import awais.instagrabber.viewmodels.DirectInboxViewModel
 import awais.instagrabber.webservices.GraphQLService
 import awais.instagrabber.webservices.MediaService
-import awais.instagrabber.webservices.ServiceCallback
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.ScrollingViewBehavior
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -68,6 +67,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterators
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.stream.Collectors
 
@@ -81,13 +83,14 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     private var isActivityCheckerServiceBound = false
     private var isBackStackEmpty = false
     private var isLoggedIn = false
+    private var deviceUuid: String? = null
+    private var csrfToken: String? = null
+    private var userId: Long = 0
 
     // private var behavior: HideBottomViewOnScrollBehavior<BottomNavigationView>? = null
     var currentTabs: List<Tab> = emptyList()
         private set
-    private var showBottomViewDestinations: List<Int> = emptyList<Int>()
-    private var graphQLService: GraphQLService? = null
-    private var mediaService: MediaService? = null
+    private var showBottomViewDestinations: List<Int> = emptyList()
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
@@ -157,17 +160,17 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
 
     private fun setupCookie() {
         val cookie = Utils.settingsHelper.getString(Constants.COOKIE)
-        var userId: Long = 0
-        var csrfToken: String? = null
-        if (!isEmpty(cookie)) {
+        userId = 0
+        csrfToken = null
+        if (cookie.isNotBlank()) {
             userId = getUserIdFromCookie(cookie)
             csrfToken = getCsrfTokenFromCookie(cookie)
         }
-        if (isEmpty(cookie) || userId == 0L || isEmpty(csrfToken)) {
+        if (cookie.isBlank() || userId == 0L || csrfToken.isNullOrBlank()) {
             isLoggedIn = false
             return
         }
-        val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
+        deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
         if (isEmpty(deviceUuid)) {
             Utils.settingsHelper.putString(Constants.DEVICE_UUID, UUID.randomUUID().toString())
         }
@@ -175,6 +178,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         isLoggedIn = true
     }
 
+    @Suppress("unused")
     private fun initDmService() {
         if (!isLoggedIn) return
         val enabled = Utils.settingsHelper.getBoolean(PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH)
@@ -369,7 +373,10 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             .collect(Collectors.toList())
         showBottomViewDestinations = currentTabs.asSequence().map {
             it.startDestinationFragmentId
-        }.toMutableList().apply { add(R.id.postViewFragment) }
+        }.toMutableList().apply {
+            add(R.id.postViewFragment)
+            add(R.id.favoritesFragment)
+        }
         if (setDefaultTabFromSettings) {
             setSelectedTab(currentTabs)
         } else {
@@ -627,30 +634,33 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             .setCancelable(false)
             .setView(R.layout.dialog_opening_post)
             .create()
-        if (graphQLService == null) graphQLService = GraphQLService.getInstance()
-        if (mediaService == null) mediaService = MediaService.getInstance(null, null, 0L)
-        val postCb: ServiceCallback<Media> = object : ServiceCallback<Media> {
-            override fun onSuccess(feedModel: Media?) {
-                if (feedModel != null) {
-                    val currentNavControllerLiveData = currentNavControllerLiveData ?: return
+        alertDialog.show()
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val media = if (isLoggedIn) MediaService.fetch(shortcodeToId(shortCode)) else GraphQLService.fetchPost(shortCode)
+                withContext(Dispatchers.Main) {
+                    if (media == null) {
+                        Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()
+                        return@withContext
+                    }
+                    val currentNavControllerLiveData = currentNavControllerLiveData ?: return@withContext
                     val navController = currentNavControllerLiveData.value
                     val bundle = Bundle()
-                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel)
+                    bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media)
                     try {
                         navController?.navigate(R.id.action_global_post_view, bundle)
                     } catch (e: Exception) {
                         Log.e(TAG, "showPostView: ", e)
                     }
-                } else Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()
-                alertDialog.dismiss()
-            }
-
-            override fun onFailure(t: Throwable) {
-                alertDialog.dismiss()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "showPostView: ", e)
+            } finally {
+                withContext(Dispatchers.Main) {
+                    alertDialog.dismiss()
+                }
             }
         }
-        alertDialog.show()
-        if (isLoggedIn) mediaService?.fetch(shortcodeToId(shortCode), postCb) else graphQLService?.fetchPost(shortCode, postCb)
     }
 
     private fun showLocationView(intentModel: IntentModel) {

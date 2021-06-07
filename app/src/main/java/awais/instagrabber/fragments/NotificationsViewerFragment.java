@@ -34,13 +34,13 @@ import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListe
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
-import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
-import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.notification.Notification;
 import awais.instagrabber.repositories.responses.notification.NotificationArgs;
 import awais.instagrabber.repositories.responses.notification.NotificationImage;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
@@ -48,6 +48,7 @@ import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -66,6 +67,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private String type;
     private long targetId;
     private Context context;
+    private long userId;
 
     private final ServiceCallback<List<Notification>> cb = new ServiceCallback<List<Notification>>() {
         @Override
@@ -106,26 +108,25 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         .setView(R.layout.dialog_opening_post)
                         .create();
                 alertDialog.show();
-                mediaService.fetch(mediaId, new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media feedModel) {
-                        final NavController navController = NavHostFragment.findNavController(NotificationsViewerFragment.this);
-                        final Bundle bundle = new Bundle();
-                        bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-                        try {
-                            navController.navigate(R.id.action_global_post_view, bundle);
-                            alertDialog.dismiss();
-                        } catch (Exception e) {
-                            Log.e(TAG, "onSuccess: ", e);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        alertDialog.dismiss();
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                mediaService.fetch(
+                        mediaId,
+                        CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                alertDialog.dismiss();
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            final NavController navController = NavHostFragment.findNavController(NotificationsViewerFragment.this);
+                            final Bundle bundle = new Bundle();
+                            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+                            try {
+                                navController.navigate(R.id.action_global_post_view, bundle);
+                                alertDialog.dismiss();
+                            } catch (Exception e) {
+                                Log.e(TAG, "onSuccess: ", e);
+                            }
+                        }), Dispatchers.getIO())
+                );
             }
         }
 
@@ -167,34 +168,40 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
-                                    @Override
-                                    public void onSuccess(final FriendshipChangeResponse result) {
-                                        onRefresh();
-                                        Log.e(TAG, "approve: status was not ok!");
-                                    }
-
-                                    @Override
-                                    public void onFailure(final Throwable t) {
-                                        Log.e(TAG, "approve: onFailure: ", t);
-                                    }
-                                });
+                                friendshipService.approve(
+                                        csrfToken,
+                                        userId,
+                                        deviceUuid,
+                                        args.getUserId(),
+                                        CoroutineUtilsKt.getContinuation(
+                                                (response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        Log.e(TAG, "approve: onFailure: ", throwable);
+                                                        return;
+                                                    }
+                                                    onRefresh();
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                                 return;
                             }
                             clickListener.onPreviewClick(model);
                             break;
                         case 2:
-                            friendshipService.ignore(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
-                                @Override
-                                public void onSuccess(final FriendshipChangeResponse result) {
-                                    onRefresh();
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable t) {
-                                    Log.e(TAG, "ignore: onFailure: ", t);
-                                }
-                            });
+                            friendshipService.ignore(
+                                    csrfToken,
+                                    userId,
+                                    deviceUuid,
+                                    args.getUserId(),
+                                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                        if (throwable != null) {
+                                            Log.e(TAG, "approve: onFailure: ", throwable);
+                                            return;
+                                        }
+                                        onRefresh();
+                                    }), Dispatchers.getIO())
+                            );
                             break;
                     }
                 };
@@ -218,11 +225,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         if (TextUtils.isEmpty(cookie)) {
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
-        mediaService = MediaService.getInstance(null, null, 0);
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
+        friendshipService = FriendshipService.INSTANCE;
+        mediaService = MediaService.INSTANCE;
         newsService = NewsService.getInstance();
     }
 

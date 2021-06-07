@@ -39,7 +39,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import awais.instagrabber.R;
@@ -52,10 +51,8 @@ import awais.instagrabber.databinding.LayoutHashtagDetailsBinding;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.FollowingType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
@@ -63,8 +60,10 @@ import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -72,6 +71,7 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.TagsService;
+import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
@@ -218,20 +218,15 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (TextUtils.isEmpty(user.getUsername())) {
                 // this only happens for anons
                 opening = true;
-                graphQLService.fetchPost(feedModel.getCode(), new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media newFeedModel) {
-                        opening = false;
-                        if (newFeedModel == null) return;
-                        openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
+                graphQLService.fetchPost(feedModel.getCode(), CoroutineUtilsKt.getContinuation((media, throwable) -> {
+                    opening = false;
+                    if (throwable != null) {
+                        Log.e(TAG, "Error", throwable);
+                        return;
                     }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        opening = false;
-                        Log.e(TAG, "Error", t);
-                    }
-                });
+                    if (media == null) return;
+                    AppExecutors.INSTANCE.getMainThread().execute(() -> openPostDialog(media, profilePicView, mainPostImage, position));
+                }, Dispatchers.getIO()));
                 return;
             }
             opening = true;
@@ -303,8 +298,8 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
-        storiesService = isLoggedIn ? StoriesService.getInstance(null, 0L, null) : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -385,7 +380,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchHashtagModel() {
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) tagsService.fetch(hashtag, cb);
-        else graphQLService.fetchTag(hashtag, cb);
+        else graphQLService.fetchTag(hashtag, CoroutineUtilsKt.getContinuation((hashtag1, throwable) -> {
+            if (throwable != null) {
+                cb.onFailure(throwable);
+                return;
+            }
+            AppExecutors.INSTANCE.getMainThread().execute(() -> cb.onSuccess(hashtag1));
+        }, Dispatchers.getIO()));
     }
 
     private void setupPosts() {
@@ -478,73 +479,81 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final Context context = getContext();
         if (context == null) return;
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
-        favoriteRepository.getFavorite(hashtag, FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
-            @Override
-            public void onSuccess(final Favorite result) {
-                favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                        result.getId(),
-                        hashtag,
-                        FavoriteType.HASHTAG,
-                        hashtagModel.getName(),
-                        "res:/" + R.drawable.ic_hashtag,
-                        result.getDateAdded()
-                ), new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {
-                        hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                        hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+        favoriteRepository.getFavorite(
+                hashtag,
+                FavoriteType.HASHTAG,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null || favorite == null) {
+                        hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                        return;
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {}
-                });
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
-            }
-        });
-        hashtagDetailsBinding.favChip.setOnClickListener(
-                v -> favoriteRepository.getFavorite(hashtag, FavoriteType.HASHTAG, new RepositoryCallback<Favorite>() {
-                    @Override
-                    public void onSuccess(final Favorite result) {
-                        favoriteRepository.deleteFavorite(hashtag, FavoriteType.HASHTAG, new RepositoryCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
+                    favoriteRepository.insertOrUpdateFavorite(
+                            new Favorite(
+                                    favorite.getId(),
+                                    hashtag,
+                                    FavoriteType.HASHTAG,
+                                    hashtagModel.getName(),
+                                    "res:/" + R.drawable.ic_hashtag,
+                                    favorite.getDateAdded()
+                            ),
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
+                                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        );
+        hashtagDetailsBinding.favChip.setOnClickListener(v -> favoriteRepository.getFavorite(
+                hashtag,
+                FavoriteType.HASHTAG,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "setHashtagDetails: ", throwable);
+                        return;
+                    }
+                    if (favorite == null) {
+                        favoriteRepository.insertOrUpdateFavorite(
+                                new Favorite(
+                                        0,
+                                        hashtag,
+                                        FavoriteType.HASHTAG,
+                                        hashtagModel.getName(),
+                                        "res:/" + R.drawable.ic_hashtag,
+                                        LocalDateTime.now()
+                                ),
+                                CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable1 != null) {
+                                        Log.e(TAG, "onDataNotAvailable: ", throwable1);
+                                        return;
+                                    }
+                                    hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
+                                    hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                    showSnackbar(getString(R.string.added_to_favs));
+                                }), Dispatchers.getIO())
+                        );
+                        return;
+                    }
+                    favoriteRepository.deleteFavorite(
+                            hashtag,
+                            FavoriteType.HASHTAG,
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
                                 hashtagDetailsBinding.favChip.setText(R.string.add_to_favorites);
                                 hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
                                 showSnackbar(getString(R.string.removed_from_favs));
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {}
-                        });
-                    }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                                0,
-                                hashtag,
-                                FavoriteType.HASHTAG,
-                                hashtagModel.getName(),
-                                "res:/" + R.drawable.ic_hashtag,
-                                LocalDateTime.now()
-                        ), new RepositoryCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
-                                hashtagDetailsBinding.favChip.setText(R.string.favorite_short);
-                                hashtagDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                                showSnackbar(getString(R.string.added_to_favs));
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {}
-                        });
-                    }
-                }));
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+                                                         )
+        );
         hashtagDetailsBinding.mainHashtagImage.setImageURI("res:/" + R.drawable.ic_hashtag);
         final String postCount = String.valueOf(hashtagModel.getMediaCount());
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
@@ -578,24 +587,21 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         storiesFetching = true;
         storiesService.getUserStory(
                 StoryViewerOptions.forHashtag(hashtagModel.getName()),
-                new ServiceCallback<List<StoryModel>>() {
-                    @Override
-                    public void onSuccess(final List<StoryModel> storyModels) {
-                        if (storyModels != null && !storyModels.isEmpty()) {
-                            hashtagDetailsBinding.mainHashtagImage.setStoriesBorder(1);
-                            hasStories = true;
-                        } else {
-                            hasStories = false;
-                        }
+                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "Error", throwable);
                         storiesFetching = false;
+                        return;
                     }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        Log.e(TAG, "Error", t);
-                        storiesFetching = false;
+                    if (storyModels != null && !storyModels.isEmpty()) {
+                        hashtagDetailsBinding.mainHashtagImage.setStoriesBorder(1);
+                        hasStories = true;
+                    } else {
+                        hasStories = false;
                     }
-                });
+                    storiesFetching = false;
+                }), Dispatchers.getIO())
+        );
     }
 
     private void setTitle() {

@@ -47,6 +47,7 @@ import awais.instagrabber.fragments.imageedit.filters.properties.FloatProperty;
 import awais.instagrabber.fragments.imageedit.filters.properties.Property;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.BitmapUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.SerializablePair;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FiltersFragmentViewModel;
@@ -54,6 +55,7 @@ import awais.instagrabber.viewmodels.ImageEditViewModel;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup;
+import kotlinx.coroutines.Dispatchers;
 
 public class FiltersFragment extends Fragment {
     private static final String TAG = FiltersFragment.class.getSimpleName();
@@ -460,32 +462,33 @@ public class FiltersFragment extends Fragment {
             filtersAdapter.setSelected(position);
             appliedFilter = filter;
         };
-        BitmapUtils.getThumbnail(context, sourceUri, new BitmapUtils.ThumbnailLoadCallback() {
-            @Override
-            public void onLoad(@Nullable final Bitmap bitmap, final int width, final int height) {
-                filtersAdapter = new FiltersAdapter(
-                        tuningFilters.values()
-                                     .stream()
-                                     .map(Filter::getInstance)
-                                     .collect(Collectors.toList()),
-                        sourceUri.toString(),
-                        bitmap,
-                        onFilterClickListener
-                );
-                appExecutors.getMainThread().execute(() -> {
+        BitmapUtils.getThumbnail(
+                context,
+                sourceUri,
+                CoroutineUtilsKt.getContinuation((bitmapResult, throwable) -> appExecutors.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "setupFilters: ", throwable);
+                        return;
+                    }
+                    if (bitmapResult == null || bitmapResult.getBitmap() == null) {
+                        return;
+                    }
+                    filtersAdapter = new FiltersAdapter(
+                            tuningFilters.values()
+                                         .stream()
+                                         .map(Filter::getInstance)
+                                         .collect(Collectors.toList()),
+                            sourceUri.toString(),
+                            bitmapResult.getBitmap(),
+                            onFilterClickListener
+                    );
                     binding.filters.setAdapter(filtersAdapter);
                     filtersAdapter.submitList(FiltersHelper.getFilters(), () -> {
                         if (appliedFilter == null) return;
                         filtersAdapter.setSelectedFilter(appliedFilter.getInstance());
                     });
-                });
-            }
-
-            @Override
-            public void onFailure(@NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-            }
-        });
+                }), Dispatchers.getIO())
+        );
         addInitialFilter();
         binding.preview.setFilter(filterGroup);
     }

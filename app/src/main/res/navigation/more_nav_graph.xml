@@ -172,5 +172,5 @@
     <fragment
         android:id="@+id/postViewFragment"
         android:name="awais.instagrabber.fragments.PostViewV2Fragment"
-        android:label="Post" />
+        android:label="@string/post" />
 </navigation>

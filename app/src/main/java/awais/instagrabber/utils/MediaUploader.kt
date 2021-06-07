@@ -4,12 +4,14 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.net.Uri
 import awais.instagrabber.models.UploadVideoOptions
-import awais.instagrabber.utils.BitmapUtils.ThumbnailLoadCallback
 import awais.instagrabber.webservices.interceptors.AddCookiesInterceptor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import okio.BufferedSink
 import okio.Okio
 import org.json.JSONObject
+import ru.gildor.coroutines.okhttp.await
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -17,89 +19,59 @@ import java.io.InputStream
 
 object MediaUploader {
     private const val HOST = "https://i.instagram.com"
-    private val appExecutors = AppExecutors
-
-    fun uploadPhoto(
-        uri: Uri,
-        contentResolver: ContentResolver,
-        listener: OnMediaUploadCompleteListener,
-    ) {
-        BitmapUtils.loadBitmap(contentResolver, uri, 1000f, false, object : ThumbnailLoadCallback {
-            override fun onLoad(bitmap: Bitmap?, width: Int, height: Int) {
-                if (bitmap == null) {
-                    listener.onFailure(RuntimeException("Bitmap result was null"))
-                    return
-                }
-                uploadPhoto(bitmap, listener)
-            }
-
-            override fun onFailure(t: Throwable) {
-                listener.onFailure(t)
-            }
-        })
+    private val octetStreamMediaType: MediaType = requireNotNull(MediaType.parse("application/octet-stream")) {
+        "No media type found for application/octet-stream"
     }
 
-    private fun uploadPhoto(
+    suspend fun uploadPhoto(
+        uri: Uri,
+        contentResolver: ContentResolver,
+    ): MediaUploadResponse = withContext(Dispatchers.IO) {
+        val bitmapResult = BitmapUtils.loadBitmap(contentResolver, uri, 1000f, false)
+        val bitmap = bitmapResult?.bitmap ?: throw IOException("bitmap is null")
+        uploadPhoto(bitmap)
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private suspend fun uploadPhoto(
         bitmap: Bitmap,
-        listener: OnMediaUploadCompleteListener,
-    ) {
-        appExecutors.tasksThread.submit {
-            val file: File
-            val byteLength: Long
-            try {
-                file = BitmapUtils.convertToJpegAndSaveToFile(bitmap, null)
-                byteLength = file.length()
-            } catch (e: Exception) {
-                listener.onFailure(e)
-                return@submit
-            }
-            val options = createUploadPhotoOptions(byteLength)
-            val headers = getUploadPhotoHeaders(options)
-            val url = HOST + "/rupload_igphoto/" + options.name + "/"
-            appExecutors.networkIO.execute {
-                try {
-                    FileInputStream(file).use { input -> upload(input, url, headers, listener) }
-                } catch (e: IOException) {
-                    listener.onFailure(e)
-                } finally {
-                    file.delete()
-                }
-            }
+    ): MediaUploadResponse = withContext(Dispatchers.IO) {
+        val file: File = BitmapUtils.convertToJpegAndSaveToFile(bitmap, null)
+        val byteLength: Long = file.length()
+        val options = createUploadPhotoOptions(byteLength)
+        val headers = getUploadPhotoHeaders(options)
+        val url = HOST + "/rupload_igphoto/" + options.name + "/"
+        try {
+            FileInputStream(file).use { input -> upload(input, url, headers) }
+        } finally {
+            file.delete()
         }
     }
 
     @JvmStatic
-    fun uploadVideo(
+    @Suppress("BlockingMethodInNonBlockingContext") // See https://youtrack.jetbrains.com/issue/KTIJ-838
+    suspend fun uploadVideo(
         uri: Uri,
         contentResolver: ContentResolver,
         options: UploadVideoOptions,
-        listener: OnMediaUploadCompleteListener,
-    ) {
-        appExecutors.tasksThread.submit {
-            val headers = getUploadVideoHeaders(options)
-            val url = HOST + "/rupload_igvideo/" + options.name + "/"
-            appExecutors.networkIO.execute {
-                try {
-                    contentResolver.openInputStream(uri).use { input ->
-                        if (input == null) {
-                            listener.onFailure(RuntimeException("InputStream was null"))
-                            return@execute
-                        }
-                        upload(input, url, headers, listener)
-                    }
-                } catch (e: IOException) {
-                    listener.onFailure(e)
-                }
+    ): MediaUploadResponse = withContext(Dispatchers.IO) {
+        val headers = getUploadVideoHeaders(options)
+        val url = HOST + "/rupload_igvideo/" + options.name + "/"
+        contentResolver.openInputStream(uri).use { input ->
+            if (input == null) {
+                // listener.onFailure(RuntimeException("InputStream was null"))
+                throw IllegalStateException("InputStream was null")
             }
+            upload(input, url, headers)
         }
     }
 
-    private fun upload(
+    @Throws(IOException::class)
+    private suspend fun upload(
         input: InputStream,
         url: String,
         headers: Map<String, String>,
-        listener: OnMediaUploadCompleteListener,
-    ) {
+    ): MediaUploadResponse {
         try {
             val client = OkHttpClient.Builder()
                 // .addInterceptor(new LoggingInterceptor())
@@ -110,46 +82,38 @@ object MediaUploader {
             val request = Request.Builder()
                 .headers(Headers.of(headers))
                 .url(url)
-                .post(create(MediaType.parse("application/octet-stream"), input))
+                .post(create(octetStreamMediaType, input))
                 .build()
-            val call = client.newCall(request)
-            val response = call.execute()
-            val body = response.body()
-            if (!response.isSuccessful) {
-                listener.onFailure(IOException("Unexpected code " + response + if (body != null) ": " + body.string() else ""))
-                return
+            return withContext(Dispatchers.IO) {
+                val response = client.newCall(request).await()
+                val body = response.body()
+                @Suppress("BlockingMethodInNonBlockingContext") // Blocked by https://github.com/square/okio/issues/501
+                MediaUploadResponse(response.code(), if (body != null) JSONObject(body.string()) else null)
             }
-            listener.onUploadComplete(MediaUploadResponse(response.code(), if (body != null) JSONObject(body.string()) else null))
         } catch (e: Exception) {
-            listener.onFailure(e)
+            // rethrow for proper stacktrace. See https://github.com/gildor/kotlin-coroutines-okhttp/tree/master#wrap-exception-manually
+            throw IOException(e)
         }
     }
 
-    private fun create(mediaType: MediaType?, inputStream: InputStream): RequestBody {
-        return object : RequestBody() {
-            override fun contentType(): MediaType? {
-                return mediaType
-            }
+    private fun create(mediaType: MediaType, inputStream: InputStream): RequestBody = object : RequestBody() {
+        override fun contentType(): MediaType {
+            return mediaType
+        }
 
-            override fun contentLength(): Long {
-                return try {
-                    inputStream.available().toLong()
-                } catch (e: IOException) {
-                    0
-                }
-            }
-
-            @Throws(IOException::class)
-            @Suppress("DEPRECATION_ERROR")
-            override fun writeTo(sink: BufferedSink) {
-                Okio.source(inputStream).use { sink.writeAll(it) }
+        override fun contentLength(): Long {
+            return try {
+                inputStream.available().toLong()
+            } catch (e: IOException) {
+                0
             }
         }
-    }
 
-    interface OnMediaUploadCompleteListener {
-        fun onUploadComplete(response: MediaUploadResponse)
-        fun onFailure(t: Throwable)
+        @Throws(IOException::class)
+        @Suppress("DEPRECATION_ERROR")
+        override fun writeTo(sink: BufferedSink) {
+            Okio.source(inputStream).use { sink.writeAll(it) }
+        }
     }
 
     data class MediaUploadResponse(val responseCode: Int, val response: JSONObject?)

@@ -4,7 +4,7 @@ import awais.instagrabber.utils.TextUtils
 import java.util.*
 
 data class HighlightModel(
-    val title: String,
+    val title: String?,
     val id: String,
     val thumbnailUrl: String,
     val timestamp: Long,

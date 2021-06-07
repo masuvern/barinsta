@@ -41,12 +41,15 @@ import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.utils.AppExecutors;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
 import awais.instagrabber.webservices.StoriesService.ArchiveFetchResponse;
+import kotlinx.coroutines.Dispatchers;
 
 public final class StoryListViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "StoryListViewerFragment";
@@ -133,7 +136,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         context = getContext();
         if (context == null) return;
         setHasOptionsMenu(true);
-        storiesService = StoriesService.getInstance(null, 0L, null);
+        storiesService = StoriesService.INSTANCE;
     }
 
     @NonNull
@@ -239,22 +242,31 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
             }
             firstRefresh = false;
         } else if (type.equals("feed")) {
-            storiesService.getFeedStories(new ServiceCallback<List<FeedStoryModel>>() {
-                @Override
-                public void onSuccess(final List<FeedStoryModel> result) {
-                    feedStoriesViewModel.getList().postValue(result);
-                    adapter.submitList(result);
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "failed", t);
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            storiesService.getFeedStories(
+                    CoroutineUtilsKt.getContinuation((feedStoryModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "failed", throwable);
+                            Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        //noinspection unchecked
+                        feedStoriesViewModel.getList().postValue((List<FeedStoryModel>) feedStoryModels);
+                        //noinspection unchecked
+                        adapter.submitList((List<FeedStoryModel>) feedStoryModels);
+                        binding.swipeRefreshLayout.setRefreshing(false);
+                    }), Dispatchers.getIO())
+            );
         } else if (type.equals("archive")) {
-            storiesService.fetchArchive(endCursor, cb);
+            storiesService.fetchArchive(
+                    endCursor,
+                    CoroutineUtilsKt.getContinuation((archiveFetchResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            cb.onFailure(throwable);
+                            return;
+                        }
+                        cb.onSuccess(archiveFetchResponse);
+                    }), Dispatchers.getIO())
+            );
         }
     }
 

@@ -33,9 +33,11 @@ import awais.instagrabber.repositories.responses.search.SearchResponse;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Debouncer;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.SearchService;
+import kotlinx.coroutines.Dispatchers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -191,17 +193,17 @@ public class SearchFragmentViewModel extends AppStateViewModel {
                 recentResultsFuture.set(Collections.emptyList());
             }
         });
-        favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
-            @Override
-            public void onSuccess(final List<Favorite> result) {
-                favoritesFuture.set(result);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                favoritesFuture.set(Collections.emptyList());
-            }
-        });
+        favoriteRepository.getAllFavorites(
+                CoroutineUtilsKt.getContinuation((favorites, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        favoritesFuture.set(Collections.emptyList());
+                        Log.e(TAG, "showRecentSearchesAndFavorites: ", throwable);
+                        return;
+                    }
+                    //noinspection unchecked
+                    favoritesFuture.set((List<Favorite>) favorites);
+                }), Dispatchers.getIO())
+        );
         //noinspection UnstableApiUsage
         final ListenableFuture<List<List<?>>> listenableFuture = Futures.allAsList(recentResultsFuture, favoritesFuture);
         Futures.addCallback(listenableFuture, new FutureCallback<List<List<?>>>() {

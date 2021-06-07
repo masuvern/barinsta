@@ -37,7 +37,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import awais.instagrabber.R;
@@ -50,17 +49,17 @@ import awais.instagrabber.databinding.LayoutLocationDetailsBinding;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
-import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -68,6 +67,7 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.LocationService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
+import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
@@ -208,20 +208,18 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (user == null) return;
             if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
-                graphQLService.fetchPost(feedModel.getCode(), new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media newFeedModel) {
-                        opening = false;
-                        if (newFeedModel == null) return;
-                        openPostDialog(newFeedModel, profilePicView, mainPostImage, position);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        opening = false;
-                        Log.e(TAG, "Error", t);
-                    }
-                });
+                graphQLService.fetchPost(
+                        feedModel.getCode(),
+                        CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            opening = false;
+                            if (throwable != null) {
+                                Log.e(TAG, "Error", throwable);
+                                return;
+                            }
+                            if (media == null) return;
+                            openPostDialog(media, profilePicView, mainPostImage, position);
+                        }))
+                );
                 return;
             }
             opening = true;
@@ -293,8 +291,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-        storiesService = StoriesService.getInstance(null, 0L, null);
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        storiesService = StoriesService.INSTANCE;
+        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -402,7 +400,16 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchLocationModel() {
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) locationService.fetch(locationId, cb);
-        else graphQLService.fetchLocation(locationId, cb);
+        else graphQLService.fetchLocation(
+                locationId,
+                CoroutineUtilsKt.getContinuation((location, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        cb.onFailure(throwable);
+                        return;
+                    }
+                    cb.onSuccess(location);
+                }))
+        );
     }
 
     private void setupLocationDetails() {
@@ -485,75 +492,82 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
         final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
-        favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
-            @Override
-            public void onSuccess(final Favorite result) {
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                locationDetailsBinding.favChip.setText(R.string.favorite_short);
-                favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                        result.getId(),
-                        String.valueOf(locationId),
-                        FavoriteType.LOCATION,
-                        locationModel.getName(),
-                        "res:/" + R.drawable.ic_location,
-                        result.getDateAdded()
-                ), new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {}
-
-                    @Override
-                    public void onDataNotAvailable() {}
-                });
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
-            }
-        });
-        locationDetailsBinding.favChip.setOnClickListener(v -> {
-            favoriteRepository.getFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Favorite>() {
-                @Override
-                public void onSuccess(final Favorite result) {
-                    favoriteRepository.deleteFavorite(String.valueOf(locationId), FavoriteType.LOCATION, new RepositoryCallback<Void>() {
-                        @Override
-                        public void onSuccess(final Void result) {
-                            locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
-                            locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
-                            showSnackbar(getString(R.string.removed_from_favs));
-                        }
-
-                        @Override
-                        public void onDataNotAvailable() {}
-                    });
-                }
-
-                @Override
-                public void onDataNotAvailable() {
-                    favoriteRepository.insertOrUpdateFavorite(new Favorite(
-                            0,
+        favoriteRepository.getFavorite(
+                String.valueOf(locationId),
+                FavoriteType.LOCATION,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null || favorite == null) {
+                        locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                        locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                        Log.e(TAG, "setupLocationDetails: ", throwable);
+                        return;
+                    }
+                    locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                    locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                    locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                    favoriteRepository.insertOrUpdateFavorite(
+                            new Favorite(
+                                    favorite.getId(),
+                                    String.valueOf(locationId),
+                                    FavoriteType.LOCATION,
+                                    locationModel.getName(),
+                                    "res:/" + R.drawable.ic_location,
+                                    favorite.getDateAdded()
+                            ),
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                }
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        );
+        locationDetailsBinding.favChip.setOnClickListener(v -> favoriteRepository.getFavorite(
+                String.valueOf(locationId),
+                FavoriteType.LOCATION,
+                CoroutineUtilsKt.getContinuation((favorite, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "setupLocationDetails: ", throwable);
+                        return;
+                    }
+                    if (favorite == null) {
+                        favoriteRepository.insertOrUpdateFavorite(
+                                new Favorite(
+                                        0,
+                                        String.valueOf(locationId),
+                                        FavoriteType.LOCATION,
+                                        locationModel.getName(),
+                                        "res:/" + R.drawable.ic_location,
+                                        LocalDateTime.now()
+                                ),
+                                CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    if (throwable1 != null) {
+                                        Log.e(TAG, "onDataNotAvailable: ", throwable1);
+                                        return;
+                                    }
+                                    locationDetailsBinding.favChip.setText(R.string.favorite_short);
+                                    locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
+                                    showSnackbar(getString(R.string.added_to_favs));
+                                }), Dispatchers.getIO())
+                        );
+                        return;
+                    }
+                    favoriteRepository.deleteFavorite(
                             String.valueOf(locationId),
                             FavoriteType.LOCATION,
-                            locationModel.getName(),
-                            "res:/" + R.drawable.ic_location,
-                            LocalDateTime.now()
-                    ), new RepositoryCallback<Void>() {
-                        @Override
-                        public void onSuccess(final Void result) {
-                            locationDetailsBinding.favChip.setText(R.string.favorite_short);
-                            locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
-                            showSnackbar(getString(R.string.added_to_favs));
-                        }
-
-                        @Override
-                        public void onDataNotAvailable() {}
-                    });
-                }
-            });
-        });
+                            CoroutineUtilsKt.getContinuation((unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onSuccess: ", throwable1);
+                                    return;
+                                }
+                                locationDetailsBinding.favChip.setText(R.string.add_to_favorites);
+                                locationDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
+                                showSnackbar(getString(R.string.removed_from_favs));
+                            }), Dispatchers.getIO())
+                    );
+                }), Dispatchers.getIO())
+        ));
         locationDetailsBinding.mainLocationImage.setOnClickListener(v -> {
             if (hasStories) {
                 // show stories
@@ -577,22 +591,19 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             storiesFetching = true;
             storiesService.getUserStory(
                     StoryViewerOptions.forLocation(locationId, locationModel.getName()),
-                    new ServiceCallback<List<StoryModel>>() {
-                        @Override
-                        public void onSuccess(final List<StoryModel> storyModels) {
-                            if (storyModels != null && !storyModels.isEmpty()) {
-                                locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
-                                hasStories = true;
-                            }
+                    CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error", throwable);
                             storiesFetching = false;
+                            return;
                         }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            Log.e(TAG, "Error", t);
-                            storiesFetching = false;
+                        if (storyModels != null && !storyModels.isEmpty()) {
+                            locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
+                            hasStories = true;
                         }
-                    });
+                        storiesFetching = false;
+                    }), Dispatchers.getIO())
+            );
         }
     }
 

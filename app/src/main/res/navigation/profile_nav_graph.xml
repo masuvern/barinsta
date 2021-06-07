@@ -177,7 +177,7 @@
     <fragment
         android:id="@+id/followViewerFragment"
         android:name="awais.instagrabber.fragments.FollowViewerFragment"
-        android:label="Followers"
+        android:label=""
         tools:layout="@layout/fragment_followers_viewer">
         <argument
             android:name="profileId"
@@ -218,6 +218,6 @@
     <fragment
         android:id="@+id/postViewFragment"
         android:name="awais.instagrabber.fragments.PostViewV2Fragment"
-        android:label="Post"
+        android:label="@string/post"
         tools:layout="@layout/dialog_post_view" />
 </navigation>

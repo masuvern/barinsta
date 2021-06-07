@@ -1,13 +1,18 @@
 package awais.instagrabber.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import awais.instagrabber.db.datasources.FavoriteDataSource
 import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.FavoriteRepository
-import awais.instagrabber.db.repositories.RepositoryCallback
+import awais.instagrabber.utils.extensions.TAG
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FavoritesViewModel(application: Application) : AndroidViewModel(application) {
     private val _list = MutableLiveData<List<Favorite>>()
@@ -20,29 +25,24 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun fetch() {
-        favoriteRepository.getAllFavorites(object : RepositoryCallback<List<Favorite>> {
-            override fun onSuccess(favorites: List<Favorite>?) {
-                _list.postValue(favorites ?: emptyList())
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _list.postValue(favoriteRepository.getAllFavorites())
+            } catch (e: Exception) {
+                Log.e(TAG, "fetch: ", e)
             }
-
-            override fun onDataNotAvailable() {}
-        })
+        }
     }
 
     fun delete(favorite: Favorite, onSuccess: () -> Unit) {
-        favoriteRepository.deleteFavorite(favorite.query, favorite.type, object : RepositoryCallback<Void> {
-            override fun onSuccess(result: Void?) {
-                onSuccess()
-                favoriteRepository.getAllFavorites(object : RepositoryCallback<List<Favorite>> {
-                    override fun onSuccess(result: List<Favorite>?) {
-                        _list.postValue(result ?: emptyList())
-                    }
-
-                    override fun onDataNotAvailable() {}
-                })
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                favoriteRepository.deleteFavorite(favorite.query, favorite.type)
+                withContext(Dispatchers.Main) { onSuccess() }
+                _list.postValue(favoriteRepository.getAllFavorites())
+            } catch (e: Exception) {
+                Log.e(TAG, "delete: ", e)
             }
-
-            override fun onDataNotAvailable() {}
-        })
+        }
     }
 }

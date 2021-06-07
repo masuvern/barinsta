@@ -5,16 +5,11 @@ import awais.instagrabber.repositories.requests.directmessages.*
 import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.repositories.responses.giphy.GiphyGif
 import awais.instagrabber.utils.TextUtils.extractUrls
-import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.Utils
 import org.json.JSONArray
 import java.util.*
 
-class DirectMessagesService private constructor(
-    val csrfToken: String,
-    val userId: Long,
-    val deviceUuid: String,
-) : BaseService() {
+object DirectMessagesService : BaseService() {
     private val repository: DirectMessagesRepository = RetrofitFactory.retrofit.create(DirectMessagesRepository::class.java)
 
     suspend fun fetchInbox(
@@ -55,6 +50,9 @@ class DirectMessagesService private constructor(
     suspend fun fetchUnseenCount(): DirectBadgeCount = repository.fetchUnseenCount()
 
     suspend fun broadcastText(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         text: String,
@@ -63,17 +61,20 @@ class DirectMessagesService private constructor(
     ): DirectThreadBroadcastResponse {
         val urls = extractUrls(text)
         if (urls.isNotEmpty()) {
-            return broadcastLink(clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
+            return broadcastLink(csrfToken, userId, deviceUuid, clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
         }
         val broadcastOptions = TextBroadcastOptions(clientContext, threadIdOrUserIds, text)
         if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
             broadcastOptions.repliedToItemId = repliedToItemId
             broadcastOptions.repliedToClientContext = repliedToClientContext
         }
-        return broadcast(broadcastOptions)
+        return broadcast(csrfToken, userId, deviceUuid, broadcastOptions)
     }
 
     private suspend fun broadcastLink(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         linkText: String,
@@ -86,75 +87,100 @@ class DirectMessagesService private constructor(
             broadcastOptions.repliedToItemId = repliedToItemId
             broadcastOptions.repliedToClientContext = repliedToClientContext
         }
-        return broadcast(broadcastOptions)
+        return broadcast(csrfToken, userId, deviceUuid, broadcastOptions)
     }
 
     suspend fun broadcastPhoto(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         uploadId: String,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId))
 
     suspend fun broadcastVideo(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         uploadId: String,
         videoResult: String,
         sampled: Boolean,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled))
 
     suspend fun broadcastVoice(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         uploadId: String,
         waveform: List<Float>,
         samplingFreq: Int,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq))
 
     suspend fun broadcastStoryReply(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         text: String,
         mediaId: String,
         reelId: String,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId))
 
     suspend fun broadcastReaction(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         itemId: String,
         emoji: String?,
         delete: Boolean,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete))
 
     suspend fun broadcastAnimatedMedia(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         giphyGif: GiphyGif,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif))
 
     suspend fun broadcastMediaShare(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         clientContext: String,
         threadIdOrUserIds: ThreadIdOrUserIds,
         mediaId: String,
-    ): DirectThreadBroadcastResponse {
-        return broadcast(MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId))
-    }
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId))
 
-    private suspend fun broadcast(broadcastOptions: BroadcastOptions): DirectThreadBroadcastResponse {
-        require(!isEmpty(broadcastOptions.clientContext)) { "Broadcast requires a valid client context value" }
-        val form = mutableMapOf<String, Any>()
+    private suspend fun broadcast(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        broadcastOptions: BroadcastOptions,
+    ): DirectThreadBroadcastResponse {
+        require(broadcastOptions.clientContext.isNotBlank()) { "Broadcast requires a valid client context value" }
+        val form = mutableMapOf<String, Any>(
+            "_csrftoken" to csrfToken,
+            "_uid" to userId,
+            "__uuid" to deviceUuid,
+            "client_context" to broadcastOptions.clientContext,
+            "mutation_token" to broadcastOptions.clientContext,
+        )
         val threadId = broadcastOptions.threadId
         if (!threadId.isNullOrBlank()) {
             form["thread_id"] = threadId
@@ -165,11 +191,6 @@ class DirectMessagesService private constructor(
             }
             form["recipient_users"] = JSONArray(userIds).toString()
         }
-        form["_csrftoken"] = csrfToken
-        form["_uid"] = userId
-        form["__uuid"] = deviceUuid
-        form["client_context"] = broadcastOptions.clientContext
-        form["mutation_token"] = broadcastOptions.clientContext
         val repliedToItemId = broadcastOptions.repliedToItemId
         val repliedToClientContext = broadcastOptions.repliedToClientContext
         if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
@@ -183,6 +204,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun addUsers(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         userIds: Collection<Long>,
     ): DirectThreadDetailsChangeResponse {
@@ -195,6 +218,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun removeUsers(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         userIds: Collection<Long>,
     ): String {
@@ -207,6 +232,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun updateTitle(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         title: String,
     ): DirectThreadDetailsChangeResponse {
@@ -219,6 +246,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun addAdmins(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         userIds: Collection<Long>,
     ): String {
@@ -231,6 +260,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun removeAdmins(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         userIds: Collection<Long>,
     ): String {
@@ -243,6 +274,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun deleteItem(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         itemId: String,
     ): String {
@@ -292,6 +325,9 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun createThread(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
         userIds: List<Long>,
         threadTitle: String?,
     ): DirectThread {
@@ -309,7 +345,11 @@ class DirectMessagesService private constructor(
         return repository.createThread(signedForm)
     }
 
-    suspend fun mute(threadId: String): String {
+    suspend fun mute(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid
@@ -317,7 +357,11 @@ class DirectMessagesService private constructor(
         return repository.mute(threadId, form)
     }
 
-    suspend fun unmute(threadId: String): String {
+    suspend fun unmute(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -325,7 +369,11 @@ class DirectMessagesService private constructor(
         return repository.unmute(threadId, form)
     }
 
-    suspend fun muteMentions(threadId: String): String {
+    suspend fun muteMentions(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -333,7 +381,11 @@ class DirectMessagesService private constructor(
         return repository.muteMentions(threadId, form)
     }
 
-    suspend fun unmuteMentions(threadId: String): String {
+    suspend fun unmuteMentions(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -350,6 +402,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun approveParticipantRequests(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         userIds: List<Long>,
     ): DirectThreadDetailsChangeResponse {
@@ -363,6 +417,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun declineParticipantRequests(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         userIds: List<Long>,
     ): DirectThreadDetailsChangeResponse {
@@ -374,7 +430,11 @@ class DirectMessagesService private constructor(
         return repository.declineParticipantRequests(threadId, form)
     }
 
-    suspend fun approvalRequired(threadId: String): DirectThreadDetailsChangeResponse {
+    suspend fun approvalRequired(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -382,7 +442,11 @@ class DirectMessagesService private constructor(
         return repository.approvalRequired(threadId, form)
     }
 
-    suspend fun approvalNotRequired(threadId: String): DirectThreadDetailsChangeResponse {
+    suspend fun approvalNotRequired(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -390,7 +454,11 @@ class DirectMessagesService private constructor(
         return repository.approvalNotRequired(threadId, form)
     }
 
-    suspend fun leave(threadId: String): DirectThreadDetailsChangeResponse {
+    suspend fun leave(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -398,7 +466,11 @@ class DirectMessagesService private constructor(
         return repository.leave(threadId, form)
     }
 
-    suspend fun end(threadId: String): DirectThreadDetailsChangeResponse {
+    suspend fun end(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): DirectThreadDetailsChangeResponse {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -423,7 +495,11 @@ class DirectMessagesService private constructor(
         return repository.fetchPendingInbox(queryMap)
     }
 
-    suspend fun approveRequest(threadId: String): String {
+    suspend fun approveRequest(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -431,7 +507,11 @@ class DirectMessagesService private constructor(
         return repository.approveRequest(threadId, form)
     }
 
-    suspend fun declineRequest(threadId: String): String {
+    suspend fun declineRequest(
+        csrfToken: String,
+        deviceUuid: String,
+        threadId: String,
+    ): String {
         val form = mapOf(
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
@@ -440,6 +520,8 @@ class DirectMessagesService private constructor(
     }
 
     suspend fun markAsSeen(
+        csrfToken: String,
+        deviceUuid: String,
         threadId: String,
         directItem: DirectItem,
     ): DirectItemSeenResponse? {
@@ -454,25 +536,4 @@ class DirectMessagesService private constructor(
         )
         return repository.markItemSeen(threadId, itemId, form)
     }
-
-    companion object {
-        private lateinit var instance: DirectMessagesService
-
-        @JvmStatic
-        fun getInstance(
-            csrfToken: String,
-            userId: Long,
-            deviceUuid: String,
-        ): DirectMessagesService {
-            if (!this::instance.isInitialized
-                || instance.csrfToken != csrfToken
-                || instance.userId != userId
-                || instance.deviceUuid != deviceUuid
-            ) {
-                instance = DirectMessagesService(csrfToken, userId, deviceUuid)
-            }
-            return instance
-        }
-    }
-
 }

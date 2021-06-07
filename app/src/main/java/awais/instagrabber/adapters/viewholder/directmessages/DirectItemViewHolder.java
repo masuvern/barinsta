@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -164,7 +165,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             binding.ivProfilePic.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             binding.tvUsername.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             if (messageDirection == MessageDirection.INCOMING && thread.isGroup()) {
-                final User user = getUser(item.getUserId(), thread.getUsers());
+                final List<User> allUsers = new LinkedList(thread.getUsers());
+                allUsers.addAll(thread.getLeftUsers());
+                final User user = getUser(item.getUserId(), allUsers);
                 if (user != null) {
                     binding.tvUsername.setText(user.getUsername());
                     binding.ivProfilePic.setImageURI(user.getProfilePicUrl());
@@ -220,7 +223,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
 
     private void setupReply(final DirectItem item, final MessageDirection messageDirection) {
         if (item.getRepliedToMessage() != null) {
-            setReply(item, messageDirection, thread.getUsers());
+            final List<User> allUsers = new LinkedList(thread.getUsers());
+            allUsers.addAll(thread.getLeftUsers());
+            setReply(item, messageDirection, allUsers);
         } else {
             binding.quoteLine.setVisibility(View.GONE);
             binding.replyContainer.setVisibility(View.GONE);
