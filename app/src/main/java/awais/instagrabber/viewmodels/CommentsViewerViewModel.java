@@ -74,7 +74,7 @@ public class CommentsViewerViewModel extends ViewModel {
                 comments = mergeList(rootList, comments);
             }
             rootCursor = result.getNextMinId();
-            rootHasNext = result.hasNext();
+            rootHasNext = result.getHasMoreComments();
             rootList.postValue(Resource.success(comments));
         }
 
@@ -100,8 +100,8 @@ public class CommentsViewerViewModel extends ViewModel {
             if (repliesCursor != null) {
                 comments = mergeList(replyList, comments);
             }
-            repliesCursor = result.getNextMinId();
-            repliesHasNext = result.hasNext();
+            repliesCursor = result.getNextMaxChildCursor();
+            repliesHasNext = result.getHasMoreTailChildComments();
             replyList.postValue(Resource.success(comments));
         }
 
@@ -228,8 +228,8 @@ public class CommentsViewerViewModel extends ViewModel {
                     final Comment commentModel = getComment(commentsJsonArray.getJSONObject(i).getJSONObject("node"), root);
                     builder.add(commentModel);
                 }
-                final Object result = root ? new CommentsFetchResponse(count, endCursor, builder.build())
-                                           : new ChildCommentsFetchResponse(count, endCursor, builder.build());
+                final Object result = root ? new CommentsFetchResponse(count, endCursor, builder.build(), hasNextPage)
+                                           : new ChildCommentsFetchResponse(count, endCursor, builder.build(), hasNextPage);
                 //noinspection unchecked
                 callback.onSuccess(result);
             } catch (Exception e) {

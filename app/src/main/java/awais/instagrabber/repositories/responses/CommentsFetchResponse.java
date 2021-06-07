@@ -10,13 +10,16 @@ public class CommentsFetchResponse {
     private final int commentCount;
     private final String nextMinId;
     private final List<Comment> comments;
+    private final boolean hasMoreComments;
 
     public CommentsFetchResponse(final int commentCount,
                                  final String nextMinId,
-                                 final List<Comment> comments) {
+                                 final List<Comment> comments,
+                                 final boolean hasMoreComments) {
         this.commentCount = commentCount;
         this.nextMinId = nextMinId;
         this.comments = comments;
+        this.hasMoreComments = hasMoreComments;
     }
 
     public int getCommentCount() {
@@ -27,12 +30,12 @@ public class CommentsFetchResponse {
         return nextMinId;
     }
 
-    public boolean hasNext() {
-        return nextMinId != null;
-    }
-
     public List<Comment> getComments() {
         return comments;
+    }
+
+    public boolean getHasMoreComments() {
+        return hasMoreComments;
     }
 
     @NonNull
@@ -42,6 +45,7 @@ public class CommentsFetchResponse {
                 "commentCount=" + commentCount +
                 ", nextMinId='" + nextMinId + '\'' +
                 ", comments=" + comments +
+                ", hasMoreComments=" + hasMoreComments +
                 '}';
     }
 }

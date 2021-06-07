@@ -14,6 +14,35 @@
     <include app:graph="@navigation/discover_nav_graph" />
 
     <action
+        android:id="@+id/action_global_commentsViewerFragment"
+        app:destination="@id/comments_nav_graph">
+        <argument
+            android:name="shortCode"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="postUserId"
+            app:argType="long" />
+    </action>
+
+    <action
+        android:id="@+id/action_global_likesViewerFragment"
+        app:destination="@id/likes_nav_graph">
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isComment"
+            app:argType="boolean"
+            app:nullable="false" />
+    </action>
+
+    <action
         android:id="@+id/action_global_profileFragment"
         app:destination="@id/profile_nav_graph">
         <argument

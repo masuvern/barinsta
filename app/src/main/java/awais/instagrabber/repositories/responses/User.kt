@@ -6,7 +6,7 @@ import java.io.Serializable
 data class User @JvmOverloads constructor(
     val pk: Long = 0,
     val username: String = "",
-    val fullName: String = "",
+    val fullName: String? = "",
     val isPrivate: Boolean = false,
     val profilePicUrl: String? = null,
     val isVerified: Boolean = false,

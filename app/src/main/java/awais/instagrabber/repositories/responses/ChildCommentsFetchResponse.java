@@ -8,27 +8,30 @@ import awais.instagrabber.models.Comment;
 
 public class ChildCommentsFetchResponse {
     private final int childCommentCount;
-    private final String nextMinId;
+    private final String nextMaxChildCursor;
     private final List<Comment> childComments;
+    private final boolean hasMoreTailChildComments;
 
     public ChildCommentsFetchResponse(final int childCommentCount,
-                                      final String nextMinId, // unconfirmed
-                                      final List<Comment> childComments) {
+                                      final String nextMaxChildCursor,
+                                      final List<Comment> childComments,
+                                      final boolean hasMoreTailChildComments) {
         this.childCommentCount = childCommentCount;
-        this.nextMinId = nextMinId;
+        this.nextMaxChildCursor = nextMaxChildCursor;
         this.childComments = childComments;
+        this.hasMoreTailChildComments = hasMoreTailChildComments;
     }
 
     public int getChildCommentCount() {
         return childCommentCount;
     }
 
-    public String getNextMinId() {
-        return nextMinId;
+    public String getNextMaxChildCursor() {
+        return nextMaxChildCursor;
     }
 
-    public boolean hasNext() {
-        return nextMinId != null;
+    public boolean getHasMoreTailChildComments() {
+        return hasMoreTailChildComments;
     }
 
     public List<Comment> getChildComments() {
@@ -38,10 +41,11 @@ public class ChildCommentsFetchResponse {
     @NonNull
     @Override
     public String toString() {
-        return "CommentsFetchResponse{" +
+        return "ChildCommentsFetchResponse{" +
                 "childCommentCount=" + childCommentCount +
-                ", nextMinId='" + nextMinId + '\'' +
+                ", nextMaxChildCursor='" + nextMaxChildCursor + '\'' +
                 ", childComments=" + childComments +
+                ", hasMoreTailChildComments=" + hasMoreTailChildComments +
                 '}';
     }
 }
