@@ -30,7 +30,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.db.datasources.DMLastNotifiedDataSource;
 import awais.instagrabber.db.entities.DMLastNotified;
 import awais.instagrabber.db.repositories.DMLastNotifiedRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
@@ -39,11 +38,14 @@ import awais.instagrabber.repositories.responses.directmessages.DirectInbox;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.DateUtils;
 import awais.instagrabber.utils.TextUtils;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -61,25 +63,26 @@ public class DMSyncService extends LifecycleService {
         Log.d(TAG, "onCreate: Service created");
         final DirectMessagesManager directMessagesManager = DirectMessagesManager.INSTANCE;
         inboxManager = directMessagesManager.getInboxManager();
-        dmLastNotifiedRepository = DMLastNotifiedRepository.getInstance(DMLastNotifiedDataSource.getInstance(getApplicationContext()));
+        final Context context = getApplicationContext();
+        if (context == null) return;
+        dmLastNotifiedRepository = DMLastNotifiedRepository.getInstance(DMLastNotifiedDataSource.getInstance(context));
     }
 
     private void parseUnread(@NonNull final DirectInbox directInbox) {
-        dmLastNotifiedRepository.getAllDMDmLastNotified(new RepositoryCallback<List<DMLastNotified>>() {
-            @Override
-            public void onSuccess(final List<DMLastNotified> result) {
-                dmLastNotifiedMap = result != null
-                                    ? result.stream().collect(Collectors.toMap(DMLastNotified::getThreadId, Function.identity()))
-                                    : Collections.emptyMap();
-                parseUnreadActual(directInbox);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                dmLastNotifiedMap = Collections.emptyMap();
-                parseUnreadActual(directInbox);
-            }
-        });
+        dmLastNotifiedRepository.getAllDMDmLastNotified(
+                CoroutineUtilsKt.getContinuation((result, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "parseUnread: ", throwable);
+                        dmLastNotifiedMap = Collections.emptyMap();
+                        parseUnreadActual(directInbox);
+                        return;
+                    }
+                    dmLastNotifiedMap = result != null
+                                        ? result.stream().collect(Collectors.toMap(DMLastNotified::getThreadId, Function.identity()))
+                                        : Collections.emptyMap();
+                    parseUnreadActual(directInbox);
+                }), Dispatchers.getIO())
+        );
         // Log.d(TAG, "inbox observer: " + directInbox);
     }
 
@@ -117,17 +120,15 @@ public class DMSyncService extends LifecycleService {
         }
         dmLastNotifiedRepository.insertOrUpdateDMLastNotified(
                 lastNotifiedListBuilder.build(),
-                new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {
+                CoroutineUtilsKt.getContinuation((unit, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    try {
+                        if (throwable != null) {
+                            Log.e(TAG, "parseUnreadActual: ", throwable);
+                        }
+                    } finally {
                         stopSelf();
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        stopSelf();
-                    }
-                }
+                }), Dispatchers.getIO())
         );
     }
 

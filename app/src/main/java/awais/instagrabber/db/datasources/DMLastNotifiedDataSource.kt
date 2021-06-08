@@ -1,70 +1,53 @@
-package awais.instagrabber.db.datasources;
+package awais.instagrabber.db.datasources
 
-import android.content.Context;
+import android.content.Context
+import awais.instagrabber.db.AppDatabase
+import awais.instagrabber.db.dao.DMLastNotifiedDao
+import awais.instagrabber.db.entities.DMLastNotified
+import java.time.LocalDateTime
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+class DMLastNotifiedDataSource private constructor(private val dmLastNotifiedDao: DMLastNotifiedDao) {
+    suspend fun getDMLastNotified(threadId: String): DMLastNotified? = dmLastNotifiedDao.findDMLastNotifiedByThreadId(threadId)
 
-import java.time.LocalDateTime;
-import java.util.List;
+    suspend fun getAllDMDmLastNotified(): List<DMLastNotified> = dmLastNotifiedDao.getAllDMDmLastNotified()
 
-import awais.instagrabber.db.AppDatabase;
-import awais.instagrabber.db.dao.DMLastNotifiedDao;
-import awais.instagrabber.db.entities.DMLastNotified;
-
-public class DMLastNotifiedDataSource {
-    private static final String TAG = DMLastNotifiedDataSource.class.getSimpleName();
-
-    private static DMLastNotifiedDataSource INSTANCE;
-
-    private final DMLastNotifiedDao dmLastNotifiedDao;
-
-    private DMLastNotifiedDataSource(final DMLastNotifiedDao dmLastNotifiedDao) {
-        this.dmLastNotifiedDao = dmLastNotifiedDao;
+    suspend fun insertOrUpdateDMLastNotified(
+        threadId: String,
+        lastNotifiedMsgTs: LocalDateTime,
+        lastNotifiedAt: LocalDateTime,
+    ) {
+        val dmLastNotified = getDMLastNotified(threadId)
+        val toUpdate = DMLastNotified(
+            dmLastNotified?.id ?: 0,
+            threadId,
+            lastNotifiedMsgTs,
+            lastNotifiedAt
+        )
+        if (dmLastNotified != null) {
+            dmLastNotifiedDao.updateDMLastNotified(toUpdate)
+            return
+        }
+        dmLastNotifiedDao.insertDMLastNotified(toUpdate)
     }
 
-    public static DMLastNotifiedDataSource getInstance(@NonNull Context context) {
-        if (INSTANCE == null) {
-            synchronized (DMLastNotifiedDataSource.class) {
-                if (INSTANCE == null) {
-                    final AppDatabase database = AppDatabase.getDatabase(context);
-                    INSTANCE = new DMLastNotifiedDataSource(database.dmLastNotifiedDao());
+    suspend fun deleteDMLastNotified(dmLastNotified: DMLastNotified) = dmLastNotifiedDao.deleteDMLastNotified(dmLastNotified)
+
+    suspend fun deleteAllDMLastNotified() = dmLastNotifiedDao.deleteAllDMLastNotified()
+
+    companion object {
+        private lateinit var INSTANCE: DMLastNotifiedDataSource
+
+        @JvmStatic
+        fun getInstance(context: Context): DMLastNotifiedDataSource {
+            if (!this::INSTANCE.isInitialized) {
+                synchronized(DMLastNotifiedDataSource::class.java) {
+                    if (!this::INSTANCE.isInitialized) {
+                        val database = AppDatabase.getDatabase(context)
+                        INSTANCE = DMLastNotifiedDataSource(database.dmLastNotifiedDao())
+                    }
                 }
             }
+            return INSTANCE
         }
-        return INSTANCE;
-    }
-
-    @Nullable
-    public final DMLastNotified getDMLastNotified(final String threadId) {
-        return dmLastNotifiedDao.findDMLastNotifiedByThreadId(threadId);
-    }
-
-    @NonNull
-    public final List<DMLastNotified> getAllDMDmLastNotified() {
-        return dmLastNotifiedDao.getAllDMDmLastNotified();
-    }
-
-    public final void insertOrUpdateDMLastNotified(final String threadId,
-                                                   final LocalDateTime lastNotifiedMsgTs,
-                                                   final LocalDateTime lastNotifiedAt) {
-        final DMLastNotified dmLastNotified = getDMLastNotified(threadId);
-        final DMLastNotified toUpdate = new DMLastNotified(dmLastNotified == null ? 0 : dmLastNotified.getId(),
-                                                           threadId,
-                                                           lastNotifiedMsgTs,
-                                                           lastNotifiedAt);
-        if (dmLastNotified != null) {
-            dmLastNotifiedDao.updateDMLastNotified(toUpdate);
-            return;
-        }
-        dmLastNotifiedDao.insertDMLastNotified(toUpdate);
-    }
-
-    public final void deleteDMLastNotified(@NonNull final DMLastNotified dmLastNotified) {
-        dmLastNotifiedDao.deleteDMLastNotified(dmLastNotified);
-    }
-
-    public final void deleteAllDMLastNotified() {
-        dmLastNotifiedDao.deleteAllDMLastNotified();
     }
 }

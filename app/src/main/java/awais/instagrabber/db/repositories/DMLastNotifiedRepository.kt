@@ -1,126 +1,47 @@
-package awais.instagrabber.db.repositories;
+package awais.instagrabber.db.repositories
 
-import java.time.LocalDateTime;
-import java.util.List;
+import awais.instagrabber.db.datasources.DMLastNotifiedDataSource
+import awais.instagrabber.db.entities.DMLastNotified
+import java.time.LocalDateTime
 
-import awais.instagrabber.db.datasources.DMLastNotifiedDataSource;
-import awais.instagrabber.db.entities.DMLastNotified;
-import awais.instagrabber.utils.AppExecutors;
+class DMLastNotifiedRepository private constructor(private val dmLastNotifiedDataSource: DMLastNotifiedDataSource) {
 
-public class DMLastNotifiedRepository {
-    private static final String TAG = DMLastNotifiedRepository.class.getSimpleName();
+    suspend fun getDMLastNotified(threadId: String): DMLastNotified? = dmLastNotifiedDataSource.getDMLastNotified(threadId)
 
-    private static DMLastNotifiedRepository instance;
+    suspend fun getAllDMDmLastNotified(): List<DMLastNotified> = dmLastNotifiedDataSource.getAllDMDmLastNotified()
 
-    private final AppExecutors appExecutors;
-    private final DMLastNotifiedDataSource dmLastNotifiedDataSource;
-
-    private DMLastNotifiedRepository(final AppExecutors appExecutors, final DMLastNotifiedDataSource dmLastNotifiedDataSource) {
-        this.appExecutors = appExecutors;
-        this.dmLastNotifiedDataSource = dmLastNotifiedDataSource;
-    }
-
-    public static DMLastNotifiedRepository getInstance(final DMLastNotifiedDataSource dmLastNotifiedDataSource) {
-        if (instance == null) {
-            instance = new DMLastNotifiedRepository(AppExecutors.INSTANCE, dmLastNotifiedDataSource);
+    suspend fun insertOrUpdateDMLastNotified(dmLastNotifiedList: List<DMLastNotified>) {
+        for (dmLastNotified in dmLastNotifiedList) {
+            dmLastNotifiedDataSource.insertOrUpdateDMLastNotified(
+                dmLastNotified.threadId,
+                dmLastNotified.lastNotifiedMsgTs,
+                dmLastNotified.lastNotifiedAt
+            )
         }
-        return instance;
     }
 
-    public void getDMLastNotified(final String threadId,
-                                  final RepositoryCallback<DMLastNotified> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final DMLastNotified dmLastNotified = dmLastNotifiedDataSource.getDMLastNotified(threadId);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (dmLastNotified == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(dmLastNotified);
-            });
-        });
+    suspend fun insertOrUpdateDMLastNotified(
+        threadId: String,
+        lastNotifiedMsgTs: LocalDateTime,
+        lastNotifiedAt: LocalDateTime,
+    ): DMLastNotified? {
+        dmLastNotifiedDataSource.insertOrUpdateDMLastNotified(threadId, lastNotifiedMsgTs, lastNotifiedAt)
+        return dmLastNotifiedDataSource.getDMLastNotified(threadId)
     }
 
-    public void getAllDMDmLastNotified(final RepositoryCallback<List<DMLastNotified>> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final List<DMLastNotified> allDMDmLastNotified = dmLastNotifiedDataSource.getAllDMDmLastNotified();
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (allDMDmLastNotified == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                // cachedAccounts = accounts;
-                callback.onSuccess(allDMDmLastNotified);
-            });
-        });
-    }
+    suspend fun deleteDMLastNotified(dmLastNotified: DMLastNotified) = dmLastNotifiedDataSource.deleteDMLastNotified(dmLastNotified)
 
-    public void insertOrUpdateDMLastNotified(final List<DMLastNotified> dmLastNotifiedList,
-                                             final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            for (final DMLastNotified dmLastNotified : dmLastNotifiedList) {
-                dmLastNotifiedDataSource.insertOrUpdateDMLastNotified(dmLastNotified.getThreadId(),
-                                                                      dmLastNotified.getLastNotifiedMsgTs(),
-                                                                      dmLastNotified.getLastNotifiedAt());
+    suspend fun deleteAllDMLastNotified() = dmLastNotifiedDataSource.deleteAllDMLastNotified()
+
+    companion object {
+        private lateinit var instance: DMLastNotifiedRepository
+
+        @JvmStatic
+        fun getInstance(dmLastNotifiedDataSource: DMLastNotifiedDataSource): DMLastNotifiedRepository {
+            if (!this::instance.isInitialized) {
+                instance = DMLastNotifiedRepository(dmLastNotifiedDataSource)
             }
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
+            return instance
+        }
     }
-
-    public void insertOrUpdateDMLastNotified(final String threadId,
-                                             final LocalDateTime lastNotifiedMsgTs,
-                                             final LocalDateTime lastNotifiedAt,
-                                             final RepositoryCallback<DMLastNotified> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            dmLastNotifiedDataSource.insertOrUpdateDMLastNotified(threadId, lastNotifiedMsgTs, lastNotifiedAt);
-            final DMLastNotified updated = dmLastNotifiedDataSource.getDMLastNotified(threadId);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (updated == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(updated);
-            });
-        });
-    }
-
-    public void deleteDMLastNotified(final DMLastNotified dmLastNotified,
-                                     final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            dmLastNotifiedDataSource.deleteDMLastNotified(dmLastNotified);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
-    }
-
-    public void deleteAllDMLastNotified(final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            dmLastNotifiedDataSource.deleteAllDMLastNotified();
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
-    }
-
 }

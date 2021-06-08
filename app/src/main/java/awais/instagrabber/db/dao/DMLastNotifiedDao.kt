@@ -1,34 +1,25 @@
-package awais.instagrabber.db.dao;
+package awais.instagrabber.db.dao
 
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-import androidx.room.Update;
-
-import java.util.List;
-
-import awais.instagrabber.db.entities.DMLastNotified;
+import androidx.room.*
+import awais.instagrabber.db.entities.DMLastNotified
 
 @Dao
-public interface DMLastNotifiedDao {
-
+interface DMLastNotifiedDao {
     @Query("SELECT * FROM dm_last_notified")
-    List<DMLastNotified> getAllDMDmLastNotified();
+    suspend fun getAllDMDmLastNotified(): List<DMLastNotified>
 
     @Query("SELECT * FROM dm_last_notified WHERE thread_id = :threadId")
-    DMLastNotified findDMLastNotifiedByThreadId(String threadId);
+    suspend fun findDMLastNotifiedByThreadId(threadId: String): DMLastNotified?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    List<Long> insertDMLastNotified(DMLastNotified... dmLastNotified);
+    suspend fun insertDMLastNotified(vararg dmLastNotified: DMLastNotified)
 
     @Update
-    void updateDMLastNotified(DMLastNotified... dmLastNotified);
+    suspend fun updateDMLastNotified(vararg dmLastNotified: DMLastNotified)
 
     @Delete
-    void deleteDMLastNotified(DMLastNotified... dmLastNotified);
+    suspend fun deleteDMLastNotified(vararg dmLastNotified: DMLastNotified)
 
     @Query("DELETE from dm_last_notified")
-    void deleteAllDMLastNotified();
+    suspend fun deleteAllDMLastNotified()
 }
