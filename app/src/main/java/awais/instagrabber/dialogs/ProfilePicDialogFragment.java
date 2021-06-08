@@ -27,6 +27,8 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import java.io.File;
 
 import awais.instagrabber.R;
+import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
+import awais.instagrabber.customviews.drawee.DoubleTapGestureListener;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
@@ -182,6 +184,13 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 })
                 .build();
         binding.imageViewer.setController(controller);
+        final AnimatedZoomableController zoomableController = (AnimatedZoomableController) binding.imageViewer.getZoomableController();
+        zoomableController.setMaxScaleFactor(3f);
+        zoomableController.setGestureZoomEnabled(true);
+        zoomableController.setEnabled(true);
+        binding.imageViewer.setZoomingEnabled(true);
+        final DoubleTapGestureListener tapListener = new DoubleTapGestureListener(binding.imageViewer);
+        binding.imageViewer.setTapListener(tapListener);
     }
 
     private void downloadProfilePicture() {
