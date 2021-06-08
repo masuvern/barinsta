@@ -12,10 +12,11 @@ class DMLastNotifiedDataSource private constructor(private val dmLastNotifiedDao
     suspend fun getAllDMDmLastNotified(): List<DMLastNotified> = dmLastNotifiedDao.getAllDMDmLastNotified()
 
     suspend fun insertOrUpdateDMLastNotified(
-        threadId: String,
-        lastNotifiedMsgTs: LocalDateTime,
-        lastNotifiedAt: LocalDateTime,
+        threadId: String?,
+        lastNotifiedMsgTs: LocalDateTime?,
+        lastNotifiedAt: LocalDateTime?,
     ) {
+        if (threadId == null) return
         val dmLastNotified = getDMLastNotified(threadId)
         val toUpdate = DMLastNotified(
             dmLastNotified?.id ?: 0,

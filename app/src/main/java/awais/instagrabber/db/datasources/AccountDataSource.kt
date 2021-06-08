@@ -11,13 +11,13 @@ class AccountDataSource private constructor(private val accountDao: AccountDao) 
     suspend fun getAllAccounts(): List<Account> = accountDao.getAllAccounts()
 
     suspend fun insertOrUpdateAccount(
-        uid: String,
-        username: String,
-        cookie: String,
-        fullName: String,
+        uid: String?,
+        username: String?,
+        cookie: String?,
+        fullName: String?,
         profilePicUrl: String?,
     ) {
-        val account = getAccount(uid)
+        val account = uid?.let { getAccount(it) }
         val toUpdate = Account(account?.id ?: 0, uid, username, cookie, fullName, profilePicUrl)
         if (account != null) {
             accountDao.updateAccounts(toUpdate)

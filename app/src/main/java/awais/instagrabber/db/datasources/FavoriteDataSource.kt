@@ -19,7 +19,8 @@ class FavoriteDataSource private constructor(private val favoriteDao: FavoriteDa
         favoriteDao.insertFavorites(favorite)
     }
 
-    suspend fun deleteFavorite(query: String, type: FavoriteType) {
+    suspend fun deleteFavorite(query: String?, type: FavoriteType?) {
+        if (query == null || type == null) return
         val favorite = getFavorite(query, type) ?: return
         favoriteDao.deleteFavorites(favorite)
     }

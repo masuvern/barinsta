@@ -21,11 +21,7 @@ class RecentSearchRepository private constructor(private val recentSearchDataSou
         type: FavoriteType,
     ) {
         var recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type)
-        recentSearch = if (recentSearch == null) {
-            RecentSearch(igId, name, username, picUrl, type, LocalDateTime.now())
-        } else {
-            RecentSearch(recentSearch.id, igId, name, username, picUrl, type, LocalDateTime.now())
-        }
+        recentSearch = RecentSearch(recentSearch?.id ?: 0, igId, name, username, picUrl, type, LocalDateTime.now())
         recentSearchDataSource.insertOrUpdateRecentSearch(recentSearch)
     }
 

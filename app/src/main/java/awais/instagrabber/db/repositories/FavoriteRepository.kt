@@ -12,7 +12,7 @@ class FavoriteRepository private constructor(private val favoriteDataSource: Fav
 
     suspend fun insertOrUpdateFavorite(favorite: Favorite) = favoriteDataSource.insertOrUpdateFavorite(favorite)
 
-    suspend fun deleteFavorite(query: String, type: FavoriteType) = favoriteDataSource.deleteFavorite(query, type)
+    suspend fun deleteFavorite(query: String?, type: FavoriteType?) = favoriteDataSource.deleteFavorite(query, type)
 
     companion object {
         private lateinit var instance: FavoriteRepository

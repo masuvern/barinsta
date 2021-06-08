@@ -65,7 +65,7 @@ class FavoritesFragment : Fragment() {
                     navController.navigate(R.id.action_global_profileFragment, bundle)
                 }
                 FavoriteType.LOCATION -> {
-                    val locationId = model.query
+                    val locationId = model.query ?: return@FavoritesAdapter
                     // Log.d(TAG, "locationId: " + locationId);
                     val navController = NavHostFragment.findNavController(this)
                     val bundle = Bundle()
