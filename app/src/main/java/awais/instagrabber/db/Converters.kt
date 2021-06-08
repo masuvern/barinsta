@@ -7,8 +7,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 
-object Converters {
-    @JvmStatic
+class Converters {
     @TypeConverter
     fun fromFavoriteTypeString(value: String?): FavoriteType? =
         if (value == null) null
@@ -18,16 +17,13 @@ object Converters {
             null
         }
 
-    @JvmStatic
     @TypeConverter
     fun favoriteTypeToString(favoriteType: FavoriteType?): String? = favoriteType?.toString()
 
-    @JvmStatic
     @TypeConverter
     fun fromTimestampToLocalDateTime(value: Long?): LocalDateTime? =
         if (value == null) null else LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.systemDefault())
 
-    @JvmStatic
     @TypeConverter
     fun localDateTimeToTimestamp(localDateTime: LocalDateTime?): Long? = localDateTime?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
 }

@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: "androidx.navigation.safeargs"
+apply plugin: 'kotlin-kapt'
 apply from: 'sentry.gradle'
 
 def getGitHash = { ->
@@ -146,6 +147,7 @@ android {
         // Error: Duplicate files during packaging of APK
         exclude 'META-INF/LICENSE.md'
         exclude 'META-INF/LICENSE-notice.md'
+        exclude 'META-INF/atomicfu.kotlin_module'
     }
 
     testOptions.unitTests {
@@ -196,6 +198,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-guava:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
     // CameraX
