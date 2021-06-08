@@ -1,124 +1,52 @@
-package awais.instagrabber.db.repositories;
+package awais.instagrabber.db.repositories
 
-import androidx.annotation.NonNull;
+import awais.instagrabber.db.datasources.RecentSearchDataSource
+import awais.instagrabber.db.entities.RecentSearch
+import awais.instagrabber.models.enums.FavoriteType
+import java.time.LocalDateTime
 
-import java.time.LocalDateTime;
-import java.util.List;
+class RecentSearchRepository private constructor(private val recentSearchDataSource: RecentSearchDataSource) {
+    suspend fun getRecentSearch(igId: String, type: FavoriteType): RecentSearch? = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type)
 
-import awais.instagrabber.db.datasources.RecentSearchDataSource;
-import awais.instagrabber.db.entities.RecentSearch;
-import awais.instagrabber.models.enums.FavoriteType;
-import awais.instagrabber.utils.AppExecutors;
+    suspend fun getAllRecentSearches(): List<RecentSearch> = recentSearchDataSource.getAllRecentSearches()
 
-public class RecentSearchRepository {
-    private static final String TAG = RecentSearchRepository.class.getSimpleName();
+    suspend fun insertOrUpdateRecentSearch(recentSearch: RecentSearch) =
+        insertOrUpdateRecentSearch(recentSearch.igId, recentSearch.name, recentSearch.username, recentSearch.picUrl, recentSearch.type)
 
-    private static RecentSearchRepository instance;
-
-    private final AppExecutors appExecutors;
-    private final RecentSearchDataSource recentSearchDataSource;
-
-    private RecentSearchRepository(final AppExecutors appExecutors, final RecentSearchDataSource recentSearchDataSource) {
-        this.appExecutors = appExecutors;
-        this.recentSearchDataSource = recentSearchDataSource;
-    }
-
-    public static RecentSearchRepository getInstance(final RecentSearchDataSource recentSearchDataSource) {
-        if (instance == null) {
-            instance = new RecentSearchRepository(AppExecutors.INSTANCE, recentSearchDataSource);
+    private suspend fun insertOrUpdateRecentSearch(
+        igId: String,
+        name: String,
+        username: String?,
+        picUrl: String?,
+        type: FavoriteType,
+    ) {
+        var recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type)
+        recentSearch = if (recentSearch == null) {
+            RecentSearch(igId, name, username, picUrl, type, LocalDateTime.now())
+        } else {
+            RecentSearch(recentSearch.id, igId, name, username, picUrl, type, LocalDateTime.now())
         }
-        return instance;
+        recentSearchDataSource.insertOrUpdateRecentSearch(recentSearch)
     }
 
-    public void getRecentSearch(@NonNull final String igId,
-                                @NonNull final FavoriteType type,
-                                final RepositoryCallback<RecentSearch> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final RecentSearch recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (recentSearch == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(recentSearch);
-            });
-        });
+    suspend fun deleteRecentSearchByIgIdAndType(igId: String, type: FavoriteType) {
+        val recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type)
+        if (recentSearch != null) {
+            recentSearchDataSource.deleteRecentSearch(recentSearch)
+        }
     }
 
-    public void getAllRecentSearches(final RepositoryCallback<List<RecentSearch>> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final List<RecentSearch> recentSearches = recentSearchDataSource.getAllRecentSearches();
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(recentSearches);
-            });
-        });
-    }
+    suspend fun deleteRecentSearch(recentSearch: RecentSearch) = recentSearchDataSource.deleteRecentSearch(recentSearch)
 
-    public void insertOrUpdateRecentSearch(@NonNull final RecentSearch recentSearch,
-                                           final RepositoryCallback<Void> callback) {
-        insertOrUpdateRecentSearch(recentSearch.getIgId(), recentSearch.getName(), recentSearch.getUsername(), recentSearch.getPicUrl(),
-                                   recentSearch.getType(), callback);
-    }
+    companion object {
+        private lateinit var instance: RecentSearchRepository
 
-    public void insertOrUpdateRecentSearch(@NonNull final String igId,
-                                           @NonNull final String name,
-                                           final String username,
-                                           final String picUrl,
-                                           @NonNull final FavoriteType type,
-                                           final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            RecentSearch recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type);
-            recentSearch = recentSearch == null
-                           ? new RecentSearch(igId, name, username, picUrl, type, LocalDateTime.now())
-                           : new RecentSearch(recentSearch.getId(), igId, name, username, picUrl, type, LocalDateTime.now());
-            recentSearchDataSource.insertOrUpdateRecentSearch(recentSearch);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
-    }
-
-    public void deleteRecentSearchByIgIdAndType(@NonNull final String igId,
-                                                @NonNull final FavoriteType type,
-                                                final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-            final RecentSearch recentSearch = recentSearchDataSource.getRecentSearchByIgIdAndType(igId, type);
-            if (recentSearch != null) {
-                recentSearchDataSource.deleteRecentSearch(recentSearch);
+        @JvmStatic
+        fun getInstance(recentSearchDataSource: RecentSearchDataSource): RecentSearchRepository {
+            if (!this::instance.isInitialized) {
+                instance = RecentSearchRepository(recentSearchDataSource)
             }
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                if (recentSearch == null) {
-                    callback.onDataNotAvailable();
-                    return;
-                }
-                callback.onSuccess(null);
-            });
-        });
-    }
-
-    public void deleteRecentSearch(@NonNull final RecentSearch recentSearch,
-                                   final RepositoryCallback<Void> callback) {
-        // request on the I/O thread
-        appExecutors.getDiskIO().execute(() -> {
-
-            recentSearchDataSource.deleteRecentSearch(recentSearch);
-            // notify on the main thread
-            appExecutors.getMainThread().execute(() -> {
-                if (callback == null) return;
-                callback.onSuccess(null);
-            });
-        });
+            return instance
+        }
     }
 }

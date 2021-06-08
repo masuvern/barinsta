@@ -1,57 +1,43 @@
-package awais.instagrabber.db.datasources;
+package awais.instagrabber.db.datasources
 
-import android.content.Context;
+import android.content.Context
+import awais.instagrabber.db.AppDatabase
+import awais.instagrabber.db.dao.RecentSearchDao
+import awais.instagrabber.db.entities.RecentSearch
+import awais.instagrabber.models.enums.FavoriteType
 
-import androidx.annotation.NonNull;
+class RecentSearchDataSource private constructor(private val recentSearchDao: RecentSearchDao) {
 
-import java.util.List;
+    suspend fun getRecentSearchByIgIdAndType(igId: String, type: FavoriteType): RecentSearch? =
+        recentSearchDao.getRecentSearchByIgIdAndType(igId, type)
 
-import awais.instagrabber.db.AppDatabase;
-import awais.instagrabber.db.dao.RecentSearchDao;
-import awais.instagrabber.db.entities.RecentSearch;
-import awais.instagrabber.models.enums.FavoriteType;
+    suspend fun getAllRecentSearches(): List<RecentSearch> = recentSearchDao.getAllRecentSearches()
 
-public class RecentSearchDataSource {
-    private static final String TAG = RecentSearchDataSource.class.getSimpleName();
-
-    private static RecentSearchDataSource INSTANCE;
-
-    private final RecentSearchDao recentSearchDao;
-
-    private RecentSearchDataSource(final RecentSearchDao recentSearchDao) {
-        this.recentSearchDao = recentSearchDao;
+    suspend fun insertOrUpdateRecentSearch(recentSearch: RecentSearch) {
+        if (recentSearch.id != 0) {
+            recentSearchDao.updateRecentSearch(recentSearch)
+            return
+        }
+        recentSearchDao.insertRecentSearch(recentSearch)
     }
 
-    public static synchronized RecentSearchDataSource getInstance(@NonNull Context context) {
-        if (INSTANCE == null) {
-            synchronized (RecentSearchDataSource.class) {
-                if (INSTANCE == null) {
-                    final AppDatabase database = AppDatabase.getDatabase(context);
-                    INSTANCE = new RecentSearchDataSource(database.recentSearchDao());
+    suspend fun deleteRecentSearch(recentSearch: RecentSearch) = recentSearchDao.deleteRecentSearch(recentSearch)
+
+    companion object {
+        private lateinit var INSTANCE: RecentSearchDataSource
+
+        @JvmStatic
+        @Synchronized
+        fun getInstance(context: Context): RecentSearchDataSource {
+            if (!this::INSTANCE.isInitialized) {
+                synchronized(RecentSearchDataSource::class.java) {
+                    if (!this::INSTANCE.isInitialized) {
+                        val database = AppDatabase.getDatabase(context)
+                        INSTANCE = RecentSearchDataSource(database.recentSearchDao())
+                    }
                 }
             }
+            return INSTANCE
         }
-        return INSTANCE;
-    }
-
-    public RecentSearch getRecentSearchByIgIdAndType(@NonNull final String igId, @NonNull final FavoriteType type) {
-        return recentSearchDao.getRecentSearchByIgIdAndType(igId, type);
-    }
-
-    @NonNull
-    public final List<RecentSearch> getAllRecentSearches() {
-        return recentSearchDao.getAllRecentSearches();
-    }
-
-    public final void insertOrUpdateRecentSearch(@NonNull final RecentSearch recentSearch) {
-        if (recentSearch.getId() != 0) {
-            recentSearchDao.updateRecentSearch(recentSearch);
-            return;
-        }
-        recentSearchDao.insertRecentSearch(recentSearch);
-    }
-
-    public final void deleteRecentSearch(@NonNull final RecentSearch recentSearch) {
-        recentSearchDao.deleteRecentSearch(recentSearch);
     }
 }

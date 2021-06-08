@@ -25,7 +25,6 @@ import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.entities.RecentSearch;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.db.repositories.RecentSearchRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.repositories.responses.search.SearchItem;
@@ -182,17 +181,17 @@ public class SearchFragmentViewModel extends AppStateViewModel {
     private void showRecentSearchesAndFavorites() {
         final SettableFuture<List<RecentSearch>> recentResultsFuture = SettableFuture.create();
         final SettableFuture<List<Favorite>> favoritesFuture = SettableFuture.create();
-        recentSearchRepository.getAllRecentSearches(new RepositoryCallback<List<RecentSearch>>() {
-            @Override
-            public void onSuccess(final List<RecentSearch> result) {
-                recentResultsFuture.set(result);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                recentResultsFuture.set(Collections.emptyList());
-            }
-        });
+        recentSearchRepository.getAllRecentSearches(
+                CoroutineUtilsKt.getContinuation((recentSearches, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "showRecentSearchesAndFavorites: ", throwable);
+                        recentResultsFuture.set(Collections.emptyList());
+                        return;
+                    }
+                    //noinspection unchecked
+                    recentResultsFuture.set((List<RecentSearch>) recentSearches);
+                }), Dispatchers.getIO())
+        );
         favoriteRepository.getAllFavorites(
                 CoroutineUtilsKt.getContinuation((favorites, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {
@@ -290,9 +289,9 @@ public class SearchFragmentViewModel extends AppStateViewModel {
             case TOP:
                 list = ImmutableList
                         .<SearchItem>builder()
-                        .addAll(body.getUsers())
-                        .addAll(body.getHashtags())
-                        .addAll(body.getPlaces())
+                        .addAll(body.getUsers() == null ? Collections.emptyList() : body.getUsers())
+                        .addAll(body.getHashtags() == null ? Collections.emptyList() : body.getHashtags())
+                        .addAll(body.getPlaces() == null ? Collections.emptyList() : body.getPlaces())
                         .build();
                 break;
             case USER:
@@ -315,15 +314,16 @@ public class SearchFragmentViewModel extends AppStateViewModel {
         try {
             final RecentSearch recentSearch = RecentSearch.fromSearchItem(searchItem);
             if (recentSearch == null) return;
-            recentSearchRepository.insertOrUpdateRecentSearch(recentSearch, new RepositoryCallback<Void>() {
-                @Override
-                public void onSuccess(final Void result) {
-                    // Log.d(TAG, "onSuccess: inserted recent: " + recentSearch);
-                }
-
-                @Override
-                public void onDataNotAvailable() {}
-            });
+            recentSearchRepository.insertOrUpdateRecentSearch(
+                    recentSearch,
+                    CoroutineUtilsKt.getContinuation((unit, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "saveToRecentSearches: ", throwable);
+                            // return;
+                        }
+                        // Log.d(TAG, "onSuccess: inserted recent: " + recentSearch);
+                    }), Dispatchers.getIO())
+            );
         } catch (Exception e) {
             Log.e(TAG, "saveToRecentSearches: ", e);
         }
@@ -336,19 +336,18 @@ public class SearchFragmentViewModel extends AppStateViewModel {
         if (recentSearch == null) return null;
         final MutableLiveData<Resource<Object>> data = new MutableLiveData<>();
         data.postValue(Resource.loading(null));
-        recentSearchRepository.deleteRecentSearchByIgIdAndType(recentSearch.getIgId(), recentSearch.getType(), new RepositoryCallback<Void>() {
-            @Override
-            public void onSuccess(final Void result) {
-                // Log.d(TAG, "onSuccess: deleted");
-                data.postValue(Resource.success(new Object()));
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                // Log.e(TAG, "onDataNotAvailable: not deleted");
-                data.postValue(Resource.error("Error deleting recent item", null));
-            }
-        });
+        recentSearchRepository.deleteRecentSearchByIgIdAndType(
+                recentSearch.getIgId(),
+                recentSearch.getType(),
+                CoroutineUtilsKt.getContinuation((unit, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "deleteRecentSearch: ", throwable);
+                        data.postValue(Resource.error("Error deleting recent item", null));
+                        return;
+                    }
+                    data.postValue(Resource.success(new Object()));
+                }), Dispatchers.getIO())
+        );
         return data;
     }
 }

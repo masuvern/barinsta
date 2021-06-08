@@ -1,36 +1,28 @@
-package awais.instagrabber.db.dao;
+package awais.instagrabber.db.dao
 
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.Query;
-import androidx.room.Update;
-
-import java.util.List;
-
-import awais.instagrabber.db.entities.RecentSearch;
-import awais.instagrabber.models.enums.FavoriteType;
+import androidx.room.*
+import awais.instagrabber.db.entities.RecentSearch
+import awais.instagrabber.models.enums.FavoriteType
 
 @Dao
-public interface RecentSearchDao {
-
+interface RecentSearchDao {
     @Query("SELECT * FROM recent_searches ORDER BY last_searched_on DESC")
-    List<RecentSearch> getAllRecentSearches();
+    suspend fun getAllRecentSearches(): List<RecentSearch>
 
     @Query("SELECT * FROM recent_searches WHERE `ig_id` = :igId AND `type` = :type")
-    RecentSearch getRecentSearchByIgIdAndType(String igId, FavoriteType type);
+    suspend fun getRecentSearchByIgIdAndType(igId: String, type: FavoriteType): RecentSearch?
 
     @Query("SELECT * FROM recent_searches WHERE instr(`name`, :query) > 0")
-    List<RecentSearch> findRecentSearchesWithNameContaining(String query);
+    suspend fun findRecentSearchesWithNameContaining(query: String): List<RecentSearch>
 
     @Insert
-    Long insertRecentSearch(RecentSearch recentSearch);
+    suspend fun insertRecentSearch(recentSearch: RecentSearch)
 
     @Update
-    void updateRecentSearch(RecentSearch recentSearch);
+    suspend fun updateRecentSearch(recentSearch: RecentSearch)
 
     @Delete
-    void deleteRecentSearch(RecentSearch recentSearch);
+    suspend fun deleteRecentSearch(recentSearch: RecentSearch)
 
     // @Query("DELETE from recent_searches")
     // void deleteAllRecentSearches();
