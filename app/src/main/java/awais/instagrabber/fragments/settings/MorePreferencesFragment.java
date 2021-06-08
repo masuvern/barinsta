@@ -39,7 +39,7 @@ import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.ProcessPhoenix;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -285,8 +285,8 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
             // adds cookies to database for quick access
             final long uid = CookieUtils.getUserIdFromCookie(cookie);
-            final UserService userService = UserService.INSTANCE;
-            userService.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+            final UserRepository userRepository = UserRepository.INSTANCE;
+            userRepository.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                 if (throwable != null) {
                     Log.e(TAG, "Error fetching user info", throwable);
                     return;

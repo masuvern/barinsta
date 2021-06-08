@@ -96,7 +96,7 @@ import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesService;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
@@ -120,7 +120,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private FriendshipService friendshipService;
     private StoriesService storiesService;
     private MediaService mediaService;
-    private UserService userService;
+    private UserRepository userRepository;
     private GraphQLService graphQLService;
     private DirectMessagesService directMessagesService;
     private boolean shouldRefresh = true;
@@ -336,7 +336,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
         storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
-        userService = isLoggedIn ? UserService.INSTANCE : null;
+        userRepository = isLoggedIn ? UserRepository.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         final Context context = getContext();
         if (context == null) return;
@@ -629,7 +629,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             return;
         }
         if (isLoggedIn) {
-            userService.getUsernameInfo(
+            userRepository.getUsernameInfo(
                     usernameTemp,
                     CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         if (throwable != null) {
@@ -639,7 +639,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                             Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        userService.getUserFriendship(
+                        userRepository.getUserFriendship(
                                 user.getPk(),
                                 CoroutineUtilsKt.getContinuation(
                                         (friendshipStatus, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {

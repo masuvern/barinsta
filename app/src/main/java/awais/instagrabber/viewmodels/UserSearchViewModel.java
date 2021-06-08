@@ -32,7 +32,7 @@ import awais.instagrabber.utils.Debouncer;
 import awais.instagrabber.utils.RankedRecipientsCache;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.DirectMessagesService;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
 import kotlinx.coroutines.Dispatchers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -58,7 +58,7 @@ public class UserSearchViewModel extends ViewModel {
     private final MutableLiveData<Boolean> showAction = new MutableLiveData<>(false);
     private final Debouncer<String> searchDebouncer;
     private final Set<RankedRecipient> selectedRecipients = new HashSet<>();
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final DirectMessagesService directMessagesService;
     private final RankedRecipientsCache rankedRecipientsCache;
 
@@ -70,7 +70,7 @@ public class UserSearchViewModel extends ViewModel {
         if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
-        userService = UserService.INSTANCE;
+        userRepository = UserRepository.INSTANCE;
         directMessagesService = DirectMessagesService.INSTANCE;
         rankedRecipientsCache = RankedRecipientsCache.INSTANCE;
         if ((rankedRecipientsCache.isFailed() || rankedRecipientsCache.isExpired()) && !rankedRecipientsCache.isUpdateInitiated()) {
@@ -168,7 +168,7 @@ public class UserSearchViewModel extends ViewModel {
     }
 
     private void defaultUserSearch() {
-        userService.search(currentQuery, CoroutineUtilsKt.getContinuation((userSearchResponse, throwable) -> {
+        userRepository.search(currentQuery, CoroutineUtilsKt.getContinuation((userSearchResponse, throwable) -> {
             if (throwable != null) {
                 Log.e(TAG, "onFailure: ", throwable);
                 recipients.postValue(Resource.error(throwable.getMessage(), getCachedRecipients()));

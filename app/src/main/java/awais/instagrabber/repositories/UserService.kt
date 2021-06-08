@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface UserRepository {
+interface UserService {
     @GET("/api/v1/users/{uid}/info/")
     suspend fun getUserInfo(@Path("uid") uid: Long): WrappedUser
 

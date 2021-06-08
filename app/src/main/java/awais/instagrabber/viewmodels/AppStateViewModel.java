@@ -14,7 +14,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -25,7 +25,7 @@ public class AppStateViewModel extends AndroidViewModel {
     private final String cookie;
     private final MutableLiveData<User> currentUser = new MutableLiveData<>();
 
-    private UserService userService;
+    private UserRepository userRepository;
 
     public AppStateViewModel(@NonNull final Application application) {
         super(application);
@@ -33,7 +33,7 @@ public class AppStateViewModel extends AndroidViewModel {
         cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) return;
-        userService = UserService.INSTANCE;
+        userRepository = UserRepository.INSTANCE;
         // final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(application));
         fetchProfileDetails();
     }
@@ -49,8 +49,8 @@ public class AppStateViewModel extends AndroidViewModel {
 
     private void fetchProfileDetails() {
         final long uid = CookieUtils.getUserIdFromCookie(cookie);
-        if (userService == null) return;
-        userService.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> {
+        if (userRepository == null) return;
+        userRepository.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> {
             if (throwable != null) {
                 Log.e(TAG, "onFailure: ", throwable);
                 return;

@@ -36,7 +36,7 @@ import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -132,8 +132,8 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void fetchAvatar() {
         if (isLoggedIn) {
-            final UserService userService = UserService.INSTANCE;
-            userService.getUserInfo(id, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+            final UserRepository repository = UserRepository.INSTANCE;
+            repository.getUserInfo(id, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                 if (throwable != null) {
                     final Context context = getContext();
                     if (context == null) {
