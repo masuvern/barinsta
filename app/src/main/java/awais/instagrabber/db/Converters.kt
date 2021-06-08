@@ -1,38 +1,33 @@
-package awais.instagrabber.db;
+package awais.instagrabber.db
 
-import androidx.room.TypeConverter;
+import androidx.room.TypeConverter
+import awais.instagrabber.models.enums.FavoriteType
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-
-import awais.instagrabber.models.enums.FavoriteType;
-
-public class Converters {
+object Converters {
+    @JvmStatic
     @TypeConverter
-    public static FavoriteType fromFavoriteTypeString(String value) {
-        try {
-            return FavoriteType.valueOf(value);
-        } catch (Exception e) {
-            return null;
+    fun fromFavoriteTypeString(value: String?): FavoriteType? =
+        if (value == null) null
+        else try {
+            FavoriteType.valueOf(value)
+        } catch (e: Exception) {
+            null
         }
-    }
 
+    @JvmStatic
     @TypeConverter
-    public static String favoriteTypeToString(FavoriteType favoriteType) {
-        return favoriteType == null ? null : favoriteType.toString();
-    }
+    fun favoriteTypeToString(favoriteType: FavoriteType?): String? = favoriteType?.toString()
 
+    @JvmStatic
     @TypeConverter
-    public static LocalDateTime fromTimestampToLocalDateTime(Long value) {
-        if (value == null) return null;
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.systemDefault());
-    }
+    fun fromTimestampToLocalDateTime(value: Long?): LocalDateTime? =
+        if (value == null) null else LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.systemDefault())
 
+    @JvmStatic
     @TypeConverter
-    public static Long localDateTimeToTimestamp(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
+    fun localDateTimeToTimestamp(localDateTime: LocalDateTime?): Long? = localDateTime?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
 }
