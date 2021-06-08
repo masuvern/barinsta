@@ -13,7 +13,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DiscoverService extends BaseService {
+public class DiscoverService {
 
     private static final String TAG = "DiscoverService";
 

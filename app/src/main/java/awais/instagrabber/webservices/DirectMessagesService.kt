@@ -9,7 +9,7 @@ import awais.instagrabber.utils.Utils
 import org.json.JSONArray
 import java.util.*
 
-object DirectMessagesService : BaseService() {
+object DirectMessagesService {
     private val repository: DirectMessagesRepository = RetrofitFactory.retrofit.create(DirectMessagesRepository::class.java)
 
     suspend fun fetchInbox(

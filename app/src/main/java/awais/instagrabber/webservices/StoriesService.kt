@@ -19,7 +19,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
-object StoriesService : BaseService() {
+object StoriesService {
     private val repository: StoriesRepository = retrofit.create(StoriesRepository::class.java)
 
     suspend fun fetch(mediaId: Long): StoryModel {

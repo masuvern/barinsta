@@ -11,7 +11,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-object FriendshipService : BaseService() {
+object FriendshipService {
     private val repository: FriendshipRepository = retrofit.create(FriendshipRepository::class.java)
 
     suspend fun follow(

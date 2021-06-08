@@ -24,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProfileService extends BaseService {
+public class ProfileService {
     private static final String TAG = "ProfileService";
 
     private final ProfileRepository repository;

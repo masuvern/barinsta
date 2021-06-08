@@ -6,7 +6,7 @@ import awais.instagrabber.repositories.SearchRepository;
 import awais.instagrabber.repositories.responses.search.SearchResponse;
 import retrofit2.Call;
 
-public class SearchService extends BaseService {
+public class SearchService {
     private static final String TAG = "LocationService";
 
     private final SearchRepository repository;

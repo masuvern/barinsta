@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FeedService extends BaseService {
+public class FeedService {
     private static final String TAG = "FeedService";
 
     private final FeedRepository repository;

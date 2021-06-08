@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewsService extends BaseService {
+public class NewsService {
     private static final String TAG = "NewsService";
 
     private final NewsRepository repository;

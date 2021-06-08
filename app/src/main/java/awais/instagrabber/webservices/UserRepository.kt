@@ -7,7 +7,7 @@ import awais.instagrabber.repositories.responses.UserSearchResponse
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import java.util.*
 
-object UserRepository : BaseService() {
+object UserRepository {
     private val service: UserService = retrofit.create(UserService::class.java)
 
     suspend fun getUserInfo(uid: Long): User {

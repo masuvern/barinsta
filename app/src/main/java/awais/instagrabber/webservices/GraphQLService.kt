@@ -12,7 +12,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-object GraphQLService : BaseService() {
+object GraphQLService {
     private val repository: GraphQLRepository = retrofitWeb.create(GraphQLRepository::class.java)
 
     // TODO convert string response to a response class

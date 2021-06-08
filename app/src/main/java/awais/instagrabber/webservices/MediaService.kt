@@ -12,7 +12,7 @@ import awais.instagrabber.utils.retryContextString
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import org.json.JSONObject
 
-object MediaService : BaseService() {
+object MediaService {
     private val DELETABLE_ITEMS_TYPES = listOf(
         MediaItemType.MEDIA_TYPE_IMAGE,
         MediaItemType.MEDIA_TYPE_VIDEO,

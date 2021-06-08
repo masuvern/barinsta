@@ -27,7 +27,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CommentService extends BaseService {
+public class CommentService {
     private static final String TAG = "CommentService";
 
     private final CommentRepository repository;
