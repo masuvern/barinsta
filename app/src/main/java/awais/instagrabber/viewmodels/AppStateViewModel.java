@@ -33,7 +33,7 @@ public class AppStateViewModel extends AndroidViewModel {
         cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
         if (!isLoggedIn) return;
-        userRepository = UserRepository.INSTANCE;
+        userRepository = UserRepository.Companion.getInstance();
         // final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(application));
         fetchProfileDetails();
     }

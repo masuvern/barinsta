@@ -90,6 +90,7 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.AppStateViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.ProfileFragmentViewModel;
+import awais.instagrabber.viewmodels.ProfileFragmentViewModelFactory;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.FriendshipService;
 import awais.instagrabber.webservices.GraphQLService;
@@ -336,14 +337,18 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
         storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
-        userRepository = isLoggedIn ? UserRepository.INSTANCE : null;
+        userRepository = isLoggedIn ? UserRepository.Companion.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         final Context context = getContext();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
-        viewModel = new ViewModelProvider(this).get(ProfileFragmentViewModel.class);
+        viewModel = new ViewModelProvider(this, new ProfileFragmentViewModelFactory(
+                UserRepository.Companion.getInstance(),
+                this,
+                getArguments()
+        )).get(ProfileFragmentViewModel.class);
         setHasOptionsMenu(true);
     }
 

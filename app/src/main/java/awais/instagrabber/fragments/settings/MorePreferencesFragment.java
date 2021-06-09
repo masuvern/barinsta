@@ -285,7 +285,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
             // adds cookies to database for quick access
             final long uid = CookieUtils.getUserIdFromCookie(cookie);
-            final UserRepository userRepository = UserRepository.INSTANCE;
+            final UserRepository userRepository = UserRepository.Companion.getInstance();
             userRepository.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                 if (throwable != null) {
                     Log.e(TAG, "Error fetching user info", throwable);

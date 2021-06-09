@@ -132,7 +132,7 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void fetchAvatar() {
         if (isLoggedIn) {
-            final UserRepository repository = UserRepository.INSTANCE;
+            final UserRepository repository = UserRepository.Companion.getInstance();
             repository.getUserInfo(id, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                 if (throwable != null) {
                     final Context context = getContext();

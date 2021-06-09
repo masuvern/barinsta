@@ -70,7 +70,7 @@ public class UserSearchViewModel extends ViewModel {
         if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
-        userRepository = UserRepository.INSTANCE;
+        userRepository = UserRepository.Companion.getInstance();
         directMessagesService = DirectMessagesService.INSTANCE;
         rankedRecipientsCache = RankedRecipientsCache.INSTANCE;
         if ((rankedRecipientsCache.isFailed() || rankedRecipientsCache.isExpired()) && !rankedRecipientsCache.isUpdateInitiated()) {
