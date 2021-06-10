@@ -4,7 +4,7 @@ import awais.instagrabber.repositories.responses.FriendshipChangeResponse
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse
 import retrofit2.http.*
 
-interface FriendshipRepository {
+interface FriendshipService {
     @FormUrlEncoded
     @POST("/api/v1/friendships/{action}/{id}/")
     suspend fun change(

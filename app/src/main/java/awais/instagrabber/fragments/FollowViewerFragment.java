@@ -33,7 +33,7 @@ import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.FriendshipRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlinx.coroutines.Dispatchers;
 import thoughtbot.expandableadapter.ExpandableGroup;
@@ -60,7 +60,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     private View.OnClickListener clickListener;
     private FragmentFollowersViewerBinding binding;
     private SwipeRefreshLayout root;
-    private FriendshipService friendshipService;
+    private FriendshipRepository friendshipRepository;
     private AppCompatActivity fragmentActivity;
 
     final ServiceCallback<FriendshipListFetchResponse> followingFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
@@ -71,7 +71,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                 if (!isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
                     endCursor = result.getNextMaxId();
-                    friendshipService.getList(
+                    friendshipRepository.getList(
                             false,
                             profileId,
                             endCursor,
@@ -85,7 +85,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     );
                 } else if (followersModels.size() == 0) {
                     if (!isFollowersList) moreAvailable = false;
-                    friendshipService.getList(
+                    friendshipRepository.getList(
                             true,
                             profileId,
                             null,
@@ -121,7 +121,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                 if (isFollowersList) followModels.addAll(result.getItems());
                 if (result.isMoreAvailable()) {
                     endCursor = result.getNextMaxId();
-                    friendshipService.getList(
+                    friendshipRepository.getList(
                             true,
                             profileId,
                             endCursor,
@@ -135,7 +135,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
                     );
                 } else if (followingModels.size() == 0) {
                     if (isFollowersList) moreAvailable = false;
-                    friendshipService.getList(
+                    friendshipRepository.getList(
                             false,
                             profileId,
                             null,
@@ -167,7 +167,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        friendshipService = FriendshipService.INSTANCE;
+        friendshipRepository = FriendshipRepository.INSTANCE;
         fragmentActivity = (AppCompatActivity) getActivity();
         setHasOptionsMenu(true);
     }
@@ -289,7 +289,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             if (!TextUtils.isEmpty(endCursor) && !searching) {
                 binding.swipeRefreshLayout.setRefreshing(true);
                 layoutManager.setStackFromEnd(true);
-                friendshipService.getList(
+                friendshipRepository.getList(
                         isFollowersList,
                         profileId,
                         endCursor,
@@ -308,7 +308,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         binding.rvFollow.setLayoutManager(layoutManager);
         if (moreAvailable) {
             binding.swipeRefreshLayout.setRefreshing(true);
-            friendshipService.getList(
+            friendshipRepository.getList(
                     isFollowersList,
                     profileId,
                     endCursor,
@@ -335,7 +335,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         if (moreAvailable) {
             binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
-            friendshipService.getList(
+            friendshipRepository.getList(
                     isFollowersList,
                     profileId,
                     endCursor,
@@ -351,7 +351,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
         } else if (followersModels.size() == 0 || followingModels.size() == 0) {
             binding.swipeRefreshLayout.setRefreshing(true);
             Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
-            friendshipService.getList(
+            friendshipRepository.getList(
                     !isFollowersList,
                     profileId,
                     null,

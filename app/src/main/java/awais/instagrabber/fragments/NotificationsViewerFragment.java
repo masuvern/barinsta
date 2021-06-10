@@ -44,7 +44,7 @@ import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
-import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.FriendshipRepository;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -60,7 +60,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private SwipeRefreshLayout root;
     private boolean shouldRefresh = true;
     private NotificationViewModel notificationViewModel;
-    private FriendshipService friendshipService;
+    private FriendshipRepository friendshipRepository;
     private MediaService mediaService;
     private NewsService newsService;
     private String csrfToken, deviceUuid;
@@ -168,7 +168,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(
+                                friendshipRepository.approve(
                                         csrfToken,
                                         userId,
                                         deviceUuid,
@@ -189,7 +189,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             clickListener.onPreviewClick(model);
                             break;
                         case 2:
-                            friendshipService.ignore(
+                            friendshipRepository.ignore(
                                     csrfToken,
                                     userId,
                                     deviceUuid,
@@ -228,7 +228,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        friendshipService = FriendshipService.INSTANCE;
+        friendshipRepository = FriendshipRepository.INSTANCE;
         mediaService = MediaService.INSTANCE;
         newsService = NewsService.getInstance();
     }

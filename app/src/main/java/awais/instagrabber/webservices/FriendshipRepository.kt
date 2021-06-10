@@ -1,7 +1,7 @@
 package awais.instagrabber.webservices
 
 import awais.instagrabber.models.FollowModel
-import awais.instagrabber.repositories.FriendshipRepository
+import awais.instagrabber.repositories.FriendshipService
 import awais.instagrabber.repositories.responses.FriendshipChangeResponse
 import awais.instagrabber.repositories.responses.FriendshipListFetchResponse
 import awais.instagrabber.repositories.responses.FriendshipRestrictResponse
@@ -11,8 +11,8 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-object FriendshipService {
-    private val repository: FriendshipRepository = retrofit.create(FriendshipRepository::class.java)
+object FriendshipRepository {
+    private val service: FriendshipService = retrofit.create(FriendshipService::class.java)
 
     suspend fun follow(
         csrfToken: String,
@@ -50,7 +50,7 @@ object FriendshipService {
             "target_user_id" to targetUserId.toString(),
         )
         val action = if (restrict) "restrict" else "unrestrict"
-        return repository.toggleRestrict(action, form)
+        return service.toggleRestrict(action, form)
     }
 
     suspend fun approve(
@@ -89,7 +89,7 @@ object FriendshipService {
             "user_id" to targetUserId,
         )
         val signedForm = Utils.sign(form)
-        return repository.change(action, targetUserId, signedForm)
+        return service.change(action, targetUserId, signedForm)
     }
 
     suspend fun changeMute(
@@ -106,7 +106,7 @@ object FriendshipService {
             "_uuid" to deviceUuid,
             (if (story) "target_reel_author_id" else "target_posts_author_id") to targetUserId.toString(),
         )
-        return repository.changeMute(
+        return service.changeMute(
             if (unmute) "unmute_posts_or_story_from_follow" else "mute_posts_or_story_from_follow",
             form
         )
@@ -118,7 +118,7 @@ object FriendshipService {
         maxId: String?,
     ): FriendshipListFetchResponse {
         val queryMap = if (maxId != null) mapOf("max_id" to maxId) else emptyMap()
-        val response = repository.getList(targetUserId, if (follower) "followers" else "following", queryMap)
+        val response = service.getList(targetUserId, if (follower) "followers" else "following", queryMap)
         return parseListResponse(response)
     }
 

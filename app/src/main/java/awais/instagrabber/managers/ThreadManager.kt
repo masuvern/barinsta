@@ -31,7 +31,7 @@ import awais.instagrabber.utils.MediaUtils.VideoInfo
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.DirectMessagesService
-import awais.instagrabber.webservices.FriendshipService
+import awais.instagrabber.webservices.FriendshipRepository
 import awais.instagrabber.webservices.MediaService
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterables
@@ -1151,7 +1151,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipService.changeBlock(csrfToken, viewerId, deviceUuid, false, user.pk)
+                FriendshipRepository.changeBlock(csrfToken, viewerId, deviceUuid, false, user.pk)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)
@@ -1165,7 +1165,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipService.changeBlock(csrfToken, viewerId, deviceUuid, true, user.pk)
+                FriendshipRepository.changeBlock(csrfToken, viewerId, deviceUuid, true, user.pk)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)
@@ -1179,7 +1179,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipService.toggleRestrict(csrfToken, deviceUuid, user.pk, true)
+                FriendshipRepository.toggleRestrict(csrfToken, deviceUuid, user.pk, true)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)
@@ -1193,7 +1193,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipService.toggleRestrict(csrfToken, deviceUuid, user.pk, false)
+                FriendshipRepository.toggleRestrict(csrfToken, deviceUuid, user.pk, false)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)

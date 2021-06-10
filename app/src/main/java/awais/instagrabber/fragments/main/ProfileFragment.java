@@ -92,7 +92,7 @@ import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.ProfileFragmentViewModel;
 import awais.instagrabber.viewmodels.ProfileFragmentViewModelFactory;
 import awais.instagrabber.webservices.DirectMessagesService;
-import awais.instagrabber.webservices.FriendshipService;
+import awais.instagrabber.webservices.FriendshipRepository;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
@@ -118,7 +118,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private User profileModel;
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
-    private FriendshipService friendshipService;
+    private FriendshipRepository friendshipRepository;
     private StoriesService storiesService;
     private MediaService mediaService;
     private UserRepository userRepository;
@@ -333,7 +333,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipService = isLoggedIn ? FriendshipService.INSTANCE : null;
+        friendshipRepository = isLoggedIn ? FriendshipRepository.INSTANCE : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
         storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
@@ -453,7 +453,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (item.getItemId() == R.id.restrict) {
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
-            friendshipService.toggleRestrict(
+            friendshipRepository.toggleRestrict(
                     csrfToken,
                     deviceUuid,
                     profileModel.getPk(),
@@ -472,7 +472,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (item.getItemId() == R.id.block) {
             if (!isLoggedIn) return false;
             // changeCb
-            friendshipService.changeBlock(
+            friendshipRepository.changeBlock(
                     csrfToken,
                     myId,
                     deviceUuid,
@@ -499,7 +499,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (item.getItemId() == R.id.mute_stories) {
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
-            friendshipService.changeMute(
+            friendshipRepository.changeMute(
                     csrfToken,
                     myId,
                     deviceUuid,
@@ -519,7 +519,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (item.getItemId() == R.id.mute_posts) {
             if (!isLoggedIn) return false;
             final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
-            friendshipService.changeMute(
+            friendshipRepository.changeMute(
                     csrfToken,
                     myId,
                     deviceUuid,
@@ -538,7 +538,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         if (item.getItemId() == R.id.remove_follower) {
             if (!isLoggedIn) return false;
-            friendshipService.removeFollower(
+            friendshipRepository.removeFollower(
                     csrfToken,
                     myId,
                     deviceUuid,
@@ -1085,7 +1085,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 new AlertDialog.Builder(context)
                         .setTitle(R.string.priv_acc)
                         .setMessage(R.string.priv_acc_confirm)
-                        .setPositiveButton(R.string.confirm, (d, w) -> friendshipService.unfollow(
+                        .setPositiveButton(R.string.confirm, (d, w) -> friendshipRepository.unfollow(
                                 csrfToken,
                                 myId,
                                 deviceUuid,
@@ -1101,7 +1101,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else if (profileModel.getFriendshipStatus().getFollowing() || profileModel.getFriendshipStatus().getOutgoingRequest()) {
-                friendshipService.unfollow(
+                friendshipRepository.unfollow(
                         csrfToken,
                         myId,
                         deviceUuid,
@@ -1115,7 +1115,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         }), Dispatchers.getIO())
                 );
             } else {
-                friendshipService.follow(
+                friendshipRepository.follow(
                         csrfToken,
                         myId,
                         deviceUuid,
