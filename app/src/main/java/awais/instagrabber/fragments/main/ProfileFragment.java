@@ -333,7 +333,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         fragmentActivity = (MainActivity) requireActivity();
-        friendshipRepository = isLoggedIn ? FriendshipRepository.INSTANCE : null;
+        friendshipRepository = isLoggedIn ? FriendshipRepository.Companion.getInstance() : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
         storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;

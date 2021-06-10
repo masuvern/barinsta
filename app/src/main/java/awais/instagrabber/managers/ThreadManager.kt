@@ -62,6 +62,7 @@ class ThreadManager(
     val pendingRequests: LiveData<DirectThreadParticipantRequestsResponse?> = _pendingRequests
     private val inboxManager: InboxManager = if (pending) DirectMessagesManager.pendingInboxManager else DirectMessagesManager.inboxManager
     private val threadIdOrUserIds: ThreadIdOrUserIds = of(threadId)
+    private val friendshipRepository: FriendshipRepository by lazy { FriendshipRepository.getInstance() }
 
     val thread: LiveData<DirectThread?> by lazy {
         distinctUntilChanged(map(inboxManager.getInbox()) { inboxResource: Resource<DirectInbox?>? ->
@@ -1151,7 +1152,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipRepository.changeBlock(csrfToken, viewerId, deviceUuid, false, user.pk)
+                friendshipRepository.changeBlock(csrfToken, viewerId, deviceUuid, false, user.pk)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)
@@ -1165,7 +1166,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipRepository.changeBlock(csrfToken, viewerId, deviceUuid, true, user.pk)
+                friendshipRepository.changeBlock(csrfToken, viewerId, deviceUuid, true, user.pk)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)
@@ -1179,7 +1180,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipRepository.toggleRestrict(csrfToken, deviceUuid, user.pk, true)
+                friendshipRepository.toggleRestrict(csrfToken, deviceUuid, user.pk, true)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)
@@ -1193,7 +1194,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                FriendshipRepository.toggleRestrict(csrfToken, deviceUuid, user.pk, false)
+                friendshipRepository.toggleRestrict(csrfToken, deviceUuid, user.pk, false)
                 refreshChats(scope)
             } catch (e: Exception) {
                 Log.e(TAG, "onFailure: ", e)

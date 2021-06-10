@@ -11,8 +11,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-object FriendshipRepository {
-    private val service: FriendshipService = retrofit.create(FriendshipService::class.java)
+class FriendshipRepository(private val service: FriendshipService) {
 
     suspend fun follow(
         csrfToken: String,
@@ -34,9 +33,7 @@ object FriendshipRepository {
         deviceUuid: String,
         unblock: Boolean,
         targetUserId: Long,
-    ): FriendshipChangeResponse {
-        return change(csrfToken, userId, deviceUuid, if (unblock) "unblock" else "block", targetUserId)
-    }
+    ): FriendshipChangeResponse = change(csrfToken, userId, deviceUuid, if (unblock) "unblock" else "block", targetUserId)
 
     suspend fun toggleRestrict(
         csrfToken: String,
@@ -144,12 +141,26 @@ object FriendshipRepository {
         val followModels = mutableListOf<FollowModel>()
         for (i in 0 until items.length()) {
             val itemJson = items.optJSONObject(i) ?: continue
-            val followModel = FollowModel(itemJson.getString("pk"),
+            val followModel = FollowModel(
+                itemJson.getString("pk"),
                 itemJson.getString("username"),
                 itemJson.optString("full_name"),
-                itemJson.getString("profile_pic_url"))
+                itemJson.getString("profile_pic_url")
+            )
             followModels.add(followModel)
         }
         return followModels
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: FriendshipRepository? = null
+
+        fun getInstance(): FriendshipRepository {
+            return INSTANCE ?: synchronized(this) {
+                val service: FriendshipService = retrofit.create(FriendshipService::class.java)
+                FriendshipRepository(service).also { INSTANCE = it }
+            }
+        }
     }
 }

@@ -167,7 +167,7 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        friendshipRepository = FriendshipRepository.INSTANCE;
+        friendshipRepository = FriendshipRepository.Companion.getInstance();
         fragmentActivity = (AppCompatActivity) getActivity();
         setHasOptionsMenu(true);
     }
