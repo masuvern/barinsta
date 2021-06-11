@@ -101,7 +101,7 @@ import awais.instagrabber.viewmodels.StoriesViewModel;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
+import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
@@ -122,7 +122,7 @@ public class StoryViewerFragment extends Fragment {
     private StoriesAdapter storiesAdapter;
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
-    private StoriesService storiesService;
+    private StoriesRepository storiesRepository;
     private MediaService mediaService;
     private StoryModel currentStory;
     private int slidePos;
@@ -162,7 +162,7 @@ public class StoryViewerFragment extends Fragment {
         userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
-        storiesService = StoriesService.INSTANCE;
+        storiesRepository = StoriesRepository.INSTANCE;
         mediaService = MediaService.INSTANCE;
         directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);
@@ -521,7 +521,7 @@ public class StoryViewerFragment extends Fragment {
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
                                 sticking = true;
-                                storiesService.respondToPoll(
+                                storiesRepository.respondToPoll(
                                         csrfToken,
                                         userId,
                                         deviceId,
@@ -560,7 +560,7 @@ public class StoryViewerFragment extends Fragment {
                         .setView(input)
                         .setPositiveButton(R.string.confirm, (d, w) -> {
                             sticking = true;
-                            storiesService.respondToQuestion(
+                            storiesRepository.respondToQuestion(
                                     csrfToken,
                                     userId,
                                     deviceId,
@@ -618,7 +618,7 @@ public class StoryViewerFragment extends Fragment {
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
                             if (quiz.getMyChoice() == -1) {
                                 sticking = true;
-                                storiesService.respondToQuiz(
+                                storiesRepository.respondToQuiz(
                                         csrfToken,
                                         userId,
                                         deviceId,
@@ -689,7 +689,7 @@ public class StoryViewerFragment extends Fragment {
                             .setView(sliderView)
                             .setPositiveButton(R.string.confirm, (d, w) -> {
                                 sticking = true;
-                                storiesService.respondToSlider(
+                                storiesRepository.respondToSlider(
                                         csrfToken,
                                         userId,
                                         deviceId,
@@ -805,7 +805,7 @@ public class StoryViewerFragment extends Fragment {
         setTitle(type);
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (type == Type.STORY) {
-            storiesService.fetch(
+            storiesRepository.fetch(
                     options.getId(),
                     CoroutineUtilsKt.getContinuation((storyModel, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         if (throwable != null) {
@@ -858,7 +858,7 @@ public class StoryViewerFragment extends Fragment {
             storyCallback.onSuccess(Collections.singletonList(live));
             return;
         }
-        storiesService.getUserStory(
+        storiesRepository.getUserStory(
                 fetchOptions,
                 CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {
@@ -972,7 +972,7 @@ public class StoryViewerFragment extends Fragment {
         }
 
         if (settingsHelper.getBoolean(MARK_AS_SEEN))
-            storiesService.seen(
+            storiesRepository.seen(
                     csrfToken,
                     userId,
                     deviceId,

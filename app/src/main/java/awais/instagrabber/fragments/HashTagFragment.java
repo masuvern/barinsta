@@ -69,7 +69,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
+import awais.instagrabber.webservices.StoriesRepository;
 import awais.instagrabber.webservices.TagsService;
 import kotlinx.coroutines.Dispatchers;
 
@@ -93,7 +93,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private String hashtag;
     private Hashtag hashtagModel = null;
     private ActionMode actionMode;
-    private StoriesService storiesService;
+    private StoriesRepository storiesRepository;
     private boolean isLoggedIn;
     private TagsService tagsService;
     private GraphQLService graphQLService;
@@ -298,7 +298,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
-        storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
+        storiesRepository = isLoggedIn ? StoriesRepository.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
@@ -585,7 +585,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchStories() {
         if (!isLoggedIn) return;
         storiesFetching = true;
-        storiesService.getUserStory(
+        storiesRepository.getUserStory(
                 StoryViewerOptions.forHashtag(hashtagModel.getName()),
                 CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {

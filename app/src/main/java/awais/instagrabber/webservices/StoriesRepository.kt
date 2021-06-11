@@ -5,7 +5,7 @@ import awais.instagrabber.fragments.settings.PreferenceKeys
 import awais.instagrabber.models.FeedStoryModel
 import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.StoryModel
-import awais.instagrabber.repositories.StoriesRepository
+import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.StoryStickerResponse
 import awais.instagrabber.repositories.responses.User
@@ -19,17 +19,17 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
-object StoriesService {
-    private val repository: StoriesRepository = retrofit.create(StoriesRepository::class.java)
+object StoriesRepository {
+    private val service: StoriesService = retrofit.create(StoriesService::class.java)
 
     suspend fun fetch(mediaId: Long): StoryModel {
-        val response = repository.fetch(mediaId)
+        val response = service.fetch(mediaId)
         val itemJson = JSONObject(response).getJSONArray("items").getJSONObject(0)
         return ResponseBodyUtils.parseStoryItem(itemJson, false, null)
     }
 
     suspend fun getFeedStories(): List<FeedStoryModel> {
-        val response = repository.getFeedStories()
+        val response = service.getFeedStories()
         return parseStoriesBody(response)
     }
 
@@ -94,7 +94,7 @@ object StoriesService {
     }
 
     suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
-        val response = repository.fetchHighlights(profileId)
+        val response = service.fetchHighlights(profileId)
         val highlightsReel = JSONObject(response).getJSONArray("tray")
         val length = highlightsReel.length()
         val highlightModels: MutableList<HighlightModel> = ArrayList()
@@ -122,7 +122,7 @@ object StoriesService {
         if (!isEmpty(maxId)) {
             form["max_id"] = maxId // NOT TESTED
         }
-        val response = repository.fetchArchive(form)
+        val response = service.fetchArchive(form)
         val data = JSONObject(response)
         val highlightsReel = data.getJSONArray("items")
         val length = highlightsReel.length()
@@ -142,7 +142,7 @@ object StoriesService {
 
     suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
         val url = buildUrl(options) ?: return emptyList()
-        val response = repository.getUserStory(url)
+        val response = service.getUserStory(url)
         val isLocOrHashtag = options.type == StoryViewerOptions.Type.LOCATION || options.type == StoryViewerOptions.Type.HASHTAG
         val isHighlight = options.type == StoryViewerOptions.Type.HIGHLIGHT || options.type == StoryViewerOptions.Type.STORY_ARCHIVE
         var data: JSONObject? = JSONObject(response)
@@ -187,7 +187,7 @@ object StoriesService {
             arg1 to arg2,
         )
         val signedForm = Utils.sign(form)
-        return repository.respondToSticker(storyId, stickerId, action, signedForm)
+        return service.respondToSticker(storyId, stickerId, action, signedForm)
     }
 
     suspend fun respondToQuestion(
@@ -249,7 +249,7 @@ object StoriesService {
             "reel" to "1",
             "live_vod" to "0",
         )
-        return repository.seen(queryMap, signedForm)
+        return service.seen(queryMap, signedForm)
     }
 
     private fun buildUrl(options: StoryViewerOptions): String? {

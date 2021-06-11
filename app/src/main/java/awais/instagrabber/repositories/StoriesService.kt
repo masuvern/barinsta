@@ -3,7 +3,7 @@ package awais.instagrabber.repositories
 import awais.instagrabber.repositories.responses.StoryStickerResponse
 import retrofit2.http.*
 
-interface StoriesRepository {
+interface StoriesService {
     // this one is the same as MediaRepository.fetch BUT you need to make sure it's a story
     @GET("/api/v1/media/{mediaId}/info/")
     suspend fun fetch(@Path("mediaId") mediaId: Long): String

@@ -66,7 +66,7 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.LocationService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
+import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
@@ -87,7 +87,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private long locationId;
     private Location locationModel;
     private ActionMode actionMode;
-    private StoriesService storiesService;
+    private StoriesRepository storiesRepository;
     private GraphQLService graphQLService;
     private LocationService locationService;
     private boolean isLoggedIn;
@@ -291,7 +291,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-        storiesService = StoriesService.INSTANCE;
+        storiesRepository = StoriesRepository.INSTANCE;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }
@@ -589,7 +589,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchStories() {
         if (isLoggedIn) {
             storiesFetching = true;
-            storiesService.getUserStory(
+            storiesRepository.getUserStory(
                     StoryViewerOptions.forLocation(locationId, locationModel.getName()),
                     CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         if (throwable != null) {

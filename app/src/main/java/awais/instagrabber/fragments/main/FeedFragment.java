@@ -54,7 +54,7 @@ import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
-import awais.instagrabber.webservices.StoriesService;
+import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
@@ -68,7 +68,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private MainActivity fragmentActivity;
     private MotionLayout root;
     private FragmentFeedBinding binding;
-    private StoriesService storiesService;
+    private StoriesRepository storiesRepository;
     private boolean shouldRefresh = true;
     private final boolean isRotate = false;
     private FeedStoriesViewModel feedStoriesViewModel;
@@ -276,7 +276,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
-        storiesService = StoriesService.INSTANCE;
+        storiesRepository = StoriesRepository.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -430,7 +430,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         // final String cookie = settingsHelper.getString(Constants.COOKIE);
         storiesFetching = true;
         updateSwipeRefreshState();
-        storiesService.getFeedStories(
+        storiesRepository.getFeedStories(
                 CoroutineUtilsKt.getContinuation((feedStoryModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {
                         Log.e(TAG, "failed", throwable);

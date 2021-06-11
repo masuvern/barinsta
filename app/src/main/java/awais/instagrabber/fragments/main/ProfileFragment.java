@@ -96,7 +96,7 @@ import awais.instagrabber.webservices.FriendshipRepository;
 import awais.instagrabber.webservices.GraphQLService;
 import awais.instagrabber.webservices.MediaService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
+import awais.instagrabber.webservices.StoriesRepository;
 import awais.instagrabber.webservices.UserRepository;
 import kotlinx.coroutines.Dispatchers;
 
@@ -119,7 +119,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private ActionMode actionMode;
     private Handler usernameSettingHandler;
     private FriendshipRepository friendshipRepository;
-    private StoriesService storiesService;
+    private StoriesRepository storiesRepository;
     private MediaService mediaService;
     private UserRepository userRepository;
     private GraphQLService graphQLService;
@@ -335,7 +335,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         fragmentActivity = (MainActivity) requireActivity();
         friendshipRepository = isLoggedIn ? FriendshipRepository.Companion.getInstance() : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
-        storiesService = isLoggedIn ? StoriesService.INSTANCE : null;
+        storiesRepository = isLoggedIn ? StoriesRepository.INSTANCE : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
         userRepository = isLoggedIn ? UserRepository.Companion.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
@@ -1046,7 +1046,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void fetchStoryAndHighlights(final long profileId) {
-        storiesService.getUserStory(
+        storiesRepository.getUserStory(
                 StoryViewerOptions.forUser(profileId, profileModel.getFullName()),
                 CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {
@@ -1059,7 +1059,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     }
                 }), Dispatchers.getIO())
         );
-        storiesService.fetchHighlights(
+        storiesRepository.fetchHighlights(
                 profileId,
                 CoroutineUtilsKt.getContinuation((highlightModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {

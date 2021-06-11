@@ -47,8 +47,8 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
-import awais.instagrabber.webservices.StoriesService.ArchiveFetchResponse;
+import awais.instagrabber.webservices.StoriesRepository;
+import awais.instagrabber.webservices.StoriesRepository.ArchiveFetchResponse;
 import kotlinx.coroutines.Dispatchers;
 
 public final class StoryListViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -61,7 +61,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
     private boolean firstRefresh = true;
     private FeedStoriesViewModel feedStoriesViewModel;
     private ArchivesViewModel archivesViewModel;
-    private StoriesService storiesService;
+    private StoriesRepository storiesRepository;
     private Context context;
     private String type;
     private String endCursor = null;
@@ -136,7 +136,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         context = getContext();
         if (context == null) return;
         setHasOptionsMenu(true);
-        storiesService = StoriesService.INSTANCE;
+        storiesRepository = StoriesRepository.INSTANCE;
     }
 
     @NonNull
@@ -242,7 +242,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
             }
             firstRefresh = false;
         } else if (type.equals("feed")) {
-            storiesService.getFeedStories(
+            storiesRepository.getFeedStories(
                     CoroutineUtilsKt.getContinuation((feedStoryModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         if (throwable != null) {
                             Log.e(TAG, "failed", throwable);
@@ -257,7 +257,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                     }), Dispatchers.getIO())
             );
         } else if (type.equals("archive")) {
-            storiesService.fetchArchive(
+            storiesRepository.fetchArchive(
                     endCursor,
                     CoroutineUtilsKt.getContinuation((archiveFetchResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         if (throwable != null) {
