@@ -66,6 +66,10 @@ public class CommentsViewerViewModel extends ViewModel {
         @Override
         public void onSuccess(final CommentsFetchResponse result) {
             // Log.d(TAG, "onSuccess: " + result);
+            if (result == null) {
+                rootList.postValue(Resource.error(t.getMessage(), getPrevList(rootList)));
+                return;
+            }
             List<Comment> comments = result.getComments();
             if (rootCursor == null) {
                 rootCount.postValue(result.getCommentCount());
@@ -88,6 +92,10 @@ public class CommentsViewerViewModel extends ViewModel {
         @Override
         public void onSuccess(final ChildCommentsFetchResponse result) {
             // Log.d(TAG, "onSuccess: " + result);
+            if (result == null) {
+                rootList.postValue(Resource.error(t.getMessage(), getPrevList(replyList)));
+                return;
+            }
             List<Comment> comments = result.getChildComments();
             // Replies
             if (repliesCursor == null) {
