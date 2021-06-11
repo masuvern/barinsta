@@ -67,7 +67,7 @@ public class CommentsViewerViewModel extends ViewModel {
         public void onSuccess(final CommentsFetchResponse result) {
             // Log.d(TAG, "onSuccess: " + result);
             if (result == null) {
-                rootList.postValue(Resource.error(t.getMessage(), getPrevList(rootList)));
+                rootList.postValue(Resource.error(R.string.generic_null_response, getPrevList(rootList)));
                 return;
             }
             List<Comment> comments = result.getComments();
@@ -93,7 +93,7 @@ public class CommentsViewerViewModel extends ViewModel {
         public void onSuccess(final ChildCommentsFetchResponse result) {
             // Log.d(TAG, "onSuccess: " + result);
             if (result == null) {
-                rootList.postValue(Resource.error(t.getMessage(), getPrevList(replyList)));
+                rootList.postValue(Resource.error(R.string.generic_null_response, getPrevList(replyList)));
                 return;
             }
             List<Comment> comments = result.getChildComments();
