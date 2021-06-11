@@ -291,7 +291,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-        storiesRepository = StoriesRepository.INSTANCE;
+        storiesRepository = StoriesRepository.Companion.getInstance();
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         setHasOptionsMenu(true);
     }

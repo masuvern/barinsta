@@ -335,7 +335,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         fragmentActivity = (MainActivity) requireActivity();
         friendshipRepository = isLoggedIn ? FriendshipRepository.Companion.getInstance() : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
-        storiesRepository = isLoggedIn ? StoriesRepository.INSTANCE : null;
+        storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
         mediaService = isLoggedIn ? MediaService.INSTANCE : null;
         userRepository = isLoggedIn ? UserRepository.Companion.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;

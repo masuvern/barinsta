@@ -136,7 +136,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         context = getContext();
         if (context == null) return;
         setHasOptionsMenu(true);
-        storiesRepository = StoriesRepository.INSTANCE;
+        storiesRepository = StoriesRepository.Companion.getInstance();
     }
 
     @NonNull

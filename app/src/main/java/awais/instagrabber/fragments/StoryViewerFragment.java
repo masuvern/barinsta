@@ -162,7 +162,7 @@ public class StoryViewerFragment extends Fragment {
         userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
-        storiesRepository = StoriesRepository.INSTANCE;
+        storiesRepository = StoriesRepository.Companion.getInstance();
         mediaService = MediaService.INSTANCE;
         directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);

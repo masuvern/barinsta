@@ -276,7 +276,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
-        storiesRepository = StoriesRepository.INSTANCE;
+        storiesRepository = StoriesRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
 

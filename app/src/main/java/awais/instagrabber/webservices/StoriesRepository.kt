@@ -19,8 +19,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
-object StoriesRepository {
-    private val service: StoriesService = retrofit.create(StoriesService::class.java)
+class StoriesRepository(private val service: StoriesService) {
 
     suspend fun fetch(mediaId: Long): StoryModel {
         val response = service.fetch(mediaId)
@@ -41,7 +40,8 @@ object StoriesRepository {
             if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(PreferenceKeys.HIDE_MUTED_REELS)) continue
             val userJson = node.getJSONObject(if (node.has("user")) "user" else "owner")
             try {
-                val user = User(userJson.getLong("pk"),
+                val user = User(
+                    userJson.getLong("pk"),
                     userJson.getString("username"),
                     userJson.optString("full_name"),
                     userJson.optBoolean("is_private"),
@@ -55,15 +55,18 @@ object StoriesRepository {
                 if (itemJson != null) {
                     firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, null)
                 }
-                feedStoryModels.add(FeedStoryModel(
-                    node.getString("id"),
-                    user,
-                    fullyRead,
-                    timestamp,
-                    firstStoryModel,
-                    node.getInt("media_count"),
-                    false,
-                    node.optBoolean("has_besties_media")))
+                feedStoryModels.add(
+                    FeedStoryModel(
+                        node.getString("id"),
+                        user,
+                        fullyRead,
+                        timestamp,
+                        firstStoryModel,
+                        node.getInt("media_count"),
+                        false,
+                        node.optBoolean("has_besties_media")
+                    )
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "parseStoriesBody: ", e)
             } // to cover promotional reels with non-long user pk's
@@ -72,23 +75,26 @@ object StoriesRepository {
         for (i in 0 until broadcasts.length()) {
             val node = broadcasts.getJSONObject(i)
             val userJson = node.getJSONObject("broadcast_owner")
-            val user = User(userJson.getLong("pk"),
+            val user = User(
+                userJson.getLong("pk"),
                 userJson.getString("username"),
                 userJson.optString("full_name"),
                 userJson.optBoolean("is_private"),
                 userJson.getString("profile_pic_url"),
                 userJson.optBoolean("is_verified")
             )
-            feedStoryModels.add(FeedStoryModel(
-                node.getString("id"),
-                user,
-                false,
-                node.getLong("published_time"),
-                ResponseBodyUtils.parseBroadcastItem(node),
-                1,
-                isLive = true,
-                isBestie = false
-            ))
+            feedStoryModels.add(
+                FeedStoryModel(
+                    node.getString("id"),
+                    user,
+                    false,
+                    node.getLong("published_time"),
+                    ResponseBodyUtils.parseBroadcastItem(node),
+                    1,
+                    isLive = true,
+                    isBestie = false
+                )
+            )
         }
         return sort(feedStoryModels)
     }
@@ -100,15 +106,17 @@ object StoriesRepository {
         val highlightModels: MutableList<HighlightModel> = ArrayList()
         for (i in 0 until length) {
             val highlightNode = highlightsReel.getJSONObject(i)
-            highlightModels.add(HighlightModel(
-                highlightNode.getString("title"),
-                highlightNode.getString(Constants.EXTRAS_ID),
-                highlightNode.getJSONObject("cover_media")
-                    .getJSONObject("cropped_image_version")
-                    .getString("url"),
-                highlightNode.getLong("latest_reel_media"),
-                highlightNode.getInt("media_count")
-            ))
+            highlightModels.add(
+                HighlightModel(
+                    highlightNode.getString("title"),
+                    highlightNode.getString(Constants.EXTRAS_ID),
+                    highlightNode.getJSONObject("cover_media")
+                        .getJSONObject("cropped_image_version")
+                        .getString("url"),
+                    highlightNode.getLong("latest_reel_media"),
+                    highlightNode.getInt("media_count")
+                )
+            )
         }
         return highlightModels
     }
@@ -129,13 +137,15 @@ object StoriesRepository {
         val highlightModels: MutableList<HighlightModel> = ArrayList()
         for (i in 0 until length) {
             val highlightNode = highlightsReel.getJSONObject(i)
-            highlightModels.add(HighlightModel(
-                null,
-                highlightNode.getString(Constants.EXTRAS_ID),
-                highlightNode.getJSONObject("cover_image_version").getString("url"),
-                highlightNode.getLong("latest_reel_media"),
-                highlightNode.getInt("media_count")
-            ))
+            highlightModels.add(
+                HighlightModel(
+                    null,
+                    highlightNode.getString(Constants.EXTRAS_ID),
+                    highlightNode.getJSONObject("cover_image_version").getString("url"),
+                    highlightNode.getLong("latest_reel_media"),
+                    highlightNode.getInt("media_count")
+                )
+            )
         }
         return ArchiveFetchResponse(highlightModels, data.getBoolean("more_available"), data.getString("max_id"))
     }
@@ -304,6 +314,18 @@ object StoriesRepository {
     class ArchiveFetchResponse(val result: List<HighlightModel>, val hasNextPage: Boolean, val nextCursor: String) {
         fun hasNextPage(): Boolean {
             return hasNextPage
+        }
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: StoriesRepository? = null
+
+        fun getInstance(): StoriesRepository {
+            return INSTANCE ?: synchronized(this) {
+                val service: StoriesService = retrofit.create(StoriesService::class.java)
+                StoriesRepository(service).also { INSTANCE = it }
+            }
         }
     }
 }
