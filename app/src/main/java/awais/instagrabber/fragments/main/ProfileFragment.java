@@ -347,6 +347,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         viewModel = new ViewModelProvider(this, new ProfileFragmentViewModelFactory(
                 UserRepository.Companion.getInstance(),
                 FriendshipRepository.Companion.getInstance(),
+                StoriesRepository.Companion.getInstance(),
                 this,
                 getArguments()
         )).get(ProfileFragmentViewModel.class);

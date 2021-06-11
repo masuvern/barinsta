@@ -3,9 +3,11 @@ package awais.instagrabber.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import awais.instagrabber.repositories.FriendshipService
+import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.UserService
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.webservices.FriendshipRepository
+import awais.instagrabber.webservices.StoriesRepository
 import awais.instagrabber.webservices.UserRepository
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +50,36 @@ internal class ProfileFragmentViewModelTest {
         }
     }
 
+    private val storiesService = object: StoriesService {
+        override suspend fun fetch(mediaId: Long): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getFeedStories(): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun fetchHighlights(uid: Long): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun fetchArchive(queryParams: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getUserStory(url: String): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun respondToSticker(storyId: String, stickerId: String, action: String, form: Map<String, String>): StoryStickerResponse {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun seen(queryParams: Map<String, String>, form: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+    }
+
     @Test
     fun testNoUsernameNoCurrentUser() {
         val state = SavedStateHandle(
@@ -57,6 +89,7 @@ internal class ProfileFragmentViewModelTest {
         )
         val userRepository = UserRepository(userService)
         val friendshipRepository = FriendshipRepository(friendshipService)
-        val viewModel = ProfileFragmentViewModel(state, userRepository, friendshipRepository)
+        val storiesRepository = StoriesRepository(storiesService)
+        val viewModel = ProfileFragmentViewModel(state, userRepository, friendshipRepository, storiesRepository)
     }
 }
