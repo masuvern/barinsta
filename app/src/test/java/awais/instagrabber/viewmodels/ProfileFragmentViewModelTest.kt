@@ -3,10 +3,12 @@ package awais.instagrabber.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import awais.instagrabber.repositories.FriendshipService
+import awais.instagrabber.repositories.MediaService
 import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.UserService
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.webservices.FriendshipRepository
+import awais.instagrabber.webservices.MediaRepository
 import awais.instagrabber.webservices.StoriesRepository
 import awais.instagrabber.webservices.UserRepository
 import org.junit.Test
@@ -50,7 +52,7 @@ internal class ProfileFragmentViewModelTest {
         }
     }
 
-    private val storiesService = object: StoriesService {
+    private val storiesService = object : StoriesService {
         override suspend fun fetch(mediaId: Long): String {
             TODO("Not yet implemented")
         }
@@ -80,6 +82,40 @@ internal class ProfileFragmentViewModelTest {
         }
     }
 
+    private val mediaService = object : MediaService {
+        override suspend fun fetch(mediaId: Long): MediaInfoResponse {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun fetchLikes(mediaId: String, action: String): LikersResponse {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun action(action: String, mediaId: String, signedForm: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun editCaption(mediaId: String, signedForm: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun translate(form: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun uploadFinish(retryContext: String, queryParams: Map<String, String>, signedForm: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun delete(mediaId: String, mediaType: String, signedForm: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun archive(mediaId: String, signedForm: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+    }
+
     @Test
     fun testNoUsernameNoCurrentUser() {
         val state = SavedStateHandle(
@@ -90,6 +126,13 @@ internal class ProfileFragmentViewModelTest {
         val userRepository = UserRepository(userService)
         val friendshipRepository = FriendshipRepository(friendshipService)
         val storiesRepository = StoriesRepository(storiesService)
-        val viewModel = ProfileFragmentViewModel(state, userRepository, friendshipRepository, storiesRepository)
+        val mediaRepository = MediaRepository(mediaService)
+        val viewModel = ProfileFragmentViewModel(
+            state,
+            userRepository,
+            friendshipRepository,
+            storiesRepository,
+            mediaRepository
+        )
     }
 }
