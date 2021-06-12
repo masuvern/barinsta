@@ -121,7 +121,7 @@ public class CommentsViewerViewModel extends ViewModel {
     };
 
     public CommentsViewerViewModel() {
-        graphQLRepository = GraphQLRepository.INSTANCE;
+        graphQLRepository = GraphQLRepository.Companion.getInstance();
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);

@@ -113,7 +113,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
         mediaRepository = isLoggedIn ? MediaRepository.Companion.getInstance() : null;
-        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         // setHasOptionsMenu(true);
     }
 

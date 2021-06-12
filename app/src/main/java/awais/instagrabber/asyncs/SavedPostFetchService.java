@@ -29,7 +29,7 @@ public class SavedPostFetchService implements PostFetcher.PostFetchService {
         this.type = type;
         this.isLoggedIn = isLoggedIn;
         this.collectionId = collectionId;
-        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 

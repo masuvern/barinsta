@@ -25,7 +25,7 @@ public class HashtagPostFetchService implements PostFetcher.PostFetchService {
         this.hashtagModel = hashtagModel;
         this.isLoggedIn = isLoggedIn;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
-        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
     }
 
     @Override

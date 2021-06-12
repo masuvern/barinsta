@@ -25,7 +25,7 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     public ProfilePostFetchService(final User profileModel, final boolean isLoggedIn) {
         this.profileModel = profileModel;
         this.isLoggedIn = isLoggedIn;
-        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 

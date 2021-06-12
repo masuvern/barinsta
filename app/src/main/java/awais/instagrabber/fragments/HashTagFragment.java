@@ -299,7 +299,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
         storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
-        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
 

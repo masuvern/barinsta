@@ -7,13 +7,11 @@ import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.extensions.TAG
-import awais.instagrabber.webservices.RetrofitFactory.retrofitWeb
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-object GraphQLRepository {
-    private val service: GraphQLService = retrofitWeb.create(GraphQLService::class.java)
+class GraphQLRepository(private val service: GraphQLService) {
 
     // TODO convert string response to a response class
     private suspend fun fetch(
@@ -145,14 +143,16 @@ object GraphQLRepository {
         val userModels: MutableList<User> = ArrayList()
         for (j in 0 until usersLen) {
             val userObject = users.getJSONObject(j).getJSONObject("node")
-            userModels.add(User(
-                userObject.getLong("id"),
-                userObject.getString("username"),
-                userObject.optString("full_name"),
-                userObject.optBoolean("is_private"),
-                userObject.getString("profile_pic_url"),
-                userObject.optBoolean("is_verified")
-            ))
+            userModels.add(
+                User(
+                    userObject.getLong("id"),
+                    userObject.getString("username"),
+                    userObject.optString("full_name"),
+                    userObject.optBoolean("is_private"),
+                    userObject.getString("profile_pic_url"),
+                    userObject.optBoolean("is_verified")
+                )
+            )
         }
         return GraphQLUserListFetchResponse(newEndCursor, status, userModels)
     }
@@ -240,7 +240,8 @@ object GraphQLRepository {
             body.getString("name"),
             timelineMedia.getLong("count"),
             if (body.optBoolean("is_following")) FollowingType.FOLLOWING else FollowingType.NOT_FOLLOWING,
-            null)
+            null
+        )
     }
 
     // TODO convert string response to a response class
@@ -262,5 +263,17 @@ object GraphQLRepository {
             body.optDouble("lng", 0.0),
             body.optDouble("lat", 0.0)
         )
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: GraphQLRepository? = null
+
+        fun getInstance(): GraphQLRepository {
+            return INSTANCE ?: synchronized(this) {
+                val service: GraphQLService = RetrofitFactory.retrofitWeb.create(GraphQLService::class.java)
+                GraphQLRepository(service).also { INSTANCE = it }
+            }
+        }
     }
 }

@@ -25,7 +25,7 @@ public class LocationPostFetchService implements PostFetcher.PostFetchService {
         this.locationModel = locationModel;
         this.isLoggedIn = isLoggedIn;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
     }
 
     @Override
