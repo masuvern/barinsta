@@ -2,15 +2,9 @@ package awais.instagrabber.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import awais.instagrabber.repositories.FriendshipService
-import awais.instagrabber.repositories.MediaService
-import awais.instagrabber.repositories.StoriesService
-import awais.instagrabber.repositories.UserService
+import awais.instagrabber.repositories.*
 import awais.instagrabber.repositories.responses.*
-import awais.instagrabber.webservices.FriendshipRepository
-import awais.instagrabber.webservices.MediaRepository
-import awais.instagrabber.webservices.StoriesRepository
-import awais.instagrabber.webservices.UserRepository
+import awais.instagrabber.webservices.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -116,6 +110,28 @@ internal class ProfileFragmentViewModelTest {
         }
     }
 
+    private val graphQLService = object : GraphQLService {
+        override suspend fun fetch(queryParams: Map<String, String>): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getUser(username: String): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getPost(shortcode: String): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getTag(tag: String): String {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getLocation(locationId: Long): String {
+            TODO("Not yet implemented")
+        }
+    }
+
     @Test
     fun testNoUsernameNoCurrentUser() {
         val state = SavedStateHandle(
@@ -127,12 +143,14 @@ internal class ProfileFragmentViewModelTest {
         val friendshipRepository = FriendshipRepository(friendshipService)
         val storiesRepository = StoriesRepository(storiesService)
         val mediaRepository = MediaRepository(mediaService)
+        val graphQLRepository = GraphQLRepository(graphQLService)
         val viewModel = ProfileFragmentViewModel(
             state,
             userRepository,
             friendshipRepository,
             storiesRepository,
-            mediaRepository
+            mediaRepository,
+            graphQLRepository,
         )
     }
 }
