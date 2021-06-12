@@ -5,7 +5,6 @@ package awais.instagrabber.utils
 import android.content.Context
 import android.util.Log
 import android.webkit.CookieManager
-import awais.instagrabber.db.datasources.AccountDataSource
 import awais.instagrabber.db.repositories.AccountRepository
 import java.net.CookiePolicy
 import java.net.HttpCookie
@@ -49,7 +48,7 @@ fun setupCookies(cookieRaw: String) {
 
 suspend fun removeAllAccounts(context: Context) {
     NET_COOKIE_MANAGER.cookieStore.removeAll()
-    AccountRepository.getInstance(AccountDataSource.getInstance(context)).deleteAllAccounts()
+    AccountRepository.getInstance(context).deleteAllAccounts()
 }
 
 fun getUserIdFromCookie(cookies: String?): Long {

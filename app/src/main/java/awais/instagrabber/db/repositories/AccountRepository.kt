@@ -1,9 +1,10 @@
 package awais.instagrabber.db.repositories
 
+import android.content.Context
 import awais.instagrabber.db.datasources.AccountDataSource
 import awais.instagrabber.db.entities.Account
 
-class AccountRepository private constructor(private val accountDataSource: AccountDataSource) {
+class AccountRepository(private val accountDataSource: AccountDataSource) {
     suspend fun getAccount(uid: Long): Account? = accountDataSource.getAccount(uid.toString())
 
     suspend fun getAllAccounts(): List<Account> = accountDataSource.getAllAccounts()
@@ -36,14 +37,14 @@ class AccountRepository private constructor(private val accountDataSource: Accou
     suspend fun deleteAllAccounts() = accountDataSource.deleteAllAccounts()
 
     companion object {
-        private lateinit var instance: AccountRepository
+        @Volatile
+        private var INSTANCE: AccountRepository? = null
 
-        @JvmStatic
-        fun getInstance(accountDataSource: AccountDataSource): AccountRepository {
-            if (!this::instance.isInitialized) {
-                instance = AccountRepository(accountDataSource)
+        fun getInstance(context: Context): AccountRepository {
+            return INSTANCE ?: synchronized(this) {
+                val dataSource: AccountDataSource = AccountDataSource.getInstance(context)
+                AccountRepository(dataSource).also { INSTANCE = it }
             }
-            return instance
         }
     }
 }

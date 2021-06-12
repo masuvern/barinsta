@@ -60,7 +60,6 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.databinding.LayoutProfileDetailsBinding;
-import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
@@ -341,7 +340,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         final Context context = getContext();
         if (context == null) return;
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
+        accountRepository = AccountRepository.Companion.getInstance(context);
         favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
         viewModel = new ViewModelProvider(this, new ProfileFragmentViewModelFactory(

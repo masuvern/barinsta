@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.entities.Favorite;
@@ -199,8 +198,9 @@ public final class ExportImportUtils {
             Log.e(TAG, "importAccounts: Error parsing json", e);
             return;
         }
-        AccountRepository.getInstance(AccountDataSource.getInstance(context))
-                         .insertOrUpdateAccounts(accounts, CoroutineUtilsKt.getContinuation((unit, throwable) -> {}, Dispatchers.getIO()));
+        AccountRepository.Companion
+                .getInstance(context)
+                .insertOrUpdateAccounts(accounts, CoroutineUtilsKt.getContinuation((unit, throwable) -> {}, Dispatchers.getIO()));
     }
 
     private static void importSettings(final JSONObject jsonObject) {
@@ -397,7 +397,7 @@ public final class ExportImportUtils {
 
     private static ListenableFuture<JSONArray> getCookies(final Context context) {
         final SettableFuture<JSONArray> future = SettableFuture.create();
-        final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
+        final AccountRepository accountRepository = AccountRepository.Companion.getInstance(context);
         accountRepository.getAllAccounts(
                 CoroutineUtilsKt.getContinuation((accounts, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {

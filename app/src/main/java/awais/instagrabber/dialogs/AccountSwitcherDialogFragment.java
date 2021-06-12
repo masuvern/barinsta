@@ -22,7 +22,6 @@ import java.util.List;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.AccountSwitcherAdapter;
 import awais.instagrabber.databinding.DialogAccountSwitcherBinding;
-import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.utils.AppExecutors;
@@ -115,7 +114,7 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
     @Override
     public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
+        accountRepository = AccountRepository.Companion.getInstance(context);
     }
 
     @Override

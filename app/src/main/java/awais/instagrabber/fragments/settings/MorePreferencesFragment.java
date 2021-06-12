@@ -28,7 +28,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
-import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
 import awais.instagrabber.utils.AppExecutors;
@@ -74,7 +73,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
         if (context == null) return;
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
+        accountRepository = AccountRepository.Companion.getInstance(context);
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);
