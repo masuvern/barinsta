@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
 import awais.instagrabber.db.repositories.AccountRepository
+import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.*
@@ -17,6 +18,7 @@ class ProfileFragmentViewModel(
     mediaRepository: MediaRepository,
     graphQLRepository: GraphQLRepository,
     accountRepository: AccountRepository,
+    favoriteRepository: FavoriteRepository,
 ) : ViewModel() {
     private val _profile = MutableLiveData<User?>()
     val profile: LiveData<User?> = _profile
@@ -40,6 +42,7 @@ class ProfileFragmentViewModelFactory(
     private val mediaRepository: MediaRepository,
     private val graphQLRepository: GraphQLRepository,
     private val accountRepository: AccountRepository,
+    private val favoriteRepository: FavoriteRepository,
     owner: SavedStateRegistryOwner,
     defaultArgs: Bundle? = null,
 ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
@@ -56,6 +59,7 @@ class ProfileFragmentViewModelFactory(
             mediaRepository,
             graphQLRepository,
             accountRepository,
+            favoriteRepository,
         ) as T
     }
 }

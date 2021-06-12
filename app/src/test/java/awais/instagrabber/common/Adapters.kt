@@ -1,7 +1,10 @@
 package awais.instagrabber.common
 
 import awais.instagrabber.db.dao.AccountDao
+import awais.instagrabber.db.dao.FavoriteDao
 import awais.instagrabber.db.entities.Account
+import awais.instagrabber.db.entities.Favorite
+import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.*
 import awais.instagrabber.repositories.responses.*
 
@@ -149,6 +152,32 @@ open class AccountDaoAdapter : AccountDao {
     }
 
     override suspend fun deleteAllAccounts() {
+        TODO("Not yet implemented")
+    }
+}
+
+open class FavoriteDaoAdapter: FavoriteDao {
+    override suspend fun getAllFavorites(): List<Favorite> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun findFavoriteByQueryAndType(query: String, type: FavoriteType): Favorite? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun insertFavorites(vararg favorites: Favorite) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateFavorites(vararg favorites: Favorite) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteFavorites(vararg favorites: Favorite) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteAllFavorites() {
         TODO("Not yet implemented")
     }
 }

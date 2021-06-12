@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import awais.instagrabber.common.*
 import awais.instagrabber.db.datasources.AccountDataSource
+import awais.instagrabber.db.datasources.FavoriteDataSource
 import awais.instagrabber.db.repositories.AccountRepository
+import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.webservices.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +27,7 @@ internal class ProfileFragmentViewModelTest {
         val graphQLRepository = GraphQLRepository(GraphQLServiceAdapter())
         val accountDataSource = AccountDataSource(AccountDaoAdapter())
         val accountRepository = AccountRepository(accountDataSource)
+        val favoriteRepository = FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter()))
         val viewModel = ProfileFragmentViewModel(
             state,
             userRepository,
@@ -33,6 +36,7 @@ internal class ProfileFragmentViewModelTest {
             mediaRepository,
             graphQLRepository,
             accountRepository,
+            favoriteRepository
         )
     }
 }

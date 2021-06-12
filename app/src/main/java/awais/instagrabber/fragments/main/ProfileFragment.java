@@ -349,6 +349,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 MediaRepository.Companion.getInstance(),
                 GraphQLRepository.Companion.getInstance(),
                 accountRepository,
+                favoriteRepository,
                 this,
                 getArguments()
         )).get(ProfileFragmentViewModel.class);
