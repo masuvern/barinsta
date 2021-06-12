@@ -45,7 +45,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
 import awais.instagrabber.webservices.FriendshipRepository;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlinx.coroutines.Dispatchers;
@@ -61,7 +61,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private boolean shouldRefresh = true;
     private NotificationViewModel notificationViewModel;
     private FriendshipRepository friendshipRepository;
-    private MediaService mediaService;
+    private MediaRepository mediaRepository;
     private NewsService newsService;
     private String csrfToken, deviceUuid;
     private String type;
@@ -108,7 +108,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         .setView(R.layout.dialog_opening_post)
                         .create();
                 alertDialog.show();
-                mediaService.fetch(
+                mediaRepository.fetch(
                         mediaId,
                         CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                             if (throwable != null) {
@@ -229,7 +229,7 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         friendshipRepository = FriendshipRepository.Companion.getInstance();
-        mediaService = MediaService.INSTANCE;
+        mediaRepository = MediaRepository.INSTANCE;
         newsService = NewsService.getInstance();
     }
 

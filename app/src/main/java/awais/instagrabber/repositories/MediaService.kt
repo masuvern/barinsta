@@ -4,7 +4,7 @@ import awais.instagrabber.repositories.responses.LikersResponse
 import awais.instagrabber.repositories.responses.MediaInfoResponse
 import retrofit2.http.*
 
-interface MediaRepository {
+interface MediaService {
     @GET("/api/v1/media/{mediaId}/info/")
     suspend fun fetch(@Path("mediaId") mediaId: Long): MediaInfoResponse
 

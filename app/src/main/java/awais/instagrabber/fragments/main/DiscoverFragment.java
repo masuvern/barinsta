@@ -35,7 +35,7 @@ import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.TopicClusterViewModel;
 import awais.instagrabber.webservices.DiscoverService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlinx.coroutines.Dispatchers;
 
@@ -48,7 +48,7 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
     private TopicClusterViewModel topicClusterViewModel;
     private boolean shouldRefresh = true;
     private DiscoverService discoverService;
-    private MediaService mediaService;
+    private MediaRepository mediaRepository;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
         // final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
         // final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         // final long userId = CookieUtils.getUserIdFromCookie(cookie);
-        mediaService = MediaService.INSTANCE;
+        mediaRepository = MediaRepository.INSTANCE;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
                 alertDialog.show();
                 final String pk = coverMedia.getPk();
                 if (pk == null) return;
-                mediaService.fetch(
+                mediaRepository.fetch(
                         Long.parseLong(pk),
                         CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                             if (throwable != null) {

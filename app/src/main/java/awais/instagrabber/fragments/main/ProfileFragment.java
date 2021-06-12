@@ -94,7 +94,7 @@ import awais.instagrabber.viewmodels.ProfileFragmentViewModelFactory;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.FriendshipRepository;
 import awais.instagrabber.webservices.GraphQLService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
 import awais.instagrabber.webservices.UserRepository;
@@ -120,7 +120,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private Handler usernameSettingHandler;
     private FriendshipRepository friendshipRepository;
     private StoriesRepository storiesRepository;
-    private MediaService mediaService;
+    private MediaRepository mediaRepository;
     private UserRepository userRepository;
     private GraphQLService graphQLService;
     private DirectMessagesService directMessagesService;
@@ -336,7 +336,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         friendshipRepository = isLoggedIn ? FriendshipRepository.Companion.getInstance() : null;
         directMessagesService = isLoggedIn ? DirectMessagesService.INSTANCE : null;
         storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
-        mediaService = isLoggedIn ? MediaService.INSTANCE : null;
+        mediaRepository = isLoggedIn ? MediaRepository.INSTANCE : null;
         userRepository = isLoggedIn ? UserRepository.Companion.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         final Context context = getContext();
@@ -865,7 +865,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                                     Utils.copyText(context, biography);
                                     break;
                                 case 1:
-                                    mediaService.translate(String.valueOf(profileModel.getPk()), "3", CoroutineUtilsKt.getContinuation(
+                                    mediaRepository.translate(String.valueOf(profileModel.getPk()), "3", CoroutineUtilsKt.getContinuation(
                                             (result, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                                                 if (throwable != null) {
                                                     Log.e(TAG, "Error translating bio", throwable);

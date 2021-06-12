@@ -99,7 +99,7 @@ import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
 import awais.instagrabber.webservices.DirectMessagesService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
@@ -123,7 +123,7 @@ public class StoryViewerFragment extends Fragment {
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
     private StoriesRepository storiesRepository;
-    private MediaService mediaService;
+    private MediaRepository mediaRepository;
     private StoryModel currentStory;
     private int slidePos;
     private int lastSlidePos;
@@ -163,7 +163,7 @@ public class StoryViewerFragment extends Fragment {
         deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesRepository = StoriesRepository.Companion.getInstance();
-        mediaService = MediaService.INSTANCE;
+        mediaRepository = MediaRepository.INSTANCE;
         directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);
     }
@@ -476,7 +476,7 @@ public class StoryViewerFragment extends Fragment {
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            mediaService.fetch(
+            mediaRepository.fetch(
                     Long.parseLong(mediaId),
                     CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                         if (throwable != null) {

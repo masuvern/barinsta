@@ -1,7 +1,7 @@
 package awais.instagrabber.webservices
 
 import awais.instagrabber.models.enums.MediaItemType
-import awais.instagrabber.repositories.MediaRepository
+import awais.instagrabber.repositories.MediaService
 import awais.instagrabber.repositories.requests.Clip
 import awais.instagrabber.repositories.requests.UploadFinishOptions
 import awais.instagrabber.repositories.responses.Media
@@ -12,18 +12,18 @@ import awais.instagrabber.utils.retryContextString
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import org.json.JSONObject
 
-object MediaService {
+object MediaRepository {
     private val DELETABLE_ITEMS_TYPES = listOf(
         MediaItemType.MEDIA_TYPE_IMAGE,
         MediaItemType.MEDIA_TYPE_VIDEO,
         MediaItemType.MEDIA_TYPE_SLIDER
     )
-    private val repository: MediaRepository = retrofit.create(MediaRepository::class.java)
+    private val service: MediaService = retrofit.create(MediaService::class.java)
 
     suspend fun fetch(
         mediaId: Long,
     ): Media? {
-        val response = repository.fetch(mediaId)
+        val response = service.fetch(mediaId)
         return if (response.items.isNullOrEmpty()) {
             null
         } else response.items[0]
@@ -77,7 +77,7 @@ object MediaService {
         }
         // there also exists "removed_collection_ids" which can be used with "save" and "unsave"
         val signedForm = Utils.sign(form)
-        val response = repository.action(action, mediaId, signedForm)
+        val response = service.action(action, mediaId, signedForm)
         val jsonObject = JSONObject(response)
         val status = jsonObject.optString("status")
         return status == "ok"
@@ -99,7 +99,7 @@ object MediaService {
             "caption_text" to newCaption,
         )
         val signedForm = Utils.sign(form)
-        val response = repository.editCaption(postId, signedForm)
+        val response = service.editCaption(postId, signedForm)
         val jsonObject = JSONObject(response)
         val status = jsonObject.optString("status")
         return status == "ok"
@@ -109,7 +109,7 @@ object MediaService {
         mediaId: String,
         isComment: Boolean,
     ): List<User> {
-        val response = repository.fetchLikes(mediaId, if (isComment) "comment_likers" else "likers")
+        val response = service.fetchLikes(mediaId, if (isComment) "comment_likers" else "likers")
         return response.users
     }
 
@@ -121,7 +121,7 @@ object MediaService {
             "id" to id,
             "type" to type,
         )
-        val response = repository.translate(form)
+        val response = service.translate(form)
         val jsonObject = JSONObject(response)
         return jsonObject.optString("translation")
     }
@@ -152,7 +152,7 @@ object MediaService {
         }
         val queryMap = if (options.videoOptions != null) mapOf("video" to "1") else emptyMap()
         val signedForm = Utils.sign(form)
-        return repository.uploadFinish(retryContextString, queryMap, signedForm)
+        return service.uploadFinish(retryContextString, queryMap, signedForm)
     }
 
     suspend fun delete(
@@ -177,6 +177,6 @@ object MediaService {
             MediaItemType.MEDIA_TYPE_SLIDER -> "CAROUSEL"
             else -> return null
         }
-        return repository.delete(postId, mediaType, signedForm)
+        return service.delete(postId, mediaType, signedForm)
     }
 }

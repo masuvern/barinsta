@@ -59,7 +59,7 @@ import awais.instagrabber.utils.emoji.EmojiParser
 import awais.instagrabber.viewmodels.AppStateViewModel
 import awais.instagrabber.viewmodels.DirectInboxViewModel
 import awais.instagrabber.webservices.GraphQLService
-import awais.instagrabber.webservices.MediaService
+import awais.instagrabber.webservices.MediaRepository
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.ScrollingViewBehavior
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -637,7 +637,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         alertDialog.show()
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val media = if (isLoggedIn) MediaService.fetch(shortcodeToId(shortCode)) else GraphQLService.fetchPost(shortCode)
+                val media = if (isLoggedIn) MediaRepository.fetch(shortcodeToId(shortCode)) else GraphQLService.fetchPost(shortCode)
                 withContext(Dispatchers.Main) {
                     if (media == null) {
                         Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()

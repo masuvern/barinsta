@@ -32,7 +32,7 @@ import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.DirectMessagesService
 import awais.instagrabber.webservices.FriendshipRepository
-import awais.instagrabber.webservices.MediaService
+import awais.instagrabber.webservices.MediaRepository
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Iterables
 import kotlinx.coroutines.CoroutineScope
@@ -453,7 +453,7 @@ class ThreadManager(
                     "4",
                     null
                 )
-                MediaService.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
+                MediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
                 val broadcastResponse = DirectMessagesService.broadcastVoice(
                     csrfToken,
                     viewerId,
@@ -791,7 +791,7 @@ class ThreadManager(
                     "2",
                     VideoOptions(duration / 1000f, emptyList(), 0, false)
                 )
-                MediaService.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
+                MediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
                 val broadcastResponse = DirectMessagesService.broadcastVideo(
                     csrfToken,
                     viewerId,

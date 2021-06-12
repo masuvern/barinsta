@@ -31,7 +31,7 @@ import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.GraphQLService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlinx.coroutines.Dispatchers;
 
@@ -42,7 +42,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
 
     private FragmentLikesBinding binding;
     private RecyclerLazyLoader lazyLoader;
-    private MediaService mediaService;
+    private MediaRepository mediaRepository;
     private GraphQLService graphQLService;
     private boolean isLoggedIn;
     private String postId, endCursor;
@@ -112,7 +112,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         // final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
-        mediaService = isLoggedIn ? MediaService.INSTANCE : null;
+        mediaRepository = isLoggedIn ? MediaRepository.INSTANCE : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         // setHasOptionsMenu(true);
     }
@@ -147,7 +147,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
                     }), Dispatchers.getIO())
             );
         } else {
-            mediaService.fetchLikes(
+            mediaRepository.fetchLikes(
                     postId,
                     isComment,
                     CoroutineUtilsKt.getContinuation((users, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
