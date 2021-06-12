@@ -30,7 +30,7 @@ import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlinx.coroutines.Dispatchers;
@@ -43,7 +43,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     private FragmentLikesBinding binding;
     private RecyclerLazyLoader lazyLoader;
     private MediaRepository mediaRepository;
-    private GraphQLService graphQLService;
+    private GraphQLRepository graphQLRepository;
     private boolean isLoggedIn;
     private String postId, endCursor;
     private boolean isComment;
@@ -113,7 +113,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
         mediaRepository = isLoggedIn ? MediaRepository.Companion.getInstance() : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
         // setHasOptionsMenu(true);
     }
 
@@ -135,7 +135,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onRefresh() {
         if (isComment && !isLoggedIn) {
             lazyLoader.resetState();
-            graphQLService.fetchCommentLikers(
+            graphQLRepository.fetchCommentLikers(
                     postId,
                     null,
                     CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
@@ -175,7 +175,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
             binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
                 if (!TextUtils.isEmpty(endCursor)) {
-                    graphQLService.fetchCommentLikers(
+                    graphQLRepository.fetchCommentLikers(
                             postId,
                             endCursor,
                             CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {

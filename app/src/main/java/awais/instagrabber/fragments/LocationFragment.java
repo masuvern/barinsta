@@ -63,7 +63,7 @@ import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.LocationService;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
@@ -88,7 +88,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private Location locationModel;
     private ActionMode actionMode;
     private StoriesRepository storiesRepository;
-    private GraphQLService graphQLService;
+    private GraphQLRepository graphQLRepository;
     private LocationService locationService;
     private boolean isLoggedIn;
     private boolean storiesFetching;
@@ -208,7 +208,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (user == null) return;
             if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
-                graphQLService.fetchPost(
+                graphQLRepository.fetchPost(
                         feedModel.getCode(),
                         CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                             opening = false;
@@ -292,7 +292,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
         storiesRepository = StoriesRepository.Companion.getInstance();
-        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -400,7 +400,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private void fetchLocationModel() {
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) locationService.fetch(locationId, cb);
-        else graphQLService.fetchLocation(
+        else graphQLRepository.fetchLocation(
                 locationId,
                 CoroutineUtilsKt.getContinuation((location, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {

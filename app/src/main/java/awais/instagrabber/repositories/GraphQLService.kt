@@ -4,7 +4,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
-interface GraphQLRepository {
+interface GraphQLService {
     @GET("/graphql/query/")
     suspend fun fetch(@QueryMap(encoded = true) queryParams: Map<String, String>): String
 

@@ -2,7 +2,7 @@ package awais.instagrabber.webservices
 
 import android.util.Log
 import awais.instagrabber.models.enums.FollowingType
-import awais.instagrabber.repositories.GraphQLRepository
+import awais.instagrabber.repositories.GraphQLService
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.ResponseBodyUtils
@@ -12,8 +12,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-object GraphQLService {
-    private val repository: GraphQLRepository = retrofitWeb.create(GraphQLRepository::class.java)
+object GraphQLRepository {
+    private val service: GraphQLService = retrofitWeb.create(GraphQLService::class.java)
 
     // TODO convert string response to a response class
     private suspend fun fetch(
@@ -27,7 +27,7 @@ object GraphQLService {
             "query_hash" to queryHash,
             "variables" to variables,
         )
-        val response = repository.fetch(queryMap)
+        val response = service.fetch(queryMap)
         return parsePostResponse(response, arg1, arg2, backup)
     }
 
@@ -134,7 +134,7 @@ object GraphQLService {
             "query_hash" to "5f0b1f6281e72053cbc07909c8d154ae",
             "variables" to "{\"comment_id\":\"" + commentId + "\"," + "\"first\":30," + "\"after\":\"" + (endCursor ?: "") + "\"}"
         )
-        val response = repository.fetch(queryMap)
+        val response = service.fetch(queryMap)
         val body = JSONObject(response)
         val status = body.getString("status")
         val data = body.getJSONObject("data").getJSONObject("comment").getJSONObject("edge_liked_by")
@@ -171,14 +171,14 @@ object GraphQLService {
             "query_hash" to if (root) "bc3296d1ce80a24b1b6e40b1e72903f5" else "51fdd02b67508306ad4484ff574a0b62",
             "variables" to JSONObject(variables).toString()
         )
-        return repository.fetch(queryMap)
+        return service.fetch(queryMap)
     }
 
     // TODO convert string response to a response class
     suspend fun fetchUser(
         username: String,
     ): User {
-        val response = repository.getUser(username)
+        val response = service.getUser(username)
         val body = JSONObject(response)
         val userJson = body.getJSONObject("graphql").getJSONObject(Constants.EXTRAS_USER)
         val isPrivate = userJson.getBoolean("is_private")
@@ -220,7 +220,7 @@ object GraphQLService {
     suspend fun fetchPost(
         shortcode: String,
     ): Media {
-        val response = repository.getPost(shortcode)
+        val response = service.getPost(shortcode)
         val body = JSONObject(response)
         val media = body.getJSONObject("graphql").getJSONObject("shortcode_media")
         return ResponseBodyUtils.parseGraphQLItem(media, null)
@@ -230,7 +230,7 @@ object GraphQLService {
     suspend fun fetchTag(
         tag: String,
     ): Hashtag {
-        val response = repository.getTag(tag)
+        val response = service.getTag(tag)
         val body = JSONObject(response)
             .getJSONObject("graphql")
             .getJSONObject(Constants.EXTRAS_HASHTAG)
@@ -247,7 +247,7 @@ object GraphQLService {
     suspend fun fetchLocation(
         locationId: Long,
     ): Location {
-        val response = repository.getLocation(locationId)
+        val response = service.getLocation(locationId)
         val body = JSONObject(response)
             .getJSONObject("graphql")
             .getJSONObject(Constants.EXTRAS_LOCATION)

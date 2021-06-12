@@ -33,7 +33,7 @@ import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.CommentService;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlin.coroutines.Continuation;
 import kotlinx.coroutines.Dispatchers;
@@ -48,7 +48,7 @@ public class CommentsViewerViewModel extends ViewModel {
     private final MutableLiveData<Resource<List<Comment>>> rootList = new MutableLiveData<>();
     private final MutableLiveData<Integer> rootCount = new MutableLiveData<>(0);
     private final MutableLiveData<Resource<List<Comment>>> replyList = new MutableLiveData<>();
-    private final GraphQLService graphQLService;
+    private final GraphQLRepository graphQLRepository;
 
     private String shortCode;
     private String postId;
@@ -121,7 +121,7 @@ public class CommentsViewerViewModel extends ViewModel {
     };
 
     public CommentsViewerViewModel() {
-        graphQLService = GraphQLService.INSTANCE;
+        graphQLRepository = GraphQLRepository.INSTANCE;
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final String deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
@@ -173,7 +173,7 @@ public class CommentsViewerViewModel extends ViewModel {
             commentService.fetchComments(postId, rootCursor, ccb);
             return;
         }
-        graphQLService.fetchComments(
+        graphQLRepository.fetchComments(
                 shortCode,
                 true,
                 rootCursor,
@@ -202,7 +202,7 @@ public class CommentsViewerViewModel extends ViewModel {
             commentService.fetchChildComments(postId, commentId, repliesCursor, rcb);
             return;
         }
-        graphQLService.fetchComments(commentId, false, repliesCursor, enqueueRequest(false, commentId, rcb));
+        graphQLRepository.fetchComments(commentId, false, repliesCursor, enqueueRequest(false, commentId, rcb));
     }
 
     private Continuation<String> enqueueRequest(final boolean root,

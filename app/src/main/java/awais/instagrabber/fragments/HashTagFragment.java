@@ -67,7 +67,7 @@ import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
 import awais.instagrabber.webservices.TagsService;
@@ -96,7 +96,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private StoriesRepository storiesRepository;
     private boolean isLoggedIn;
     private TagsService tagsService;
-    private GraphQLService graphQLService;
+    private GraphQLRepository graphQLRepository;
     private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
     private Media downloadFeedModel;
@@ -218,7 +218,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (TextUtils.isEmpty(user.getUsername())) {
                 // this only happens for anons
                 opening = true;
-                graphQLService.fetchPost(feedModel.getCode(), CoroutineUtilsKt.getContinuation((media, throwable) -> {
+                graphQLRepository.fetchPost(feedModel.getCode(), CoroutineUtilsKt.getContinuation((media, throwable) -> {
                     opening = false;
                     if (throwable != null) {
                         Log.e(TAG, "Error", throwable);
@@ -299,7 +299,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
         storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -380,7 +380,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private void fetchHashtagModel() {
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isLoggedIn) tagsService.fetch(hashtag, cb);
-        else graphQLService.fetchTag(hashtag, CoroutineUtilsKt.getContinuation((hashtag1, throwable) -> {
+        else graphQLRepository.fetchTag(hashtag, CoroutineUtilsKt.getContinuation((hashtag1, throwable) -> {
             if (throwable != null) {
                 cb.onFailure(throwable);
                 return;

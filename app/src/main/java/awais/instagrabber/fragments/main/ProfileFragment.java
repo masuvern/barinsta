@@ -93,7 +93,7 @@ import awais.instagrabber.viewmodels.ProfileFragmentViewModel;
 import awais.instagrabber.viewmodels.ProfileFragmentViewModelFactory;
 import awais.instagrabber.webservices.DirectMessagesService;
 import awais.instagrabber.webservices.FriendshipRepository;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
@@ -122,7 +122,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private StoriesRepository storiesRepository;
     private MediaRepository mediaRepository;
     private UserRepository userRepository;
-    private GraphQLService graphQLService;
+    private GraphQLRepository graphQLRepository;
     private DirectMessagesService directMessagesService;
     private boolean shouldRefresh = true;
     private boolean hasStories = false;
@@ -338,7 +338,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
         mediaRepository = isLoggedIn ? MediaRepository.Companion.getInstance() : null;
         userRepository = isLoggedIn ? UserRepository.Companion.getInstance() : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
         final Context context = getContext();
         if (context == null) return;
         accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
@@ -669,7 +669,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             );
             return;
         }
-        graphQLService.fetchUser(
+        graphQLRepository.fetchUser(
                 usernameTemp,
                 CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {

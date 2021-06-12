@@ -8,7 +8,7 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.CoroutineUtilsKt;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
 import kotlinx.coroutines.Dispatchers;
@@ -16,7 +16,7 @@ import kotlinx.coroutines.Dispatchers;
 public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "ProfilePostFetchService";
     private final ProfileService profileService;
-    private final GraphQLService graphQLService;
+    private final GraphQLRepository graphQLRepository;
     private final User profileModel;
     private final boolean isLoggedIn;
     private String nextMaxId;
@@ -25,7 +25,7 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     public ProfilePostFetchService(final User profileModel, final boolean isLoggedIn) {
         this.profileModel = profileModel;
         this.isLoggedIn = isLoggedIn;
-        graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.INSTANCE;
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 
@@ -51,7 +51,7 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
             }
         };
         if (isLoggedIn) profileService.fetchPosts(profileModel.getPk(), nextMaxId, cb);
-        else graphQLService.fetchProfilePosts(
+        else graphQLRepository.fetchProfilePosts(
                 profileModel.getPk(),
                 30,
                 nextMaxId,
