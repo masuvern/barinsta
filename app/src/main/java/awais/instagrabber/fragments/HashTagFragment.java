@@ -48,7 +48,6 @@ import awais.instagrabber.asyncs.HashtagPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentHashtagBinding;
 import awais.instagrabber.databinding.LayoutHashtagDetailsBinding;
-import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
@@ -478,7 +477,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         hashtagDetailsBinding.favChip.setVisibility(View.VISIBLE);
         final Context context = getContext();
         if (context == null) return;
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
+        final FavoriteRepository favoriteRepository = FavoriteRepository.Companion.getInstance(context);
         favoriteRepository.getFavorite(
                 hashtag,
                 FavoriteType.HASHTAG,

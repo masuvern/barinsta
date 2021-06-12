@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.datasources.RecentSearchDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.entities.RecentSearch;
@@ -83,7 +82,7 @@ public class SearchFragmentViewModel extends AppStateViewModel {
         distinctQuery = distinctUntilChanged(query);
         searchService = SearchService.getInstance();
         recentSearchRepository = RecentSearchRepository.getInstance(RecentSearchDataSource.getInstance(application));
-        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(application));
+        favoriteRepository = FavoriteRepository.Companion.getInstance(application);
     }
 
     public LiveData<String> getQuery() {

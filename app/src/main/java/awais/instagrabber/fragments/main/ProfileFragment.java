@@ -60,7 +60,6 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.customviews.PrimaryActionModeCallback.CallbacksHelper;
 import awais.instagrabber.databinding.FragmentProfileBinding;
 import awais.instagrabber.databinding.LayoutProfileDetailsBinding;
-import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.FavoriteRepository;
@@ -341,7 +340,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final Context context = getContext();
         if (context == null) return;
         accountRepository = AccountRepository.Companion.getInstance(context);
-        favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
+        favoriteRepository = FavoriteRepository.Companion.getInstance(context);
         appStateViewModel = new ViewModelProvider(fragmentActivity).get(AppStateViewModel.class);
         viewModel = new ViewModelProvider(this, new ProfileFragmentViewModelFactory(
                 UserRepository.Companion.getInstance(),
@@ -709,7 +708,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         profileDetailsBinding.isPrivate.setVisibility(profileModel.isPrivate() ? View.VISIBLE : View.GONE);
 
         setupButtons(profileId);
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(getContext()));
+        final FavoriteRepository favoriteRepository = FavoriteRepository.Companion.getInstance(getContext());
         favoriteRepository.getFavorite(
                 profileModel.getUsername(),
                 FavoriteType.USER,

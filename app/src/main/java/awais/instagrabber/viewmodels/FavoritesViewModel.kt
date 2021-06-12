@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import awais.instagrabber.db.datasources.FavoriteDataSource
 import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.utils.extensions.TAG
@@ -18,7 +17,7 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
     private val _list = MutableLiveData<List<Favorite>>()
     val list: LiveData<List<Favorite>> = _list
 
-    private val favoriteRepository: FavoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(application))
+    private val favoriteRepository: FavoriteRepository = FavoriteRepository.getInstance(application)
 
     init {
         fetch()

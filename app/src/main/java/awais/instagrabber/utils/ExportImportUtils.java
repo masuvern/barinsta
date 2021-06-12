@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
@@ -158,7 +157,7 @@ public final class ExportImportUtils {
                     LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneId.systemDefault())
             );
             // Log.d(TAG, "importJson: favoriteModel: " + favoriteModel);
-            final FavoriteRepository favRepo = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
+            final FavoriteRepository favRepo = FavoriteRepository.Companion.getInstance(context);
             favRepo.getFavorite(
                     query,
                     favoriteType,
@@ -365,7 +364,7 @@ public final class ExportImportUtils {
 
     private static ListenableFuture<JSONArray> getFavorites(final Context context) {
         final SettableFuture<JSONArray> future = SettableFuture.create();
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
+        final FavoriteRepository favoriteRepository = FavoriteRepository.Companion.getInstance(context);
         favoriteRepository.getAllFavorites(
                 CoroutineUtilsKt.getContinuation((favorites, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                     if (throwable != null) {

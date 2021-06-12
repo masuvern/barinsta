@@ -6,7 +6,7 @@ import awais.instagrabber.db.dao.FavoriteDao
 import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.models.enums.FavoriteType
 
-class FavoriteDataSource private constructor(private val favoriteDao: FavoriteDao) {
+class FavoriteDataSource(private val favoriteDao: FavoriteDao) {
     suspend fun getFavorite(query: String, type: FavoriteType): Favorite? = favoriteDao.findFavoriteByQueryAndType(query, type)
 
     suspend fun getAllFavorites(): List<Favorite> = favoriteDao.getAllFavorites()
@@ -26,20 +26,14 @@ class FavoriteDataSource private constructor(private val favoriteDao: FavoriteDa
     }
 
     companion object {
-        private lateinit var INSTANCE: FavoriteDataSource
+        @Volatile
+        private var INSTANCE: FavoriteDataSource? = null
 
-        @JvmStatic
-        @Synchronized
         fun getInstance(context: Context): FavoriteDataSource {
-            if (!this::INSTANCE.isInitialized) {
-                synchronized(FavoriteDataSource::class.java) {
-                    if (!this::INSTANCE.isInitialized) {
-                        val database = AppDatabase.getDatabase(context)
-                        INSTANCE = FavoriteDataSource(database.favoriteDao())
-                    }
-                }
+            return INSTANCE ?: synchronized(this) {
+                val dao: FavoriteDao = AppDatabase.getDatabase(context).favoriteDao()
+                FavoriteDataSource(dao).also { INSTANCE = it }
             }
-            return INSTANCE
         }
     }
 }

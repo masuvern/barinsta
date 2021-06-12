@@ -46,7 +46,6 @@ import awais.instagrabber.asyncs.LocationPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentLocationBinding;
 import awais.instagrabber.databinding.LayoutLocationDetailsBinding;
-import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
@@ -489,8 +488,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             locationDetailsBinding.btnMap.setOnClickListener(null);
         }
 
-        final FavoriteDataSource dataSource = FavoriteDataSource.getInstance(context);
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(dataSource);
+        final FavoriteRepository favoriteRepository = FavoriteRepository.Companion.getInstance(context);
         locationDetailsBinding.favChip.setVisibility(View.VISIBLE);
         favoriteRepository.getFavorite(
                 String.valueOf(locationId),
