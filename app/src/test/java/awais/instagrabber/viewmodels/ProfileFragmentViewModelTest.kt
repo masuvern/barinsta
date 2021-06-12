@@ -2,6 +2,10 @@ package awais.instagrabber.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import awais.instagrabber.db.dao.AccountDao
+import awais.instagrabber.db.datasources.AccountDataSource
+import awais.instagrabber.db.entities.Account
+import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.repositories.*
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.webservices.*
@@ -132,6 +136,32 @@ internal class ProfileFragmentViewModelTest {
         }
     }
 
+    private val accountDao = object : AccountDao{
+        override suspend fun getAllAccounts(): List<Account> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun findAccountByUid(uid: String): Account? {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun insertAccounts(vararg accounts: Account) {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun updateAccounts(vararg accounts: Account) {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun deleteAccounts(vararg accounts: Account) {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun deleteAllAccounts() {
+            TODO("Not yet implemented")
+        }
+    }
+
     @Test
     fun testNoUsernameNoCurrentUser() {
         val state = SavedStateHandle(
@@ -144,6 +174,8 @@ internal class ProfileFragmentViewModelTest {
         val storiesRepository = StoriesRepository(storiesService)
         val mediaRepository = MediaRepository(mediaService)
         val graphQLRepository = GraphQLRepository(graphQLService)
+        val accountDataSource = AccountDataSource(accountDao)
+        val accountRepository = AccountRepository(accountDataSource)
         val viewModel = ProfileFragmentViewModel(
             state,
             userRepository,
@@ -151,6 +183,7 @@ internal class ProfileFragmentViewModelTest {
             storiesRepository,
             mediaRepository,
             graphQLRepository,
+            accountRepository,
         )
     }
 }
