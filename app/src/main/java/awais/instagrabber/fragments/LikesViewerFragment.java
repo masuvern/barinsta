@@ -112,7 +112,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         // final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
         final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
-        mediaRepository = isLoggedIn ? MediaRepository.INSTANCE : null;
+        mediaRepository = isLoggedIn ? MediaRepository.Companion.getInstance() : null;
         graphQLService = isLoggedIn ? null : GraphQLService.INSTANCE;
         // setHasOptionsMenu(true);
     }

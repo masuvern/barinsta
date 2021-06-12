@@ -45,6 +45,7 @@ class PostViewV2ViewModel : ViewModel() {
     private val deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
     private val csrfToken = getCsrfTokenFromCookie(cookie)
     private val viewerId = getUserIdFromCookie(cookie)
+    private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
 
     lateinit var media: Media
         private set
@@ -135,7 +136,7 @@ class PostViewV2ViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val mediaId = media.pk ?: return@launch
-                val liked = MediaRepository.like(csrfToken!!, viewerId, deviceUuid, mediaId)
+                val liked = mediaRepository.like(csrfToken!!, viewerId, deviceUuid, mediaId)
                 updateMediaLikeUnlike(data, liked)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
@@ -154,7 +155,7 @@ class PostViewV2ViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val mediaId = media.pk ?: return@launch
-                val unliked = MediaRepository.unlike(csrfToken!!, viewerId, deviceUuid, mediaId)
+                val unliked = mediaRepository.unlike(csrfToken!!, viewerId, deviceUuid, mediaId)
                 updateMediaLikeUnlike(data, unliked)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
@@ -203,7 +204,7 @@ class PostViewV2ViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val mediaId = media.pk ?: return@launch
-                val saved = MediaRepository.save(csrfToken!!, viewerId, deviceUuid, mediaId, collection)
+                val saved = mediaRepository.save(csrfToken!!, viewerId, deviceUuid, mediaId, collection)
                 getSaveUnsaveCallback(data, saved, ignoreSaveState)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
@@ -221,7 +222,7 @@ class PostViewV2ViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             val mediaId = media.pk ?: return@launch
-            val unsaved = MediaRepository.unsave(csrfToken!!, viewerId, deviceUuid, mediaId)
+            val unsaved = mediaRepository.unsave(csrfToken!!, viewerId, deviceUuid, mediaId)
             getSaveUnsaveCallback(data, unsaved, false)
         }
         return data
@@ -251,7 +252,7 @@ class PostViewV2ViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val postId = media.pk ?: return@launch
-                val result = MediaRepository.editCaption(csrfToken!!, viewerId, deviceUuid, postId, caption)
+                val result = mediaRepository.editCaption(csrfToken!!, viewerId, deviceUuid, postId, caption)
                 if (result) {
                     data.postValue(success(""))
                     media.setPostCaption(caption)
@@ -278,7 +279,7 @@ class PostViewV2ViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val result = MediaRepository.translate(pk, "1")
+                val result = mediaRepository.translate(pk, "1")
                 if (result.isBlank()) {
                     data.postValue(error("", null))
                     return@launch
@@ -315,7 +316,7 @@ class PostViewV2ViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = MediaRepository.delete(csrfToken!!, viewerId, deviceUuid, mediaId, mediaType)
+                val response = mediaRepository.delete(csrfToken!!, viewerId, deviceUuid, mediaId, mediaType)
                 if (response == null) {
                     data.postValue(success(Any()))
                     return@launch

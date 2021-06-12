@@ -163,7 +163,7 @@ public class StoryViewerFragment extends Fragment {
         deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesRepository = StoriesRepository.Companion.getInstance();
-        mediaRepository = MediaRepository.INSTANCE;
+        mediaRepository = MediaRepository.Companion.getInstance();
         directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);
     }

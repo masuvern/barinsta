@@ -103,6 +103,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             isActivityCheckerServiceBound = false
         }
     }
+    private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -637,7 +638,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         alertDialog.show()
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val media = if (isLoggedIn) MediaRepository.fetch(shortcodeToId(shortCode)) else GraphQLService.fetchPost(shortCode)
+                val media = if (isLoggedIn) mediaRepository.fetch(shortcodeToId(shortCode)) else GraphQLService.fetchPost(shortCode)
                 withContext(Dispatchers.Main) {
                     if (media == null) {
                         Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()

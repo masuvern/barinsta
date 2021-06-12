@@ -12,13 +12,7 @@ import awais.instagrabber.utils.retryContextString
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import org.json.JSONObject
 
-object MediaRepository {
-    private val DELETABLE_ITEMS_TYPES = listOf(
-        MediaItemType.MEDIA_TYPE_IMAGE,
-        MediaItemType.MEDIA_TYPE_VIDEO,
-        MediaItemType.MEDIA_TYPE_SLIDER
-    )
-    private val service: MediaService = retrofit.create(MediaService::class.java)
+class MediaRepository(private val service: MediaService) {
 
     suspend fun fetch(
         mediaId: Long,
@@ -178,5 +172,23 @@ object MediaRepository {
             else -> return null
         }
         return service.delete(postId, mediaType, signedForm)
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: MediaRepository? = null
+
+        private val DELETABLE_ITEMS_TYPES = listOf(
+            MediaItemType.MEDIA_TYPE_IMAGE,
+            MediaItemType.MEDIA_TYPE_VIDEO,
+            MediaItemType.MEDIA_TYPE_SLIDER
+        )
+
+        fun getInstance(): MediaRepository {
+            return INSTANCE ?: synchronized(this) {
+                val service: MediaService = retrofit.create(MediaService::class.java)
+                MediaRepository(service).also { INSTANCE = it }
+            }
+        }
     }
 }

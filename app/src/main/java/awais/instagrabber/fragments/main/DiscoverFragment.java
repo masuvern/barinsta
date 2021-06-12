@@ -59,7 +59,7 @@ public class DiscoverFragment extends Fragment implements SwipeRefreshLayout.OnR
         // final String cookie = Utils.settingsHelper.getString(Constants.COOKIE);
         // final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         // final long userId = CookieUtils.getUserIdFromCookie(cookie);
-        mediaRepository = MediaRepository.INSTANCE;
+        mediaRepository = MediaRepository.Companion.getInstance();
     }
 
     @Override

@@ -63,6 +63,7 @@ class ThreadManager(
     private val inboxManager: InboxManager = if (pending) DirectMessagesManager.pendingInboxManager else DirectMessagesManager.inboxManager
     private val threadIdOrUserIds: ThreadIdOrUserIds = of(threadId)
     private val friendshipRepository: FriendshipRepository by lazy { FriendshipRepository.getInstance() }
+    private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
 
     val thread: LiveData<DirectThread?> by lazy {
         distinctUntilChanged(map(inboxManager.getInbox()) { inboxResource: Resource<DirectInbox?>? ->
@@ -453,7 +454,7 @@ class ThreadManager(
                     "4",
                     null
                 )
-                MediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
+                mediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
                 val broadcastResponse = DirectMessagesService.broadcastVoice(
                     csrfToken,
                     viewerId,
@@ -791,7 +792,7 @@ class ThreadManager(
                     "2",
                     VideoOptions(duration / 1000f, emptyList(), 0, false)
                 )
-                MediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
+                mediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
                 val broadcastResponse = DirectMessagesService.broadcastVideo(
                     csrfToken,
                     viewerId,
